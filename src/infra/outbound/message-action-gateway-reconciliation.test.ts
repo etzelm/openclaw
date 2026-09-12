@@ -1,66 +1,27 @@
 // Covers plugin-dispatched message actions, target resolution, dry-run behavior,
 // and plugin tool-result extraction.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
-import type { OpenClawConfig } from "../../config/config.js";
-import { setActivePluginRegistry } from "../../plugins/runtime.js";
-import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../../utils/message-channel.js";
 import {
-  createActionHubPluginFixture,
   createGatewayActionPlugin,
   messageActionRunnerMocks as mocks,
   resetMessageActionRunnerMocks,
   runMessageAction,
   setMessageActionTestPlugin as setTestPlugin,
+  useActionHubPluginFixture,
+  readMockCallArg,
+  readRecordField,
+  expectRecordFields,
+  createEnabledMessageActionConfig,
 } from "./message-action-runner.test-helpers.js";
-
-const requireLabeledRecord = createRequireRecord("record", "expected-label");
-
-function readMockCallArg(
-  mock: { mock: { calls: unknown[][] } },
-  label: string,
-  callIndex = 0,
-  argIndex = 0,
-): Record<string, unknown> {
-  const mockCall = mock.mock.calls[callIndex];
-  const value = mockCall?.[argIndex];
-  return requireLabeledRecord(value, label);
-}
-
-function readRecordField(record: Record<string, unknown>, key: string, label: string) {
-  const value = record[key];
-  return requireLabeledRecord(value, label);
-}
-
-function expectRecordFields(
-  record: Record<string, unknown>,
-  expected: Record<string, unknown>,
-  label: string,
-) {
-  for (const [key, value] of Object.entries(expected)) {
-    expect(record[key], `${label}.${key}`).toEqual(value);
-  }
-}
 
 describe("runMessageAction plugin dispatch", () => {
   beforeEach(() => {
     resetMessageActionRunnerMocks();
   });
   describe("alias-based plugin action dispatch", () => {
-    const { handleAction, plugin: actionHubPlugin } = createActionHubPluginFixture();
-
-    beforeEach(() => {
-      setTestPlugin(actionHubPlugin, "actionhub");
-      handleAction.mockClear();
-    });
-
-    afterEach(() => {
-      setActivePluginRegistry(createTestRegistry([]));
-      vi.clearAllMocks();
-      vi.unstubAllEnvs();
-    });
+    useActionHubPluginFixture();
     it("owns terminal source-reply receipts before dispatching to a remote gateway", async () => {
       const gatewayPlugin = createGatewayActionPlugin({
         pluginId: "gatewaychat",
@@ -90,13 +51,7 @@ describe("runMessageAction plugin dispatch", () => {
       const policySessionKey = "agent:main:gatewaychat:policy:user-123";
 
       await runMessageAction({
-        cfg: {
-          channels: {
-            gatewaychat: {
-              enabled: true,
-            },
-          },
-        } as OpenClawConfig,
+        cfg: createEnabledMessageActionConfig("gatewaychat"),
         action: "send",
         params: {
           channel: "gatewaychat",
@@ -174,7 +129,7 @@ describe("runMessageAction plugin dispatch", () => {
       });
 
       await runMessageAction({
-        cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+        cfg: createEnabledMessageActionConfig("gatewaychat"),
         action: "send",
         params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
         sourceReplyFinal: true,
@@ -213,7 +168,7 @@ describe("runMessageAction plugin dispatch", () => {
       });
 
       const result = await runMessageAction({
-        cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+        cfg: createEnabledMessageActionConfig("gatewaychat"),
         action: "send",
         params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
         sourceReplyFinal: true,
@@ -262,7 +217,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
           sourceReplyFinal: true,
@@ -307,7 +262,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
           sourceReplyFinal: true,
@@ -349,7 +304,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
           sourceReplyFinal: true,
@@ -399,7 +354,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
           sourceReplyFinal: true,
@@ -446,7 +401,7 @@ describe("runMessageAction plugin dispatch", () => {
         .mockResolvedValueOnce(failedPayload);
 
       await runMessageAction({
-        cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+        cfg: createEnabledMessageActionConfig("gatewaychat"),
         action: "send",
         params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
         sourceReplyFinal: true,
@@ -486,7 +441,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
           sourceReplyFinal: true,
@@ -527,7 +482,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: { channel: "gatewaychat", target: "user-123", message: "terminal answer" },
           sourceReplyFinal: true,
@@ -569,13 +524,7 @@ describe("runMessageAction plugin dispatch", () => {
       const controller = new AbortController();
 
       const actionInput = {
-        cfg: {
-          channels: {
-            gatewaychat: {
-              enabled: true,
-            },
-          },
-        } as OpenClawConfig,
+        cfg: createEnabledMessageActionConfig("gatewaychat"),
         action: "send",
         params: {
           channel: "gatewaychat",
@@ -684,13 +633,7 @@ describe("runMessageAction plugin dispatch", () => {
 
       await expect(
         runMessageAction({
-          cfg: {
-            channels: {
-              gatewaychat: {
-                enabled: true,
-              },
-            },
-          } as OpenClawConfig,
+          cfg: createEnabledMessageActionConfig("gatewaychat"),
           action: "send",
           params: {
             channel: "gatewaychat",
