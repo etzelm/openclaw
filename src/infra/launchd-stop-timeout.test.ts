@@ -11,7 +11,13 @@ const LAUNCHD_ENV = { XPC_SERVICE_NAME: "ai.openclaw.gateway" };
 const printed = (fields: string) => ({ code: 0, stdout: fields, stderr: "", termination: "exit" });
 
 beforeEach(() => {
-  vi.stubGlobal("process", { ...process, platform: "darwin", pid: 4242, getuid: () => 501 });
+  vi.stubGlobal("process", {
+    ...process,
+    platform: "darwin",
+    pid: 4242,
+    ppid: 4241,
+    getuid: () => 501,
+  });
   execLaunchctl.mockReset();
 });
 afterEach(() => vi.unstubAllGlobals());
@@ -80,8 +86,42 @@ describe("launchd stop timeout reads the running job", () => {
       "gui/501/ai.openclaw.gateway",
       "user/501/ai.openclaw.gateway",
     ]) {
-      expect(result?.warning).toContain(`${target}: pid 99 does not match the running process`);
+      expect(result?.warning).toContain(
+        `${target}: pid 99 is neither this process nor its launcher`,
+      );
     }
+  });
+
+  // The installed service can keep a launcher parent while the serving Gateway
+  // runs as its child, so the job prints the launcher's pid. Requiring
+  // pid === process.pid there would reject the job that enforces the deadline.
+  it("accepts the job when it is this process's launcher parent", async () => {
+    execLaunchctl.mockResolvedValue(printed("\texit timeout = 12\n\tpid = 4241\n"));
+    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
+      timeoutMs: 12_000,
+      source: "launchd system/ai.openclaw.gateway exit timeout",
+    });
+  });
+
+  // node-runtime-recovery.mjs builds the launcher's reap timer from
+  // LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS, never from the job, so a longer operator
+  // deadline cannot be spent: the parent force-kills this process first.
+  it("caps a launcher parent's longer deadline at the launcher's own stop timer", async () => {
+    execLaunchctl.mockResolvedValue(printed("\texit timeout = 90\n\tpid = 4241\n"));
+    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
+      timeoutMs: 20_000,
+      source:
+        "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's 20000ms stop timer",
+    });
+  });
+
+  // Same job deadline, no launcher in the way: nothing caps it.
+  it("spends a long deadline in full when this process is the job itself", async () => {
+    execLaunchctl.mockResolvedValue(printed("\texit timeout = 90\n\tpid = 4242\n"));
+    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
+      timeoutMs: 90_000,
+      source: "launchd system/ai.openclaw.gateway exit timeout",
+    });
   });
 
   it.each([

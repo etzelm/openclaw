@@ -26,6 +26,23 @@ function resolveLaunchdDomains(label: string): string[] {
 }
 
 /**
+ * Which process the printed job actually is. The installed service can keep a
+ * launcher parent while the serving Gateway runs as its child, so `launchctl
+ * print` reports the launcher's pid and a bare `pid === process.pid` test would
+ * reject the enforcing job. Only this process and its immediate parent qualify;
+ * anything else is a same-named job in another domain.
+ */
+function resolveJobRelation(pid: number | undefined): "self" | "launcher" | null {
+  if (pid === undefined) {
+    return null;
+  }
+  if (pid === process.pid) {
+    return "self";
+  }
+  return pid === process.ppid ? "launcher" : null;
+}
+
+/**
  * launchd's own documented default when a job omits ExitTimeOut, and the value
  * OpenClaw's LaunchAgent template writes. Guessing short only forfeits drain
  * headroom; guessing long is what lets the supervisor kill an unfinished drain.
@@ -81,15 +98,27 @@ export async function readLaunchdStopTimeout(
     }
     const entries = parseKeyValueOutput(result.stdout || result.stderr || "", "=");
     // Adopting a deadline from a same-named job in the other domain would be
-    // worse than the fallback, so the printed job must be this process.
+    // worse than the fallback, so the printed job must be ours.
     const pid = parseStrictPositiveInteger(entries.pid ?? "");
-    if (pid !== process.pid) {
-      failed(`pid ${pid ?? "missing"} does not match the running process`);
+    const relation = resolveJobRelation(pid);
+    if (!relation) {
+      failed(`pid ${pid ?? "missing"} is neither this process nor its launcher`);
       continue;
     }
     const seconds = parseStrictPositiveInteger(entries["exit timeout"] ?? "");
     if (seconds !== undefined) {
-      return { timeoutMs: seconds * 1_000, source: `launchd ${target} exit timeout` };
+      const jobMs = seconds * 1_000;
+      // A launcher parent reaps this process on its own timer, and that timer is
+      // built from LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS rather than from the job's
+      // ExitTimeOut. Spending a longer operator deadline would only get the
+      // drain force-killed by our own parent, so take whichever binds first.
+      const launcherMs = LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS * 1_000;
+      return relation === "self" || jobMs <= launcherMs
+        ? { timeoutMs: jobMs, source: `launchd ${target} exit timeout` }
+        : {
+            timeoutMs: launcherMs,
+            source: `launchd ${target} exit timeout capped at the launcher's ${launcherMs}ms stop timer`,
+          };
     }
     failed("exit timeout is missing or invalid");
   }
