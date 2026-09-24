@@ -433,6 +433,7 @@ export async function executePluginOwnedProcess(params: {
   onOutstandingWorkChange?: (active: boolean) => void;
   activeToolCount?: () => number;
   compactionActive?: () => boolean;
+  onCompactionActiveChange?: (listener: () => void) => () => void;
   getActiveLoopbackAskUserDeadline?: () => number | undefined;
   onActiveLoopbackAskUserDeadlineChange?: (listener: () => void) => () => void;
   onNoOutputTimeout?: (error: FailoverError) => void;
@@ -487,7 +488,11 @@ export async function executePluginOwnedProcess(params: {
     replayUnsafe: false,
   };
   const reportOutstandingWork = () =>
-    params.onOutstandingWorkChange?.(outstanding.approvals > 0 || outstanding.background > 0);
+    params.onOutstandingWorkChange?.(
+      outstanding.approvals > 0 ||
+        outstanding.background > 0 ||
+        (params.compactionActive?.() ?? false),
+    );
   const updatePendingApproval = (delta: number) => {
     outstanding.approvals = Math.max(0, outstanding.approvals + delta);
     reportOutstandingWork();
@@ -521,6 +526,9 @@ export async function executePluginOwnedProcess(params: {
   );
   const stopAskUserDeadlineListener = params.onActiveLoopbackAskUserDeadlineChange?.(() =>
     watchdog.reset(),
+  );
+  const stopCompactionWorkListener = params.onCompactionActiveChange?.(() =>
+    reportOutstandingWork(),
   );
 
   const replyBackendHandle = run.replyOperation
@@ -675,6 +683,7 @@ export async function executePluginOwnedProcess(params: {
   } finally {
     watchdog.dispose();
     stopAskUserDeadlineListener?.();
+    stopCompactionWorkListener?.();
     params.onOutstandingWorkChange?.(false);
     // Permission callbacks can be retained by the plugin or its subprocess.
     // Closing the turn fences those capabilities before any outer cleanup runs.

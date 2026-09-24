@@ -115,3 +115,46 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
     });
   });
 });
+
+describe("compaction reported as outstanding work", () => {
+  it("notifies onOutstandingWorkChange when compaction becomes active and inactive", async () => {
+    vi.useFakeTimers();
+    const { context } = await createExecution();
+    const workChanged: boolean[] = [];
+    let compacting = false;
+    // simulate what execute-process.ts wires from events.hasActiveCompaction
+    const compactionChangeListeners = new Set<() => void>();
+    const onCompactionActiveChange = (listener: () => void) => {
+      compactionChangeListeners.add(listener);
+      return () => compactionChangeListeners.delete(listener);
+    };
+
+    const run = runPlugin(
+      context,
+      async function* () {
+        compacting = true;
+        for (const l of compactionChangeListeners) {
+          l();
+        }
+        yield { type: "system", subtype: "status", status: "compacting" };
+        compacting = false;
+        for (const l of compactionChangeListeners) {
+          l();
+        }
+        yield { compact_result: "success" };
+        yield { type: "result", subtype: "success", is_error: false, result: "ok" };
+      },
+      {
+        noOutputTimeoutMs: 10_000,
+        compactionActive: () => compacting,
+        onCompactionActiveChange,
+        onOutstandingWorkChange: (active) => {
+          workChanged.push(active);
+        },
+      },
+    );
+    await expect(run).resolves.toMatchObject({ reason: "exit", timedOut: false });
+    expect(workChanged).toContain(true);
+    expect(workChanged).toContain(false);
+  });
+});
