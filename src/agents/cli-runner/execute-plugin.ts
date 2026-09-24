@@ -432,6 +432,7 @@ export async function executePluginOwnedProcess(params: {
   consumeStdout: (chunk: string) => void;
   onOutstandingWorkChange?: (active: boolean) => void;
   activeToolCount?: () => number;
+  compactionActive?: () => boolean;
   getActiveLoopbackAskUserDeadline?: () => number | undefined;
   onActiveLoopbackAskUserDeadlineChange?: (listener: () => void) => () => void;
   onNoOutputTimeout?: (error: FailoverError) => void;
@@ -503,6 +504,7 @@ export async function executePluginOwnedProcess(params: {
       getActiveAskUserDeadline: params.getActiveLoopbackAskUserDeadline,
       activeToolCount: () => Math.max(params.activeToolCount?.() ?? 0, outstanding.approvals),
       backgroundTaskCount: () => outstanding.background,
+      compactionActive: () => params.compactionActive?.() ?? false,
       hasObservedActivity: () => outstanding.observed,
       hasReplayUnsafeActivity: () => outstanding.replayUnsafe,
       onNoOutputTimeout: (error) => {

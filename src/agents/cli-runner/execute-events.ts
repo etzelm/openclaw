@@ -49,6 +49,7 @@ export function createCliEventHandlers(params: {
     }
   };
   let observedCliActivity = false;
+  let compactionActive = false;
   let signaledToolExecutionStarted = false;
   let signaledAssistantOutputStarted = false;
   let commentaryCounter = 0;
@@ -332,6 +333,10 @@ export function createCliEventHandlers(params: {
   };
   const emitCliCompaction = (event: CliCompactionDelta) => {
     observedCliActivity = true;
+    // Native compaction is silent but busy: the no-output watchdog reads this
+    // between phase boundaries, so an end event must always clear the flag,
+    // even for a failed compaction (`completed: false`).
+    compactionActive = event.phase === "start";
     emitLiveEvent("compaction", () => ({ ...event, backend: context.backendResolved.id }));
   };
   const finalizeParsedTools = () => {
@@ -428,6 +433,7 @@ export function createCliEventHandlers(params: {
     emitCliThinkingDelta,
     emitCliThinkingProgress,
     hasObservedCliActivity: () => observedCliActivity,
+    hasActiveCompaction: () => compactionActive,
     activeParsedToolCount: () => activeParsedTools.size,
     getToolSummary,
   };
