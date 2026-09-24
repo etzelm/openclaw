@@ -82,6 +82,11 @@ const windowsPath = {
   relative: (from: string, to: string) => path.win32.relative(from, to).replaceAll("\\", path.sep),
 };
 const exitSentinel = new Error("replacement exited");
+// node-runtime-recovery.mjs declares its own escalation deadline to the replacement child so
+// the serving Gateway can bound shutdown on a timer that provably exists. These cases spawn a
+// non-foreground doctor --fix argv, so that deadline is the 1s signal exit grace plus the 1s
+// force-kill grace.
+const launcherStopTimeoutMs = "2000";
 let child: ChildProcess;
 let exitSpy: MockInstance<typeof process.exit>;
 let stderrSpy: MockInstance<typeof process.stderr.write>;
@@ -497,6 +502,7 @@ describe("runtime recovery discovery", () => {
       expect(mocks.spawn.mock.calls[0]?.[2].env).toEqual({
         ...env,
         OPENCLAW_NODE_UPDATE_RESPAWNED: "1",
+        OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: launcherStopTimeoutMs,
       });
     });
   });
@@ -880,7 +886,11 @@ describe("runtime recovery discovery", () => {
           ["--trace-warnings", "/fixture/dist/index.js", "doctor", "--non-interactive", "--fix"],
           {
             stdio: "inherit",
-            env: { ...originalEnv, OPENCLAW_NODE_UPDATE_RESPAWNED: "1" },
+            env: {
+              ...originalEnv,
+              OPENCLAW_NODE_UPDATE_RESPAWNED: "1",
+              OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: launcherStopTimeoutMs,
+            },
             windowsHide: hide,
           },
         );
