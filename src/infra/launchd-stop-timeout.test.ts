@@ -15,7 +15,7 @@ const result = (stdout: string) => ({ code: 0, stdout, stderr: "", termination: 
  * Shaped like real `launchctl print` output rather than a bare field list: the
  * job's own `state` at one tab, then coalition blocks carrying their own
  * `state = active` at two tabs, then `job state`. A live Gateway LaunchDaemon
- * prints `state` four times in exactly this arrangement.
+ * prints `state` three times in exactly this arrangement.
  */
 const printed = (state: string, fields: string) =>
   result(

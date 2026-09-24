@@ -323,6 +323,25 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     expect(budget.timeoutMs).toBe(15_000);
   });
 
+  // Warned but non-null is the defaulted-value case, not a failed probe: launchd is
+  // confirmed to be stopping the job, so a clock is running and there is nothing to
+  // retain. Warning about a timeout that "could not be confirmed" here would be the
+  // same false statement in a different place.
+  it("does not retain when only the deadline's value had to be defaulted", async () => {
+    delete process.env.OPENCLAW_SUPERVISOR_MODE;
+    execLaunchctl.mockResolvedValue(printed("SIGTERMed", "\tpid = 4242\n"));
+    const warn = vi.fn();
+    const budget = await resolveGatewayShutdownBudget(
+      "launchd",
+      { info: vi.fn(), warn },
+      launchdOwnedStop,
+    );
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining("its exit timeout is missing or invalid"),
+    );
+    expect(budget.timeoutMs).toBe(15_000);
+  });
+
   // No stop is running at startup, so there is no enforcing deadline to read and
   // no reason to spend a launchctl print discovering that.
   it("does not inspect the job at startup", async () => {

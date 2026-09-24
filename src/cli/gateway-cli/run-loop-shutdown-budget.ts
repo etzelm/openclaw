@@ -44,7 +44,11 @@ async function readNativeStopTimeout(stopping: boolean): Promise<{
   // to adopt a deadline that does not govern the stop the Gateway will get.
   if (process.platform === "darwin" && stopping) {
     const read = await readLaunchdStopTimeout();
-    return { ...read, inconclusive: read.warning !== undefined };
+    // Warned but non-null is the defaulted-value case: launchd is confirmed to be
+    // stopping the job and only its deadline had to be guessed, so a clock is
+    // genuinely running and nothing needs retaining. Only a warning with no
+    // deadline at all means the probe established nothing.
+    return { ...read, inconclusive: read.stop === null && read.warning !== undefined };
   }
   return { stop: null, inconclusive: false };
 }
