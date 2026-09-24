@@ -137,9 +137,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
       "gui/501/ai.openclaw.gateway",
       "user/501/ai.openclaw.gateway",
     ]) {
-      expect(read.warning).toContain(
-        `${target}: pid 99 is neither this process nor its launcher`,
-      );
+      expect(read.warning).toContain(`${target}: pid 99 is neither this process nor its launcher`);
     }
   });
 
