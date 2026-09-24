@@ -274,6 +274,57 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     expect(drain.drainTimeoutMs).toBe(32_000);
   });
 
+  // A launchd-OWNED Gateway, rather than an externally supervised one. Its startup
+  // budget is already native, so this is the configuration where the retained-budget
+  // safety net can fire. `previous` is what a 20 second template job resolves.
+  const launchdOwnedStop = {
+    previous: { timeoutMs: 15_000, nativeStopBudget: true },
+    acceptedAtMs: Number.MAX_SAFE_INTEGER,
+  };
+
+  // An in-process restart signals the Gateway without launchd running the stop, so
+  // the job still prints `running`. That is a confirmed answer, not a failed probe,
+  // and claiming the deadline "could not be confirmed" there would be false on every
+  // in-process restart of a default macOS install.
+  it("does not claim an unconfirmed timeout when launchd is confirmed not to be stopping", async () => {
+    delete process.env.OPENCLAW_SUPERVISOR_MODE;
+    execLaunchctl.mockResolvedValue(printed("running", "\texit timeout = 20\n\tpid = 4242\n"));
+    const warn = vi.fn();
+    const budget = await resolveGatewayShutdownBudget(
+      "launchd",
+      { info: vi.fn(), warn },
+      launchdOwnedStop,
+    );
+    expect(warn).not.toHaveBeenCalled();
+    expect(budget.timeoutMs).toBe(15_000);
+    expect(budget.nativeStopBudget).toBe(true);
+  });
+
+  // A probe that established nothing is the case the safety net exists for, so the
+  // startup budget is held rather than widened.
+  it("retains the startup budget when the job could not be inspected at all", async () => {
+    delete process.env.OPENCLAW_SUPERVISOR_MODE;
+    execLaunchctl.mockResolvedValue({
+      code: 1,
+      stdout: "",
+      stderr: "permission denied",
+      termination: "exit",
+    });
+    const warn = vi.fn();
+    const budget = await resolveGatewayShutdownBudget(
+      "launchd",
+      { info: vi.fn(), warn },
+      launchdOwnedStop,
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("Unable to inspect the launchd job"),
+    );
+    expect(warn).toHaveBeenCalledWith(
+      "Retaining the startup shutdown budget of 15000ms because the current supervisor stop timeout could not be confirmed.",
+    );
+    expect(budget.timeoutMs).toBe(15_000);
+  });
+
   // No stop is running at startup, so there is no enforcing deadline to read and
   // no reason to spend a launchctl print discovering that.
   it("does not inspect the job at startup", async () => {

@@ -14,16 +14,28 @@ type NativeStopTimeout = { timeoutMs: number; source: string };
 /**
  * Ask whichever supervisor actually enforces the deadline on this platform.
  *
- * `stop` and `warning` are independent answers. A probe that could not establish
- * a deadline still has something to tell the operator, and only a non-null `stop`
- * may be spent as a native stop budget.
+ * Three independent answers. `stop` is a deadline that may be spent as a native
+ * stop budget. `warning` is what the operator needs to hear. `inconclusive` says
+ * the probe could not establish an answer at all, which is the only case the
+ * retained-budget safety net below is for: a read that positively determined no
+ * launchd deadline governs this stop is an answer, not a failure, so retaining a
+ * startup budget and warning that the timeout "could not be confirmed" would be
+ * false on every in-process restart of a launchd-owned Gateway.
  */
-async function readNativeStopTimeout(
-  stopping: boolean,
-): Promise<{ stop: NativeStopTimeout | null; warning?: string }> {
+async function readNativeStopTimeout(stopping: boolean): Promise<{
+  stop: NativeStopTimeout | null;
+  warning?: string;
+  inconclusive: boolean;
+}> {
   if (process.platform === "linux") {
     const systemd = await readSystemdStopTimeout();
-    return { stop: systemd, warning: systemd?.warning };
+    // Unchanged from the linux-only original: absent unit or warned read both
+    // count as unconfirmed there.
+    return {
+      stop: systemd,
+      warning: systemd?.warning,
+      inconclusive: !systemd || Boolean(systemd.warning),
+    };
   }
   // launchd's ExitTimeOut bounds a stop that launchd is running and nothing else:
   // an externally delivered SIGTERM never starts that clock, and the job outlives
@@ -31,9 +43,10 @@ async function readNativeStopTimeout(
   // is under way, and reading one at startup would spend a launchctl print only
   // to adopt a deadline that does not govern the stop the Gateway will get.
   if (process.platform === "darwin" && stopping) {
-    return await readLaunchdStopTimeout();
+    const read = await readLaunchdStopTimeout();
+    return { ...read, inconclusive: read.warning !== undefined };
   }
-  return { stop: null };
+  return { stop: null, inconclusive: false };
 }
 
 export async function resolveGatewayShutdownBudget(
@@ -49,9 +62,7 @@ export async function resolveGatewayShutdownBudget(
   const native = await readNativeStopTimeout(refresh !== undefined);
   const nativeStop = native.stop;
   const retained =
-    refresh?.previous.nativeStopBudget && (!nativeStop || native.warning)
-      ? refresh.previous
-      : undefined;
+    refresh?.previous.nativeStopBudget && native.inconclusive ? refresh.previous : undefined;
   if (native.warning) {
     logger.warn(native.warning);
   }

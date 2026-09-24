@@ -61,7 +61,7 @@ function resolveJobRelation(pid: number | undefined): "self" | "launcher" | null
  * The job's own `state`, which `launchctl print` puts at the top of the block at
  * a single tab. The shared key-value parser cannot supply it: nested coalition
  * blocks carry their own `state = active` lines and that parser keeps the last
- * occurrence. Read against the running Gateway LaunchDaemon, `state` appears four
+ * occurrence. Read against the running Gateway LaunchDaemon, `state` appears three
  * times, the job's at one tab and two coalition lines at two tabs, and the parser
  * answers `active`.
  */
@@ -125,10 +125,12 @@ function defaultStopDeadline(target: string, reason: string): LaunchdStopRead {
  * all. The caller already owns that policy number, so the warning alone is what
  * this adds, and it still routes the operator to the job.
  */
-function unresolved(label: string, failures: string[]): LaunchdStopRead {
+function unresolved(failures: string[]): LaunchdStopRead {
   return {
     stop: null,
-    warning: `Unable to inspect the launchd job ${label}; ${failures
+    // Each failure already names the target it came from, and the label-resolution
+    // case has no label to name, so the prefix deliberately carries neither.
+    warning: `Unable to inspect the launchd job; ${failures
       .map((failure) => truncateUtf16Safe(failure.replaceAll(/\s+/g, " "), 500))
       .join("; ")}; keeping the Gateway stop policy. Check the running job with launchctl print.`,
   };
@@ -156,9 +158,7 @@ export async function readLaunchdStopTimeout(
   try {
     label = resolveLaunchAgentLabel(env);
   } catch (error: unknown) {
-    return unresolved("the configured label", [
-      `label could not be resolved: ${formatErrorMessage(error)}`,
-    ]);
+    return unresolved([`label could not be resolved: ${formatErrorMessage(error)}`]);
   }
   for (const target of resolveLaunchdDomains(label)) {
     const failed = (reason: string) => failures.push(`${target}: ${reason}`);
@@ -209,5 +209,5 @@ export async function readLaunchdStopTimeout(
         }
       : { stop: { timeoutMs: jobMs, source: `launchd ${target} exit timeout` } };
   }
-  return unresolved(label, failures);
+  return unresolved(failures);
 }
