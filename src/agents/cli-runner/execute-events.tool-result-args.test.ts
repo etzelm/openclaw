@@ -25,10 +25,7 @@ import {
 import { createMockPluginRegistry } from "../../plugins/hooks.test-fixtures.js";
 import { createCliJsonlStreamingParser } from "../cli-output-stream.js";
 import { createCliEventHandlers } from "./execute-events.js";
-import {
-  buildContext,
-  buildToolTracking,
-} from "./execute-events.tool-result-args.test-support.js";
+import { buildContext, buildToolTracking } from "./execute-events.tool-result-args.test-support.js";
 import { createCliToolTracking } from "./execute-tool-tracking.js";
 import type { PreparedCliRunContext } from "./types.js";
 

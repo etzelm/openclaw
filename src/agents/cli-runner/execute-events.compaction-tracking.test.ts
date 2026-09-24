@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCliEventHandlers } from "./execute-events.js";
-import {
-  buildContext,
-  buildToolTracking,
-} from "./execute-events.tool-result-args.test-support.js";
+import { buildContext, buildToolTracking } from "./execute-events.tool-result-args.test-support.js";
 
 describe("cli native compaction tracking", () => {
   it.each([true, false])(
