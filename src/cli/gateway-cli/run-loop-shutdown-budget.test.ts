@@ -316,9 +316,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
       { info: vi.fn(), warn },
       launchdOwnedStop,
     );
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("Unable to inspect the launchd job"),
-    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("Unable to inspect the launchd job"));
     expect(warn).toHaveBeenCalledWith(
       "Retaining the startup shutdown budget of 15000ms because the current supervisor stop timeout could not be confirmed.",
     );
