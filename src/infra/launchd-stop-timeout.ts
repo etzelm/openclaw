@@ -7,7 +7,7 @@ import { formatErrorMessage } from "./errors.js";
 import { LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS } from "./gateway-shutdown-budget.js";
 import { detectRespawnSupervisor } from "./supervisor-markers.js";
 
-export type LaunchdStopTimeout = { timeoutMs: number; source: string };
+type LaunchdStopTimeout = { timeoutMs: number; source: string };
 
 /**
  * What inspecting the job established, which is two independent answers.
