@@ -50,6 +50,18 @@ it.each([
       XPC_SERVICE_NAME: "ai.openclaw.fixture",
     });
     detach = () => child.emit("exit", 0, null);
+    // The child is told the deadline this launcher armed, so a serving Gateway can
+    // bound its shutdown budget on a declared timer rather than on a parent pid.
+    // The escalation asserted below lands on exactly this instant.
+    expect(spawn).toHaveBeenCalledExactlyOnceWith(
+      "node",
+      ["child.mjs"],
+      expect.objectContaining({
+        env: expect.objectContaining({
+          OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: String(nativeBudgetMs - 1_000),
+        }),
+      }),
+    );
     const signal = process.listeners("SIGTERM").find((listener) => !previous.has(listener));
     expect(signal).toBeDefined();
     signal!("SIGTERM");

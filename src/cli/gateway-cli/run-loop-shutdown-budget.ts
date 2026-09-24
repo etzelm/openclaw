@@ -12,11 +12,16 @@ import { readSystemdStopTimeout } from "../../infra/systemd-stop-timeout.js";
 type NativeStopTimeout = { timeoutMs: number; source: string; warning?: string };
 
 /** Ask whichever supervisor actually enforces the deadline on this platform. */
-async function readNativeStopTimeout(): Promise<NativeStopTimeout | null> {
+async function readNativeStopTimeout(stopping: boolean): Promise<NativeStopTimeout | null> {
   if (process.platform === "linux") {
     return await readSystemdStopTimeout();
   }
-  if (process.platform === "darwin") {
+  // launchd's ExitTimeOut bounds a stop that launchd is running and nothing else:
+  // an externally delivered SIGTERM never starts that clock, and the job outlives
+  // the deadline untouched. There is no enforcing deadline to read before a stop
+  // is under way, and reading one at startup would spend a launchctl print only
+  // to adopt a deadline that does not govern the stop the Gateway will get.
+  if (process.platform === "darwin" && stopping) {
     return await readLaunchdStopTimeout();
   }
   return null;
@@ -32,7 +37,7 @@ export async function resolveGatewayShutdownBudget(
 ) {
   // Restart ownership may be external while the platform supervisor still
   // enforces the stop deadline. That holds on darwin exactly as it does on linux.
-  const nativeStop = await readNativeStopTimeout();
+  const nativeStop = await readNativeStopTimeout(refresh !== undefined);
   const retained =
     refresh?.previous.nativeStopBudget && (!nativeStop || nativeStop.warning)
       ? refresh.previous

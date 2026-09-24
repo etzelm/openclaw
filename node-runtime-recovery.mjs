@@ -55,10 +55,16 @@ export const runRespawnedChild = (command, args, env) => {
     process.platform !== "win32" && isForegroundGatewayRunArgv(process.argv)
       ? serviceStopTimeoutMs - respawnSignalForceKillGraceMs - respawnSignalHardExitGraceMs
       : respawnSignalExitGraceMs;
+  // Escalation reaps the child one force-kill grace after the exit grace elapses,
+  // so this is the deadline the launcher actually enforces on the serving Gateway.
+  const launcherStopTimeoutMs = signalExitGraceMs + respawnSignalForceKillGraceMs;
   const stdioIsTerminal = process.stdin.isTTY || process.stdout.isTTY;
+  // Declare that deadline to the child. Only this launcher sets the marker, so the
+  // serving Gateway can bound its shutdown budget on a timer that provably exists
+  // instead of inferring one from a parent pid that any process manager can own.
   const child = spawn(command, args, {
     stdio: "inherit",
-    env,
+    env: { ...env, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: String(launcherStopTimeoutMs) },
     windowsHide: !stdioIsTerminal,
   });
   const listeners = new Map();
