@@ -23,6 +23,7 @@ type SupervisorSpawnInput = Parameters<ReturnType<typeof getProcessSupervisor>["
 const NO_OUTPUT_TIMEOUT_MS = 1_000;
 const COMPACTION_START = { type: "system", subtype: "status", status: "compacting" };
 const COMPACTION_END = { compact_result: "success" };
+const COMPACTION_FAILED = { compact_result: "failed" };
 
 /** Mirrors the shape a CLI backend plugin projects from its own native records. */
 const parseJsonlLifecycleEvent: CliBackendParseJsonlLifecycleEvent = (line) => {
@@ -30,12 +31,13 @@ const parseJsonlLifecycleEvent: CliBackendParseJsonlLifecycleEvent = (line) => {
     return null;
   }
   const record = JSON.parse(line) as Record<string, unknown>;
-  if (record.compact_result === "success") {
-    return { kind: "compaction", phase: "end", completed: true };
+  if (record.compact_result === "success" || record.compact_result === "failed") {
+    return { kind: "compaction", phase: "end", completed: record.compact_result === "success" };
   }
-  return record.type === "system" && record.status === "compacting"
-    ? { kind: "compaction", phase: "start" }
-    : null;
+  if (record.type === "system" && record.subtype === "status") {
+    return record.status === "compacting" ? { kind: "compaction", phase: "start" } : null;
+  }
+  return null;
 };
 
 function buildCompactionRunContext(runId: string) {
@@ -111,6 +113,31 @@ it("re-arms the no-output watchdog once the streamed compaction record ends", as
       compactionEnded.resolve();
       // The turn goes silent with nothing outstanding; a finished compaction
       // must not grant permanent immunity from the ordinary watchdog.
+      await waitUntilAborted(execution);
+      yield { type: "result", subtype: "success", result: "unreachable" };
+    },
+  };
+  const run = wrapPreparedCliRunWithTestAdmission(executePreparedCliRun)(context);
+  const rejection = expect(run).rejects.toThrow("produced no output");
+
+  await compactionEnded.promise;
+  await vi.advanceTimersByTimeAsync(NO_OUTPUT_TIMEOUT_MS * 2);
+
+  await rejection;
+});
+
+it("re-arms the no-output watchdog when the streamed compaction record fails", async () => {
+  useWatchdogTimers();
+  const context = buildCompactionRunContext("compaction-seam-rearm-failed");
+  const compactionEnded = createDeferred();
+  context.executionTarget = {
+    kind: "plugin",
+    async *execute(execution) {
+      yield COMPACTION_START;
+      yield COMPACTION_FAILED;
+      compactionEnded.resolve();
+      // A compaction that ends in failure still ends. Treating only a
+      // successful result as an end would latch the defer on forever.
       await waitUntilAborted(execution);
       yield { type: "result", subtype: "success", result: "unreachable" };
     },
