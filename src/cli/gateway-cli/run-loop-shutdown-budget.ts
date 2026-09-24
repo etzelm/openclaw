@@ -6,7 +6,21 @@ import {
   GATEWAY_SHUTDOWN_TIMEOUT_MS,
   GATEWAY_SUPERVISOR_EXIT_MARGIN_MS,
 } from "../../infra/gateway-shutdown-budget.js";
+import { readLaunchdStopTimeout } from "../../infra/launchd-stop-timeout.js";
 import { readSystemdStopTimeout } from "../../infra/systemd-stop-timeout.js";
+
+type NativeStopTimeout = { timeoutMs: number; source: string; warning?: string };
+
+/** Ask whichever supervisor actually enforces the deadline on this platform. */
+async function readNativeStopTimeout(): Promise<NativeStopTimeout | null> {
+  if (process.platform === "linux") {
+    return await readSystemdStopTimeout();
+  }
+  if (process.platform === "darwin") {
+    return await readLaunchdStopTimeout();
+  }
+  return null;
+}
 
 export async function resolveGatewayShutdownBudget(
   supervisor: string | null,
@@ -16,28 +30,29 @@ export async function resolveGatewayShutdownBudget(
     acceptedAtMs: number;
   },
 ) {
-  // Restart ownership may be external while systemd still enforces the stop deadline.
-  const systemdStop = process.platform === "linux" ? await readSystemdStopTimeout() : null;
+  // Restart ownership may be external while the platform supervisor still
+  // enforces the stop deadline. That holds on darwin exactly as it does on linux.
+  const nativeStop = await readNativeStopTimeout();
   const retained =
-    refresh?.previous.nativeStopBudget && (!systemdStop || systemdStop.warning)
+    refresh?.previous.nativeStopBudget && (!nativeStop || nativeStop.warning)
       ? refresh.previous
       : undefined;
-  if (systemdStop?.warning) {
-    logger.warn(systemdStop.warning);
+  if (nativeStop?.warning) {
+    logger.warn(nativeStop.warning);
   }
   if (retained) {
     logger.warn(
-      `Retaining the startup shutdown budget of ${retained.timeoutMs}ms because the current systemd stop timeout could not be confirmed.`,
+      `Retaining the startup shutdown budget of ${retained.timeoutMs}ms because the current supervisor stop timeout could not be confirmed.`,
     );
   }
-  const stop = systemdStop ?? {
+  const stop = nativeStop ?? {
     timeoutMs:
       supervisor === "launchd"
         ? LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS * 1_000
         : GATEWAY_SERVICE_STOP_TIMEOUT_MS,
     source: supervisor === "launchd" ? "launchd ExitTimeOut" : "Gateway stop policy",
   };
-  const nativeStopBudget = systemdStop !== null || supervisor === "launchd" || Boolean(retained);
+  const nativeStopBudget = nativeStop !== null || supervisor === "launchd" || Boolean(retained);
   const limitMs =
     retained?.timeoutMs ??
     Math.min(GATEWAY_SHUTDOWN_TIMEOUT_MS, stop.timeoutMs - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS);

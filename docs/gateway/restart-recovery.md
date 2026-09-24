@@ -128,7 +128,8 @@ Node version and the service manager tracks a launcher parent. The launcher
 forwards the stop signal and waits for the serving Gateway to drain within the
 shared service budget. Managed restart intent targets the live serving owner,
 so unfinished work still follows restart recovery when its drain budget expires.
-The launchd stop budget remains 20 seconds; Linux units use the deadlines below.
+macOS jobs use the running launchd job's own `ExitTimeOut`, and Linux units use
+their own stop timeout; both are described in the deadline sections below.
 This requires a Gateway started with the updated launcher: replacing files cannot
 change a launcher that is already running.
 
@@ -272,6 +273,37 @@ successfully stopping its children records the captured parent's cancellation
 before acknowledging, without overwriting a newer turn in that session.
 If another child cannot be stopped, the response still reports incomplete
 cancellation; the captured parent's cancellation is persisted before that error.
+
+### Launchd stop deadlines
+
+At startup and when accepting shutdown, a macOS Gateway reads the effective
+`exit timeout` of the launchd job it is running inside. It prints the job and
+accepts the answer only when the printed `pid` is this process, so a same-named
+job in another domain can never supply the deadline. It checks `system/<label>`,
+then `gui/<uid>/<label>`, then `user/<uid>/<label>`, which covers an
+operator-authored LaunchDaemon and an OpenClaw-installed LaunchAgent alike. The
+third target matters for a service account with no logged-in session: that
+account has no gui domain, and launchctl answers `125 Domain does not support
+specified action` for it while `user/<uid>` prints normally.
+
+The deadline follows the supervisor that enforces it rather than restart
+ownership, so `OPENCLAW_SUPERVISOR_MODE=external` no longer selects the
+platform-neutral policy on a launchd host. Active-work drain reserves 10 seconds
+for final chat writes and server cleanup, and another 5 seconds before launchd's
+deadline. A job carrying the installed template's 20-second `ExitTimeOut`
+therefore gets a 5-second drain and a 15-second Gateway shutdown deadline. A job
+whose `ExitTimeOut` is at or below that 5-second exit margin gets no drain
+headroom, which is the consequence of the configured deadline rather than a
+budget the Gateway can spend.
+
+If the job cannot be inspected, the Gateway warns with the target and failure
+reason and falls back to 20 seconds. That is both launchd's documented default
+for a job omitting `ExitTimeOut` and the value OpenClaw's LaunchAgent template
+writes. Guessing short only forfeits drain headroom, while guessing long is what
+lets launchd kill an unfinished drain. A failed shutdown reread retains the
+startup budget, with elapsed time deducted, instead of assuming a longer
+timeout. Already-running Gateways keep their startup reading until they restart,
+so changing a job's `ExitTimeOut` takes effect on the next start.
 
 ## Host sleep and process freezes
 

@@ -1,15 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveGatewayShutdownBudget } from "./run-loop-shutdown-budget.js";
 
-const { readFile, execUser, execSystem } = vi.hoisted(() => ({
+const { readFile, execUser, execSystem, execLaunchctl } = vi.hoisted(() => ({
   readFile: vi.fn(),
   execUser: vi.fn(),
   execSystem: vi.fn(),
+  execLaunchctl: vi.fn(),
 }));
 vi.mock("node:fs/promises", () => ({ default: { readFile } }));
 vi.mock("../../daemon/systemd-exec.js", () => ({
   execSystemctlUser: execUser,
   execSystemctl: execSystem,
+}));
+vi.mock("../../daemon/launchd-exec.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../daemon/launchd-exec.js")>()),
+  execLaunchctl,
 }));
 
 beforeEach(() => {
@@ -23,6 +28,7 @@ beforeEach(() => {
       "User=openclaw\nType=simple\nNotifyAccess=none\nKillMode=control-group",
     stderr: "",
   });
+  execLaunchctl.mockReset();
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -92,5 +98,101 @@ describe("Gateway stop deadline independent of restart ownership", () => {
     expect(warn).not.toHaveBeenCalled();
     expect(execSystem).not.toHaveBeenCalled();
     expect(execUser).not.toHaveBeenCalled();
+  });
+});
+
+describe("Gateway stop deadline independent of restart ownership on darwin", () => {
+  beforeEach(() => {
+    vi.stubGlobal("process", {
+      ...process,
+      platform: "darwin",
+      pid: 4242,
+      getuid: () => 501,
+      env: {},
+    });
+    process.env.XPC_SERVICE_NAME = "ai.openclaw.gateway";
+  });
+
+  it("clamps an external launchd job to its own exit timeout", async () => {
+    process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+    execLaunchctl.mockResolvedValue({
+      code: 0,
+      stdout: "\tstate = running\n\tminimum runtime = 10\n\texit timeout = 5\n\tpid = 4242\n",
+      stderr: "",
+      termination: "exit",
+    });
+    const info = vi.fn();
+    const budget = await resolveGatewayShutdownBudget("external", { info, warn: vi.fn() });
+    budget.log("startup");
+    expect(info).toHaveBeenCalledWith(
+      "shutdown budget at startup: drain=0ms shutdown=0ms reserve=0ms exitMargin=5000ms; source=launchd system/ai.openclaw.gateway exit timeout=5000ms",
+    );
+    expect(budget.nativeStopBudget).toBe(true);
+    expect(execLaunchctl).toHaveBeenCalled();
+  });
+
+  it.each([
+    { seconds: 20, timeoutMs: 15_000, drainMs: 5_000, reserveMs: 10_000 },
+    { seconds: 90, timeoutMs: 85_000, drainMs: 75_000, reserveMs: 10_000 },
+  ])(
+    "derives the budget from a $seconds second exit timeout",
+    async ({ seconds, timeoutMs, drainMs, reserveMs }) => {
+      process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+      execLaunchctl.mockResolvedValue({
+        code: 0,
+        stdout: `\texit timeout = ${seconds}\n\tpid = 4242\n`,
+        stderr: "",
+        termination: "exit",
+      });
+      const info = vi.fn();
+      const budget = await resolveGatewayShutdownBudget("external", { info, warn: vi.fn() });
+      budget.log("shutdown");
+      expect(budget.timeoutMs).toBe(timeoutMs);
+      expect(budget.reserveMs).toBe(reserveMs);
+      expect(info).toHaveBeenCalledWith(
+        `shutdown budget at shutdown: drain=${drainMs}ms shutdown=${timeoutMs}ms reserve=${reserveMs}ms exitMargin=5000ms; source=launchd system/ai.openclaw.gateway exit timeout=${seconds * 1_000}ms`,
+      );
+    },
+  );
+
+  it("warns and uses the launchd default when the job cannot be inspected", async () => {
+    process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+    execLaunchctl.mockResolvedValue({
+      code: 1,
+      stdout: "",
+      stderr: "permission denied",
+      termination: "exit",
+    });
+    const warn = vi.fn();
+    const budget = await resolveGatewayShutdownBudget("external", { info: vi.fn(), warn });
+    expect(budget.timeoutMs).toBe(15_000);
+    expect(budget.nativeStopBudget).toBe(true);
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining("Unable to read the launchd exit timeout"),
+    );
+  });
+
+  it("keeps the platform-neutral policy when darwin is not running a launchd job", async () => {
+    process.env = {};
+    const warn = vi.fn();
+    const budget = await resolveGatewayShutdownBudget(null, { info: vi.fn(), warn });
+    expect(budget.timeoutMs).toBe(325_000);
+    expect(budget.nativeStopBudget).toBe(false);
+    expect(warn).not.toHaveBeenCalled();
+    expect(execLaunchctl).not.toHaveBeenCalled();
+  });
+
+  it("never reads systemd on darwin", async () => {
+    process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+    execLaunchctl.mockResolvedValue({
+      code: 0,
+      stdout: "\texit timeout = 20\n\tpid = 4242\n",
+      stderr: "",
+      termination: "exit",
+    });
+    await resolveGatewayShutdownBudget("external", { info: vi.fn(), warn: vi.fn() });
+    expect(execSystem).not.toHaveBeenCalled();
+    expect(execUser).not.toHaveBeenCalled();
+    expect(readFile).not.toHaveBeenCalled();
   });
 });
