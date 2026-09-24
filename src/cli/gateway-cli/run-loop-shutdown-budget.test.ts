@@ -136,9 +136,11 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
   });
 
   // THE REGRESSION GUARD. The linked report is an externally delivered SIGTERM
-  // under a five second job, where launchd never starts its clock and active work
-  // drained for 315 seconds. Adopting the job deadline there would hand that same
-  // supported setup a zero drain and interrupt work that had time to finish.
+  // under a five second job, where launchd never starts its clock and the drain ran
+  // its full 315 seconds. Measured on the reporting host, it then hit its own
+  // timeout with work still active rather than finishing early, so the drain was
+  // being used. Adopting the job deadline there would hand that same supported
+  // setup a zero drain and cut that work off at once.
   it("keeps the full drain when launchd did not initiate the stop", async () => {
     execLaunchctl.mockResolvedValue(printed("running", "\texit timeout = 5\n\tpid = 4242\n"));
     const info = vi.fn();
