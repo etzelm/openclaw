@@ -4,13 +4,25 @@ import { execLaunchctl, formatLaunchctlResultDetail } from "../daemon/launchd-ex
 import { resolveLaunchAgentLabel } from "../daemon/launchd-label.js";
 import { parseKeyValueOutput } from "../daemon/runtime-parse.js";
 import { formatErrorMessage } from "./errors.js";
-import {
-  GATEWAY_SERVICE_STOP_TIMEOUT_MS,
-  LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS,
-} from "./gateway-shutdown-budget.js";
+import { LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS } from "./gateway-shutdown-budget.js";
 import { detectRespawnSupervisor } from "./supervisor-markers.js";
 
-export type LaunchdStopTimeout = { timeoutMs: number; source: string; warning?: string };
+export type LaunchdStopTimeout = { timeoutMs: number; source: string };
+
+/**
+ * What inspecting the job established, which is two independent answers.
+ *
+ * `stop` is a deadline launchd is enforcing on this process, and it is null
+ * whenever none was established: this is not a launchd job, launchd is not the
+ * one stopping it, or the job could not be inspected at all. Only a non-null
+ * `stop` may be spent as a native stop budget.
+ *
+ * `warning` is what the operator needs to hear, and it is deliberately separate.
+ * A failed inspection has something to report without having found a deadline,
+ * and reporting the platform-neutral policy as if it came from launchd is what
+ * would let an unverified number cap a longer requested restart drain.
+ */
+export type LaunchdStopRead = { stop: LaunchdStopTimeout | null; warning?: string };
 
 const LAUNCHCTL_PRINT_TIMEOUT_MS = 2_000;
 
@@ -54,7 +66,7 @@ function resolveJobRelation(pid: number | undefined): "self" | "launcher" | null
  * answers `active`.
  */
 function readJobState(printed: string): string | undefined {
-  return /^\tstate = (?<state>.+)$/mu.exec(printed)?.groups?.state.trim();
+  return /^\tstate = (?<state>.+)$/mu.exec(printed)?.groups?.state?.trim();
 }
 
 /**
@@ -94,28 +106,31 @@ function readLauncherStopTimeoutMs(env: NodeJS.ProcessEnv): number | undefined {
  * template writes. Guessing short only forfeits drain headroom; guessing long is
  * what lets the supervisor kill an unfinished drain.
  */
-function defaultStopDeadline(target: string, reason: string): LaunchdStopTimeout {
+function defaultStopDeadline(target: string, reason: string): LaunchdStopRead {
   const timeoutMs = LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS * 1_000;
   return {
-    timeoutMs,
-    source: `launchd ${target} exit timeout unavailable; default ExitTimeOut`,
+    stop: { timeoutMs, source: `launchd ${target} exit timeout unavailable; default ExitTimeOut` },
     warning: `launchd is stopping ${target} but ${reason}; using ${timeoutMs}ms default. Check the running job with launchctl print.`,
   };
 }
 
 /**
  * The job could not be inspected, so whether launchd is stopping it is unknown.
- * Report the platform-neutral policy rather than a shorter guess: shortening here
- * would cut a drain that no launchd deadline was bounding, and the warning still
- * routes the operator to the job.
+ *
+ * No deadline is reported. Shortening the budget here would cut a drain that no
+ * launchd deadline was bounding, and handing back the platform-neutral policy as
+ * a launchd answer is worse than saying nothing: the caller would classify an
+ * unverified number as a native stop budget, which caps a longer requested
+ * restart drain and arms a forced exit on a stop launchd may not be running at
+ * all. The caller already owns that policy number, so the warning alone is what
+ * this adds, and it still routes the operator to the job.
  */
-function unresolved(label: string, failures: string[]): LaunchdStopTimeout {
+function unresolved(label: string, failures: string[]): LaunchdStopRead {
   return {
-    timeoutMs: GATEWAY_SERVICE_STOP_TIMEOUT_MS,
-    source: `launchd ${label} stop state unavailable; Gateway stop policy`,
-    warning: `Unable to inspect the launchd job; ${failures
+    stop: null,
+    warning: `Unable to inspect the launchd job ${label}; ${failures
       .map((failure) => truncateUtf16Safe(failure.replaceAll(/\s+/g, " "), 500))
-      .join("; ")}; keeping the ${GATEWAY_SERVICE_STOP_TIMEOUT_MS}ms Gateway stop policy. Check the running job with launchctl print.`,
+      .join("; ")}; keeping the Gateway stop policy. Check the running job with launchctl print.`,
   };
 }
 
@@ -125,15 +140,16 @@ function unresolved(label: string, failures: string[]): LaunchdStopTimeout {
  * `ExitTimeOut` bounds a stop that launchd is running and nothing else, so it is
  * adopted only while the printed job reports launchd stopping it. An operator
  * job may set any value, so `LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS` is the fallback
- * rather than the answer. Returns null when this process is not a launchd job,
- * and when launchd is not the one stopping it, which leaves the caller on the
- * platform-neutral policy it already resolved.
+ * rather than the answer. `stop` is null when this process is not a launchd job,
+ * when launchd is not the one stopping it, and when the job could not be
+ * inspected, each of which leaves the caller on the platform-neutral policy it
+ * already resolved.
  */
 export async function readLaunchdStopTimeout(
   env: NodeJS.ProcessEnv = process.env,
-): Promise<LaunchdStopTimeout | null> {
+): Promise<LaunchdStopRead> {
   if (detectRespawnSupervisor(env, "darwin") !== "launchd") {
-    return null;
+    return { stop: null };
   }
   const failures: string[] = [];
   let label: string;
@@ -172,7 +188,7 @@ export async function readLaunchdStopTimeout(
     // This is our job, so stop searching. Whether its deadline binds this stop is
     // a separate question from whether the job was found.
     if (!isLaunchdStoppingJob(readJobState(printed))) {
-      return null;
+      return { stop: null };
     }
     const seconds = parseStrictPositiveInteger(entries["exit timeout"] ?? "");
     if (seconds === undefined) {
@@ -186,10 +202,12 @@ export async function readLaunchdStopTimeout(
     const launcherMs = relation === "launcher" ? readLauncherStopTimeoutMs(env) : undefined;
     return launcherMs !== undefined && launcherMs < jobMs
       ? {
-          timeoutMs: launcherMs,
-          source: `launchd ${target} exit timeout capped at the launcher's ${launcherMs}ms stop timer`,
+          stop: {
+            timeoutMs: launcherMs,
+            source: `launchd ${target} exit timeout capped at the launcher's ${launcherMs}ms stop timer`,
+          },
         }
-      : { timeoutMs: jobMs, source: `launchd ${target} exit timeout` };
+      : { stop: { timeoutMs: jobMs, source: `launchd ${target} exit timeout` } };
   }
   return unresolved(label, failures);
 }

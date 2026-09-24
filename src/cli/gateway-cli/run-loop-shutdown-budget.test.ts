@@ -1,5 +1,9 @@
+import { performance } from "node:perf_hooks";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { resolveGatewayShutdownBudget } from "./run-loop-shutdown-budget.js";
+import {
+  resolveGatewayShutdownBudget,
+  resolveGatewayShutdownDrainBudget,
+} from "./run-loop-shutdown-budget.js";
 
 const { readFile, execUser, execSystem, execLaunchctl } = vi.hoisted(() => ({
   readFile: vi.fn(),
@@ -209,9 +213,65 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
       stoppingNow,
     );
     expect(budget.timeoutMs).toBe(325_000);
+    // The number alone is not the contract. A failed probe confirmed no launchd
+    // deadline, so this must not be classified as a native stop budget either:
+    // that flag is what caps a restart drain and arms a forced exit.
+    expect(budget.nativeStopBudget).toBe(false);
     expect(warn).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining("Unable to inspect the launchd job"),
     );
+  });
+
+  // The flag is only worth asserting because of what it does downstream, so drive
+  // the real consumer. An operator restart that asked to drain for ten minutes
+  // keeps that request when no launchd deadline was ever confirmed.
+  it("leaves a longer requested restart drain uncapped when the job cannot be inspected", async () => {
+    execLaunchctl.mockResolvedValue({
+      code: 1,
+      stdout: "",
+      stderr: "permission denied",
+      termination: "exit",
+    });
+    const budget = await resolveGatewayShutdownBudget(
+      "external",
+      { info: vi.fn(), warn: vi.fn() },
+      stoppingNow,
+    );
+    expect(budget.nativeStopBudget).toBe(false);
+    const drain = resolveGatewayShutdownDrainBudget({
+      budget,
+      isRestart: true,
+      forceRestart: false,
+      restartWithoutSupervisor: false,
+      acceptedAtMs: performance.now(),
+      requestedRestartDrainTimeoutMs: 600_000,
+    });
+    // Only elapsed time comes off the request; no supervisor ceiling applies.
+    expect(drain.drainTimeoutMs).toBeGreaterThan(590_000);
+    expect(drain.restartTimeoutMs()).toBe(325_000);
+  });
+
+  // The same consumer, with a deadline that WAS confirmed, still gets capped.
+  // Without this pair the test above would also pass if the launchd read were
+  // deleted outright.
+  it("caps that same restart drain at a confirmed job deadline", async () => {
+    execLaunchctl.mockResolvedValue(printed("SIGTERMed", "\texit timeout = 47\n\tpid = 4242\n"));
+    const budget = await resolveGatewayShutdownBudget(
+      "external",
+      { info: vi.fn(), warn: vi.fn() },
+      stoppingNow,
+    );
+    expect(budget.nativeStopBudget).toBe(true);
+    const drain = resolveGatewayShutdownDrainBudget({
+      budget,
+      isRestart: true,
+      forceRestart: false,
+      restartWithoutSupervisor: false,
+      acceptedAtMs: performance.now(),
+      requestedRestartDrainTimeoutMs: 600_000,
+    });
+    // 47s job - 5s exit margin = 42000ms shutdown, less the 10000ms reserve.
+    expect(drain.drainTimeoutMs).toBe(32_000);
   });
 
   // No stop is running at startup, so there is no enforcing deadline to read and

@@ -9,12 +9,21 @@ import {
 import { readLaunchdStopTimeout } from "../../infra/launchd-stop-timeout.js";
 import { readSystemdStopTimeout } from "../../infra/systemd-stop-timeout.js";
 
-type NativeStopTimeout = { timeoutMs: number; source: string; warning?: string };
+type NativeStopTimeout = { timeoutMs: number; source: string };
 
-/** Ask whichever supervisor actually enforces the deadline on this platform. */
-async function readNativeStopTimeout(stopping: boolean): Promise<NativeStopTimeout | null> {
+/**
+ * Ask whichever supervisor actually enforces the deadline on this platform.
+ *
+ * `stop` and `warning` are independent answers. A probe that could not establish
+ * a deadline still has something to tell the operator, and only a non-null `stop`
+ * may be spent as a native stop budget.
+ */
+async function readNativeStopTimeout(
+  stopping: boolean,
+): Promise<{ stop: NativeStopTimeout | null; warning?: string }> {
   if (process.platform === "linux") {
-    return await readSystemdStopTimeout();
+    const systemd = await readSystemdStopTimeout();
+    return { stop: systemd, warning: systemd?.warning };
   }
   // launchd's ExitTimeOut bounds a stop that launchd is running and nothing else:
   // an externally delivered SIGTERM never starts that clock, and the job outlives
@@ -24,7 +33,7 @@ async function readNativeStopTimeout(stopping: boolean): Promise<NativeStopTimeo
   if (process.platform === "darwin" && stopping) {
     return await readLaunchdStopTimeout();
   }
-  return null;
+  return { stop: null };
 }
 
 export async function resolveGatewayShutdownBudget(
@@ -37,13 +46,14 @@ export async function resolveGatewayShutdownBudget(
 ) {
   // Restart ownership may be external while the platform supervisor still
   // enforces the stop deadline. That holds on darwin exactly as it does on linux.
-  const nativeStop = await readNativeStopTimeout(refresh !== undefined);
+  const native = await readNativeStopTimeout(refresh !== undefined);
+  const nativeStop = native.stop;
   const retained =
-    refresh?.previous.nativeStopBudget && (!nativeStop || nativeStop.warning)
+    refresh?.previous.nativeStopBudget && (!nativeStop || native.warning)
       ? refresh.previous
       : undefined;
-  if (nativeStop?.warning) {
-    logger.warn(nativeStop.warning);
+  if (native.warning) {
+    logger.warn(native.warning);
   }
   if (retained) {
     logger.warn(

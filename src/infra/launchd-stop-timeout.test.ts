@@ -41,8 +41,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
       stopping("\tminimum runtime = 10\n\texit timeout = 5\n\tpid = 4242\n"),
     );
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 5_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 5_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
     expect(execLaunchctl).toHaveBeenCalledExactlyOnceWith(
       ["print", "system/ai.openclaw.gateway"],
@@ -57,8 +56,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("reads the job's own state, not a nested coalition's", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 47\n\tpid = 4242\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 47_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 47_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -68,7 +66,9 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   // deadline bounds nothing and the caller keeps the budget it already had.
   it("declines the deadline when launchd is not the one stopping the job", async () => {
     execLaunchctl.mockResolvedValue(printed("running", "\texit timeout = 5\n\tpid = 4242\n"));
-    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toBeNull();
+    // No deadline and nothing to warn about: this is the ordinary shape of a stop
+    // that some other sender delivered.
+    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({ stop: null });
     // Our job was found in the first domain, so there is nothing left to search.
     expect(execLaunchctl).toHaveBeenCalledTimes(1);
   });
@@ -77,15 +77,14 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     "treats the unrecognised state %j as not stopping",
     async (state) => {
       execLaunchctl.mockResolvedValue(printed(state, "\texit timeout = 5\n\tpid = 4242\n"));
-      await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toBeNull();
+      await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({ stop: null });
     },
   );
 
   it("accepts any signal launchd reports having delivered", async () => {
     execLaunchctl.mockResolvedValue(printed("SIGKILLed", "\texit timeout = 9\n\tpid = 4242\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 9_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 9_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -99,8 +98,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
       })
       .mockResolvedValueOnce(stopping("\texit timeout = 20\n\tpid = 4242\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 20_000,
-      source: "launchd gui/501/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 20_000, source: "launchd gui/501/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -123,24 +121,23 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
       })
       .mockResolvedValueOnce(stopping("\texit timeout = 30\n\tpid = 4242\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 30_000,
-      source: "launchd user/501/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 30_000, source: "launchd user/501/ai.openclaw.gateway exit timeout" },
     });
     expect(execLaunchctl).toHaveBeenCalledTimes(3);
   });
 
   it("refuses a same-named job in every other domain and says why", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 300\n\tpid = 99\n"));
-    const timeout = await readLaunchdStopTimeout(LAUNCHD_ENV);
-    // Nothing was established, so the platform-neutral policy stands rather than
-    // a shorter guess that would cut a drain launchd may not be bounding.
-    expect(timeout?.timeoutMs).toBe(330_000);
+    const read = await readLaunchdStopTimeout(LAUNCHD_ENV);
+    // Nothing was established, so no deadline is reported at all and the caller
+    // keeps the platform-neutral policy it already resolved.
+    expect(read.stop).toBeNull();
     for (const target of [
       "system/ai.openclaw.gateway",
       "gui/501/ai.openclaw.gateway",
       "user/501/ai.openclaw.gateway",
     ]) {
-      expect(timeout?.warning).toContain(
+      expect(read.warning).toContain(
         `${target}: pid 99 is neither this process nor its launcher`,
       );
     }
@@ -152,8 +149,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("accepts the job when it is this process's launcher parent", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 12\n\tpid = 4241\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 12_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 12_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -162,9 +158,11 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("caps a declared launcher deadline that binds before the job's", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
     await expect(readLaunchdStopTimeout(LAUNCHER_ENV)).resolves.toEqual({
-      timeoutMs: 19_000,
-      source:
-        "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's 19000ms stop timer",
+      stop: {
+        timeoutMs: 19_000,
+        source:
+          "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's 19000ms stop timer",
+      },
     });
   });
 
@@ -174,8 +172,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("leaves an undeclared parent's longer job deadline intact", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      timeoutMs: 90_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -186,8 +183,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
       await expect(
         readLaunchdStopTimeout({ ...LAUNCHD_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: declared }),
       ).resolves.toEqual({
-        timeoutMs: 90_000,
-        source: "launchd system/ai.openclaw.gateway exit timeout",
+        stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
       });
     },
   );
@@ -196,8 +192,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("keeps a job deadline shorter than the declared launcher timer", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 5\n\tpid = 4241\n"));
     await expect(readLaunchdStopTimeout(LAUNCHER_ENV)).resolves.toEqual({
-      timeoutMs: 5_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 5_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -208,8 +203,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     await expect(
       readLaunchdStopTimeout({ ...LAUNCHD_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: "1000" }),
     ).resolves.toEqual({
-      timeoutMs: 90_000,
-      source: "launchd system/ai.openclaw.gateway exit timeout",
+      stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
@@ -219,40 +213,44 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     "uses the conservative default when a running stop has no readable deadline",
     async (fields) => {
       execLaunchctl.mockResolvedValue(stopping(fields));
-      const timeout = await readLaunchdStopTimeout(LAUNCHD_ENV);
-      expect(timeout?.timeoutMs).toBe(20_000);
-      expect(timeout?.source).toBe(
+      const read = await readLaunchdStopTimeout(LAUNCHD_ENV);
+      // A deadline IS running here, so this one is a real native budget even
+      // though its value had to be defaulted.
+      expect(read.stop?.timeoutMs).toBe(20_000);
+      expect(read.stop?.source).toBe(
         "launchd system/ai.openclaw.gateway exit timeout unavailable; default ExitTimeOut",
       );
-      expect(timeout?.warning).toContain(
+      expect(read.warning).toContain(
         "launchd is stopping system/ai.openclaw.gateway but its exit timeout is missing or invalid",
       );
     },
   );
 
-  it("keeps the platform-neutral policy when the job cannot be inspected", async () => {
+  // THE REGRESSION GUARD for the failed-inspection path. A probe that established
+  // nothing must report no deadline: handing back the Gateway's own stop policy
+  // here is what let the caller classify an unverified number as a native stop
+  // budget, capping a longer requested restart drain and arming a forced exit.
+  it("reports no deadline when the job cannot be inspected", async () => {
     execLaunchctl.mockResolvedValue({
       code: 1,
       stdout: "",
       stderr: "permission denied",
       termination: "exit",
     });
-    const timeout = await readLaunchdStopTimeout(LAUNCHD_ENV);
-    expect(timeout?.timeoutMs).toBe(330_000);
-    expect(timeout?.source).toBe(
-      "launchd ai.openclaw.gateway stop state unavailable; Gateway stop policy",
-    );
-    expect(timeout?.warning).toContain(
+    const read = await readLaunchdStopTimeout(LAUNCHD_ENV);
+    expect(read.stop).toBeNull();
+    expect(read.warning).toContain(
       "system/ai.openclaw.gateway: launchctl print exited 1: permission denied",
     );
-    expect(timeout?.warning).toContain("Check the running job with launchctl print.");
+    expect(read.warning).toContain("keeping the Gateway stop policy");
+    expect(read.warning).toContain("Check the running job with launchctl print.");
   });
 
   it("survives launchctl throwing rather than exiting nonzero", async () => {
     execLaunchctl.mockRejectedValue(new Error("spawn ENOENT"));
-    const timeout = await readLaunchdStopTimeout(LAUNCHD_ENV);
-    expect(timeout?.timeoutMs).toBe(330_000);
-    expect(timeout?.warning).toContain("launchctl print threw");
+    const read = await readLaunchdStopTimeout(LAUNCHD_ENV);
+    expect(read.stop).toBeNull();
+    expect(read.warning).toContain("launchctl print threw");
   });
 
   it("honours an explicit label override", async () => {
@@ -260,23 +258,22 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     await expect(
       readLaunchdStopTimeout({ ...LAUNCHD_ENV, OPENCLAW_LAUNCHD_LABEL: "com.example.gw" }),
     ).resolves.toEqual({
-      timeoutMs: 45_000,
-      source: "launchd system/com.example.gw exit timeout",
+      stop: { timeoutMs: 45_000, source: "launchd system/com.example.gw exit timeout" },
     });
   });
 
   it("warns instead of throwing when the configured label is invalid", async () => {
-    const timeout = await readLaunchdStopTimeout({
+    const read = await readLaunchdStopTimeout({
       ...LAUNCHD_ENV,
       OPENCLAW_LAUNCHD_LABEL: "bad label/../etc",
     });
-    expect(timeout?.timeoutMs).toBe(330_000);
-    expect(timeout?.warning).toContain("label could not be resolved");
+    expect(read.stop).toBeNull();
+    expect(read.warning).toContain("label could not be resolved");
     expect(execLaunchctl).not.toHaveBeenCalled();
   });
 
   it("stays out of the way when this process is not a launchd job", async () => {
-    await expect(readLaunchdStopTimeout({})).resolves.toBeNull();
+    await expect(readLaunchdStopTimeout({})).resolves.toEqual({ stop: null });
     expect(execLaunchctl).not.toHaveBeenCalled();
   });
 });
