@@ -18,6 +18,9 @@ beforeEach(() => {
   vi.useFakeTimers();
   child = new ChildProcess();
   kill = vi.spyOn(child, "kill").mockReturnValue(true);
+  // `spawn` is hoisted once for the file, so its call log survives across cases
+  // and `toHaveBeenCalledExactlyOnceWith` would only ever hold for the first one.
+  spawn.mockClear();
   spawn.mockReturnValue(child);
   exit = vi.spyOn(process, "exit").mockImplementation(vi.fn<typeof process.exit>());
   vi.spyOn(process, "kill").mockReturnValue(true);
