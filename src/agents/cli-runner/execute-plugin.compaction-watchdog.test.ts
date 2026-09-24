@@ -154,7 +154,9 @@ describe("compaction reported as outstanding work", () => {
       },
     );
     await expect(run).resolves.toMatchObject({ reason: "exit", timedOut: false });
-    expect(workChanged).toContain(true);
-    expect(workChanged).toContain(false);
+    // Exact sequence, not membership: `toContain` also accepts a report that
+    // latches on and never withdraws. The trailing false is the terminal report
+    // `executePluginOwnedProcess` makes when it closes the turn.
+    expect(workChanged).toEqual([true, false, false]);
   });
 });
