@@ -295,14 +295,22 @@ export async function findDetachedTaskRunAsync(
     const direct = await findTaskByRunIdAsync(params.runId, read);
     owner.assertCurrent();
     read.assertCurrent();
-    const task =
+    // Same run-id scoping the synchronous lookup applies: the preferred row above can
+    // belong to another runtime that shares this run id, so match this caller's own
+    // row before falling back to the session or concluding absence.
+    const owned =
       direct && taskMatchesFindIdentity(direct, params)
         ? direct
-        : params.allowSessionFallback === true
-          ? read
-              .listTasksForRelatedSessionKey(params.sessionKey)
-              .find((candidate) => taskMatchesFindScope(candidate, params))
-          : undefined;
+        : read
+            .getTasksByRunId(params.runId)
+            .find((candidate) => taskMatchesFindIdentity(candidate, params));
+    const task =
+      owned ??
+      (params.allowSessionFallback === true
+        ? read
+            .listTasksForRelatedSessionKey(params.sessionKey)
+            .find((candidate) => taskMatchesFindScope(candidate, params))
+        : undefined);
     // A legacy custom runtime without a lookup hook cannot prove absence in its own store.
     return task || !owner.runtime ? { lookup: "available", task } : { lookup: "unavailable" };
   } catch (error) {
