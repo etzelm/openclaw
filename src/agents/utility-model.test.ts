@@ -402,4 +402,60 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
       }),
     ).toBeUndefined();
   });
+
+  // The opt-out documented for installations that hold an API key alongside a
+  // CLI-backed primary and want these completions to stay on HTTP.
+  it("keeps the derived model on HTTP when its own entry pins the default runtime", () => {
+    const cfg = {
+      agents: {
+        defaults: {
+          model: "anthropic/claude-opus-5",
+          models: {
+            "anthropic/claude-opus-5": { agentRuntime: { id: "claude-cli" } },
+            "anthropic/claude-haiku-4-5": { agentRuntime: { id: "openclaw" } },
+          },
+        },
+      },
+    } as OpenClawConfig;
+
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot,
+      }),
+    ).toBeUndefined();
+  });
+
+  // The boundary of that opt-out, stated so it cannot be documented loosely: an
+  // entry only opts out when it names a runtime. A bare entry, and an
+  // `agentRuntime.id` that normalizes back to the default, both still inherit.
+  it("still inherits when the derived entry names no non-default runtime", () => {
+    const withEntry = (haiku: Record<string, unknown>) =>
+      ({
+        agents: {
+          defaults: {
+            model: "anthropic/claude-opus-5",
+            models: {
+              "anthropic/claude-opus-5": { agentRuntime: { id: "claude-cli" } },
+              "anthropic/claude-haiku-4-5": haiku,
+            },
+          },
+        },
+      }) as OpenClawConfig;
+
+    for (const cfg of [withEntry({}), withEntry({ agentRuntime: { id: "default" } })]) {
+      expect(
+        resolveAutomaticUtilityRuntimeOverride({
+          cfg,
+          agentId: "main",
+          utilityProvider: "anthropic",
+          utilityModelId: "claude-haiku-4-5",
+          metadataSnapshot,
+        }),
+      ).toBe("claude-cli");
+    }
+  });
 });
