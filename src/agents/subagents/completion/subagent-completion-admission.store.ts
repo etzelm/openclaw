@@ -28,7 +28,6 @@ import { formatTaskBlockedFollowupMessage } from "../../../tasks/task-executor-p
 import { syncFlowFromTaskAfterTaskMutation } from "../../../tasks/task-registry-state.js";
 import {
   bindTaskRecord,
-  findTaskRecordByRunIdForViewInDatabase,
   readTaskRecord,
   upsertTaskRunRowInDatabase,
 } from "../../../tasks/task-registry.store.kernel.js";
@@ -63,6 +62,10 @@ import {
 } from "../registry/subagent-registry.store.sqlite.js";
 import type { SubagentRunRecord } from "../registry/subagent-registry.types.js";
 import { compareSubagentRunGeneration } from "../registry/subagent-run-generation.js";
+import {
+  describeRunIdTaskOwnership,
+  readRunIdTaskOwnership,
+} from "./subagent-completion-admission.task-owner.js";
 
 const log = createSubsystemLogger("subagents/completion");
 
@@ -250,6 +253,7 @@ function ownsTasklessCompletion(
   database: OpenClawStateDatabase,
   subagent: SubagentRunRecord,
   expected: SubagentRunRecord,
+  ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId),
 ): boolean {
   // Announce records transport observations before committing suspension; they do
   // not transfer ownership of the result, execution, or requester wake.
@@ -270,7 +274,9 @@ function ownsTasklessCompletion(
   return (
     subagentRuns.get(subagent.runId) === expected &&
     ownerPayload(subagent) === ownerPayload(expected) &&
-    !findTaskRecordByRunIdForViewInDatabase(database.db, subagent.taskRunId ?? subagent.runId) &&
+    // Any row holding this run id still has an execution owner in its own runtime, so
+    // retirement stays refused. A completion is ownerless only when no row holds the id.
+    ownership.rows.length === 0 &&
     ![...subagentRuns.values()].some(newerSibling) &&
     !loadSubagentRunsForChildSessionFromSqlite(subagent.childSessionKey, database).some(
       newerSibling,
@@ -298,11 +304,12 @@ export function reconcileRetiredSubagentCancellation(
     if (!subagent || retiredCancellationEndedAt(subagent, now) !== endedAt) {
       return false;
     }
+    const ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId);
     // Retained tasks still use ordinary cancellation and requester-wake ordering.
-    if (findTaskRecordByRunIdForViewInDatabase(database.db, subagent.taskRunId ?? subagent.runId)) {
+    if (ownership.rows.length > 0) {
       return undefined;
     }
-    if (!ownsTasklessCompletion(database, subagent, expected)) {
+    if (!ownsTasklessCompletion(database, subagent, expected, ownership)) {
       return false;
     }
     subagent.killReconciliation = undefined;
@@ -595,8 +602,20 @@ export function settleRequesterCompletionBatch(params: {
       const cohort = first?.requesterSettleWake?.batchRunIds?.toSorted().join("\0");
       const checkedOmittedIds = new Set<string>();
       const mutations = entries.map(({ subagent: expected, taskId }): CompletionMutation => {
-        const changedOwner = () =>
-          new Error("subagent completion owner changed before settlement: " + expected.runId);
+        // A refusal repeats on every sweep for as long as the condition holds, so the
+        // error carries what the operator cannot otherwise see: which run refused, and
+        // whether its run id is unheld, held by another runtime, or held by a row this
+        // completion does not own.
+        const changedOwner = (detail?: string) =>
+          new Error(
+            "subagent completion owner changed before settlement: " +
+              expected.runId +
+              (detail ? ` (${detail})` : ""),
+          );
+        const ownershipDetail = () =>
+          describeRunIdTaskOwnership(
+            readRunIdTaskOwnership(database, expected.taskRunId ?? expected.runId),
+          );
         const subagent = readSubagentRun(database, expected.runId);
         if (
           !subagent ||
@@ -651,7 +670,7 @@ export function settleRequesterCompletionBatch(params: {
                 subagent,
               );
               if (!missing) {
-                throw changedOwner();
+                throw changedOwner(ownershipDetail());
               }
               return missing;
             }
@@ -659,7 +678,7 @@ export function settleRequesterCompletionBatch(params: {
               task.runtime !== "subagent" ||
               task.runId !== (subagent.taskRunId ?? subagent.runId)
             ) {
-              throw changedOwner();
+              throw changedOwner(ownershipDetail());
             }
             const delivery = ensureDeliveryState(subagent);
             const deliveredAt = params.outcome.deliveredAt ?? now;
@@ -701,7 +720,7 @@ export function settleRequesterCompletionBatch(params: {
               subagent,
             );
             if (!blocked) {
-              throw changedOwner();
+              throw changedOwner(ownershipDetail());
             }
             mutation = blocked;
           }
