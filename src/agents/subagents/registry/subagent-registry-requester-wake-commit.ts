@@ -56,8 +56,10 @@ function deferWakeCommit(
     pending.failures >= REQUESTER_SETTLE_WAKE_COMMIT_SUSTAINED_FAILURES &&
     !pending.sustainedFailureReported
   ) {
-    // One report per episode. Re-reporting on every later attempt is what
-    // produced the original flood; the retry itself keeps running.
+    // One report per episode: this warn does not repeat every attempt. The
+    // original flood came from per-attempt logging at the commit call site
+    // this diff does not touch; raising the backoff ceiling from 120s to
+    // 30min throttles that logging roughly 15x rather than eliminating it.
     pending.sustainedFailureReported = true;
     context.options.warn("requester settle wake commit still failing; retries continue", {
       failures: pending.failures,
@@ -70,10 +72,7 @@ function deferWakeCommit(
   // in the past would strand the pending wake until restart.
   pending.nextAttemptAt =
     Date.now() +
-    Math.min(
-      REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS,
-      30_000 * 2 ** Math.min(pending.failures - 1, 6),
-    );
+    Math.min(REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS, 30_000 * 2 ** (pending.failures - 1));
 }
 
 // Persistence failure cannot erase a transport result or its replay budget. Keep
