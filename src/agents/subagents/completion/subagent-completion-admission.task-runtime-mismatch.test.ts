@@ -322,5 +322,11 @@ describe("foreign-runtime subagent completion owners", () => {
     });
     expect(settled.completion).toEqual(completion);
     expect(settled.requesterSettleWake).toBeUndefined();
+    // The production warning must read differently from the runtime-mismatch case
+    // above, or an operator cannot tell true absence from a repaired collision.
+    expect(warnings).toHaveBeenCalledOnce();
+    expect(JSON.stringify(warnings.mock.calls[0])).toContain(input.subagent.runId);
+    expect(JSON.stringify(warnings.mock.calls[0])).toContain("task-missing");
+    expect(JSON.stringify(warnings.mock.calls[0])).not.toContain("task-owner-runtime-mismatch");
   });
 });
