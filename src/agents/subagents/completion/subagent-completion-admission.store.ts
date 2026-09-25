@@ -29,11 +29,10 @@ import { syncFlowFromTaskAfterTaskMutation } from "../../../tasks/task-registry-
 import {
   bindTaskRecord,
   findTaskRecordByRunIdForViewInDatabase,
-  listTaskRecordsByRunIdForViewInDatabase,
   readTaskRecord,
   upsertTaskRunRowInDatabase,
 } from "../../../tasks/task-registry.store.kernel.js";
-import type { TaskRecord, TaskRuntime } from "../../../tasks/task-registry.types.js";
+import type { TaskRecord } from "../../../tasks/task-registry.types.js";
 import { resolveTaskCleanupAfter } from "../../../tasks/task-retention.js";
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import {
@@ -64,6 +63,7 @@ import {
 } from "../registry/subagent-registry.store.sqlite.js";
 import type { SubagentRunRecord } from "../registry/subagent-registry.types.js";
 import { compareSubagentRunGeneration } from "../registry/subagent-run-generation.js";
+import { readRunIdTaskOwnership } from "./subagent-completion-admission.task-owner.js";
 
 const log = createSubsystemLogger("subagents/completion");
 
@@ -245,24 +245,6 @@ function retiredCancellationEndedAt(subagent: SubagentRunRecord, now: number): n
     return undefined;
   }
   return endedAt;
-}
-
-/**
- * Ownership facts for one run id. The shared view returns a single preferred row
- * and its comparator only deprioritizes `cli`, so an older `cron` or `acp` row can
- * be selected ahead of a live subagent row that shares the id. Retirement reads
- * every row instead: a surviving subagent owner is authoritative, and a foreign
- * row is only ever the reason a completion has no owner of its own.
- */
-function readRunIdTaskOwnership(
-  database: OpenClawStateDatabase,
-  runId: string,
-): { subagentOwner: TaskRecord | undefined; foreignRuntime: TaskRuntime | undefined } {
-  const records = listTaskRecordsByRunIdForViewInDatabase(database.db, runId);
-  return {
-    subagentOwner: records.find((task) => task.runtime === "subagent"),
-    foreignRuntime: records.find((task) => task.runtime !== "subagent")?.runtime,
-  };
 }
 
 function ownsTasklessCompletion(
