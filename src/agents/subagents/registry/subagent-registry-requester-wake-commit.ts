@@ -27,10 +27,11 @@ const REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS = 120_000;
 /**
  * Identical failure reports one retry episode emits before it withholds them.
  *
- * Counted per episode against reports actually emitted, not against
- * {@link PendingRequesterSettleWakeCommit.failures}: the lifecycle owner's retry
- * loop re-enters its dispatch without going through the commit seam, so that
- * failure count can stay put while the same report repeats.
+ * Counted against reports actually emitted rather than against
+ * {@link PendingRequesterSettleWakeCommit.failures}, because that is the
+ * quantity being bounded. The two track each other whenever a rejected write is
+ * what failed, but only a report counter stays correct for a rejection that
+ * reaches this reporting path without advancing the commit failure count.
  */
 const REQUESTER_SETTLE_WAKE_FAILURE_REPORT_BUDGET = 5;
 

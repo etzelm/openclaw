@@ -272,11 +272,10 @@ describe("requester settle wake failure reporting", () => {
   });
 
   it("spends a fixed budget on an identical repeat, then withholds it", () => {
-    // Regression for a budget read off the episode's failure count. The
-    // lifecycle owner's retry loop re-enters its own dispatch and returns early
-    // on the pending it already holds, so it never reaches the commit seam that
-    // advances that count. A budget derived from it never expires and every
-    // attempt keeps reporting.
+    // The budget is spent by reporting, so it is counted that way and holds
+    // even when nothing advances the episode's commit failure count between
+    // reports. Driving it without any intervening commit attempt is what pins
+    // that down: a budget read off `failures` would not expire here.
     const { context, entry } = openEpisode();
 
     const decisions: boolean[] = [];
