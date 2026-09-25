@@ -116,6 +116,10 @@ describe("foreign-runtime subagent completion owners", () => {
     return foreign;
   }
 
+  /** The run id settlement reads ownership from, exactly as the production path derives it. */
+  const ownerRunId = (input: ReturnType<typeof records>) =>
+    input.subagent.taskRunId ?? input.subagent.runId;
+
   /** Drives one requester-settle sweep whose requester refuses the delivery. */
   async function sweepUndeliveredRequesterWake(input: ReturnType<typeof records>) {
     const driver = requesterWakeDriver([input], {
@@ -184,6 +188,11 @@ describe("foreign-runtime subagent completion owners", () => {
       expect(warnings).toHaveBeenCalledOnce();
       expect(JSON.stringify(warnings.mock.calls[0])).toContain(input.subagent.runId);
       expect(JSON.stringify(warnings.mock.calls[0])).toContain("task-missing");
+      // The operator-visible line names the runtime holding the run id, not just the
+      // stable disposition, so the journal explains why this result was dropped.
+      expect(JSON.stringify(warnings.mock.calls[0])).toContain(
+        `task-owner-runtime-mismatch:${runtime}`,
+      );
     },
   );
 
@@ -201,7 +210,7 @@ describe("foreign-runtime subagent completion owners", () => {
 
       // The collision is real: the shared run-id view prefers the older foreign row
       // even though the subagent row this completion owns is still present.
-      expect(findTaskRecordByRunIdForViewInDatabase(database.db, input.task.runId)).toMatchObject({
+      expect(findTaskRecordByRunIdForViewInDatabase(database.db, ownerRunId(input))).toMatchObject({
         taskId: foreign.taskId,
         runtime,
       });
@@ -231,11 +240,11 @@ describe("foreign-runtime subagent completion owners", () => {
 
   it("settles an undelivered requester wake once when no task row owns its run id", async () => {
     const input = persistArrivedCompletion();
-    database.db.prepare("DELETE FROM task_runs WHERE run_id = ?").run(input.task.runId);
+    database.db.prepare("DELETE FROM task_runs WHERE run_id = ?").run(ownerRunId(input));
     reopenOwners();
     input.subagent = subagentRuns.get(input.subagent.runId)!;
     const completion = structuredClone(input.subagent.completion);
-    expect(findTaskRecordByRunIdForViewInDatabase(database.db, input.task.runId)).toBeUndefined();
+    expect(findTaskRecordByRunIdForViewInDatabase(database.db, ownerRunId(input))).toBeUndefined();
 
     const driver = await sweepUndeliveredRequesterWake(input);
     expect(driver.wake).toHaveBeenCalledOnce();
