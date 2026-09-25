@@ -7,12 +7,9 @@ import type { TaskRecord } from "../../../tasks/task-registry.types.js";
 import { createSubagentRunRecord } from "../../subagent-test-fixtures.test-helpers.js";
 import type { SubagentLifecycleOptions } from "../registry/subagent-registry-lifecycle-context.js";
 import { SubagentLifecycleController } from "../registry/subagent-registry-lifecycle.js";
-import {
-  getSubagentRunsForChildSession,
-  subagentRuns,
-} from "../registry/subagent-registry-memory.js";
+import { subagentRuns } from "../registry/subagent-registry-memory.js";
 import { getLatestLiveSubagentRunByChildSessionKey } from "../registry/subagent-registry-read.js";
-import { resolveSubagentTaskForRun } from "../registry/subagent-registry-sweep-kill.js";
+import { findSubagentTaskForRun } from "../registry/subagent-registry-sweep-kill.js";
 import { saveSubagentRegistryToSqlite } from "../registry/subagent-registry.store.sqlite.js";
 import type { SubagentRunRecord } from "../registry/subagent-registry.types.js";
 import {
@@ -86,14 +83,13 @@ export function records() {
 }
 
 /**
- * Mirrors the production wiring in subagent-registry.ts, which resolves a run's task
- * through the detached-task runtime rather than by task id. Tests that assert
- * ownership behaviour need this resolver because the task-id fixture below cannot
- * reproduce the runtime filtering the real requester path applies.
+ * The production resolver itself, the same function `subagent-registry.ts` wires into
+ * the lifecycle controller. Tests that assert ownership behaviour need it because the
+ * task-id fixture below cannot reproduce the runtime filtering the real requester path
+ * applies.
  */
-export const productionSubagentTaskResolver: SubagentLifecycleOptions["resolveSubagentTask"] = (
-  entry,
-) => resolveSubagentTaskForRun(getSubagentRunsForChildSession(entry.childSessionKey), entry);
+export const productionSubagentTaskResolver: SubagentLifecycleOptions["resolveSubagentTask"] =
+  findSubagentTaskForRun;
 
 export function requesterWakeDriver(
   inputs: ReturnType<typeof records>[],

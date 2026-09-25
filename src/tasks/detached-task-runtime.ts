@@ -30,7 +30,11 @@ import {
 } from "./task-executor.js";
 import { transitionTaskRecordsByRunNative } from "./task-registry-transition.native.js";
 import type { TaskRecord } from "./task-registry.types.js";
-import { findTaskByRunIdForStatus, listTasksForSessionKeyForStatus } from "./task-status-access.js";
+import {
+  findTaskByRunIdForStatus,
+  listTasksByRunIdForStatus,
+  listTasksForSessionKeyForStatus,
+} from "./task-status-access.js";
 
 const log = createSubsystemLogger("tasks/detached-runtime");
 const DETACHED_TASK_RECOVERY_WARN_MS = 5_000;
@@ -52,6 +56,17 @@ function findCoreTaskRun(params: DetachedTaskFindParams): TaskRecord | undefined
   const direct = findTaskByRunIdForStatus(params.runId);
   if (direct && taskMatchesFindIdentity(direct, params)) {
     return direct;
+  }
+  // Run ids are not unique across runtimes and the preferred-row lookup above
+  // deprioritizes only `cli`, so an older `cron` or `acp` row can be selected ahead
+  // of this caller's own row. Rejecting on that selection alone would report the
+  // caller's task as absent while it is still present, so scope the lookup to the
+  // requested runtime before concluding anything.
+  const owned = listTasksByRunIdForStatus(params.runId).find((task) =>
+    taskMatchesFindIdentity(task, params),
+  );
+  if (owned) {
+    return owned;
   }
   if (params.allowSessionFallback !== true) {
     return undefined;

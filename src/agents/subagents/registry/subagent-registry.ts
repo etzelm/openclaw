@@ -55,7 +55,7 @@ import {
   persistSubagentRunsToDiskOrThrow,
   persistSubagentRunsToDiskAsyncOrThrow,
 } from "./subagent-registry-state.js";
-import { resolveSubagentTaskForRun } from "./subagent-registry-sweep-kill.js";
+import { findSubagentTaskForRun } from "./subagent-registry-sweep-kill.js";
 import {
   createSubagentRegistrySweeper,
   retireSupersededSubagentRun as retireSupersededSubagentRunForSweep,
@@ -112,10 +112,6 @@ export function prepareSubagentSessionCleanupRevocation(sessionKey: string): () 
       getSubagentRunsForChildSession(sessionKey),
     );
   };
-}
-
-function findSubagentTaskForRun(entry: SubagentRunRecord) {
-  return resolveSubagentTaskForRun(getSubagentRunsForChildSession(entry.childSessionKey), entry);
 }
 
 export function scheduleSubagentRegistrySweep(params?: { delayMs?: number }) {

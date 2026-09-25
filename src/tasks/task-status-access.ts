@@ -6,7 +6,9 @@ import {
 } from "./generated-media-task-activity.js";
 import { prepareTaskRegistryRead } from "./task-registry-read.js";
 // Filters task status visibility by requester, owner, and flow scope.
+import { getTasksByRunId } from "./task-registry-state.js";
 import {
+  ensureTaskRegistryReady,
   findTaskByRunId,
   listTaskRecords,
   listTaskSessionActivity,
@@ -57,6 +59,18 @@ export async function readTaskStatusSnapshots(params: { sessionKey?: string; age
 
 export function findTaskByRunIdForStatus(runId: string): TaskRecord | undefined {
   return findTaskByRunId(runId);
+}
+
+/**
+ * Run ids are not unique across runtimes, and the preferred-row lookup deprioritizes
+ * only `cli`, so an older `cron` or `acp` row can be selected ahead of the row a
+ * runtime-scoped caller asked for. Listing the run id lets that caller match on its
+ * own runtime instead of rejecting whichever row the shared preference happened to
+ * pick.
+ */
+export function listTasksByRunIdForStatus(runId: string): TaskRecord[] {
+  ensureTaskRegistryReady();
+  return getTasksByRunId(runId);
 }
 
 /** Snapshots generated-media task ids so replay guards stay attempt-local. */
