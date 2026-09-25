@@ -28,7 +28,6 @@ import { formatTaskBlockedFollowupMessage } from "../../../tasks/task-executor-p
 import { syncFlowFromTaskAfterTaskMutation } from "../../../tasks/task-registry-state.js";
 import {
   bindTaskRecord,
-  findTaskRecordByRunIdForViewInDatabase,
   readTaskRecord,
   upsertTaskRunRowInDatabase,
 } from "../../../tasks/task-registry.store.kernel.js";
@@ -302,11 +301,14 @@ export function reconcileRetiredSubagentCancellation(
     if (!subagent || retiredCancellationEndedAt(subagent, now) !== endedAt) {
       return false;
     }
-    // Retained tasks still use ordinary cancellation and requester-wake ordering.
-    if (findTaskRecordByRunIdForViewInDatabase(database.db, subagent.taskRunId ?? subagent.runId)) {
+    const ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId);
+    // Retained tasks still use ordinary cancellation and requester-wake ordering. A
+    // foreign row sharing this run id is never this subagent's own retained task, so
+    // only a surviving subagent-owned row defers to the ordinary path.
+    if (ownership.subagentOwner) {
       return undefined;
     }
-    if (!ownsTasklessCompletion(database, subagent, expected)) {
+    if (!ownsTasklessCompletion(database, subagent, expected, ownership)) {
       return false;
     }
     subagent.killReconciliation = undefined;
