@@ -366,7 +366,7 @@ describe("foreign-runtime subagent completion owners", () => {
 
       // Once no row holds the id the completion is genuinely ownerless, and the same
       // call resolves the marker. This is the boundary the fence turns on.
-      database.db.prepare("DELETE FROM task_runs WHERE run_id = ?").run(input.task.runId);
+      database.db.prepare("DELETE FROM task_runs WHERE run_id = ?").run(ownerRunId(input));
       reopenOwners();
       const ownerless = subagentRuns.get(input.subagent.runId)!;
       expect(reconcileRetiredSubagentCancellation(ownerless, Date.now())).toBe(true);
