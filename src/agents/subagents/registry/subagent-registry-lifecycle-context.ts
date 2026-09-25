@@ -106,8 +106,8 @@ export type PendingRequesterSettleWakeCommit = {
   commit(entries: readonly SubagentRunRecord[]): boolean;
   failures: number;
   nextAttemptAt: number;
-  /** Repeated failures stopped this retry; the wake stays on its row untouched. */
-  exhausted?: boolean;
+  /** One sustained-failure report was emitted for this retry episode. */
+  sustainedFailureReported?: boolean;
 };
 
 export interface SubagentLifecycleWakeContext extends SubagentLifecycleCommonContext {

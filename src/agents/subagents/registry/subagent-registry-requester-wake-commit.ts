@@ -6,14 +6,21 @@ import { maskLifecycleIdentifier } from "./subagent-registry-lifecycle-delivery.
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
 /**
- * Retries allowed for one settlement write before it stops.
+ * Consecutive failures after which one settlement write counts as sustained.
  *
- * A settlement write that keeps failing cannot durably record its own give-up,
- * because the durable write is the thing failing. So exhaustion stops the retry
- * instead of writing an outcome: the wake stays on its row, no captured result
- * is discarded, and no sibling obligation is cleared.
+ * Reaching it changes cadence and logging only. The obligation is never
+ * abandoned: the durable write that cannot succeed now can succeed once storage
+ * recovers, and the requester stays unsettled until it does.
  */
-const REQUESTER_SETTLE_WAKE_COMMIT_MAX_FAILURES = 5;
+const REQUESTER_SETTLE_WAKE_COMMIT_SUSTAINED_FAILURES = 5;
+
+/**
+ * Longest gap between retries of one settlement write.
+ *
+ * The original ceiling was 120s, so a write that could never succeed was
+ * reattempted, and logged, every two minutes for the life of the process.
+ */
+const REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS = 1_800_000;
 
 function clearPendingWakeCommit(
   context: SubagentLifecycleWakeContext,
@@ -45,20 +52,28 @@ function deferWakeCommit(
   pending: PendingRequesterSettleWakeCommit,
 ): void {
   pending.failures += 1;
-  if (pending.failures >= REQUESTER_SETTLE_WAKE_COMMIT_MAX_FAILURES) {
-    pending.exhausted = true;
-    // A deadline already in the past leaves no retry timer armed, and the
-    // retained pending keeps the lifecycle owner short-circuited here. A fresh
-    // attempt needs a genuine row change, which drops this pending, or a restart.
-    pending.nextAttemptAt = 0;
-    context.options.warn("requester settle wake commit abandoned after repeated failures", {
+  if (
+    pending.failures >= REQUESTER_SETTLE_WAKE_COMMIT_SUSTAINED_FAILURES &&
+    !pending.sustainedFailureReported
+  ) {
+    // One report per episode. Re-reporting on every later attempt is what
+    // produced the original flood; the retry itself keeps running.
+    pending.sustainedFailureReported = true;
+    context.options.warn("requester settle wake commit still failing; retries continue", {
       failures: pending.failures,
+      maxBackoffMs: REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS,
       runIds: pending.entries.map((entry) => maskLifecycleIdentifier(entry.runId, "run")),
     });
-    return;
   }
+  // Always a future deadline. The lifecycle owner arms its retry timer from
+  // this value and skips any deadline that is not ahead of now, so a deadline
+  // in the past would strand the pending wake until restart.
   pending.nextAttemptAt =
-    Date.now() + Math.min(120_000, 30_000 * 2 ** Math.min(pending.failures - 1, 2));
+    Date.now() +
+    Math.min(
+      REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS,
+      30_000 * 2 ** Math.min(pending.failures - 1, 6),
+    );
 }
 
 // Persistence failure cannot erase a transport result or its replay budget. Keep
@@ -165,8 +180,7 @@ export function retryPendingWakeCommit(
   context: SubagentLifecycleWakeContext,
   pending: PendingRequesterSettleWakeCommit,
 ): void {
-  // An abandoned commit keeps its custody but never retries again.
-  if (pending.exhausted || pending.nextAttemptAt > Date.now()) {
+  if (pending.nextAttemptAt > Date.now()) {
     return;
   }
   try {
