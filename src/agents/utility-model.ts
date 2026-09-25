@@ -128,6 +128,36 @@ export function resolveUtilityModelRefForAgent(params: {
 }
 
 /**
+ * Whether `modelId` is the small model automatic routing derives for the
+ * primary's provider (manifest `defaultUtilityModel`).
+ *
+ * The derived ref is built as `<provider>/<modelId>`, and a model id may itself
+ * contain slashes, so the provider prefix is removed positionally rather than
+ * by splitting on every separator.
+ */
+function isAutomaticUtilityModelId(params: {
+  cfg: OpenClawConfig;
+  primaryProvider: string;
+  modelId: string;
+  metadataSnapshot?: Pick<PluginMetadataSnapshot, "plugins">;
+}): boolean {
+  const derivedRef = resolveAutomaticUtilityModelRef({
+    cfg: params.cfg,
+    primaryProvider: params.primaryProvider,
+    ...(params.metadataSnapshot ? { metadataSnapshot: params.metadataSnapshot } : {}),
+  });
+  if (!derivedRef) {
+    return false;
+  }
+  const separator = derivedRef.indexOf("/");
+  if (separator < 0) {
+    return false;
+  }
+  const derivedModelId = derivedRef.slice(separator + 1);
+  return derivedModelId.trim().toLowerCase() === params.modelId.trim().toLowerCase();
+}
+
+/**
  * The agent runtime an automatically derived utility model must execute on, or
  * undefined when it already resolves its own.
  *
@@ -144,6 +174,11 @@ export function resolveUtilityModelRefForAgent(params: {
  * `agentRuntime` already applies to every model of that provider, and an
  * implicit runtime is resolved per concrete route, so neither needs to be
  * copied onto the derived ref.
+ *
+ * Inheritance is also limited to the provider-declared automatic utility model.
+ * A caller that passes its own `modelRef` reaches this helper with that ref, so
+ * provider equality alone would let an explicitly selected same-provider model
+ * move off its own route and onto the primary's CLI quota.
  */
 export function resolveAutomaticUtilityRuntimeOverride(params: {
   cfg: OpenClawConfig;
@@ -151,6 +186,7 @@ export function resolveAutomaticUtilityRuntimeOverride(params: {
   /** Provider and model of the already-resolved utility selection. */
   utilityProvider: string;
   utilityModelId: string;
+  metadataSnapshot?: Pick<PluginMetadataSnapshot, "plugins">;
 }): string | undefined {
   // An explicit utilityModel owns its own runtime; only automatic routing inherits.
   if (readUtilityModelSetting(params.cfg, params.agentId).kind !== "auto") {
@@ -159,6 +195,21 @@ export function resolveAutomaticUtilityRuntimeOverride(params: {
   const primary = resolveDefaultModelForAgent({ cfg: params.cfg, agentId: params.agentId });
   const utilityProvider = params.utilityProvider.trim().toLowerCase();
   if (!primary.provider || !primary.model || primary.provider.toLowerCase() !== utilityProvider) {
+    return undefined;
+  }
+  // Selection prefers a caller-supplied modelRef over automatic derivation, so
+  // an unset utilityModel does not prove the ref in hand was derived. Inherit
+  // only for the provider-declared automatic utility model; any other
+  // explicitly selected same-provider model keeps whatever route it already
+  // resolves, including the HTTP default.
+  if (
+    !isAutomaticUtilityModelId({
+      cfg: params.cfg,
+      primaryProvider: primary.provider,
+      modelId: params.utilityModelId,
+      ...(params.metadataSnapshot ? { metadataSnapshot: params.metadataSnapshot } : {}),
+    })
+  ) {
     return undefined;
   }
   const derived = resolveAgentHarnessPolicy({

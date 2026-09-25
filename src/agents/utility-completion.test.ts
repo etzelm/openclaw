@@ -12,7 +12,9 @@ const manifestPlugins = [
       providers: {
         anthropic: {
           defaultUtilityModel: "claude-haiku-4-5",
-          models: [{ id: "claude-haiku-4-5" }, { id: "claude-opus-5" }],
+          // claude-sonnet-5 is a same-provider model with no config entry of its
+          // own, so it resolves the default HTTP runtime and must stay there.
+          models: [{ id: "claude-haiku-4-5" }, { id: "claude-opus-5" }, { id: "claude-sonnet-5" }],
         },
       },
     },
@@ -57,6 +59,24 @@ describe("prepareUtilityCompletionForAgent", () => {
     expect(prepared.provider).toBe("anthropic");
     expect(prepared.model).toBe("claude-haiku-4-5");
     expect(prepared).toHaveProperty("agentHarnessRuntimeOverride", "claude-cli");
+  });
+
+  // Selection prefers a caller-supplied modelRef over automatic derivation, so
+  // useUtilityModel alone does not prove the ref was derived. Inheriting on
+  // provider equality alone would move this call off HTTP and onto the primary's
+  // CLI subscription quota without any config change.
+  it("leaves an explicitly selected same-provider model on its own runtime", async () => {
+    const prepared = await prepareUtilityCompletionForAgent({
+      cfg: cliPrimary,
+      agentId: "main",
+      modelRef: "anthropic/claude-sonnet-5",
+      useUtilityModel: true,
+      manifestPlugins,
+    });
+
+    expect(prepared.provider).toBe("anthropic");
+    expect(prepared.model).toBe("claude-sonnet-5");
+    expect(prepared).not.toHaveProperty("agentHarnessRuntimeOverride");
   });
 
   it("leaves an explicit utility model on its own runtime", async () => {

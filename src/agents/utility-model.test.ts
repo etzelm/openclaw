@@ -265,6 +265,9 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
       },
     },
   } as OpenClawConfig;
+  // Inheritance is scoped to the manifest-declared automatic utility model, so
+  // every case states that declaration instead of relying on ambient plugin state.
+  const metadataSnapshot = snapshotWithDefaults({ anthropic: "claude-haiku-4-5" });
 
   it("inherits the primary's model-level runtime for an auto-derived utility model", () => {
     expect(
@@ -273,8 +276,36 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
         agentId: "main",
         utilityProvider: "anthropic",
         utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot,
       }),
     ).toBe("claude-cli");
+  });
+
+  it("leaves an explicitly selected same-provider model on its own route", () => {
+    // Selection prefers a caller-supplied modelRef over automatic derivation, so
+    // provider equality alone would move a model that already routes over HTTP
+    // onto the primary's CLI subscription quota.
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg: cliPrimary,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-sonnet-5",
+        metadataSnapshot,
+      }),
+    ).toBeUndefined();
+  });
+
+  it("does not inherit when the provider declares no automatic utility model", () => {
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg: cliPrimary,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot: snapshotWithDefaults({ openai: "gpt-5.4-mini" }),
+      }),
+    ).toBeUndefined();
   });
 
   it.each([
@@ -291,6 +322,7 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
         agentId: "main",
         utilityProvider: "anthropic",
         utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot,
       }),
     ).toBeUndefined();
   });
@@ -302,6 +334,7 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
         agentId: "main",
         utilityProvider: "openai",
         utilityModelId: "gpt-5.6-luna",
+        metadataSnapshot,
       }),
     ).toBeUndefined();
   });
@@ -315,6 +348,7 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
         agentId: "main",
         utilityProvider: "anthropic",
         utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot,
       }),
     ).toBeUndefined();
   });
@@ -324,7 +358,15 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
     // provider, so the derived ref resolves it without help.
     const cfg = {
       agents: { defaults: { model: "anthropic/claude-opus-5" } },
-      models: { providers: { anthropic: { agentRuntime: { id: "claude-cli" } } } },
+      models: {
+        providers: {
+          anthropic: {
+            baseUrl: "https://api.anthropic.com",
+            models: [],
+            agentRuntime: { id: "claude-cli" },
+          },
+        },
+      },
     } as OpenClawConfig;
 
     expect(
@@ -333,6 +375,7 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
         agentId: "main",
         utilityProvider: "anthropic",
         utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot,
       }),
     ).toBeUndefined();
   });
@@ -355,6 +398,7 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
         agentId: "main",
         utilityProvider: "anthropic",
         utilityModelId: "claude-haiku-4-5",
+        metadataSnapshot,
       }),
     ).toBeUndefined();
   });

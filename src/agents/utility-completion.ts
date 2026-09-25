@@ -15,13 +15,23 @@ export async function prepareUtilityCompletionForAgent(
   // it must execute on the primary's runtime instead of the default HTTP route.
   // This is keyed on the resolved selection rather than on an absent modelRef:
   // the session observer passes the already-derived ref back in, so gating on
-  // `!modelRef` would skip the very path that reported this.
+  // `!modelRef` would skip the very path that reported this. The helper still
+  // confirms the selection is the derived model, so an explicitly selected
+  // same-provider ref keeps its own route.
   const agentHarnessRuntimeOverride = params.useUtilityModel
     ? resolveAutomaticUtilityRuntimeOverride({
         cfg: params.cfg,
         agentId: params.agentId,
         utilityProvider: selection.provider,
         utilityModelId: selection.modelId,
+        ...(params.manifestPlugins
+          ? {
+              metadataSnapshot:
+                "plugins" in params.manifestPlugins
+                  ? params.manifestPlugins
+                  : { plugins: params.manifestPlugins },
+            }
+          : {}),
       })
     : undefined;
   return {
