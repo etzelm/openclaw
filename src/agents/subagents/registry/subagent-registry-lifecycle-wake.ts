@@ -488,14 +488,10 @@ export function scheduleRequesterSettleWake(
           return;
         }
         const safeError = buildSafeLifecycleErrorMeta(error);
-        const maskedRunId = maskLifecycleIdentifier(runId, "run");
-        const maskedRequesterSessionKey = maskLifecycleIdentifier(requesterSessionKey, "session");
-        // Renderers that drop structured meta leave this line as the operator's only
-        // signal, so a repeating wake has to name its run and reason in the message.
-        params.warn(`requester settle wake failed for run ${maskedRunId}: ${safeError.message}`, {
+        params.warn("requester settle wake failed", {
           error: safeError,
-          runId: maskedRunId,
-          requesterSessionKey: maskedRequesterSessionKey,
+          runId: maskLifecycleIdentifier(runId, "run"),
+          requesterSessionKey: maskLifecycleIdentifier(requesterSessionKey, "session"),
         });
         const current = params.runs.get(runId);
         if (
@@ -520,15 +516,11 @@ export function scheduleRequesterSettleWake(
             true,
           );
         } catch (settleError) {
-          const safeSettleError = buildSafeLifecycleErrorMeta(settleError);
-          params.warn(
-            `failed to persist requester settle wake rejection for run ${maskedRunId}: ${safeSettleError.message}`,
-            {
-              error: safeSettleError,
-              runId: maskedRunId,
-              requesterSessionKey: maskedRequesterSessionKey,
-            },
-          );
+          params.warn("failed to persist requester settle wake rejection", {
+            error: buildSafeLifecycleErrorMeta(settleError),
+            runId: maskLifecycleIdentifier(runId, "run"),
+            requesterSessionKey: maskLifecycleIdentifier(requesterSessionKey, "session"),
+          });
         }
       })
       .finally(() => {

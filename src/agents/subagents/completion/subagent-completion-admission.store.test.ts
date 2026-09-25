@@ -176,7 +176,7 @@ describe("atomic subagent completion admission store", () => {
       try {
         await driver.run();
         expect(driver.warn).not.toHaveBeenCalledWith(
-          expect.stringContaining("failed to persist requester settle wake rejection"),
+          "failed to persist requester settle wake rejection",
           expect.any(Object),
         );
         expect(input.subagent).toMatchObject({
@@ -251,7 +251,7 @@ describe("atomic subagent completion admission store", () => {
       try {
         await driver.run();
         expect(driver.warn).toHaveBeenCalledWith(
-          expect.stringContaining("failed to persist requester settle wake rejection"),
+          "failed to persist requester settle wake rejection",
           expect.objectContaining({
             error: expect.objectContaining({
               message: expect.stringContaining(
@@ -287,7 +287,7 @@ describe("atomic subagent completion admission store", () => {
     try {
       await driver.run();
       expect(driver.warn).toHaveBeenCalledWith(
-        expect.stringContaining("failed to persist requester settle wake rejection"),
+        "failed to persist requester settle wake rejection",
         expect.objectContaining({
           error: expect.objectContaining({
             message: expect.stringContaining("cut:nonsuccess-task"),
@@ -342,7 +342,7 @@ describe("atomic subagent completion admission store", () => {
     try {
       await driver.run();
       expect(driver.warn).not.toHaveBeenCalledWith(
-        expect.stringContaining("failed to persist requester settle wake rejection"),
+        "failed to persist requester settle wake rejection",
         expect.any(Object),
       );
       expect(systemEvents()).toHaveLength(1);

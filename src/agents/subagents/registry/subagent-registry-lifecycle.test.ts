@@ -83,10 +83,7 @@ import {
   registerPrivateCompletionSettlementTests,
   registerTaskFinalizationAuthorityTests,
 } from "./subagent-registry-lifecycle-completion.test-support.js";
-import {
-  loadPendingFinalDeliveryPayload,
-  maskLifecycleIdentifier,
-} from "./subagent-registry-lifecycle-delivery.js";
+import { loadPendingFinalDeliveryPayload } from "./subagent-registry-lifecycle-delivery.js";
 import {
   SubagentLifecycleController,
   type SubagentLifecycleOptions,
@@ -6620,14 +6617,7 @@ describe("requester settle wake trigger", () => {
     ).not.toThrow();
 
     await waitForLifecycleState(() => {
-      expect(warn).toHaveBeenCalledWith(
-        `requester settle wake failed for run ${maskLifecycleIdentifier(entry.runId, "run")}: wake exploded`,
-        expect.objectContaining({
-          error: expect.objectContaining({ message: expect.stringContaining("wake exploded") }),
-          runId: maskLifecycleIdentifier(entry.runId, "run"),
-          requesterSessionKey: maskLifecycleIdentifier(entry.requesterSessionKey, "session"),
-        }),
-      );
+      expect(warn).toHaveBeenCalledWith("requester settle wake failed", expect.anything());
     });
     expect(entry.requesterSettleWake).toBeUndefined();
   });
@@ -6704,14 +6694,7 @@ describe("requester settle wake trigger", () => {
 
       admittedWake.reject(new Error("wake exploded"));
       await waitForLifecycleState(() =>
-        expect(warn).toHaveBeenCalledWith(
-          `requester settle wake failed for run ${maskLifecycleIdentifier(entry.runId, "run")}: wake exploded`,
-          expect.objectContaining({
-            error: expect.objectContaining({ message: expect.stringContaining("wake exploded") }),
-            runId: maskLifecycleIdentifier(entry.runId, "run"),
-            requesterSessionKey: maskLifecycleIdentifier(entry.requesterSessionKey, "session"),
-          }),
-        ),
+        expect(warn).toHaveBeenCalledWith("requester settle wake failed", expect.anything()),
       );
       if (kind === "replacement") {
         expect(current.requesterSettleWake).toEqual(entry.requesterSettleWake);

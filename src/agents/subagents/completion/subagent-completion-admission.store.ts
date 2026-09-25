@@ -62,7 +62,10 @@ import {
 } from "../registry/subagent-registry.store.sqlite.js";
 import type { SubagentRunRecord } from "../registry/subagent-registry.types.js";
 import { compareSubagentRunGeneration } from "../registry/subagent-run-generation.js";
-import { readRunIdTaskOwnership } from "./subagent-completion-admission.task-owner.js";
+import {
+  describeRunIdTaskOwnership,
+  readRunIdTaskOwnership,
+} from "./subagent-completion-admission.task-owner.js";
 
 const log = createSubsystemLogger("subagents/completion");
 
@@ -271,9 +274,9 @@ function ownsTasklessCompletion(
   return (
     subagentRuns.get(subagent.runId) === expected &&
     ownerPayload(subagent) === ownerPayload(expected) &&
-    // A surviving subagent owner refuses settlement even when an older foreign row
-    // wins run-id selection; only a foreign row standing alone clears retirement.
-    !ownership.subagentOwner &&
+    // Any row holding this run id still has an execution owner in its own runtime, so
+    // retirement stays refused. A completion is ownerless only when no row holds the id.
+    ownership.rows.length === 0 &&
     ![...subagentRuns.values()].some(newerSibling) &&
     !loadSubagentRunsForChildSessionFromSqlite(subagent.childSessionKey, database).some(
       newerSibling,
@@ -302,10 +305,8 @@ export function reconcileRetiredSubagentCancellation(
       return false;
     }
     const ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId);
-    // Retained tasks still use ordinary cancellation and requester-wake ordering. A
-    // foreign row sharing this run id is never this subagent's own retained task, so
-    // only a surviving subagent-owned row defers to the ordinary path.
-    if (ownership.subagentOwner) {
+    // Retained tasks still use ordinary cancellation and requester-wake ordering.
+    if (ownership.rows.length > 0) {
       return undefined;
     }
     if (!ownsTasklessCompletion(database, subagent, expected, ownership)) {
@@ -347,15 +348,8 @@ function prepareBlockedSubagentCompletion(
   subagent: SubagentRunRecord | null,
 ): CompletionMutation | undefined {
   const generation = params.subagent.delivery?.generation ?? 1;
-  const persistedTask = readTaskRecord(database.db, params.taskId);
-  // Run ids are not unique across runtimes, so this id can resolve to a row this
-  // completion does not own. No later sweep can turn that row into a subagent
-  // owner, so treat it as an absent owner instead of rejecting on every sweep.
-  const task = persistedTask?.runtime === "subagent" ? persistedTask : undefined;
+  const task = readTaskRecord(database.db, params.taskId);
   if (subagent && !task) {
-    // The requester path can pass no task id at all, so ownership is read from the run
-    // id the completion always carries. One read serves both the fence and the reason.
-    const ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId);
     // Missing task ownership cannot recover on retry. Fence the exact persisted
     // completion and retain its result instead of recreating historical work.
     if (
@@ -372,7 +366,7 @@ function prepareBlockedSubagentCompletion(
       !["pending", "in_progress"].includes(subagent.delivery?.status ?? "pending") ||
       subagent.delivery?.deliveredAt !== undefined ||
       subagent.delivery?.announcedAt !== undefined ||
-      !ownsTasklessCompletion(database, subagent, params.subagent, ownership)
+      !ownsTasklessCompletion(database, subagent, params.subagent)
     ) {
       return undefined;
     }
@@ -382,9 +376,7 @@ function prepareBlockedSubagentCompletion(
       disposition: "permanent_failure" as const,
       discardReason: "task-missing" as const,
       discardedAt: now,
-      lastError: ownership.foreignRuntime
-        ? `task-owner-runtime-mismatch:${ownership.foreignRuntime}`
-        : "task-missing",
+      lastError: "task-missing",
       nextAttemptAt: undefined,
       queueId: undefined,
     });
@@ -405,6 +397,7 @@ function prepareBlockedSubagentCompletion(
   if (
     !subagent ||
     !task ||
+    task.runtime !== "subagent" ||
     subagent.execution.status !== "terminal" ||
     subagent.expectsCompletionMessage !== true ||
     (subagent.taskRunId ?? subagent.runId) !== task.runId ||
@@ -549,14 +542,9 @@ function commitCompletionMutations(
     }
     for (const { subagent } of mutations) {
       if (subagent.delivery?.discardReason === "task-missing") {
-        // The disposition stays stable for consumers; the reason separates an absent
-        // owner from another runtime holding the same run id, which is the only
-        // signal that tells an operator why this result was never delivered.
-        const reason = subagent.delivery.lastError ?? "task-missing";
-        log.warn(`Subagent completion retired: ${reason}`, {
+        log.warn("Subagent completion retired: task-missing", {
           runId: subagent.runId,
           disposition: "task-missing",
-          reason,
         });
       }
     }
@@ -614,8 +602,20 @@ export function settleRequesterCompletionBatch(params: {
       const cohort = first?.requesterSettleWake?.batchRunIds?.toSorted().join("\0");
       const checkedOmittedIds = new Set<string>();
       const mutations = entries.map(({ subagent: expected, taskId }): CompletionMutation => {
-        const changedOwner = () =>
-          new Error("subagent completion owner changed before settlement: " + expected.runId);
+        // A refusal repeats on every sweep for as long as the condition holds, so the
+        // error carries what the operator cannot otherwise see: which run refused, and
+        // whether its run id is unheld, held by another runtime, or held by a row this
+        // completion does not own.
+        const changedOwner = (detail?: string) =>
+          new Error(
+            "subagent completion owner changed before settlement: " +
+              expected.runId +
+              (detail ? ` (${detail})` : ""),
+          );
+        const ownershipDetail = () =>
+          describeRunIdTaskOwnership(
+            readRunIdTaskOwnership(database, expected.taskRunId ?? expected.runId),
+          );
         const subagent = readSubagentRun(database, expected.runId);
         if (
           !subagent ||
@@ -670,7 +670,7 @@ export function settleRequesterCompletionBatch(params: {
                 subagent,
               );
               if (!missing) {
-                throw changedOwner();
+                throw changedOwner(ownershipDetail());
               }
               return missing;
             }
@@ -678,7 +678,7 @@ export function settleRequesterCompletionBatch(params: {
               task.runtime !== "subagent" ||
               task.runId !== (subagent.taskRunId ?? subagent.runId)
             ) {
-              throw changedOwner();
+              throw changedOwner(ownershipDetail());
             }
             const delivery = ensureDeliveryState(subagent);
             const deliveredAt = params.outcome.deliveredAt ?? now;
@@ -720,7 +720,7 @@ export function settleRequesterCompletionBatch(params: {
               subagent,
             );
             if (!blocked) {
-              throw changedOwner();
+              throw changedOwner(ownershipDetail());
             }
             mutation = blocked;
           }

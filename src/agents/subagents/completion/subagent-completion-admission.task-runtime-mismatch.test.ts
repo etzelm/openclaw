@@ -41,15 +41,19 @@ const tempDirs = useAutoCleanupTempDirTracker(afterAll);
 vi.mock("../registry/subagent-registry.js", () => ({ resumeSubagentRun: vi.fn() }));
 
 /**
- * Run ids are not unique across task runtimes, so a requester-settle wake can
- * resolve a row this completion does not own. That owner can never become a
- * subagent row, so settlement must terminalize once instead of re-arming.
+ * Run ids are not unique across task runtimes and the shared run-id view returns only
+ * its preferred row, so a requester-settle wake can resolve a row this completion does
+ * not own. These cases drive the production resolver so both halves are covered.
  *
- * A run id is also not unique, and the shared run-id view returns only its preferred
- * row, so an older foreign row can be selected ahead of a live subagent row. These
- * cases drive the production resolver so both halves are covered: the resolver has to
- * find the row it asked for by runtime and deliver, and the settlement transaction has
- * to refuse retirement on its own when handed a foreign row.
+ * Delivery: when a live subagent row sits behind an older foreign row, the resolver has
+ * to return the row it asked for by runtime and deliver, instead of routing a
+ * deliverable result into the taskless path.
+ *
+ * Custody: a row from another runtime is never treated as an absent owner. It still has
+ * an execution owner in its own runtime, so settlement refuses and the result and the
+ * durable requester wake are both retained. Retirement is reached only when no row
+ * holds the run id at all, and the refusal names the holding runtime so an operator can
+ * tell the two apart.
  */
 describe("foreign-runtime subagent completion owners", () => {
   let database: OpenClawStateDatabase;
@@ -171,54 +175,51 @@ describe("foreign-runtime subagent completion owners", () => {
     });
 
   it.each(["cli", "cron", "acp"] as const)(
-    "settles an undelivered requester wake once when its only task owner is runtime=%s",
+    "keeps an undelivered completion whose only task owner is runtime=%s",
     async (runtime) => {
       const input = persistArrivedCompletion();
       // Reproduces the reported shape: a succeeded child whose persisted ledger row
-      // belongs to another runtime, so the subagent owner lookup never matches.
+      // belongs to another runtime, so the subagent owner lookup never matches. The
+      // Gateway's tracked agent dispatch creates exactly this `cli` row against an
+      // agent run id (src/gateway/agent-turn/agent-run-dispatch.ts), so that runtime
+      // still owns the execution and this captured result is not ownerless.
       database.db
         .prepare("UPDATE task_runs SET runtime = ? WHERE task_id = ?")
         .run(runtime, input.task.taskId);
       const ownerRowBefore = readOwnerRow();
       reopenOwners();
       input.subagent = subagentRuns.get(input.subagent.runId)!;
+      const armedWake = structuredClone(input.subagent.requesterSettleWake);
       const completion = structuredClone(input.subagent.completion);
 
       const driver = await sweepUndeliveredRequesterWake(input);
       expect(driver.wake).toHaveBeenCalledOnce();
 
+      // Settlement refuses rather than retiring, so the captured result and the
+      // durable requester wake both survive for the runtime that holds this run id.
       const settled = loadSubagentRegistryFromSqlite().get(input.subagent.runId)!;
-      expect(settled.delivery).toMatchObject({
-        status: "discarded",
-        disposition: "permanent_failure",
-        discardReason: "task-missing",
-        // The reason names the runtime holding the id. The production resolver
-        // filters that row out, so only a run-id owner read can report it.
-        lastError: `task-owner-runtime-mismatch:${runtime}`,
-        discardedAt: expect.any(Number),
-      });
-      // The child result survives; only its delivery is terminalized.
+      expect(settled.delivery).toMatchObject({ status: "pending" });
+      expect(settled.delivery?.discardReason).toBeUndefined();
+      expect(settled.delivery?.discardedAt).toBeUndefined();
+      expect(settled.suppressCompletionDelivery).toBeUndefined();
       expect(settled.completion).toEqual(completion);
-      expect(settled.requesterSettleWake).toBeUndefined();
+      expect(settled.requesterSettleWake).toEqual(armedWake);
       // Settlement never reaches into a row owned by another runtime.
       expect(readOwnerRow()).toEqual(ownerRowBefore);
+      // Nothing was retired, so the retirement journal stays silent.
+      expect(warnings).not.toHaveBeenCalled();
 
-      reopenOwners();
-      input.subagent = subagentRuns.get(input.subagent.runId)!;
-      const restarted = await sweepUndeliveredRequesterWake(input);
-      // A second sweep after restart neither re-enters the wake nor warns again.
-      expect(restarted.wake).not.toHaveBeenCalled();
-      expect(loadSubagentRegistryFromSqlite().get(input.subagent.runId)).toEqual(input.subagent);
-      // One retirement notice across both sweeps is the whole point: the first
-      // settlement is terminal, so the sweeper never speaks about this run again.
-      expect(warnings).toHaveBeenCalledOnce();
-      expect(JSON.stringify(warnings.mock.calls[0])).toContain(input.subagent.runId);
-      expect(JSON.stringify(warnings.mock.calls[0])).toContain("task-missing");
-      // The operator-visible line names the runtime holding the run id, not just the
-      // stable disposition, so the journal explains why this result was dropped.
-      expect(JSON.stringify(warnings.mock.calls[0])).toContain(
-        `task-owner-runtime-mismatch:${runtime}`,
+      // The refusal repeats for as long as the collision holds, so it has to name the
+      // runtime holding the id; "owner changed" alone reads the same as a vanished owner.
+      expect(driver.warn).toHaveBeenCalledWith(
+        "requester settle wake failed",
+        expect.objectContaining({
+          error: expect.objectContaining({
+            message: expect.stringContaining(`task owner runtime is ${runtime}`),
+          }),
+        }),
       );
+      expect(JSON.stringify(driver.warn.mock.calls)).toContain(input.subagent.runId);
     },
   );
 
@@ -343,25 +344,35 @@ describe("foreign-runtime subagent completion owners", () => {
   }
 
   it.each(["cron", "acp"] as const)(
-    "resolves a taskless kill reconciliation behind an older runtime=%s row",
+    "defers a taskless kill reconciliation while a runtime=%s row holds the run id",
     (runtime) => {
       const input = historicalKillReconciliation();
-      // The subagent's own task row is already gone; only a foreign row shares the
-      // run id, reproducing the exact collision the fix targets. The old unscoped
-      // check treated this foreign row as a retained task and deferred forever.
+      // Only a foreign row shares the run id. That row still has an execution owner in
+      // its own runtime, so kill reconciliation defers to the ordinary cancellation and
+      // requester-wake ordering rather than resolving the marker on its own.
       input.task.runtime = runtime;
       settleSubagentCompletionDelivery({ ...input, databaseOptions: { database } });
       const foreignRowBefore = readOwnerRow();
       reopenOwners();
       const live = subagentRuns.get(input.subagent.runId)!;
+      const marker = structuredClone(live.killReconciliation);
 
-      expect(reconcileRetiredSubagentCancellation(live, Date.now())).toBe(true);
+      expect(reconcileRetiredSubagentCancellation(live, Date.now())).toBeUndefined();
 
-      // The provisional kill marker resolves instead of deferring forever, and the
-      // foreign row is never mistaken for the retained task or touched.
+      // The marker is retained and the foreign row is never touched.
       const saved = loadSubagentRegistryFromSqlite().get(input.subagent.runId)!;
-      expect(saved.killReconciliation).toBeUndefined();
+      expect(saved.killReconciliation).toEqual(marker);
       expect(readOwnerRow()).toEqual(foreignRowBefore);
+
+      // Once no row holds the id the completion is genuinely ownerless, and the same
+      // call resolves the marker. This is the boundary the fence turns on.
+      database.db.prepare("DELETE FROM task_runs WHERE run_id = ?").run(input.task.runId);
+      reopenOwners();
+      const ownerless = subagentRuns.get(input.subagent.runId)!;
+      expect(reconcileRetiredSubagentCancellation(ownerless, Date.now())).toBe(true);
+      expect(
+        loadSubagentRegistryFromSqlite().get(input.subagent.runId)!.killReconciliation,
+      ).toBeUndefined();
     },
   );
 
@@ -381,17 +392,16 @@ describe("foreign-runtime subagent completion owners", () => {
       status: "discarded",
       disposition: "permanent_failure",
       discardReason: "task-missing",
-      // A genuinely ownerless run keeps the plain reason; no runtime holds the id.
       lastError: "task-missing",
       discardedAt: expect.any(Number),
     });
+    // The child result survives; only its delivery is terminalized.
     expect(settled.completion).toEqual(completion);
     expect(settled.requesterSettleWake).toBeUndefined();
-    // The production warning must read differently from the runtime-mismatch case
-    // above, or an operator cannot tell true absence from a repaired collision.
+    // Retirement is reached only here, where no runtime holds the id at all. The
+    // preserved cases above must not produce this notice.
     expect(warnings).toHaveBeenCalledOnce();
     expect(JSON.stringify(warnings.mock.calls[0])).toContain(input.subagent.runId);
     expect(JSON.stringify(warnings.mock.calls[0])).toContain("task-missing");
-    expect(JSON.stringify(warnings.mock.calls[0])).not.toContain("task-owner-runtime-mismatch");
   });
 });

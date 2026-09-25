@@ -697,7 +697,7 @@ describe("persisted subagent requester wakes", () => {
       try {
         await driver.run();
         expect(driver.warn).not.toHaveBeenCalledWith(
-          expect.stringContaining("failed to persist requester settle wake rejection"),
+          "failed to persist requester settle wake rejection",
           expect.any(Object),
         );
         reopenOwners();
@@ -784,7 +784,7 @@ describe("persisted subagent requester wakes", () => {
       try {
         await driver.run();
         expect(driver.warn).not.toHaveBeenCalledWith(
-          expect.stringContaining("failed to persist requester settle wake rejection"),
+          "failed to persist requester settle wake rejection",
           expect.any(Object),
         );
         reopenOwners();
@@ -836,12 +836,12 @@ describe("persisted subagent requester wakes", () => {
         await driver.run();
         if (change === "unchanged") {
           expect(driver.warn).not.toHaveBeenCalledWith(
-            expect.stringContaining("failed to persist requester settle wake rejection"),
+            "failed to persist requester settle wake rejection",
             expect.any(Object),
           );
         } else {
           expect(driver.warn).toHaveBeenCalledWith(
-            expect.stringContaining("failed to persist requester settle wake rejection"),
+            "failed to persist requester settle wake rejection",
             expect.any(Object),
           );
         }
