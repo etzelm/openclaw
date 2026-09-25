@@ -270,7 +270,9 @@ function ownsTasklessCompletion(
   return (
     subagentRuns.get(subagent.runId) === expected &&
     ownerPayload(subagent) === ownerPayload(expected) &&
-    !findTaskRecordByRunIdForViewInDatabase(database.db, subagent.taskRunId ?? subagent.runId) &&
+    // A surviving owner refuses settlement; a row owned by another runtime is not one.
+    findTaskRecordByRunIdForViewInDatabase(database.db, subagent.taskRunId ?? subagent.runId)
+      ?.runtime !== "subagent" &&
     ![...subagentRuns.values()].some(newerSibling) &&
     !loadSubagentRunsForChildSessionFromSqlite(subagent.childSessionKey, database).some(
       newerSibling,
@@ -341,7 +343,11 @@ function prepareBlockedSubagentCompletion(
   subagent: SubagentRunRecord | null,
 ): CompletionMutation | undefined {
   const generation = params.subagent.delivery?.generation ?? 1;
-  const task = readTaskRecord(database.db, params.taskId);
+  const persistedTask = readTaskRecord(database.db, params.taskId);
+  // Run ids are not unique across runtimes, so this id can resolve to a row this
+  // completion does not own. No later sweep can turn that row into a subagent
+  // owner, so treat it as an absent owner instead of rejecting on every sweep.
+  const task = persistedTask?.runtime === "subagent" ? persistedTask : undefined;
   if (subagent && !task) {
     // Missing task ownership cannot recover on retry. Fence the exact persisted
     // completion and retain its result instead of recreating historical work.
@@ -369,7 +375,7 @@ function prepareBlockedSubagentCompletion(
       disposition: "permanent_failure" as const,
       discardReason: "task-missing" as const,
       discardedAt: now,
-      lastError: "task-missing",
+      lastError: persistedTask ? "task-owner-runtime-mismatch" : "task-missing",
       nextAttemptAt: undefined,
       queueId: undefined,
     });
@@ -390,7 +396,6 @@ function prepareBlockedSubagentCompletion(
   if (
     !subagent ||
     !task ||
-    task.runtime !== "subagent" ||
     subagent.execution.status !== "terminal" ||
     subagent.expectsCompletionMessage !== true ||
     (subagent.taskRunId ?? subagent.runId) !== task.runId ||
