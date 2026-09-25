@@ -2,7 +2,18 @@ import type {
   PendingRequesterSettleWakeCommit,
   SubagentLifecycleWakeContext,
 } from "./subagent-registry-lifecycle-context.js";
+import { maskLifecycleIdentifier } from "./subagent-registry-lifecycle-delivery.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
+
+/**
+ * Retries allowed for one settlement write before it stops.
+ *
+ * A settlement write that keeps failing cannot durably record its own give-up,
+ * because the durable write is the thing failing. So exhaustion stops the retry
+ * instead of writing an outcome: the wake stays on its row, no captured result
+ * is discarded, and no sibling obligation is cleared.
+ */
+const REQUESTER_SETTLE_WAKE_COMMIT_MAX_FAILURES = 5;
 
 function clearPendingWakeCommit(
   context: SubagentLifecycleWakeContext,
@@ -29,8 +40,23 @@ export function getPendingWakeCommit(
   return pending;
 }
 
-function deferWakeCommit(pending: PendingRequesterSettleWakeCommit): void {
+function deferWakeCommit(
+  context: SubagentLifecycleWakeContext,
+  pending: PendingRequesterSettleWakeCommit,
+): void {
   pending.failures += 1;
+  if (pending.failures >= REQUESTER_SETTLE_WAKE_COMMIT_MAX_FAILURES) {
+    pending.exhausted = true;
+    // A deadline already in the past leaves no retry timer armed, and the
+    // retained pending keeps the lifecycle owner short-circuited here. A fresh
+    // attempt needs a genuine row change, which drops this pending, or a restart.
+    pending.nextAttemptAt = 0;
+    context.options.warn("requester settle wake commit abandoned after repeated failures", {
+      failures: pending.failures,
+      runIds: pending.entries.map((entry) => maskLifecycleIdentifier(entry.runId, "run")),
+    });
+    return;
+  }
   pending.nextAttemptAt =
     Date.now() + Math.min(120_000, 30_000 * 2 ** Math.min(pending.failures - 1, 2));
 }
@@ -116,7 +142,7 @@ export function commitRequesterWake(
     if (!retainOnFailure) {
       return;
     }
-    deferWakeCommit(pending);
+    deferWakeCommit(context, pending);
     for (const entry of entries) {
       if (pending.isCurrent(entry)) {
         context.pendingRequesterSettleWakeCommits.set(entry, pending);
@@ -139,7 +165,8 @@ export function retryPendingWakeCommit(
   context: SubagentLifecycleWakeContext,
   pending: PendingRequesterSettleWakeCommit,
 ): void {
-  if (pending.nextAttemptAt > Date.now()) {
+  // An abandoned commit keeps its custody but never retries again.
+  if (pending.exhausted || pending.nextAttemptAt > Date.now()) {
     return;
   }
   try {
@@ -149,10 +176,10 @@ export function retryPendingWakeCommit(
     if (pending.commit(members)) {
       clearPendingWakeCommit(context, pending);
     } else {
-      deferWakeCommit(pending);
+      deferWakeCommit(context, pending);
     }
   } catch (error) {
-    deferWakeCommit(pending);
+    deferWakeCommit(context, pending);
     throw error;
   }
 }
