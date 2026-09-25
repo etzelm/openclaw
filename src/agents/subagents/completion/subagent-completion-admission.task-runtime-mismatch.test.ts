@@ -162,7 +162,7 @@ describe("foreign-runtime subagent completion owners", () => {
     sweepRequesterWake(input, {
       delivered: true,
       requesterVisibleFinalDelivered: true,
-      path: "session",
+      path: "direct",
     });
 
   it.each(["cli", "cron", "acp"] as const)(
