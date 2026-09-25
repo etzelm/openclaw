@@ -41,6 +41,7 @@ import {
 
 const {
   mockFindTaskByRunIdForStatus,
+  mockListTasksByRunIdForStatus,
   mockListTasksForSessionKeyForStatus,
   mockLogWarn,
   mockCreateQueuedTaskRunCore,
@@ -48,6 +49,7 @@ const {
   mockCreateRunningTaskRunCoreWithReceiptAsync,
 } = vi.hoisted(() => ({
   mockFindTaskByRunIdForStatus: vi.fn(),
+  mockListTasksByRunIdForStatus: vi.fn(() => [] as TaskRecord[]),
   mockListTasksForSessionKeyForStatus: vi.fn(() => [] as TaskRecord[]),
   mockLogWarn: vi.fn(),
   mockCreateQueuedTaskRunCore: vi.fn<typeof import("./task-executor.js").createQueuedTaskRunCore>(
@@ -82,6 +84,7 @@ vi.mock("../logging/subsystem.js", () => ({
 
 vi.mock("./task-status-access.js", () => ({
   findTaskByRunIdForStatus: mockFindTaskByRunIdForStatus,
+  listTasksByRunIdForStatus: mockListTasksByRunIdForStatus,
   listTasksForSessionKeyForStatus: mockListTasksForSessionKeyForStatus,
 }));
 
@@ -216,6 +219,8 @@ describe("detached-task-runtime", () => {
   afterEach(() => {
     resetDetachedTaskLifecycleRuntimeForTests();
     mockFindTaskByRunIdForStatus.mockReset();
+    mockListTasksByRunIdForStatus.mockReset();
+    mockListTasksByRunIdForStatus.mockReturnValue([]);
     mockListTasksForSessionKeyForStatus.mockReset();
     mockListTasksForSessionKeyForStatus.mockReturnValue([]);
     mockLogWarn.mockClear();
@@ -511,6 +516,64 @@ describe("detached-task-runtime", () => {
         resetDetachedTaskLifecycleRuntimeForTests();
         expect(() => assertCurrent()).toThrow(/admission is closed/);
       }));
+  });
+
+  // Run ids are not unique across runtimes, and the preferred-row lookup deprioritizes
+  // only `cli`, so an older `cron` or `acp` row can be selected ahead of the row this
+  // caller owns. Rejecting on that selection alone reported a live task as absent.
+  it.each(["cron", "acp", "cli"] as const)(
+    "finds its own task row when an older runtime=%s row shares the run id",
+    (runtime) => {
+      const expected = createFakeTaskRecord({
+        taskId: "task-owned",
+        runtime: "subagent",
+        runId: "run-shared",
+        childSessionKey: "agent:main:subagent:child",
+        createdAt: 30,
+      });
+      const foreign = createFakeTaskRecord({
+        taskId: `task-${runtime}-collision`,
+        runtime,
+        runId: "run-shared",
+        childSessionKey: "agent:main:subagent:child",
+        createdAt: 10,
+      });
+      // The shared preference selects the older foreign row.
+      mockFindTaskByRunIdForStatus.mockReturnValue(foreign);
+      mockListTasksByRunIdForStatus.mockReturnValue([foreign, expected]);
+
+      expect(
+        findDetachedTaskRun({
+          runId: "run-shared",
+          runtime: "subagent",
+          sessionKey: "agent:main:subagent:child",
+          createdAtOrAfter: 0,
+        }),
+      ).toEqual({ lookup: "available", task: expected });
+    },
+  );
+
+  it("reports no task when only another runtime holds the run id", () => {
+    const foreign = createFakeTaskRecord({
+      taskId: "task-cron-only",
+      runtime: "cron",
+      runId: "run-foreign-only",
+      childSessionKey: "agent:main:subagent:child",
+      createdAt: 10,
+    });
+    mockFindTaskByRunIdForStatus.mockReturnValue(foreign);
+    mockListTasksByRunIdForStatus.mockReturnValue([foreign]);
+
+    // A foreign row standing alone is still an absent owner for this caller, and the
+    // scoped lookup must not widen into returning another runtime's task.
+    expect(
+      findDetachedTaskRun({
+        runId: "run-foreign-only",
+        runtime: "subagent",
+        sessionKey: "agent:main:subagent:child",
+        createdAtOrAfter: 0,
+      }),
+    ).toEqual({ lookup: "available", task: undefined });
   });
 
   it("finds a replacement task within the requested session generation", () => {
