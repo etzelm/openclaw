@@ -83,7 +83,7 @@ function isUnstableTask(task: TaskRecord | undefined) {
   );
 }
 
-export function resolveSubagentTaskForRun(
+function resolveSubagentTaskForRun(
   candidates: Iterable<SubagentRunRecord>,
   entry: SubagentRunRecord,
 ) {
