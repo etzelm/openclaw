@@ -13,15 +13,17 @@ export async function prepareUtilityCompletionForAgent(
   }
   // An automatically derived small model carries no model entry of its own, so
   // it must execute on the primary's runtime instead of the default HTTP route.
-  const agentHarnessRuntimeOverride =
-    params.useUtilityModel && !params.modelRef?.trim()
-      ? resolveAutomaticUtilityRuntimeOverride({
-          cfg: params.cfg,
-          agentId: params.agentId,
-          utilityProvider: selection.provider,
-          utilityModelId: selection.modelId,
-        })
-      : undefined;
+  // This is keyed on the resolved selection rather than on an absent modelRef:
+  // the session observer passes the already-derived ref back in, so gating on
+  // `!modelRef` would skip the very path that reported this.
+  const agentHarnessRuntimeOverride = params.useUtilityModel
+    ? resolveAutomaticUtilityRuntimeOverride({
+        cfg: params.cfg,
+        agentId: params.agentId,
+        utilityProvider: selection.provider,
+        utilityModelId: selection.modelId,
+      })
+    : undefined;
   return {
     config: params.cfg,
     provider: selection.provider,

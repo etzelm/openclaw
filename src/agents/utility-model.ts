@@ -139,11 +139,11 @@ export function resolveUtilityModelRefForAgent(params: {
  * such as `claude-cli` that provider holds no API key on purpose, so the
  * completion fails with "No API key found" even though the primary works.
  *
- * Inheriting only when the derived model resolves to the default runtime keeps
- * the other routes untouched: a provider-level `agentRuntime` already applies to
- * every model of that provider, and an implicit runtime (OpenAI's Codex harness)
- * is re-derived identically for the small model, so both leave the derived
- * runtime non-default and skip inheritance.
+ * Only a runtime pinned on the primary's own model entry fails to carry, so
+ * inheritance is limited to `runtimeSource === "model"`. A provider-level
+ * `agentRuntime` already applies to every model of that provider, and an
+ * implicit runtime is resolved per concrete route, so neither needs to be
+ * copied onto the derived ref.
  */
 export function resolveAutomaticUtilityRuntimeOverride(params: {
   cfg: OpenClawConfig;
@@ -176,5 +176,8 @@ export function resolveAutomaticUtilityRuntimeOverride(params: {
     config: params.cfg,
     agentId: params.agentId,
   });
+  if (primaryPolicy.runtimeSource !== "model") {
+    return undefined;
+  }
   return isDefaultAgentRuntimeId(primaryPolicy.runtime) ? undefined : primaryPolicy.runtime;
 }

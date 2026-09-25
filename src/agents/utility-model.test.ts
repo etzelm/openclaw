@@ -319,6 +319,24 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
     ).toBeUndefined();
   });
 
+  it("does not inherit a provider-level runtime", () => {
+    // A provider-level agentRuntime already applies to every model of that
+    // provider, so the derived ref resolves it without help.
+    const cfg = {
+      agents: { defaults: { model: "anthropic/claude-opus-5" } },
+      models: { providers: { anthropic: { agentRuntime: { id: "claude-cli" } } } },
+    } as OpenClawConfig;
+
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+      }),
+    ).toBeUndefined();
+  });
+
   it("skips inheritance when the derived model already resolves its own runtime", () => {
     // A provider-wildcard entry already covers the derived ref, so the harness
     // policy resolves it directly and no override is needed.

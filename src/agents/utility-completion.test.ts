@@ -42,6 +42,23 @@ describe("prepareUtilityCompletionForAgent", () => {
     expect(prepared).toHaveProperty("agentHarnessRuntimeOverride", "claude-cli");
   });
 
+  // session-observer-completion.ts resolves the utility ref itself and passes it
+  // back as modelRef, so the override must survive that shape too. Gating on an
+  // absent modelRef left the reported path (#138789) unfixed.
+  it("routes the session observer's pre-resolved ref through the CLI runtime", async () => {
+    const prepared = await prepareUtilityCompletionForAgent({
+      cfg: cliPrimary,
+      agentId: "main",
+      modelRef: "anthropic/claude-haiku-4-5",
+      useUtilityModel: true,
+      manifestPlugins,
+    });
+
+    expect(prepared.provider).toBe("anthropic");
+    expect(prepared.model).toBe("claude-haiku-4-5");
+    expect(prepared).toHaveProperty("agentHarnessRuntimeOverride", "claude-cli");
+  });
+
   it("leaves an explicit utility model on its own runtime", async () => {
     const cfg = {
       agents: {
