@@ -28,11 +28,14 @@ import {
   setDetachedTaskDeliveryStatusByRunIdCore,
   startTaskRunByRunIdCore,
 } from "./task-executor.js";
-import { findTaskByRunIdAsync } from "./task-registry-query.js";
+import { listTasksByRunIdAsync } from "./task-registry-query.js";
 import { prepareTaskRegistryRead } from "./task-registry-read.js";
 import { transitionTaskRecordsByRunNative } from "./task-registry-transition.native.js";
 import type { TaskRecord } from "./task-registry.types.js";
-import { findTaskByRunIdForStatus, listTasksForSessionKeyForStatus } from "./task-status-access.js";
+import {
+  listTasksByRunIdForStatus,
+  listTasksForSessionKeyForStatus,
+} from "./task-status-access.js";
 
 const log = createSubsystemLogger("tasks/detached-runtime");
 const DETACHED_TASK_RECOVERY_WARN_MS = 5_000;
@@ -51,9 +54,17 @@ function taskMatchesFindIdentity(task: TaskRecord, params: DetachedTaskFindParam
 }
 
 function findCoreTaskRun(params: DetachedTaskFindParams): TaskRecord | undefined {
-  const direct = findTaskByRunIdForStatus(params.runId);
-  if (direct && taskMatchesFindIdentity(direct, params)) {
-    return direct;
+  // Run ids are not unique across runtimes and the shared lookup returns one preferred
+  // row, deprioritizing only `cli`, so an older `cron` or `acp` row can be selected
+  // ahead of this caller's own row. Rejecting on that selection alone would report the
+  // caller's task as absent while it is still present, so scope the lookup to the
+  // requested runtime before concluding anything. The preferred row is this list's
+  // first entry, so a matching caller still resolves it first.
+  const owned = listTasksByRunIdForStatus(params.runId).find((task) =>
+    taskMatchesFindIdentity(task, params),
+  );
+  if (owned) {
+    return owned;
   }
   if (params.allowSessionFallback !== true) {
     return undefined;
@@ -277,17 +288,20 @@ export async function findDetachedTaskRunAsync(
     if (!read) {
       return { lookup: "unavailable" };
     }
-    const direct = await findTaskByRunIdAsync(params.runId, read);
+    // Same run-id scoping the synchronous lookup applies: the preferred row is the
+    // first entry here and can belong to another runtime sharing this run id, so match
+    // this caller's own row before falling back to the session or concluding absence.
+    // One prepared list serves both, so the ACP backing preparation runs once.
+    const rows = await listTasksByRunIdAsync(params.runId, read);
     owner.assertCurrent();
     read.assertCurrent();
     const task =
-      direct && taskMatchesFindIdentity(direct, params)
-        ? direct
-        : params.allowSessionFallback === true
-          ? read
-              .listTasksForRelatedSessionKey(params.sessionKey)
-              .find((candidate) => taskMatchesFindScope(candidate, params))
-          : undefined;
+      rows.find((candidate) => taskMatchesFindIdentity(candidate, params)) ??
+      (params.allowSessionFallback === true
+        ? read
+            .listTasksForRelatedSessionKey(params.sessionKey)
+            .find((candidate) => taskMatchesFindScope(candidate, params))
+        : undefined);
     // A legacy custom runtime without a lookup hook cannot prove absence in its own store.
     return task || !owner.runtime ? { lookup: "available", task } : { lookup: "unavailable" };
   } catch (error) {
