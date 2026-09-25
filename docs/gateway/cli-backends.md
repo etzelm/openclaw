@@ -48,7 +48,9 @@ When `agents.defaults.utilityModel` is unset, these completions use a provider-d
 | `claude-cli` pinned on its model entry | configured          | the HTTP route, billed to that credential |
 | default                                | either              | the HTTP route                            |
 
-So the CLI runtime is a fallback for a model that cannot authenticate itself, not a redirect of working HTTP traffic. Configuring an API key later moves these completions back onto it.
+So the CLI runtime is a fallback for a model that cannot authenticate itself, not a redirect of working HTTP traffic.
+
+The route is decided once, when a utility completion is prepared. The session observer reuses one prepared completion for the life of an observer run and re-prepares only when its selected utility model reference changes, so adding a provider credential partway through a run does not move that run back to HTTP. It takes effect the next time the completion is prepared.
 
 To choose the route yourself rather than letting the credential decide, name a runtime on the derived model's own entry. The entry has to name one: a bare entry, or `id: "default"`, still falls back.
 

@@ -44,6 +44,11 @@ export async function prepareUtilityCompletionForAgent(
   // credential borrows the primary's runtime, which is exactly the case that
   // otherwise fails with "No API key found for provider". The probe runs only
   // when a runtime would otherwise be inherited, so the common path is unchanged.
+  //
+  // The decision is per preparation. A caller that retains a prepared completion,
+  // as the session observer does for the life of one observer run, keeps the route
+  // it was prepared with until it re-prepares; a credential added mid-run is picked
+  // up then, not immediately.
   const agentHarnessRuntimeOverride =
     inheritedRuntime &&
     !(await (params.hasProviderAuth ?? hasAvailableAuthForProvider)({
