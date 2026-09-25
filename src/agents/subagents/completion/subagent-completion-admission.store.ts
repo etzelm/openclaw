@@ -29,10 +29,11 @@ import { syncFlowFromTaskAfterTaskMutation } from "../../../tasks/task-registry-
 import {
   bindTaskRecord,
   findTaskRecordByRunIdForViewInDatabase,
+  listTaskRecordsByRunIdForViewInDatabase,
   readTaskRecord,
   upsertTaskRunRowInDatabase,
 } from "../../../tasks/task-registry.store.kernel.js";
-import type { TaskRecord } from "../../../tasks/task-registry.types.js";
+import type { TaskRecord, TaskRuntime } from "../../../tasks/task-registry.types.js";
 import { resolveTaskCleanupAfter } from "../../../tasks/task-retention.js";
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import {
@@ -246,6 +247,24 @@ function retiredCancellationEndedAt(subagent: SubagentRunRecord, now: number): n
   return endedAt;
 }
 
+/**
+ * Ownership facts for one run id. The shared view returns a single preferred row
+ * and its comparator only deprioritizes `cli`, so an older `cron` or `acp` row can
+ * be selected ahead of a live subagent row that shares the id. Retirement reads
+ * every row instead: a surviving subagent owner is authoritative, and a foreign
+ * row is only ever the reason a completion has no owner of its own.
+ */
+function readRunIdTaskOwnership(
+  database: OpenClawStateDatabase,
+  runId: string,
+): { subagentOwner: TaskRecord | undefined; foreignRuntime: TaskRuntime | undefined } {
+  const records = listTaskRecordsByRunIdForViewInDatabase(database.db, runId);
+  return {
+    subagentOwner: records.find((task) => task.runtime === "subagent"),
+    foreignRuntime: records.find((task) => task.runtime !== "subagent")?.runtime,
+  };
+}
+
 function ownsTasklessCompletion(
   database: OpenClawStateDatabase,
   subagent: SubagentRunRecord,
@@ -270,9 +289,9 @@ function ownsTasklessCompletion(
   return (
     subagentRuns.get(subagent.runId) === expected &&
     ownerPayload(subagent) === ownerPayload(expected) &&
-    // A surviving owner refuses settlement; a row owned by another runtime is not one.
-    findTaskRecordByRunIdForViewInDatabase(database.db, subagent.taskRunId ?? subagent.runId)
-      ?.runtime !== "subagent" &&
+    // A surviving subagent owner refuses settlement even when an older foreign row
+    // wins run-id selection; only a foreign row standing alone clears retirement.
+    !readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId).subagentOwner &&
     ![...subagentRuns.values()].some(newerSibling) &&
     !loadSubagentRunsForChildSessionFromSqlite(subagent.childSessionKey, database).some(
       newerSibling,
@@ -349,6 +368,13 @@ function prepareBlockedSubagentCompletion(
   // owner, so treat it as an absent owner instead of rejecting on every sweep.
   const task = persistedTask?.runtime === "subagent" ? persistedTask : undefined;
   if (subagent && !task) {
+    // The requester path filters a foreign task out before settlement, so it passes
+    // no task id at all. Read ownership from the run id, which the completion always
+    // carries, or this diagnostic could never describe the case it exists for.
+    const { foreignRuntime } = readRunIdTaskOwnership(
+      database,
+      subagent.taskRunId ?? subagent.runId,
+    );
     // Missing task ownership cannot recover on retry. Fence the exact persisted
     // completion and retain its result instead of recreating historical work.
     if (
@@ -375,7 +401,7 @@ function prepareBlockedSubagentCompletion(
       disposition: "permanent_failure" as const,
       discardReason: "task-missing" as const,
       discardedAt: now,
-      lastError: persistedTask ? "task-owner-runtime-mismatch" : "task-missing",
+      lastError: foreignRuntime ? `task-owner-runtime-mismatch:${foreignRuntime}` : "task-missing",
       nextAttemptAt: undefined,
       queueId: undefined,
     });
