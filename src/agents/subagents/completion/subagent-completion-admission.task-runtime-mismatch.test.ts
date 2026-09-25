@@ -17,12 +17,17 @@ import {
 } from "../../../tasks/task-registry.store.kernel.js";
 import type { TaskRecord, TaskRuntime } from "../../../tasks/task-registry.types.js";
 import { resetTaskRegistryForTests } from "../../../tasks/task-runtime.test-helpers.js";
+import { createSubagentRunRecord } from "../../subagent-test-fixtures.test-helpers.js";
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
-import { SUBAGENT_ENDED_REASON_COMPLETE } from "../registry/subagent-lifecycle-events.js";
+import {
+  SUBAGENT_ENDED_REASON_COMPLETE,
+  SUBAGENT_ENDED_REASON_KILLED,
+} from "../registry/subagent-lifecycle-events.js";
 import { subagentRuns } from "../registry/subagent-registry-memory.js";
 import { loadSubagentRegistryFromSqlite } from "../registry/subagent-registry.store.sqlite.js";
 import {
   blockSubagentCompletionDelivery,
+  reconcileRetiredSubagentCancellation,
   settleSubagentCompletionDelivery,
 } from "./subagent-completion-admission.store.js";
 import {
@@ -297,6 +302,66 @@ describe("foreign-runtime subagent completion owners", () => {
       expect(readOwnerRow()).toEqual(ownerRowBefore);
       expect(readOwnerRow(foreign.taskId)).toEqual(foreignRowBefore);
       expect(warnings).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Builds a retired-cancellation completion whose task row has already been
+   * pruned, in the shape `reconcileRetiredSubagentCancellation` requires: a
+   * provisional kill marker, a terminal `killed`/`error` execution, and a still-armed
+   * requester wake. This mirrors the already-tested `ownsTasklessCompletion` fence
+   * above, but through the kill-reconciliation call site instead of the ordinary
+   * blocked-completion path.
+   */
+  function historicalKillReconciliation() {
+    const input = records();
+    const endedAt = Date.now() - 9 * 24 * 60 * 60_000;
+    input.subagent = createSubagentRunRecord({
+      runId: input.subagent.runId,
+      generation: 1,
+      taskRunId: input.task.runId,
+      childSessionKey: input.subagent.childSessionKey,
+      createdAt: endedAt - 60_000,
+      startedAt: endedAt - 50_000,
+      endedAt,
+      endedReason: SUBAGENT_ENDED_REASON_KILLED,
+      outcome: { status: "error", error: "stopped" },
+      cleanup: "keep",
+      cleanupHandled: true,
+      cleanupCompletedAt: endedAt,
+      suppressAnnounceReason: "killed",
+      killReconciliation: { killedAt: endedAt - 2 },
+      expectsCompletionMessage: true,
+      completion: { required: true },
+      delivery: { status: "pending" },
+      requesterSettleWake: { status: "dispatching", attemptCount: 3, rearmGeneration: 1 },
+    });
+    input.task.status = "cancelled";
+    input.task.createdAt = input.subagent.createdAt;
+    input.task.endedAt = endedAt;
+    return input;
+  }
+
+  it.each(["cron", "acp"] as const)(
+    "resolves a taskless kill reconciliation behind an older runtime=%s row",
+    (runtime) => {
+      const input = historicalKillReconciliation();
+      // The subagent's own task row is already gone; only a foreign row shares the
+      // run id, reproducing the exact collision the fix targets. The old unscoped
+      // check treated this foreign row as a retained task and deferred forever.
+      input.task.runtime = runtime;
+      settleSubagentCompletionDelivery({ ...input, databaseOptions: { database } });
+      const foreignRowBefore = readOwnerRow();
+      reopenOwners();
+      const live = subagentRuns.get(input.subagent.runId)!;
+
+      expect(reconcileRetiredSubagentCancellation(live, Date.now())).toBe(true);
+
+      // The provisional kill marker resolves instead of deferring forever, and the
+      // foreign row is never mistaken for the retained task or touched.
+      const saved = loadSubagentRegistryFromSqlite().get(input.subagent.runId)!;
+      expect(saved.killReconciliation).toBeUndefined();
+      expect(readOwnerRow()).toEqual(foreignRowBefore);
     },
   );
 
