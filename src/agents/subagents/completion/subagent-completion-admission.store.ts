@@ -548,9 +548,14 @@ function commitCompletionMutations(
     }
     for (const { subagent } of mutations) {
       if (subagent.delivery?.discardReason === "task-missing") {
-        log.warn("Subagent completion retired: task-missing", {
+        // The disposition stays stable for consumers; the reason separates an absent
+        // owner from another runtime holding the same run id, which is the only
+        // signal that tells an operator why this result was never delivered.
+        const reason = subagent.delivery.lastError ?? "task-missing";
+        log.warn(`Subagent completion retired: ${reason}`, {
           runId: subagent.runId,
           disposition: "task-missing",
+          reason,
         });
       }
     }
