@@ -33,6 +33,7 @@ import { prepareTaskRegistryRead } from "./task-registry-read.js";
 import { transitionTaskRecordsByRunNative } from "./task-registry-transition.native.js";
 import type { TaskRecord } from "./task-registry.types.js";
 import {
+  findTaskByRunIdForStatus,
   listTasksByRunIdForStatus,
   listTasksForSessionKeyForStatus,
 } from "./task-status-access.js";
@@ -54,12 +55,15 @@ function taskMatchesFindIdentity(task: TaskRecord, params: DetachedTaskFindParam
 }
 
 function findCoreTaskRun(params: DetachedTaskFindParams): TaskRecord | undefined {
-  // Run ids are not unique across runtimes and the shared lookup returns one preferred
-  // row, deprioritizing only `cli`, so an older `cron` or `acp` row can be selected
-  // ahead of this caller's own row. Rejecting on that selection alone would report the
-  // caller's task as absent while it is still present, so scope the lookup to the
-  // requested runtime before concluding anything. The preferred row is this list's
-  // first entry, so a matching caller still resolves it first.
+  const direct = findTaskByRunIdForStatus(params.runId);
+  if (direct && taskMatchesFindIdentity(direct, params)) {
+    return direct;
+  }
+  // Run ids are not unique across runtimes and the preferred-row lookup above
+  // deprioritizes only `cli`, so an older `cron` or `acp` row can be selected ahead of
+  // this caller's own row. Rejecting on that selection alone would report the caller's
+  // task as absent while it is still present, so scope the lookup to the requested
+  // runtime before concluding anything. This second read only happens on that miss.
   const owned = listTasksByRunIdForStatus(params.runId).find((task) =>
     taskMatchesFindIdentity(task, params),
   );

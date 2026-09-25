@@ -626,7 +626,8 @@ describe("detached-task-runtime", () => {
         childSessionKey: "agent:main:subagent:child",
         createdAt: 10,
       });
-      // The shared preference selects the older foreign row.
+      // The shared preference selects the older foreign row, so the short-circuit
+      // misses and the runtime-scoped list is what has to find the caller's own row.
       mockFindTaskByRunIdForStatus.mockReturnValue(foreign);
       mockListTasksByRunIdForStatus.mockReturnValue([foreign, expected]);
 
@@ -664,6 +665,39 @@ describe("detached-task-runtime", () => {
     ).toEqual({ lookup: "available", task: undefined });
   });
 
+  // Every runtime-scoped caller goes through this lookup, not just `subagent`. A `cli`
+  // caller is the one the comparator actively deprioritizes, so it is the case most
+  // likely to be shadowed by any other row sharing its run id.
+  it("finds a cli caller's own row behind a preferred row of another runtime", () => {
+    const expected = createFakeTaskRecord({
+      taskId: "task-cli-owned",
+      runtime: "cli",
+      runId: "run-cli-shared",
+      childSessionKey: "agent:main",
+      createdAt: 40,
+    });
+    const foreign = createFakeTaskRecord({
+      taskId: "task-subagent-collision",
+      runtime: "subagent",
+      runId: "run-cli-shared",
+      childSessionKey: "agent:main:subagent:child",
+      createdAt: 10,
+    });
+    // `cli` sorts last regardless of age, so the caller's own row is never preferred.
+    mockFindTaskByRunIdForStatus.mockReturnValue(foreign);
+    mockListTasksByRunIdForStatus.mockReturnValue([foreign, expected]);
+
+    expect(
+      findDetachedTaskRun({
+        runId: "run-cli-shared",
+        runtime: "cli",
+        sessionKey: "agent:main",
+        createdAtOrAfter: 0,
+      }),
+    ).toEqual({ lookup: "available", task: expected });
+    expect(mockListTasksForSessionKeyForStatus).not.toHaveBeenCalled();
+  });
+
   it("finds a replacement task within the requested session generation", () => {
     const expected = createFakeTaskRecord({
       taskId: "task-expected",
@@ -672,15 +706,15 @@ describe("detached-task-runtime", () => {
       childSessionKey: "agent:main:subagent:expected",
       createdAt: 30,
     });
-    mockFindTaskByRunIdForStatus.mockReturnValue(
-      createFakeTaskRecord({
-        taskId: "task-other-generation",
-        runtime: "subagent",
-        runId: "run-shared",
-        childSessionKey: "agent:main:subagent:other",
-        createdAt: 10,
-      }),
-    );
+    const otherGeneration = createFakeTaskRecord({
+      taskId: "task-other-generation",
+      runtime: "subagent",
+      runId: "run-shared",
+      childSessionKey: "agent:main:subagent:other",
+      createdAt: 10,
+    });
+    mockFindTaskByRunIdForStatus.mockReturnValue(otherGeneration);
+    mockListTasksByRunIdForStatus.mockReturnValue([otherGeneration]);
     mockListTasksForSessionKeyForStatus.mockReturnValue([
       createFakeTaskRecord({
         taskId: "task-next-generation",
