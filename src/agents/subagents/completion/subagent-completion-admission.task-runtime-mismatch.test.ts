@@ -17,10 +17,14 @@ import {
 } from "../../../tasks/task-registry.store.kernel.js";
 import type { TaskRecord, TaskRuntime } from "../../../tasks/task-registry.types.js";
 import { resetTaskRegistryForTests } from "../../../tasks/task-runtime.test-helpers.js";
+import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import { SUBAGENT_ENDED_REASON_COMPLETE } from "../registry/subagent-lifecycle-events.js";
 import { subagentRuns } from "../registry/subagent-registry-memory.js";
 import { loadSubagentRegistryFromSqlite } from "../registry/subagent-registry.store.sqlite.js";
-import { settleSubagentCompletionDelivery } from "./subagent-completion-admission.store.js";
+import {
+  blockSubagentCompletionDelivery,
+  settleSubagentCompletionDelivery,
+} from "./subagent-completion-admission.store.js";
 import {
   armRequesterWake,
   productionSubagentTaskResolver,
@@ -36,9 +40,11 @@ vi.mock("../registry/subagent-registry.js", () => ({ resumeSubagentRun: vi.fn() 
  * resolve a row this completion does not own. That owner can never become a
  * subagent row, so settlement must terminalize once instead of re-arming.
  *
- * Every case here drives the production task resolver, because the run-id view
- * returns only its preferred row: an older foreign row hides a live subagent row
- * from the resolver, and only a transactional owner check can tell the two apart.
+ * A run id is also not unique, and the shared run-id view returns only its preferred
+ * row, so an older foreign row can be selected ahead of a live subagent row. These
+ * cases drive the production resolver so both halves are covered: the resolver has to
+ * find the row it asked for by runtime and deliver, and the settlement transaction has
+ * to refuse retirement on its own when handed a foreign row.
  */
 describe("foreign-runtime subagent completion owners", () => {
   let database: OpenClawStateDatabase;
@@ -120,19 +126,18 @@ describe("foreign-runtime subagent completion owners", () => {
   const ownerRunId = (input: ReturnType<typeof records>) =>
     input.subagent.taskRunId ?? input.subagent.runId;
 
-  /** Drives one requester-settle sweep whose requester refuses the delivery. */
-  async function sweepUndeliveredRequesterWake(input: ReturnType<typeof records>) {
+  /** Drives one requester-settle sweep through the production resolver. */
+  async function sweepRequesterWake(
+    input: ReturnType<typeof records>,
+    outcome: SubagentAnnounceDeliveryResult,
+  ) {
     const driver = requesterWakeDriver([input], {
       resolveSubagentTask: productionSubagentTaskResolver,
     });
     driver.controller.options.callGateway = vi.fn().mockResolvedValue({ messages: [] });
     driver.wake.mockImplementation(async (params) => {
-      params.completeBatch([input.subagent], 1, {
-        delivered: false,
-        path: "none",
-        error: "requester unavailable",
-      });
-      return false;
+      params.completeBatch([input.subagent], 1, outcome);
+      return outcome.delivered === true;
     });
     try {
       driver.controller.resumeRequesterSettleWake(input.subagent.runId, input.subagent, "restore");
@@ -143,6 +148,22 @@ describe("foreign-runtime subagent completion owners", () => {
       driver.controller.clearScheduledResumeTimers();
     }
   }
+
+  /** The requester refused this delivery, which is what arms the retirement path. */
+  const sweepUndeliveredRequesterWake = (input: ReturnType<typeof records>) =>
+    sweepRequesterWake(input, {
+      delivered: false,
+      path: "none",
+      error: "requester unavailable",
+    });
+
+  /** The requester accepted this delivery, so a resolvable owner must settle it. */
+  const sweepDeliveredRequesterWake = (input: ReturnType<typeof records>) =>
+    sweepRequesterWake(input, {
+      delivered: true,
+      requesterVisibleFinalDelivered: true,
+      path: "session",
+    });
 
   it.each(["cli", "cron", "acp"] as const)(
     "settles an undelivered requester wake once when its only task owner is runtime=%s",
@@ -197,8 +218,52 @@ describe("foreign-runtime subagent completion owners", () => {
   );
 
   it.each(["cron", "acp"] as const)(
-    "retains an undelivered requester wake when a subagent owner survives behind an older runtime=%s row",
+    "delivers a completion whose subagent owner sits behind an older runtime=%s row",
     async (runtime) => {
+      const input = persistArrivedCompletion();
+      const foreign = addCollidingForeignTaskRow(input.task, runtime);
+      const foreignRowBefore = readOwnerRow(foreign.taskId);
+      reopenOwners();
+      input.subagent = subagentRuns.get(input.subagent.runId)!;
+      const completion = structuredClone(input.subagent.completion);
+
+      // The collision is real: the shared run-id view prefers the older foreign row
+      // even though the subagent row this completion owns is still present.
+      expect(findTaskRecordByRunIdForViewInDatabase(database.db, ownerRunId(input))).toMatchObject({
+        taskId: foreign.taskId,
+        runtime,
+      });
+      // The production resolver asked for runtime=subagent, so it has to return that
+      // row rather than reject whichever row the shared preference happened to pick.
+      expect(productionSubagentTaskResolver(input.subagent)).toMatchObject({
+        lookup: "available",
+        task: { taskId: input.task.taskId, runtime: "subagent" },
+      });
+
+      const driver = await sweepDeliveredRequesterWake(input);
+      expect(driver.wake).toHaveBeenCalledOnce();
+
+      // The result reaches the requester. A resolver blinded by the collision would
+      // instead route this into the taskless path and never deliver it at all.
+      const settled = loadSubagentRegistryFromSqlite().get(input.subagent.runId)!;
+      expect(settled.delivery).toMatchObject({
+        status: "delivered",
+        disposition: "delivered",
+        deliveredAt: expect.any(Number),
+      });
+      expect(settled.delivery?.discardReason).toBeUndefined();
+      expect(settled.suppressCompletionDelivery).toBeUndefined();
+      expect(settled.completion).toEqual(completion);
+      expect(settled.requesterSettleWake).toBeUndefined();
+      // The owned row records the delivery; the foreign row is never touched.
+      expect(readOwnerRow()).toMatchObject({ runtime: "subagent", delivery_status: "delivered" });
+      expect(readOwnerRow(foreign.taskId)).toEqual(foreignRowBefore);
+    },
+  );
+
+  it.each(["cron", "acp"] as const)(
+    "refuses retirement when a subagent owner survives behind an older runtime=%s row",
+    (runtime) => {
       const input = persistArrivedCompletion();
       const foreign = addCollidingForeignTaskRow(input.task, runtime);
       const ownerRowBefore = readOwnerRow();
@@ -208,33 +273,30 @@ describe("foreign-runtime subagent completion owners", () => {
       const armedWake = structuredClone(input.subagent.requesterSettleWake);
       const completion = structuredClone(input.subagent.completion);
 
-      // The collision is real: the shared run-id view prefers the older foreign row
-      // even though the subagent row this completion owns is still present.
-      expect(findTaskRecordByRunIdForViewInDatabase(database.db, ownerRunId(input))).toMatchObject({
-        taskId: foreign.taskId,
-        runtime,
-      });
-      // So the production resolver is blinded too and hands settlement no task id.
-      expect(productionSubagentTaskResolver(input.subagent)).toEqual({
-        lookup: "available",
-        task: undefined,
-      });
+      // Ask settlement to retire this completion against the foreign row directly,
+      // which is the shape a blinded caller produces. The transactional fence has to
+      // refuse on its own, without relying on the resolver having been fixed.
+      expect(
+        blockSubagentCompletionDelivery({
+          subagent: input.subagent,
+          taskId: foreign.taskId,
+          reason: "requester unavailable",
+          databaseOptions: { database },
+        }),
+      ).toBe(false);
 
-      const driver = await sweepUndeliveredRequesterWake(input);
-      expect(driver.wake).toHaveBeenCalledOnce();
-
-      // A surviving owner refuses settlement, so the result stays deliverable.
+      // Nothing was retired, so the result is still deliverable on the next sweep.
       const settled = loadSubagentRegistryFromSqlite().get(input.subagent.runId)!;
       expect(settled.delivery).toMatchObject({ status: "pending" });
       expect(settled.delivery?.discardReason).toBeUndefined();
       expect(settled.delivery?.discardedAt).toBeUndefined();
       expect(settled.suppressCompletionDelivery).toBeUndefined();
       expect(settled.completion).toEqual(completion);
-      // The requester wake is the retry channel; retirement would have cleared it.
       expect(settled.requesterSettleWake).toEqual(armedWake);
       // Neither ledger row is touched by a refused settlement.
       expect(readOwnerRow()).toEqual(ownerRowBefore);
       expect(readOwnerRow(foreign.taskId)).toEqual(foreignRowBefore);
+      expect(warnings).not.toHaveBeenCalled();
     },
   );
 
