@@ -50,7 +50,7 @@ When `agents.defaults.utilityModel` is unset, these completions use a provider-d
 
 So the CLI runtime is a fallback for a model that cannot authenticate itself, not a redirect of working HTTP traffic.
 
-The route is decided once, when a utility completion is prepared. The session observer reuses one prepared completion for the life of an observer run and re-prepares only when its selected utility model reference changes, so adding a provider credential partway through a run does not move that run back to HTTP. It takes effect the next time the completion is prepared.
+The route is decided when a utility completion is prepared. A completion that stayed on its own credential is prepared once and reused for the life of an observer run. A completion that borrowed the primary's runtime is not reused: the session observer re-decides on its next digest, so adding a provider credential partway through a run moves that run back to HTTP at the next digest rather than at the end of the run. Only a borrowed route pays for that recheck, so an installation already on its own credential keeps its single preparation.
 
 To choose the route yourself rather than letting the credential decide, name a runtime on the derived model's own entry. The entry has to name one: a bare entry, or `id: "default"`, still falls back.
 
