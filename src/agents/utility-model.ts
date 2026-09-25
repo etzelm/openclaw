@@ -8,7 +8,9 @@ import {
 } from "../config/utility-model-separation-migration.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
+import { isDefaultAgentRuntimeId } from "./agent-runtime-id.js";
 import { resolveNativeModelPrimary } from "./agent-scope.js";
+import { resolveAgentHarnessPolicy } from "./harness/policy.js";
 import { splitTrailingAuthProfile } from "./model-ref-profile.js";
 import { resolveDefaultModelForAgent } from "./model-selection.js";
 import { readUtilityModelSetting } from "./utility-model-setting.js";
@@ -123,4 +125,56 @@ export function resolveUtilityModelRefForAgent(params: {
       params.primaryModelRef?.trim() || resolveNativeModelPrimary(params.cfg, params.agentId),
     metadataSnapshot: params.metadataSnapshot,
   });
+}
+
+/**
+ * The agent runtime an automatically derived utility model must execute on, or
+ * undefined when it already resolves its own.
+ *
+ * Automatic routing derives a small model from the primary's provider, so the
+ * derived ref matches no configured model entry of its own. A runtime pinned on
+ * the primary model entry (`agents.defaults.models["<provider>/<model>"].
+ * agentRuntime`) therefore does not carry, and the derived ref silently falls
+ * back to the default runtime and its HTTP auth path. For a CLI-backed primary
+ * such as `claude-cli` that provider holds no API key on purpose, so the
+ * completion fails with "No API key found" even though the primary works.
+ *
+ * Inheriting only when the derived model resolves to the default runtime keeps
+ * the other routes untouched: a provider-level `agentRuntime` already applies to
+ * every model of that provider, and an implicit runtime (OpenAI's Codex harness)
+ * is re-derived identically for the small model, so both leave the derived
+ * runtime non-default and skip inheritance.
+ */
+export function resolveAutomaticUtilityRuntimeOverride(params: {
+  cfg: OpenClawConfig;
+  agentId: string;
+  /** Provider and model of the already-resolved utility selection. */
+  utilityProvider: string;
+  utilityModelId: string;
+}): string | undefined {
+  // An explicit utilityModel owns its own runtime; only automatic routing inherits.
+  if (readUtilityModelSetting(params.cfg, params.agentId).kind !== "auto") {
+    return undefined;
+  }
+  const primary = resolveDefaultModelForAgent({ cfg: params.cfg, agentId: params.agentId });
+  const utilityProvider = params.utilityProvider.trim().toLowerCase();
+  if (!primary.provider || !primary.model || primary.provider.toLowerCase() !== utilityProvider) {
+    return undefined;
+  }
+  const derived = resolveAgentHarnessPolicy({
+    provider: params.utilityProvider,
+    modelId: params.utilityModelId,
+    config: params.cfg,
+    agentId: params.agentId,
+  });
+  if (!isDefaultAgentRuntimeId(derived.runtime)) {
+    return undefined;
+  }
+  const primaryPolicy = resolveAgentHarnessPolicy({
+    provider: primary.provider,
+    modelId: primary.model,
+    config: params.cfg,
+    agentId: params.agentId,
+  });
+  return isDefaultAgentRuntimeId(primaryPolicy.runtime) ? undefined : primaryPolicy.runtime;
 }

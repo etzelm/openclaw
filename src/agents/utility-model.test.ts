@@ -6,6 +6,7 @@ import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot
 import { makeProviderModelFixture } from "./test-helpers/provider-model-fixture.js";
 import { readUtilityModelSetting } from "./utility-model-setting.js";
 import {
+  resolveAutomaticUtilityRuntimeOverride,
   resolveConfiguredSetupModelForAgent,
   resolveUtilityModelRefForAgent,
 } from "./utility-model.js";
@@ -249,6 +250,94 @@ describe("resolveUtilityModelRefForAgent", () => {
 
     expect(
       resolveUtilityModelRefForAgent({ cfg, agentId: "main", metadataSnapshot }),
+    ).toBeUndefined();
+  });
+});
+
+describe("resolveAutomaticUtilityRuntimeOverride", () => {
+  // The primary pins a CLI runtime on its own model entry, so the derived small
+  // model matches no entry and would otherwise take the default HTTP auth path.
+  const cliPrimary = {
+    agents: {
+      defaults: {
+        model: "anthropic/claude-opus-5",
+        models: { "anthropic/claude-opus-5": { agentRuntime: { id: "claude-cli" } } },
+      },
+    },
+  } as OpenClawConfig;
+
+  it("inherits the primary's model-level runtime for an auto-derived utility model", () => {
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg: cliPrimary,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+      }),
+    ).toBe("claude-cli");
+  });
+
+  it.each([
+    { label: "explicit", utilityModel: "openai/gpt-5.6-luna" },
+    { label: "disabled", utilityModel: "" },
+  ])("does not inherit when utilityModel is $label", ({ utilityModel }) => {
+    const cfg = {
+      agents: { defaults: { ...cliPrimary.agents?.defaults, utilityModel } },
+    } as OpenClawConfig;
+
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("does not inherit across providers", () => {
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg: cliPrimary,
+        agentId: "main",
+        utilityProvider: "openai",
+        utilityModelId: "gpt-5.6-luna",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("leaves a primary on the default runtime alone", () => {
+    const cfg = { agents: { defaults: { model: "anthropic/claude-opus-5" } } } as OpenClawConfig;
+
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("skips inheritance when the derived model already resolves its own runtime", () => {
+    // A provider-wildcard entry already covers the derived ref, so the harness
+    // policy resolves it directly and no override is needed.
+    const cfg = {
+      agents: {
+        defaults: {
+          model: "anthropic/claude-opus-5",
+          models: { "anthropic/*": { agentRuntime: { id: "claude-cli" } } },
+        },
+      },
+    } as OpenClawConfig;
+
+    expect(
+      resolveAutomaticUtilityRuntimeOverride({
+        cfg,
+        agentId: "main",
+        utilityProvider: "anthropic",
+        utilityModelId: "claude-haiku-4-5",
+      }),
     ).toBeUndefined();
   });
 });
