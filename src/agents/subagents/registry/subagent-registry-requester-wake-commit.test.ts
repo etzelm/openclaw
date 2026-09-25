@@ -7,6 +7,7 @@ import {
   commitRequesterWake,
   getPendingWakeCommit,
   retryPendingWakeCommit,
+  shouldReportRequesterSettleWakeFailure,
 } from "./subagent-registry-requester-wake-commit.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
@@ -96,11 +97,32 @@ describe("requester settle wake commit retry", () => {
     vi.useRealTimers();
   });
 
-  it("throttles a settlement write that keeps being rejected", () => {
-    // Regression for a settlement commit that can never succeed. The failure
-    // count only ever selected a backoff capped at 120s, so the sweeper retried
-    // the same rejected write every two minutes for the life of the process.
+  it("holds the retry ceiling at two minutes", () => {
+    // Regression for recovery latency: widening this ceiling to cut log volume
+    // also postpones the write that would have succeeded, so the requester waits
+    // out the whole gap after storage comes back. Reported volume is bounded by
+    // shouldReportRequesterSettleWakeFailure instead.
     // https://github.com/openclaw/openclaw/issues/154252
+    const entry = makeRetainedChild();
+    const { context } = makeContext([entry]);
+
+    commitRequesterWake(context, [entry], undefined, () => false, true);
+    let widestGapMs = 0;
+    for (let pass = 0; pass < 50; pass += 1) {
+      const pending = getPendingWakeCommit(context, entry);
+      expect(pending).toBeDefined();
+      widestGapMs = Math.max(widestGapMs, (pending?.nextAttemptAt ?? 0) - Date.now());
+      vi.setSystemTime(Math.max(Date.now(), pending?.nextAttemptAt ?? 0) + 1);
+      retryPendingWakeCommit(context, pending as PendingRequesterSettleWakeCommit);
+    }
+
+    expect(widestGapMs).toBeLessThanOrEqual(120_000);
+  });
+
+  it("keeps retrying a rejected write at that cadence all day", () => {
+    // The attempts-per-day figure is the recovery guarantee: a settlement that
+    // can only succeed once storage returns has to be reattempted often enough
+    // that the requester settles promptly when it does.
     const entry = makeRetainedChild();
     const { context } = makeContext([entry]);
     const commit = vi.fn(() => false);
@@ -109,7 +131,7 @@ describe("requester settle wake commit retry", () => {
     runForWindow(context, entry, ONE_DAY_MS, 60_000);
 
     // A 120s ceiling yields about 720 attempts a day; a 1800s ceiling about 50.
-    expect(commit.mock.calls.length).toBeLessThan(60);
+    expect(commit.mock.calls.length).toBeGreaterThan(700);
   });
 
   it("keeps a future retry deadline so the lifecycle owner stays armed", () => {
@@ -212,5 +234,102 @@ describe("requester settle wake commit retry", () => {
     commitRequesterWake(context, [entry], undefined, nextCommit, true);
     expect(nextCommit).toHaveBeenCalledOnce();
     expect(getPendingWakeCommit(context, entry)).toBeUndefined();
+  });
+});
+
+const READONLY_FAULT = { name: "SqliteError", message: "attempt to write a readonly database" };
+const MALFORMED_FAULT = { name: "SqliteError", message: "database disk image is malformed" };
+
+describe("requester settle wake failure reporting", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** Puts a live retry episode on the row without reporting anything yet. */
+  function openEpisode(writable = () => false): {
+    context: SubagentLifecycleWakeContext;
+    entry: SubagentRunRecord;
+    warn: ReturnType<typeof vi.fn>;
+  } {
+    const entry = makeRetainedChild();
+    const { context, warn } = makeContext([entry]);
+    commitRequesterWake(context, [entry], undefined, writable, true);
+    return { context, entry, warn };
+  }
+
+  it("reports a failure that no retry episode owns", () => {
+    const entry = makeRetainedChild();
+    const { context } = makeContext([entry]);
+
+    // Nothing is pending, so this failure has nothing to repeat.
+    expect(getPendingWakeCommit(context, entry)).toBeUndefined();
+    expect(shouldReportRequesterSettleWakeFailure(context, entry, READONLY_FAULT)).toBe(true);
+  });
+
+  it("spends a fixed budget on an identical repeat, then withholds it", () => {
+    // Regression for a budget read off the episode's failure count. The
+    // lifecycle owner's retry loop re-enters its own dispatch and returns early
+    // on the pending it already holds, so it never reaches the commit seam that
+    // advances that count. A budget derived from it never expires and every
+    // attempt keeps reporting.
+    const { context, entry } = openEpisode();
+
+    const decisions: boolean[] = [];
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      decisions.push(shouldReportRequesterSettleWakeFailure(context, entry, READONLY_FAULT));
+    }
+
+    expect(decisions.filter(Boolean)).toHaveLength(5);
+    expect(decisions.slice(0, 5).every(Boolean)).toBe(true);
+    expect(getPendingWakeCommit(context, entry)?.suppressedFailureLogs).toBe(35);
+  });
+
+  it("always reports a fault other than the one already reported", () => {
+    const { context, entry } = openEpisode();
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      shouldReportRequesterSettleWakeFailure(context, entry, READONLY_FAULT);
+    }
+
+    // A new failure mode must never sit hidden behind an older one.
+    expect(shouldReportRequesterSettleWakeFailure(context, entry, MALFORMED_FAULT)).toBe(true);
+    expect(shouldReportRequesterSettleWakeFailure(context, entry, MALFORMED_FAULT)).toBe(true);
+  });
+
+  it("accounts for the reports it withheld once the episode recovers", () => {
+    // A log that goes quiet must not read as an outage that stopped happening.
+    let writable = false;
+    const { context, entry, warn } = openEpisode(() => writable);
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      shouldReportRequesterSettleWakeFailure(context, entry, READONLY_FAULT);
+    }
+
+    writable = true;
+    sweep(context, entry, 5);
+
+    expect(getPendingWakeCommit(context, entry)).toBeUndefined();
+    const recovered = warn.mock.calls.filter(
+      ([message]) => message === "requester settle wake commit recovered",
+    );
+    expect(recovered).toHaveLength(1);
+    expect(recovered[0]?.[1]).toMatchObject({ suppressedFailureLogs: 25 });
+  });
+
+  it("stays silent about recovery when it withheld nothing", () => {
+    let writable = false;
+    const { context, entry, warn } = openEpisode(() => writable);
+    shouldReportRequesterSettleWakeFailure(context, entry, READONLY_FAULT);
+
+    writable = true;
+    sweep(context, entry, 5);
+
+    expect(getPendingWakeCommit(context, entry)).toBeUndefined();
+    expect(
+      warn.mock.calls.filter(([message]) => message === "requester settle wake commit recovered"),
+    ).toHaveLength(0);
   });
 });

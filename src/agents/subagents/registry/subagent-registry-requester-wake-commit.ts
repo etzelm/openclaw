@@ -8,19 +8,31 @@ import type { SubagentRunRecord } from "./subagent-registry.types.js";
 /**
  * Consecutive failures after which one settlement write counts as sustained.
  *
- * Reaching it changes cadence and logging only. The obligation is never
- * abandoned: the durable write that cannot succeed now can succeed once storage
- * recovers, and the requester stays unsettled until it does.
+ * Reaching it changes reporting only. Neither the obligation nor the retry
+ * cadence is touched: the durable write that cannot succeed now can succeed
+ * once storage recovers, and the requester stays unsettled until it does.
  */
 const REQUESTER_SETTLE_WAKE_COMMIT_SUSTAINED_FAILURES = 5;
 
 /**
  * Longest gap between retries of one settlement write.
  *
- * The original ceiling was 120s, so a write that could never succeed was
- * reattempted, and logged, every two minutes for the life of the process.
+ * Deliberately the ceiling this loop has always used. A settlement failing only
+ * because storage is unavailable has to land promptly once storage returns, so
+ * recovery latency stays bounded by this value and the reported flood is bounded
+ * by {@link shouldReportRequesterSettleWakeFailure} instead of by waiting longer.
  */
-const REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS = 1_800_000;
+const REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS = 120_000;
+
+/**
+ * Identical failure reports one retry episode emits before it withholds them.
+ *
+ * Counted per episode against reports actually emitted, not against
+ * {@link PendingRequesterSettleWakeCommit.failures}: the lifecycle owner's retry
+ * loop re-enters its dispatch without going through the commit seam, so that
+ * failure count can stay put while the same report repeats.
+ */
+const REQUESTER_SETTLE_WAKE_FAILURE_REPORT_BUDGET = 5;
 
 function clearPendingWakeCommit(
   context: SubagentLifecycleWakeContext,
@@ -31,6 +43,51 @@ function clearPendingWakeCommit(
       context.pendingRequesterSettleWakeCommits.delete(entry);
     }
   }
+  const suppressed = pending.suppressedFailureLogs ?? 0;
+  if (suppressed > 0) {
+    // Closing the episode accounts for what it withheld, so a log that went
+    // quiet is never read as an outage that stopped happening.
+    context.options.warn("requester settle wake commit recovered", {
+      failures: pending.failures,
+      suppressedFailureLogs: suppressed,
+      runIds: pending.entries.map((entry) => maskLifecycleIdentifier(entry.runId, "run")),
+    });
+  }
+}
+
+/**
+ * Decides whether the lifecycle owner reports one more settlement failure.
+ *
+ * The retry loop is what repeats; the volume in the reported incident came from
+ * reporting every one of its attempts. An episode reports its first few
+ * failures in full, then withholds identical repeats and counts them for
+ * {@link clearPendingWakeCommit}. A fault other than the one already reported is
+ * not a repeat and is always reported, so a new failure mode is never hidden
+ * behind an older one.
+ */
+export function shouldReportRequesterSettleWakeFailure(
+  context: SubagentLifecycleWakeContext,
+  entry: SubagentRunRecord,
+  error: Record<string, string>,
+): boolean {
+  const pending = getPendingWakeCommit(context, entry);
+  if (!pending) {
+    // No retry episode owns this failure, so nothing is going to repeat it.
+    return true;
+  }
+  const signature = `${error.name ?? ""}\u0000${error.message ?? ""}`;
+  if (pending.reportedFailureSignature !== signature) {
+    pending.reportedFailureSignature = signature;
+    pending.reportedFailureLogs = 1;
+    return true;
+  }
+  const reported = pending.reportedFailureLogs ?? 0;
+  if (reported < REQUESTER_SETTLE_WAKE_FAILURE_REPORT_BUDGET) {
+    pending.reportedFailureLogs = reported + 1;
+    return true;
+  }
+  pending.suppressedFailureLogs = (pending.suppressedFailureLogs ?? 0) + 1;
+  return false;
 }
 
 export function getPendingWakeCommit(
@@ -56,14 +113,14 @@ function deferWakeCommit(
     pending.failures >= REQUESTER_SETTLE_WAKE_COMMIT_SUSTAINED_FAILURES &&
     !pending.sustainedFailureReported
   ) {
-    // One report per episode: this warn does not repeat every attempt. The
-    // original flood came from per-attempt logging at the commit call site
-    // this diff does not touch; raising the backoff ceiling from 120s to
-    // 30min throttles that logging roughly 15x rather than eliminating it.
+    // One report per episode: this warn does not repeat every attempt. It is
+    // also the notice that the per-attempt pair at the lifecycle owner is about
+    // to go quiet, so the drop in volume is attributable rather than mysterious.
     pending.sustainedFailureReported = true;
     context.options.warn("requester settle wake commit still failing; retries continue", {
       failures: pending.failures,
-      maxBackoffMs: REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS,
+      retryIntervalMs: REQUESTER_SETTLE_WAKE_COMMIT_MAX_BACKOFF_MS,
+      suppressingIdenticalFailures: true,
       runIds: pending.entries.map((entry) => maskLifecycleIdentifier(entry.runId, "run")),
     });
   }

@@ -108,6 +108,12 @@ export type PendingRequesterSettleWakeCommit = {
   nextAttemptAt: number;
   /** One sustained-failure report was emitted for this retry episode. */
   sustainedFailureReported?: boolean;
+  /** Fault last reported for this episode; a different one is not a repeat. */
+  reportedFailureSignature?: string;
+  /** Reports already emitted for the current signature. */
+  reportedFailureLogs?: number;
+  /** Identical failure reports withheld after the reporting budget ran out. */
+  suppressedFailureLogs?: number;
 };
 
 export interface SubagentLifecycleWakeContext extends SubagentLifecycleCommonContext {
