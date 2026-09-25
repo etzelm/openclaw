@@ -158,8 +158,13 @@ function isAutomaticUtilityModelId(params: {
 }
 
 /**
- * The agent runtime an automatically derived utility model must execute on, or
- * undefined when it already resolves its own.
+ * The agent runtime an automatically derived utility model would inherit from
+ * its primary, or undefined when it already resolves its own.
+ *
+ * This answers the configuration question only. Whether that runtime is actually
+ * used is the caller's decision: `prepareUtilityCompletionForAgent` applies it
+ * just to a derived model with no usable provider credential, so an installation
+ * holding both an API key and a CLI-backed primary keeps its HTTP route.
  *
  * Automatic routing derives a small model from the primary's provider, so the
  * derived ref matches no configured model entry of its own. A runtime pinned on

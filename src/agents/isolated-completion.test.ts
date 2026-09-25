@@ -785,6 +785,8 @@ describe("runIsolatedCompletion", () => {
       agentId: "main",
       useUtilityModel: true,
       manifestPlugins,
+      // Stated, not inherited from the host: this is the CLI-only installation.
+      hasProviderAuth: async () => false,
     });
     const request = {
       ...prepared,
@@ -817,6 +819,79 @@ describe("runIsolatedCompletion", () => {
     expect(mocks.prepareSimpleCompletionModel).toHaveBeenCalledOnce();
     expect(dispatch).not.toHaveBeenCalled();
     expect(mocks.runCliAgent).toHaveBeenCalledOnce();
+  });
+
+  // The same configuration on an installation that also holds a provider
+  // credential. Inheriting here would move existing digests and titles off API
+  // billing and onto CLI subscription quota on upgrade, so the prepared
+  // completion carries no owner and the CLI is never spawned.
+  it("keeps an auto-derived utility completion on the host route when the provider has auth", async () => {
+    const cfg = {
+      agents: {
+        defaults: {
+          model: "anthropic/claude-opus-5",
+          models: { "anthropic/claude-opus-5": { agentRuntime: { id: "claude-cli" } } },
+        },
+      },
+    } as OpenClawConfig;
+    const manifestPlugins = [
+      {
+        id: "anthropic",
+        modelCatalog: {
+          providers: {
+            anthropic: {
+              defaultUtilityModel: "claude-haiku-4-5",
+              models: [{ id: "claude-haiku-4-5" }, { id: "claude-opus-5" }],
+            },
+          },
+        },
+      },
+    ] as unknown as PluginMetadataSnapshot["plugins"];
+    mocks.isCliRuntimeAliasForProvider.mockImplementation(
+      ({ runtime, provider }) => runtime === "claude-cli" && provider === "anthropic",
+    );
+    mocks.prepareSimpleCompletionModel.mockResolvedValue({
+      model: { provider: "anthropic", id: "claude-haiku-4-5", api: "anthropic-messages" },
+      auth: { apiKey: "anthropic-test-key", source: "profile:anthropic:test", mode: "api-key" },
+    });
+    const dispatch = vi.fn(async () => ({
+      assistant: isolatedAssistant([{ type: "text", text: "Utility result" }]),
+    }));
+    registerIsolatedHarness({
+      id: "openclaw",
+      label: "OpenClaw",
+      runIsolatedCompletionV2: dispatch,
+    });
+
+    const prepared = await prepareUtilityCompletionForAgent({
+      cfg,
+      agentId: "main",
+      useUtilityModel: true,
+      manifestPlugins,
+      // The installation holding both an API key and a CLI-backed primary.
+      hasProviderAuth: async () => true,
+    });
+
+    expect(prepared).not.toHaveProperty("agentHarnessRuntimeOverride");
+
+    await expect(
+      runIsolatedCompletion({
+        ...prepared,
+        systemPrompt: "Return JSON.",
+        prompt: "Do the task.",
+        timeoutMs: 1_000,
+      }),
+    ).resolves.toMatchObject({ text: "Utility result" });
+    // The reported identity comes from this fixture's resolved runtime model, so
+    // the derived route is asserted where it is decided: host credential
+    // preparation was asked for the derived model, and no CLI was spawned.
+    expect(mocks.prepareSimpleCompletionModel).toHaveBeenCalledOnce();
+    expect(mocks.prepareSimpleCompletionModel).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: "anthropic", modelId: "claude-haiku-4-5" }),
+      expect.anything(),
+    );
+    expect(dispatch).toHaveBeenCalledOnce();
+    expect(mocks.runCliAgent).not.toHaveBeenCalled();
   });
 
   it("keeps concurrent CLI isolated completions independently admitted", async () => {

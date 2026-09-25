@@ -403,8 +403,9 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
     ).toBeUndefined();
   });
 
-  // The opt-out documented for installations that hold an API key alongside a
-  // CLI-backed primary and want these completions to stay on HTTP.
+  // A runtime named on the derived model's own entry wins outright, so an
+  // operator can pin these completions to the HTTP route even on a host with no
+  // provider credential, where the credential gate would otherwise inherit.
   it("keeps the derived model on HTTP when its own entry pins the default runtime", () => {
     const cfg = {
       agents: {
@@ -429,8 +430,8 @@ describe("resolveAutomaticUtilityRuntimeOverride", () => {
     ).toBeUndefined();
   });
 
-  // The boundary of that opt-out, stated so it cannot be documented loosely: an
-  // entry only opts out when it names a runtime. A bare entry, and an
+  // The boundary of that pin, stated so it cannot be documented loosely: an
+  // entry only counts when it names a runtime. A bare entry, and an
   // `agentRuntime.id` that normalizes back to the default, both still inherit.
   it("still inherits when the derived entry names no non-default runtime", () => {
     const withEntry = (haiku: Record<string, unknown>) =>
