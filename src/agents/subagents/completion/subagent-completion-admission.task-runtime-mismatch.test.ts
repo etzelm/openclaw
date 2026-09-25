@@ -146,7 +146,7 @@ describe("foreign-runtime subagent completion owners", () => {
     driver.controller.options.callGateway = vi.fn().mockResolvedValue({ messages: [] });
     driver.wake.mockImplementation(async (params) => {
       params.completeBatch([input.subagent], 1, outcome);
-      return outcome.delivered === true;
+      return outcome.delivered;
     });
     try {
       driver.controller.resumeRequesterSettleWake(input.subagent.runId, input.subagent, "restore");
@@ -215,13 +215,47 @@ describe("foreign-runtime subagent completion owners", () => {
         "requester settle wake failed",
         expect.objectContaining({
           error: expect.objectContaining({
-            message: expect.stringContaining(`task owner runtime is ${runtime}`),
+            message: expect.stringContaining(`run id held by ${runtime}`),
           }),
         }),
       );
       expect(JSON.stringify(driver.warn.mock.calls)).toContain(input.subagent.runId);
     },
   );
+
+  it("names every runtime holding the run id when more than one row collides", async () => {
+    const input = persistArrivedCompletion();
+    // Two foreign rows and no subagent row: the Gateway CLI fallback shape plus a
+    // colliding cron row. Reporting only the first would hide half the collision.
+    database.db
+      .prepare("UPDATE task_runs SET runtime = ? WHERE task_id = ?")
+      .run("cron", input.task.taskId);
+    addCollidingForeignTaskRow({ ...input.task, runtime: "cron" }, "cli");
+    reopenOwners();
+    input.subagent = subagentRuns.get(input.subagent.runId)!;
+    const armedWake = structuredClone(input.subagent.requesterSettleWake);
+    const completion = structuredClone(input.subagent.completion);
+
+    const driver = await sweepUndeliveredRequesterWake(input);
+
+    // Custody is preserved exactly as with a single foreign row.
+    const settled = loadSubagentRegistryFromSqlite().get(input.subagent.runId)!;
+    expect(settled.delivery).toMatchObject({ status: "pending" });
+    expect(settled.delivery?.discardReason).toBeUndefined();
+    expect(settled.completion).toEqual(completion);
+    expect(settled.requesterSettleWake).toEqual(armedWake);
+    expect(warnings).not.toHaveBeenCalled();
+
+    // Sorted and de-duplicated, so the line is stable across row insertion order.
+    expect(driver.warn).toHaveBeenCalledWith(
+      "requester settle wake failed",
+      expect.objectContaining({
+        error: expect.objectContaining({
+          message: expect.stringContaining("run id held by cli, cron"),
+        }),
+      }),
+    );
+  });
 
   it.each(["cron", "acp"] as const)(
     "delivers a completion whose subagent owner sits behind an older runtime=%s row",
