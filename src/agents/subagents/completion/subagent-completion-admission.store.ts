@@ -251,6 +251,7 @@ function ownsTasklessCompletion(
   database: OpenClawStateDatabase,
   subagent: SubagentRunRecord,
   expected: SubagentRunRecord,
+  ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId),
 ): boolean {
   // Announce records transport observations before committing suspension; they do
   // not transfer ownership of the result, execution, or requester wake.
@@ -273,7 +274,7 @@ function ownsTasklessCompletion(
     ownerPayload(subagent) === ownerPayload(expected) &&
     // A surviving subagent owner refuses settlement even when an older foreign row
     // wins run-id selection; only a foreign row standing alone clears retirement.
-    !readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId).subagentOwner &&
+    !ownership.subagentOwner &&
     ![...subagentRuns.values()].some(newerSibling) &&
     !loadSubagentRunsForChildSessionFromSqlite(subagent.childSessionKey, database).some(
       newerSibling,
@@ -350,13 +351,9 @@ function prepareBlockedSubagentCompletion(
   // owner, so treat it as an absent owner instead of rejecting on every sweep.
   const task = persistedTask?.runtime === "subagent" ? persistedTask : undefined;
   if (subagent && !task) {
-    // The requester path filters a foreign task out before settlement, so it passes
-    // no task id at all. Read ownership from the run id, which the completion always
-    // carries, or this diagnostic could never describe the case it exists for.
-    const { foreignRuntime } = readRunIdTaskOwnership(
-      database,
-      subagent.taskRunId ?? subagent.runId,
-    );
+    // The requester path can pass no task id at all, so ownership is read from the run
+    // id the completion always carries. One read serves both the fence and the reason.
+    const ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId);
     // Missing task ownership cannot recover on retry. Fence the exact persisted
     // completion and retain its result instead of recreating historical work.
     if (
@@ -373,7 +370,7 @@ function prepareBlockedSubagentCompletion(
       !["pending", "in_progress"].includes(subagent.delivery?.status ?? "pending") ||
       subagent.delivery?.deliveredAt !== undefined ||
       subagent.delivery?.announcedAt !== undefined ||
-      !ownsTasklessCompletion(database, subagent, params.subagent)
+      !ownsTasklessCompletion(database, subagent, params.subagent, ownership)
     ) {
       return undefined;
     }
@@ -383,7 +380,9 @@ function prepareBlockedSubagentCompletion(
       disposition: "permanent_failure" as const,
       discardReason: "task-missing" as const,
       discardedAt: now,
-      lastError: foreignRuntime ? `task-owner-runtime-mismatch:${foreignRuntime}` : "task-missing",
+      lastError: ownership.foreignRuntime
+        ? `task-owner-runtime-mismatch:${ownership.foreignRuntime}`
+        : "task-missing",
       nextAttemptAt: undefined,
       queueId: undefined,
     });
