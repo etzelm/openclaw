@@ -1,38 +1,34 @@
 // Attributes run-id task ownership when subagent completion settlement refuses.
 import type { OpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
 import { listTaskRecordsByRunIdForViewInDatabase } from "../../../tasks/task-registry.store.kernel.js";
-import type { TaskRecord, TaskRuntime } from "../../../tasks/task-registry.types.js";
-
-export type RunIdTaskOwnership = {
-  /** Every row holding this run id, in lookup preference order. */
-  rows: readonly TaskRecord[];
-  /** A runtime holding the same run id without owning this completion. */
-  foreignRuntime: TaskRuntime | undefined;
-};
+import type { TaskRecord } from "../../../tasks/task-registry.types.js";
 
 /**
- * Ownership facts for one run id. Run ids are not unique across runtimes and the
- * shared run-id view returns a single preferred row, so a refusal that reports only
- * "owner changed" cannot tell an operator whether the row is absent or held by another
- * runtime. Reading every row supplies that attribution. It decides nothing: settlement
- * still refuses while any row holds the id, so a completion whose execution owner
- * lives in another runtime keeps its result and its durable requester wake.
+ * Every task row holding one run id, in lookup preference order. Run ids are not unique
+ * across runtimes and the shared run-id view returns a single preferred row, so a
+ * refusal that reports only "owner changed" cannot tell an operator whether the id is
+ * unheld or held by another runtime. Reading every row supplies that. It decides
+ * nothing: settlement still refuses while any row holds the id, so a completion whose
+ * execution owner lives in another runtime keeps its result and its durable wake.
  */
-export function readRunIdTaskOwnership(
+export function readRunIdTaskRows(
   database: OpenClawStateDatabase,
   runId: string,
-): RunIdTaskOwnership {
-  const rows = listTaskRecordsByRunIdForViewInDatabase(database.db, runId);
-  return {
-    rows,
-    foreignRuntime: rows.find((task) => task.runtime !== "subagent")?.runtime,
-  };
+): readonly TaskRecord[] {
+  return listTaskRecordsByRunIdForViewInDatabase(database.db, runId);
 }
 
-/** Names why a completion found no subagent owner, for the settlement refusal journal. */
-export function describeRunIdTaskOwnership(ownership: RunIdTaskOwnership): string {
-  if (ownership.foreignRuntime) {
-    return `task owner runtime is ${ownership.foreignRuntime}`;
+/**
+ * Names which runtimes hold this run id, for the settlement refusal journal. This
+ * describes the ledger, not the conjunct that refused: a refusal can also come from a
+ * superseded in-memory owner or a newer sibling while no row holds the id at all. It is
+ * phrased as an observation so it never reads as the cause, and it lists every holding
+ * runtime so a collision between more than two rows is not reported as one.
+ */
+export function describeRunIdTaskRows(rows: readonly TaskRecord[]): string {
+  if (rows.length === 0) {
+    return "run id held by no task row";
   }
-  return ownership.rows.length > 0 ? "task owner is not this completion" : "task owner is absent";
+  const runtimes = [...new Set(rows.map((task) => task.runtime))].toSorted();
+  return `run id held by ${runtimes.join(", ")}`;
 }

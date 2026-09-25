@@ -63,8 +63,8 @@ import {
 import type { SubagentRunRecord } from "../registry/subagent-registry.types.js";
 import { compareSubagentRunGeneration } from "../registry/subagent-run-generation.js";
 import {
-  describeRunIdTaskOwnership,
-  readRunIdTaskOwnership,
+  describeRunIdTaskRows,
+  readRunIdTaskRows,
 } from "./subagent-completion-admission.task-owner.js";
 
 const log = createSubsystemLogger("subagents/completion");
@@ -253,7 +253,7 @@ function ownsTasklessCompletion(
   database: OpenClawStateDatabase,
   subagent: SubagentRunRecord,
   expected: SubagentRunRecord,
-  ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId),
+  rows = readRunIdTaskRows(database, subagent.taskRunId ?? subagent.runId),
 ): boolean {
   // Announce records transport observations before committing suspension; they do
   // not transfer ownership of the result, execution, or requester wake.
@@ -276,7 +276,7 @@ function ownsTasklessCompletion(
     ownerPayload(subagent) === ownerPayload(expected) &&
     // Any row holding this run id still has an execution owner in its own runtime, so
     // retirement stays refused. A completion is ownerless only when no row holds the id.
-    ownership.rows.length === 0 &&
+    rows.length === 0 &&
     ![...subagentRuns.values()].some(newerSibling) &&
     !loadSubagentRunsForChildSessionFromSqlite(subagent.childSessionKey, database).some(
       newerSibling,
@@ -304,12 +304,12 @@ export function reconcileRetiredSubagentCancellation(
     if (!subagent || retiredCancellationEndedAt(subagent, now) !== endedAt) {
       return false;
     }
-    const ownership = readRunIdTaskOwnership(database, subagent.taskRunId ?? subagent.runId);
+    const rows = readRunIdTaskRows(database, subagent.taskRunId ?? subagent.runId);
     // Retained tasks still use ordinary cancellation and requester-wake ordering.
-    if (ownership.rows.length > 0) {
+    if (rows.length > 0) {
       return undefined;
     }
-    if (!ownsTasklessCompletion(database, subagent, expected, ownership)) {
+    if (!ownsTasklessCompletion(database, subagent, expected, rows)) {
       return false;
     }
     subagent.killReconciliation = undefined;
@@ -613,9 +613,7 @@ export function settleRequesterCompletionBatch(params: {
               (detail ? ` (${detail})` : ""),
           );
         const ownershipDetail = () =>
-          describeRunIdTaskOwnership(
-            readRunIdTaskOwnership(database, expected.taskRunId ?? expected.runId),
-          );
+          describeRunIdTaskRows(readRunIdTaskRows(database, expected.taskRunId ?? expected.runId));
         const subagent = readSubagentRun(database, expected.runId);
         if (
           !subagent ||
