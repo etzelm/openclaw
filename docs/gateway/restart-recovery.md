@@ -321,8 +321,11 @@ of surrendering all of it.
 | 47s                 | 5000ms      | 42000ms           | 10000ms | 32000ms           |
 | No launchd deadline | 5000ms      | 325000ms          | 10000ms | 315000ms          |
 
-Every positive deadline therefore leaves active work some time to finish, and a
-longer `ExitTimeOut` never yields a shorter drain than a shorter one does.
+The allocation therefore leaves active work a positive share of every positive
+deadline, and a longer `ExitTimeOut` never allocates a shorter drain than a shorter
+one does. The time spent resolving the budget is then debited from it, exactly as it
+already was, so a deadline shorter than that resolution cost can still leave nothing
+to spend.
 
 When startup recovers from an unsupported Node version, the launchd job is the
 launcher and the serving Gateway is its child, so the job prints the launcher's
