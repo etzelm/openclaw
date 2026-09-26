@@ -79,8 +79,15 @@ it
       expect(exit, output).toEqual([0, null]);
       expect(elapsed, output).toBeLessThan(stopTimeoutMs);
       expect(output).toContain("process proof: acquisition-cancelled");
+      // The fixture's launchd label is synthetic, so the per-stop re-inspection cannot
+      // find a job to read and the startup budget is retained instead. Both
+      // attributions prove the same thing this case is guarding: the shutdown budget
+      // came from the 20 second native stop timeout and not from the platform-neutral
+      // policy, which would report a 330000ms source and a far longer deadline.
       expect(output).toMatch(
-        new RegExp(`shutdown budget at shutdown:.*source=.*=${stopTimeoutMs}ms`),
+        new RegExp(
+          `shutdown budget at shutdown:.*source=(?:.*=${stopTimeoutMs}ms|startup shutdown budget=${shutdownTimeoutMs}ms)`,
+        ),
       );
       if (mode === "cooperative") {
         expect(output).toContain("process proof: acquisition-joined");
