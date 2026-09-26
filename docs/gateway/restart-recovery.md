@@ -338,11 +338,21 @@ never below half the shutdown budget. Funding the full 10-second reserve alongsi
 that 5-second drain takes 15 seconds of shutdown budget, which is what a 20-second
 `ExitTimeOut` resolves to once inspecting the job itself costs nothing. That inspection
 is up to three `launchctl print` calls at 2 seconds each, so its own cost is bounded
-near 6 seconds, not the low milliseconds a single measured host might suggest, and
-**every deadline from 20 seconds up resolves to the same allocation the fixed margin
-and reserve gave outright, minus whatever that inspection cost.** The template is one
-of them: a 20-second job gives up exactly what the inspection cost, for any cost up to
-5 seconds.
+near 6 seconds, not the low milliseconds a single measured host might suggest, and the
+allocation it yields depends on which side of a 5-second debit the inspection lands on:
+
+- **While the inspection costs 5 seconds or less, the reserve absorbs all of it and the
+  drain is untouched.** A 20-second job resolves a `10000 - debit` reserve against a
+  flat 5-second drain, so it gives up exactly what the inspection cost and nothing more.
+  The measured debit on this host is 13 milliseconds, giving 9987 against 10000.
+- **Past a 5-second debit the drain floor is itself share-bounded and the two converge
+  on half of what is left.** A 6-second debit leaves a 9-second budget on that same
+  20-second job, which splits 4500/4500 rather than retaining the old reserve. Reaching
+  that case takes all three domain probes hitting their full timeout, meaning
+  `launchctl` hanging three times over.
+
+Above the template the threshold stops mattering: any deadline whose budget still funds
+15 seconds after the debit keeps the full 10-second reserve alongside the 5-second drain.
 
 | Job `ExitTimeOut`   | Exit margin | Shutdown deadline | Reserve | Active-work drain | Drain before |
 | ------------------- | ----------- | ----------------- | ------- | ----------------- | ------------ |

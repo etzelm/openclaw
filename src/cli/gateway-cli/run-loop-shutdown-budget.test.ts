@@ -287,6 +287,32 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     }
   });
 
+  // The case above only covers a debit small enough that the reserve pays it alone. The
+  // probe can cost far more than 13ms: it is up to three `launchctl print` calls at a
+  // 2 second timeout each. Past a 5 second debit the drain floor is share-bounded too,
+  // so the claim that a 20 second deadline keeps its old allocation less the debit stops
+  // holding and both allowances converge on half the remainder. Pinning that boundary
+  // keeps the documented threshold honest instead of reasoned.
+  it("converges the reserve and the drain once the elapsed debit passes the floor", async () => {
+    execLaunchctl.mockResolvedValue(printed("SIGTERMed", "\texit timeout = 20\n\tpid = 4242\n"));
+    const nowMs = performance.now();
+    const clock = vi.spyOn(performance, "now").mockReturnValue(nowMs);
+    try {
+      const budget = await resolveGatewayShutdownBudget(
+        "external",
+        { info: vi.fn(), warn: vi.fn() },
+        { previous: stoppingNow.previous, acceptedAtMs: nowMs - 6_000 },
+      );
+      expect(budget.timeoutMs).toBe(9_000);
+      expect(budget.reserveMs).toBe(4_500);
+      expect(budget.timeoutMs - budget.reserveMs).toBe(4_500);
+      // Not the old allocation less the debit: that would have left the reserve at 4000.
+      expect(budget.reserveMs).not.toBe(GATEWAY_SHUTDOWN_RESERVE_MS - 6_000);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
   // The allowances are only ever capped to keep a drain, never to reallocate a deadline
   // that already worked. A deadline able to fund the 10s reserve alongside the 5s drain
   // the 20s template yields needs 15s of shutdown budget, which every deadline from 20s

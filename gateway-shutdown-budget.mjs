@@ -33,8 +33,14 @@ const GATEWAY_SUPERVISOR_EXIT_MARGIN_SHARE = 0.25;
  * of 20 seconds or more once the probe that reads it is subtracted: that probe is up to
  * three `launchctl print` calls at `LAUNCHCTL_PRINT_TIMEOUT_MS` (2 seconds) each, so its
  * cost is bounded near 6 seconds, not the low milliseconds one measured host might
- * suggest, and a 20 second deadline gives up exactly what the probe cost, for any cost
- * up to 5 seconds. Below that, the reserve this yields is already below what a flat
+ * suggest. Which allowance pays that cost turns on a 5 second threshold. At or under 5
+ * seconds of probe cost the reserve absorbs all of it and this floor is untouched, so a
+ * 20 second deadline resolves `10000 - cost` of reserve against a flat 5 second drain and
+ * gives up exactly what the probe cost (13ms measured here, so 9987). Over 5 seconds the
+ * share below bounds the floor too and the two converge on half the remainder: a 6 second
+ * cost leaves a 9 second budget that splits 4500/4500, which does NOT retain the old
+ * reserve, and reaching it needs all three domain probes to hit their full timeout.
+ * Below 20 seconds of deadline, the reserve this yields is already below what a flat
  * subtraction left, from roughly 8 seconds up to 20 seconds of deadline: that includes
  * 16 to 19 seconds, where a flat subtraction still funded the reserve in full and left
  * a positive drain of its own (1 to 4 seconds). At 15 seconds the reserve now gives up
