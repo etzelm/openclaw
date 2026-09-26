@@ -497,10 +497,13 @@ export async function executePluginOwnedProcess(params: {
     const compactionWork = params.compactionActive?.() ?? false;
     // Compaction alone carries its narrower ceiling into diagnostics recovery too, so
     // a wedged compaction cannot hold the blocked-tool floor on that path either.
-    params.onOutstandingWorkChange?.(
-      toolWork || compactionWork,
-      !toolWork && compactionWork ? CLI_COMPACTION_GRACE_MS : undefined,
-    );
+    if (!toolWork && compactionWork) {
+      params.onOutstandingWorkChange?.(true, CLI_COMPACTION_GRACE_MS);
+      return;
+    }
+    // Everything else keeps the single-argument call it already made, so a report that
+    // carries no narrowed floor is indistinguishable from one made before this change.
+    params.onOutstandingWorkChange?.(toolWork || compactionWork);
   };
   const updatePendingApproval = (delta: number) => {
     outstanding.approvals = Math.max(0, outstanding.approvals + delta);
