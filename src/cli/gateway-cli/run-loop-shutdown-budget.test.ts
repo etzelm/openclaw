@@ -136,7 +136,10 @@ describe("Gateway stop deadline independent of restart ownership", () => {
       expect(budget.timeoutMs - budget.reserveMs).toBe(drainMs);
       // What a flat, unshared subtraction would have left active work at the same deadline.
       expect(
-        Math.max(0, seconds * 1_000 - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS - GATEWAY_SHUTDOWN_RESERVE_MS),
+        Math.max(
+          0,
+          seconds * 1_000 - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS - GATEWAY_SHUTDOWN_RESERVE_MS,
+        ),
       ).toBe(fixedDrainMs);
       expect(budget.reserveMs).toBeGreaterThanOrEqual(Math.floor(timeoutMs / 2));
     },
