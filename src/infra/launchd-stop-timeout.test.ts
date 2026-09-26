@@ -15,7 +15,6 @@ const SERVICE_ENV = { ...LAUNCHD_ENV, OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gatew
 // Adds the marker the recovery launcher has always stamped on children it respawns,
 // which is what separates the upgrade case from an unrelated parent.
 const RESPAWNED_SERVICE_ENV = { ...SERVICE_ENV, OPENCLAW_NODE_UPDATE_RESPAWNED: "1" };
-const LAUNCHER_ENV = { ...LAUNCHD_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: "19000" };
 const result = (stdout: string) => ({ code: 0, stdout, stderr: "", termination: "exit" });
 
 /**
@@ -161,11 +160,14 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     });
   });
 
-  // node-runtime-recovery.mjs declares the reap timer it armed. A longer operator
-  // deadline cannot be spent under it: the parent force-kills this process first.
-  it("caps a declared launcher deadline that binds before the job's", async () => {
-    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
-    await expect(readLaunchdStopTimeout(LAUNCHER_ENV)).resolves.toEqual({
+  // The launcher declares nothing, so its reap timer is derived from the expression
+  // the launcher itself arms from. A longer operator deadline cannot be spent under
+  // it: the parent force-kills this process first. Deriving rather than being told is
+  // what makes this hold when an already-running older launcher started this Gateway,
+  // which is the only shape an upgrade can take.
+  it("caps the job deadline at the launcher's derived reap timer", async () => {
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4241\n"));
+    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
       stop: {
         timeoutMs: 19_000,
         source:
@@ -174,86 +176,42 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     });
   });
 
-  // The upgrade case: an already-running published launcher starts a candidate
-  // Gateway. That launcher arms the same reap timer and declares nothing, so reading
-  // the silence as "no deadline" would budget the job's 90 seconds past a force-kill
-  // the parent fires at 19. It has stamped its respawn marker on every child since
-  // long before it declared the timer, so the timer it armed is reconstructible from
-  // the graces both sides share.
-  it("caps an undeclared recovery launcher at its reconstructed reap timer", async () => {
-    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
-    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
-      stop: {
-        timeoutMs: 19_000,
-        source:
-          "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's reconstructed 19000ms stop timer",
-      },
-    });
-  });
-
-  // Holding the parent slot is still not evidence of a reap timer. An operator
-  // wrapper can keep the job's pid and start the Gateway itself while running none,
-  // and capping its deadline would cut a drain nothing was going to interrupt.
+  // Holding the parent slot is not evidence of a reap timer. An operator wrapper can
+  // keep the job's pid and start the Gateway itself while running none, and capping
+  // its deadline would cut a drain nothing was going to interrupt.
   it("leaves a parent that did not respawn this process capping nothing", async () => {
-    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4241\n"));
     await expect(readLaunchdStopTimeout(SERVICE_ENV)).resolves.toEqual({
-      stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
+      stop: { timeoutMs: 55_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
-
-  // A declaration that cannot be parsed is not a deadline. The reconstruction stands
-  // in for it when the recovery launcher respawned this process, and only then.
-  it.each(["", "   ", "not-a-number", "0", "-5"])(
-    "falls back to the reconstructed timer for a malformed launcher declaration %j",
-    async (declared) => {
-      execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
-      await expect(
-        readLaunchdStopTimeout({
-          ...RESPAWNED_SERVICE_ENV,
-          OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: declared,
-        }),
-      ).resolves.toEqual({
-        stop: {
-          timeoutMs: 19_000,
-          source:
-            "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's reconstructed 19000ms stop timer",
-        },
-      });
-      await expect(
-        readLaunchdStopTimeout({ ...SERVICE_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: declared }),
-      ).resolves.toEqual({
-        stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
-      });
-    },
-  );
 
   // Outside the service layout the launcher bounds its child by the platform-neutral
-  // stop policy, which outlasts any realistic job deadline, so nothing is cut.
-  it("reconstructs the policy deadline when the respawning job is not the service", async () => {
-    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
+  // stop policy, which outlasts any job deadline launchd will enforce, so nothing is
+  // cut even though the marker says a launcher is there.
+  it("derives the policy deadline when the respawning job is not the service", async () => {
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4241\n"));
     await expect(
       readLaunchdStopTimeout({ ...LAUNCHD_ENV, OPENCLAW_NODE_UPDATE_RESPAWNED: "1" }),
     ).resolves.toEqual({
-      stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
+      stop: { timeoutMs: 55_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
   // launchd reaps the whole job first, so a shorter job deadline still wins.
-  it("keeps a job deadline shorter than the declared launcher timer", async () => {
+  it("keeps a job deadline shorter than the launcher's reap timer", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 5\n\tpid = 4241\n"));
-    await expect(readLaunchdStopTimeout(LAUNCHER_ENV)).resolves.toEqual({
+    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
       stop: { timeoutMs: 5_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
-  // The declaration is scoped to the parent that made it, so an inherited or
-  // spoofed value cannot shorten the budget of a Gateway that is the job itself.
-  it("ignores a declared launcher timer when this process is the job", async () => {
-    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4242\n"));
-    await expect(
-      readLaunchdStopTimeout({ ...LAUNCHD_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: "1000" }),
-    ).resolves.toEqual({
-      stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
+  // The launcher timer belongs to a parent, so a Gateway that is the job itself is
+  // never shortened by one even while carrying an inherited respawn marker.
+  it("ignores the launcher timer when this process is the job", async () => {
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4242\n"));
+    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
+      stop: { timeoutMs: 55_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 

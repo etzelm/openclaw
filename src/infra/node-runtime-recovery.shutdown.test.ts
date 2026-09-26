@@ -53,16 +53,19 @@ it.each([
       XPC_SERVICE_NAME: "ai.openclaw.fixture",
     });
     detach = () => child.emit("exit", 0, null);
-    // The child is told the deadline this launcher armed, so a serving Gateway can
-    // bound its shutdown budget on a declared timer rather than on a parent pid.
-    // The escalation asserted below lands on exactly this instant.
+    // The launcher tells the child nothing about the timer it armed: the serving
+    // Gateway derives the same deadline from the same shared expression, which is what
+    // lets a Gateway started by an already-running older launcher bound itself
+    // correctly. So the env must reach the child unchanged, and the escalation
+    // asserted below is what that derivation has to land on.
     expect(spawn).toHaveBeenCalledExactlyOnceWith(
       "node",
       ["child.mjs"],
       expect.objectContaining({
-        env: expect.objectContaining({
-          OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: String(nativeBudgetMs - 1_000),
-        }),
+        env: {
+          OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.fixture",
+          XPC_SERVICE_NAME: "ai.openclaw.fixture",
+        },
       }),
     );
     const signal = process.listeners("SIGTERM").find((listener) => !previous.has(listener));

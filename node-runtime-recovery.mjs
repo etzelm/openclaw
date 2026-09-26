@@ -46,8 +46,9 @@ const respawnSignalHardExitGraceMs = RESPAWN_SIGNAL_HARD_EXIT_GRACE_MS;
 export const runRespawnedChild = (command, args, env) => {
   // The serving Gateway owns drain and cleanup. Reap a stuck child only in the
   // supervisor's exit margin, after that owner has had its full shutdown budget.
-  // The shared resolver owns this arithmetic so a Gateway whose launcher predates
-  // the marker below can reconstruct the very same deadline.
+  // The shared resolver owns this arithmetic so the serving Gateway derives the very
+  // same deadline from the same expression, which is what lets a Gateway started by
+  // any build of this launcher bound itself correctly without being told.
   const launcherStopTimeoutMs = resolveLauncherStopTimeoutMs({
     env,
     platform: process.platform,
@@ -55,12 +56,9 @@ export const runRespawnedChild = (command, args, env) => {
   });
   const signalExitGraceMs = launcherStopTimeoutMs - respawnSignalForceKillGraceMs;
   const stdioIsTerminal = process.stdin.isTTY || process.stdout.isTTY;
-  // Declare that deadline to the child so a Gateway that finds the marker can spend
-  // a timer it was told about rather than one it inferred. A published launcher sets
-  // no marker, and the reader falls back to reconstructing this same value.
   const child = spawn(command, args, {
     stdio: "inherit",
-    env: { ...env, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: String(launcherStopTimeoutMs) },
+    env,
     windowsHide: !stdioIsTerminal,
   });
   const listeners = new Map();

@@ -95,45 +95,36 @@ function isLaunchdStoppingJob(state: string | undefined): boolean {
 /**
  * The stop deadline OpenClaw's Node recovery launcher armed for this process.
  *
- * A current launcher declares it in the child environment. A launcher published
- * before that marker existed arms the identical timer without announcing it, and
- * treating that silence as "no deadline" is what would let a long custom
- * `ExitTimeOut` be budgeted past a force-kill its parent is already counting down:
- * the upgrade case is an already-running old launcher starting a new Gateway, so the
- * marker is missing exactly when the mismatch is widest. The value is therefore
- * reconstructed from the same shared graces the launcher arms itself from.
+ * The launcher does not announce it. It is derived here from the same shared
+ * expression the launcher arms itself from, so the two cannot disagree and no build
+ * of the launcher has to be new enough to tell the Gateway anything. That matters
+ * because replacing files cannot change a launcher that is already running: the
+ * first Gateway built from a given change is started by the previous launcher, and a
+ * value that had to be declared would be missing exactly then, which is what would
+ * let a long `ExitTimeOut` be budgeted past a force-kill the parent is already
+ * counting down.
  *
- * Holding the parent slot still proves nothing on its own, so the reconstruction is
- * gated on the recovery launcher's own respawn marker rather than on the parent
- * relation: an external process manager can start the Gateway from inside the same
- * job and run no reap timer at all, and that parent's deadline stays unreduced.
+ * Holding the parent slot proves nothing on its own, so this is gated on the
+ * recovery launcher's own respawn marker rather than on the parent relation: an
+ * external process manager can start the Gateway from inside the same job and run no
+ * reap timer at all, and that parent's deadline stays unreduced.
  */
-function readLauncherStopTimeoutMs(
-  env: NodeJS.ProcessEnv,
-): { timeoutMs: number; declared: boolean } | undefined {
-  const declared = parseStrictPositiveInteger(env.OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS ?? "");
-  if (declared !== undefined) {
-    return { timeoutMs: declared, declared: true };
-  }
-  // Reconstruct only for the launcher whose arithmetic is being reconstructed. The
-  // recovery launcher stamps this marker on every child it respawns, and it did so
-  // long before it declared the timer, so it is present in exactly the upgrade case
-  // and absent for any other parent. An operator wrapper that keeps the job's pid
-  // and starts the Gateway itself runs no such timer, and capping its deadline at
-  // one would cut a drain nothing was going to interrupt.
+function resolveParentLauncherStopTimeoutMs(env: NodeJS.ProcessEnv): number | undefined {
+  // The recovery launcher stamps this marker on every child it respawns, and has
+  // done so far longer than this deadline has been derived, so it is present for a
+  // Gateway this launcher started and absent for any other parent. An operator
+  // wrapper that keeps the job's pid and starts the Gateway itself runs no such
+  // timer, and capping its deadline would cut a drain nothing was going to interrupt.
   if (env.OPENCLAW_NODE_UPDATE_RESPAWNED !== "1") {
     return undefined;
   }
-  return {
-    timeoutMs: resolveLauncherStopTimeoutMs({
-      env,
-      platform: process.platform,
-      // The launcher branched on its own argv, and it respawns the child with the
-      // same user arguments, so testing ours reproduces the branch it took.
-      foreground: isForegroundGatewayRunArgv(process.argv),
-    }),
-    declared: false,
-  };
+  return resolveLauncherStopTimeoutMs({
+    env,
+    platform: process.platform,
+    // The launcher branched on its own argv, and it respawns the child with the same
+    // user arguments, so testing ours reproduces the branch it took.
+    foreground: isForegroundGatewayRunArgv(process.argv),
+  });
 }
 
 /**
@@ -234,17 +225,13 @@ export async function readLaunchdStopTimeout(
     const jobMs = seconds * 1_000;
     // A parent that reaps this process on its own timer binds before the job's
     // ExitTimeOut, and spending the longer deadline would only get the drain
-    // force-killed. The launchd job printed here is OpenClaw's own, so a parent
-    // holding its pid is OpenClaw's launcher and that timer provably exists whether
-    // or not the launcher was new enough to declare it.
-    const launcher = relation === "launcher" ? readLauncherStopTimeoutMs(env) : undefined;
-    return launcher !== undefined && launcher.timeoutMs < jobMs
+    // force-killed.
+    const launcherMs = relation === "launcher" ? resolveParentLauncherStopTimeoutMs(env) : undefined;
+    return launcherMs !== undefined && launcherMs < jobMs
       ? {
           stop: {
-            timeoutMs: launcher.timeoutMs,
-            source: `launchd ${target} exit timeout capped at the launcher's ${
-              launcher.declared ? "" : "reconstructed "
-            }${launcher.timeoutMs}ms stop timer`,
+            timeoutMs: launcherMs,
+            source: `launchd ${target} exit timeout capped at the launcher's ${launcherMs}ms stop timer`,
           },
         }
       : { stop: { timeoutMs: jobMs, source: `launchd ${target} exit timeout` } };

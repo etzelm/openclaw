@@ -128,10 +128,9 @@ Node version and the service manager tracks a launcher parent. The launcher
 forwards the stop signal and waits for the serving Gateway to drain within the
 shared service budget. Managed restart intent targets the live serving owner,
 so unfinished work still follows restart recovery when its drain budget expires.
-When launchd drives the stop, macOS uses the running job's own `ExitTimeOut`,
-capped by the launcher's stop timer whether that launcher declares it or the
-Gateway reconstructs it, and Linux units use their own stop timeout; both are
-described in the deadline sections below.
+When launchd drives the stop, macOS uses the running job's own `ExitTimeOut`, capped
+by the launcher's own stop timer when a launcher is in the path, and Linux units use
+their own stop timeout; both are described in the deadline sections below.
 This requires a Gateway started with the updated launcher: replacing files cannot
 change a launcher that is already running.
 
@@ -327,32 +326,46 @@ one does. The time spent resolving the budget is then debited from it, exactly a
 already was, so a deadline shorter than that resolution cost can still leave nothing
 to spend.
 
+Raising `ExitTimeOut` past 60 has no effect. launchd honours 1 through 60 exactly and
+silently clamps anything larger, measured on macOS 27 against a bare `/bin/sleep`
+job: a plist asking for 61, 75, 90, 120 or 300 reads back its own value through
+`plutil` while `launchctl print` reports `exit timeout = 60` for each. The Gateway
+reads the enforced value rather than the plist, so the launchd branch of the budget
+cannot exceed 55000ms on that OS however large the plist value is.
+
 When startup recovers from an unsupported Node version, the launchd job is the
 launcher and the serving Gateway is its child, so the job prints the launcher's
 `pid`. The deadline is still read, and it is then capped by the stop timer that
-launcher armed. `node-runtime-recovery.mjs` passes
-`OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS` to the Gateway it spawns, carrying the instant
-at which it would force-kill that child. A longer operator `ExitTimeOut` is not
-spendable under that timer: the launcher would kill the drain before launchd's own
-deadline arrived. A shorter one still applies, because launchd reaps the whole job
-first.
+launcher armed: on a forwarded stop signal `node-runtime-recovery.mjs` re-sends
+SIGTERM to its child, force-kills it one grace later, and exits one grace after that.
+A longer operator `ExitTimeOut` is not spendable under that timer, because the
+launcher would kill the drain before launchd's own deadline arrived. A shorter one
+still applies, because launchd reaps the whole job first.
 
-An already-running launcher published before that variable existed arms the same
-timer and declares nothing, which is exactly the upgrade shape: replacing files
-cannot change a launcher that is already running, so a candidate Gateway can be
-started by an older launcher. Treating that silence as "no deadline" would budget a
-long custom `ExitTimeOut` past a force-kill the parent is already counting down, so
-the Gateway reconstructs the timer instead. Both sides derive it from the same shared
-escalation graces, so the reconstruction cannot drift from the timer actually armed.
+The launcher does not tell the Gateway that instant. Both derive it from one
+expression in `gateway-shutdown-budget.mjs`, the launcher to arm its escalation and
+the Gateway to bound its budget, so the two cannot disagree. Deriving rather than
+declaring is what makes this work on upgrade: replacing files cannot change a launcher
+that is already running, so the first Gateway built from any change is started by the
+previous launcher. A value that had to be announced would be missing exactly then,
+which is when the mismatch is widest.
 
-Holding the parent slot is still not evidence of that timer. An external process
-manager can start the Gateway from inside the same job and run no reap timer at all,
-and capping its deadline at OpenClaw's would cut a valid drain short. The
-reconstruction is therefore gated on `OPENCLAW_NODE_UPDATE_RESPAWNED`, the marker the
-recovery launcher has stamped on every child it respawns since long before it
-declared a timer. It is present in exactly the upgrade case and absent for any other
-parent, whose job deadline stays unreduced. The shutdown log names a reconstructed
-cap so an operator can tell it from a declared one.
+Holding the parent slot is not evidence of that timer. An external process manager can
+start the Gateway from inside the same job and run no reap timer at all, and capping
+its deadline at OpenClaw's would cut a valid drain short. The cap is therefore gated on
+`OPENCLAW_NODE_UPDATE_RESPAWNED`, the marker the recovery launcher stamps on every
+child it respawns. It is present for a Gateway that launcher started and absent for any
+other parent, whose job deadline stays unreduced.
+
+While the recovery launcher holds the parent slot, that launcher's timer is the
+binding deadline and it derives from the LaunchAgent template's exit timeout rather
+than from the running job's value. Raising a job's `ExitTimeOut` therefore buys no
+extra drain in this layout: the parent still force-kills at 19000ms, and a budget
+spent past that point would only be truncated. Measured on macOS 27 with a job whose
+enforced deadline was 60000ms, the resolved shutdown budget was 14231ms, held down by
+the launcher rather than the job. An operator who needs a longer drain under the
+recovery launcher has to stop the launcher from being in the path, which a normal
+restart onto a supported Node version does.
 
 The two failure modes are deliberately different. If the job cannot be inspected
 at all, nothing has been established about who is stopping it, so the Gateway
