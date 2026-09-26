@@ -160,7 +160,62 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
     await vi.advanceTimersByTimeAsync(CLI_COMPACTION_GRACE_MS + 60_000);
     expect(settled).toBeUndefined();
 
-    await vi.advanceTimersByTimeAsync(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
+    // One tick short of the blocked-tool floor the run is still deferred, so the
+    // bound is that floor exactly, not a cap applied some ticks late.
+    await vi.advanceTimersByTimeAsync(
+      BLOCKED_TOOL_CALL_ABORT_FLOOR_MS - (CLI_COMPACTION_GRACE_MS + 60_000) - 2_000,
+    );
+    expect(settled).toBeUndefined();
+
+    await vi.advanceTimersByTimeAsync(4_000);
+    expect(settled).toMatchObject({
+      reason: "no-output-timeout",
+      timedOut: true,
+      noOutputTimedOut: true,
+    });
+    await run;
+  });
+
+  it("measures the compaction ceiling from the last stdout record, not compaction start", async () => {
+    vi.useFakeTimers();
+    const { context } = await createExecution({ timeoutMs: 60 * 60_000 });
+    const received: string[] = [];
+    const midCompactionRecord = createDeferred();
+    let settled: RunExit | undefined;
+    const run = runPlugin(
+      context,
+      async function* (execution) {
+        yield { type: "system", subtype: "status", status: "compacting" };
+        // Claude Code is silent while it compacts, but the watchdog does not assume
+        // so: any stdout record restarts the quiet clock, exactly as it does for a
+        // tool call, and the ceiling is the silence since that record.
+        await midCompactionRecord.promise;
+        yield { type: "stream_event", event: { type: "ping" } };
+        await waitUntilAborted(execution);
+        yield SUCCESS_RESULT;
+      },
+      {
+        noOutputTimeoutMs: 180_000,
+        consumeStdout: received.push.bind(received),
+        compactionActive: () => true,
+      },
+    ).then((result) => (settled = result));
+    await vi.waitFor(() => expect(received).toHaveLength(1));
+
+    await vi.advanceTimersByTimeAsync(CLI_COMPACTION_GRACE_MS - 60_000);
+    midCompactionRecord.resolve();
+    await vi.waitFor(() => expect(received).toHaveLength(2));
+
+    // The ceiling measured from compaction start has passed and the run is still
+    // deferred, so that is not the clock in play.
+    await vi.advanceTimersByTimeAsync(60_000 + 2_000);
+    expect(settled).toBeUndefined();
+
+    // One tick short of a full ceiling after the mid-compaction record: still deferred.
+    await vi.advanceTimersByTimeAsync(CLI_COMPACTION_GRACE_MS - 62_000 - 2_000);
+    expect(settled).toBeUndefined();
+
+    await vi.advanceTimersByTimeAsync(4_000);
     expect(settled).toMatchObject({
       reason: "no-output-timeout",
       timedOut: true,

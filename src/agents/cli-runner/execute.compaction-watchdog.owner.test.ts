@@ -20,19 +20,37 @@ import {
   createDiagnosticEmbeddedRunOwner,
   getDiagnosticSessionActivitySnapshot,
   markDiagnosticEmbeddedRunStarted,
+  resolveRunStaleThresholdMs,
 } from "../../logging/diagnostic-run-activity.js";
 import { logSessionStateChange, startDiagnosticHeartbeat } from "../../logging/diagnostic.js";
 import { resetDiagnosticStateForTest } from "../../logging/diagnostic.test-support.js";
 import type { CliBackendParseJsonlLifecycleEvent } from "../../plugins/cli-backend.types.js";
 import { buildPreparedCliRunContext } from "../cli-runner.test-helpers.js";
 import { CLI_COMPACTION_GRACE_MS } from "../cli-watchdog-defaults.js";
+import { type CliWatchdogClock, defaultCliWatchdogClock } from "./execute-plugin-watchdog.js";
 import { executePreparedCliRun } from "./execute.js";
-import { wrapPreparedCliRunWithTestAdmission } from "./execute.test-support.js";
+import {
+  setCliRunnerExecuteTestDeps,
+  wrapPreparedCliRunWithTestAdmission,
+} from "./execute.test-support.js";
 
 /** The production ceiling a resumed claude-cli turn actually runs with. */
 const NO_OUTPUT_TIMEOUT_MS = 180_000;
 /** Longer than the no-output budget, still inside the compaction ceiling. */
 const QUIET_ADVANCE_MS = 240_000;
+/** `resolveStuckSessionAbortMs` in `diagnostic.ts`: max(5 minutes, 3 x the 120s warn). */
+const STUCK_SESSION_ABORT_MS = 360_000;
+/** `DIAGNOSTIC_HEARTBEAT_INTERVAL_MS` in `diagnostic.ts`. */
+const HEARTBEAT_INTERVAL_MS = 30_000;
+/**
+ * A plugin watchdog clock that never ticks. The watchdog is the other liveness
+ * owner and would end a compaction-only stall at the ceiling before diagnostics
+ * recovery gets its turn, so a case observing the diagnostics owner alone mutes it.
+ */
+const silencedWatchdogClock: CliWatchdogClock = {
+  now: () => Date.now(),
+  setTimeout: () => () => {},
+};
 const COMPACTION_START = { type: "system", subtype: "status", status: "compacting" };
 const COMPACTION_END = { compact_result: "success" };
 
@@ -52,6 +70,7 @@ const parseJsonlLifecycleEvent: CliBackendParseJsonlLifecycleEvent = (line) => {
 };
 
 afterEach(() => {
+  setCliRunnerExecuteTestDeps({ watchdogClock: defaultCliWatchdogClock });
   resetDiagnosticStateForTest();
   vi.useRealTimers();
 });
@@ -192,6 +211,165 @@ it("hands the diagnostics allowance back when a streamed compaction fails", asyn
 
     finish.resolve();
     await expect(run).resolves.toMatchObject({ text: "failed compaction released" });
+  } finally {
+    finish.resolve();
+    await Promise.allSettled([run]);
+    closeDiagnosticEmbeddedRunOwner(owner);
+  }
+});
+
+it("requests recovery for a compaction that never ends once the stuck-session floor is spent", async () => {
+  vi.useFakeTimers({
+    toFake: ["Date", "setTimeout", "clearTimeout", "setInterval", "clearInterval"],
+  });
+  vi.setSystemTime(Date.parse("2026-09-24T00:00:00Z"));
+  const recoverStuckSession = vi.fn();
+  startDiagnosticHeartbeat({ diagnostics: { enabled: true } }, { recoverStuckSession });
+  // The watchdog would kill this run at the compaction ceiling first. Muting its
+  // clock is the only double here: the compaction still streams as a backend record
+  // and reaches diagnostics through the real wiring, so this is the outcome the
+  // snapshot deadline above stands in for, observed directly.
+  setCliRunnerExecuteTestDeps({ watchdogClock: silencedWatchdogClock });
+  const context = buildPreparedCliRunContext({
+    runId: "compaction-owner-stuck-run",
+    sessionId: "compaction-owner-stuck-session",
+    sessionKey: "agent:main:compaction-owner-stuck",
+    agentId: "main",
+    model: "fixture-model",
+    config: { plugins: { enabled: false } },
+    timeoutMs: 1_800_000,
+    backend: {
+      command: process.execPath,
+      sessionMode: "none",
+      reliability: {
+        watchdog: { fresh: { minMs: NO_OUTPUT_TIMEOUT_MS, maxMs: NO_OUTPUT_TIMEOUT_MS } },
+      },
+    },
+  });
+  context.backendResolved.bundleMcp = false;
+  context.backendResolved.parseJsonlLifecycleEvent = parseJsonlLifecycleEvent;
+  const started = createDeferred();
+  const finish = createDeferred();
+  context.executionTarget = {
+    kind: "plugin",
+    async *execute() {
+      yield COMPACTION_START;
+      started.resolve();
+      // No end record ever arrives: this compaction is wedged.
+      await finish.promise;
+      yield { type: "result", subtype: "success", result: "released by the test" };
+    },
+  };
+  const owner = createDiagnosticEmbeddedRunOwner(context.params);
+  context.params.diagnosticOwner = owner;
+  logSessionStateChange({ ...context.params, state: "processing" });
+  markDiagnosticEmbeddedRunStarted({ ...context.params, owner });
+
+  const run = wrapPreparedCliRunWithTestAdmission(executePreparedCliRun)(context);
+  try {
+    await started.promise;
+    // Diagnostics reclaims a compaction-only stall at max(stuck-session abort floor,
+    // compaction ceiling), which is the 360s floor: the last heartbeat before it must
+    // stay quiet...
+    await vi.advanceTimersByTimeAsync(STUCK_SESSION_ABORT_MS - HEARTBEAT_INTERVAL_MS);
+    expect(recoverStuckSession).not.toHaveBeenCalled();
+
+    // ...and the first heartbeat past it must ask for recovery, a quarter hour short
+    // of the blocked-tool floor a latched compaction used to hold on this owner.
+    await vi.advanceTimersByTimeAsync(2 * HEARTBEAT_INTERVAL_MS);
+    expect(recoverStuckSession).toHaveBeenCalled();
+    expect(recoverStuckSession.mock.calls[0]?.[0]).toMatchObject({
+      sessionId: "compaction-owner-stuck-session",
+      sessionKey: "agent:main:compaction-owner-stuck",
+      allowActiveAbort: true,
+    });
+    expect(STUCK_SESSION_ABORT_MS + HEARTBEAT_INTERVAL_MS).toBeLessThan(
+      BLOCKED_TOOL_CALL_ABORT_FLOOR_MS,
+    );
+  } finally {
+    finish.resolve();
+    await Promise.allSettled([run]);
+    closeDiagnosticEmbeddedRunOwner(owner);
+  }
+});
+
+it("keeps a parsed tool in flight during compaction on the tool clock, not the ceiling", async () => {
+  vi.useFakeTimers({
+    toFake: ["Date", "setTimeout", "clearTimeout", "setInterval", "clearInterval"],
+  });
+  vi.setSystemTime(Date.parse("2026-09-24T00:00:00Z"));
+  // The heartbeat is what subscribes run-activity tracking to tool.execution.started.
+  startDiagnosticHeartbeat({ diagnostics: { enabled: true } }, { recoverStuckSession: vi.fn() });
+  const context = buildPreparedCliRunContext({
+    runId: "compaction-owner-tool-run",
+    sessionId: "compaction-owner-tool-session",
+    sessionKey: "agent:main:compaction-owner-tool",
+    agentId: "main",
+    model: "fixture-model",
+    config: { plugins: { enabled: false } },
+    timeoutMs: 1_800_000,
+    backend: {
+      command: process.execPath,
+      sessionMode: "none",
+      reliability: {
+        watchdog: { fresh: { minMs: NO_OUTPUT_TIMEOUT_MS, maxMs: NO_OUTPUT_TIMEOUT_MS } },
+      },
+    },
+  });
+  context.backendResolved.bundleMcp = false;
+  context.backendResolved.parseJsonlLifecycleEvent = parseJsonlLifecycleEvent;
+  const started = createDeferred<number>();
+  const finish = createDeferred();
+  context.executionTarget = {
+    kind: "plugin",
+    async *execute() {
+      yield COMPACTION_START;
+      // A tool the CLI runs itself, started while the compaction is still open.
+      yield {
+        type: "assistant",
+        message: {
+          role: "assistant",
+          content: [
+            {
+              type: "tool_use",
+              id: "tool-during-compaction",
+              name: "Bash",
+              input: { command: "true" },
+            },
+          ],
+        },
+      };
+      started.resolve(Date.now());
+      await finish.promise;
+      yield { type: "result", subtype: "success", result: "tool during compaction" };
+    },
+  };
+  const owner = createDiagnosticEmbeddedRunOwner(context.params);
+  context.params.diagnosticOwner = owner;
+  logSessionStateChange({ ...context.params, state: "processing" });
+  markDiagnosticEmbeddedRunStarted({ ...context.params, owner });
+
+  const run = wrapPreparedCliRunWithTestAdmission(executePreparedCliRun)(context);
+  try {
+    const startedAt = await started.promise;
+    await vi.advanceTimersByTimeAsync(0);
+    await waitForDiagnosticEventsDrained();
+
+    // The plugin runner leaves parsed tools out of its outstanding-work report, so the
+    // compaction ceiling is still what it reports here. That is not a gap: the tool's
+    // own tool.execution.started event makes this a tool_call for diagnostics, and the
+    // tool branch of the stale threshold never reads the backend deadline.
+    const snapshot = getDiagnosticSessionActivitySnapshot(context.params);
+    expect(snapshot).toMatchObject({
+      activeWorkKind: "tool_call",
+      activeBackendLivenessDeadlineAtMs: startedAt + CLI_COMPACTION_GRACE_MS,
+    });
+    expect(
+      resolveRunStaleThresholdMs(snapshot, snapshot.lastProgressAgeMs ?? 0, STUCK_SESSION_ABORT_MS),
+    ).toBe(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
+
+    finish.resolve();
+    await expect(run).resolves.toMatchObject({ text: "tool during compaction" });
   } finally {
     finish.resolve();
     await Promise.allSettled([run]);

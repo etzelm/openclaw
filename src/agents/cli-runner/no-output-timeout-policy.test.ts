@@ -9,7 +9,9 @@ const CONTEXT = {
   lane: undefined,
 };
 const OUTSTANDING_WORK_GRACE_MS = 900_000;
-// Bind the assertions to the shipped constant so a change to it fails here.
+// Most arithmetic below is expressed through the shipped constant, so it follows a
+// change to that constant rather than catching it. The value itself is pinned once,
+// deliberately, by the literal 300_000 in the compaction-only cap case.
 const COMPACTION_GRACE_MS = CLI_COMPACTION_GRACE_MS;
 
 describe("resolveCliNoOutputTimeoutDecision", () => {
@@ -124,7 +126,9 @@ describe("resolveCliNoOutputTimeoutDecision", () => {
       compactionGraceMs: COMPACTION_GRACE_MS,
     });
 
-    expect(decision.deferMs).toBe(COMPACTION_GRACE_MS - 100);
+    // Pinned to the literal on purpose: the ceiling is a reviewed number, so moving it
+    // must fail here rather than silently re-deriving every assertion in this file.
+    expect(decision.deferMs).toBe(300_000 - 100);
     expect(decision.deferMs).toBeLessThan(OUTSTANDING_WORK_GRACE_MS - 100);
   });
 
@@ -132,8 +136,9 @@ describe("resolveCliNoOutputTimeoutDecision", () => {
     const decision = resolveCliNoOutputTimeoutDecision({
       context: CONTEXT,
       timeoutMs: 100,
-      // A start record with no end record: the quiet clock restarted on that record,
-      // so this is the silence measured from compaction start.
+      // A start record with no end record and nothing after it: the quiet clock
+      // restarted on that record, so the silence since the last record is the
+      // silence since compaction start.
       quietDurationMs: COMPACTION_GRACE_MS,
       cliTimeout: {
         mode: "no-output",
