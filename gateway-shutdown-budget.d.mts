@@ -15,7 +15,7 @@ export function resolveRespawnServiceStopTimeoutMs(
   env: NodeJS.ProcessEnv,
   platform: NodeJS.Platform,
 ): number;
-export const RESPAWN_LAUNCHER_MARKER_ENV_VARS: string[];
+export const RESPAWN_LAUNCHER_MARKER_ENV_VARS: readonly string[];
 export function isRespawnedByLauncher(env: NodeJS.ProcessEnv): boolean;
 export function resolveLauncherStopTimeoutMs(params: {
   env: NodeJS.ProcessEnv;
