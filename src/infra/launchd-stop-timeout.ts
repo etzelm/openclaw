@@ -227,7 +227,10 @@ export async function readLaunchdStopTimeout(
       // shorten every externally signalled stop. Warning with no deadline also marks
       // the read inconclusive, so an in-process restart retains its startup budget
       // instead of treating this as a positive answer.
-      return state === undefined && entries["exit timeout"] !== undefined
+      // `!state` rather than an undefined test: the value is trimmed after matching, so
+      // a line carrying only whitespace yields an empty string and would otherwise skip
+      // the warning while behaving exactly like a missing one.
+      return !state && entries["exit timeout"] !== undefined
         ? {
             stop: null,
             warning: `launchd ${target} printed an exit timeout but no job state, so it is treated as not stopping and the Gateway stop policy is kept. Check the running job with launchctl print.`,

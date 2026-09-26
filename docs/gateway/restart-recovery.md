@@ -201,6 +201,8 @@ unaffected, because the deadline can fund both allowances outright. Below that t
 reserve shrinks in step with the deadline and the drain grows: a 20-second unit moves
 from a 10-second reserve and a 5-second drain to 7.5 seconds of each, and a unit at or
 below 15 seconds now drains at all where it previously drained for zero milliseconds.
+The exit margin holds its full 5 seconds down to a 20-second deadline and shrinks
+below that, to 3.75 seconds at 15 seconds and a quarter of anything shorter.
 The drained work, ordering, and interruption behavior stay the same.
 
 Service-child cleanup uses the remaining Gateway shutdown budget, leaving time
@@ -308,12 +310,16 @@ delivered. Measured on macOS 27 against a job carrying `ExitTimeOut` 47, a
 and killed it at the 47 second mark, while a plain `kill -TERM` printed `running`
 and left the process alive 85 seconds later. An upgrade watcher or an operator
 signalling the Gateway directly therefore keeps whatever budget the Gateway had
-already resolved, which on a launchd-supervised host is the one derived from the
-LaunchAgent template's exit timeout rather than the job's own value. No supervisor
-deadline governs that stop at all: the Gateway's own force-exit timer is the only
-bound, which is why refusing the job's deadline here is the conservative answer and
-not a lost opportunity. Any unrecognised state counts as not stopping, so the Gateway
-keeps the budget it already had.
+already resolved. Which budget that is depends on restart ownership: a Gateway whose
+supervisor is launchd keeps the one derived from the LaunchAgent template's exit
+timeout, while one running `OPENCLAW_SUPERVISOR_MODE=external` keeps the
+platform-neutral policy and arms no force-exit timer. launchd is not enforcing a
+deadline on either, which is why refusing the job's value here is the conservative
+answer and not a lost opportunity. One exception is worth knowing: if the Node
+recovery launcher is in the path, a signal delivered to the job pid reaches that
+launcher, which does arm its own reap timer even though launchd is not stopping the
+job. Any unrecognised state counts as not stopping, so the Gateway keeps the budget it
+already had.
 
 Once launchd is stopping the job, the deadline follows the supervisor that
 enforces it rather than restart ownership, so `OPENCLAW_SUPERVISOR_MODE=external`
