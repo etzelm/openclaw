@@ -91,7 +91,9 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     expect(execLaunchctl).toHaveBeenCalledTimes(1);
   });
 
-  it.each(["waiting", "exited", "not running", "SIGTERM", "sigtermed", ""])(
+  // An empty value is deliberately not in this table: there is no state to fail to
+  // recognise, so it belongs with the missing-state warning below.
+  it.each(["waiting", "exited", "not running", "SIGTERM", "sigtermed"])(
     "treats the unrecognised state %j as not stopping",
     async (state) => {
       execLaunchctl.mockResolvedValue(printed(state, "\texit timeout = 5\n\tpid = 4242\n"));
@@ -109,13 +111,16 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   // An absent `state` is indistinguishable from a job launchd is not stopping, so the
   // budget would silently revert to the platform-neutral policy on a macOS that printed
   // this block differently. The deadline parsed from the same block is what makes the
-  // case reportable, and the warning is what keeps it from being silent.
-  it("warns when the job printed a deadline but no state", async () => {
-    execLaunchctl.mockResolvedValue(
-      result(
-        `system/ai.openclaw.gateway = {\n\tactive count = 1\n\ttype = LaunchDaemon\n\n\texit timeout = 47\n\tpid = 4242\n\tjob state = running\n}\n`,
-      ),
-    );
+  // case reportable, and the warning is what keeps it from being silent. An empty value
+  // reaches the same place as a missing line, because neither yields a state to read.
+  it.each([
+    [
+      "no state line",
+      `system/ai.openclaw.gateway = {\n\tactive count = 1\n\ttype = LaunchDaemon\n\n\texit timeout = 47\n\tpid = 4242\n\tjob state = running\n}\n`,
+    ],
+    ["an empty state value", printed("", "\texit timeout = 47\n\tpid = 4242\n").stdout],
+  ])("warns when the job printed a deadline but %s", async (_label, stdout) => {
+    execLaunchctl.mockResolvedValue(result(stdout));
     const read = await readLaunchdStopTimeout(LAUNCHD_ENV);
     expect(read.stop).toBeNull();
     expect(read.warning).toBe(

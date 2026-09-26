@@ -218,7 +218,7 @@ export async function readLaunchdStopTimeout(
     // a separate question from whether the job was found.
     const state = readJobState(printed);
     if (!isLaunchdStoppingJob(state)) {
-      // An absent `state` reads exactly like a job launchd is not stopping, so the
+      // An absent or empty `state` reads exactly like a job launchd is not stopping, so the
       // Gateway would silently keep the platform-neutral policy on a macOS that
       // printed this block differently. A deadline parsed out of the same block is
       // what makes that indistinguishable case worth reporting: the job was found and
