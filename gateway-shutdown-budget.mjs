@@ -28,12 +28,20 @@ const GATEWAY_SUPERVISOR_EXIT_MARGIN_SHARE = 0.25;
  *
  * 5 seconds is the drain the shipped LaunchAgent template already yields: its 20 second
  * `ExitTimeOut` funds the 5 second margin and the 10 second reserve outright and leaves
- * active work the remaining 5. Holding that as a floor is what keeps the reserve whole
- * wherever the fixed subtraction could already fund it, so no deadline at or above the
- * template loses post-drain cleanup time to this change. Only a budget too short to
- * fund both gives the reserve up, and there the fixed subtraction had already driven
- * drain to zero, so there is no working allocation to preserve. The share bounds that
- * case: a budget under 10 seconds splits evenly rather than handing drain everything.
+ * active work the remaining 5. Holding that as a floor keeps the reserve whole, the full
+ * 10 seconds, for every stop budget of 15 seconds or more, which is every `ExitTimeOut`
+ * of 20 seconds or more once the probe that reads it is subtracted: that probe is up to
+ * three `launchctl print` calls at `LAUNCHCTL_PRINT_TIMEOUT_MS` (2 seconds) each, so its
+ * cost is bounded near 6 seconds, not the low milliseconds one measured host might
+ * suggest, and a 20 second deadline gives up exactly what the probe cost, for any cost
+ * up to 5 seconds. Below that, the reserve this yields is already below what a flat
+ * subtraction left, from roughly 8 seconds up to 20 seconds of deadline: that includes
+ * 16 to 19 seconds, where a flat subtraction still funded the reserve in full and left
+ * a positive drain of its own (1 to 4 seconds). At 15 seconds the reserve now gives up
+ * 3750 of its 10000 to fund the drain floor, and at 10 seconds, where a flat subtraction
+ * had already cut the reserve to 5000, it gives up another 1250. The share bounds the
+ * shortest case: a budget under 10 seconds splits evenly rather than handing drain
+ * everything.
  */
 const GATEWAY_SHUTDOWN_DRAIN_FLOOR_MS = 5_000;
 const GATEWAY_SHUTDOWN_DRAIN_FLOOR_SHARE = 0.5;

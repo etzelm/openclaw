@@ -107,6 +107,40 @@ describe("Gateway stop deadline independent of restart ownership", () => {
     expect(execSystem).not.toHaveBeenCalled();
     expect(execUser).not.toHaveBeenCalled();
   });
+
+  // The systemd coverage above only pins TimeoutStopUSec at 90 seconds and 10 minutes,
+  // both comfortably above the 20 second threshold. This mirrors the darwin exit-timeout
+  // table's sub-20-second cases against a systemd stub: a unit deadline in this band
+  // gives up part of a reserve a flat subtraction would have funded in full, rather than
+  // draining for zero milliseconds as that flat subtraction did.
+  it.each([
+    { seconds: 19, timeoutMs: 14_250, reserveMs: 9_250, drainMs: 5_000, fixedDrainMs: 4_000 },
+    { seconds: 16, timeoutMs: 12_000, reserveMs: 7_000, drainMs: 5_000, fixedDrainMs: 1_000 },
+    { seconds: 15, timeoutMs: 11_250, reserveMs: 6_250, drainMs: 5_000, fixedDrainMs: 0 },
+    { seconds: 10, timeoutMs: 7_500, reserveMs: 3_750, drainMs: 3_750, fixedDrainMs: 0 },
+  ])(
+    "keeps a drain a $seconds second systemd TimeoutStopUSec previously spent on overhead",
+    async ({ seconds, timeoutMs, reserveMs, drainMs, fixedDrainMs }) => {
+      process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+      execSystem.mockResolvedValue({
+        code: 0,
+        stdout: `LoadState=loaded\nTimeoutStopUSec=${seconds}s\nInvocationID=own`,
+        stderr: "",
+      });
+      const budget = await resolveGatewayShutdownBudget("external", {
+        info: vi.fn(),
+        warn: vi.fn(),
+      });
+      expect(budget.timeoutMs).toBe(timeoutMs);
+      expect(budget.reserveMs).toBe(reserveMs);
+      expect(budget.timeoutMs - budget.reserveMs).toBe(drainMs);
+      // What a flat, unshared subtraction would have left active work at the same deadline.
+      expect(
+        Math.max(0, seconds * 1_000 - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS - GATEWAY_SHUTDOWN_RESERVE_MS),
+      ).toBe(fixedDrainMs);
+      expect(budget.reserveMs).toBeGreaterThanOrEqual(Math.floor(timeoutMs / 2));
+    },
+  );
 });
 
 describe("Gateway stop deadline follows the launchd stop that is actually running", () => {
@@ -226,6 +260,29 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
       );
     },
   );
+
+  // Every case above pins `acceptedAtMs` to `Number.MAX_SAFE_INTEGER`, which floors
+  // elapsed at zero and proves nothing about a real, nonzero debit. `performance.now`
+  // is not faked anywhere in this file, so this pins it directly rather than trusting
+  // the wall clock to land on a specific millisecond by chance: the reserve gives up
+  // exactly that observed 13ms debit and the 5 second drain floor still funds in full.
+  it("debits the reserve by a real elapsed delay, leaving the drain floor untouched", async () => {
+    execLaunchctl.mockResolvedValue(printed("SIGTERMed", "\texit timeout = 20\n\tpid = 4242\n"));
+    const nowMs = performance.now();
+    const clock = vi.spyOn(performance, "now").mockReturnValue(nowMs);
+    try {
+      const budget = await resolveGatewayShutdownBudget(
+        "external",
+        { info: vi.fn(), warn: vi.fn() },
+        { previous: stoppingNow.previous, acceptedAtMs: nowMs - 13 },
+      );
+      expect(budget.timeoutMs).toBe(14_987);
+      expect(budget.reserveMs).toBe(9_987);
+      expect(budget.timeoutMs - budget.reserveMs).toBe(5_000);
+    } finally {
+      clock.mockRestore();
+    }
+  });
 
   // The allowances are only ever capped to keep a drain, never to reallocate a deadline
   // that already worked. A deadline able to fund the 10s reserve alongside the 5s drain

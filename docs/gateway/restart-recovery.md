@@ -197,8 +197,9 @@ Both allowances are bounded when the deadline cannot fund them, by the same rule
 launchd budget uses and for the same reason: subtracting two values sized for a
 315-second drain from a short stop timeout consumed it entirely and left active work
 nothing. A unit whose `TimeoutStopSec` is 20 seconds or longer keeps the allocation it
-already had, down to the millisecond, because 20 seconds is the least that funds the
-full 10-second reserve alongside a 5-second drain. Below that the deadline cannot fund
+already had, less whatever the stop inspection itself cost, rather than to the exact
+millisecond: 20 seconds is only the least that funds the full 10-second reserve
+alongside a 5-second drain before that cost comes off. Below that the deadline cannot fund
 both, and the reserve yields to keep a drain: a unit at or below 15 seconds now drains
 at all where it previously drained for zero milliseconds, and the four values between
 trade part of a reserve for a drain that was under 5 seconds. The reserve never falls
@@ -335,8 +336,13 @@ deadline cannot fund it: the exit margin takes at most a quarter of the job's
 deadline, and the reserve yields only as far as keeping 5 seconds of drain requires,
 never below half the shutdown budget. Funding the full 10-second reserve alongside
 that 5-second drain takes 15 seconds of shutdown budget, which is what a 20-second
-`ExitTimeOut` resolves to, so **every deadline from 20 seconds up keeps the exact
-allocation it had before this change.** The template is one of them.
+`ExitTimeOut` resolves to once inspecting the job itself costs nothing. That inspection
+is up to three `launchctl print` calls at 2 seconds each, so its own cost is bounded
+near 6 seconds, not the low milliseconds a single measured host might suggest, and
+**every deadline from 20 seconds up resolves to the same allocation the fixed margin
+and reserve gave outright, minus whatever that inspection cost.** The template is one
+of them: a 20-second job gives up exactly what the inspection cost, for any cost up to
+5 seconds.
 
 | Job `ExitTimeOut`   | Exit margin | Shutdown deadline | Reserve | Active-work drain | Drain before |
 | ------------------- | ----------- | ----------------- | ------- | ----------------- | ------------ |
