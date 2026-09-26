@@ -216,8 +216,23 @@ export async function readLaunchdStopTimeout(
     }
     // This is our job, so stop searching. Whether its deadline binds this stop is
     // a separate question from whether the job was found.
-    if (!isLaunchdStoppingJob(readJobState(printed))) {
-      return { stop: null };
+    const state = readJobState(printed);
+    if (!isLaunchdStoppingJob(state)) {
+      // An absent `state` reads exactly like a job launchd is not stopping, so the
+      // Gateway would silently keep the platform-neutral policy on a macOS that
+      // printed this block differently. A deadline parsed out of the same block is
+      // what makes that indistinguishable case worth reporting: the job was found and
+      // read, and only the one field this decision turns on went missing. It stays
+      // "not stopping" rather than guessing the other way, because guessing would
+      // shorten every externally signalled stop. Warning with no deadline also marks
+      // the read inconclusive, so an in-process restart retains its startup budget
+      // instead of treating this as a positive answer.
+      return state === undefined && entries["exit timeout"] !== undefined
+        ? {
+            stop: null,
+            warning: `launchd ${target} printed an exit timeout but no job state, so it is treated as not stopping and the Gateway stop policy is kept. Check the running job with launchctl print.`,
+          }
+        : { stop: null };
     }
     const seconds = parseStrictPositiveInteger(entries["exit timeout"] ?? "");
     if (seconds === undefined) {

@@ -89,6 +89,13 @@ it
           `shutdown budget at shutdown:.*source=(?:.*=${stopTimeoutMs}ms|startup shutdown budget=${shutdownTimeoutMs}ms)`,
         ),
       );
+      if (process.platform === "darwin") {
+        // The label resolves to no real job, so this cannot assert a successful read.
+        // What it does assert is that the darwin probe ran inside a real spawned
+        // Gateway on a real stop: only the launchd reader emits this, and reverting the
+        // darwin dispatch removes it.
+        expect(output).toContain("Unable to inspect the launchd job");
+      }
       if (mode === "cooperative") {
         expect(output).toContain("process proof: acquisition-joined");
         expect(output).not.toContain("shutdown deadline reached");

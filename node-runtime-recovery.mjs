@@ -62,7 +62,10 @@ export const runRespawnedChild = (command, args, env) => {
     windowsHide: !stdioIsTerminal,
   });
   const listeners = new Map();
-  // Keep signal forwarding and bounded shutdown in sync with src/entry.compile-cache.ts.
+  // Keep signal forwarding and bounded shutdown in sync with src/entry.compile-cache.ts,
+  // which drives src/process/respawn-child-runner.ts. That runner still holds its own
+  // copies of the escalation graces and reaps on a fixed short one, so only this
+  // launcher's deadline is the one the serving Gateway derives.
   let signalExitTimer = null;
   let signalForceKillTimer = null;
   let signalHardExitTimer = null;

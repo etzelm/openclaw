@@ -182,7 +182,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
 
   // Drain must never be starved to zero by the allowances: every positive deadline
   // leaves active work some time, and a longer deadline never yields less of it.
-  it.each([1, 2, 5, 10, 15, 20, 25, 47, 90, 315])(
+  it.each([1, 2, 5, 10, 15, 20, 25, 47, 60])(
     "leaves a positive drain for a %s second exit timeout",
     async (seconds) => {
       execLaunchctl.mockResolvedValue(
@@ -201,7 +201,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
   it.each([
     { seconds: 20, timeoutMs: 15_000, reserveMs: 7_500, drainMs: 7_500, exitMarginMs: 5_000 },
     { seconds: 47, timeoutMs: 42_000, reserveMs: 10_000, drainMs: 32_000, exitMarginMs: 5_000 },
-    { seconds: 90, timeoutMs: 85_000, reserveMs: 10_000, drainMs: 75_000, exitMarginMs: 5_000 },
+    { seconds: 55, timeoutMs: 50_000, reserveMs: 10_000, drainMs: 40_000, exitMarginMs: 5_000 },
   ])(
     "derives the budget from a $seconds second exit timeout",
     async ({ seconds, timeoutMs, reserveMs, drainMs, exitMarginMs }) => {

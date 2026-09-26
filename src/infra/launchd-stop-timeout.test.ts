@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RESPAWN_LAUNCHER_MARKER_ENV_VARS } from "./gateway-shutdown-budget.js";
+import { isRespawnedByLauncher } from "./gateway-shutdown-budget.js";
 import { readLaunchdStopTimeout } from "./launchd-stop-timeout.js";
 
 const { execLaunchctl } = vi.hoisted(() => ({ execLaunchctl: vi.fn() }));
@@ -8,6 +8,14 @@ vi.mock("../daemon/launchd-exec.js", async (importOriginal) => ({
   execLaunchctl,
 }));
 
+// The authoritative list is module-local beside the deadline it authorises in
+// gateway-shutdown-budget.mjs, so it is restated here and tied back to the
+// implementation by the recognition cases at the end of this file.
+const RESPAWN_MARKERS = [
+  "OPENCLAW_NODE_UPDATE_RESPAWNED",
+  "OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED",
+  "OPENCLAW_PACKAGED_COMPILE_CACHE_RESPAWNED",
+] as const;
 const LAUNCHD_ENV = { XPC_SERVICE_NAME: "ai.openclaw.gateway" };
 // The service layout the recovery launcher bounds by the LaunchAgent exit timeout:
 // launchd names the job in XPC_SERVICE_NAME and the handoff carries the label, which
@@ -98,6 +106,30 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     });
   });
 
+  // An absent `state` is indistinguishable from a job launchd is not stopping, so the
+  // budget would silently revert to the platform-neutral policy on a macOS that printed
+  // this block differently. The deadline parsed from the same block is what makes the
+  // case reportable, and the warning is what keeps it from being silent.
+  it("warns when the job printed a deadline but no state", async () => {
+    execLaunchctl.mockResolvedValue(
+      result(
+        `system/ai.openclaw.gateway = {\n\tactive count = 1\n\ttype = LaunchDaemon\n\n\texit timeout = 47\n\tpid = 4242\n\tjob state = running\n}\n`,
+      ),
+    );
+    const read = await readLaunchdStopTimeout(LAUNCHD_ENV);
+    expect(read.stop).toBeNull();
+    expect(read.warning).toBe(
+      "launchd system/ai.openclaw.gateway printed an exit timeout but no job state, so it is treated as not stopping and the Gateway stop policy is kept. Check the running job with launchctl print.",
+    );
+  });
+
+  // A job with neither field is an ordinary not-stopping answer and must stay quiet,
+  // otherwise every in-process restart of a launchd-owned Gateway would warn.
+  it("stays silent when the job is simply not stopping", async () => {
+    execLaunchctl.mockResolvedValue(printed("running", "\texit timeout = 47\n\tpid = 4242\n"));
+    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({ stop: null });
+  });
+
   it("falls back to the gui domain when the job is not a LaunchDaemon", async () => {
     execLaunchctl
       .mockResolvedValueOnce({
@@ -171,7 +203,7 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   // launcher through the same function and arm the same timer. Gating on the
   // Node-recovery marker alone left the two compile-cache respawns uncapped, and the
   // packaged one can wrap a foreground `gateway run` on an installed service.
-  it.each(RESPAWN_LAUNCHER_MARKER_ENV_VARS)(
+  it.each(RESPAWN_MARKERS)(
     "caps the job deadline at the launcher's derived reap timer for %s",
     async (marker) => {
       execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4241\n"));
@@ -292,5 +324,22 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("stays out of the way when this process is not a launchd job", async () => {
     await expect(readLaunchdStopTimeout({})).resolves.toEqual({ stop: null });
     expect(execLaunchctl).not.toHaveBeenCalled();
+  });
+});
+
+// Ties the names this file caps on back to the implementation's own list. Without
+// this, dropping a marker from that list would leave the cap cases above still
+// passing against the two that remained.
+describe("launcher respawn markers", () => {
+  it.each(RESPAWN_MARKERS)("recognises %s as a respawning launcher", (marker) => {
+    expect(isRespawnedByLauncher({ [marker]: "1" })).toBe(true);
+  });
+
+  it("recognises nothing else", () => {
+    expect(isRespawnedByLauncher({})).toBe(false);
+    expect(isRespawnedByLauncher({ OPENCLAW_SUPERVISOR_MODE: "external" })).toBe(false);
+    // Only the set value counts, so an emptied or disabled marker caps nothing.
+    expect(isRespawnedByLauncher({ OPENCLAW_NODE_UPDATE_RESPAWNED: "0" })).toBe(false);
+    expect(isRespawnedByLauncher({ OPENCLAW_NODE_UPDATE_RESPAWNED: "" })).toBe(false);
   });
 });

@@ -132,7 +132,10 @@ When launchd drives the stop, macOS uses the running job's own `ExitTimeOut`, ca
 by the launcher's own stop timer when a launcher is in the path, and Linux units use
 their own stop timeout; both are described in the deadline sections below.
 This requires a Gateway started with the updated launcher: replacing files cannot
-change a launcher that is already running.
+change a launcher that is already running. The stop deadlines below are the
+exception: the serving Gateway derives the launcher's reap timer rather than being
+told it, precisely so a Gateway started by an already-running older launcher still
+bounds itself correctly.
 
 For these managed restarts, if the CLI cannot verify the service command, serving
 owner, or restart-intent recording, it refuses the restart before signaling with
@@ -185,10 +188,19 @@ unit's effective `TimeoutStopUSec`, including drop-ins. It logs the source and
 reconciled stop budget at both points, so a repaired unit takes effect without
 restarting first. Inspection and any wait for startup to finish consume the same
 shutdown deadline. Active-work drain uses at most
-315 seconds, with 10 seconds reserved for final chat writes and server cleanup
-and another 5 seconds before systemd's deadline. A unit with the default
+315 seconds, with up to 10 seconds reserved for final chat writes and server cleanup
+and up to another 5 seconds before systemd's deadline. A unit with the default
 90-second stop timeout therefore gets a 75-second drain and an 85-second Gateway
 shutdown deadline. A shorter supervisor timeout also caps requested restart waits.
+
+Both allowances are capped at a share of the deadline they are carved from, by the
+same rule the launchd budget uses and for the same reason: subtracting two values
+sized for a 315-second drain from a short stop timeout consumed it entirely and left
+active work nothing. A unit whose `TimeoutStopSec` is 25 seconds or longer is
+unaffected, because the deadline can fund both allowances outright. Below that the
+reserve shrinks in step with the deadline and the drain grows: a 20-second unit moves
+from a 10-second reserve and a 5-second drain to 7.5 seconds of each, and a unit at or
+below 15 seconds now drains at all where it previously drained for zero milliseconds.
 The drained work, ordering, and interruption behavior stay the same.
 
 Service-child cleanup uses the remaining Gateway shutdown budget, leaving time
@@ -295,9 +307,13 @@ delivered. Measured on macOS 27 against a job carrying `ExitTimeOut` 47, a
 `launchctl bootout` printed `SIGTERMed` from inside the job's own SIGTERM handler
 and killed it at the 47 second mark, while a plain `kill -TERM` printed `running`
 and left the process alive 85 seconds later. An upgrade watcher or an operator
-signalling the Gateway directly therefore keeps the platform-neutral drain, which
-is the deadline that actually governs that stop. Any unrecognised state counts as
-not stopping, so the Gateway keeps the budget it already had.
+signalling the Gateway directly therefore keeps whatever budget the Gateway had
+already resolved, which on a launchd-supervised host is the one derived from the
+LaunchAgent template's exit timeout rather than the job's own value. No supervisor
+deadline governs that stop at all: the Gateway's own force-exit timer is the only
+bound, which is why refusing the job's deadline here is the conservative answer and
+not a lost opportunity. Any unrecognised state counts as not stopping, so the Gateway
+keeps the budget it already had.
 
 Once launchd is stopping the job, the deadline follows the supervisor that
 enforces it rather than restart ownership, so `OPENCLAW_SUPERVISOR_MODE=external`
@@ -353,16 +369,18 @@ which is when the mismatch is widest.
 Holding the parent slot is not evidence of that timer. An external process manager can
 start the Gateway from inside the same job and run no reap timer at all, and capping
 its deadline at OpenClaw's would cut a valid drain short. The cap is therefore gated on
-`OPENCLAW_NODE_UPDATE_RESPAWNED`, the marker the recovery launcher stamps on every
-child it respawns. It is present for a Gateway that launcher started and absent for any
-other parent, whose job deadline stays unreduced.
+the respawn markers a launcher stamps on the child it starts, listed beside the deadline
+they authorise in `gateway-shutdown-budget.mjs`. Every path that respawns the Gateway
+through that launcher sets one of them, including the two compile-cache respawns, so a
+Gateway it started is capped and a parent that set none keeps its job deadline
+unreduced.
 
 While the recovery launcher holds the parent slot, that launcher's timer is the
 binding deadline and it derives from the LaunchAgent template's exit timeout rather
 than from the running job's value. Raising a job's `ExitTimeOut` therefore buys no
 extra drain in this layout: the parent still force-kills at 19000ms, and a budget
 spent past that point would only be truncated. Measured on macOS 27 with a job whose
-enforced deadline was 60000ms, the resolved shutdown budget was 14231ms, held down by
+enforced deadline was 60000ms, the resolved shutdown budget was 14237ms, held down by
 the launcher rather than the job. An operator who needs a longer drain under the
 recovery launcher has to stop the launcher from being in the path, which a normal
 restart onto a supported Node version does.
