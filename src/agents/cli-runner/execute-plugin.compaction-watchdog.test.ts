@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import {
-  BLOCKED_TOOL_CALL_ABORT_FLOOR_MS,
-  RUN_STALE_TAKEOVER_MS,
-} from "../../logging/diagnostic-run-activity.js";
+import { BLOCKED_TOOL_CALL_ABORT_FLOOR_MS } from "../../logging/diagnostic-run-activity.js";
 import type { RunExit } from "../../process/supervisor/types.js";
 import { CLI_COMPACTION_GRACE_MS, CLI_RESUME_WATCHDOG_DEFAULTS } from "../cli-watchdog-defaults.js";
 import {
@@ -184,12 +181,12 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
     expect(REPORTED_COMPACTION_SILENCE_MS).toBeGreaterThan(CLI_RESUME_WATCHDOG_DEFAULTS.maxMs);
     expect(REPORTED_COMPACTION_SILENCE_MS).toBeLessThan(CLI_COMPACTION_GRACE_MS);
 
-    // The point inside that band, derived rather than picked: the ceiling is exactly
-    // RUN_STALE_TAKEOVER_MS halved, so a wedged compaction is always detected with a
-    // full half-window of margin before the stale-run takeover could race it. Pinning
-    // the relation here means the value cannot drift away from the window it is
-    // derived from, and it keeps the upper end of the band a test rather than prose.
-    expect(CLI_COMPACTION_GRACE_MS * 2).toBe(RUN_STALE_TAKEOVER_MS);
+    // Upper end of the band: the ceiling must stay under the blocked-tool floor it
+    // replaced, or compaction would gain nothing over borrowing that floor. This is a
+    // real constraint rather than a preference, and it is the only one on this side.
+    // The exact point between the floor and this bound is a judgment about how long to
+    // wait on a wedged compaction, and the PR description says so instead of dressing
+    // it up as a derivation.
     expect(CLI_COMPACTION_GRACE_MS).toBeLessThan(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
   });
 
