@@ -6,6 +6,7 @@ export {
   GATEWAY_SUPERVISOR_EXIT_MARGIN_SHARE,
   GATEWAY_SHUTDOWN_TIMEOUT_MS,
   GATEWAY_SERVICE_STOP_TIMEOUT_MS,
+  isRespawnedByLauncher,
   LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS,
   resolveLauncherStopTimeoutMs,
   resolveShutdownReserveMs,

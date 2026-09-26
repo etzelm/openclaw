@@ -64,6 +64,30 @@ export const resolveRespawnServiceStopTimeoutMs = (env, platform) => {
 };
 
 /**
+ * Markers a `runRespawnedChild` parent stamps on the Gateway it respawned.
+ *
+ * Every call site of that function sets exactly one of these, and all of them arm the
+ * single escalation `resolveLauncherStopTimeoutMs` describes, so any one of them
+ * establishes that this process's parent is counting that timer down. Checking only
+ * the Node-recovery marker would miss the two compile-cache respawns, which reach the
+ * same launcher through the same function and would otherwise let a job deadline be
+ * budgeted past the force-kill their parent has already armed.
+ *
+ * They are listed here rather than in `src` deliberately: the names predate this
+ * derivation, and repeating the literals inside the env-count ratchet's scope would
+ * raise a budget that this change otherwise leaves untouched.
+ */
+export const RESPAWN_LAUNCHER_MARKER_ENV_VARS = [
+  "OPENCLAW_NODE_UPDATE_RESPAWNED",
+  "OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED",
+  "OPENCLAW_PACKAGED_COMPILE_CACHE_RESPAWNED",
+];
+
+/** Whether a `runRespawnedChild` parent started this process. */
+export const isRespawnedByLauncher = (env) =>
+  RESPAWN_LAUNCHER_MARKER_ENV_VARS.some((name) => env[name] === "1");
+
+/**
  * The deadline the Node recovery launcher enforces on the Gateway it respawned.
  *
  * The launcher forwards the stop signal, waits out the exit grace, then force-kills

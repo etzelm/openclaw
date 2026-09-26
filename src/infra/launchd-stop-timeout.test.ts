@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RESPAWN_LAUNCHER_MARKER_ENV_VARS } from "./gateway-shutdown-budget.js";
 import { readLaunchdStopTimeout } from "./launchd-stop-timeout.js";
 
 const { execLaunchctl } = vi.hoisted(() => ({ execLaunchctl: vi.fn() }));
@@ -12,8 +13,8 @@ const LAUNCHD_ENV = { XPC_SERVICE_NAME: "ai.openclaw.gateway" };
 // launchd names the job in XPC_SERVICE_NAME and the handoff carries the label, which
 // is the pair the launcher branches on and a respawned child inherits unchanged.
 const SERVICE_ENV = { ...LAUNCHD_ENV, OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" };
-// Adds the marker the recovery launcher has always stamped on children it respawns,
-// which is what separates the upgrade case from an unrelated parent.
+// Adds one of the markers a respawning launcher stamps on its child, which is what
+// separates a Gateway that launcher started from an unrelated parent.
 const RESPAWNED_SERVICE_ENV = { ...SERVICE_ENV, OPENCLAW_NODE_UPDATE_RESPAWNED: "1" };
 const result = (stdout: string) => ({ code: 0, stdout, stderr: "", termination: "exit" });
 
@@ -165,16 +166,24 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   // it: the parent force-kills this process first. Deriving rather than being told is
   // what makes this hold when an already-running older launcher started this Gateway,
   // which is the only shape an upgrade can take.
-  it("caps the job deadline at the launcher's derived reap timer", async () => {
-    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4241\n"));
-    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
-      stop: {
-        timeoutMs: 19_000,
-        source:
-          "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's 19000ms stop timer",
-      },
-    });
-  });
+  //
+  // Every marker is covered because all three respawn call sites reach the same
+  // launcher through the same function and arm the same timer. Gating on the
+  // Node-recovery marker alone left the two compile-cache respawns uncapped, and the
+  // packaged one can wrap a foreground `gateway run` on an installed service.
+  it.each(RESPAWN_LAUNCHER_MARKER_ENV_VARS)(
+    "caps the job deadline at the launcher's derived reap timer for %s",
+    async (marker) => {
+      execLaunchctl.mockResolvedValue(stopping("\texit timeout = 55\n\tpid = 4241\n"));
+      await expect(readLaunchdStopTimeout({ ...SERVICE_ENV, [marker]: "1" })).resolves.toEqual({
+        stop: {
+          timeoutMs: 19_000,
+          source:
+            "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's 19000ms stop timer",
+        },
+      });
+    },
+  );
 
   // Holding the parent slot is not evidence of a reap timer. An operator wrapper can
   // keep the job's pid and start the Gateway itself while running none, and capping

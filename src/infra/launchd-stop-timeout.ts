@@ -6,6 +6,7 @@ import { resolveLaunchAgentLabel } from "../daemon/launchd-label.js";
 import { parseKeyValueOutput } from "../daemon/runtime-parse.js";
 import { formatErrorMessage } from "./errors.js";
 import {
+  isRespawnedByLauncher,
   LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS,
   resolveLauncherStopTimeoutMs,
 } from "./gateway-shutdown-budget.js";
@@ -104,18 +105,18 @@ function isLaunchdStoppingJob(state: string | undefined): boolean {
  * let a long `ExitTimeOut` be budgeted past a force-kill the parent is already
  * counting down.
  *
- * Holding the parent slot proves nothing on its own, so this is gated on the
- * recovery launcher's own respawn marker rather than on the parent relation: an
- * external process manager can start the Gateway from inside the same job and run no
- * reap timer at all, and that parent's deadline stays unreduced.
+ * Holding the parent slot proves nothing on its own, so this is gated on the respawn
+ * markers that launcher stamps rather than on the parent relation: an external process
+ * manager can start the Gateway from inside the same job and run no reap timer at all,
+ * and that parent's deadline stays unreduced.
  */
 function resolveParentLauncherStopTimeoutMs(env: NodeJS.ProcessEnv): number | undefined {
-  // The recovery launcher stamps this marker on every child it respawns, and has
-  // done so far longer than this deadline has been derived, so it is present for a
-  // Gateway this launcher started and absent for any other parent. An operator
-  // wrapper that keeps the job's pid and starts the Gateway itself runs no such
-  // timer, and capping its deadline would cut a drain nothing was going to interrupt.
-  if (env.OPENCLAW_NODE_UPDATE_RESPAWNED !== "1") {
+  // One of these is set on every child the launcher respawns, and all of them predate
+  // this deadline being derived, so a marker is present for a Gateway that launcher
+  // started and absent for any other parent. An operator wrapper that keeps the job's
+  // pid and starts the Gateway itself runs no such timer, and capping its deadline
+  // would cut a drain nothing was going to interrupt.
+  if (!isRespawnedByLauncher(env)) {
     return undefined;
   }
   return resolveLauncherStopTimeoutMs({
@@ -226,7 +227,8 @@ export async function readLaunchdStopTimeout(
     // A parent that reaps this process on its own timer binds before the job's
     // ExitTimeOut, and spending the longer deadline would only get the drain
     // force-killed.
-    const launcherMs = relation === "launcher" ? resolveParentLauncherStopTimeoutMs(env) : undefined;
+    const launcherMs =
+      relation === "launcher" ? resolveParentLauncherStopTimeoutMs(env) : undefined;
     return launcherMs !== undefined && launcherMs < jobMs
       ? {
           stop: {
