@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { BLOCKED_TOOL_CALL_ABORT_FLOOR_MS } from "../../logging/diagnostic-run-activity.js";
 import type { RunExit } from "../../process/supervisor/types.js";
-import { CLI_COMPACTION_GRACE_MS } from "../cli-watchdog-defaults.js";
+import { CLI_COMPACTION_GRACE_MS, CLI_RESUME_WATCHDOG_DEFAULTS } from "../cli-watchdog-defaults.js";
 import {
   closePluginTestAdmissions,
   createExecution,
@@ -10,6 +10,14 @@ import {
   SUCCESS_RESULT,
   waitUntilAborted,
 } from "./execute-plugin.test-support.js";
+
+// The silence measured in the linked report, #138644, and the only near-limit
+// compaction timing on record: its last stream event at 21:34:30.941Z and its
+// compaction output at 21:37:31.385Z are 180_444ms apart, and its audit row closes
+// that run at 180.4s. The live capture on this branch measured 14_360ms, but on a
+// 27.5k-token session, and auto-compaction fires near the context limit. So this,
+// not the live number, is the silence the ceiling has to clear.
+const REPORTED_COMPACTION_SILENCE_MS = 180_444;
 
 afterEach(() => {
   closePluginTestAdmissions();
@@ -129,6 +137,82 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
       noOutputTimedOut: true,
     });
     expect(CLI_COMPACTION_GRACE_MS).toBeLessThan(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
+    await run;
+  });
+
+  it("survives the near-limit compaction silence measured in the linked report", async () => {
+    vi.useFakeTimers();
+    const { context } = await createExecution({ timeoutMs: 60 * 60_000 });
+    const received: string[] = [];
+    const compactionFinished = createDeferred();
+    let compacting = false;
+    let settled: RunExit | undefined;
+    const run = runPlugin(
+      context,
+      async function* () {
+        compacting = true;
+        yield { type: "system", subtype: "status", status: "compacting" };
+        await compactionFinished.promise;
+        compacting = false;
+        yield { compact_result: "success" };
+        yield SUCCESS_RESULT;
+      },
+      {
+        // The budget production derives for a resumed run, not a compressed one.
+        noOutputTimeoutMs: CLI_RESUME_WATCHDOG_DEFAULTS.maxMs,
+        consumeStdout: received.push.bind(received),
+        compactionActive: () => compacting,
+      },
+    ).then((result) => (settled = result));
+    await vi.waitFor(() => expect(received).toHaveLength(1));
+
+    // The reported run was terminated at exactly this point, with 894 transcript
+    // lines of completed work behind it. This one is still deferred.
+    await vi.advanceTimersByTimeAsync(REPORTED_COMPACTION_SILENCE_MS);
+    expect(settled).toBeUndefined();
+
+    compactionFinished.resolve();
+    await expect(run).resolves.toMatchObject({ reason: "exit", timedOut: false });
+
+    // Why the ceiling cannot be narrowed to the budget it extends: the reported
+    // silence sits above that budget and below the ceiling. Any ceiling at or below
+    // the budget reproduces the report, so this case fails if the bound is narrowed
+    // past the measurement it exists to cover.
+    expect(REPORTED_COMPACTION_SILENCE_MS).toBeGreaterThan(CLI_RESUME_WATCHDOG_DEFAULTS.maxMs);
+    expect(REPORTED_COMPACTION_SILENCE_MS).toBeLessThan(CLI_COMPACTION_GRACE_MS);
+  });
+
+  it("reproduces the reported termination when the watchdog cannot see the compaction", async () => {
+    vi.useFakeTimers();
+    const { context } = await createExecution({ timeoutMs: 60 * 60_000 });
+    const received: string[] = [];
+    let settled: RunExit | undefined;
+    const run = runPlugin(
+      context,
+      async function* (execution) {
+        // The same timeline as the case above, minus the only thing this PR adds:
+        // the compaction is invisible to the predicate, which is main's behaviour.
+        yield { type: "system", subtype: "status", status: "compacting" };
+        await waitUntilAborted(execution);
+        yield SUCCESS_RESULT;
+      },
+      {
+        noOutputTimeoutMs: CLI_RESUME_WATCHDOG_DEFAULTS.maxMs,
+        consumeStdout: received.push.bind(received),
+        compactionActive: () => false,
+      },
+    ).then((result) => (settled = result));
+    await vi.waitFor(() => expect(received).toHaveLength(1));
+
+    // The turn dies before the reported compaction output would have arrived. This
+    // is the defect the ceiling exists to fix, held at the reported timing so the
+    // pair reads as a before and after rather than as two unrelated bounds.
+    await vi.advanceTimersByTimeAsync(REPORTED_COMPACTION_SILENCE_MS);
+    expect(settled).toMatchObject({
+      reason: "no-output-timeout",
+      timedOut: true,
+      noOutputTimedOut: true,
+    });
     await run;
   });
 

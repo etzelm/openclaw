@@ -16,11 +16,14 @@ export const CLI_RESUME_WATCHDOG_DEFAULTS = {
 // Native compaction is silent but busy, so it defers the no-output watchdog. It is
 // one summarization call over the transcript, not an open-ended tool call, so it
 // gets this ceiling instead of BLOCKED_TOOL_CALL_ABORT_FLOOR_MS: a start record with
-// no end record is detected here rather than a quarter hour later. The bound sits
-// above CLI_RESUME_WATCHDOG_DEFAULTS.maxMs so a real compaction still survives, and
-// below RUN_STALE_TAKEOVER_MS so a wedged one cannot outlive the window that reclaims
-// quiet runs. Measured reference: a 27.5k-token compaction is ~14s of silence. That
-// is a small context, so the headroom is extrapolated: auto-compaction fires near the
-// context limit, and the silence of a compaction that size, or of one riding out API
-// retry backoff, is unmeasured.
+// no end record is detected here rather than a quarter hour later.
+//
+// The value is bracketed by measurement rather than chosen. Floor: the compaction
+// reported in #138644 consumed 180_444ms of stream silence, so any ceiling at or
+// below CLI_RESUME_WATCHDOG_DEFAULTS.maxMs reproduces that report exactly. Ceiling:
+// RUN_STALE_TAKEOVER_MS already reclaims quiet runs, and a wedged compaction must not
+// outlive it. That leaves (180.4s, 10 min), and 5 minutes is the round value inside
+// it, 1.66x the reported silence. Both ends are asserted against the reported timing
+// in execute-plugin.compaction-watchdog.test.ts, so narrowing this past the
+// measurement fails a named case instead of passing quietly.
 export const CLI_COMPACTION_GRACE_MS = 5 * 60_000;
