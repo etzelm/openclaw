@@ -489,6 +489,10 @@ export async function executePluginOwnedProcess(params: {
     replayUnsafe: false,
   };
   const reportOutstandingWork = () => {
+    // Parsed tools are deliberately absent here: diagnostics tracks them itself via
+    // tool.execution.started, which makes activeWorkKind "tool_call" and takes the
+    // blocked-tool branch before the backend deadline is ever consulted. Counting
+    // them again would double-report the same work.
     const toolWork = outstanding.approvals > 0 || outstanding.background > 0;
     const compactionWork = params.compactionActive?.() ?? false;
     // Compaction alone carries its narrower ceiling into diagnostics recovery too, so

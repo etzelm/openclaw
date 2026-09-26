@@ -19,5 +19,8 @@ export const CLI_RESUME_WATCHDOG_DEFAULTS = {
 // no end record is detected here rather than a quarter hour later. The bound sits
 // above CLI_RESUME_WATCHDOG_DEFAULTS.maxMs so a real compaction still survives, and
 // below RUN_STALE_TAKEOVER_MS so a wedged one cannot outlive the window that reclaims
-// quiet runs. Measured reference: a 27.5k-token compaction is ~14s of silence.
+// quiet runs. Measured reference: a 27.5k-token compaction is ~14s of silence. That
+// is a small context, so the headroom is extrapolated: auto-compaction fires near the
+// context limit, and the silence of a compaction that size, or of one riding out API
+// retry backoff, is unmeasured.
 export const CLI_COMPACTION_GRACE_MS = 5 * 60_000;

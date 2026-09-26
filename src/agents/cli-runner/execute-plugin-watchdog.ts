@@ -136,8 +136,10 @@ export function createCliPluginWatchdog(
           askUserDeadline === undefined
             ? BLOCKED_TOOL_CALL_ABORT_FLOOR_MS
             : Math.max(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS, askUserDeadline - lastOutputAtMs),
-        // The quiet clock restarts on the compaction start record itself, so this
-        // ceiling is measured from compaction start for the silence that defines it.
+        // lastOutputAtMs restarts on every stdout record, the compaction start record
+        // included, so this ceiling bounds silence since the last record. It is the
+        // compaction's own budget only while the compaction stays silent; a record
+        // emitted mid-compaction restarts it, exactly as one restarts tool grace.
         compactionGraceMs: CLI_COMPACTION_GRACE_MS,
       });
       if (decision.deferMs !== undefined) {
