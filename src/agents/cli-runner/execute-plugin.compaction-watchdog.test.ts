@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { BLOCKED_TOOL_CALL_ABORT_FLOOR_MS } from "../../logging/diagnostic-run-activity.js";
+import type { RunExit } from "../../process/supervisor/types.js";
 import { CLI_COMPACTION_GRACE_MS } from "../cli-watchdog-defaults.js";
 import {
   closePluginTestAdmissions,
@@ -95,6 +96,9 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
     // end this run, which is exactly the stalled-compaction case under review.
     const { context } = await createExecution({ timeoutMs: 60 * 60_000 });
     const received: string[] = [];
+    // Settled is read synchronously so a mutation that removes the ceiling fails the
+    // assertion immediately instead of hanging this suite until its timeout.
+    let settled: RunExit | undefined;
     const run = runPlugin(
       context,
       async function* (execution) {
@@ -108,29 +112,31 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
         consumeStdout: received.push.bind(received),
         compactionActive: () => true,
       },
-    );
+    ).then((result) => (settled = result));
     await vi.waitFor(() => expect(received).toHaveLength(1));
 
     // One tick short of the ceiling the run is still deferred, so the bound is the
     // compaction ceiling and not some earlier coincidence.
     await vi.advanceTimersByTimeAsync(CLI_COMPACTION_GRACE_MS - 2_000);
-    expect(await Promise.race([run, Promise.resolve("pending")])).toBe("pending");
+    expect(settled).toBeUndefined();
 
     // Crossing it terminates, well inside the 15-minute blocked-tool floor that a
     // latched compaction would otherwise have held.
     await vi.advanceTimersByTimeAsync(4_000);
-    await expect(run).resolves.toMatchObject({
+    expect(settled).toMatchObject({
       reason: "no-output-timeout",
       timedOut: true,
       noOutputTimedOut: true,
     });
     expect(CLI_COMPACTION_GRACE_MS).toBeLessThan(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
+    await run;
   });
 
   it("keeps the blocked-tool floor for a compaction that overlaps real tool work", async () => {
     vi.useFakeTimers();
     const { context } = await createExecution({ timeoutMs: 60 * 60_000 });
     const received: string[] = [];
+    let settled: RunExit | undefined;
     const run = runPlugin(
       context,
       async function* (execution) {
@@ -146,18 +152,21 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
         // already had before compaction was ever a deferral term.
         activeToolCount: () => 1,
       },
-    );
+    ).then((result) => (settled = result));
     await vi.waitFor(() => expect(received).toHaveLength(1));
 
+    // Past the compaction ceiling and still running: the tool call, not compaction,
+    // is what governs the grace here.
     await vi.advanceTimersByTimeAsync(CLI_COMPACTION_GRACE_MS + 60_000);
-    expect(await Promise.race([run, Promise.resolve("pending")])).toBe("pending");
+    expect(settled).toBeUndefined();
 
     await vi.advanceTimersByTimeAsync(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
-    await expect(run).resolves.toMatchObject({
+    expect(settled).toMatchObject({
       reason: "no-output-timeout",
       timedOut: true,
       noOutputTimedOut: true,
     });
+    await run;
   });
 
   it("keeps the overall deadline authoritative while compaction remains active", async () => {
