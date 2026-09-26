@@ -21,6 +21,7 @@ import {
   runBeforeToolCallHook,
 } from "../agent-tools.before-tool-call.js";
 import type { CliTerminalInterruption } from "../cli-output-contracts.js";
+import { CLI_COMPACTION_GRACE_MS } from "../cli-watchdog-defaults.js";
 import { resolveExecDefaults } from "../exec-defaults.js";
 import { FailoverError, isSignalTimeoutReason } from "../failover-error.js";
 import { withAgentQuestionAnswerAuthority } from "../harness/host-private-capabilities.js";
@@ -430,7 +431,7 @@ export async function executePluginOwnedProcess(params: {
   noOutputTimeoutMs: number;
   watchdogClock?: CliWatchdogClock;
   consumeStdout: (chunk: string) => void;
-  onOutstandingWorkChange?: (active: boolean) => void;
+  onOutstandingWorkChange?: (active: boolean, graceFloorMs?: number) => void;
   activeToolCount?: () => number;
   compactionActive?: () => boolean;
   onCompactionActiveChange?: (listener: () => void) => () => void;
@@ -487,12 +488,16 @@ export async function executePluginOwnedProcess(params: {
     observed: false,
     replayUnsafe: false,
   };
-  const reportOutstandingWork = () =>
+  const reportOutstandingWork = () => {
+    const toolWork = outstanding.approvals > 0 || outstanding.background > 0;
+    const compactionWork = params.compactionActive?.() ?? false;
+    // Compaction alone carries its narrower ceiling into diagnostics recovery too, so
+    // a wedged compaction cannot hold the blocked-tool floor on that path either.
     params.onOutstandingWorkChange?.(
-      outstanding.approvals > 0 ||
-        outstanding.background > 0 ||
-        (params.compactionActive?.() ?? false),
+      toolWork || compactionWork,
+      !toolWork && compactionWork ? CLI_COMPACTION_GRACE_MS : undefined,
     );
+  };
   const updatePendingApproval = (delta: number) => {
     outstanding.approvals = Math.max(0, outstanding.approvals + delta);
     reportOutstandingWork();

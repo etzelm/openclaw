@@ -25,13 +25,14 @@ import { logSessionStateChange, startDiagnosticHeartbeat } from "../../logging/d
 import { resetDiagnosticStateForTest } from "../../logging/diagnostic.test-support.js";
 import type { CliBackendParseJsonlLifecycleEvent } from "../../plugins/cli-backend.types.js";
 import { buildPreparedCliRunContext } from "../cli-runner.test-helpers.js";
+import { CLI_COMPACTION_GRACE_MS } from "../cli-watchdog-defaults.js";
 import { executePreparedCliRun } from "./execute.js";
 import { wrapPreparedCliRunWithTestAdmission } from "./execute.test-support.js";
 
 /** The production ceiling a resumed claude-cli turn actually runs with. */
 const NO_OUTPUT_TIMEOUT_MS = 180_000;
-/** Longer than the no-output budget, still inside the 15 minute work ceiling. */
-const QUIET_ADVANCE_MS = 390_000;
+/** Longer than the no-output budget, still inside the compaction ceiling. */
+const QUIET_ADVANCE_MS = 240_000;
 const COMPACTION_START = { type: "system", subtype: "status", status: "compacting" };
 const COMPACTION_END = { compact_result: "success" };
 
@@ -108,10 +109,14 @@ it("holds the diagnostics recovery deadline open across a streamed compaction", 
 
     // The recovery timer owns its own clock: a deferred watchdog does not stop it.
     expect(recoverStuckSession).not.toHaveBeenCalled();
+    // Compaction alone gets its own ceiling here, not the blocked-tool floor a
+    // latched tool call holds, so a wedged compaction is reachable by recovery
+    // in minutes rather than a quarter hour.
     expect(getDiagnosticSessionActivitySnapshot(context.params)).toMatchObject({
-      activeBackendLivenessDeadlineAtMs: startedAt + BLOCKED_TOOL_CALL_ABORT_FLOOR_MS,
+      activeBackendLivenessDeadlineAtMs: startedAt + CLI_COMPACTION_GRACE_MS,
       lastProgressAgeMs: QUIET_ADVANCE_MS,
     });
+    expect(CLI_COMPACTION_GRACE_MS).toBeLessThan(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
 
     release.resolve();
     const clearedAt = await ended.promise;

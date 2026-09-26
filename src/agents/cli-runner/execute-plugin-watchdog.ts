@@ -1,4 +1,5 @@
 import { BLOCKED_TOOL_CALL_ABORT_FLOOR_MS } from "../../logging/diagnostic-run-activity.js";
+import { CLI_COMPACTION_GRACE_MS } from "../cli-watchdog-defaults.js";
 import type { FailoverError } from "../failover-error.js";
 import { cliBackendLog } from "./log.js";
 import * as noOutputPolicy from "./no-output-timeout-policy.js";
@@ -135,6 +136,9 @@ export function createCliPluginWatchdog(
           askUserDeadline === undefined
             ? BLOCKED_TOOL_CALL_ABORT_FLOOR_MS
             : Math.max(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS, askUserDeadline - lastOutputAtMs),
+        // The quiet clock restarts on the compaction start record itself, so this
+        // ceiling is measured from compaction start for the silence that defines it.
+        compactionGraceMs: CLI_COMPACTION_GRACE_MS,
       });
       if (decision.deferMs !== undefined) {
         noOutputDeadlineMs = nowMs + decision.deferMs;
