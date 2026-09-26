@@ -76,7 +76,9 @@ export const resolveLauncherStopTimeoutMs = ({ env, platform, foreground }) => {
   const serviceStopTimeoutMs = resolveRespawnServiceStopTimeoutMs(env, platform);
   const signalExitGraceMs =
     platform !== "win32" && foreground
-      ? serviceStopTimeoutMs - RESPAWN_SIGNAL_FORCE_KILL_GRACE_MS - RESPAWN_SIGNAL_HARD_EXIT_GRACE_MS
+      ? serviceStopTimeoutMs -
+        RESPAWN_SIGNAL_FORCE_KILL_GRACE_MS -
+        RESPAWN_SIGNAL_HARD_EXIT_GRACE_MS
       : RESPAWN_SIGNAL_EXIT_GRACE_MS;
   return signalExitGraceMs + RESPAWN_SIGNAL_FORCE_KILL_GRACE_MS;
 };
