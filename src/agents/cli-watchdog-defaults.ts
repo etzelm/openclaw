@@ -18,12 +18,15 @@ export const CLI_RESUME_WATCHDOG_DEFAULTS = {
 // gets this ceiling instead of BLOCKED_TOOL_CALL_ABORT_FLOOR_MS: a start record with
 // no end record is detected here rather than a quarter hour later.
 //
-// The value is bracketed by measurement rather than chosen. Floor: the compaction
-// reported in #138644 consumed 180_444ms of stream silence, so any ceiling at or
-// below CLI_RESUME_WATCHDOG_DEFAULTS.maxMs reproduces that report exactly. Ceiling:
-// RUN_STALE_TAKEOVER_MS already reclaims quiet runs, and a wedged compaction must not
-// outlive it. That leaves (180.4s, 10 min), and 5 minutes is the round value inside
-// it, 1.66x the reported silence. Both ends are asserted against the reported timing
-// in execute-plugin.compaction-watchdog.test.ts, so narrowing this past the
-// measurement fails a named case instead of passing quietly.
+// The value is derived, not picked. Floor, measured: the compaction reported in
+// #138644 consumed 180_444ms of stream silence, so any ceiling at or below
+// CLI_RESUME_WATCHDOG_DEFAULTS.maxMs reproduces that report exactly. Point, derived:
+// this is RUN_STALE_TAKEOVER_MS halved, so a wedged compaction is always detected with
+// a full half-window of margin before the stale-run takeover could race it. Halving
+// that window is the only rule applied, it yields exactly one value, and that value
+// clears the measured floor at 1.66x.
+//
+// Both facts are pinned in execute-plugin.compaction-watchdog.test.ts: the floor
+// against the reported timing, and the halving against RUN_STALE_TAKEOVER_MS itself.
+// Changing this constant alone fails a named case instead of passing quietly.
 export const CLI_COMPACTION_GRACE_MS = 5 * 60_000;

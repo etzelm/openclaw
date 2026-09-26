@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import { BLOCKED_TOOL_CALL_ABORT_FLOOR_MS } from "../../logging/diagnostic-run-activity.js";
+import {
+  BLOCKED_TOOL_CALL_ABORT_FLOOR_MS,
+  RUN_STALE_TAKEOVER_MS,
+} from "../../logging/diagnostic-run-activity.js";
 import type { RunExit } from "../../process/supervisor/types.js";
 import { CLI_COMPACTION_GRACE_MS, CLI_RESUME_WATCHDOG_DEFAULTS } from "../cli-watchdog-defaults.js";
 import {
@@ -174,12 +177,20 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
     compactionFinished.resolve();
     await expect(run).resolves.toMatchObject({ reason: "exit", timedOut: false });
 
-    // Why the ceiling cannot be narrowed to the budget it extends: the reported
-    // silence sits above that budget and below the ceiling. Any ceiling at or below
-    // the budget reproduces the report, so this case fails if the bound is narrowed
-    // past the measurement it exists to cover.
+    // Floor of the band, measured: the reported silence sits above the budget the
+    // ceiling extends and below the ceiling itself. Any ceiling at or below the budget
+    // reproduces the report, so narrowing the constant past the measurement fails here
+    // rather than passing quietly.
     expect(REPORTED_COMPACTION_SILENCE_MS).toBeGreaterThan(CLI_RESUME_WATCHDOG_DEFAULTS.maxMs);
     expect(REPORTED_COMPACTION_SILENCE_MS).toBeLessThan(CLI_COMPACTION_GRACE_MS);
+
+    // The point inside that band, derived rather than picked: the ceiling is exactly
+    // RUN_STALE_TAKEOVER_MS halved, so a wedged compaction is always detected with a
+    // full half-window of margin before the stale-run takeover could race it. Pinning
+    // the relation here means the value cannot drift away from the window it is
+    // derived from, and it keeps the upper end of the band a test rather than prose.
+    expect(CLI_COMPACTION_GRACE_MS * 2).toBe(RUN_STALE_TAKEOVER_MS);
+    expect(CLI_COMPACTION_GRACE_MS).toBeLessThan(BLOCKED_TOOL_CALL_ABORT_FLOOR_MS);
   });
 
   it("reproduces the reported termination when the watchdog cannot see the compaction", async () => {
@@ -204,15 +215,24 @@ describe("plugin-owned CLI execution native compaction watchdog", () => {
     ).then((result) => (settled = result));
     await vi.waitFor(() => expect(received).toHaveLength(1));
 
-    // The turn dies before the reported compaction output would have arrived. This
-    // is the defect the ceiling exists to fix, held at the reported timing so the
-    // pair reads as a before and after rather than as two unrelated bounds.
-    await vi.advanceTimersByTimeAsync(REPORTED_COMPACTION_SILENCE_MS);
+    // One tick short of the ordinary budget the turn is still alive. Asserting this
+    // first is what makes the case able to fail: without it the run could have been
+    // killed at the first tick and the termination assertion below would still pass.
+    await vi.advanceTimersByTimeAsync(CLI_RESUME_WATCHDOG_DEFAULTS.maxMs - 2_000);
+    expect(settled).toBeUndefined();
+
+    // Crossing the budget kills it, so the bound here is the ordinary budget exactly.
+    await vi.advanceTimersByTimeAsync(4_000);
     expect(settled).toMatchObject({
       reason: "no-output-timeout",
       timedOut: true,
       noOutputTimedOut: true,
     });
+
+    // And that kill lands before the reported compaction output would have arrived,
+    // which is the lost turn in #138644: 894 transcript lines of completed work
+    // discarded while the CLI was healthy.
+    expect(CLI_RESUME_WATCHDOG_DEFAULTS.maxMs).toBeLessThan(REPORTED_COMPACTION_SILENCE_MS);
     await run;
   });
 
