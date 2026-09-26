@@ -1,6 +1,10 @@
 import { performance } from "node:perf_hooks";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  GATEWAY_SHUTDOWN_RESERVE_MS,
+  GATEWAY_SUPERVISOR_EXIT_MARGIN_MS,
+} from "../../infra/gateway-shutdown-budget.js";
+import {
   resolveGatewayShutdownBudget,
   resolveGatewayShutdownDrainBudget,
 } from "./run-loop-shutdown-budget.js";
@@ -199,7 +203,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
   );
 
   it.each([
-    { seconds: 20, timeoutMs: 15_000, reserveMs: 7_500, drainMs: 7_500, exitMarginMs: 5_000 },
+    { seconds: 20, timeoutMs: 15_000, reserveMs: 10_000, drainMs: 5_000, exitMarginMs: 5_000 },
     { seconds: 47, timeoutMs: 42_000, reserveMs: 10_000, drainMs: 32_000, exitMarginMs: 5_000 },
     { seconds: 55, timeoutMs: 50_000, reserveMs: 10_000, drainMs: 40_000, exitMarginMs: 5_000 },
   ])(
@@ -220,6 +224,69 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
       expect(info).toHaveBeenCalledWith(
         `shutdown budget at shutdown: drain=${drainMs}ms shutdown=${timeoutMs}ms reserve=${reserveMs}ms exitMargin=${exitMarginMs}ms; source=launchd system/ai.openclaw.gateway exit timeout=${seconds * 1_000}ms`,
       );
+    },
+  );
+
+  // The allowances are only ever capped to keep a drain, never to reallocate a deadline
+  // that already worked. A deadline able to fund the 10s reserve alongside the 5s drain
+  // the 20s template yields needs 15s of shutdown budget, which every deadline from 20s
+  // up has, so all of them must resolve exactly what subtracting the fixed allowances
+  // outright resolved. Asserting against that arithmetic rather than against literals is
+  // what makes this a regression test: capping the reserve at a share of the budget, as
+  // an earlier revision did, drops a 20s job's reserve to 7500ms and fails here.
+  it.each([20, 21, 25, 30, 47, 55, 60])(
+    "allocates a %s second exit timeout exactly as the fixed allowances did",
+    async (seconds) => {
+      execLaunchctl.mockResolvedValue(
+        printed("SIGTERMed", `\texit timeout = ${seconds}\n\tpid = 4242\n`),
+      );
+      const budget = await resolveGatewayShutdownBudget(
+        "external",
+        { info: vi.fn(), warn: vi.fn() },
+        stoppingNow,
+      );
+      const fixedTimeoutMs = seconds * 1_000 - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS;
+      expect(budget.timeoutMs).toBe(fixedTimeoutMs);
+      expect(budget.reserveMs).toBe(GATEWAY_SHUTDOWN_RESERVE_MS);
+      expect(budget.timeoutMs - budget.reserveMs).toBe(
+        fixedTimeoutMs - GATEWAY_SHUTDOWN_RESERVE_MS,
+      );
+    },
+  );
+
+  // Under 20 seconds the budget cannot fund both allowances, so one has to give. The
+  // fixed subtraction gave up the drain: 15 seconds and below drained for 0ms, and the
+  // four deadlines between left active work under 5 seconds. These pin what is given up
+  // instead, and that the reserve never falls below half the budget doing it. No shipped
+  // template or platform default lands here: the LaunchAgent template and launchd's own
+  // default are both 20 seconds, and systemd's default stop timeout is 90.
+  it.each([
+    { seconds: 19, timeoutMs: 14_250, reserveMs: 9_250, drainMs: 5_000, fixedDrainMs: 4_000 },
+    { seconds: 16, timeoutMs: 12_000, reserveMs: 7_000, drainMs: 5_000, fixedDrainMs: 1_000 },
+    { seconds: 15, timeoutMs: 11_250, reserveMs: 6_250, drainMs: 5_000, fixedDrainMs: 0 },
+    { seconds: 10, timeoutMs: 7_500, reserveMs: 3_750, drainMs: 3_750, fixedDrainMs: 0 },
+  ])(
+    "keeps a drain a $seconds second exit timeout previously spent on overhead",
+    async ({ seconds, timeoutMs, reserveMs, drainMs, fixedDrainMs }) => {
+      execLaunchctl.mockResolvedValue(
+        printed("SIGTERMed", `\texit timeout = ${seconds}\n\tpid = 4242\n`),
+      );
+      const budget = await resolveGatewayShutdownBudget(
+        "external",
+        { info: vi.fn(), warn: vi.fn() },
+        stoppingNow,
+      );
+      expect(budget.timeoutMs).toBe(timeoutMs);
+      expect(budget.reserveMs).toBe(reserveMs);
+      expect(budget.timeoutMs - budget.reserveMs).toBe(drainMs);
+      // What the fixed subtraction left active work at the same deadline.
+      expect(
+        Math.max(
+          0,
+          seconds * 1_000 - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS - GATEWAY_SHUTDOWN_RESERVE_MS,
+        ),
+      ).toBe(fixedDrainMs);
+      expect(budget.reserveMs).toBeGreaterThanOrEqual(Math.floor(timeoutMs / 2));
     },
   );
 

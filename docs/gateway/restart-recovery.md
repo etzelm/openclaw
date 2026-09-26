@@ -193,17 +193,19 @@ and up to another 5 seconds before systemd's deadline. A unit with the default
 90-second stop timeout therefore gets a 75-second drain and an 85-second Gateway
 shutdown deadline. A shorter supervisor timeout also caps requested restart waits.
 
-Both allowances are capped at a share of the deadline they are carved from, by the
-same rule the launchd budget uses and for the same reason: subtracting two values
-sized for a 315-second drain from a short stop timeout consumed it entirely and left
-active work nothing. A unit whose `TimeoutStopSec` is 25 seconds or longer is
-unaffected, because the deadline can fund both allowances outright. Below that the
-reserve shrinks in step with the deadline and the drain grows: a 20-second unit moves
-from a 10-second reserve and a 5-second drain to 7.5 seconds of each, and a unit at or
-below 15 seconds now drains at all where it previously drained for zero milliseconds.
-The exit margin holds its full 5 seconds down to a 20-second deadline and shrinks
-below that, to 3.75 seconds at 15 seconds and a quarter of anything shorter.
-The drained work, ordering, and interruption behavior stay the same.
+Both allowances are bounded when the deadline cannot fund them, by the same rule the
+launchd budget uses and for the same reason: subtracting two values sized for a
+315-second drain from a short stop timeout consumed it entirely and left active work
+nothing. A unit whose `TimeoutStopSec` is 20 seconds or longer keeps the allocation it
+already had, down to the millisecond, because 20 seconds is the least that funds the
+full 10-second reserve alongside a 5-second drain. Below that the deadline cannot fund
+both, and the reserve yields to keep a drain: a unit at or below 15 seconds now drains
+at all where it previously drained for zero milliseconds, and the four values between
+trade part of a reserve for a drain that was under 5 seconds. The reserve never falls
+below half the shutdown budget. The exit margin holds its full 5 seconds down to a
+20-second deadline and shrinks below that, to 3.75 seconds at 15 seconds and a quarter
+of anything shorter. The drained work, ordering, and interruption behavior stay the
+same, and systemd's own 90-second default is unaffected.
 
 Service-child cleanup uses the remaining Gateway shutdown budget, leaving time
 for final exit bookkeeping. A forced restart drains admitted work within the same
@@ -328,25 +330,33 @@ Active-work drain reserves up to 10 seconds for final chat writes and server
 cleanup, and up to another 5 seconds before launchd's deadline. Both allowances were
 sized against the 315-second platform-neutral drain, where they are rounding error,
 and an operator job may enforce a deadline far shorter than that. Subtracting them
-outright from a short deadline left nothing to drain, so each is capped at a share
-of what it is carved from: the exit margin takes at most a quarter of the job's
-deadline, and the reserve at most half of what remains. A deadline long enough to
-fund both keeps them in full, and a shorter one keeps a proportional drain instead
-of surrendering all of it.
+outright from a short deadline left nothing to drain, so each is bounded when the
+deadline cannot fund it: the exit margin takes at most a quarter of the job's
+deadline, and the reserve yields only as far as keeping 5 seconds of drain requires,
+never below half the shutdown budget. Funding the full 10-second reserve alongside
+that 5-second drain takes 15 seconds of shutdown budget, which is what a 20-second
+`ExitTimeOut` resolves to, so **every deadline from 20 seconds up keeps the exact
+allocation it had before this change.** The template is one of them.
 
-| Job `ExitTimeOut`   | Exit margin | Shutdown deadline | Reserve | Active-work drain |
-| ------------------- | ----------- | ----------------- | ------- | ----------------- |
-| 5s                  | 1250ms      | 3750ms            | 1875ms  | 1875ms            |
-| 15s                 | 3750ms      | 11250ms           | 5625ms  | 5625ms            |
-| 20s (template)      | 5000ms      | 15000ms           | 7500ms  | 7500ms            |
-| 47s                 | 5000ms      | 42000ms           | 10000ms | 32000ms           |
-| No launchd deadline | 5000ms      | 325000ms          | 10000ms | 315000ms          |
+| Job `ExitTimeOut`   | Exit margin | Shutdown deadline | Reserve | Active-work drain | Drain before |
+| ------------------- | ----------- | ----------------- | ------- | ----------------- | ------------ |
+| 5s                  | 1250ms      | 3750ms            | 1875ms  | 1875ms            | 0ms          |
+| 15s                 | 3750ms      | 11250ms           | 6250ms  | 5000ms            | 0ms          |
+| 19s                 | 4750ms      | 14250ms           | 9250ms  | 5000ms            | 4000ms       |
+| 20s (template)      | 5000ms      | 15000ms           | 10000ms | 5000ms            | 5000ms       |
+| 47s                 | 5000ms      | 42000ms           | 10000ms | 32000ms           | 32000ms      |
+| No launchd deadline | 5000ms      | 325000ms          | 10000ms | 315000ms          | 315000ms     |
+
+Only a deadline under 20 seconds allocates differently than it used to, and there the
+previous drain was under 5 seconds: zero at 15 seconds and below, where the reserve was
+holding back cleanup time the job had no drain left to reach. Neither the LaunchAgent
+template nor launchd's own default lands in that band; both are 20 seconds.
 
 The allocation therefore leaves active work a positive share of every positive
-deadline, and a longer `ExitTimeOut` never allocates a shorter drain than a shorter
-one does. The time spent resolving the budget is then debited from it, exactly as it
-already was, so a deadline shorter than that resolution cost can still leave nothing
-to spend.
+deadline, and a longer `ExitTimeOut` never allocates a shorter drain, or a shorter
+reserve, than a shorter one does. The time spent resolving the budget is then debited
+from it, exactly as it already was, so a deadline shorter than that resolution cost can
+still leave nothing to spend.
 
 Raising `ExitTimeOut` past 60 has no effect. launchd honours 1 through 60 exactly and
 silently clamps anything larger, measured on macOS 27 against a bare `/bin/sleep`

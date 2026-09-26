@@ -11,21 +11,32 @@ export const GATEWAY_SERVICE_STOP_TIMEOUT_MS =
 export const LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS = 20;
 
 /**
- * The share of a deadline each fixed allowance may take when the deadline is too
+ * The share of a stop deadline the exit margin may take when the deadline is too
  * short to fund it outright.
  *
- * `GATEWAY_SHUTDOWN_RESERVE_MS` and `GATEWAY_SUPERVISOR_EXIT_MARGIN_MS` were sized
- * against the 315 second policy drain, where both are rounding error. A launchd job
- * may enforce any `ExitTimeOut`, and subtracting fixed allowances from a short one
- * leaves active work nothing: the margin alone consumes a 5 second deadline whole,
- * and margin plus reserve consume 15 seconds, so drain reached zero well before the
- * deadline itself did. Capping each allowance at a share of what it is carved from
- * keeps the full allowance once the deadline can afford it and otherwise leaves
- * drain a proportional slice, so drain rises with `ExitTimeOut` and stays positive
- * for every positive deadline.
+ * `GATEWAY_SUPERVISOR_EXIT_MARGIN_MS` was sized against the 315 second policy drain,
+ * where it is rounding error. A launchd job may enforce any `ExitTimeOut`, and
+ * subtracting a fixed 5 seconds from a 5 second deadline consumes it whole, leaving a
+ * shutdown budget of zero: the Gateway force-exits before draining anything. Capping
+ * the margin at a share of the deadline keeps the full 5 seconds once the deadline can
+ * afford it, from 20 seconds up, and otherwise leaves a positive budget behind.
  */
 const GATEWAY_SUPERVISOR_EXIT_MARGIN_SHARE = 0.25;
-const GATEWAY_SHUTDOWN_RESERVE_SHARE = 0.5;
+
+/**
+ * The drain a shutdown budget keeps for active work before the reserve claims any of it.
+ *
+ * 5 seconds is the drain the shipped LaunchAgent template already yields: its 20 second
+ * `ExitTimeOut` funds the 5 second margin and the 10 second reserve outright and leaves
+ * active work the remaining 5. Holding that as a floor is what keeps the reserve whole
+ * wherever the fixed subtraction could already fund it, so no deadline at or above the
+ * template loses post-drain cleanup time to this change. Only a budget too short to
+ * fund both gives the reserve up, and there the fixed subtraction had already driven
+ * drain to zero, so there is no working allocation to preserve. The share bounds that
+ * case: a budget under 10 seconds splits evenly rather than handing drain everything.
+ */
+const GATEWAY_SHUTDOWN_DRAIN_FLOOR_MS = 5_000;
+const GATEWAY_SHUTDOWN_DRAIN_FLOOR_SHARE = 0.5;
 
 /** The exit margin to hold back from a supervisor-enforced stop deadline. */
 export const resolveSupervisorExitMarginMs = (stopTimeoutMs) =>
@@ -35,11 +46,14 @@ export const resolveSupervisorExitMarginMs = (stopTimeoutMs) =>
   );
 
 /** The post-drain reserve to hold back from a resolved shutdown budget. */
-export const resolveShutdownReserveMs = (shutdownTimeoutMs) =>
-  Math.min(
-    GATEWAY_SHUTDOWN_RESERVE_MS,
-    Math.floor(Math.max(0, shutdownTimeoutMs) * GATEWAY_SHUTDOWN_RESERVE_SHARE),
+export const resolveShutdownReserveMs = (shutdownTimeoutMs) => {
+  const budgetMs = Math.max(0, shutdownTimeoutMs);
+  const drainFloorMs = Math.min(
+    GATEWAY_SHUTDOWN_DRAIN_FLOOR_MS,
+    Math.floor(budgetMs * GATEWAY_SHUTDOWN_DRAIN_FLOOR_SHARE),
   );
+  return Math.min(GATEWAY_SHUTDOWN_RESERVE_MS, budgetMs - drainFloorMs);
+};
 
 // Escalation graces the Node recovery launcher applies to a stopping child. Kept
 // here rather than in the launcher so the serving Gateway can derive the deadline
