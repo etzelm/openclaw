@@ -8,6 +8,10 @@ vi.mock("../daemon/launchd-exec.js", async (importOriginal) => ({
 }));
 
 const LAUNCHD_ENV = { XPC_SERVICE_NAME: "ai.openclaw.gateway" };
+// The service layout the recovery launcher bounds by the LaunchAgent exit timeout:
+// launchd names the job in XPC_SERVICE_NAME and the handoff carries the label, which
+// is the pair the launcher branches on and a respawned child inherits unchanged.
+const SERVICE_ENV = { ...LAUNCHD_ENV, OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" };
 const LAUNCHER_ENV = { ...LAUNCHD_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: "19000" };
 const result = (stdout: string) => ({ code: 0, stdout, stderr: "", termination: "exit" });
 
@@ -30,6 +34,9 @@ beforeEach(() => {
     pid: 4242,
     ppid: 4241,
     getuid: () => 501,
+    // The reader only runs inside a serving Gateway, and reconstructing an
+    // undeclared launcher's timer replays the argv branch the launcher took.
+    argv: ["/usr/local/bin/node", "/usr/local/bin/openclaw", "gateway", "run"],
   });
   execLaunchctl.mockReset();
 });
@@ -164,24 +171,46 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     });
   });
 
-  // Holding the parent slot is not evidence of a reap timer: an external process
-  // manager can sit there and run none. Capping it at OpenClaw's launcher timer
-  // would cut a valid drain short, so an undeclared parent caps nothing.
-  it("leaves an undeclared parent's longer job deadline intact", async () => {
+  // The upgrade case: an already-running published launcher starts a candidate
+  // Gateway. That launcher arms the same reap timer and declares nothing, so reading
+  // the silence as "no deadline" would budget the job's 90 seconds past a force-kill
+  // the parent fires at 19. The job printed here is OpenClaw's own and its pid is
+  // this process's parent, so that parent is OpenClaw's launcher and the timer it
+  // armed is reconstructible from the graces both sides share.
+  it("caps an undeclared launcher parent at its reconstructed reap timer", async () => {
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
+    await expect(readLaunchdStopTimeout(SERVICE_ENV)).resolves.toEqual({
+      stop: {
+        timeoutMs: 19_000,
+        source:
+          "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's reconstructed 19000ms stop timer",
+      },
+    });
+  });
+
+  // A launcher outside the service layout bounds its child by the platform-neutral
+  // stop policy, which is longer than any realistic job deadline, so nothing is cut.
+  it("reconstructs the policy deadline when the parent is not the service job", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
       stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
     });
   });
 
+  // A declaration that cannot be parsed is not a deadline, and the reconstruction
+  // stands in for it rather than letting the job's longer deadline through.
   it.each(["", "   ", "not-a-number", "0", "-5"])(
-    "ignores a malformed launcher declaration %j",
+    "falls back to the reconstructed timer for a malformed launcher declaration %j",
     async (declared) => {
       execLaunchctl.mockResolvedValue(stopping("\texit timeout = 90\n\tpid = 4241\n"));
       await expect(
-        readLaunchdStopTimeout({ ...LAUNCHD_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: declared }),
+        readLaunchdStopTimeout({ ...SERVICE_ENV, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: declared }),
       ).resolves.toEqual({
-        stop: { timeoutMs: 90_000, source: "launchd system/ai.openclaw.gateway exit timeout" },
+        stop: {
+          timeoutMs: 19_000,
+          source:
+            "launchd system/ai.openclaw.gateway exit timeout capped at the launcher's reconstructed 19000ms stop timer",
+        },
       });
     },
   );

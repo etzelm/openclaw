@@ -6,8 +6,9 @@ import path from "node:path";
 import { consumeRootOptionToken as consumeLauncherRootOptionToken } from "./cli-root-options.mjs";
 import { isForegroundGatewayRunArgv } from "./gateway-run-argv.mjs";
 import {
-  GATEWAY_SERVICE_STOP_TIMEOUT_MS,
-  LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS,
+  RESPAWN_SIGNAL_FORCE_KILL_GRACE_MS,
+  RESPAWN_SIGNAL_HARD_EXIT_GRACE_MS,
+  resolveLauncherStopTimeoutMs,
 } from "./gateway-shutdown-budget.mjs";
 import {
   detectCurrentSqliteCapabilities,
@@ -39,29 +40,24 @@ const respawnSignals =
   process.platform === "win32"
     ? ["SIGTERM", "SIGINT", "SIGBREAK"]
     : ["SIGTERM", "SIGINT", "SIGHUP", "SIGQUIT"];
-const respawnSignalExitGraceMs = 1_000;
-const respawnSignalForceKillGraceMs = 1_000;
-const respawnSignalHardExitGraceMs = 1_000;
+const respawnSignalForceKillGraceMs = RESPAWN_SIGNAL_FORCE_KILL_GRACE_MS;
+const respawnSignalHardExitGraceMs = RESPAWN_SIGNAL_HARD_EXIT_GRACE_MS;
 
 export const runRespawnedChild = (command, args, env) => {
-  const launchdService = env.OPENCLAW_LAUNCHD_LABEL?.trim();
-  const serviceStopTimeoutMs =
-    process.platform === "darwin" && launchdService && env.XPC_SERVICE_NAME === launchdService
-      ? LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS * 1_000
-      : GATEWAY_SERVICE_STOP_TIMEOUT_MS;
   // The serving Gateway owns drain and cleanup. Reap a stuck child only in the
   // supervisor's exit margin, after that owner has had its full shutdown budget.
-  const signalExitGraceMs =
-    process.platform !== "win32" && isForegroundGatewayRunArgv(process.argv)
-      ? serviceStopTimeoutMs - respawnSignalForceKillGraceMs - respawnSignalHardExitGraceMs
-      : respawnSignalExitGraceMs;
-  // Escalation reaps the child one force-kill grace after the exit grace elapses,
-  // so this is the deadline the launcher actually enforces on the serving Gateway.
-  const launcherStopTimeoutMs = signalExitGraceMs + respawnSignalForceKillGraceMs;
+  // The shared resolver owns this arithmetic so a Gateway whose launcher predates
+  // the marker below can reconstruct the very same deadline.
+  const launcherStopTimeoutMs = resolveLauncherStopTimeoutMs({
+    env,
+    platform: process.platform,
+    foreground: isForegroundGatewayRunArgv(process.argv),
+  });
+  const signalExitGraceMs = launcherStopTimeoutMs - respawnSignalForceKillGraceMs;
   const stdioIsTerminal = process.stdin.isTTY || process.stdout.isTTY;
-  // Declare that deadline to the child. Only this launcher sets the marker, so the
-  // serving Gateway can bound its shutdown budget on a timer that provably exists
-  // instead of inferring one from a parent pid that any process manager can own.
+  // Declare that deadline to the child so a Gateway that finds the marker can spend
+  // a timer it was told about rather than one it inferred. A published launcher sets
+  // no marker, and the reader falls back to reconstructing this same value.
   const child = spawn(command, args, {
     stdio: "inherit",
     env: { ...env, OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS: String(launcherStopTimeoutMs) },

@@ -1,10 +1,14 @@
 import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
 import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isForegroundGatewayRunArgv } from "../cli/gateway-run-argv.js";
 import { execLaunchctl, formatLaunchctlResultDetail } from "../daemon/launchd-exec.js";
 import { resolveLaunchAgentLabel } from "../daemon/launchd-label.js";
 import { parseKeyValueOutput } from "../daemon/runtime-parse.js";
 import { formatErrorMessage } from "./errors.js";
-import { LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS } from "./gateway-shutdown-budget.js";
+import {
+  LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS,
+  resolveLauncherStopTimeoutMs,
+} from "./gateway-shutdown-budget.js";
 import { detectRespawnSupervisor } from "./supervisor-markers.js";
 
 type LaunchdStopTimeout = { timeoutMs: number; source: string };
@@ -89,14 +93,42 @@ function isLaunchdStoppingJob(state: string | undefined): boolean {
 }
 
 /**
- * The stop deadline OpenClaw's Node recovery launcher armed for this process,
- * declared in the child environment by `node-runtime-recovery.mjs`. Being the
- * immediate parent does not establish that timer: an external process manager can
- * hold that position and run no such timer at all. Absent means there is no
- * launcher deadline to respect, so the job's own deadline stands unreduced.
+ * The stop deadline OpenClaw's Node recovery launcher armed for this process.
+ *
+ * A current launcher declares it in the child environment. A launcher published
+ * before that marker existed arms the identical timer without announcing it, and
+ * treating that silence as "no deadline" is what would let a long custom
+ * `ExitTimeOut` be budgeted past a force-kill its parent is already counting down:
+ * the upgrade case is an already-running old launcher starting a new Gateway, so the
+ * marker is missing exactly when the mismatch is widest. The value is therefore
+ * reconstructed from the same shared graces the launcher arms itself from.
+ *
+ * Reconstruction is sound only in the position the caller has already established:
+ * the printed job carries OpenClaw's own resolved label and its pid is this
+ * process's immediate parent, so this process's parent is the process launchd
+ * started for OpenClaw's job, and `runRespawnedChild` is the only path that puts a
+ * Gateway underneath it. An unrelated process manager can hold the parent slot, but
+ * it cannot also be the process launchd started under OpenClaw's label, so the
+ * "any process manager could be my parent" case never reaches here.
  */
-function readLauncherStopTimeoutMs(env: NodeJS.ProcessEnv): number | undefined {
-  return parseStrictPositiveInteger(env.OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS ?? "");
+function readLauncherStopTimeoutMs(env: NodeJS.ProcessEnv): {
+  timeoutMs: number;
+  declared: boolean;
+} {
+  const declared = parseStrictPositiveInteger(env.OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS ?? "");
+  if (declared !== undefined) {
+    return { timeoutMs: declared, declared: true };
+  }
+  return {
+    timeoutMs: resolveLauncherStopTimeoutMs({
+      env,
+      platform: process.platform,
+      // The launcher branched on its own argv, and it respawns the child with the
+      // same user arguments, so testing ours reproduces the branch it took.
+      foreground: isForegroundGatewayRunArgv(process.argv),
+    }),
+    declared: false,
+  };
 }
 
 /**
@@ -197,14 +229,17 @@ export async function readLaunchdStopTimeout(
     const jobMs = seconds * 1_000;
     // A parent that reaps this process on its own timer binds before the job's
     // ExitTimeOut, and spending the longer deadline would only get the drain
-    // force-killed. Holding the parent slot does not prove that timer exists,
-    // so the cap comes from OpenClaw's launcher declaring the timer it armed.
-    const launcherMs = relation === "launcher" ? readLauncherStopTimeoutMs(env) : undefined;
-    return launcherMs !== undefined && launcherMs < jobMs
+    // force-killed. The launchd job printed here is OpenClaw's own, so a parent
+    // holding its pid is OpenClaw's launcher and that timer provably exists whether
+    // or not the launcher was new enough to declare it.
+    const launcher = relation === "launcher" ? readLauncherStopTimeoutMs(env) : undefined;
+    return launcher !== undefined && launcher.timeoutMs < jobMs
       ? {
           stop: {
-            timeoutMs: launcherMs,
-            source: `launchd ${target} exit timeout capped at the launcher's ${launcherMs}ms stop timer`,
+            timeoutMs: launcher.timeoutMs,
+            source: `launchd ${target} exit timeout capped at the launcher's ${
+              launcher.declared ? "" : "reconstructed "
+            }${launcher.timeoutMs}ms stop timer`,
           },
         }
       : { stop: { timeoutMs: jobMs, source: `launchd ${target} exit timeout` } };

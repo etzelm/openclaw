@@ -2,9 +2,9 @@ import { performance } from "node:perf_hooks";
 import { LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS } from "../../daemon/launchd-plist.js";
 import {
   GATEWAY_SERVICE_STOP_TIMEOUT_MS,
-  GATEWAY_SHUTDOWN_RESERVE_MS,
   GATEWAY_SHUTDOWN_TIMEOUT_MS,
-  GATEWAY_SUPERVISOR_EXIT_MARGIN_MS,
+  resolveShutdownReserveMs,
+  resolveSupervisorExitMarginMs,
 } from "../../infra/gateway-shutdown-budget.js";
 import { readLaunchdStopTimeout } from "../../infra/launchd-stop-timeout.js";
 import { readSystemdStopTimeout } from "../../infra/systemd-stop-timeout.js";
@@ -83,15 +83,19 @@ export async function resolveGatewayShutdownBudget(
     source: supervisor === "launchd" ? "launchd ExitTimeOut" : "Gateway stop policy",
   };
   const nativeStopBudget = nativeStop !== null || supervisor === "launchd" || Boolean(retained);
+  // An operator job may enforce a deadline far shorter than the policy these fixed
+  // allowances were sized against, so each is capped at a share of what it is carved
+  // from. A deadline long enough to fund them is unaffected; a short one keeps a
+  // proportional drain instead of surrendering all of it to margin and reserve.
+  const exitMarginMs = resolveSupervisorExitMarginMs(stop.timeoutMs);
   const limitMs =
-    retained?.timeoutMs ??
-    Math.min(GATEWAY_SHUTDOWN_TIMEOUT_MS, stop.timeoutMs - GATEWAY_SUPERVISOR_EXIT_MARGIN_MS);
+    retained?.timeoutMs ?? Math.min(GATEWAY_SHUTDOWN_TIMEOUT_MS, stop.timeoutMs - exitMarginMs);
   const elapsedMs =
     refresh && nativeStopBudget
       ? Math.max(0, Math.ceil(performance.now() - refresh.acceptedAtMs))
       : 0;
   const timeoutMs = Math.max(0, limitMs - elapsedMs);
-  const reserveMs = Math.min(GATEWAY_SHUTDOWN_RESERVE_MS, timeoutMs);
+  const reserveMs = resolveShutdownReserveMs(timeoutMs);
   return {
     nativeStopBudget,
     timeoutMs,
@@ -108,7 +112,10 @@ export async function resolveGatewayShutdownBudget(
           },
     log: (phase: "startup" | "shutdown") => {
       logger.info(
-        `shutdown budget at ${phase}: drain=${Math.max(0, timeoutMs - GATEWAY_SHUTDOWN_RESERVE_MS)}ms shutdown=${timeoutMs}ms reserve=${reserveMs}ms exitMargin=${GATEWAY_SUPERVISOR_EXIT_MARGIN_MS}ms; source=${retained ? `startup shutdown budget=${retained.timeoutMs}ms` : `${stop.source}=${stop.timeoutMs}ms`}`,
+        // Report the drain and margin actually spent. Subtracting the unscaled
+        // reserve constant here understated a short budget's drain by the amount the
+        // scaled reserve gave back.
+        `shutdown budget at ${phase}: drain=${Math.max(0, timeoutMs - reserveMs)}ms shutdown=${timeoutMs}ms reserve=${reserveMs}ms exitMargin=${exitMarginMs}ms; source=${retained ? `startup shutdown budget=${retained.timeoutMs}ms` : `${stop.source}=${stop.timeoutMs}ms`}`,
       );
     },
   };

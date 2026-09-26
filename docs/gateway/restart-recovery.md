@@ -129,9 +129,9 @@ forwards the stop signal and waits for the serving Gateway to drain within the
 shared service budget. Managed restart intent targets the live serving owner,
 so unfinished work still follows restart recovery when its drain budget expires.
 When launchd drives the stop, macOS uses the running job's own `ExitTimeOut`,
-capped by the launcher's stop timer whenever that launcher declares one, and Linux
-units use their own stop timeout; both are described in the deadline sections
-below.
+capped by the launcher's stop timer whether that launcher declares it or the
+Gateway reconstructs it, and Linux units use their own stop timeout; both are
+described in the deadline sections below.
 This requires a Gateway started with the updated launcher: replacing files cannot
 change a launcher that is already running.
 
@@ -303,27 +303,51 @@ not stopping, so the Gateway keeps the budget it already had.
 Once launchd is stopping the job, the deadline follows the supervisor that
 enforces it rather than restart ownership, so `OPENCLAW_SUPERVISOR_MODE=external`
 no longer selects the platform-neutral policy for a launchd-driven stop.
-Active-work drain reserves 10 seconds for final chat writes and server cleanup,
-and another 5 seconds before launchd's deadline. A job carrying the installed
-template's 20-second `ExitTimeOut` therefore gets a 5-second drain and a 15-second
-Gateway shutdown deadline. A job whose `ExitTimeOut` is at or below that 5-second
-exit margin gets no drain headroom, which is the consequence of the configured
-deadline rather than a budget the Gateway can spend.
+Active-work drain reserves up to 10 seconds for final chat writes and server
+cleanup, and up to another 5 seconds before launchd's deadline. Both allowances were
+sized against the 315-second platform-neutral drain, where they are rounding error,
+and an operator job may enforce a deadline far shorter than that. Subtracting them
+outright from a short deadline left nothing to drain, so each is capped at a share
+of what it is carved from: the exit margin takes at most a quarter of the job's
+deadline, and the reserve at most half of what remains. A deadline long enough to
+fund both keeps them in full, and a shorter one keeps a proportional drain instead
+of surrendering all of it.
+
+| Job `ExitTimeOut`   | Exit margin | Shutdown deadline | Reserve | Active-work drain |
+| ------------------- | ----------- | ----------------- | ------- | ----------------- |
+| 5s                  | 1250ms      | 3750ms            | 1875ms  | 1875ms            |
+| 15s                 | 3750ms      | 11250ms           | 5625ms  | 5625ms            |
+| 20s (template)      | 5000ms      | 15000ms           | 7500ms  | 7500ms            |
+| 47s                 | 5000ms      | 42000ms           | 10000ms | 32000ms           |
+| No launchd deadline | 5000ms      | 325000ms          | 10000ms | 315000ms          |
+
+Every positive deadline therefore leaves active work some time to finish, and a
+longer `ExitTimeOut` never yields a shorter drain than a shorter one does.
 
 When startup recovers from an unsupported Node version, the launchd job is the
 launcher and the serving Gateway is its child, so the job prints the launcher's
-`pid`. The deadline is still read, and it is capped only when that launcher
-declares the stop timer it armed. `node-runtime-recovery.mjs` passes
+`pid`. The deadline is still read, and it is then capped by the stop timer that
+launcher armed. `node-runtime-recovery.mjs` passes
 `OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS` to the Gateway it spawns, carrying the instant
 at which it would force-kill that child. A longer operator `ExitTimeOut` is not
 spendable under that timer: the launcher would kill the drain before launchd's own
 deadline arrived. A shorter one still applies, because launchd reaps the whole job
 first.
 
-Holding the parent slot is not evidence of that timer on its own. An external
-process manager can start the Gateway from inside the same job and run no reap
-timer at all, and capping its deadline at OpenClaw's would cut a valid drain
-short, so an undeclared parent leaves the job's deadline unreduced.
+An already-running launcher published before that variable existed arms the same
+timer and declares nothing, which is exactly the upgrade shape: replacing files
+cannot change a launcher that is already running, so a candidate Gateway can be
+started by an older launcher. Treating that silence as "no deadline" would budget a
+long custom `ExitTimeOut` past a force-kill the parent is already counting down, so
+the Gateway reconstructs the timer instead. Both sides derive it from the same
+shared escalation graces, and the reconstruction is used only where the printed job
+carries OpenClaw's own label and its `pid` is this process's immediate parent. In
+that position the parent is the process launchd started for OpenClaw's job, and the
+recovery launcher is the only path that puts a Gateway underneath it, so the timer
+provably exists. An unrelated process manager can hold the parent slot, but it
+cannot also be the process launchd started under OpenClaw's label, so its deadline
+is never reduced by a timer it does not run. The shutdown log names a reconstructed
+cap so an operator can tell it from a declared one.
 
 The two failure modes are deliberately different. If the job cannot be inspected
 at all, nothing has been established about who is stopping it, so the Gateway

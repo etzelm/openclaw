@@ -157,7 +157,11 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     expect(budget.nativeStopBudget).toBe(false);
   });
 
-  it("adopts the job's exit timeout once launchd is stopping it", async () => {
+  // A deadline this short cannot fund the fixed 5s margin and 10s reserve, and
+  // subtracting them outright left the job's whole 5 seconds spent on overhead with
+  // nothing to drain. Each allowance is capped at a share of what it is carved from,
+  // so the short job keeps a proportional drain that still fits inside the deadline.
+  it("keeps a proportional drain when the job's exit timeout cannot fund the fixed allowances", async () => {
     execLaunchctl.mockResolvedValue(
       printed("SIGTERMed", "\tminimum runtime = 10\n\texit timeout = 5\n\tpid = 4242\n"),
     );
@@ -169,18 +173,38 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     );
     budget.log("shutdown");
     expect(info).toHaveBeenCalledWith(
-      "shutdown budget at shutdown: drain=0ms shutdown=0ms reserve=0ms exitMargin=5000ms; source=launchd system/ai.openclaw.gateway exit timeout=5000ms",
+      "shutdown budget at shutdown: drain=1875ms shutdown=3750ms reserve=1875ms exitMargin=1250ms; source=launchd system/ai.openclaw.gateway exit timeout=5000ms",
     );
+    expect(budget.timeoutMs).toBe(3_750);
+    expect(budget.reserveMs).toBe(1_875);
     expect(budget.nativeStopBudget).toBe(true);
   });
 
+  // Drain must never be starved to zero by the allowances: every positive deadline
+  // leaves active work some time, and a longer deadline never yields less of it.
+  it.each([1, 2, 5, 10, 15, 20, 25, 47, 90, 315])(
+    "leaves a positive drain for a %s second exit timeout",
+    async (seconds) => {
+      execLaunchctl.mockResolvedValue(
+        printed("SIGTERMed", `\texit timeout = ${seconds}\n\tpid = 4242\n`),
+      );
+      const budget = await resolveGatewayShutdownBudget(
+        "external",
+        { info: vi.fn(), warn: vi.fn() },
+        stoppingNow,
+      );
+      expect(budget.timeoutMs - budget.reserveMs).toBeGreaterThan(0);
+      expect(budget.timeoutMs).toBeLessThanOrEqual(seconds * 1_000);
+    },
+  );
+
   it.each([
-    { seconds: 20, timeoutMs: 15_000, drainMs: 5_000 },
-    { seconds: 47, timeoutMs: 42_000, drainMs: 32_000 },
-    { seconds: 90, timeoutMs: 85_000, drainMs: 75_000 },
+    { seconds: 20, timeoutMs: 15_000, reserveMs: 7_500, drainMs: 7_500, exitMarginMs: 5_000 },
+    { seconds: 47, timeoutMs: 42_000, reserveMs: 10_000, drainMs: 32_000, exitMarginMs: 5_000 },
+    { seconds: 90, timeoutMs: 85_000, reserveMs: 10_000, drainMs: 75_000, exitMarginMs: 5_000 },
   ])(
     "derives the budget from a $seconds second exit timeout",
-    async ({ seconds, timeoutMs, drainMs }) => {
+    async ({ seconds, timeoutMs, reserveMs, drainMs, exitMarginMs }) => {
       execLaunchctl.mockResolvedValue(
         printed("SIGTERMed", `\texit timeout = ${seconds}\n\tpid = 4242\n`),
       );
@@ -192,9 +216,9 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
       );
       budget.log("shutdown");
       expect(budget.timeoutMs).toBe(timeoutMs);
-      expect(budget.reserveMs).toBe(10_000);
+      expect(budget.reserveMs).toBe(reserveMs);
       expect(info).toHaveBeenCalledWith(
-        `shutdown budget at shutdown: drain=${drainMs}ms shutdown=${timeoutMs}ms reserve=10000ms exitMargin=5000ms; source=launchd system/ai.openclaw.gateway exit timeout=${seconds * 1_000}ms`,
+        `shutdown budget at shutdown: drain=${drainMs}ms shutdown=${timeoutMs}ms reserve=${reserveMs}ms exitMargin=${exitMarginMs}ms; source=launchd system/ai.openclaw.gateway exit timeout=${seconds * 1_000}ms`,
       );
     },
   );
