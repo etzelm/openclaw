@@ -402,8 +402,17 @@ to 20 seconds. That is both launchd's documented default for a job omitting
 there only forfeits drain headroom, while guessing long is what lets launchd kill
 an unfinished drain.
 
-Because the job is read per stop rather than at startup, editing a loaded job's
-`ExitTimeOut` takes effect on the Gateway's next stop without a restart.
+The deadline comes from the job launchd has loaded, not from the plist on disk,
+so editing a loaded job's `ExitTimeOut` changes nothing on its own. The loaded
+job keeps reporting its old value after the file changes, and it still does
+after `launchctl kickstart -k`, which restarts the process without reloading the
+job. Only reloading the job, `launchctl bootout` then `launchctl bootstrap`,
+changes what the Gateway will read, and that restarts the Gateway with it.
+
+What reading per stop buys is narrower: the Gateway never plans against a
+deadline it cached at its own startup. Whatever the loaded job reports when the
+stop begins is what the budget spends, which is how one process can resolve the
+platform-neutral policy at startup and a launchd deadline at the stop.
 
 ## Host sleep and process freezes
 
