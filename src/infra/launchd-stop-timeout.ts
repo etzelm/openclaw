@@ -103,21 +103,26 @@ function isLaunchdStoppingJob(state: string | undefined): boolean {
  * marker is missing exactly when the mismatch is widest. The value is therefore
  * reconstructed from the same shared graces the launcher arms itself from.
  *
- * Reconstruction is sound only in the position the caller has already established:
- * the printed job carries OpenClaw's own resolved label and its pid is this
- * process's immediate parent, so this process's parent is the process launchd
- * started for OpenClaw's job, and `runRespawnedChild` is the only path that puts a
- * Gateway underneath it. An unrelated process manager can hold the parent slot, but
- * it cannot also be the process launchd started under OpenClaw's label, so the
- * "any process manager could be my parent" case never reaches here.
+ * Holding the parent slot still proves nothing on its own, so the reconstruction is
+ * gated on the recovery launcher's own respawn marker rather than on the parent
+ * relation: an external process manager can start the Gateway from inside the same
+ * job and run no reap timer at all, and that parent's deadline stays unreduced.
  */
-function readLauncherStopTimeoutMs(env: NodeJS.ProcessEnv): {
-  timeoutMs: number;
-  declared: boolean;
-} {
+function readLauncherStopTimeoutMs(
+  env: NodeJS.ProcessEnv,
+): { timeoutMs: number; declared: boolean } | undefined {
   const declared = parseStrictPositiveInteger(env.OPENCLAW_LAUNCHER_STOP_TIMEOUT_MS ?? "");
   if (declared !== undefined) {
     return { timeoutMs: declared, declared: true };
+  }
+  // Reconstruct only for the launcher whose arithmetic is being reconstructed. The
+  // recovery launcher stamps this marker on every child it respawns, and it did so
+  // long before it declared the timer, so it is present in exactly the upgrade case
+  // and absent for any other parent. An operator wrapper that keeps the job's pid
+  // and starts the Gateway itself runs no such timer, and capping its deadline at
+  // one would cut a drain nothing was going to interrupt.
+  if (env.OPENCLAW_NODE_UPDATE_RESPAWNED !== "1") {
+    return undefined;
   }
   return {
     timeoutMs: resolveLauncherStopTimeoutMs({

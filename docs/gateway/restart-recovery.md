@@ -339,14 +339,16 @@ timer and declares nothing, which is exactly the upgrade shape: replacing files
 cannot change a launcher that is already running, so a candidate Gateway can be
 started by an older launcher. Treating that silence as "no deadline" would budget a
 long custom `ExitTimeOut` past a force-kill the parent is already counting down, so
-the Gateway reconstructs the timer instead. Both sides derive it from the same
-shared escalation graces, and the reconstruction is used only where the printed job
-carries OpenClaw's own label and its `pid` is this process's immediate parent. In
-that position the parent is the process launchd started for OpenClaw's job, and the
-recovery launcher is the only path that puts a Gateway underneath it, so the timer
-provably exists. An unrelated process manager can hold the parent slot, but it
-cannot also be the process launchd started under OpenClaw's label, so its deadline
-is never reduced by a timer it does not run. The shutdown log names a reconstructed
+the Gateway reconstructs the timer instead. Both sides derive it from the same shared
+escalation graces, so the reconstruction cannot drift from the timer actually armed.
+
+Holding the parent slot is still not evidence of that timer. An external process
+manager can start the Gateway from inside the same job and run no reap timer at all,
+and capping its deadline at OpenClaw's would cut a valid drain short. The
+reconstruction is therefore gated on `OPENCLAW_NODE_UPDATE_RESPAWNED`, the marker the
+recovery launcher has stamped on every child it respawns since long before it
+declared a timer. It is present in exactly the upgrade case and absent for any other
+parent, whose job deadline stays unreduced. The shutdown log names a reconstructed
 cap so an operator can tell it from a declared one.
 
 The two failure modes are deliberately different. If the job cannot be inspected
