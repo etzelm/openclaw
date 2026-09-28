@@ -294,151 +294,56 @@ cancellation; the captured parent's cancellation is persisted before that error.
 
 ### Launchd stop deadlines
 
-When a stop is accepted, a macOS Gateway reads the effective `exit timeout` of the
-launchd job it is running inside. It prints the job and accepts the answer only
-when the printed `pid` is this process or the launcher that spawned it, so a
-same-named job in another domain can never supply the deadline. It checks
-`system/<label>`, then `gui/<uid>/<label>`, then `user/<uid>/<label>`, which covers
-an operator-authored LaunchDaemon and an OpenClaw-installed LaunchAgent alike. The
-third target matters for a service account with no logged-in session: that
-account has no gui domain, and launchctl answers `125 Domain does not support
-specified action` for it while `user/<uid>` prints normally.
+On a launchd-driven stop, the macOS Gateway reads the **loaded** job's effective
+`exit timeout` with `launchctl print`. It checks the system, GUI, and user
+domains, and accepts only a job whose PID is the Gateway or its launcher. Restart
+ownership can still be external: the supervisor that enforces the stop, not the
+owner of the next start, determines the deadline. A direct SIGTERM does not start
+launchd's stop clock, so it keeps the existing Gateway stop policy unless an
+OpenClaw launcher independently enforces its own child reap timer.
 
-`ExitTimeOut` bounds a stop that launchd is running, and nothing else, so the
-Gateway adopts it only while the printed job reports launchd stopping it. launchd
-reports `state = SIGTERMed` from the moment it begins its own stop and keeps
-reporting `state = running` while the process handles a signal some other sender
-delivered. Measured on macOS 27 against a job carrying `ExitTimeOut` 47, a
-`launchctl bootout` printed `SIGTERMed` from inside the job's own SIGTERM handler
-and killed it at the 47 second mark, while a plain `kill -TERM` printed `running`
-and left the process alive 85 seconds later. An upgrade watcher or an operator
-signalling the Gateway directly therefore keeps whatever budget the Gateway had
-already resolved. Which budget that is depends on restart ownership: a Gateway whose
-supervisor is launchd keeps the one derived from the LaunchAgent template's exit
-timeout, while one running `OPENCLAW_SUPERVISOR_MODE=external` keeps the
-platform-neutral policy and arms no force-exit timer. launchd is not enforcing a
-deadline on either, which is why refusing the job's value here is the conservative
-answer and not a lost opportunity. One exception is worth knowing: if the Node
-recovery launcher is in the path, a signal delivered to the job pid reaches that
-launcher, which does arm its own reap timer even though launchd is not stopping the
-job. Any unrecognised state counts as not stopping, so the Gateway keeps the budget it
-already had.
+The **stop budget** is time available until the supervisor can kill the process.
+The Gateway sets aside an exit margin (up to 5 seconds) and plans its shutdown
+inside the remainder. **Drain** is the first part of that shutdown: stop admitting
+new work and wait for active turns and background tasks to settle. The rest is
+reserved for final writes and service cleanup (up to 10 seconds). The Gateway
+logs the chosen source, drain, shutdown deadline, reserve, and exit margin.
 
-Once launchd is stopping the job, the deadline follows the supervisor that
-enforces it rather than restart ownership, so `OPENCLAW_SUPERVISOR_MODE=external`
-no longer selects the platform-neutral policy for a launchd-driven stop.
-Active-work drain reserves up to 10 seconds for final chat writes and server
-cleanup, and up to another 5 seconds before launchd's deadline. Both allowances were
-sized against the 315-second platform-neutral drain, where they are rounding error,
-and an operator job may enforce a deadline far shorter than that. Subtracting them
-outright from a short deadline left nothing to drain, so each is bounded when the
-deadline cannot fund it: the exit margin takes at most a quarter of the job's
-deadline, and the reserve yields only as far as keeping 5 seconds of drain requires,
-never below half the shutdown budget. Funding the full 10-second reserve alongside
-that 5-second drain takes 15 seconds of shutdown budget, which is what a 20-second
-`ExitTimeOut` resolves to once inspecting the job itself costs nothing. That inspection
-is up to three `launchctl print` calls at 2 seconds each, so its own cost is bounded
-near 6 seconds, not the low milliseconds a single measured host might suggest, and the
-allocation it yields depends on which side of a 5-second debit the inspection lands on:
+For the installed 20-second LaunchAgent job, the nominal split is 5 seconds of
+drain, 10 seconds for cleanup, and 5 seconds before launchd's deadline. Time
+spent inspecting the job is debited. For a shorter custom deadline the exit
+margin is at most a quarter, and the cleanup reserve gives way to leave active
+work up to 5 seconds of drain (at most half of the remaining shutdown budget
+when it is very short). For example, a 5-second job nominally leaves 1.875
+seconds each for drain and cleanup after its 1.25-second exit margin; a
+15-second job leaves 5 seconds of drain, 6.25 seconds for cleanup, and a
+3.75-second margin. **This reduces cleanup time for custom jobs below 20
+seconds.** The default systemd 90-second deadline is unaffected. The probe can
+consume up to three 2-second calls; a very slow inspection can leave no drain.
 
-- **While the inspection costs 5 seconds or less, the reserve absorbs all of it and the
-  drain is untouched.** A 20-second job resolves a `10000 - debit` reserve against a
-  flat 5-second drain, so it gives up exactly what the inspection cost and nothing more.
-  The measured debit on this host is 13 milliseconds, giving 9987 against 10000.
-- **Past a 5-second debit the drain floor is itself share-bounded and the two converge
-  on half of what is left.** A 6-second debit leaves a 9-second budget on that same
-  20-second job, which splits 4500/4500 rather than retaining the old reserve. Reaching
-  that case takes all three domain probes hitting their full timeout, meaning
-  `launchctl` hanging three times over.
+If a Node-recovery or compile-cache launcher is the job's PID, its own child
+reap timer may be shorter than launchd's deadline. The Gateway caps its budget
+at that timer only when its respawn markers establish that this launcher started
+it; an unrelated parent does not shorten the budget.
 
-Above the template the threshold stops mattering: any deadline whose budget still funds
-15 seconds after the debit keeps the full 10-second reserve alongside the 5-second drain.
+A direct signal to a marked launcher can start its own timer while launchd
+still reports `running`. The Gateway cannot distinguish that forwarded signal
+from a direct signal to its child, where the launcher has no timer, so it does
+not cap this case. Operators stopping a launcher directly should use the loaded
+job stop instead to get an enforceable, reported deadline.
 
-| Job `ExitTimeOut`   | Exit margin | Shutdown deadline | Reserve | Active-work drain | Drain before |
-| ------------------- | ----------- | ----------------- | ------- | ----------------- | ------------ |
-| 5s                  | 1250ms      | 3750ms            | 1875ms  | 1875ms            | 0ms          |
-| 15s                 | 3750ms      | 11250ms           | 6250ms  | 5000ms            | 0ms          |
-| 19s                 | 4750ms      | 14250ms           | 9250ms  | 5000ms            | 4000ms       |
-| 20s (template)      | 5000ms      | 15000ms           | 10000ms | 5000ms            | 5000ms       |
-| 47s                 | 5000ms      | 42000ms           | 10000ms | 32000ms           | 32000ms      |
-| No launchd deadline | 5000ms      | 325000ms          | 10000ms | 315000ms          | 315000ms     |
+`ExitTimeOut=0` means no launchd stop deadline, not a missing value. Without a
+launcher timer, the Gateway keeps its ordinary policy and does not classify the
+job as a native deadline. An unreadable job leaves
+the existing stop policy in place with a warning, while a confirmed stopping
+job whose timeout is missing uses launchd's 20-second default with a warning.
 
-Only a deadline under 20 seconds allocates differently than it used to, and there the
-previous drain was under 5 seconds: zero at 15 seconds and below, where the reserve was
-holding back cleanup time the job had no drain left to reach. Neither the LaunchAgent
-template nor launchd's own default lands in that band; both are 20 seconds.
-
-The allocation therefore leaves active work a positive share of every positive
-deadline, and a longer `ExitTimeOut` never allocates a shorter drain, or a shorter
-reserve, than a shorter one does. The time spent resolving the budget is then debited
-from it, exactly as it already was, so a deadline shorter than that resolution cost can
-still leave nothing to spend.
-
-Raising `ExitTimeOut` past 60 has no effect. launchd honours 1 through 60 exactly and
-silently clamps anything larger, measured on macOS 27 against a bare `/bin/sleep`
-job: a plist asking for 61, 75, 90, 120 or 300 reads back its own value through
-`plutil` while `launchctl print` reports `exit timeout = 60` for each. The Gateway
-reads the enforced value rather than the plist, so the launchd branch of the budget
-cannot exceed 55000ms on that OS however large the plist value is.
-
-When startup recovers from an unsupported Node version, the launchd job is the
-launcher and the serving Gateway is its child, so the job prints the launcher's
-`pid`. The deadline is still read, and it is then capped by the stop timer that
-launcher armed: on a forwarded stop signal `node-runtime-recovery.mjs` re-sends
-SIGTERM to its child, force-kills it one grace later, and exits one grace after that.
-A longer operator `ExitTimeOut` is not spendable under that timer, because the
-launcher would kill the drain before launchd's own deadline arrived. A shorter one
-still applies, because launchd reaps the whole job first.
-
-The launcher does not tell the Gateway that instant. Both derive it from one
-expression in `gateway-shutdown-budget.mjs`, the launcher to arm its escalation and
-the Gateway to bound its budget, so the two cannot disagree. Deriving rather than
-declaring is what makes this work on upgrade: replacing files cannot change a launcher
-that is already running, so the first Gateway built from any change is started by the
-previous launcher. A value that had to be announced would be missing exactly then,
-which is when the mismatch is widest.
-
-Holding the parent slot is not evidence of that timer. An external process manager can
-start the Gateway from inside the same job and run no reap timer at all, and capping
-its deadline at OpenClaw's would cut a valid drain short. The cap is therefore gated on
-the respawn markers a launcher stamps on the child it starts, listed beside the deadline
-they authorise in `gateway-shutdown-budget.mjs`. Every path that respawns the Gateway
-through that launcher sets one of them, including the two compile-cache respawns, so a
-Gateway it started is capped and a parent that set none keeps its job deadline
-unreduced.
-
-While the recovery launcher holds the parent slot, that launcher's timer is the
-binding deadline and it derives from the LaunchAgent template's exit timeout rather
-than from the running job's value. Raising a job's `ExitTimeOut` therefore buys no
-extra drain in this layout: the parent still force-kills at 19000ms, and a budget
-spent past that point would only be truncated. Measured on macOS 27 with a job whose
-enforced deadline was 60000ms, the resolved shutdown budget was 14237ms, held down by
-the launcher rather than the job. An operator who needs a longer drain under the
-recovery launcher has to stop the launcher from being in the path, which a normal
-restart onto a supported Node version does.
-
-The two failure modes are deliberately different. If the job cannot be inspected
-at all, nothing has been established about who is stopping it, so the Gateway
-warns with the target and failure reason and keeps the platform-neutral policy;
-shortening the drain on a failed read would cut work that no launchd deadline was
-bounding. If launchd is stopping the job but its `ExitTimeOut` is missing or
-unparseable, a deadline is definitely running, so the Gateway warns and falls back
-to 20 seconds. That is both launchd's documented default for a job omitting
-`ExitTimeOut` and the value OpenClaw's LaunchAgent template writes. Guessing short
-there only forfeits drain headroom, while guessing long is what lets launchd kill
-an unfinished drain.
-
-The deadline comes from the job launchd has loaded, not from the plist on disk,
-so editing a loaded job's `ExitTimeOut` changes nothing on its own. The loaded
-job keeps reporting its old value after the file changes, and it still does
-after `launchctl kickstart -k`, which restarts the process without reloading the
-job. Only reloading the job, `launchctl bootout` then `launchctl bootstrap`,
-changes what the Gateway will read, and that restarts the Gateway with it.
-
-What reading per stop buys is narrower: the Gateway never plans against a
-deadline it cached at its own startup. Whatever the loaded job reports when the
-stop begins is what the budget spends, which is how one process can resolve the
-platform-neutral policy at startup and a launchd deadline at the stop.
+The value comes from the job launchd has **loaded**, not the plist on disk.
+Editing `ExitTimeOut` or running `launchctl kickstart -k` does not reload it;
+`launchctl bootout` followed by `launchctl bootstrap` does, restarting the
+Gateway. Reading per stop avoids a stale startup snapshot, not a stale loaded
+job. On macOS 27, launchd reports at most 60 seconds even if the plist asks
+for more; inspect the loaded job to confirm the effective value.
 
 ## Host sleep and process freezes
 

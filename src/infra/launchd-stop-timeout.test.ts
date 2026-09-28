@@ -91,6 +91,28 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     expect(execLaunchctl).toHaveBeenCalledTimes(1);
   });
 
+  it("preserves direct-child drain when a marked launcher has not started its timer", async () => {
+    execLaunchctl.mockResolvedValue(printed("running", "\texit timeout = 60\n\tpid = 4241\n"));
+    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({ stop: null });
+  });
+
+  it("keeps launchd's unlimited exit timeout distinct from a missing one", async () => {
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 0\n\tpid = 4242\n"));
+    await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
+      stop: { timeoutMs: Infinity, source: "launchd system/ai.openclaw.gateway unlimited exit timeout" },
+    });
+  });
+
+  it("caps an unlimited launchd stop at the launcher's finite timer", async () => {
+    execLaunchctl.mockResolvedValue(stopping("\texit timeout = 0\n\tpid = 4241\n"));
+    await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
+      stop: {
+        timeoutMs: 19_000,
+        source: "launchd system/ai.openclaw.gateway unlimited exit timeout capped at the launcher's 19000ms stop timer",
+      },
+    });
+  });
+
   // An empty value is deliberately not in this table: there is no state to fail to
   // recognise, so it belongs with the missing-state warning below.
   it.each(["waiting", "exited", "not running", "SIGTERM", "sigtermed"])(

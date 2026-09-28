@@ -198,6 +198,29 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     expect(budget.nativeStopBudget).toBe(false);
   });
 
+  it.each(["external", "launchd"])(
+    "does not treat a launchd ExitTimeOut of zero as a native deadline under %s ownership",
+    async (supervisor) => {
+      execLaunchctl.mockResolvedValue(printed("SIGTERMed", "\texit timeout = 0\n\tpid = 4242\n"));
+      const budget = await resolveGatewayShutdownBudget(
+        supervisor,
+        { info: vi.fn(), warn: vi.fn() },
+        stoppingNow,
+      );
+      expect(budget.timeoutMs).toBe(325_000);
+      expect(budget.nativeStopBudget).toBe(false);
+      const drain = resolveGatewayShutdownDrainBudget({
+        budget,
+        isRestart: true,
+        forceRestart: false,
+        restartWithoutSupervisor: false,
+        acceptedAtMs: performance.now(),
+        requestedRestartDrainTimeoutMs: 600_000,
+      });
+      expect(drain.drainTimeoutMs).toBeGreaterThan(590_000);
+    },
+  );
+
   // A deadline this short cannot fund the fixed 5s margin and 10s reserve, and
   // subtracting them outright left the job's whole 5 seconds spent on overhead with
   // nothing to drain. Each allowance is capped at a share of what it is carved from,

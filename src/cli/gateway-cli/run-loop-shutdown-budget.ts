@@ -82,7 +82,11 @@ export async function resolveGatewayShutdownBudget(
         : GATEWAY_SERVICE_STOP_TIMEOUT_MS,
     source: supervisor === "launchd" ? "launchd ExitTimeOut" : "Gateway stop policy",
   };
-  const nativeStopBudget = nativeStop !== null || supervisor === "launchd" || Boolean(retained);
+  // ExitTimeOut=0 is unlimited. It is an observed job value, not a native
+  // deadline that may cap a requested restart or arm a forced exit.
+  const nativeStopBudget = nativeStop
+    ? Number.isFinite(nativeStop.timeoutMs)
+    : supervisor === "launchd" || Boolean(retained);
   // An operator job may enforce a deadline far shorter than the policy these fixed
   // allowances were sized against, so each is capped at a share of what it is carved
   // from. A deadline long enough to fund them is unaffected; a short one keeps a
