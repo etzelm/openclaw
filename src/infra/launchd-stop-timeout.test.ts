@@ -99,7 +99,10 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
   it("keeps launchd's unlimited exit timeout distinct from a missing one", async () => {
     execLaunchctl.mockResolvedValue(stopping("\texit timeout = 0\n\tpid = 4242\n"));
     await expect(readLaunchdStopTimeout(LAUNCHD_ENV)).resolves.toEqual({
-      stop: { timeoutMs: Infinity, source: "launchd system/ai.openclaw.gateway unlimited exit timeout" },
+      stop: {
+        timeoutMs: Infinity,
+        source: "launchd system/ai.openclaw.gateway unlimited exit timeout",
+      },
     });
   });
 
@@ -108,7 +111,8 @@ describe("launchd stop timeout reads the job launchd is stopping", () => {
     await expect(readLaunchdStopTimeout(RESPAWNED_SERVICE_ENV)).resolves.toEqual({
       stop: {
         timeoutMs: 19_000,
-        source: "launchd system/ai.openclaw.gateway unlimited exit timeout capped at the launcher's 19000ms stop timer",
+        source:
+          "launchd system/ai.openclaw.gateway unlimited exit timeout capped at the launcher's 19000ms stop timer",
       },
     });
   });
