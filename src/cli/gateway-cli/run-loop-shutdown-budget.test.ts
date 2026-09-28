@@ -211,7 +211,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
       expect(budget.nativeStopBudget).toBe(false);
       const drain = resolveGatewayShutdownDrainBudget({
         budget,
-        isRestart: true,
+        action: "restart",
         forceRestart: false,
         restartWithoutSupervisor: false,
         acceptedAtMs: performance.now(),
@@ -442,7 +442,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     expect(budget.nativeStopBudget).toBe(false);
     const drain = resolveGatewayShutdownDrainBudget({
       budget,
-      isRestart: true,
+      action: "restart",
       forceRestart: false,
       restartWithoutSupervisor: false,
       acceptedAtMs: performance.now(),
@@ -466,7 +466,7 @@ describe("Gateway stop deadline follows the launchd stop that is actually runnin
     expect(budget.nativeStopBudget).toBe(true);
     const drain = resolveGatewayShutdownDrainBudget({
       budget,
-      isRestart: true,
+      action: "restart",
       forceRestart: false,
       restartWithoutSupervisor: false,
       acceptedAtMs: performance.now(),
