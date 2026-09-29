@@ -17,6 +17,7 @@ import {
   validateSystemEventParams,
 } from "../../../packages/gateway-protocol/src/schema/system-event.js";
 import { listAgentIds } from "../../agents/agent-scope.js";
+import { getRuntimeAuthProfileStoreCredentialsRevision } from "../../agents/auth-profiles/runtime-snapshots.js";
 import type { UtilityCompletionRuntime } from "../../agents/utility-completion.js";
 import { readUtilityModelSetting } from "../../agents/utility-model-setting.js";
 import { resolveUtilityModelRefForAgent } from "../../agents/utility-model.js";
@@ -54,12 +55,14 @@ let advertisedLanHostPromise: Promise<string | null> | null = null;
 let stateDiskSnapshot:
   | { stateDir: string; expiresAt: number; disk: ReturnType<typeof tryReadDiskSpace> }
   | undefined;
-// Utility route reads stored credential metadata; share the disk cadence and
-// re-resolve at once when the runtime config generation changes.
+// Utility route reads stored credential metadata. Re-resolve at once when the
+// config or credential generation changes; the disk cadence bounds staleness from
+// logins made outside this process (e.g. a CLI's own login).
 let utilityRuntimeSnapshot:
   | {
       config: OpenClawConfig;
       agentId: string;
+      credentialsRevision: number;
       expiresAt: number;
       runtime: Promise<UtilityCompletionRuntime | undefined>;
     }
@@ -71,15 +74,18 @@ const cpuInfoSnapshot = (() => {
 })();
 
 function resolveCachedUtilityRuntime(config: OpenClawConfig, agentId: string) {
+  const credentialsRevision = getRuntimeAuthProfileStoreCredentialsRevision();
   if (
     !utilityRuntimeSnapshot ||
     utilityRuntimeSnapshot.config !== config ||
     utilityRuntimeSnapshot.agentId !== agentId ||
+    utilityRuntimeSnapshot.credentialsRevision !== credentialsRevision ||
     Date.now() >= utilityRuntimeSnapshot.expiresAt
   ) {
     utilityRuntimeSnapshot = {
       config,
       agentId,
+      credentialsRevision,
       expiresAt: Date.now() + 30_000,
       runtime: import("../../agents/utility-completion.js")
         .then(({ resolveUtilityCompletionRuntimeForAgent }) =>

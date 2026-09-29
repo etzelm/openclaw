@@ -12,7 +12,21 @@ const mocks = vi.hoisted(() => ({
   resolveAdvertisedLanHostCore: vi.fn(async () => "192.168.1.20"),
   runCommandWithTimeout: vi.fn(),
   statfs: vi.fn(),
+  credentialsRevision: 0,
+  resolveUtilityRuntime: vi.fn(),
 }));
+
+vi.mock("../../agents/auth-profiles/runtime-snapshots.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../agents/auth-profiles/runtime-snapshots.js")>()),
+  getRuntimeAuthProfileStoreCredentialsRevision: () => mocks.credentialsRevision,
+}));
+
+// Count route lookups while keeping the real owner's answers.
+vi.mock("../../agents/utility-completion.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../agents/utility-completion.js")>();
+  mocks.resolveUtilityRuntime.mockImplementation(actual.resolveUtilityCompletionRuntimeForAgent);
+  return { ...actual, resolveUtilityCompletionRuntimeForAgent: mocks.resolveUtilityRuntime };
+});
 
 vi.mock("../../process/exec.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../process/exec.js")>()),
@@ -185,6 +199,31 @@ describe("system.info", () => {
       model: "anthropic/claude-haiku-4-5",
       runtime: { id: "claude-cli", kind: "cli", label: "Claude CLI" },
     });
+  });
+
+  it("re-resolves the utility route as soon as stored credentials change", async () => {
+    const respond = vi.fn();
+    const config = {
+      agents: {
+        defaults: {
+          model: { primary: "anthropic/claude-opus-4-6" },
+          utilityModel: "anthropic/claude-haiku-4-5",
+        },
+      },
+    };
+    const request = {
+      params: {},
+      respond,
+      context: { getRuntimeConfig: () => config },
+    } as unknown as GatewayRequestHandlerOptions;
+    const handler = expectDefined(systemHandlers["system.info"], "system.info handler");
+    mocks.resolveUtilityRuntime.mockClear();
+    await handler(request);
+    await handler(request);
+    expect(mocks.resolveUtilityRuntime).toHaveBeenCalledTimes(1);
+    mocks.credentialsRevision += 1;
+    await handler(request);
+    expect(mocks.resolveUtilityRuntime).toHaveBeenCalledTimes(2);
   });
 
   it.each([false, true])(
