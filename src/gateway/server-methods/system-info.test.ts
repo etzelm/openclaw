@@ -13,12 +13,18 @@ const mocks = vi.hoisted(() => ({
   runCommandWithTimeout: vi.fn(),
   statfs: vi.fn(),
   credentialsRevision: 0,
+  pluginRegistryVersion: 0,
   resolveUtilityRuntime: vi.fn(),
 }));
 
 vi.mock("../../agents/auth-profiles/runtime-snapshots.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../agents/auth-profiles/runtime-snapshots.js")>()),
   getRuntimeAuthProfileStoreCredentialsRevision: () => mocks.credentialsRevision,
+}));
+
+vi.mock("../../plugins/runtime.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../plugins/runtime.js")>()),
+  getActivePluginRegistryVersion: () => mocks.pluginRegistryVersion,
 }));
 
 // Count route lookups while keeping the real owner's answers.
@@ -201,7 +207,10 @@ describe("system.info", () => {
     });
   });
 
-  it("re-resolves the utility route as soon as stored credentials change", async () => {
+  it.each([
+    ["stored credentials change", () => (mocks.credentialsRevision += 1)],
+    ["the plugin registry is replaced", () => (mocks.pluginRegistryVersion += 1)],
+  ])("re-resolves the utility route as soon as %s", async (_change, change) => {
     const respond = vi.fn();
     const config = {
       agents: {
@@ -221,7 +230,7 @@ describe("system.info", () => {
     await handler(request);
     await handler(request);
     expect(mocks.resolveUtilityRuntime).toHaveBeenCalledTimes(1);
-    mocks.credentialsRevision += 1;
+    change();
     await handler(request);
     expect(mocks.resolveUtilityRuntime).toHaveBeenCalledTimes(2);
   });

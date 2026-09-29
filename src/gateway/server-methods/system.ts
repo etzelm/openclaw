@@ -40,6 +40,7 @@ import {
 } from "../../infra/system-event-ownership.js";
 import { enqueueSystemEvent, isSystemEventContextChanged } from "../../infra/system-events.js";
 import { listSystemPresence, updateSystemPresence } from "../../infra/system-presence.js";
+import { getActivePluginRegistryVersion } from "../../plugins/runtime.js";
 import { normalizeAgentId, resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import { createPresenceRecipientProjection } from "../presence-projection.js";
 import { getGatewayProcessInstanceId } from "../process-instance.js";
@@ -55,14 +56,16 @@ let advertisedLanHostPromise: Promise<string | null> | null = null;
 let stateDiskSnapshot:
   | { stateDir: string; expiresAt: number; disk: ReturnType<typeof tryReadDiskSpace> }
   | undefined;
-// Utility route reads stored credential metadata. Re-resolve at once when the
-// config or credential generation changes; the disk cadence bounds staleness from
-// logins made outside this process (e.g. a CLI's own login).
+// Utility route reads stored credential metadata and registered harnesses.
+// Re-resolve at once when the config, credential, or plugin registry generation
+// changes; the disk cadence bounds staleness from logins made outside this
+// process (e.g. a CLI's own login).
 let utilityRuntimeSnapshot:
   | {
       config: OpenClawConfig;
       agentId: string;
       credentialsRevision: number;
+      pluginRegistryVersion: number;
       expiresAt: number;
       runtime: Promise<UtilityCompletionRuntime | undefined>;
     }
@@ -75,17 +78,20 @@ const cpuInfoSnapshot = (() => {
 
 function resolveCachedUtilityRuntime(config: OpenClawConfig, agentId: string) {
   const credentialsRevision = getRuntimeAuthProfileStoreCredentialsRevision();
+  const pluginRegistryVersion = getActivePluginRegistryVersion();
   if (
     !utilityRuntimeSnapshot ||
     utilityRuntimeSnapshot.config !== config ||
     utilityRuntimeSnapshot.agentId !== agentId ||
     utilityRuntimeSnapshot.credentialsRevision !== credentialsRevision ||
+    utilityRuntimeSnapshot.pluginRegistryVersion !== pluginRegistryVersion ||
     Date.now() >= utilityRuntimeSnapshot.expiresAt
   ) {
     utilityRuntimeSnapshot = {
       config,
       agentId,
       credentialsRevision,
+      pluginRegistryVersion,
       expiresAt: Date.now() + 30_000,
       runtime: import("../../agents/utility-completion.js")
         .then(({ resolveUtilityCompletionRuntimeForAgent }) =>
