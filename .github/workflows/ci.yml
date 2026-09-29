@@ -878,6 +878,9 @@ jobs:
           case "$AUTHOR_ASSOCIATION" in
             OWNER | MEMBER | COLLABORATOR | CONTRIBUTOR) trusted_pull_request=true ;;
           esac
+          # Trusted fork first attempts run on the same Blacksmith labels as
+          # same-repository PRs, so they share its planner profile. Fork retries
+          # route hosted because forks cannot read the backend override.
           if [[
             "$hosted_runner_profile_contract" == "true" &&
             (
@@ -885,7 +888,10 @@ jobs:
               "$GITHUB_REPOSITORY" != "openclaw/openclaw" ||
               (
                 "$GITHUB_EVENT_NAME" == "pull_request" &&
-                ("$HEAD_REPOSITORY" != "$GITHUB_REPOSITORY" || "$trusted_pull_request" != "true")
+                (
+                  "$trusted_pull_request" != "true" ||
+                  ("$HEAD_REPOSITORY" != "$GITHUB_REPOSITORY" && "${GITHUB_RUN_ATTEMPT:-1}" != "1")
+                )
               )
             )
           ]]; then
