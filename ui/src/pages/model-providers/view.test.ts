@@ -774,10 +774,16 @@ describe("renderModelProviders", () => {
   );
 
   it.each([
-    ["claude-cli", "Auto · Claude Haiku 4.5 · Claude CLI · native"],
-    ["openclaw", "Auto · Claude Haiku 4.5 · API · OpenClaw"],
+    [
+      { id: "claude-cli", kind: "cli", label: "Claude CLI" },
+      "Auto · Claude Haiku 4.5 · Claude CLI · native",
+    ],
+    [
+      { id: "openclaw", kind: "api", label: "OpenClaw Default" },
+      "Auto · Claude Haiku 4.5 · API · OpenClaw",
+    ],
     [undefined, "Auto · Claude Haiku 4.5"],
-  ])("names the automatic utility model's %s route", async (runtime, expected) => {
+  ] as const)("names the automatic utility model's route (%o)", async (runtime, expected) => {
     const container = mount(
       props({
         configuredModels: [

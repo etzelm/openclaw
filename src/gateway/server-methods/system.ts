@@ -17,6 +17,7 @@ import {
   validateSystemEventParams,
 } from "../../../packages/gateway-protocol/src/schema/system-event.js";
 import { listAgentIds } from "../../agents/agent-scope.js";
+import type { UtilityCompletionRuntime } from "../../agents/utility-completion.js";
 import { readUtilityModelSetting } from "../../agents/utility-model-setting.js";
 import { resolveUtilityModelRefForAgent } from "../../agents/utility-model.js";
 import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
@@ -60,7 +61,7 @@ let utilityRuntimeSnapshot:
       config: OpenClawConfig;
       agentId: string;
       expiresAt: number;
-      runtime: Promise<string | undefined>;
+      runtime: Promise<UtilityCompletionRuntime | undefined>;
     }
   | undefined;
 // CPU identity belongs to this process; os.cpus() also reads every core's live timings.

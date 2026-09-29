@@ -287,7 +287,7 @@ describe("models.list configured static entries", () => {
     ).resolves.toEqual({
       defaultModels: {
         automaticUtilityModel: "openai/gpt-5.6-luna",
-        automaticUtilityRuntime: "openclaw",
+        automaticUtilityRuntime: { id: "openclaw", kind: "api", label: "OpenClaw Default" },
       },
       models: [
         expect.objectContaining({

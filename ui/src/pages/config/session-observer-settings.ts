@@ -6,7 +6,7 @@ import { providerIdFromModelRef } from "../../components/provider-icon.ts";
 import { renderSettingsRow, renderSettingsToggleRow } from "../../components/settings-ui.ts";
 import { t } from "../../i18n/index.ts";
 import { registerSettingsEnglish } from "../../i18n/locales/en-settings.ts";
-import { formatUtilityModelRuntimeLabel } from "../../lib/model-runtime-label.ts";
+import { formatCompletionRoute } from "../../lib/model-runtime-label.ts";
 
 registerSettingsEnglish();
 
@@ -46,7 +46,7 @@ function resolvedModelLabel(status: SystemInfoResult["defaultAgentUtilityModel"]
   if (status.status === "disabled") {
     return t("configView.sessionObserver.modelDisabled");
   }
-  const runtime = formatUtilityModelRuntimeLabel(status.model, status.runtime);
+  const runtime = formatCompletionRoute(status.runtime)?.label;
   return t(
     status.status === "auto"
       ? "configView.sessionObserver.modelAuto"

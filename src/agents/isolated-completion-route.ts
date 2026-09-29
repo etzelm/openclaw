@@ -97,14 +97,22 @@ export function resolveIsolatedCompletionRoute(params: {
   return cliOwner ? { selection, cliOwner } : { selection };
 }
 
+/** How an isolated completion reaches its model, for provider-neutral route labels. */
+export type IsolatedCompletionRuntime = {
+  id: string;
+  /** api: built-in HTTP runtime; cli: a CLI backend; harness: a plugin agent harness. */
+  kind: "api" | "cli" | "harness";
+  /** Display label a plugin harness declares for itself. */
+  harnessLabel?: string;
+};
+
 /**
- * Runtime id an isolated completion would execute on right now: the CLI backend
- * id, or the selected harness id ("openclaw" for the built-in HTTP runtime).
- * Undefined when no owner can serve the request.
+ * Runtime an isolated completion would execute on right now. Undefined when no
+ * owner can serve the request.
  */
-export function resolveIsolatedCompletionRuntimeId(
+export function resolveIsolatedCompletionRuntime(
   params: IsolatedCompletionRouteParams,
-): string | undefined {
+): IsolatedCompletionRuntime | undefined {
   const config = params.config ?? {};
   try {
     const agentId = params.agentId ?? resolveDefaultAgentId(config);
@@ -125,12 +133,15 @@ export function resolveIsolatedCompletionRuntimeId(
       explicitRuntimeOverride: params.agentHarnessRuntimeOverride,
     });
     if (route.cliOwner) {
-      return route.cliOwner;
+      return { id: route.cliOwner, kind: "cli" };
     }
-    const { harness } = route.selection;
+    const { harness, selectedHarnessId } = route.selection;
+    if (!harness) {
+      return { id: selectedHarnessId, kind: "api" };
+    }
     // A plugin harness without isolated completion support fails the run.
-    return !harness || harness.runIsolatedCompletionV2 || harness.runIsolatedCompletion
-      ? route.selection.selectedHarnessId
+    return harness.runIsolatedCompletionV2 || harness.runIsolatedCompletion
+      ? { id: selectedHarnessId, kind: "harness", harnessLabel: harness.label }
       : undefined;
   } catch {
     // Status displays must not fail their response. Selection throws for a

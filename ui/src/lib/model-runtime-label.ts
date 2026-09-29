@@ -40,20 +40,19 @@ export function formatModelRuntimeLabel(
   return runtimeId ? { label: formatAgentRuntimeLabel(runtimeId) } : undefined;
 }
 
-/**
- * Route label for a resolved utility model. The built-in runtime is only
- * named where it distinguishes a route (Anthropic API vs Claude CLI).
- */
-export function formatUtilityModelRuntimeLabel(
-  modelRef: string,
-  runtimeId: string | undefined,
-): string | undefined {
-  if (!runtimeId) {
+/** A completion route as the Gateway reports it (system.info, models.list). */
+export type CompletionRoute = { id: string; kind: "api" | "cli" | "harness"; label: string };
+
+/** Provider-neutral route label and billing note for a Gateway-reported completion route. */
+export function formatCompletionRoute(
+  route: CompletionRoute | undefined,
+): { label: string; detail: string } | undefined {
+  if (!route) {
     return undefined;
   }
-  const provider = modelRef.split("/", 1)[0]?.trim().toLowerCase() ?? "";
-  if (runtimeId === "openclaw" && !resolveModelRuntimeRoute(provider, runtimeId)) {
-    return undefined;
-  }
-  return formatModelRuntimeLabel(provider, runtimeId)?.label;
+  const params = { runtime: route.label };
+  return {
+    label: t(`chat.modelControls.completionRoutes.${route.kind}.label`, params),
+    detail: t(`chat.modelControls.completionRoutes.${route.kind}.detail`, params),
+  };
 }

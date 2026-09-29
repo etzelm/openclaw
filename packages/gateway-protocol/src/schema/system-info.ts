@@ -2,13 +2,14 @@
 import type { Static } from "typebox";
 import { Type } from "typebox";
 import { closedObject } from "./closed-object.js";
+import { GatewayCompletionRouteSchema } from "./model-runtime-options.js";
 import { GatewayEventLoopHealthSchema, GatewayProcessMemorySchema } from "./runtime-vitals.js";
 
 /** Empty request payload for Gateway host system information. */
 export const SystemInfoParamsSchema = closedObject({});
 
-/** Runtime utility completions execute on, e.g. "claude-cli" or "openclaw" (HTTP). */
-const UtilityModelRuntimeSchema = Type.Optional(Type.String({ minLength: 1 }));
+/** Where utility completions execute; absent when no owner can serve them. */
+const UtilityModelRuntimeSchema = Type.Optional(GatewayCompletionRouteSchema);
 
 const UtilityModelStatusSchema = Type.Union([
   closedObject({

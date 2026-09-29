@@ -183,7 +183,7 @@ describe("system.info", () => {
     expect(payload.defaultAgentUtilityModel).toEqual({
       status: "configured",
       model: "anthropic/claude-haiku-4-5",
-      runtime: "claude-cli",
+      runtime: { id: "claude-cli", kind: "cli", label: "Claude CLI" },
     });
   });
 

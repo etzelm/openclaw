@@ -4,6 +4,7 @@ import { closedObject } from "./closed-object.js";
 import { ChatAccountSelectionSchema, ModelAuthProfileIdSchema } from "./model-account-selection.js";
 import {
   GatewayAgentRuntimeSchema,
+  GatewayCompletionRouteSchema,
   GatewayContextWindowOptionSchema,
   GatewayThinkingLevelOptionSchema,
 } from "./model-runtime-options.js";
@@ -172,7 +173,7 @@ export const ModelsListResultSchema = closedObject({
       /** Auto preview from agents.defaults.model, even when utility routing is explicit or disabled. */
       automaticUtilityModel: Type.Union([NonEmptyString, Type.Null()]),
       /** Runtime the automatic utility model executes on; present only while utility routing is automatic. */
-      automaticUtilityRuntime: Type.Optional(NonEmptyString),
+      automaticUtilityRuntime: Type.Optional(GatewayCompletionRouteSchema),
     }),
   ),
   refreshFailed: Type.Optional(Type.Boolean()),

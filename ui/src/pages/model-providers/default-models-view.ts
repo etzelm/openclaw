@@ -21,7 +21,7 @@ import {
   listEffectiveModelAuthProviders,
 } from "../../lib/model-auth.ts";
 import { describeModelProviderAuth } from "../../lib/model-provider-auth-label.ts";
-import { formatUtilityModelRuntimeLabel } from "../../lib/model-runtime-label.ts";
+import { formatCompletionRoute, type CompletionRoute } from "../../lib/model-runtime-label.ts";
 import type { ModelProviderRowMessage } from "./config-mutation.ts";
 import { modelCatalogRef, type DefaultModelSelection, type ModelPickerEntry } from "./data.ts";
 import { renderMutationMessage } from "./view-status.ts";
@@ -32,8 +32,8 @@ export type DefaultModelsViewProps = {
   selection: DefaultModelSelection;
   authStatus?: ModelAuthStatusResult | null;
   automaticUtilityModel?: string | null;
-  /** Runtime the automatic utility model executes on, when utility routing is automatic. */
-  automaticUtilityRuntime?: string;
+  /** Route the automatic utility model executes on, when utility routing is automatic. */
+  automaticUtilityRuntime?: CompletionRoute;
   thinkingLevel: string | undefined;
   thinkingOverridden: boolean;
   fastMode: FastMode | undefined;
@@ -189,6 +189,7 @@ export function renderDefaultModels(props: DefaultModelsViewProps) {
   );
   const options = modelOptions(props.models, authProviders);
   const automaticRef = props.automaticUtilityModel;
+  const automaticRoute = formatCompletionRoute(props.automaticUtilityRuntime);
   const automaticBaseRef = automaticRef ? splitTrailingAuthProfile(automaticRef).model : "";
   const automaticEntry = props.models.find((model) => modelCatalogRef(model) === automaticBaseRef);
   const automaticModel = automaticRef
@@ -254,10 +255,7 @@ export function renderDefaultModels(props: DefaultModelsViewProps) {
                 ? [
                     t("quickSettings.model.fastModes.auto"),
                     automaticModel?.label ?? props.automaticUtilityModel,
-                    formatUtilityModelRuntimeLabel(
-                      props.automaticUtilityModel,
-                      props.automaticUtilityRuntime,
-                    ),
+                    automaticRoute?.label,
                   ]
                     .filter(Boolean)
                     .join(" · ")
@@ -266,7 +264,8 @@ export function renderDefaultModels(props: DefaultModelsViewProps) {
               detail:
                 automaticRef === null
                   ? t("modelProviders.defaults.automaticUnavailable")
-                  : automaticModel?.detail,
+                  : [automaticModel?.detail, automaticRoute?.detail].filter(Boolean).join(" ") ||
+                    undefined,
             },
             { value: "", label: t("modelProviders.defaults.disabled") },
             ...options,
