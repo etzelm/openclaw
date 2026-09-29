@@ -53,12 +53,18 @@ import {
 import { isPreparedModelCatalogFull } from "../../agents/prepared-model-runtime.full-catalog.js";
 import { preparedModelRuntimeConfigsMatch } from "../../agents/prepared-model-runtime.js";
 import { resolveSessionModelRef } from "../../agents/session-model-ref.js";
-import { resolveAutomaticUtilityModelRef } from "../../agents/utility-model.js";
+import { readUtilityModelSetting } from "../../agents/utility-model-setting.js";
+import {
+  resolveAutomaticUtilityModelRef,
+  resolveUtilityModelRefForAgent,
+} from "../../agents/utility-model.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
 import { createThinkingCatalogResolver } from "../../auto-reply/thinking.js";
 import { getRuntimeConfig, getRuntimeConfigSourceSnapshot } from "../../config/config.js";
+import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
 import { resolveAgentModelPrimaryValue } from "../../config/model-input.js";
 import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { resolveProviderModelCatalogId } from "../../plugins/provider-model-routes.js";
 import { withPluginRuntimeRegistryScope } from "../../plugins/runtime/gateway-request-scope.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
@@ -275,6 +281,48 @@ type BuildModelsListResultParams = {
   routeResolverFactory?: typeof createOpenAIModelRoutesResolver;
 };
 
+/** Auto utility preview from agents.defaults.model, plus its route while utility routing is automatic. */
+async function resolveDefaultModelsPreview(params: {
+  cfg: OpenClawConfig;
+  metadataSnapshot: Pick<PluginMetadataSnapshot, "owners" | "plugins"> | undefined;
+}): Promise<NonNullable<ModelsListResult["defaultModels"]>> {
+  const { cfg, metadataSnapshot } = params;
+  const automaticUtilityModel =
+    resolveAutomaticUtilityModelRef({
+      cfg,
+      primaryProvider: resolveDefaultModelForAgent({
+        cfg,
+        manifestPlugins: metadataSnapshot,
+        allowPluginNormalization: false,
+      }).provider,
+      primaryModelRef: resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model),
+      metadataSnapshot,
+    }) ?? null;
+  // Only a sole default agent runs the defaults preview; with several agents each owns its route.
+  const agentId = tryResolveLegacyCompatibilityAgentId(cfg);
+  // An explicit or disabled setting never runs the preview, so it has no route to report;
+  // a default agent whose own primary derives another model would report that model's route.
+  if (
+    !automaticUtilityModel ||
+    !agentId ||
+    readUtilityModelSetting(cfg, agentId).kind !== "auto" ||
+    resolveUtilityModelRefForAgent({ cfg, agentId, metadataSnapshot }) !== automaticUtilityModel
+  ) {
+    return { automaticUtilityModel };
+  }
+  const { resolveUtilityCompletionRuntimeForAgent } =
+    await import("../../agents/utility-completion.js");
+  const automaticUtilityRuntime = await resolveUtilityCompletionRuntimeForAgent({
+    cfg,
+    agentId,
+    ...(metadataSnapshot ? { manifestPlugins: metadataSnapshot } : {}),
+  });
+  return {
+    automaticUtilityModel,
+    ...(automaticUtilityRuntime ? { automaticUtilityRuntime } : {}),
+  };
+}
+
 export async function buildModelsListResult(
   params: BuildModelsListResultParams,
 ): Promise<ModelsListResult> {
@@ -459,26 +507,15 @@ export async function prepareModelsListResult(
         [...visibilityPolicy.allowedKeys].some((key) => key.startsWith(`${provider}/`))),
   );
   draft?.assertCurrent();
+  const defaultModels =
+    (params.params.includeDefaultModels ??
+    (view === "configured" && !params.params.sessionKey && !params.params.authProfileId))
+      ? await resolveDefaultModelsPreview({ cfg, metadataSnapshot })
+      : undefined;
+  draft?.assertCurrent();
   const outcomeProjection = {
     ...(pendingProviders?.length ? { pendingProviders } : {}),
-    ...((params.params.includeDefaultModels ??
-    (view === "configured" && !params.params.sessionKey && !params.params.authProfileId))
-      ? {
-          defaultModels: {
-            automaticUtilityModel:
-              resolveAutomaticUtilityModelRef({
-                cfg,
-                primaryProvider: resolveDefaultModelForAgent({
-                  cfg,
-                  manifestPlugins: metadataSnapshot,
-                  allowPluginNormalization: false,
-                }).provider,
-                primaryModelRef: resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model),
-                metadataSnapshot,
-              }) ?? null,
-          },
-        }
-      : {}),
+    ...(defaultModels ? { defaultModels } : {}),
     ...(publicProviderOutcomes?.length ? { providerOutcomes: publicProviderOutcomes } : {}),
     ...(snapshot.refreshFailed ? { refreshFailed: true } : {}),
     ...(view === "provider-config" || (!scope && !params.requesterProfileId)

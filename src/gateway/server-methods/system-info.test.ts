@@ -158,6 +158,35 @@ describe("system.info", () => {
     });
   });
 
+  it("reports the runtime the default agent's utility completions execute on", async () => {
+    const respond = vi.fn();
+    const config = {
+      agents: {
+        defaults: {
+          model: { primary: "anthropic/claude-opus-4-6" },
+          utilityModel: "anthropic/claude-haiku-4-5",
+          models: { "anthropic/claude-haiku-4-5": { agentRuntime: { id: "claude-cli" } } },
+        },
+      },
+    };
+    const request = {
+      params: {},
+      respond,
+      context: { getRuntimeConfig: () => config },
+    } as unknown as GatewayRequestHandlerOptions;
+    const handler = expectDefined(systemHandlers["system.info"], "system.info handler");
+    await handler(request);
+    const payload = respond.mock.calls[0]?.[1];
+    if (!validateSystemInfoResult(payload)) {
+      throw new Error("system.info returned an invalid payload");
+    }
+    expect(payload.defaultAgentUtilityModel).toEqual({
+      status: "configured",
+      model: "anthropic/claude-haiku-4-5",
+      runtime: "claude-cli",
+    });
+  });
+
   it.each([false, true])(
     "bounds state-volume reads, keeps live counters and invalidates on expiry or path change (unavailable=%s)",
     async (unavailable) => {

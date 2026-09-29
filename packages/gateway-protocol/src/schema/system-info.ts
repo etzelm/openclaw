@@ -7,9 +7,20 @@ import { GatewayEventLoopHealthSchema, GatewayProcessMemorySchema } from "./runt
 /** Empty request payload for Gateway host system information. */
 export const SystemInfoParamsSchema = closedObject({});
 
+/** Runtime utility completions execute on, e.g. "claude-cli" or "openclaw" (HTTP). */
+const UtilityModelRuntimeSchema = Type.Optional(Type.String({ minLength: 1 }));
+
 const UtilityModelStatusSchema = Type.Union([
-  closedObject({ status: Type.Literal("auto"), model: Type.String({ minLength: 1 }) }),
-  closedObject({ status: Type.Literal("configured"), model: Type.String({ minLength: 1 }) }),
+  closedObject({
+    status: Type.Literal("auto"),
+    model: Type.String({ minLength: 1 }),
+    runtime: UtilityModelRuntimeSchema,
+  }),
+  closedObject({
+    status: Type.Literal("configured"),
+    model: Type.String({ minLength: 1 }),
+    runtime: UtilityModelRuntimeSchema,
+  }),
   closedObject({ status: Type.Literal("disabled") }),
   closedObject({ status: Type.Literal("unavailable") }),
 ]);

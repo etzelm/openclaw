@@ -662,6 +662,7 @@ export class ModelProvidersPage extends OpenClawLightDomElement {
       defaultModels: defaults,
       authStatus: data.authStatus,
       automaticUtilityModel: catalog?.defaultModels?.automaticUtilityModel,
+      automaticUtilityRuntime: catalog?.defaultModels?.automaticUtilityRuntime,
       thinkingLevel: defaults.thinkingLevel,
       thinkingOverridden: defaults.thinkingOverridden,
       fastMode: defaults.fastMode,

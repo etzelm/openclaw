@@ -21,6 +21,7 @@ import {
   listEffectiveModelAuthProviders,
 } from "../../lib/model-auth.ts";
 import { describeModelProviderAuth } from "../../lib/model-provider-auth-label.ts";
+import { formatUtilityModelRuntimeLabel } from "../../lib/model-runtime-label.ts";
 import type { ModelProviderRowMessage } from "./config-mutation.ts";
 import { modelCatalogRef, type DefaultModelSelection, type ModelPickerEntry } from "./data.ts";
 import { renderMutationMessage } from "./view-status.ts";
@@ -31,6 +32,8 @@ export type DefaultModelsViewProps = {
   selection: DefaultModelSelection;
   authStatus?: ModelAuthStatusResult | null;
   automaticUtilityModel?: string | null;
+  /** Runtime the automatic utility model executes on, when utility routing is automatic. */
+  automaticUtilityRuntime?: string;
   thinkingLevel: string | undefined;
   thinkingOverridden: boolean;
   fastMode: FastMode | undefined;
@@ -248,7 +251,16 @@ export function renderDefaultModels(props: DefaultModelsViewProps) {
             {
               value: AUTOMATIC_UTILITY_VALUE,
               label: props.automaticUtilityModel
-                ? `${t("quickSettings.model.fastModes.auto")} · ${automaticModel?.label ?? props.automaticUtilityModel}`
+                ? [
+                    t("quickSettings.model.fastModes.auto"),
+                    automaticModel?.label ?? props.automaticUtilityModel,
+                    formatUtilityModelRuntimeLabel(
+                      props.automaticUtilityModel,
+                      props.automaticUtilityRuntime,
+                    ),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
                 : t("quickSettings.model.fastModes.auto"),
               provider: automaticModel?.provider,
               detail:

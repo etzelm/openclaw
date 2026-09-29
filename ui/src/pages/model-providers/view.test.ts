@@ -773,6 +773,40 @@ describe("renderModelProviders", () => {
     },
   );
 
+  it.each([
+    ["claude-cli", "Auto · Claude Haiku 4.5 · Claude CLI · native"],
+    ["openclaw", "Auto · Claude Haiku 4.5 · API · OpenClaw"],
+    [undefined, "Auto · Claude Haiku 4.5"],
+  ])("names the automatic utility model's %s route", async (runtime, expected) => {
+    const container = mount(
+      props({
+        configuredModels: [
+          { id: "claude-opus", provider: "anthropic", name: "Claude Opus", available: true },
+          {
+            id: "claude-haiku-4-5",
+            provider: "anthropic",
+            name: "Claude Haiku 4.5",
+            available: true,
+          },
+        ],
+        defaultModels: { primary: "anthropic/claude-opus", fallbacks: [], utilityModel: null },
+        automaticUtilityModel: "anthropic/claude-haiku-4-5",
+        ...(runtime ? { automaticUtilityRuntime: runtime } : {}),
+      }),
+    );
+    await updatePickers(container);
+    const selected = text(
+      container
+        .querySelectorAll(".model-providers__defaults openclaw-select-picker")[1]
+        ?.querySelector('[role="option"][aria-selected="true"]') ?? null,
+    );
+    expect(selected.startsWith(expected)).toBe(true);
+    if (!runtime) {
+      expect(selected).not.toContain("Claude CLI");
+      expect(selected).not.toContain("API · OpenClaw");
+    }
+  });
+
   it("disables probing when the gateway does not advertise the method", () => {
     const onProbe = vi.fn();
     const container = mount(props({ probeAvailable: false, onProbe }));

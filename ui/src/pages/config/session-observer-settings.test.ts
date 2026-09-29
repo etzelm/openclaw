@@ -58,4 +58,53 @@ describe("session observer settings patches", () => {
     expect(option("GPT Mini")?.getAttribute("aria-disabled") === "true").toBe(true);
     expect(container.textContent).toContain("Explicit model catalog unavailable");
   });
+
+  it.each([
+    ["claude-cli", "auto (anthropic/claude-haiku-4-5 · Claude CLI · native)"],
+    ["openclaw", "auto (anthropic/claude-haiku-4-5 · API · OpenClaw)"],
+    [undefined, "auto (anthropic/claude-haiku-4-5)"],
+  ])("names the resolved small model's %s route", (runtime, expected) => {
+    const container = document.createElement("div");
+    render(
+      renderSessionObserverSettings({
+        enabled: true,
+        utilityModel: undefined,
+        resolvedUtilityModel: {
+          status: "auto",
+          model: "anthropic/claude-haiku-4-5",
+          ...(runtime ? { runtime } : {}),
+        },
+        models: [],
+        modelsUnavailable: false,
+        disabled: false,
+        onEnabledChange: () => undefined,
+        onUtilityModelChange: () => undefined,
+      }),
+      container,
+    );
+    expect(container.textContent).toContain(expected);
+  });
+
+  it("does not name the built-in runtime where it is not a route choice", () => {
+    const container = document.createElement("div");
+    render(
+      renderSessionObserverSettings({
+        enabled: true,
+        utilityModel: "openai/gpt-5-mini",
+        resolvedUtilityModel: {
+          status: "configured",
+          model: "openai/gpt-5-mini",
+          runtime: "openclaw",
+        },
+        models: [],
+        modelsUnavailable: false,
+        disabled: false,
+        onEnabledChange: () => undefined,
+        onUtilityModelChange: () => undefined,
+      }),
+      container,
+    );
+    expect(container.textContent).toContain("configured (openai/gpt-5-mini)");
+    expect(container.textContent).not.toContain("OpenClaw)");
+  });
 });
