@@ -281,7 +281,10 @@ type BuildModelsListResultParams = {
   routeResolverFactory?: typeof createOpenAIModelRoutesResolver;
 };
 
-/** Auto utility preview from agents.defaults.model, plus its route while utility routing is automatic. */
+/**
+ * Auto utility preview from agents.defaults.model, plus the route the utility
+ * model in effect (automatic or explicit) runs on.
+ */
 async function resolveDefaultModelsPreview(params: {
   cfg: OpenClawConfig;
   metadataSnapshot: Pick<PluginMetadataSnapshot, "owners" | "plugins"> | undefined;
@@ -298,29 +301,34 @@ async function resolveDefaultModelsPreview(params: {
       primaryModelRef: resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model),
       metadataSnapshot,
     }) ?? null;
-  // Only a sole default agent runs the defaults preview; with several agents each owns its route.
+  // The picker shows the defaults for all agents, so report a route only for a sole
+  // agent that runs exactly that setting: its own override would describe another model.
   const agentId = tryResolveLegacyCompatibilityAgentId(cfg);
-  // An explicit or disabled setting never runs the preview, so it has no route to report;
-  // a default agent whose own primary derives another model would report that model's route.
+  const defaults = readUtilityModelSetting(cfg);
+  const effective = agentId ? readUtilityModelSetting(cfg, agentId) : undefined;
   if (
-    !automaticUtilityModel ||
     !agentId ||
-    readUtilityModelSetting(cfg, agentId).kind !== "auto" ||
-    resolveUtilityModelRefForAgent({ cfg, agentId, metadataSnapshot }) !== automaticUtilityModel
+    !effective ||
+    effective.kind !== defaults.kind ||
+    effective.kind === "disabled" ||
+    (effective.kind === "explicit" &&
+      defaults.kind === "explicit" &&
+      effective.modelRef !== defaults.modelRef) ||
+    (effective.kind === "auto" &&
+      (!automaticUtilityModel ||
+        resolveUtilityModelRefForAgent({ cfg, agentId, metadataSnapshot }) !==
+          automaticUtilityModel))
   ) {
     return { automaticUtilityModel };
   }
   const { resolveUtilityCompletionRuntimeForAgent } =
     await import("../../agents/utility-completion.js");
-  const automaticUtilityRuntime = await resolveUtilityCompletionRuntimeForAgent({
+  const utilityRuntime = await resolveUtilityCompletionRuntimeForAgent({
     cfg,
     agentId,
     ...(metadataSnapshot ? { manifestPlugins: metadataSnapshot } : {}),
   });
-  return {
-    automaticUtilityModel,
-    ...(automaticUtilityRuntime ? { automaticUtilityRuntime } : {}),
-  };
+  return { automaticUtilityModel, ...(utilityRuntime ? { utilityRuntime } : {}) };
 }
 
 export async function buildModelsListResult(

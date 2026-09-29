@@ -172,8 +172,8 @@ export const ModelsListResultSchema = closedObject({
     closedObject({
       /** Auto preview from agents.defaults.model, even when utility routing is explicit or disabled. */
       automaticUtilityModel: Type.Union([NonEmptyString, Type.Null()]),
-      /** Runtime the automatic utility model executes on; present only while utility routing is automatic. */
-      automaticUtilityRuntime: Type.Optional(GatewayCompletionRouteSchema),
+      /** Route the utility model in effect (automatic or explicit) runs on; absent when disabled. */
+      utilityRuntime: Type.Optional(GatewayCompletionRouteSchema),
     }),
   ),
   refreshFailed: Type.Optional(Type.Boolean()),

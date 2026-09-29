@@ -32,8 +32,8 @@ export type DefaultModelsViewProps = {
   selection: DefaultModelSelection;
   authStatus?: ModelAuthStatusResult | null;
   automaticUtilityModel?: string | null;
-  /** Route the automatic utility model executes on, when utility routing is automatic. */
-  automaticUtilityRuntime?: CompletionRoute;
+  /** Route the utility model in effect (automatic or explicit) runs on. */
+  utilityRuntime?: CompletionRoute;
   thinkingLevel: string | undefined;
   thinkingOverridden: boolean;
   fastMode: FastMode | undefined;
@@ -189,7 +189,13 @@ export function renderDefaultModels(props: DefaultModelsViewProps) {
   );
   const options = modelOptions(props.models, authProviders);
   const automaticRef = props.automaticUtilityModel;
-  const automaticRoute = formatCompletionRoute(props.automaticUtilityRuntime);
+  const utilityValue = props.selection.utilityModel ?? AUTOMATIC_UTILITY_VALUE;
+  const utilityRoute = formatCompletionRoute(props.utilityRuntime);
+  // The route describes the model in effect, so it joins that option's account detail.
+  const withUtilityRoute = (value: string, detail: string | undefined) =>
+    value === utilityValue && utilityRoute
+      ? [detail, utilityRoute.label].filter(Boolean).join(" · ")
+      : detail;
   const automaticBaseRef = automaticRef ? splitTrailingAuthProfile(automaticRef).model : "";
   const automaticEntry = props.models.find((model) => modelCatalogRef(model) === automaticBaseRef);
   const automaticModel = automaticRef
@@ -247,31 +253,28 @@ export function renderDefaultModels(props: DefaultModelsViewProps) {
         control: renderModelPicker({
           id: UTILITY_MODEL_PICKER_ID,
           label: t("modelProviders.defaults.utility"),
-          value: props.selection.utilityModel ?? AUTOMATIC_UTILITY_VALUE,
+          value: utilityValue,
           options: [
             {
               value: AUTOMATIC_UTILITY_VALUE,
               label: props.automaticUtilityModel
-                ? [
-                    t("quickSettings.model.fastModes.auto"),
-                    automaticModel?.label ?? props.automaticUtilityModel,
-                    automaticRoute?.label,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")
+                ? `${t("quickSettings.model.fastModes.auto")} · ${automaticModel?.label ?? props.automaticUtilityModel}`
                 : t("quickSettings.model.fastModes.auto"),
               provider: automaticModel?.provider,
               detail:
                 automaticRef === null
                   ? t("modelProviders.defaults.automaticUnavailable")
-                  : [automaticModel?.detail, automaticRoute?.detail].filter(Boolean).join(" ") ||
-                    undefined,
+                  : withUtilityRoute(AUTOMATIC_UTILITY_VALUE, automaticModel?.detail),
             },
             { value: "", label: t("modelProviders.defaults.disabled") },
-            ...options,
+            ...options.map((option) => {
+              const detail = withUtilityRoute(option.value, option.detail);
+              return detail === option.detail ? option : { ...option, detail };
+            }),
           ],
           disabled: modelControlsDisabled || saving,
-          title,
+          // A blocked mutation explains itself first; otherwise the tooltip explains the route.
+          title: title || utilityRoute?.detail || "",
           showSelectedDetail: true,
           onChange: (value) =>
             props.onUtilityChange(value === AUTOMATIC_UTILITY_VALUE ? null : value),
