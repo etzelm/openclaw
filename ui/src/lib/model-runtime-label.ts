@@ -14,7 +14,7 @@ const AGENT_RUNTIME_LABELS: Readonly<Record<string, string>> = {
   openclaw: "OpenClaw",
 };
 
-export function formatAgentRuntimeLabel(id: string): string {
+function formatAgentRuntimeLabel(id: string): string {
   const normalized = id.trim().toLowerCase();
   return (
     AGENT_RUNTIME_LABELS[normalized] ??
