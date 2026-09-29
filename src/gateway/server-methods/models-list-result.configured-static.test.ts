@@ -304,6 +304,23 @@ describe("models.list configured static entries", () => {
     });
   });
 
+  it("reports no automatic utility route when an explicit utility model runs instead", async () => {
+    const result = await listModels({
+      catalog: [],
+      staticEntries: [catalogEntry("gpt-5.6-sol", "openai-responses")],
+      cfg: {
+        agents: {
+          defaults: {
+            model: { primary: "openai/gpt-5.6-sol" },
+            utilityModel: "openai/gpt-5.6-sol",
+          },
+        },
+      } as OpenClawConfig,
+      view: "configured",
+    });
+    expect(result.defaultModels).toEqual({ automaticUtilityModel: "openai/gpt-5.6-luna" });
+  });
+
   it("projects agent aliases onto inherited default and fallback catalog rows", async () => {
     await withEnvAsync(WITHOUT_OPENAI_ENV_AUTH, async () => {
       const cfg = {

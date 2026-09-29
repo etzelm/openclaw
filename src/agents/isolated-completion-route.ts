@@ -106,13 +106,13 @@ export function resolveIsolatedCompletionRuntimeId(
   params: IsolatedCompletionRouteParams,
 ): string | undefined {
   const config = params.config ?? {};
-  const agentId = params.agentId ?? resolveDefaultAgentId(config);
-  const { provider, runtimeOverride } = resolveIsolatedCompletionProvider({
-    provider: params.provider,
-    config,
-    agentHarnessRuntimeOverride: params.agentHarnessRuntimeOverride,
-  });
   try {
+    const agentId = params.agentId ?? resolveDefaultAgentId(config);
+    const { provider, runtimeOverride } = resolveIsolatedCompletionProvider({
+      provider: params.provider,
+      config,
+      agentHarnessRuntimeOverride: params.agentHarnessRuntimeOverride,
+    });
     const route = resolveIsolatedCompletionRoute({
       config,
       provider,
@@ -124,10 +124,18 @@ export function resolveIsolatedCompletionRuntimeId(
       runtimeOverride,
       explicitRuntimeOverride: params.agentHarnessRuntimeOverride,
     });
-    return route.cliOwner ?? route.selection.selectedHarnessId;
+    if (route.cliOwner) {
+      return route.cliOwner;
+    }
+    const { harness } = route.selection;
+    // A plugin harness without isolated completion support fails the run.
+    return !harness || harness.runIsolatedCompletionV2 || harness.runIsolatedCompletion
+      ? route.selection.selectedHarnessId
+      : undefined;
   } catch {
-    // Selection throws for a pinned harness that is missing or unsupported;
-    // the completion would fail too, so there is no route to report.
+    // Status displays must not fail their response. Selection throws for a
+    // pinned harness that is missing or unsupported; the completion would
+    // fail too, so there is no route to report.
     return undefined;
   }
 }
