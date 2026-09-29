@@ -85,6 +85,11 @@ describe("session observer settings patches", () => {
       { id: "google-gemini-cli", kind: "cli", label: "Gemini CLI" },
       "auto (google/gemini-flash · Gemini CLI · native)",
     ],
+    [
+      "haiku",
+      { id: "openclaw", kind: "api", label: "OpenClaw Default" },
+      "auto (haiku · API · OpenClaw)",
+    ],
     ["anthropic/claude-haiku-4-5", undefined, "auto (anthropic/claude-haiku-4-5)"],
   ] as const)("names the resolved small model's route for %s on %o", (model, runtime, expected) => {
     const container = document.createElement("div");
