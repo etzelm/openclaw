@@ -788,11 +788,19 @@ describe("renderModelProviders", () => {
   ];
 
   it.each([
-    [{ id: "claude-cli", kind: "cli", label: "Claude CLI" }, "Claude CLI · native"],
-    [{ id: "openclaw", kind: "api", label: "OpenClaw Default" }, "API · OpenClaw"],
+    [
+      { id: "claude-cli", kind: "cli", label: "Claude CLI" },
+      "Claude CLI · native",
+      "Runs through Claude CLI using its own login.",
+    ],
+    [
+      { id: "openclaw", kind: "api", label: "OpenClaw Default" },
+      "API · OpenClaw",
+      "Uses the provider's API connection",
+    ],
   ] as const)(
     "shows the automatic utility model's route in its detail line (%o)",
-    async (runtime, route) => {
+    async (runtime, route, billing) => {
       const container = mount(
         props({
           configuredModels: utilityModels,
@@ -805,6 +813,10 @@ describe("renderModelProviders", () => {
       const automatic = utilityOption(container, "__openclaw_automatic_utility__");
       expect(automatic.label).toBe("Auto · Claude Haiku 4.5");
       expect(automatic.detail).toContain(route);
+      const trigger = container
+        .querySelectorAll(".model-providers__defaults openclaw-select-picker")[1]
+        ?.querySelector<HTMLButtonElement>("button[aria-haspopup]");
+      expect(trigger?.title).toContain(billing);
     },
   );
 
