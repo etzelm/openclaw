@@ -302,6 +302,8 @@ describe("operator model discovery at registered reads", () => {
       await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
         const f = createFixture();
         expectDefined(f.cfg.agents?.defaults, "agent defaults").utilityModel = utilityModel;
+        expectDefined(f.cfg.models?.providers?.example, "example provider").apiKey =
+          "synthetic-key";
         await state.writeConfig(f.cfg);
         const respond = await f.request("models.list", { agentId: "main", view: "configured" });
         expect(respond.mock.calls[0]?.[0]).toBe(true);

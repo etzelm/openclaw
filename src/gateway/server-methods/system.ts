@@ -17,14 +17,12 @@ import {
   validateSystemEventParams,
 } from "../../../packages/gateway-protocol/src/schema/system-event.js";
 import { listAgentIds } from "../../agents/agent-scope.js";
-import { getRuntimeAuthProfileStoreCredentialsRevision } from "../../agents/auth-profiles/runtime-snapshots.js";
-import type { UtilityCompletionRuntime } from "../../agents/utility-completion.js";
+import { preparedModelRuntimeConfigsMatch } from "../../agents/prepared-model-runtime.js";
 import { readUtilityModelSetting } from "../../agents/utility-model-setting.js";
 import { resolveUtilityModelRefForAgent } from "../../agents/utility-model.js";
 import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
 import { resolveGatewayPort, resolveStateDir } from "../../config/paths.js";
 import { resolveSystemMainSessionTarget } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import { resolveAdvertisedLanHostCore } from "../../infra/advertised-lan-host.js";
 import { loadOrCreateProcessDeviceIdentityAsync } from "../../infra/device-identity-async.js";
 import { publicKeyRawBase64UrlFromPem } from "../../infra/device-identity.js";
@@ -40,10 +38,10 @@ import {
 } from "../../infra/system-event-ownership.js";
 import { enqueueSystemEvent, isSystemEventContextChanged } from "../../infra/system-events.js";
 import { listSystemPresence, updateSystemPresence } from "../../infra/system-presence.js";
-import { getActivePluginRegistryVersion } from "../../plugins/runtime.js";
 import { normalizeAgentId, resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import { createPresenceRecipientProjection } from "../presence-projection.js";
 import { getGatewayProcessInstanceId } from "../process-instance.js";
+import { readPreparedCatalog } from "../server-model-catalog-auth.js";
 import { readGatewayProcessVitals } from "../server/process-vitals.js";
 import { resolveRequestedSessionAgentId } from "../session-request-agent.js";
 import { getSessionRowProjection } from "../session-row-projection-access.js";
@@ -56,52 +54,11 @@ let advertisedLanHostPromise: Promise<string | null> | null = null;
 let stateDiskSnapshot:
   | { stateDir: string; expiresAt: number; disk: ReturnType<typeof tryReadDiskSpace> }
   | undefined;
-// Utility route reads stored credential metadata and registered harnesses.
-// Re-resolve at once when the config, credential, or plugin registry generation
-// changes; the disk cadence bounds staleness from logins made outside this
-// process (e.g. a CLI's own login).
-let utilityRuntimeSnapshot:
-  | {
-      config: OpenClawConfig;
-      agentId: string;
-      credentialsRevision: number;
-      pluginRegistryVersion: number;
-      expiresAt: number;
-      runtime: Promise<UtilityCompletionRuntime | undefined>;
-    }
-  | undefined;
 // CPU identity belongs to this process; os.cpus() also reads every core's live timings.
 const cpuInfoSnapshot = (() => {
   const cpus = os.cpus();
   return { cpuCount: cpus.length, cpuModel: cpus[0]?.model.trim() || undefined };
 })();
-
-function resolveCachedUtilityRuntime(config: OpenClawConfig, agentId: string) {
-  const credentialsRevision = getRuntimeAuthProfileStoreCredentialsRevision();
-  const pluginRegistryVersion = getActivePluginRegistryVersion();
-  if (
-    !utilityRuntimeSnapshot ||
-    utilityRuntimeSnapshot.config !== config ||
-    utilityRuntimeSnapshot.agentId !== agentId ||
-    utilityRuntimeSnapshot.credentialsRevision !== credentialsRevision ||
-    utilityRuntimeSnapshot.pluginRegistryVersion !== pluginRegistryVersion ||
-    Date.now() >= utilityRuntimeSnapshot.expiresAt
-  ) {
-    utilityRuntimeSnapshot = {
-      config,
-      agentId,
-      credentialsRevision,
-      pluginRegistryVersion,
-      expiresAt: Date.now() + 30_000,
-      runtime: import("../../agents/utility-completion.js")
-        .then(({ resolveUtilityCompletionRuntimeForAgent }) =>
-          resolveUtilityCompletionRuntimeForAgent({ cfg: config, agentId }),
-        )
-        .catch(() => undefined),
-    };
-  }
-  return utilityRuntimeSnapshot.runtime;
-}
 
 function resolveCachedAdvertisedLanHost(): Promise<string | null> {
   // Route discovery may spawn a platform command. Keep the result process-stable
@@ -144,14 +101,42 @@ async function collectSystemInfo(context: GatewayRequestContext): Promise<System
       if (utilitySetting.kind === "disabled") {
         return { status: "disabled" } as const;
       }
+      const prepared = await readPreparedCatalog(context, soleAgentId);
+      const current =
+        prepared &&
+        prepared.agentId === soleAgentId &&
+        preparedModelRuntimeConfigsMatch(prepared.config, config) &&
+        prepared.isCurrent();
       const model =
         utilitySetting.kind === "explicit"
           ? utilitySetting.modelRef
-          : resolveUtilityModelRefForAgent({ cfg: config, agentId: soleAgentId });
+          : current
+            ? resolveUtilityModelRefForAgent({
+                cfg: prepared.config,
+                agentId: soleAgentId,
+                metadataSnapshot: prepared.metadataSnapshot,
+              })
+            : undefined;
       if (!model) {
         return { status: "unavailable" } as const;
       }
-      const runtime = await resolveCachedUtilityRuntime(config, soleAgentId);
+      const { resolveUtilityCompletionRuntimeForAgent } =
+        await import("../../agents/utility-completion.js");
+      const runtime = current
+        ? await resolveUtilityCompletionRuntimeForAgent({
+            cfg: prepared.config,
+            agentId: soleAgentId,
+            agentDir: prepared.agentDir,
+            workspaceDir: prepared.workspaceDir,
+            metadataSnapshot: prepared.metadataSnapshot,
+            preparedAuthStore: prepared.authStore,
+            preparedRuntimeAuthModes: prepared.authModes,
+            preparedRuntimeAuthMaterializations: prepared.authMaterializations,
+            pluginRegistry: prepared.pluginRegistry,
+            snapshot: prepared,
+            isCurrent: prepared.isCurrent,
+          })
+        : undefined;
       return {
         status: utilitySetting.kind === "explicit" ? "configured" : "auto",
         model,

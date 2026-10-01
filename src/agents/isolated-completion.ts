@@ -40,6 +40,8 @@ import {
   requireIsolatedAssistantText,
 } from "./isolated-completion-output.js";
 import {
+  resolveIsolatedCompletionAuthorizationOwner,
+  selectIsolatedHarnessAuthAttempt,
   resolveIsolatedCompletionProvider,
   resolveIsolatedCompletionRoute,
 } from "./isolated-completion-route.js";
@@ -108,19 +110,6 @@ function clampIsolatedStreamParams(
     return streamParams;
   }
   return { ...streamParams, maxTokens: Math.min(streamParams.maxTokens, modelMaxTokens) };
-}
-
-function selectIsolatedHarnessAuthPlan(attempt: PreparedAgentRuntimeAuthAttempt) {
-  if (attempt.kind !== "profile") {
-    return attempt.plan;
-  }
-  return {
-    ...attempt.plan,
-    forwardedAuthProfileId: attempt.profileId,
-    // Core owns candidate order. A harness receives one selected credential
-    // snapshot per call so it cannot inspect or reorder fallback profiles.
-    forwardedAuthProfileCandidateIds: [attempt.profileId],
-  };
 }
 
 async function runCliIsolatedCompletion(params: {
@@ -511,10 +500,7 @@ async function runIsolatedCompletionOwned(
         for (const preparedAttempt of harnessAuth?.attempts ?? [undefined]) {
           assertCurrent();
           remainingTimeoutMs();
-          const attempt: PreparedAgentRuntimeAuthAttempt | undefined =
-            preparedAttempt?.kind === "profile"
-              ? { ...preparedAttempt, plan: selectIsolatedHarnessAuthPlan(preparedAttempt) }
-              : preparedAttempt;
+          const attempt = preparedAttempt && selectIsolatedHarnessAuthAttempt(preparedAttempt);
           if (
             attempt &&
             !canRunPreparedAgentRuntimeAuthAttempt({ attempt, priorProfileAttempted })
@@ -539,9 +525,9 @@ async function runIsolatedCompletionOwned(
           try {
             let authorization: AgentHarnessIsolatedCompletionAuthorization;
             if (
-              attempt?.plan.harnessAuthProvider &&
-              attempt.plan.modelRoute?.authRequirement !== "api-key" &&
-              harnessAuth
+              attempt &&
+              harnessAuth &&
+              resolveIsolatedCompletionAuthorizationOwner(attempt.plan) === "harness"
             ) {
               const plan = attempt.plan;
               // Auth owns the resolved model tuple; a manifest alias remains only

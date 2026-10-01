@@ -5,34 +5,21 @@ import { expectDefined } from "@openclaw/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { validateSystemInfoResult } from "../../../packages/gateway-protocol/src/index.js";
 import * as diskSpace from "../../infra/disk-space.js";
+import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
+import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
+import { withPluginRuntimeRegistryScope } from "../../plugins/runtime/gateway-request-scope.js";
 import { getGatewayProcessInstanceId } from "../process-instance.js";
+import {
+  createModelsListTestContext,
+  providerCatalogEntry,
+} from "./models-list-result.openai-routes.test-support.js";
 import type { GatewayRequestHandlerOptions } from "./types.js";
 
 const mocks = vi.hoisted(() => ({
   resolveAdvertisedLanHostCore: vi.fn(async () => "192.168.1.20"),
   runCommandWithTimeout: vi.fn(),
   statfs: vi.fn(),
-  credentialsRevision: 0,
-  pluginRegistryVersion: 0,
-  resolveUtilityRuntime: vi.fn(),
 }));
-
-vi.mock("../../agents/auth-profiles/runtime-snapshots.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../agents/auth-profiles/runtime-snapshots.js")>()),
-  getRuntimeAuthProfileStoreCredentialsRevision: () => mocks.credentialsRevision,
-}));
-
-vi.mock("../../plugins/runtime.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../plugins/runtime.js")>()),
-  getActivePluginRegistryVersion: () => mocks.pluginRegistryVersion,
-}));
-
-// Count route lookups while keeping the real owner's answers.
-vi.mock("../../agents/utility-completion.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../agents/utility-completion.js")>();
-  mocks.resolveUtilityRuntime.mockImplementation(actual.resolveUtilityCompletionRuntimeForAgent);
-  return { ...actual, resolveUtilityCompletionRuntimeForAgent: mocks.resolveUtilityRuntime };
-});
 
 vi.mock("../../process/exec.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../process/exec.js")>()),
@@ -119,7 +106,11 @@ describe("system.info", () => {
       params: {},
       respond,
       context: {
-        getRuntimeConfig: () => ({ gateway: { port: 18789 } }),
+        ...createModelsListTestContext({
+          cfg: { gateway: { port: 18789 } },
+          catalog: [],
+          metadataSnapshot: createPluginMetadataSnapshotFixture(),
+        }),
         getEventLoopHealth,
       },
     } as unknown as GatewayRequestHandlerOptions;
@@ -192,7 +183,24 @@ describe("system.info", () => {
     const request = {
       params: {},
       respond,
-      context: { getRuntimeConfig: () => config },
+      context: createModelsListTestContext({
+        cfg: config,
+        catalog: [providerCatalogEntry("anthropic", "claude-haiku-4-5")],
+        preparedAuthModes: { "claude-cli": "oauth" },
+        pluginRegistry: (() => {
+          const registry = createEmptyPluginRegistry();
+          registry.cliBackends.push({
+            pluginId: "anthropic",
+            source: "runtime",
+            backend: {
+              id: "claude-cli",
+              modelProvider: "anthropic",
+              config: { command: "claude" },
+            },
+          });
+          return registry;
+        })(),
+      }),
     } as unknown as GatewayRequestHandlerOptions;
     const handler = expectDefined(systemHandlers["system.info"], "system.info handler");
     await handler(request);
@@ -207,32 +215,59 @@ describe("system.info", () => {
     });
   });
 
-  it.each([
-    ["stored credentials change", () => (mocks.credentialsRevision += 1)],
-    ["the plugin registry is replaced", () => (mocks.pluginRegistryVersion += 1)],
-  ])("re-resolves the utility route as soon as %s", async (_change, change) => {
-    const respond = vi.fn();
+  it("keeps each utility route on its prepared owner across requests with the same config", async () => {
     const config = {
+      models: {
+        providers: {
+          custom: {
+            api: "openai-completions" as const,
+            baseUrl: "https://custom.example/v1",
+            apiKey: "synthetic-key",
+            models: [],
+          },
+        },
+      },
       agents: {
         defaults: {
-          model: { primary: "anthropic/claude-opus-4-6" },
-          utilityModel: "anthropic/claude-haiku-4-5",
+          model: "custom/main",
+          utilityModel: "custom/small",
+          models: { "custom/small": { agentRuntime: { id: "utility-test" } } },
         },
       },
     };
-    const request = {
-      params: {},
-      respond,
-      context: { getRuntimeConfig: () => config },
-    } as unknown as GatewayRequestHandlerOptions;
+    const respond = vi.fn();
     const handler = expectDefined(systemHandlers["system.info"], "system.info handler");
-    mocks.resolveUtilityRuntime.mockClear();
-    await handler(request);
-    await handler(request);
-    expect(mocks.resolveUtilityRuntime).toHaveBeenCalledTimes(1);
-    change();
-    await handler(request);
-    expect(mocks.resolveUtilityRuntime).toHaveBeenCalledTimes(2);
+    const ambientRegistry = createEmptyPluginRegistry();
+    for (const label of ["First Owner", "Replacement Owner"]) {
+      const pluginRegistry = createEmptyPluginRegistry();
+      pluginRegistry.agentHarnesses.push({
+        pluginId: "utility-test",
+        source: "runtime",
+        harness: {
+          id: "utility-test",
+          label,
+          supports: () => ({ supported: true }),
+          runAttempt: vi.fn(),
+          runIsolatedCompletionV2: vi.fn(),
+        },
+      });
+      await withPluginRuntimeRegistryScope(ambientRegistry, () =>
+        handler({
+          params: {},
+          respond,
+          context: createModelsListTestContext({
+            cfg: config,
+            catalog: [providerCatalogEntry("custom", "small")],
+            pluginRegistry,
+          }),
+        } as unknown as GatewayRequestHandlerOptions),
+      );
+      expect(respond.mock.lastCall?.[1].defaultAgentUtilityModel.runtime).toEqual({
+        id: "utility-test",
+        kind: "harness",
+        label,
+      });
+    }
   });
 
   it.each([false, true])(
@@ -254,7 +289,7 @@ describe("system.info", () => {
       const request = {
         params: {},
         respond,
-        context: { getRuntimeConfig: () => ({}) },
+        context: createModelsListTestContext({ cfg: {}, catalog: [] }),
       } as unknown as GatewayRequestHandlerOptions;
       const handler = expectDefined(systemHandlers["system.info"], "system.info handler");
       await handler(request);
@@ -316,7 +351,7 @@ describe("system.info", () => {
       )({
         params: {},
         respond,
-        context: { getRuntimeConfig: () => ({}) },
+        context: createModelsListTestContext({ cfg: {}, catalog: [] }),
       } as unknown as GatewayRequestHandlerOptions);
       const [ok, payload] = respond.mock.calls[0] ?? [];
       expect(ok).toBe(true);
