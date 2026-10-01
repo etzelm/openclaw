@@ -8,6 +8,7 @@ import type {
   CodexGetAccountResponse,
   JsonValue,
 } from "./protocol.js";
+import { createCodexRequestTimeoutDiagnostics } from "./request-diagnostics.js";
 import type {
   CodexControlRequestFailureCategory,
   CodexControlRequestObservation,
@@ -302,7 +303,6 @@ export async function withCodexAppServerJsonClient<T>(
 ): Promise<T> {
   const timeoutMs = params.timeoutMs ?? 60_000;
   const timeoutMessage = params.timeoutMessage ?? "codex app-server request timed out";
-  const { createCodexRequestTimeoutDiagnostics } = await import("./request-diagnostics.js");
   const timeoutDiagnostics = createCodexRequestTimeoutDiagnostics(timeoutMs);
   let activePhase: CodexControlRequestPhase = "prepare";
   let errorPhase: CodexControlRequestPhase | undefined;

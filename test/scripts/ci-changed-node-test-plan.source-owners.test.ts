@@ -365,7 +365,7 @@ describe("CI changed Node test plan", () => {
 
   it.each([
     "src/node-host/node-worker-bundle-installer.test.ts",
-    "src/plugin-sdk/config-runtime.test.ts",
+    "src/plugin-sdk/plugin-config-runtime.test.ts",
     "src/plugins/contracts/registry.retry.test.ts",
     "src/channels/plugins/config-schema.test.ts",
   ])("keeps exact test leaf %s focused while retaining boundary coverage", (target) => {
@@ -425,7 +425,7 @@ describe("CI changed Node test plan", () => {
   it("keeps uncovered and deleted-path coverage beside a dedicated contract target", () => {
     const target = "src/plugins/contracts/registry.retry.test.ts";
     const remaining = [
-      "src/plugin-sdk/config-runtime.test.ts",
+      "src/plugin-sdk/plugin-config-runtime.test.ts",
       "src/channels/plugins/config-schema.test.ts",
       "src/plugins/contracts/deleted.test.ts",
     ];
@@ -791,9 +791,24 @@ describe("CI changed Node test plan", () => {
       consumer,
     ]);
 
-    expect(resolvePolicyTestTargets([source])).toEqual([gatewayCallsitesGuard, sourcePolicyTest]);
+    const sourceInventories = [
+      "test/scripts/pr-wrapper-source-closure.test.ts",
+      "test/scripts/pr-worktree-provision.test.ts",
+      "test/scripts/eager-import-closure.test.ts",
+      "test/scripts/update-restart-module-outcome.test.ts",
+      "test/scripts/type-suppression-inventory.test.ts",
+      "test/scripts/plugin-sdk-surface-report.test.ts",
+    ];
+    expect(resolvePolicyTestTargets([source])).toEqual([
+      ...sourceInventories,
+      gatewayCallsitesGuard,
+      sourcePolicyTest,
+    ]);
     expect(resolvePolicyTestTargets([source], { completeOwnersOnly: true })).toEqual([]);
-    expect(resolvePolicyTestTargets(["src/example/runtime.ts"])).toEqual([gatewayCallsitesGuard]);
+    expect(resolvePolicyTestTargets(["src/example/runtime.ts"])).toEqual([
+      ...sourceInventories,
+      gatewayCallsitesGuard,
+    ]);
   });
 
   it("selects erased core sources through their concrete owner tests", () => {
