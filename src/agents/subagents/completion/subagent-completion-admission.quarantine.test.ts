@@ -509,9 +509,9 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       const attemptAt: number[] = [];
       const settle = store.settle.getMockImplementation()!;
-      store.settle.mockImplementation(((params: Parameters<typeof settle>[0]) => {
+      store.settle.mockImplementation(((params: unknown) => {
         attemptAt.push(Date.now());
-        return settle(params);
+        return settle(params as never);
       }) as never);
       const driver = await startWake(input, undelivered());
       try {
