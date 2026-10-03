@@ -465,8 +465,7 @@ describe("requester settle wake quarantine (#154252)", () => {
     // record is neither re-delivered nor looped on.
     expect(agentCalls()).toBe(announcesBefore + 1);
     expect(
-      callGatewayMock.mock.calls.filter(([request]) => request.method === "agent").at(-1)?.[0]
-        .params,
+      callGatewayMock.mock.calls.findLast(([request]) => request.method === "agent")?.[0].params,
     ).toMatchObject({ message: expect.stringContaining("partial result") });
     expect(quietAgain.every((calls) => calls === 0)).toBe(true);
     expect(readRow()?.requesterSettleWake).toBeUndefined();

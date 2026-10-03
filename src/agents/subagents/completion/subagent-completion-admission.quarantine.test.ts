@@ -398,6 +398,17 @@ describe("requester settle wake quarantine (#154252)", () => {
         await advanceRequesterWakeTime(TICK_MS);
       }
     };
+    /**
+     * Synchronize on the state an attempt produces: how many retries one tick admits depends
+     * on when the real worker's reply lands against the fake clock, so a tick count is not a
+     * contract.
+     */
+    const tickUntil = async (done: () => boolean, cap = 40) => {
+      for (let i = 0; i < cap && !done(); i += 1) {
+        await tick();
+      }
+      expect(done()).toBe(true);
+    };
     const quarantineWarns = (driver: { warn: ReturnType<typeof vi.fn> }) =>
       driver.warn.mock.calls.filter(([message]) => message === QUARANTINE_WARN);
     /**
@@ -426,7 +437,7 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       const driver = await startWake(input, undelivered());
       try {
-        await tick(QUARANTINE_AFTER);
+        await tickUntil(() => store.quarantine.mock.calls.length > 0);
 
         expect(store.settle).toHaveBeenCalledTimes(QUARANTINE_AFTER);
         expect(store.quarantine).toHaveBeenCalledOnce();
@@ -483,7 +494,7 @@ describe("requester settle wake quarantine (#154252)", () => {
         strandCohortMember(input);
         const driver = await startWake(input, outcome);
         try {
-          await tick(QUARANTINE_AFTER);
+          await tickUntil(() => quarantineWarns(driver).length > 0);
           expect(quarantineWarns(driver)).toHaveLength(1);
           expect(shape()).toEqual(expected);
         } finally {
@@ -501,7 +512,7 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       const driver = await startWake(input, undefined);
       try {
-        await tick(3);
+        await tickUntil(() => persisted()?.requesterSettleWake === undefined);
 
         expect(store.complete).toHaveBeenCalledOnce();
         expect(store.errors).toEqual([]);
@@ -542,7 +553,7 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       const driver = await startWake(input, { delivered: true, path: "direct" });
       try {
-        await tick(12);
+        await tickUntil(() => store.settle.mock.calls.length > QUARANTINE_AFTER * 2);
 
         expect(store.settle.mock.calls.length).toBeGreaterThan(QUARANTINE_AFTER * 2);
         expect(store.quarantine).not.toHaveBeenCalled();
@@ -551,8 +562,7 @@ describe("requester settle wake quarantine (#154252)", () => {
         expect(persisted()?.delivery?.status).toBe("in_progress");
 
         rewritePersisted((row) => (row.requesterSettleWake = undefined), SIBLING_ID);
-        await tick(2);
-        expect(persisted()?.requesterSettleWake).toBeUndefined();
+        await tickUntil(() => persisted()?.requesterSettleWake === undefined);
         expect(persisted()?.delivery?.status).toBe("delivered");
       } finally {
         driver.controller.clearScheduledResumeTimers();
@@ -569,7 +579,7 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       const driver = await startWake(input, undelivered());
       try {
-        await tick(QUARANTINE_AFTER * 2);
+        await tickUntil(() => store.settle.mock.calls.length > QUARANTINE_AFTER);
 
         expect(store.settle.mock.calls.length).toBeGreaterThan(QUARANTINE_AFTER);
         expect(store.errors.length).toBe(store.settle.mock.calls.length);
@@ -582,8 +592,7 @@ describe("requester settle wake quarantine (#154252)", () => {
         expect(persisted()?.requesterSettleWake).toBeDefined();
 
         database.db.exec("DROP TRIGGER reject_settle");
-        await tick(3);
-        expect(persisted()?.requesterSettleWake).toBeUndefined();
+        await tickUntil(() => persisted()?.requesterSettleWake === undefined);
         expect(persisted()?.delivery?.status).toBe("failed");
         expect(store.quarantine).not.toHaveBeenCalled();
       } finally {
@@ -600,8 +609,9 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       let driver = await startWake(input, undelivered());
       try {
-        await tick(2);
-        expect(store.settle).toHaveBeenCalledTimes(3);
+        await tickUntil(() => store.settle.mock.calls.length >= 3);
+        const attemptsBeforeRestart = store.settle.mock.calls.length;
+        expect(attemptsBeforeRestart).toBeLessThan(QUARANTINE_AFTER);
         expect(store.quarantine).not.toHaveBeenCalled();
         driver.controller.clearScheduledResumeTimers();
 
@@ -615,13 +625,10 @@ describe("requester settle wake quarantine (#154252)", () => {
           return true;
         });
         await driver.run(reloaded);
-        // The new episode starts at one, so the persisted row has not been quarantined yet.
-        await tick(QUARANTINE_AFTER - 2);
-        expect(store.quarantine).not.toHaveBeenCalled();
-        expect(persisted()?.requesterSettleWake).toBeDefined();
-        await tick(1);
+        await tickUntil(() => store.quarantine.mock.calls.length > 0);
 
-        expect(store.settle).toHaveBeenCalledTimes(3 + QUARANTINE_AFTER);
+        // The new episode counted from one: the row survived until its own fifth failure.
+        expect(store.settle.mock.calls.length - attemptsBeforeRestart).toBe(QUARANTINE_AFTER);
         expect(store.quarantine).toHaveBeenCalledOnce();
         expect(quarantineWarns(driver)).toHaveLength(1);
         expect(persisted()?.requesterSettleWake).toBeUndefined();
@@ -629,8 +636,9 @@ describe("requester settle wake quarantine (#154252)", () => {
           status: "suspended",
           suspendedReason: "permanent_failure",
         });
+        const attemptsAfterQuarantine = store.settle.mock.calls.length;
         await tick(10);
-        expect(store.settle).toHaveBeenCalledTimes(3 + QUARANTINE_AFTER);
+        expect(store.settle).toHaveBeenCalledTimes(attemptsAfterQuarantine);
       } finally {
         driver.controller.clearScheduledResumeTimers();
       }
