@@ -17,9 +17,10 @@ import type { SubagentRunRecord } from "./subagent-registry.types.js";
 // Budget: the commit retry backoff is 30s doubling to a 120s cap (deferWakeCommit in
 // subagent-registry-requester-wake-commit.ts), so the waits after rejections 1..4 are
 // 30s, 60s, 120s and 120s. The fifth rejection, which quarantines, lands 330s (5.5 minutes)
-// after the first; the lifecycle test "spends the real 30s doubling, 120s capped backoff"
-// measures exactly that in the real controller. It is the backoff alone: a sweeper resume
-// (60s interval, subagent-registry-sweeper.ts) is not part of the measurement.
+// after the first; the controller-level test "spends the documented 330s between the first and
+// fifth rejection" in subagent-completion-admission.quarantine.test.ts measures that lower
+// bound with the real controller timer. It is the backoff alone: a sweeper resume (60s
+// interval, subagent-registry-sweeper.ts) is not part of the measurement.
 //
 // The signature includes the first failing runId on purpose: a different failing member is
 // a different obstacle, so a flapping cohort resets the count and is never quarantined
