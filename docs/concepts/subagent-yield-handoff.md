@@ -40,6 +40,14 @@ registry accepts the wait. The attempt carries that fact into terminal reply
 presentation, so a registered message wait does not produce a missing-continuation
 warning. Refused or unregistered waits do not provide that evidence.
 
+`resolveYieldedRunContinuation` owns whether a paused run can still be continued.
+A collector without a recorded result never can, because an explicit wait reads a
+collector and no continuation resumes it. A leaf that no continuation reached within
+24 hours of its pause cannot be either: the pause time is the `execution.endedAt`
+that the yield already recorded, never earlier than the row's creation. The registry sweeper settles both through the
+existing completion owner as an `error` that keeps that time. A run that still owes
+a wake to unfinished children stays continuable, however old its pause.
+
 Private child results wait for their spawning turn to settle before individual
 announcement admission. Normal settlement resumes each finished private child,
 even while siblings are still running. Explicit yield assigns the frozen batch
