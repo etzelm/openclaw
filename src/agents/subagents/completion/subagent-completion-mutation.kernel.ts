@@ -216,25 +216,39 @@ function prepareBlockedSubagentCompletion(
   } else {
     subagent.suppressCompletionDelivery = true;
   }
-  const text =
-    successful && !params.storeReplaced
-      ? "Subagent completion delivery is blocked: " + params.reason
-      : null;
-  const queued = text
-    ? prepareClaimedSessionDelivery(
-        {
-          kind: "systemEvent",
-          sessionKey: resolveEventSessionKey(subagent.requesterSessionKey),
-          ...(subagent.requesterAgentId ? { agentId: subagent.requesterAgentId } : {}),
-          text,
-          ...(subagent.requesterOrigin ? { deliveryContext: subagent.requesterOrigin } : {}),
-          idempotencyKey: `subagent-completion-blocked:${subagent.runId}:generation:${generation}`,
-        },
-        0,
-        now,
-      )
-    : undefined;
-  return { subagent, queued };
+  return {
+    subagent,
+    queued: prepareBlockedDeliveryEvent(subagent, params.reason, generation, now, {
+      successful,
+      storeReplaced: params.storeReplaced === true,
+    }),
+  };
+}
+
+// The requester's visible outcome for a successful child whose result cannot be delivered.
+// Failed children and replaced stores record their outcome on the row instead.
+function prepareBlockedDeliveryEvent(
+  subagent: SubagentRunRecord,
+  reason: string,
+  generation: number,
+  now: number,
+  facts: { successful: boolean; storeReplaced: boolean },
+): QueuedSessionDelivery | undefined {
+  if (!facts.successful || facts.storeReplaced) {
+    return undefined;
+  }
+  return prepareClaimedSessionDelivery(
+    {
+      kind: "systemEvent",
+      sessionKey: resolveEventSessionKey(subagent.requesterSessionKey),
+      ...(subagent.requesterAgentId ? { agentId: subagent.requesterAgentId } : {}),
+      text: "Subagent completion delivery is blocked: " + reason,
+      ...(subagent.requesterOrigin ? { deliveryContext: subagent.requesterOrigin } : {}),
+      idempotencyKey: `subagent-completion-blocked:${subagent.runId}:generation:${generation}`,
+    },
+    0,
+    now,
+  );
 }
 
 function commitCompletionMutations(
@@ -406,7 +420,7 @@ function settleRequesterBatch(
 // exists to bound. A row the ordinary blocked-completion owner can still record keeps its
 // payload as a failed delivery with the outcome's disposition, exactly as an exhausted wake
 // does. One it can never record is suspended with its reason, so no result retries forever
-// and none is dropped silently.
+// and none is dropped silently; a successful child's requester still gets the blocked event.
 function quarantineRequesterWake(
   database: OpenClawStateDatabase,
   params: Extract<SubagentCompletionMutation, { kind: "quarantineWake" }>,
@@ -426,7 +440,9 @@ function quarantineRequesterWake(
       subagent.requesterAgentId !== first?.requesterAgentId ||
       subagent.requesterSettleWake.rearmGeneration !==
         first?.requesterSettleWake?.rearmGeneration ||
-      subagent.requesterSettleWake.batchRunIds?.toSorted().join("\0") !== cohort
+      subagent.requesterSettleWake.batchRunIds?.toSorted().join("\0") !== cohort ||
+      // A delivery re-arm bumps the generation; its payload belongs to the new delivery.
+      (subagent.delivery?.generation ?? 1) !== (expected.delivery?.generation ?? 1)
     ) {
       throw new Error("subagent completion owner changed before quarantine: " + expected.runId);
     }
@@ -466,6 +482,20 @@ function quarantineRequesterWake(
           nextAttemptAt: undefined,
           queueId: undefined,
         });
+        // The requester still learns that a successful child's result was not delivered.
+        mutation = {
+          subagent,
+          queued: prepareBlockedDeliveryEvent(
+            subagent,
+            quarantine.reason,
+            expected.delivery?.generation ?? 1,
+            params.now,
+            {
+              successful: subagent.execution.outcome?.status === "ok",
+              storeReplaced: quarantine.storeReplaced === true,
+            },
+          ),
+        };
       }
     }
     // Ordinary settlement retires a delete-cleanup row here, immediately or after the

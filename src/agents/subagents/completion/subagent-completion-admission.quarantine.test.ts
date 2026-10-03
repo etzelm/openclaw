@@ -225,7 +225,7 @@ describe("requester settle wake quarantine (#154252)", () => {
       ).toBe(true);
     });
 
-    it("suspends a row the blocked-completion owner can never record, without a system event", async () => {
+    it("suspends a failed child the blocked-completion owner can never record, with no event, as ordinary blocking queues none for a failed child", async () => {
       const input = failedRecords("cancelled", { status: "error", error: "killed by operator" });
       input.subagent.generation = 1;
       input.subagent.execution.endedAt = Date.now() - 8 * DAY;
@@ -249,11 +249,32 @@ describe("requester settle wake quarantine (#154252)", () => {
         lastDropReason: "sink_unavailable",
         wake: undefined,
       });
+      expect(persisted()?.delivery?.lastError).toBe("quarantined for test");
       expect(shape("completion-newer").status).toBe("delivered");
       expect(await systemEventTexts()).toEqual([]);
     });
 
-    it("suspends a row whose delivery generation moved on, which ordinary settlement rejects as owner-changed", async () => {
+    it("tells the requester when a successful child's result is suspended instead of recorded", async () => {
+      const input = armRequesterWake(records());
+      // The blocked-completion owner only records a terminal run, so this row is forced.
+      input.subagent.execution.status = "running";
+      persistOwner(input);
+      expect(input.subagent.execution.outcome?.status).toBe("ok");
+
+      await quarantine(input, { reason: "quarantined for test" });
+
+      expect(shape()).toMatchObject({
+        status: "suspended",
+        suspendedReason: "permanent_failure",
+        lastDropReason: "sink_unavailable",
+        wake: undefined,
+      });
+      expect(await systemEventTexts()).toEqual([
+        "Subagent completion delivery is blocked: quarantined for test",
+      ]);
+    });
+
+    it("refuses a row whose delivery generation moved on, leaving it and its new payload untouched", async () => {
       const input = failedRecords("failed", { status: "error", error: "child failed" });
       persistOwner(input);
       rewritePersisted((row) => (row.delivery!.generation = 2));
@@ -269,15 +290,16 @@ describe("requester settle wake quarantine (#154252)", () => {
           { database, path: database.path },
         ),
       ).toThrow(`subagent completion owner changed before settlement: ${RUN_ID}`);
+      const before = structuredClone(persisted());
 
-      quarantineInKernel(input);
+      expect(() => quarantineInKernel(input)).toThrow(
+        `subagent completion owner changed before quarantine: ${RUN_ID}`,
+      );
 
-      expect(shape()).toMatchObject({
-        status: "suspended",
-        disposition: "permanent_failure",
-        suspendedReason: "permanent_failure",
-        wake: undefined,
-      });
+      expect(persisted()).toEqual(before);
+      expect(persisted()?.delivery).toMatchObject({ generation: 2, status: "in_progress" });
+      expect(persisted()?.requesterSettleWake).toBeDefined();
+      expect(await systemEventTexts()).toEqual([]);
     });
 
     it("never touches a paused sessions_yield row", async () => {
