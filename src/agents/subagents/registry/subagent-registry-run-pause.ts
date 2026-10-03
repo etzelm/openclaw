@@ -10,6 +10,23 @@ import { shouldSuppressSubagentRecoverySessionEffects } from "./subagent-recover
 import { mutateSubagentRuns, SubagentRegistryWriteError } from "./subagent-registry-persistence.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
+const COLLECTOR_YIELD_ERROR =
+  "Collector yielded without recording a result, and no continuation can resume a collector. Run it again and end its turn normally.";
+
+type YieldedRunContinuation = { state: "continuable" } | { state: "unreachable"; error: string };
+
+/**
+ * Owns "can a continuation still resume this yielded run?" for a row where
+ * `isYieldedSubagentRun` (execution observation) holds. Callers settle an unreachable run through the
+ * completion owner instead of leaving it parked. Every other yielded row stays continuable.
+ */
+export function resolveYieldedRunContinuation(entry: SubagentRunRecord): YieldedRunContinuation {
+  // A collector result is read by an explicit wait, never delivered by a continuation.
+  return entry.collect === true && entry.collectorCompletion === undefined
+    ? { state: "unreachable", error: COLLECTOR_YIELD_ERROR }
+    : { state: "continuable" };
+}
+
 /** Capture the accepted tool intent before the runtime publishes its yielded terminal. */
 export async function markSubagentMessageWaitInRuns(params: {
   runId: string;

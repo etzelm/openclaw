@@ -374,9 +374,13 @@ function planTerminalCompletion(
   },
 ) {
   const params = context.options;
+  const yielded = currentEntry.pauseReason === "sessions_yield";
+  // A settle request outlives the sweep that issued it; it must not rewrite a run that has
+  // since resumed or finished.
   if (
-    currentEntry.pauseReason === "sessions_yield" &&
-    completeParams.reason !== SUBAGENT_ENDED_REASON_KILLED
+    completeParams.settleYielded === true
+      ? !yielded
+      : yielded && completeParams.reason !== SUBAGENT_ENDED_REASON_KILLED
   ) {
     return undefined;
   }
