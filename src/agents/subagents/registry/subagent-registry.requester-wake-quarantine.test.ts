@@ -7,6 +7,9 @@ const probe = vi.hoisted(() => ({
   settleCalls: 0,
   settleOk: 0,
   settleErrors: [] as string[],
+  settleAt: [] as number[],
+  quarantineErrors: [] as string[],
+  quarantineCalls: 0,
   warns: [] as Array<{ msg: string; meta?: Record<string, unknown> }>,
 }));
 
@@ -75,6 +78,8 @@ let sessionStore: Record<string, SessionStoreEntry> = {};
 let sessionStorePath: string;
 let agentCallObserved = createDeferred();
 let storageOutage = false;
+// Runs inside a rejected settle, before the error reaches the episode: the test's seam for a foreign write.
+let afterSettleFailure: ((failures: number) => void) | undefined;
 
 const callGatewayMock = vi.fn(async (request: GatewayRequest) => {
   if (request.method === "agent.wait") {
@@ -244,12 +249,17 @@ describe("requester settle wake quarantine (#154252)", () => {
     probe.settleCalls = 0;
     probe.settleOk = 0;
     probe.settleErrors.length = 0;
+    probe.settleAt.length = 0;
+    probe.quarantineErrors.length = 0;
+    probe.quarantineCalls = 0;
     probe.warns.length = 0;
     storageOutage = false;
+    afterSettleFailure = undefined;
     const settle = completionStore.settleRequesterCompletionBatch;
     vi.spyOn(completionStore, "settleRequesterCompletionBatch").mockImplementation(
       async (params) => {
         probe.settleCalls += 1;
+        probe.settleAt.push(Date.now());
         try {
           if (storageOutage) {
             // The failure a read-only or locked state database produces, in the same wrapper
@@ -267,6 +277,19 @@ describe("requester settle wake quarantine (#154252)", () => {
           return result;
         } catch (error) {
           probe.settleErrors.push(error instanceof Error ? error.message : String(error));
+          afterSettleFailure?.(probe.settleErrors.length);
+          throw error;
+        }
+      },
+    );
+    const quarantine = completionStore.quarantineRequesterSettleWake;
+    vi.spyOn(completionStore, "quarantineRequesterSettleWake").mockImplementation(
+      async (params) => {
+        probe.quarantineCalls += 1;
+        try {
+          return await quarantine(params);
+        } catch (error) {
+          probe.quarantineErrors.push(error instanceof Error ? error.message : String(error));
           throw error;
         }
       },
@@ -560,6 +583,106 @@ describe("requester settle wake quarantine (#154252)", () => {
     });
     expect(row?.delivery?.suspendedReason).toBeUndefined();
     expect(row?.completion?.resultText).toBe("partial result");
+  });
+
+  it("a delivery re-arm during the final attempt refuses the quarantine and the episode keeps retrying at the capped 120s cadence", async () => {
+    const endedAt = T0 - 3_600_000;
+    await start();
+    await seed(
+      baseRow(endedAt, { execution: { status: "terminal", startedAt: endedAt - 4_000, endedAt } }),
+    );
+    let rearmed: ReturnType<typeof readRow>;
+    // The fifth rejection is the one that reaches the quarantine. A new delivery generation
+    // with its own payload commits to SQLite between that rejection and the quarantine write.
+    afterSettleFailure = (failures) => {
+      const row = readRow();
+      if (failures !== QUARANTINE_AFTER || !row?.delivery) {
+        return;
+      }
+      saveSubagentRegistryChangesToSqlite(
+        new Map([
+          [
+            RUN_ID,
+            {
+              ...row,
+              delivery: {
+                ...row.delivery,
+                status: "pending",
+                generation: 2,
+                payload: {
+                  requesterSessionKey: MAIN_REQUESTER_SESSION_KEY,
+                  childSessionKey: row.childSessionKey,
+                  childRunId: RUN_ID,
+                  task: "re-armed delivery",
+                  startedAt: endedAt - 4_000,
+                  endedAt,
+                  expectsCompletionMessage: true,
+                },
+              },
+            } as never,
+          ],
+        ]),
+        [RUN_ID],
+      );
+      rearmed = readRow();
+    };
+    const queuedForRequester = () =>
+      (
+        openOpenClawStateDatabase()
+          .db.prepare("SELECT COUNT(*) AS n FROM delivery_queue_entries WHERE session_key = ?")
+          .get(MAIN_REQUESTER_SESSION_KEY) as { n: number }
+      ).n;
+    const stepUntil = async (done: () => boolean, maxSteps: number) => {
+      for (let i = 0; i < maxSteps && !done(); i += 1) {
+        await vi.advanceTimersByTimeAsync(5_000);
+        await flushAsync();
+      }
+    };
+
+    // Whole ticks until four rejections have landed; the fifth arrives on the episode's own
+    // retry timer, which the 5s steps resolve.
+    const perTick: number[] = [];
+    while (probe.settleErrors.length < QUARANTINE_AFTER - 1 && perTick.length < 60) {
+      perTick.push(await tick());
+    }
+    await stepUntil(() => rearmed !== undefined, 400);
+    expect(rearmed?.delivery?.generation).toBe(2);
+    const settlesAtRefusal = probe.settleCalls;
+    // Keep stepping until the episode has retried several more times.
+    await stepUntil(() => probe.settleCalls >= settlesAtRefusal + 5, 1_440);
+    report("delivery re-armed before the quarantine write", perTick);
+
+    // The in-flight write sees the re-arm before the worker does: the queued write's version
+    // check and the plan's generation guard refuse it, so the kernel compare is not reached
+    // here. The refusal is an ordinary commit failure.
+    expect(probe.quarantineCalls).toBe(1);
+    expect(probe.quarantineErrors).toEqual([
+      "Subagent requester wake cohort changed before mutation",
+    ]);
+    expect(quarantineWarns()).toEqual([]);
+    expect(queuedForRequester()).toBe(0);
+    // The row, with the new delivery's payload, is exactly what the foreign write left.
+    expect(readRow()).toEqual(rearmed);
+
+    // The episode is not released and not quarantined by the refusal: it retries forever
+    // at the 120s ceiling, every attempt failing the same plan guard, and the count of
+    // identical owner-changed rejections is never advanced again (no second quarantine).
+    const retries = probe.settleErrors.slice(QUARANTINE_AFTER);
+    expect(retries.length).toBeGreaterThanOrEqual(5);
+    for (const message of retries) {
+      expect(message).toBe("Subagent requester wake cohort changed before mutation");
+    }
+    expect(probe.quarantineCalls).toBe(1);
+    expect(probe.settleOk).toBe(0);
+    const gaps = probe.settleAt
+      .slice(QUARANTINE_AFTER + 1)
+      .map((at, index, all) => (index === 0 ? 0 : at - all[index - 1]!))
+      .slice(1);
+    // The first retry after the refusal rides the same fake clock as the refresh I/O; the
+    // steady state after it is the ceiling.
+    expect(gaps.length).toBeGreaterThanOrEqual(3);
+    expect(gaps.every((gap) => gap === 120_000)).toBe(true);
+    expect(readRow()?.requesterSettleWake).toMatchObject({ status: "pending" });
   });
 
   it("negative control: A1 and A2 kill-reconciliation rows still settle with zero quarantines", async () => {
