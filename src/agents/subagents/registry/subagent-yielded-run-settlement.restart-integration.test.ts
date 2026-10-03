@@ -22,6 +22,7 @@ type RunView = { runId: string; status: string };
 
 const T0 = Date.parse("2026-10-03T08:00:00Z");
 const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
 const COLLECTOR_KEY = "agent:main:subagent:legacy-collector";
 
 describe("yielded run settlement", () => {
@@ -62,13 +63,14 @@ describe("yielded run settlement", () => {
       swarmRequesterSessionKey: "agent:main:main",
       expectsCompletionMessage: false,
       pauseReason: "sessions_yield",
+      createdAt: T0 - 5 * MINUTE_MS,
       startedAt: T0 - 5 * MINUTE_MS,
       endedAt: T0 - 4 * MINUTE_MS,
       ...(outcome ? { outcome } : {}),
     });
 
   it.each(LEGACY_SHAPES)(
-    "settles a collector persisted yielded without a result when the registry restarts ($shape)",
+    "settles stranded yielded rows on the first sweep after the registry restarts ($shape)",
     async ({ outcome }) => {
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(T0);
@@ -86,18 +88,58 @@ describe("yielded run settlement", () => {
         expectsCompletionMessage: true,
         wakeOnDescendantSettle: true,
         pauseReason: "sessions_yield",
+        createdAt: T0 - 5 * MINUTE_MS,
         startedAt: T0 - 5 * MINUTE_MS,
         endedAt: T0 - 4 * MINUTE_MS,
       });
-      const legacyLeaf = makeRunRecord({
-        runId: "yielded-legacy-leaf",
-        childSessionKey: "agent:main:subagent:legacy-leaf",
+      const recentLeaf = makeRunRecord({
+        runId: "yielded-recent-leaf",
+        childSessionKey: "agent:main:subagent:recent-leaf",
         expectsCompletionMessage: true,
         pauseReason: "sessions_yield",
+        createdAt: T0 - 5 * MINUTE_MS,
         startedAt: T0 - 5 * MINUTE_MS,
         endedAt: T0 - 4 * MINUTE_MS,
       });
-      for (const run of [legacyYieldedCollector(outcome), orchestrator, legacyLeaf]) {
+      // Paused far longer than the bound, yet it owes a wake to a child that is still waiting.
+      const awaitingOrchestrator = makeRunRecord({
+        runId: "yielded-awaiting-orchestrator",
+        childSessionKey: "agent:main:subagent:awaiting-orchestrator",
+        expectsCompletionMessage: true,
+        pauseReason: "sessions_yield",
+        createdAt: T0 - 26 * HOUR_MS,
+        startedAt: T0 - 26 * HOUR_MS,
+        endedAt: T0 - 25 * HOUR_MS,
+      });
+      const awaitedChild = makeRunRecord({
+        runId: "yielded-awaited-child",
+        childSessionKey: "agent:main:subagent:awaited-child",
+        requesterSessionKey: awaitingOrchestrator.childSessionKey,
+        expectsCompletionMessage: true,
+        pauseReason: "sessions_yield",
+        createdAt: T0 - 2 * HOUR_MS,
+        startedAt: T0 - 2 * HOUR_MS,
+        endedAt: T0 - HOUR_MS,
+      });
+      // The same kind of leaf as `recentLeaf`, paused 25 h before the sweep: the parked rows that no
+      // continuation reached within the bound.
+      const expiredLeaf = makeRunRecord({
+        runId: "yielded-expired-leaf",
+        childSessionKey: "agent:main:subagent:expired-leaf",
+        expectsCompletionMessage: true,
+        pauseReason: "sessions_yield",
+        createdAt: T0 - 26 * HOUR_MS,
+        startedAt: T0 - 26 * HOUR_MS,
+        endedAt: T0 - 25 * HOUR_MS,
+      });
+      for (const run of [
+        legacyYieldedCollector(outcome),
+        orchestrator,
+        recentLeaf,
+        awaitingOrchestrator,
+        awaitedChild,
+        expiredLeaf,
+      ]) {
         await addSubagentRunForTests(run);
       }
       expect(persisted("legacy-yielded-collector")?.execution.outcome?.status).toBe(
@@ -124,7 +166,16 @@ describe("yielded run settlement", () => {
       expect(waited.completed).toMatchObject([
         { status: "failed", error: expect.stringContaining("Collector yielded") },
       ]);
-      for (const control of [orchestrator, legacyLeaf]) {
+      expect(persisted("yielded-expired-leaf")).toMatchObject({
+        execution: {
+          status: "terminal",
+          // The run ended when it yielded; settling must not move that time.
+          endedAt: T0 - 25 * HOUR_MS,
+          outcome: { status: "error", error: expect.stringContaining("within 24 hours") },
+        },
+      });
+      expect(persisted("yielded-expired-leaf")?.pauseReason).toBeUndefined();
+      for (const control of [orchestrator, recentLeaf, awaitingOrchestrator, awaitedChild]) {
         expect(persisted(control.runId), control.runId).toMatchObject({
           pauseReason: "sessions_yield",
           execution: { status: "terminal" },

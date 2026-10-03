@@ -30,30 +30,38 @@ export function isYieldedSubagentRun(entry: SubagentRunRecord): boolean {
   );
 }
 
+/** Latest child runs of a yielded run whose completion the run still waits for. */
+export function listPendingYieldedRunChildren(
+  entry: SubagentRunRecord,
+  children: Iterable<SubagentRunRecord>,
+): SubagentRunRecord[] {
+  const latestChildren = new Map<string, SubagentRunRecord>();
+  for (const child of children) {
+    if (child.requesterSessionKey === entry.childSessionKey) {
+      recordLatestSubagentRun(latestChildren, child.childSessionKey, child);
+    }
+  }
+  return [...latestChildren.values()]
+    .filter(
+      (child) =>
+        child.collect !== true &&
+        child.expectsCompletionMessage === true &&
+        child.suppressAnnounceReason !== "steer-restart" &&
+        (isYieldedSubagentRun(child) ||
+          !hasSubagentRunEnded(child) ||
+          child.requesterSettleWake !== undefined ||
+          typeof child.cleanupCompletedAt !== "number"),
+    )
+    .toSorted((left, right) => left.runId.localeCompare(right.runId));
+}
+
 /** Project recorded execution separately from completion and requester delivery. */
 export function observeSubagentExecution(
   entry: SubagentRunRecord,
   children: Iterable<SubagentRunRecord>,
 ): SubagentExecutionObservation {
   if (isYieldedSubagentRun(entry)) {
-    const latestChildren = new Map<string, SubagentRunRecord>();
-    for (const child of children) {
-      if (child.requesterSessionKey === entry.childSessionKey) {
-        recordLatestSubagentRun(latestChildren, child.childSessionKey, child);
-      }
-    }
-    const pending = [...latestChildren.values()]
-      .filter(
-        (child) =>
-          child.collect !== true &&
-          child.expectsCompletionMessage === true &&
-          child.suppressAnnounceReason !== "steer-restart" &&
-          (isYieldedSubagentRun(child) ||
-            !hasSubagentRunEnded(child) ||
-            child.requesterSettleWake !== undefined ||
-            typeof child.cleanupCompletedAt !== "number"),
-      )
-      .toSorted((left, right) => left.runId.localeCompare(right.runId));
+    const pending = listPendingYieldedRunChildren(entry, children);
     return {
       state: "waiting",
       wait:
