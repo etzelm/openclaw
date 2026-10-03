@@ -509,7 +509,7 @@ describe("requester settle wake quarantine (#154252)", () => {
       const store = observeStore();
       const attemptAt: number[] = [];
       const settle = store.settle.getMockImplementation()!;
-      store.settle.mockImplementation(((params: unknown) => {
+      store.settle.mockImplementation(((params: Parameters<typeof settle>[0]) => {
         attemptAt.push(Date.now());
         return settle(params);
       }) as never);
