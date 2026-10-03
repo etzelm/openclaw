@@ -327,6 +327,14 @@ note. If that does not match, it ignores one exact context note for comparison, 
 the same turn appears once. Stored transcript text and unmatched imported turns
 remain intact.
 
+Some turns keep the requester's native binding while running in a separate native
+session, such as a sub-agent completion whose restricted tool set gives it a
+different MCP configuration. OpenClaw keeps that turn's prompt and reply on the
+binding (each capped at 2,000 characters, newest 8 turns) and prepends them once,
+as a marked context block, to the next turn that resumes the bound session. The
+separate turn's tool restrictions are unchanged. A fresh session recovers the same
+exchange from saved history instead, and chat history shows each turn once.
+
 ### History account boundaries
 
 Native session compatibility and permission to replay saved OpenClaw history are separate. Clearing or replacing a native binding does not establish ownership of older transcript rows. OpenClaw records a private account fingerprint and contiguous transcript coverage before an admitted CLI turn, then advances coverage with that turn’s canonical writes. It never stores credential values in this metadata.
