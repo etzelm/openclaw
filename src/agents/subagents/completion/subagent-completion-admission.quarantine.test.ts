@@ -501,6 +501,41 @@ describe("requester settle wake quarantine (#154252)", () => {
       }
     });
 
+    it("spends the real 30s doubling, 120s capped backoff: 330s between the first and fifth rejection", async () => {
+      fakeTimers();
+      const input = failedRecords("failed", { status: "error", error: "child failed" });
+      persistOwner(input);
+      strandCohortMember(input);
+      const store = observeStore();
+      const attemptAt: number[] = [];
+      const settle = store.settle.getMockImplementation()!;
+      store.settle.mockImplementation(((params: unknown) => {
+        attemptAt.push(Date.now());
+        return settle(params);
+      }) as never);
+      const driver = await startWake(input, undelivered());
+      try {
+        for (let i = 0; i < 400 && store.quarantine.mock.calls.length === 0; i += 1) {
+          await advanceRequesterWakeTime(1_000);
+        }
+
+        expect(attemptAt).toHaveLength(QUARANTINE_AFTER);
+        // Whole-second ticks add at most one second to each backoff.
+        const extras = attemptAt
+          .slice(1)
+          .map((at, index) => at - attemptAt[index]! - [30_000, 60_000, 120_000, 120_000][index]!);
+        for (const extra of extras) {
+          expect(extra).toBeGreaterThanOrEqual(0);
+          expect(extra).toBeLessThanOrEqual(1_000);
+        }
+        const total = attemptAt[4]! - attemptAt[0]!;
+        expect(total).toBeGreaterThanOrEqual(330_000);
+        expect(total).toBeLessThanOrEqual(334_000);
+      } finally {
+        driver.controller.clearScheduledResumeTimers();
+      }
+    });
+
     it.each(UNDELIVERED_OUTCOMES)(
       "carries the %s disposition through the lifecycle quarantine",
       async (_label, outcome) => {

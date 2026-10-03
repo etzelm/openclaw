@@ -11,12 +11,22 @@ import { maskLifecycleIdentifier } from "./subagent-registry-lifecycle-log.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
 // Only the owner-changed rejection is a pure function of persisted rows, so repeating it
-// cannot recover. Five identical rejections span about five minutes of backoff. Storage and
-// transport failures never count: they keep retrying until the store recovers (#154252).
-// The count lives on the in-memory retry episode, so a Gateway restart starts a new episode:
-// a row that still cannot settle spends five more attempts per boot and is then quarantined
-// again. That keeps the bound without a schema change, and a quarantined row has no wake left
-// to repeat after the restart (#154252).
+// cannot recover. Storage and transport failures never count: they keep retrying until the
+// store recovers (#154252).
+//
+// Budget: the commit retry backoff is 30s doubling to a 120s cap (deferWakeCommit in
+// subagent-registry-requester-wake-commit.ts), so the waits after rejections 1..4 are
+// 30s, 60s, 120s and 120s. The fifth rejection, which quarantines, lands 330s (5.5 minutes)
+// after the first; the lifecycle test "spends the real 30s doubling, 120s capped backoff"
+// measures exactly that in the real controller. It is the backoff alone: a sweeper resume
+// (60s interval, subagent-registry-sweeper.ts) is not part of the measurement.
+//
+// The signature includes the first failing runId on purpose: a different failing member is
+// a different obstacle, so a flapping cohort resets the count and is never quarantined
+// for its churn alone. The count lives on the in-memory retry episode, so a Gateway restart
+// starts a new episode: a row that still cannot settle spends five more attempts per boot
+// and is then quarantined again. That keeps the bound without a schema change, and a
+// quarantined row has no wake left to repeat after the restart (#154252).
 const REQUESTER_SETTLE_WAKE_QUARANTINE_AFTER_FAILURES = 5;
 
 /** Keeps the failed delivery's own error next to the quarantine reason in the stored row. */
