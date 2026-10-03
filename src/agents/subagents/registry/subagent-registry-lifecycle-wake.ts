@@ -6,6 +6,7 @@ import { captureOpenClawStateWorkerContext } from "../../../state/openclaw-state
 import type { OpenClawStateWorkerContext } from "../../../state/openclaw-state-worker-context.types.js";
 import { resolveSubagentRequesterAgentId } from "../../subagent-requester-owner.js";
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
+import type { RequesterWakeQuarantine } from "../completion/subagent-completion-mutation.types.js";
 import { revokeRequesterCronAuthorityBatch } from "../requester-cron-authority.js";
 import { revokeRequesterFinalAttachment } from "../requester-final-attachment.js";
 import { isCompletedRequesterDeliveryBlocked } from "./subagent-delivery-state.js";
@@ -36,7 +37,10 @@ import {
   commitRequesterSettleWakeMutation,
   isCurrentRequesterSettleWakeBatch,
 } from "./subagent-registry-requester-wake-mutation.js";
-import { settleOrQuarantineRequesterWake } from "./subagent-registry-requester-wake-quarantine.js";
+import {
+  appendDeliveryDetail,
+  settleOrQuarantineRequesterWake,
+} from "./subagent-registry-requester-wake-quarantine.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 import { captureRequesterSettleRunIdentity } from "./subagent-requester-settle-identity.js";
 import {
@@ -53,15 +57,15 @@ const completeRequesterSettleWakeBatch = async (
   pending: PendingRequesterSettleWakeCommit,
   rearmGeneration?: number,
   outcome?: SubagentAnnounceDeliveryResult,
-  quarantineReason?: string,
+  quarantine?: RequesterWakeQuarantine,
 ): Promise<boolean> => {
   const params = context.options;
   if (
     !(await commitRequesterSettleWakeMutation(
       context,
       entries,
-      quarantineReason !== undefined
-        ? { kind: "quarantine", reason: quarantineReason }
+      quarantine
+        ? { kind: "quarantine", ...quarantine }
         : outcome
           ? { kind: "settle", outcome }
           : { kind: "complete" },
@@ -494,25 +498,31 @@ export function scheduleRequesterSettleWake(
                         outcome,
                       );
                     // A delivered outcome is never quarantined: that would replay a sent result.
-                    const committed =
-                      outcome && !outcome.delivered
-                        ? await settleOrQuarantineRequesterWake(
-                            context,
-                            episode,
-                            members,
-                            settle,
-                            (reason) =>
-                              completeRequesterSettleWakeBatch(
-                                context,
-                                members,
-                                stateContext,
-                                episode,
-                                rearmGeneration,
-                                undefined,
-                                reason,
-                              ),
-                          )
-                        : await settle();
+                    // A wake with no outcome only consumes an obsolete wake, and every
+                    // owner-changed condition its write can hit is checked before the worker.
+                    const undelivered = outcome && !outcome.delivered ? outcome : undefined;
+                    const committed = undelivered
+                      ? await settleOrQuarantineRequesterWake(
+                          context,
+                          episode,
+                          members,
+                          settle,
+                          (reason) =>
+                            completeRequesterSettleWakeBatch(
+                              context,
+                              members,
+                              stateContext,
+                              episode,
+                              rearmGeneration,
+                              undefined,
+                              {
+                                reason: appendDeliveryDetail(reason, undelivered),
+                                disposition: undelivered.disposition,
+                                storeReplaced: undelivered.storeReplaced,
+                              },
+                            ),
+                        )
+                      : await settle();
                     if (committed) {
                       onCommitted?.();
                     }

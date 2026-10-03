@@ -10,40 +10,41 @@ const probe = vi.hoisted(() => ({
   warns: [] as Array<{ msg: string; meta?: Record<string, unknown> }>,
 }));
 
-vi.mock("../../../logging/subsystem.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../../logging/subsystem.js")>();
-  return {
-    ...actual,
-    createSubsystemLogger: (name: string) => {
-      const logger = actual.createSubsystemLogger(name);
-      return new Proxy(logger, {
-        get(target, prop, receiver) {
-          if (prop === "warn") {
-            // Record the real record and still emit it through the real logger.
-            return (msg: string, meta?: Record<string, unknown>) => {
-              probe.warns.push({ msg, meta });
-              target.warn(msg, meta);
-            };
-          }
-          return Reflect.get(target, prop, receiver);
-        },
-      });
+// Explicit logger: the warn sink records every record and nothing reaches a real transport.
+vi.mock("../../../logging/subsystem.js", () => {
+  const logger = {
+    subsystem: "test",
+    isEnabled: () => false,
+    trace: () => {},
+    debug: () => {},
+    info: () => {},
+    warn: (msg: string, meta?: Record<string, unknown>) => {
+      probe.warns.push({ msg, meta });
     },
+    error: () => {},
+    fatal: () => {},
+    raw: () => {},
+    child: () => logger,
+  };
+  return {
+    createSubsystemLogger: () => logger,
+    runtimeForLogger: () => ({ log: () => {}, error: () => {}, exit: () => {} }),
   };
 });
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { getRuntimeConfig } from "../../../config/config.js";
 import { replaceSessionEntry } from "../../../config/sessions/session-accessor.js";
 import { callGateway } from "../../../gateway/call.js";
 import type { GatewayRequestContext } from "../../../gateway/server-methods/types.js";
 import { onAgentEvent } from "../../../infra/agent-events.js";
+import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
+import "../spawn/subagent-spawn-model.mocks.shared.js";
 import {
   createOpenClawTestState,
   type OpenClawTestState,
 } from "../../../test-utils/openclaw-test-state.js";
-import "../spawn/subagent-spawn-model.mocks.shared.js";
 import { loadAgentRuntimePluginRegistryHandle } from "../../runtime-plugins.js";
 import { testing as subagentAnnounceDeliveryTesting } from "../announce/subagent-announce-delivery.test-support.js";
 import { testing as subagentAnnounceOutputTesting } from "../announce/subagent-announce-output.test-support.js";
@@ -65,8 +66,8 @@ const MAIN_REQUESTER_SESSION_KEY = "agent:main:main";
 const RUN_ID = "run-154252";
 const DAY = 24 * 60 * 60 * 1000;
 const T0 = Date.UTC(2026, 9, 3, 12, 0, 0);
-// Longer than the 120s retry ceiling, so every tick admits exactly one retry.
-const TICK_MS = 130_000;
+// Longer than the 120s retry ceiling, so every tick admits at most one retry.
+const TICK_MS = 600_000;
 const QUARANTINE_AFTER = 5;
 const OWNER_CHANGED = /subagent completion owner changed before settlement: /;
 
@@ -146,33 +147,6 @@ vi.mock("../../../config/sessions.js", async () => ({
   updateSessionStore: vi.fn(),
 }));
 
-vi.mock("../../../config/sessions/session-accessor.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../config/sessions/session-accessor.js")>()),
-  loadSessionEntry: (scope: { sessionKey: string }) => sessionStore[scope.sessionKey],
-  patchSessionEntryCore: async (
-    ...[scope, update, options = {}]: Parameters<
-      typeof import("../../../config/sessions/session-accessor.js").patchSessionEntryCore
-    >
-  ) => {
-    const entry = sessionStore[scope.sessionKey];
-    if (!entry) {
-      return null;
-    }
-    const patch = await update(entry, { existingEntry: { ...entry } });
-    if (patch === null || options.shouldCommit?.() === false) {
-      return entry;
-    }
-    options.assertCommitAllowed?.();
-    const updated = options.replaceEntry
-      ? (patch as import("../../../config/sessions/types.js").SessionEntry)
-      : { ...entry, ...patch };
-    sessionStore[scope.sessionKey] = updated;
-    return updated;
-  },
-  listSessionEntriesReadOnly: () =>
-    Object.entries(sessionStore).map(([sessionKey, entry]) => ({ sessionKey, entry })),
-}));
-
 vi.mock("../../../plugins/hook-runner-global.js", () => ({
   getGlobalHookRunner: vi.fn(() => null),
 }));
@@ -222,9 +196,19 @@ describe("requester settle wake quarantine (#154252)", () => {
   let settleRootWork: ReturnType<typeof observeRootWork>;
   const { flushAsync } = createLifecycleWaits(MAIN_REQUESTER_SESSION_KEY);
 
-  beforeEach(async () => {
+  // One state directory for the file: booting the real SQLite worker costs most of a
+  // test's wall time, so each test clears the rows it wrote instead.
+  beforeAll(async () => {
     testState = await createOpenClawTestState({ scenario: "minimal", applyEnv: true });
     sessionStorePath = testState.statePath("agents", "main", "sessions", "sessions.json");
+  });
+
+  afterAll(async () => {
+    await testState.cleanup();
+  });
+
+  beforeEach(async () => {
+    openOpenClawStateDatabase().db.exec("DELETE FROM subagent_runs");
     previousFastTestEnv = process.env.OPENCLAW_TEST_FAST;
     process.env.OPENCLAW_TEST_FAST = "1";
     loadConfigMock.mockReset().mockReturnValue({
@@ -338,7 +322,6 @@ describe("requester settle wake quarantine (#154252)", () => {
       } else {
         process.env.OPENCLAW_TEST_FAST = previousFastTestEnv;
       }
-      await testState.cleanup();
     }
   });
 
@@ -374,16 +357,16 @@ describe("requester settle wake quarantine (#154252)", () => {
     return perTick;
   };
 
-  const WINDOW_TICKS = 50;
+  const WINDOW_TICKS = 12;
   // Both legs observe the same first window. The fixed row then keeps going until its
   // quarantine lands (the cadence depends on timer alignment), and a quiet tail proves it.
   const driveToQuarantine = async () => {
     const perTick = await run(WINDOW_TICKS);
     const callsInWindow = probe.settleCalls;
-    while (quarantineWarns().length === 0 && perTick.length < 120) {
+    while (quarantineWarns().length === 0 && perTick.length < 60) {
       perTick.push(await tick());
     }
-    const quiet = await run(20);
+    const quiet = await run(6);
     return { perTick: [...perTick, ...quiet], callsInWindow, quiet };
   };
 
@@ -412,7 +395,7 @@ describe("requester settle wake quarantine (#154252)", () => {
     for (const message of probe.settleErrors) {
       expect(message).toMatch(OWNER_CHANGED);
     }
-    // No settle attempt in the 20 ticks (about 43 minutes) after the quarantine.
+    // No settle attempt in the 6 ticks (an hour) after the quarantine.
     expect(quiet.every((calls) => calls === 0)).toBe(true);
     expect(quarantineWarns()).toHaveLength(1);
     expect(quarantineWarns()[0]?.meta).toMatchObject({
@@ -440,6 +423,54 @@ describe("requester settle wake quarantine (#154252)", () => {
       lastDropReason: "sink_unavailable",
       lastError: expect.stringContaining("quarantined after 5 identical settlement failures"),
     });
+  });
+
+  it("re-woken: a re-armed quarantined row wakes the requester once, settles once, and goes quiet", async () => {
+    const endedAt = T0 - 3_600_000;
+    await start();
+    await seed(
+      baseRow(endedAt, { execution: { status: "terminal", startedAt: endedAt - 4_000, endedAt } }),
+    );
+    const { quiet } = await driveToQuarantine();
+    expectBounded(quiet);
+    const quarantined = readRow();
+    expect(quarantined?.delivery?.status).toBe("suspended");
+    const agentCalls = () =>
+      callGatewayMock.mock.calls.filter(([request]) => request.method === "agent").length;
+    const announcesBefore = agentCalls();
+    const settleCallsBefore = probe.settleCalls;
+
+    // A later child settling re-arms the requester wake on the same row.
+    await seed({
+      ...quarantined,
+      requesterSettleWake: {
+        status: "pending",
+        attemptCount: 0,
+        rearmGeneration: 2,
+        batchRunIds: [RUN_ID],
+      },
+    });
+    // The re-armed wake settles once against the suspended row and clears itself.
+    const perTick: number[] = [];
+    while (probe.settleOk === 0 && perTick.length < 60) {
+      perTick.push(await tick());
+    }
+    const quietAgain = await run(6);
+    report("re-woken quarantined row", [...perTick, ...quietAgain]);
+
+    expect(probe.settleCalls - settleCallsBefore).toBe(1);
+    expect(probe.settleErrors).toHaveLength(QUARANTINE_AFTER);
+    expect(quarantineWarns()).toHaveLength(1);
+    // The wake is an ordinary one: the requester is told the result once, and the suspended
+    // record is neither re-delivered nor looped on.
+    expect(agentCalls()).toBe(announcesBefore + 1);
+    expect(
+      callGatewayMock.mock.calls.filter(([request]) => request.method === "agent").at(-1)?.[0]
+        .params,
+    ).toMatchObject({ message: expect.stringContaining("partial result") });
+    expect(quietAgain.every((calls) => calls === 0)).toBe(true);
+    expect(readRow()?.requesterSettleWake).toBeUndefined();
+    expect(readRow()?.delivery).toEqual(quarantined?.delivery);
   });
 
   it("B2: a retired cancellation with a newer sibling on its child session is suspended", async () => {

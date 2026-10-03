@@ -1,3 +1,4 @@
+import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import {
   readRequesterSettleOwnerChangedMessage,
   REQUESTER_SETTLE_OWNER_CHANGED_MESSAGE,
@@ -12,7 +13,20 @@ import type { SubagentRunRecord } from "./subagent-registry.types.js";
 // Only the owner-changed rejection is a pure function of persisted rows, so repeating it
 // cannot recover. Five identical rejections span about five minutes of backoff. Storage and
 // transport failures never count: they keep retrying until the store recovers (#154252).
+// The count lives on the in-memory retry episode, so a Gateway restart starts a new episode:
+// a row that still cannot settle spends five more attempts per boot and is then quarantined
+// again. That keeps the bound without a schema change, and a quarantined row has no wake left
+// to repeat after the restart (#154252).
 const REQUESTER_SETTLE_WAKE_QUARANTINE_AFTER_FAILURES = 5;
+
+/** Keeps the failed delivery's own error next to the quarantine reason in the stored row. */
+export function appendDeliveryDetail(
+  reason: string,
+  outcome: Pick<SubagentAnnounceDeliveryResult, "error" | "reason">,
+): string {
+  const detail = outcome.error ?? outcome.reason;
+  return detail ? `${reason}; last delivery error: ${detail}` : reason;
+}
 
 /**
  * Settle a non-delivered wake, quarantining it once the same owner-changed rejection has

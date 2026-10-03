@@ -6,7 +6,10 @@ import {
   quarantineRequesterSettleWake,
   settleRequesterCompletionBatch,
 } from "../completion/subagent-completion-admission.store.js";
-import type { RequesterWakeMutation } from "../completion/subagent-completion-mutation.types.js";
+import type {
+  RequesterWakeMutation,
+  RequesterWakeQuarantine,
+} from "../completion/subagent-completion-mutation.types.js";
 import type {
   PendingRequesterSettleWakeCommit,
   SubagentLifecycleWakeContext,
@@ -80,7 +83,7 @@ export async function commitRequesterSettleWakeMutation(
   operation:
     | RequesterWakeMutation
     | { kind: "settle"; outcome: SubagentAnnounceDeliveryResult }
-    | { kind: "quarantine"; reason: string },
+    | ({ kind: "quarantine" } & RequesterWakeQuarantine),
   stateContext: OpenClawStateWorkerContext,
   pending: PendingRequesterSettleWakeCommit,
   onPublished?: (entries: readonly SubagentRunRecord[]) => void,
@@ -122,7 +125,7 @@ export async function commitRequesterSettleWakeMutation(
         assertCurrent,
         onPublished: options.onPublished,
         entries,
-        reason: operation.reason,
+        quarantine: operation,
       })
     : operation.kind === "settle"
       ? settleRequesterCompletionBatch({

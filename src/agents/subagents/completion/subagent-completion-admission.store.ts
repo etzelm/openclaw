@@ -48,6 +48,7 @@ import type {
   BlockSubagentCompletionRequest,
   RequesterWakeCommittedWrite,
   RequesterWakeMutation,
+  RequesterWakeQuarantine,
   SubagentCompletionMutation,
   SubagentCompletionMutationResult,
   SubagentCompletionQueueReceipt,
@@ -690,17 +691,17 @@ export async function settleRequesterCompletionBatch(
 export async function quarantineRequesterSettleWake(
   params: CompletionMutationOptions & {
     entries: readonly SubagentRunRecord[];
-    reason: string;
+    quarantine: RequesterWakeQuarantine;
     onPublished?: () => void;
   },
 ): Promise<CompletionMutationPublication> {
-  const { entries, reason, ...options } = params;
+  const { entries, quarantine, ...options } = params;
   return mutateCompletion(
     entries,
     (rows) => ({
       kind: "quarantineWake",
       entries: currentRequesterEntries(rows, entries),
-      reason,
+      quarantine,
       now: Date.now(),
     }),
     options,
