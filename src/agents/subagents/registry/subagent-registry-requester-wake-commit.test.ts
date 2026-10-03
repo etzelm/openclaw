@@ -7,10 +7,11 @@ import type {
 import {
   commitRequesterWake,
   getPendingWakeCommit,
+  REQUESTER_SETTLE_WAKE_PARKED_PROBE_INTERVAL_MS,
   retryPendingWakeCommit,
   shouldReportRequesterSettleWakeFailure,
 } from "./subagent-registry-requester-wake-commit.js";
-import { settleOrQuarantineRequesterWake } from "./subagent-registry-requester-wake-quarantine.js";
+import { settleOrParkRequesterWake } from "./subagent-registry-requester-wake-park.js";
 import { createRequesterWakeContextFixture } from "./subagent-registry-requester-yield.test-support.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 import { copySubagentRunRuntimeOwner } from "./subagent-run-generation.js";
@@ -514,139 +515,93 @@ describe("requester settle wake failure reporting", () => {
     ).toHaveLength(0);
   });
 
-  describe("owner-changed settlement quarantine (#154252)", () => {
-    const ownerChanged = (runId = "run-a") =>
-      new Error(`subagent completion owner changed before settlement: ${runId}`);
-    const storageFault = () =>
-      Object.assign(new Error("attempt to write a readonly database"), {
-        code: "ERR_SQLITE_ERROR",
-      });
+  describe("parked owner-changed settlement (#154252)", () => {
+    const ownerChanged = () =>
+      new Error("subagent completion owner changed before settlement: run-a");
 
-    /**
-     * Mirrors the completeBatch caller: a non-delivered settle wrapped by the quarantine
-     * policy. The first attempt runs through commitRequesterWake, later ones through the
-     * lifecycle retry seam, and rejections are the retained-episode failures the sweeper sees.
-     */
-    async function openSettleEpisode(
-      entry: SubagentRunRecord,
-      settle: () => boolean,
-      quarantine: (reason: string) => boolean = () => true,
-    ) {
-      const { context, warn } = makeContext([entry]);
-      const quarantined = vi.fn(quarantine);
+    /** Mirrors the completeBatch caller: a non-delivered settle wrapped by the park policy. */
+    async function openSettleEpisode(entry: SubagentRunRecord, settle: () => Promise<boolean>) {
+      const { context } = makeContext([entry]);
+      const attempts = vi.fn(settle);
       await commitRequesterWake(
         context,
         [entry],
         undefined,
-        (members, episode) =>
-          settleOrQuarantineRequesterWake(
-            context,
-            episode,
-            members,
-            async () => settle(),
-            async (reason) => quarantined(reason),
-          ),
+        (members, episode) => settleOrParkRequesterWake(context, episode, members, attempts),
         true,
       ).catch(() => undefined);
-      return { context, warn, quarantined };
+      return { context, attempts };
     }
 
-    async function retryAll(
+    async function retryDue(
       context: SubagentLifecycleWakeContext,
       entry: SubagentRunRecord,
-      passes: number,
-    ) {
-      for (let pass = 0; pass < passes; pass += 1) {
-        const pending = getPendingWakeCommit(context, entry);
-        if (!pending) {
-          return;
-        }
-        vi.setSystemTime(Math.max(Date.now(), pending.nextAttemptAt) + 1);
-        await retryPendingWakeCommit(context, pending).catch(() => undefined);
-      }
+    ): Promise<void> {
+      const pending = getPendingWakeCommit(context, entry)!;
+      vi.setSystemTime(Math.max(Date.now(), pending.nextAttemptAt));
+      await retryPendingWakeCommit(context, pending).catch(() => undefined);
     }
 
-    it("quarantines on the fifth identical owner-changed rejection and clears the episode", async () => {
+    it("defers a parked episode by the probe interval and keeps its wake retained", async () => {
       const entry = makeRetainedChild();
-      const { context, warn, quarantined } = await openSettleEpisode(entry, () => {
+      const { context, attempts } = await openSettleEpisode(entry, async () => {
         throw ownerChanged();
       });
-      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBe(1);
-      await retryAll(context, entry, 3);
-      expect(quarantined).not.toHaveBeenCalled();
-      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBe(4);
+      for (let i = 0; i < 3; i += 1) {
+        await retryDue(context, entry);
+      }
+      // Four rejections so far: still on the capped backoff.
+      expect(getPendingWakeCommit(context, entry)?.parked).toBeFalsy();
+      expect(getPendingWakeCommit(context, entry)!.nextAttemptAt - Date.now()).toBe(120_000);
 
-      await retryAll(context, entry, 1);
+      await retryDue(context, entry);
 
-      expect(quarantined).toHaveBeenCalledOnce();
-      expect(quarantined.mock.calls[0]?.[0]).toContain("after 5 identical settlement failures");
-      expect(getPendingWakeCommit(context, entry)).toBeUndefined();
-      const quarantineWarns = warn.mock.calls.filter(
-        ([message]) => message === "requester settle wake quarantined",
+      const parked = getPendingWakeCommit(context, entry)!;
+      expect(parked.parked).toBe(true);
+      expect(attempts).toHaveBeenCalledTimes(5);
+      expect(parked.nextAttemptAt - Date.now()).toBe(
+        REQUESTER_SETTLE_WAKE_PARKED_PROBE_INTERVAL_MS,
       );
-      expect(quarantineWarns).toHaveLength(1);
-      expect(quarantineWarns[0]?.[1]).toMatchObject({
-        signature: "subagent completion owner changed before settlement",
-        failures: 5,
-      });
+      // A sweeper resume before the deadline is gated; the probe runs once it is due.
+      vi.setSystemTime(Date.now() + REQUESTER_SETTLE_WAKE_PARKED_PROBE_INTERVAL_MS - 1);
+      await retryPendingWakeCommit(context, parked);
+      expect(attempts).toHaveBeenCalledTimes(5);
+      vi.setSystemTime(Date.now() + 1);
+      await retryPendingWakeCommit(context, parked).catch(() => undefined);
+      expect(attempts).toHaveBeenCalledTimes(6);
     });
 
-    it("never quarantines storage failures, however long they last", async () => {
+    it("keeps the capped backoff for storage failures, however long they last", async () => {
       const entry = makeRetainedChild();
-      const { context, quarantined } = await openSettleEpisode(entry, () => {
-        throw storageFault();
+      const { context, attempts } = await openSettleEpisode(entry, async () => {
+        throw Object.assign(new Error("database is locked"), { code: "ERR_SQLITE_ERROR" });
       });
-      await retryAll(context, entry, 60);
+      for (let i = 0; i < 30; i += 1) {
+        await retryDue(context, entry);
+      }
 
-      expect(quarantined).not.toHaveBeenCalled();
-      const pending = getPendingWakeCommit(context, entry);
-      expect(pending?.failures).toBeGreaterThan(50);
-      expect(pending?.ownerChangedFailures ?? 0).toBe(0);
-      // Retries stay capped at the 120s ceiling rather than backing off further.
-      expect(pending!.nextAttemptAt - Date.now()).toBeLessThanOrEqual(120_000);
+      const pending = getPendingWakeCommit(context, entry)!;
+      expect(attempts).toHaveBeenCalledTimes(31);
+      expect(pending.parked).toBeFalsy();
+      expect(pending.nextAttemptAt - Date.now()).toBe(120_000);
     });
 
-    it("resets the budget when a different failure interrupts the run", async () => {
+    it("clears the parked episode once a probe settles", async () => {
       const entry = makeRetainedChild();
-      const faults = [
-        ...Array.from({ length: 4 }, () => ownerChanged()),
-        storageFault(),
-        ...Array.from({ length: 4 }, () => ownerChanged()),
-        ...Array.from({ length: 4 }, () => ownerChanged("run-b")),
-      ];
-      const total = faults.length;
-      const { context, quarantined } = await openSettleEpisode(entry, () => {
-        throw faults.shift() ?? ownerChanged("run-b");
-      });
-      await retryAll(context, entry, total - 1);
-
-      // Neither run of four, nor the switch to another run id, reached five in a row.
-      expect(faults).toHaveLength(0);
-      expect(quarantined).not.toHaveBeenCalled();
-      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBe(4);
-    });
-
-    it("retries a failing quarantine write like a storage failure, keeping the count", async () => {
-      const entry = makeRetainedChild();
-      let writable = false;
-      const { context, quarantined } = await openSettleEpisode(
-        entry,
-        () => {
+      let healed = false;
+      const { context } = await openSettleEpisode(entry, async () => {
+        if (!healed) {
           throw ownerChanged();
-        },
-        () => {
-          if (!writable) {
-            throw storageFault();
-          }
-          return true;
-        },
-      );
-      await retryAll(context, entry, 8);
-      expect(quarantined.mock.calls.length).toBeGreaterThan(2);
-      expect(getPendingWakeCommit(context, entry)).toBeDefined();
+        }
+        return true;
+      });
+      for (let i = 0; i < 4; i += 1) {
+        await retryDue(context, entry);
+      }
+      expect(getPendingWakeCommit(context, entry)?.parked).toBe(true);
 
-      writable = true;
-      await retryAll(context, entry, 2);
+      healed = true;
+      await retryDue(context, entry);
 
       expect(getPendingWakeCommit(context, entry)).toBeUndefined();
     });
@@ -660,21 +615,13 @@ describe("requester settle wake failure reporting", () => {
       await commitRequesterWake(context, [entry], undefined, transition, true).catch(
         () => undefined,
       );
-      await retryAll(context, entry, 20);
+      for (let i = 0; i < 20; i += 1) {
+        await retryDue(context, entry);
+      }
 
       expect(transition.mock.calls.length).toBeGreaterThan(15);
+      expect(getPendingWakeCommit(context, entry)?.parked).toBeUndefined();
       expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBeUndefined();
-    });
-
-    it("never quarantines a paused yield cohort", async () => {
-      const yielded = { ...makeRetainedChild("run-y"), pauseReason: "sessions_yield" as const };
-      const { context, quarantined } = await openSettleEpisode(yielded, () => {
-        throw ownerChanged("run-y");
-      });
-      await retryAll(context, yielded, 12);
-
-      expect(quarantined).not.toHaveBeenCalled();
-      expect(getPendingWakeCommit(context, yielded)?.ownerChangedFailures ?? 0).toBe(0);
     });
   });
 });

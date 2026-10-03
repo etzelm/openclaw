@@ -216,39 +216,25 @@ function prepareBlockedSubagentCompletion(
   } else {
     subagent.suppressCompletionDelivery = true;
   }
-  return {
-    subagent,
-    queued: prepareBlockedDeliveryEvent(subagent, params.reason, generation, now, {
-      successful,
-      storeReplaced: params.storeReplaced === true,
-    }),
-  };
-}
-
-// The requester's visible outcome for a successful child whose result cannot be delivered.
-// Failed children and replaced stores record their outcome on the row instead.
-function prepareBlockedDeliveryEvent(
-  subagent: SubagentRunRecord,
-  reason: string,
-  generation: number,
-  now: number,
-  facts: { successful: boolean; storeReplaced: boolean },
-): QueuedSessionDelivery | undefined {
-  if (!facts.successful || facts.storeReplaced) {
-    return undefined;
-  }
-  return prepareClaimedSessionDelivery(
-    {
-      kind: "systemEvent",
-      sessionKey: resolveEventSessionKey(subagent.requesterSessionKey),
-      ...(subagent.requesterAgentId ? { agentId: subagent.requesterAgentId } : {}),
-      text: "Subagent completion delivery is blocked: " + reason,
-      ...(subagent.requesterOrigin ? { deliveryContext: subagent.requesterOrigin } : {}),
-      idempotencyKey: `subagent-completion-blocked:${subagent.runId}:generation:${generation}`,
-    },
-    0,
-    now,
-  );
+  const text =
+    successful && !params.storeReplaced
+      ? "Subagent completion delivery is blocked: " + params.reason
+      : null;
+  const queued = text
+    ? prepareClaimedSessionDelivery(
+        {
+          kind: "systemEvent",
+          sessionKey: resolveEventSessionKey(subagent.requesterSessionKey),
+          ...(subagent.requesterAgentId ? { agentId: subagent.requesterAgentId } : {}),
+          text,
+          ...(subagent.requesterOrigin ? { deliveryContext: subagent.requesterOrigin } : {}),
+          idempotencyKey: `subagent-completion-blocked:${subagent.runId}:generation:${generation}`,
+        },
+        0,
+        now,
+      )
+    : undefined;
+  return { subagent, queued };
 }
 
 function commitCompletionMutations(
@@ -410,100 +396,6 @@ function settleRequesterBatch(
       return mutation;
     },
   );
-  return commitCompletionMutations(database, mutations);
-}
-
-// Bounds a wake whose settlement cannot succeed. It guards the same row identity as the
-// ordinary settle read (generation, requester, re-arm generation, frozen cohort) so a
-// re-arm that commits after the in-memory check is never cleared, but it skips the
-// omitted-cohort-member scan and the blocked-completion preconditions whose failure it
-// exists to bound. A row the ordinary blocked-completion owner can still record keeps its
-// payload as a failed delivery with the outcome's disposition, exactly as an exhausted wake
-// does. One it can never record is suspended with its reason, so no result retries forever
-// and none is dropped silently; a successful child's requester still gets the blocked event.
-function quarantineRequesterWake(
-  database: OpenClawStateDatabase,
-  params: Extract<SubagentCompletionMutation, { kind: "quarantineWake" }>,
-): SubagentCompletionMutationResult {
-  const { quarantine } = params;
-  const first = params.entries[0]?.subagent;
-  const cohort = first?.requesterSettleWake?.batchRunIds?.toSorted().join("\0");
-  const mutations = params.entries.map(({ subagent: expected }): CompletionMutation => {
-    const subagent = readSubagentRun(database, expected.runId);
-    if (
-      !subagent ||
-      !subagent.requesterSettleWake ||
-      // A paused yield cohort still owns unfinished requester work and is never quarantined.
-      subagent.pauseReason === "sessions_yield" ||
-      compareSubagentRunGeneration(subagent, expected) !== 0 ||
-      subagent.requesterSessionKey !== first?.requesterSessionKey ||
-      subagent.requesterAgentId !== first?.requesterAgentId ||
-      subagent.requesterSettleWake.rearmGeneration !==
-        first?.requesterSettleWake?.rearmGeneration ||
-      subagent.requesterSettleWake.batchRunIds?.toSorted().join("\0") !== cohort ||
-      // A delivery re-arm bumps the generation; its payload belongs to the new delivery.
-      (subagent.delivery?.generation ?? 1) !== (expected.delivery?.generation ?? 1)
-    ) {
-      throw new Error("subagent completion owner changed before quarantine: " + expected.runId);
-    }
-    subagent.cleanupHandled = expected.cleanupHandled;
-    let mutation: CompletionMutation = { subagent };
-    if (
-      subagent.expectsCompletionMessage === true &&
-      ["pending", "in_progress"].includes(subagent.delivery?.status ?? "pending")
-    ) {
-      const blocked = prepareBlockedSubagentCompletion(
-        database,
-        {
-          subagent: expected,
-          reason: quarantine.reason,
-          disposition: quarantine.disposition,
-          storeReplaced: quarantine.storeReplaced,
-          suspendedReason: quarantine.storeReplaced ? "permanent_failure" : undefined,
-        },
-        params.now,
-        subagent,
-      );
-      if (blocked) {
-        mutation = blocked;
-      } else {
-        const delivery = ensureDeliveryState(subagent);
-        Object.assign(delivery, {
-          status: "suspended" as const,
-          disposition: quarantine.storeReplaced
-            ? ("intentional_non_delivery" as const)
-            : ("permanent_failure" as const),
-          lastError: quarantine.reason,
-          deliveredAt: undefined,
-          announcedAt: undefined,
-          suspendedAt: delivery.suspendedAt ?? params.now,
-          suspendedReason: "permanent_failure" as const,
-          lastDropReason: "sink_unavailable" as const,
-          nextAttemptAt: undefined,
-          queueId: undefined,
-        });
-        // The requester still learns that a successful child's result was not delivered.
-        mutation = {
-          subagent,
-          queued: prepareBlockedDeliveryEvent(
-            subagent,
-            quarantine.reason,
-            expected.delivery?.generation ?? 1,
-            params.now,
-            {
-              successful: subagent.execution.outcome?.status === "ok",
-              storeReplaced: quarantine.storeReplaced === true,
-            },
-          ),
-        };
-      }
-    }
-    // Ordinary settlement retires a delete-cleanup row here, immediately or after the
-    // requester turn. A quarantined row keeps its record instead, so neither is armed.
-    completeRequesterSettleWakeState(mutation.subagent);
-    mutation.subagent.retireAfterRequesterTurn = undefined;
-    return mutation;
-  });
   return commitCompletionMutations(database, mutations);
 }
 
@@ -715,8 +607,6 @@ export function mutateSubagentCompletionInDatabase(
       return settleRequesterBatch(database, mutation);
     case "requesterWake":
       return mutateRequesterWake(database, mutation);
-    case "quarantineWake":
-      return quarantineRequesterWake(database, mutation);
   }
   throw new Error("Unknown subagent completion mutation");
 }

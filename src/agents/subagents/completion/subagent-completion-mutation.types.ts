@@ -17,13 +17,6 @@ export type RequesterWakeMutation =
   | { kind: "transition"; state: RequesterSettleWakeBatchState }
   | { kind: "complete" };
 
-/** The failed outcome's disposition and store replacement, carried as ordinary settlement does. */
-export type RequesterWakeQuarantine = {
-  reason: string;
-  disposition?: NonNullable<SubagentRunRecord["delivery"]>["disposition"];
-  storeReplaced?: true;
-};
-
 export type SubagentCompletionQueueReceipt =
   | { id: string; status: "pending"; enqueuedAt: number; payloadJson: string }
   | { id: string; status: "completed" | "failed" };
@@ -42,12 +35,6 @@ export type SubagentCompletionMutation =
       entries: readonly { subagent: SubagentRunRecord }[];
       operation: RequesterWakeMutation;
       committed?: RequesterWakeCommittedWrite;
-    }
-  | {
-      kind: "quarantineWake";
-      entries: readonly { subagent: SubagentRunRecord }[];
-      quarantine: RequesterWakeQuarantine;
-      now: number;
     }
   | {
       kind: "requesterBatch";

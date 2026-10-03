@@ -123,6 +123,8 @@ export type PendingRequesterSettleWakeCommit = {
   /** Owner-changed rejection the settle attempts keep repeating, and how many in a row. */
   ownerChangedSignature?: string;
   ownerChangedFailures?: number;
+  /** The repeat budget ran out: retries drop to the slow probe cadence, nothing is closed. */
+  parked?: boolean;
 };
 
 export interface SubagentLifecycleWakeContext extends SubagentLifecycleCommonContext {

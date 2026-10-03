@@ -48,7 +48,6 @@ import type {
   BlockSubagentCompletionRequest,
   RequesterWakeCommittedWrite,
   RequesterWakeMutation,
-  RequesterWakeQuarantine,
   SubagentCompletionMutation,
   SubagentCompletionMutationResult,
   SubagentCompletionQueueReceipt,
@@ -684,27 +683,6 @@ export async function settleRequesterCompletionBatch(
         }
       },
     },
-  );
-}
-
-/** Clears a wake whose settlement can never succeed, row by row, without replaying delivery. */
-export async function quarantineRequesterSettleWake(
-  params: CompletionMutationOptions & {
-    entries: readonly SubagentRunRecord[];
-    quarantine: RequesterWakeQuarantine;
-    onPublished?: () => void;
-  },
-): Promise<CompletionMutationPublication> {
-  const { entries, quarantine, ...options } = params;
-  return mutateCompletion(
-    entries,
-    (rows) => ({
-      kind: "quarantineWake",
-      entries: currentRequesterEntries(rows, entries),
-      quarantine,
-      now: Date.now(),
-    }),
-    options,
   );
 }
 

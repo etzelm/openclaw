@@ -3,13 +3,9 @@ import type { OpenClawStateWorkerContext } from "../../../state/openclaw-state-w
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import {
   mutateRequesterSettleWakeBatch,
-  quarantineRequesterSettleWake,
   settleRequesterCompletionBatch,
 } from "../completion/subagent-completion-admission.store.js";
-import type {
-  RequesterWakeMutation,
-  RequesterWakeQuarantine,
-} from "../completion/subagent-completion-mutation.types.js";
+import type { RequesterWakeMutation } from "../completion/subagent-completion-mutation.types.js";
 import type {
   PendingRequesterSettleWakeCommit,
   SubagentLifecycleWakeContext,
@@ -80,10 +76,7 @@ function assertRequesterWakeCommitCurrent(
 export async function commitRequesterSettleWakeMutation(
   context: SubagentLifecycleWakeContext,
   entries: readonly SubagentRunRecord[],
-  operation:
-    | RequesterWakeMutation
-    | { kind: "settle"; outcome: SubagentAnnounceDeliveryResult }
-    | ({ kind: "quarantine" } & RequesterWakeQuarantine),
+  operation: RequesterWakeMutation | { kind: "settle"; outcome: SubagentAnnounceDeliveryResult },
   stateContext: OpenClawStateWorkerContext,
   pending: PendingRequesterSettleWakeCommit,
   onPublished?: (entries: readonly SubagentRunRecord[]) => void,
@@ -119,24 +112,16 @@ export async function commitRequesterSettleWakeMutation(
       onPublished?.(published);
     },
   };
-  const result = await (operation.kind === "quarantine"
-    ? quarantineRequesterSettleWake({
-        context: options.context,
-        assertCurrent,
-        onPublished: options.onPublished,
-        entries,
-        quarantine: operation,
+  const result = await (operation.kind === "settle"
+    ? settleRequesterCompletionBatch({
+        ...options,
+        entries: entries.map((subagent) => ({ subagent })),
+        outcome: operation.outcome,
+        isCurrent: () => {
+          assertCurrent();
+          return true;
+        },
       })
-    : operation.kind === "settle"
-      ? settleRequesterCompletionBatch({
-          ...options,
-          entries: entries.map((subagent) => ({ subagent })),
-          outcome: operation.outcome,
-          isCurrent: () => {
-            assertCurrent();
-            return true;
-          },
-        })
-      : mutateRequesterSettleWakeBatch({ ...options, entries, operation }));
+    : mutateRequesterSettleWakeBatch({ ...options, entries, operation }));
   return result.applied === true && result.publication === "published";
 }
