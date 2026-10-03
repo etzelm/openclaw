@@ -42,11 +42,12 @@ warning. Refused or unregistered waits do not provide that evidence.
 
 `resolveYieldedRunContinuation` owns whether a paused run can still be continued.
 A collector without a recorded result never can, because an explicit wait reads a
-collector and no continuation resumes it. A leaf that no continuation reached within
-24 hours of its pause cannot be either: the pause time is the `execution.endedAt`
-that the yield already recorded, never earlier than the row's creation. The registry sweeper settles both through the
-existing completion owner as an `error` that keeps that time. A run that still owes
-a wake to unfinished children stays continuable, however old its pause.
+collector and no continuation resumes it. The registry sweeper settles that run
+through the existing completion owner as an `error` that keeps the end time the
+yield recorded. Every other paused run stays continuable however long it has been
+paused: a declared message wait, a leaf that an earlier version left paused, and an
+orchestrator waiting on descendants are not bounded by this settlement. A kill
+claim on a paused run is never settled over; cancellation stays with the kill path.
 
 Private child results wait for their spawning turn to settle before individual
 announcement admission. Normal settlement resumes each finished private child,

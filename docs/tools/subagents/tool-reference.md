@@ -341,17 +341,6 @@ child is still finishing its yielding turn: when the pause publishes, the
 follow-up takes over the requester's completion, and the requester is announced
 once that follow-up finishes.
 
-A paused child that no continuation reaches does not wait for good. The registry
-measures the pause from the `endedAt` it recorded when the yield ended the turn
-(never earlier than the run was created). Once 24 hours have passed without a continuation, the next registry sweep settles
-the run as an `error` ("Subagent yielded and no continuation arrived within 24
-hours of its pause.") and announces it through the normal completion path. A
-continuation sent before that resumes the run as usual. The bound is fixed, is not
-a tool parameter, and persists nothing beyond the pause itself, so it also settles a
-leaf that an earlier version left paused. A paused orchestrator that still waits for
-its announced children is never settled by age; those children's own settlement
-wakes it.
-
 A yield claim belongs to the turn that spawned the children. When a later turn
 of the same session calls `sessions_yield` while children spawned by an earlier
 turn are still running or still owe their completion, the tool returns
@@ -400,7 +389,8 @@ without a result is settled as failed by the first registry sweep after the
 registry restores, and `agents_wait` then returns that failure with its error. That
 row has no terminal turn left to evaluate, so the sweep records the failure itself
 as an `error` outcome, where a collector that yields now ends as an ordinary
-terminal.
+terminal. Only collectors are settled this way: a child that declared a message wait
+stays paused until a continuation reaches it, however long that takes.
 
 The registry also continues a yielded sub-agent when its announced children
 settle, including an orchestrator spawned by cron. That internal settlement
@@ -448,8 +438,7 @@ A zero timeout reads a snapshot. `reason` is `completed`, `attention`,
 Waiting does not cancel execution or consume completion delivery.
 
 List entries include the native `runId`, child `sessionKey`, status, outcome,
-and delivery status. A yielded child remains `waiting` until its continuation or, after 24 hours without
-one, until the registry settles it as an error.
+and delivery status. A yielded child remains `waiting` until its continuation.
 For an external wait, its controlling parent can send a continuation with
 `sessions_send`; yielding itself does not schedule external work.
 

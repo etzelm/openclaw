@@ -10,44 +10,21 @@ import { shouldSuppressSubagentRecoverySessionEffects } from "./subagent-recover
 import { mutateSubagentRuns, SubagentRegistryWriteError } from "./subagent-registry-persistence.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
-/** A yielded leaf that no continuation reached within this age of its pause is settled as expired. */
-const YIELDED_WAIT_MAX_AGE_MS = 24 * 60 * 60_000;
 const COLLECTOR_YIELD_ERROR =
   "Collector yielded without recording a result, and no continuation can resume a collector. Run it again and end its turn normally.";
-const YIELDED_WAIT_EXPIRED_ERROR = `Subagent yielded and no continuation arrived within ${YIELDED_WAIT_MAX_AGE_MS / 3_600_000} hours of its pause.`;
 
 type YieldedRunContinuation = { state: "continuable" } | { state: "unreachable"; error: string };
 
 /**
  * Owns "can a continuation still resume this yielded run?" for a row where
  * `isYieldedSubagentRun` (execution observation) holds. Callers settle an unreachable run through the
- * completion owner instead of leaving it parked. The pause time is the `execution.endedAt` that
- * `markSubagentRunPausedAfterYield` records, so nothing extra is persisted. A run that still owes
- * a wake to unfinished children (`awaitsChildren`, or `wakeOnDescendantSettle`) stays continuable.
+ * completion owner instead of leaving it parked. Every other yielded row stays continuable.
  */
-export function resolveYieldedRunContinuation(
-  entry: SubagentRunRecord,
-  now: number,
-  awaitsChildren: boolean,
-): YieldedRunContinuation {
-  // A collector result is read by an explicit wait, never delivered by a continuation, and a
-  // frozen result is never replaced by an age expiry.
-  if (entry.collect === true) {
-    return entry.collectorCompletion === undefined
-      ? { state: "unreachable", error: COLLECTOR_YIELD_ERROR }
-      : { state: "continuable" };
-  }
-  const endedAt = entry.execution.endedAt;
-  if (
-    awaitsChildren ||
-    entry.wakeOnDescendantSettle === true ||
-    typeof endedAt !== "number" ||
-    // A pause cannot predate its own row, so an earlier recorded end is not a pause time.
-    now < Math.max(endedAt, entry.createdAt) + YIELDED_WAIT_MAX_AGE_MS
-  ) {
-    return { state: "continuable" };
-  }
-  return { state: "unreachable", error: YIELDED_WAIT_EXPIRED_ERROR };
+export function resolveYieldedRunContinuation(entry: SubagentRunRecord): YieldedRunContinuation {
+  // A collector result is read by an explicit wait, never delivered by a continuation.
+  return entry.collect === true && entry.collectorCompletion === undefined
+    ? { state: "unreachable", error: COLLECTOR_YIELD_ERROR }
+    : { state: "continuable" };
 }
 
 /** Capture the accepted tool intent before the runtime publishes its yielded terminal. */

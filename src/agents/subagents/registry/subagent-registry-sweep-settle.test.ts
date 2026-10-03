@@ -3,52 +3,65 @@ import { createSubagentRunRecord } from "../../subagent-test-fixtures.test-helpe
 import { settleUnreachableYieldedSubagentRun } from "./subagent-registry-sweep-settle.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
-const YIELDED_WAIT_MAX_AGE_MS = 24 * 60 * 60_000;
 const PAUSED_AT = Date.parse("2026-10-03T08:00:00Z");
-const PAST_BOUND = PAUSED_AT + YIELDED_WAIT_MAX_AGE_MS;
 
-const leaf = (overrides: Partial<SubagentRunRecord> = {}) =>
+type RunOverrides = NonNullable<Parameters<typeof createSubagentRunRecord>[0]>;
+
+const yielded = (overrides: Partial<RunOverrides> = {}) =>
   createSubagentRunRecord({
-    runId: "parked-leaf",
+    runId: "parked-run",
     pauseReason: "sessions_yield",
-    expectsCompletionMessage: true,
     createdAt: PAUSED_AT - 60_000,
     startedAt: PAUSED_AT - 30_000,
     endedAt: PAUSED_AT,
     ...overrides,
-  } as Parameters<typeof createSubagentRunRecord>[0]);
+  });
+const collector = (overrides: Partial<RunOverrides> = {}) =>
+  yielded({ collect: true, expectsCompletionMessage: false, ...overrides });
 
-const settle = async (entry: SubagentRunRecord, now = PAST_BOUND) => {
+const settle = async (entry: SubagentRunRecord) => {
   const complete = vi.fn(async () => undefined);
   const settled = await settleUnreachableYieldedSubagentRun({
     runId: entry.runId,
     entry,
-    runs: [entry],
-    now,
     complete,
   });
   return { settled, complete };
 };
 
 describe("settleUnreachableYieldedSubagentRun", () => {
-  it("asks the completion owner to settle an expired leaf at the time it paused", async () => {
-    const entry = leaf();
+  it("asks the completion owner to settle a collector without a result at its yield time", async () => {
+    const entry = collector();
     const { settled, complete } = await settle(entry);
     expect(settled).toBe(true);
     expect(complete).toHaveBeenCalledWith(
       expect.objectContaining({
-        runId: "parked-leaf",
+        runId: "parked-run",
         expectedEntry: entry,
         endedAt: PAUSED_AT,
         settleYielded: true,
-        outcome: { status: "error", error: expect.stringContaining("within 24 hours") },
+        outcome: { status: "error", error: expect.stringContaining("Collector yielded") },
       }),
       "sweeper-unreachable-yield",
     );
   });
 
-  it("leaves a leaf inside the bound alone", async () => {
-    const { settled, complete } = await settle(leaf(), PAST_BOUND - 1);
+  it.each([
+    {
+      label: "a leaf waiting on a message, however long ago it paused",
+      entry: () =>
+        yielded({ expectsCompletionMessage: true, endedAt: PAUSED_AT - 400 * 86_400_000 }),
+    },
+    {
+      label: "an orchestrator waiting on descendants",
+      entry: () => yielded({ expectsCompletionMessage: true, wakeOnDescendantSettle: true }),
+    },
+    {
+      label: "a collector with a frozen result",
+      entry: () => collector({ collectorCompletion: { status: "done" } }),
+    },
+  ])("never settles $label", async ({ entry }) => {
+    const { settled, complete } = await settle(entry());
     expect(settled).toBe(false);
     expect(complete).not.toHaveBeenCalled();
   });
@@ -62,16 +75,12 @@ describe("settleUnreachableYieldedSubagentRun", () => {
     { label: "a killed announce suppression", overrides: { suppressAnnounceReason: "killed" } },
     { label: "a killed ended reason", overrides: { endedReason: "subagent-killed" } },
     { label: "a resumed run", overrides: { pauseReason: undefined } },
-  ] as const)("never settles a row excluded as not yielded: $label", async ({ overrides }) => {
-    for (const collect of [false, true]) {
-      const { settled, complete } = await settle(
-        leaf({
-          ...(collect ? { collect: true, expectsCompletionMessage: false } : {}),
-          ...overrides,
-        }),
-      );
-      expect(settled, `collect=${collect}`).toBe(false);
+  ] as const)(
+    "never settles a collector excluded as not yielded: $label",
+    async ({ overrides }) => {
+      const { settled, complete } = await settle(collector(overrides));
+      expect(settled).toBe(false);
       expect(complete).not.toHaveBeenCalled();
-    }
-  });
+    },
+  );
 });

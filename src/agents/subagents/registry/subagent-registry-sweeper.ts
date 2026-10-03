@@ -284,8 +284,6 @@ export function createSubagentRegistrySweeper(params: {
           await settleUnreachableYieldedSubagentRun({
             runId,
             entry,
-            runs: runs.values(),
-            now,
             complete: params.completeSubagentRunWithRecovery,
           })
         ) {

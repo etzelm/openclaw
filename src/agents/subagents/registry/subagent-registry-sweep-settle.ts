@@ -1,7 +1,4 @@
-import {
-  isYieldedSubagentRun,
-  listPendingYieldedRunChildren,
-} from "./subagent-execution-observation.js";
+import { isYieldedSubagentRun } from "./subagent-execution-observation.js";
 import { SUBAGENT_ENDED_REASON_ERROR } from "./subagent-lifecycle-events.js";
 import type { createSubagentRegistryCompletionRuntime } from "./subagent-registry-completion-runtime.js";
 import { resolveYieldedRunContinuation } from "./subagent-registry-run-pause.js";
@@ -75,17 +72,11 @@ export async function settleStaleActiveSubagentRun(params: {
 export async function settleUnreachableYieldedSubagentRun(params: {
   runId: string;
   entry: SubagentRunRecord;
-  runs: Iterable<SubagentRunRecord>;
-  now: number;
   complete: CompleteRun;
 }): Promise<boolean> {
-  const { runId, entry, runs, now, complete } = params;
+  const { runId, entry, complete } = params;
   const continuation = isYieldedSubagentRun(entry)
-    ? resolveYieldedRunContinuation(
-        entry,
-        now,
-        listPendingYieldedRunChildren(entry, runs).length > 0,
-      )
+    ? resolveYieldedRunContinuation(entry)
     : undefined;
   if (continuation?.state !== "unreachable") {
     return false;
