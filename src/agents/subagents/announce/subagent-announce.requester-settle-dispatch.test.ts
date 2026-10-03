@@ -357,7 +357,7 @@ describe("requester settle dispatch deadline", () => {
     },
   );
 
-  it("never completes an ordinary batch on requester_turn_pending, so it cannot reach the settle quarantine (#154252)", async () => {
+  it("never completes an ordinary batch on requester_turn_pending, so it cannot reach the settle park (#154252)", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(10_000);
     const child = settledChild();
