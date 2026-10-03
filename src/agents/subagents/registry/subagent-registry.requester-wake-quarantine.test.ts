@@ -137,7 +137,12 @@ function createGatewayContext() {
       throw new Error("Unexpected recovery notice");
     },
   };
-  const context = { recoveryRuntime } as GatewayRequestContext;
+  // Activation binds this context to every row restored at boot, and wake release reads
+  // the child's abort controllers through it.
+  const context = {
+    recoveryRuntime,
+    chatAbortControllers: new Map(),
+  } as unknown as GatewayRequestContext;
   context.resolveGatewayContext = () => context;
   return context;
 }
@@ -495,6 +500,61 @@ describe("requester settle wake quarantine (#154252)", () => {
     expect(readRow()?.delivery).toEqual(quarantined?.delivery);
   });
 
+  it("first boot after an upgrade quarantines a row stranded before it, through restore and the sweeper", async () => {
+    const endedAt = T0 - 3_600_000;
+    // Written by the previous version: a persisted wake at the attempt ceiling on a row whose
+    // settle can only fail with the owner-changed rejection. The row goes through the
+    // registry's own writer, then the registry is torn down so that nothing in memory knows
+    // the row or counts its failures.
+    await start();
+    await seed(
+      baseRow(endedAt, {
+        execution: { status: "terminal", startedAt: endedAt - 4_000, endedAt },
+        requesterSettleWake: {
+          status: "pending",
+          attemptCount: QUARANTINE_AFTER,
+          rearmGeneration: 1,
+          batchRunIds: [RUN_ID],
+        },
+      }),
+    );
+    // The gateway restarts: every in-memory registry, controller and timer is torn down
+    // without touching SQLite, and the only state left is the stored row.
+    await registry.resetSubagentRegistryForTests({ persist: false });
+    probe.settleCalls = 0;
+    probe.settleOk = 0;
+    probe.settleErrors.length = 0;
+    probe.settleAt.length = 0;
+    probe.warns.length = 0;
+    expect(registry.getSubagentRunByRunId(RUN_ID)).toBeUndefined();
+    expect(readRow()?.requesterSettleWake).toMatchObject({ status: "pending" });
+    expect(probe.settleCalls).toBe(0);
+
+    // The gateway's own startup: initSubagentRegistry (server-startup-bootstrap) restores
+    // from SQLite, activation re-arms what restore found, and the sweeper owns the rest.
+    await start();
+    expect(registry.getSubagentRunByRunId(RUN_ID)?.requesterSettleWake).toMatchObject({
+      status: "pending",
+    });
+    const { perTick, callsInWindow, quiet } = await driveToQuarantine();
+    report("first boot after upgrade, stranded row restored from SQLite", perTick, callsInWindow);
+
+    // Exactly the budget, then the quarantine; nothing retries over the quiet hour after it.
+    expect(probe.settleCalls).toBe(QUARANTINE_AFTER);
+    expectBounded(quiet);
+    await run(WINDOW_TICKS);
+    expect(probe.settleCalls).toBe(QUARANTINE_AFTER);
+    expect(quarantineWarns()).toHaveLength(1);
+    const row = readRow();
+    expect(row?.requesterSettleWake).toBeUndefined();
+    expect(row?.delivery).toMatchObject({
+      status: "suspended",
+      disposition: "permanent_failure",
+      suspendedReason: "permanent_failure",
+      lastError: expect.stringContaining("quarantined after 5 identical settlement failures"),
+    });
+  });
+
   it("B2: a retired cancellation with a newer sibling on its child session is suspended", async () => {
     await start();
     await seed(baseRow(T0 - 8 * DAY, { generation: 1 }));
@@ -583,6 +643,12 @@ describe("requester settle wake quarantine (#154252)", () => {
     });
     expect(row?.delivery?.suspendedReason).toBeUndefined();
     expect(row?.completion?.resultText).toBe("partial result");
+    // Failed rows keep their payload under the ordinary archive rules: a keep-cleanup row has
+    // no archive deadline, so a sweep a week past the 7 day suspended retention leaves it whole.
+    vi.setSystemTime(Date.now() + 8 * DAY);
+    await registry.testing.sweepOnceForTests();
+    await flushAsync();
+    expect(readRow()?.delivery).toEqual(row?.delivery);
   });
 
   it("a delivery re-arm during the final attempt refuses the quarantine and the episode keeps retrying at the capped 120s cadence", async () => {
