@@ -37,6 +37,12 @@ export type SubagentCompletionMutation =
       committed?: RequesterWakeCommittedWrite;
     }
   | {
+      kind: "quarantineWake";
+      entries: readonly { subagent: SubagentRunRecord }[];
+      reason: string;
+      now: number;
+    }
+  | {
       kind: "requesterBatch";
       committed?: RequesterWakeCommittedWrite;
       entries: readonly { subagent: SubagentRunRecord }[];

@@ -36,6 +36,7 @@ import {
   commitRequesterSettleWakeMutation,
   isCurrentRequesterSettleWakeBatch,
 } from "./subagent-registry-requester-wake-mutation.js";
+import { settleOrQuarantineRequesterWake } from "./subagent-registry-requester-wake-quarantine.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 import { captureRequesterSettleRunIdentity } from "./subagent-requester-settle-identity.js";
 import {
@@ -52,13 +53,18 @@ const completeRequesterSettleWakeBatch = async (
   pending: PendingRequesterSettleWakeCommit,
   rearmGeneration?: number,
   outcome?: SubagentAnnounceDeliveryResult,
+  quarantineReason?: string,
 ): Promise<boolean> => {
   const params = context.options;
   if (
     !(await commitRequesterSettleWakeMutation(
       context,
       entries,
-      outcome ? { kind: "settle", outcome } : { kind: "complete" },
+      quarantineReason !== undefined
+        ? { kind: "quarantine", reason: quarantineReason }
+        : outcome
+          ? { kind: "settle", outcome }
+          : { kind: "complete" },
       stateContext,
       pending,
     ))
@@ -478,14 +484,35 @@ export function scheduleRequesterSettleWake(
                     ) {
                       return false;
                     }
-                    const committed = await completeRequesterSettleWakeBatch(
-                      context,
-                      members,
-                      stateContext,
-                      episode,
-                      rearmGeneration,
-                      outcome,
-                    );
+                    const settle = () =>
+                      completeRequesterSettleWakeBatch(
+                        context,
+                        members,
+                        stateContext,
+                        episode,
+                        rearmGeneration,
+                        outcome,
+                      );
+                    // A delivered outcome is never quarantined: that would replay a sent result.
+                    const committed =
+                      outcome && !outcome.delivered
+                        ? await settleOrQuarantineRequesterWake(
+                            context,
+                            episode,
+                            members,
+                            settle,
+                            (reason) =>
+                              completeRequesterSettleWakeBatch(
+                                context,
+                                members,
+                                stateContext,
+                                episode,
+                                rearmGeneration,
+                                undefined,
+                                reason,
+                              ),
+                          )
+                        : await settle();
                     if (committed) {
                       onCommitted?.();
                     }

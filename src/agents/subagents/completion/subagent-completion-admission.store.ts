@@ -686,6 +686,27 @@ export async function settleRequesterCompletionBatch(
   );
 }
 
+/** Clears a wake whose settlement can never succeed, row by row, without replaying delivery. */
+export async function quarantineRequesterSettleWake(
+  params: CompletionMutationOptions & {
+    entries: readonly SubagentRunRecord[];
+    reason: string;
+    onPublished?: () => void;
+  },
+): Promise<CompletionMutationPublication> {
+  const { entries, reason, ...options } = params;
+  return mutateCompletion(
+    entries,
+    (rows) => ({
+      kind: "quarantineWake",
+      entries: currentRequesterEntries(rows, entries),
+      reason,
+      now: Date.now(),
+    }),
+    options,
+  );
+}
+
 export async function mutateRequesterSettleWakeBatch(
   params: RequesterCompletionMutationOptions & {
     entries: readonly SubagentRunRecord[];

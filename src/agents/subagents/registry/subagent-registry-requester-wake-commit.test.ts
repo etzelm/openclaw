@@ -10,6 +10,7 @@ import {
   retryPendingWakeCommit,
   shouldReportRequesterSettleWakeFailure,
 } from "./subagent-registry-requester-wake-commit.js";
+import { settleOrQuarantineRequesterWake } from "./subagent-registry-requester-wake-quarantine.js";
 import { createRequesterWakeContextFixture } from "./subagent-registry-requester-yield.test-support.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 import { copySubagentRunRuntimeOwner } from "./subagent-run-generation.js";
@@ -511,5 +512,169 @@ describe("requester settle wake failure reporting", () => {
     expect(
       warn.mock.calls.filter(([message]) => message === "requester settle wake commit recovered"),
     ).toHaveLength(0);
+  });
+
+  describe("owner-changed settlement quarantine (#154252)", () => {
+    const ownerChanged = (runId = "run-a") =>
+      new Error(`subagent completion owner changed before settlement: ${runId}`);
+    const storageFault = () =>
+      Object.assign(new Error("attempt to write a readonly database"), {
+        code: "ERR_SQLITE_ERROR",
+      });
+
+    /**
+     * Mirrors the completeBatch caller: a non-delivered settle wrapped by the quarantine
+     * policy. The first attempt runs through commitRequesterWake, later ones through the
+     * lifecycle retry seam, and rejections are the retained-episode failures the sweeper sees.
+     */
+    async function openSettleEpisode(
+      entry: SubagentRunRecord,
+      settle: () => boolean,
+      quarantine: (reason: string) => boolean = () => true,
+    ) {
+      const { context, warn } = makeContext([entry]);
+      const quarantined = vi.fn(quarantine);
+      await commitRequesterWake(
+        context,
+        [entry],
+        undefined,
+        (members, episode) =>
+          settleOrQuarantineRequesterWake(
+            context,
+            episode,
+            members,
+            async () => settle(),
+            async (reason) => quarantined(reason),
+          ),
+        true,
+      ).catch(() => undefined);
+      return { context, warn, quarantined };
+    }
+
+    async function retryAll(
+      context: SubagentLifecycleWakeContext,
+      entry: SubagentRunRecord,
+      passes: number,
+    ) {
+      for (let pass = 0; pass < passes; pass += 1) {
+        const pending = getPendingWakeCommit(context, entry);
+        if (!pending) {
+          return;
+        }
+        vi.setSystemTime(Math.max(Date.now(), pending.nextAttemptAt) + 1);
+        await retryPendingWakeCommit(context, pending).catch(() => undefined);
+      }
+    }
+
+    it("quarantines on the fifth identical owner-changed rejection and clears the episode", async () => {
+      const entry = makeRetainedChild();
+      const { context, warn, quarantined } = await openSettleEpisode(entry, () => {
+        throw ownerChanged();
+      });
+      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBe(1);
+      await retryAll(context, entry, 3);
+      expect(quarantined).not.toHaveBeenCalled();
+      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBe(4);
+
+      await retryAll(context, entry, 1);
+
+      expect(quarantined).toHaveBeenCalledOnce();
+      expect(quarantined.mock.calls[0]?.[0]).toContain("after 5 identical settlement failures");
+      expect(getPendingWakeCommit(context, entry)).toBeUndefined();
+      const quarantineWarns = warn.mock.calls.filter(
+        ([message]) => message === "requester settle wake quarantined",
+      );
+      expect(quarantineWarns).toHaveLength(1);
+      expect(quarantineWarns[0]?.[1]).toMatchObject({
+        signature: "subagent completion owner changed before settlement",
+        failures: 5,
+      });
+    });
+
+    it("never quarantines storage failures, however long they last", async () => {
+      const entry = makeRetainedChild();
+      const { context, quarantined } = await openSettleEpisode(entry, () => {
+        throw storageFault();
+      });
+      await retryAll(context, entry, 60);
+
+      expect(quarantined).not.toHaveBeenCalled();
+      const pending = getPendingWakeCommit(context, entry);
+      expect(pending?.failures).toBeGreaterThan(50);
+      expect(pending?.ownerChangedFailures ?? 0).toBe(0);
+      // Retries stay capped at the 120s ceiling rather than backing off further.
+      expect(pending!.nextAttemptAt - Date.now()).toBeLessThanOrEqual(120_000);
+    });
+
+    it("resets the budget when a different failure interrupts the run", async () => {
+      const entry = makeRetainedChild();
+      const faults = [
+        ...Array.from({ length: 4 }, () => ownerChanged()),
+        storageFault(),
+        ...Array.from({ length: 4 }, () => ownerChanged()),
+        ...Array.from({ length: 4 }, () => ownerChanged("run-b")),
+      ];
+      const total = faults.length;
+      const { context, quarantined } = await openSettleEpisode(entry, () => {
+        throw faults.shift() ?? ownerChanged("run-b");
+      });
+      await retryAll(context, entry, total - 1);
+
+      // Neither run of four, nor the switch to another run id, reached five in a row.
+      expect(faults).toHaveLength(0);
+      expect(quarantined).not.toHaveBeenCalled();
+      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBe(4);
+    });
+
+    it("retries a failing quarantine write like a storage failure, keeping the count", async () => {
+      const entry = makeRetainedChild();
+      let writable = false;
+      const { context, quarantined } = await openSettleEpisode(
+        entry,
+        () => {
+          throw ownerChanged();
+        },
+        () => {
+          if (!writable) {
+            throw storageFault();
+          }
+          return true;
+        },
+      );
+      await retryAll(context, entry, 8);
+      expect(quarantined.mock.calls.length).toBeGreaterThan(2);
+      expect(getPendingWakeCommit(context, entry)).toBeDefined();
+
+      writable = true;
+      await retryAll(context, entry, 2);
+
+      expect(getPendingWakeCommit(context, entry)).toBeUndefined();
+    });
+
+    it("does not count a transition episode that never enters the policy", async () => {
+      const entry = makeRetainedChild();
+      const { context } = makeContext([entry]);
+      const transition = vi.fn(() => {
+        throw ownerChanged();
+      });
+      await commitRequesterWake(context, [entry], undefined, transition, true).catch(
+        () => undefined,
+      );
+      await retryAll(context, entry, 20);
+
+      expect(transition.mock.calls.length).toBeGreaterThan(15);
+      expect(getPendingWakeCommit(context, entry)?.ownerChangedFailures).toBeUndefined();
+    });
+
+    it("never quarantines a paused yield cohort", async () => {
+      const yielded = { ...makeRetainedChild("run-y"), pauseReason: "sessions_yield" as const };
+      const { context, quarantined } = await openSettleEpisode(yielded, () => {
+        throw ownerChanged("run-y");
+      });
+      await retryAll(context, yielded, 12);
+
+      expect(quarantined).not.toHaveBeenCalled();
+      expect(getPendingWakeCommit(context, yielded)?.ownerChangedFailures ?? 0).toBe(0);
+    });
   });
 });

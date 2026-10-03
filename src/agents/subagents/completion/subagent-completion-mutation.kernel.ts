@@ -50,6 +50,27 @@ import {
 } from "./subagent-completion-queue-receipt.js";
 
 const SUSPENDED_RETENTION_MS = 7 * 24 * 60 * 60_000;
+
+// The worker thread boundary keeps only the message, so main-thread retry policy matches on it.
+export const REQUESTER_SETTLE_OWNER_CHANGED_MESSAGE =
+  "subagent completion owner changed before settlement";
+const requesterSettleOwnerChanged = (runId: string) =>
+  new Error(REQUESTER_SETTLE_OWNER_CHANGED_MESSAGE + ": " + runId);
+
+/**
+ * The owner-changed message when persisted rows alone rejected settlement, so retrying the
+ * same plan cannot recover. Queued writes wrap the worker error, so the cause chain is read.
+ */
+export function readRequesterSettleOwnerChangedMessage(error: unknown): string | undefined {
+  let cause: unknown = error;
+  for (let depth = 0; depth < 4 && cause instanceof Error; depth += 1) {
+    if (cause.message.startsWith(REQUESTER_SETTLE_OWNER_CHANGED_MESSAGE)) {
+      return cause.message;
+    }
+    cause = cause.cause;
+  }
+  return undefined;
+}
 type CompletionMutation = {
   subagent: SubagentRunRecord;
   queued?: QueuedSessionDelivery;
@@ -269,8 +290,7 @@ function readRequesterBatch(
   const cohort = first?.requesterSettleWake?.batchRunIds?.toSorted().join("\0");
   const checkedOmittedIds = new Set<string>();
   return entries.map(({ subagent: expected }) => {
-    const changedOwner = () =>
-      new Error("subagent completion owner changed before settlement: " + expected.runId);
+    const changedOwner = () => requesterSettleOwnerChanged(expected.runId);
     const subagent = readSubagentRun(database, expected.runId);
     if (
       !subagent ||
@@ -328,8 +348,7 @@ function settleRequesterBatch(
         }
         return { subagent };
       }
-      const changedOwner = () =>
-        new Error("subagent completion owner changed before settlement: " + expected.runId);
+      const changedOwner = () => requesterSettleOwnerChanged(expected.runId);
       // An exact requester receipt can arrive after expiry transferred this result to its wake.
       const acknowledgeExpiredDelivery =
         params.outcome.delivered &&
@@ -377,6 +396,59 @@ function settleRequesterBatch(
       return mutation;
     },
   );
+  return commitCompletionMutations(database, mutations);
+}
+
+// Row-local by design: it must not depend on the cohort check or on the blocked-completion
+// preconditions whose failure it exists to bound. A row the ordinary blocked-completion
+// owner can still record keeps its payload as a failed delivery, exactly as an exhausted
+// wake does. One it can never record is suspended with its reason, so no result retries
+// forever and none is dropped silently.
+function quarantineRequesterWake(
+  database: OpenClawStateDatabase,
+  params: Extract<SubagentCompletionMutation, { kind: "quarantineWake" }>,
+): SubagentCompletionMutationResult {
+  const mutations = params.entries.map(({ subagent: expected }): CompletionMutation => {
+    const subagent = readSubagentRun(database, expected.runId);
+    if (!subagent || compareSubagentRunGeneration(subagent, expected) !== 0) {
+      throw new Error("subagent completion owner changed before quarantine: " + expected.runId);
+    }
+    subagent.cleanupHandled = expected.cleanupHandled;
+    let mutation: CompletionMutation = { subagent };
+    if (
+      subagent.requesterSettleWake &&
+      subagent.pauseReason !== "sessions_yield" &&
+      subagent.expectsCompletionMessage === true &&
+      ["pending", "in_progress"].includes(subagent.delivery?.status ?? "pending")
+    ) {
+      const blocked = prepareBlockedSubagentCompletion(
+        database,
+        { subagent: expected, reason: params.reason },
+        params.now,
+        subagent,
+      );
+      if (blocked) {
+        mutation = blocked;
+      } else {
+        const delivery = ensureDeliveryState(subagent);
+        Object.assign(delivery, {
+          status: "suspended" as const,
+          disposition: "permanent_failure" as const,
+          lastError: params.reason,
+          deliveredAt: undefined,
+          announcedAt: undefined,
+          suspendedAt: delivery.suspendedAt ?? params.now,
+          suspendedReason: "permanent_failure" as const,
+          lastDropReason: "sink_unavailable" as const,
+          nextAttemptAt: undefined,
+          queueId: undefined,
+        });
+      }
+    }
+    // A retire-after-settle flag is ignored on purpose: a quarantined row keeps its record.
+    completeRequesterSettleWakeState(mutation.subagent);
+    return mutation;
+  });
   return commitCompletionMutations(database, mutations);
 }
 
@@ -588,6 +660,8 @@ export function mutateSubagentCompletionInDatabase(
       return settleRequesterBatch(database, mutation);
     case "requesterWake":
       return mutateRequesterWake(database, mutation);
+    case "quarantineWake":
+      return quarantineRequesterWake(database, mutation);
   }
   throw new Error("Unknown subagent completion mutation");
 }

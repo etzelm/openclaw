@@ -3,6 +3,7 @@ import type { OpenClawStateWorkerContext } from "../../../state/openclaw-state-w
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import {
   mutateRequesterSettleWakeBatch,
+  quarantineRequesterSettleWake,
   settleRequesterCompletionBatch,
 } from "../completion/subagent-completion-admission.store.js";
 import type { RequesterWakeMutation } from "../completion/subagent-completion-mutation.types.js";
@@ -76,7 +77,10 @@ function assertRequesterWakeCommitCurrent(
 export async function commitRequesterSettleWakeMutation(
   context: SubagentLifecycleWakeContext,
   entries: readonly SubagentRunRecord[],
-  operation: RequesterWakeMutation | { kind: "settle"; outcome: SubagentAnnounceDeliveryResult },
+  operation:
+    | RequesterWakeMutation
+    | { kind: "settle"; outcome: SubagentAnnounceDeliveryResult }
+    | { kind: "quarantine"; reason: string },
   stateContext: OpenClawStateWorkerContext,
   pending: PendingRequesterSettleWakeCommit,
   onPublished?: (entries: readonly SubagentRunRecord[]) => void,
@@ -112,16 +116,24 @@ export async function commitRequesterSettleWakeMutation(
       onPublished?.(published);
     },
   };
-  const result = await (operation.kind === "settle"
-    ? settleRequesterCompletionBatch({
-        ...options,
-        entries: entries.map((subagent) => ({ subagent })),
-        outcome: operation.outcome,
-        isCurrent: () => {
-          assertCurrent();
-          return true;
-        },
+  const result = await (operation.kind === "quarantine"
+    ? quarantineRequesterSettleWake({
+        context: options.context,
+        assertCurrent,
+        onPublished: options.onPublished,
+        entries,
+        reason: operation.reason,
       })
-    : mutateRequesterSettleWakeBatch({ ...options, entries, operation }));
+    : operation.kind === "settle"
+      ? settleRequesterCompletionBatch({
+          ...options,
+          entries: entries.map((subagent) => ({ subagent })),
+          outcome: operation.outcome,
+          isCurrent: () => {
+            assertCurrent();
+            return true;
+          },
+        })
+      : mutateRequesterSettleWakeBatch({ ...options, entries, operation }));
   return result.applied === true && result.publication === "published";
 }
