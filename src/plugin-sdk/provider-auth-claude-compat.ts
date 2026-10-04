@@ -249,12 +249,20 @@ export function readClaudeNativeLoginOwner(
   const service = resolveClaudeCliKeychainService(homeDir, env);
   let stored: ClaudeCliCredential | null = null;
   if ((options.platform ?? process.platform) === "darwin") {
-    stored = parseClaudeCliOauthCredential(
-      readClaudeKeychain(execSyncImpl, CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS, service, env)?.claudeAiOauth,
-    );
-    if (!stored && hasClaudeKeychainItem(execSyncImpl, service, env)) {
-      // The live login sits in a Keychain item this process cannot read; a credentials
-      // file beside it would be stale.
+    const password = probeClaudeKeychainPassword(execSyncImpl, service, env);
+    if (password.state === "ok") {
+      stored = parseClaudeCliOauthCredential(password.value.claudeAiOauth);
+      if (!stored) {
+        return undefined;
+      }
+    } else if (
+      (password.state === "absent"
+        ? "absent"
+        : probeClaudeKeychainItem(execSyncImpl, service, env)) !== "absent"
+    ) {
+      // The live login sits in a Keychain item this process cannot read, or the lookups failed
+      // for a reason other than the item not existing. A credentials file beside it may be
+      // stale, so only a confirmed absence lets the file stand.
       return undefined;
     }
   }
@@ -344,6 +352,72 @@ function readClaudeKeychain(
     return isRecord(parsed) ? parsed : null;
   } catch {
     return null;
+  }
+}
+
+// `security find-generic-password` exits 44 (errSecItemNotFound) only when the item does not
+// exist. A timeout, spawn error, locked keychain or any other status says nothing about it.
+const SECURITY_ITEM_NOT_FOUND_STATUS = 44;
+
+function isKeychainItemNotFound(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    error.status === SECURITY_ITEM_NOT_FOUND_STATUS
+  );
+}
+
+type KeychainPasswordProbe =
+  | { state: "ok"; value: Record<string, unknown> }
+  | { state: "absent" }
+  | { state: "unknown" };
+
+/** Tri-state read of the Keychain login: readable, confirmed absent, or unknown. */
+function probeClaudeKeychainPassword(
+  execSyncImpl: typeof execSync,
+  service: string,
+  env: NodeJS.ProcessEnv,
+): KeychainPasswordProbe {
+  let result: string;
+  try {
+    result = execSyncImpl(
+      `${MACOS_SECURITY_PATH} find-generic-password -a "${resolveClaudeCliKeychainAccount(env)}" -w -s "${service}"`,
+      {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
+        timeout: CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS,
+      },
+    );
+  } catch (error) {
+    return isKeychainItemNotFound(error) ? { state: "absent" } : { state: "unknown" };
+  }
+  try {
+    const parsed: unknown = JSON.parse(result.trim());
+    return isRecord(parsed) ? { state: "ok", value: parsed } : { state: "unknown" };
+  } catch {
+    return { state: "unknown" };
+  }
+}
+
+/** Tri-state metadata lookup: the item exists, is confirmed absent, or the lookup failed. */
+function probeClaudeKeychainItem(
+  execSyncImpl: typeof execSync,
+  service: string,
+  env: NodeJS.ProcessEnv,
+): "present" | "absent" | "unknown" {
+  try {
+    execSyncImpl(
+      `${MACOS_SECURITY_PATH} find-generic-password -a "${resolveClaudeCliKeychainAccount(env)}" -s "${service}"`,
+      {
+        encoding: "utf8",
+        timeout: CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS,
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
+    return "present";
+  } catch (error) {
+    return isKeychainItemNotFound(error) ? "absent" : "unknown";
   }
 }
 

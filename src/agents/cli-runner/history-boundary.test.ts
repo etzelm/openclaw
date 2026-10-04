@@ -496,6 +496,35 @@ describe("CLI transcript account boundary", () => {
       });
     });
 
+    it("refuses at send and at the coverage commit once the login can no longer be established", async () => {
+      const f = await fixture();
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      await seedNative(f, backendUsing(backend));
+      const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary as { maxSeq: number };
+      const real = cliCredentials.resolveNativeCliLoginOwner;
+      let unknown = false;
+      // An unresolvable login (for example both Keychain lookups failing) resolves to no owner.
+      vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner").mockImplementation((id, env) =>
+        unknown ? undefined : real(id, env),
+      );
+      await withNativeWriter(f, "boundary-native-unknown", backendUsing(backend), (writer) => {
+        writer.assertReadable();
+        unknown = true;
+        expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+        expect(() => writer.assertCurrent()).toThrow("CLI history authority changed");
+        expect(() =>
+          f.manager().appendMessage({ role: "user", content: "turn while unknown", timestamp: 2 }),
+        ).toThrow("CLI history authority changed");
+        expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+          state: "known",
+          maxSeq: before.maxSeq,
+        });
+        unknown = false;
+        writer.assertCurrent();
+      });
+    });
+
     it("refuses to cover a turn whose login changed after preparation", async () => {
       const f = await fixture();
       const { backend } = logins();

@@ -229,6 +229,11 @@ describe("readClaudeNativeLoginOwner", () => {
 
   describe("macOS Keychain", () => {
     const keychainPayload = JSON.stringify({ claudeAiOauth: credentials() });
+    // `security` exits 44 (errSecItemNotFound) only when the item does not exist.
+    const notFound = () =>
+      Object.assign(new Error("The specified item could not be found in the keychain."), {
+        status: 44,
+      });
 
     it("reads the Keychain login without trusting the file beside it", () => {
       const homeDir = makeHome({ account: { accountUuid: "uuid-a" } });
@@ -259,11 +264,91 @@ describe("readClaudeNativeLoginOwner", () => {
         credentials: credentials(),
       });
       const execSync = vi.fn(() => {
-        throw new Error("not found");
+        throw notFound();
       }) as never;
       expect(readClaudeNativeLoginOwner({ homeDir, platform: "darwin", execSync })).toBe(
         "uuid:uuid-a",
       );
+    });
+
+    describe("ambiguous lookups with a stale credentials file", () => {
+      const stale = () =>
+        makeHome({ account: { accountUuid: "uuid-a" }, credentials: credentials() });
+      const calls = (execSync: unknown) =>
+        (execSync as { mock: { calls: unknown[][] } }).mock.calls;
+      const timeout = () =>
+        Object.assign(new Error("spawnSync /usr/bin/security ETIMEDOUT"), {
+          code: "ETIMEDOUT",
+          status: null,
+        });
+
+      it("refuses when both lookups fail for a reason other than absence", () => {
+        for (const failure of [
+          () => new Error("denied"),
+          timeout,
+          () => Object.assign(new Error("locked"), { status: 36 }),
+          () => Object.assign(new Error("spawn"), { code: "ENOENT" }),
+        ]) {
+          const execSync = vi.fn(() => {
+            throw failure();
+          }) as never;
+          expect(
+            readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync }),
+          ).toBeUndefined();
+          expect(calls(execSync)).toHaveLength(2);
+        }
+      });
+
+      it("refuses when the password lookup fails and the metadata lookup confirms the item", () => {
+        const execSync = vi.fn((command: string) => {
+          if (command.includes(" -w ")) {
+            throw timeout();
+          }
+          return "";
+        }) as never;
+        expect(
+          readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync }),
+        ).toBeUndefined();
+      });
+
+      it.each(["not json", "[]", "42", "null"])(
+        "refuses an unusable Keychain payload (%s) without consulting the file",
+        (payload) => {
+          const execSync = vi.fn(() => payload) as never;
+          expect(
+            readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync }),
+          ).toBeUndefined();
+        },
+      );
+
+      it("lets the file stand on a confirmed absence from the password lookup alone", () => {
+        const execSync = vi.fn(() => {
+          throw notFound();
+        }) as never;
+        expect(readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync })).toBe(
+          "uuid:uuid-a",
+        );
+        expect(calls(execSync)).toHaveLength(1);
+      });
+
+      it("lets the file stand when a failed password lookup is followed by a confirmed absence", () => {
+        const execSync = vi.fn((command: string) => {
+          if (command.includes(" -w ")) {
+            throw timeout();
+          }
+          throw notFound();
+        }) as never;
+        expect(readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync })).toBe(
+          "uuid:uuid-a",
+        );
+      });
+
+      it("reads the Keychain login when the password lookup succeeds", () => {
+        const execSync = vi.fn(() => keychainPayload) as never;
+        expect(readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync })).toBe(
+          "uuid:uuid-a",
+        );
+      });
     });
   });
 });
