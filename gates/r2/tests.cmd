@@ -1,0 +1,1 @@
+pnpm test src/agents/cli-runner/ src/plugin-sdk/provider-auth-claude-compat.test.ts src/plugin-sdk/session-store-history-boundary.test.ts src/agents/cli-credentials.test.ts src/gateway/session-lifecycle-run-failure.test.ts extensions/anthropic/cli-runtime.test.ts

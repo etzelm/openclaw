@@ -1,0 +1,42 @@
+[
+ {
+  "mutation": "K1 metadata lookup failure treated as absence",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence"
+  ]
+ },
+ {
+  "mutation": "K2 password lookup failure treated as absence",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence",
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item",
+   "readClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read"
+  ]
+ },
+ {
+  "mutation": "K3 any exit status accepted as item-not-found",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence",
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item"
+  ]
+ },
+ {
+  "mutation": "K4a non-object Keychain payload treated as absence",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (42) without consulting the file",
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload ([]) without consulting the file",
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (null) without consulting the file"
+  ]
+ },
+ {
+  "mutation": "K4b unparsable Keychain payload treated as absence",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (not json) without consulting the file"
+  ]
+ }
+]

@@ -1,0 +1,166 @@
+######## after / allowed
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-04T18:34:27.031Z","pid":76273,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:34:27.034Z","pid":76273,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:34:27.053Z","pid":76273,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3a892ae6c65d69fb5c205eb94c972412c30597c5347538f307b1c140176c083b","promptFile":"$RUN/fake-claude.log.user-76273-1.txt"}
+=== turn2 (account A, fresh claude session)
+{"at":"2026-10-04T18:34:36.553Z","pid":78109,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:34:36.560Z","pid":78109,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:34:36.584Z","pid":78109,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":516,"sha256":"65b7f06aa027003a7c660c2b887af4299d55ed0d5033c65ea0e9f87c62be3814","promptFile":"$RUN/fake-claude.log.user-78109-1.txt"}
+[prompt canaries per user message]
+user-76273-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-78109-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+######## after / different-account
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-04T18:34:44.818Z","pid":79507,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:34:44.820Z","pid":79507,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:34:44.839Z","pid":79507,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3a892ae6c65d69fb5c205eb94c972412c30597c5347538f307b1c140176c083b","promptFile":"$RUN/fake-claude.log.user-79507-1.txt"}
+=== turn2 (account B)
+{"at":"2026-10-04T18:34:52.512Z","pid":80597,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:34:52.515Z","pid":80597,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true}
+{"at":"2026-10-04T18:34:52.516Z","pid":80597,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true,"chars":48,"sha256":"b4613d87dbc02dd85faea2e8ce11f94f0be4403cc54ced43183ec4d414050b52","promptFile":"$RUN/fake-claude.log.user-80597-1.txt"}
+[prompt canaries per user message]
+user-79507-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-80597-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+######## after / revoked
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-04T18:34:59.688Z","pid":81599,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:34:59.690Z","pid":81599,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:34:59.709Z","pid":81599,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3a892ae6c65d69fb5c205eb94c972412c30597c5347538f307b1c140176c083b","promptFile":"$RUN/fake-claude.log.user-81599-1.txt"}
+=== turn2 (credential revoked)
+{"at":"2026-10-04T18:35:07.166Z","pid":82183,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":false,"argc":29}
+{"at":"2026-10-04T18:35:07.168Z","pid":82183,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":false}
+{"at":"2026-10-04T18:35:07.168Z","pid":82183,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":false,"chars":48,"sha256":"f7f2a18722b7c03f97040d89ad6c653f0b990b8dcbea12ea0ba09f9f7073d5eb","promptFile":"$RUN/fake-claude.log.user-82183-1.txt"}
+[prompt canaries per user message]
+user-81599-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-82183-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+######## after / reassign-before-send
+turn 1 exit=0
+turn 2 exit=1
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=2092 runId=ee593549-888c-461e-b3e2-6aa4b66d5515 error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=2793 error="CLI history authority changed before execution" errorName=Error
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-04T18:35:13.910Z","pid":82633,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:35:13.912Z","pid":82633,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:35:13.928Z","pid":82633,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3f71403dbd800de983583c6ac657818f0f6a2c332df656ab857d1dc91354e52e","promptFile":"$RUN/fake-claude.log.user-82633-1.txt"}
+=== turn2 (account A at launch; login reassigned to B while claude initializes, before the prompt is sent)
+{"at":"2026-10-04T18:35:22.360Z","pid":83250,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:35:22.362Z","pid":83250,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:35:22.367Z","pid":83250,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+[prompt canaries per user message]
+user-82633-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+######## after / revoke-before-send
+turn 1 exit=0
+turn 2 exit=1
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=2181 runId=d0375c03-fd7b-4abc-80cf-c4a902d67165 error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=2866 error="CLI history authority changed before execution" errorName=Error
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-04T18:35:29.143Z","pid":83698,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:35:29.145Z","pid":83698,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:35:29.160Z","pid":83698,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3f71403dbd800de983583c6ac657818f0f6a2c332df656ab857d1dc91354e52e","promptFile":"$RUN/fake-claude.log.user-83698-1.txt"}
+=== turn2 (account A at launch; credential revoked while claude initializes, before the prompt is sent)
+{"at":"2026-10-04T18:35:37.654Z","pid":84183,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:35:37.656Z","pid":84183,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:35:37.663Z","pid":84183,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":false,"hook":"FAKE_ON_INIT"}
+[prompt canaries per user message]
+user-83698-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+######## after / empty-first-turn-switch
+turn 1 exit=1
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=82 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=1898 runId=dc64dcef-3b38-41d0-8562-e83995ed752b error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=2247 error="CLI history authority changed before execution" errorName=Error
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=467 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=present
+[fake claude child records]
+=== turn1 (prepared under A; login reassigned to B before the prompt is sent; first turn, no recovery prompt)
+{"at":"2026-10-04T18:35:44.450Z","pid":84590,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:35:44.452Z","pid":84590,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:35:44.458Z","pid":84590,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+=== turn2 (back on account A)
+{"at":"2026-10-04T18:35:52.242Z","pid":84822,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:35:52.244Z","pid":84822,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:35:52.263Z","pid":84822,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":467,"sha256":"91d0e62d16444b49905aa1c7e47fa4e058e20c076c347384ab738393e072f906","promptFile":"$RUN/fake-claude.log.user-84822-1.txt"}
+[prompt canaries per user message]
+user-84822-1.txt: chars=467 PINEAPPLE-7=0 BANANA-3=1
+######## after / coverage-switch
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=551 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[agents/cli-runner] CLI assistant transcript persistence failed: CLI history authority changed before execution
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=50 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-04T18:36:00.959Z","pid":85493,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:36:00.961Z","pid":85493,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:36:00.982Z","pid":85493,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3f71403dbd800de983583c6ac657818f0f6a2c332df656ab857d1dc91354e52e","promptFile":"$RUN/fake-claude.log.user-85493-1.txt"}
+=== turn2 (account A at launch and at send; login reassigned to B after the prompt was delivered, before the turn is committed)
+{"at":"2026-10-04T18:36:10.557Z","pid":86949,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:36:10.561Z","pid":86949,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:36:10.576Z","pid":86949,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"fed49459af77157d27d619370e496c3cda0f5c2b17d555e85bd1a229140b6e16","promptFile":"$RUN/fake-claude.log.user-86949-1.txt"}
+{"at":"2026-10-04T18:36:10.580Z","pid":86949,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (back on account A)
+{"at":"2026-10-04T18:36:17.192Z","pid":87115,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:36:17.195Z","pid":87115,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T18:36:17.196Z","pid":87115,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"f42be12fb95ced0bac2ab603494ac2f773f0acea6c35ec489592b92545ff5662","promptFile":"$RUN/fake-claude.log.user-87115-1.txt"}
+[prompt canaries per user message]
+user-85493-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-86949-1.txt: chars=551 PINEAPPLE-7=1 BANANA-3=1
+user-87115-1.txt: chars=50 PINEAPPLE-7=0 BANANA-3=0
+######## after / skill-config-dir
+turn 1 exit=1
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=1262 runId=9a6bab22-5f58-4e6e-86e5-f09b21378f21 error=CLI history authority changed before execution: the spawn environment selects a different Claude login than the one recorded at preparation
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=1625 error="CLI history authority changed before execution: the spawn environment selects a different Claude login than the one recorded at preparation" errorName=Error
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=470 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=present
+[fake claude child records]
+=== turn1 (skill config injects CLAUDE_CONFIG_DIR=skill login at execution)
+=== turn2 (no skill env: child runs under the Gateway login)
+{"at":"2026-10-04T18:36:30.844Z","pid":87482,"event":"spawn","configDir":null,"loginAccount":"account-GATEWAY","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T18:36:30.846Z","pid":87482,"event":"initialize","configDir":null,"loginAccount":"account-GATEWAY","loginCredentialPresent":true}
+{"at":"2026-10-04T18:36:30.863Z","pid":87482,"event":"user-message-received","configDir":null,"loginAccount":"account-GATEWAY","loginCredentialPresent":true,"chars":470,"sha256":"5923728ffc2609ee1e6517ca4bafb0b11f37e1e2e6b7e331516a25d57c3a0d7f","promptFile":"$RUN/fake-claude.log.user-87482-1.txt"}
+[prompt canaries per user message]
+user-87482-1.txt: chars=470 PINEAPPLE-7=1 BANANA-3=0

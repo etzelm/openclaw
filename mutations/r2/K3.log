@@ -1,0 +1,87 @@
+
+ RUN  v5.0.1 $W/mut
+
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > names the owner from the account record once a credential is present 23ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > falls back to the email when the account has no uuid 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > keeps the owner when the plan or token changes 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > does not trust a leftover account record without a credential 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > has no owner without an account record 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > fails closed when the credential root differs from the account config root 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner for a relative config root the child would resolve against its own cwd 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > has no owner when an API key helper replaces the login 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > reads the Keychain login without trusting the file beside it 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > uses the credentials file when no Keychain item exists 2ms
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence 4ms
+   → expected 'uuid:uuid-a' to be undefined
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item 2ms
+   → expected 'uuid:uuid-a' to be undefined
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (not json) without consulting the file 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload ([]) without consulting the file 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (42) without consulting the file 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (null) without consulting the file 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand on a confirmed absence from the password lookup alone 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand when a failed password lookup is followed by a confirmed absence 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > reads the Keychain login when the password lookup succeeds 2ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 28 passed (30)
+   Start at  11:54:17
+   Duration  764ms (worker 43%, setup 25%, tests 16%, transform 14%, import 2%)
+
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/plugin-sdk/provider-auth-claude-compat.test.ts --maxWorkers=2
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence
+AssertionError: expected 'uuid:uuid-a' to be undefined
+
+- Expected:
+undefined
+
++ Received:
+"uuid:uuid-a"
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:297:13
+    295|           expect(
+    296|             readClaudeNativeLoginOwner({ homeDir: stale(), platform: "…
+    297|           ).toBeUndefined();
+       |             ^
+    298|           expect(calls(execSync)).toHaveLength(2);
+    299|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item
+AssertionError: expected 'uuid:uuid-a' to be undefined
+
+- Expected:
+undefined
+
++ Received:
+"uuid:uuid-a"
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:311:11
+    309|         expect(
+    310|           readClaudeNativeLoginOwner({ homeDir: stale(), platform: "da…
+    311|         ).toBeUndefined();
+       |           ^
+    312|       });
+    313|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+[test] failed 1 Vitest shard in 1.57s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

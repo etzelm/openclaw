@@ -1,0 +1,59 @@
+# rebase and amend proof (round 3)
+final head: 4ff780ae65151ba06758b67303d2b408257ab471
+final base: 0816aa1b57dc815d0c1e0d48bcb9517980985438
+keychain evidence tree: 15cc65fa155 (base c9bff77155b0), pre-fix tree: a242429e1a3 (base c9bff77155b0)
+
+## range-diff, pre-fix commits (base c9bff77155b0) vs final first two commits (base 0816aa1b57dc815d0c1e0d48bcb9517980985438); = means identical patch
+1:  1824187b0b7 = 1:  21438af303b fix(agents): own native Claude login history for fresh-session reseed
+2:  a242429e1a3 = 2:  2f0db5685fa fix(agents): bind native Claude login history owner to the executing environment
+
+## commits on main between c9bff77155b and the final base
+       4
+## files changed on main in that range that the PR also changes (empty means none)
+(end)
+
+## difference between the evidence tree 15cc65fa155 and the final head for the files the keychain commit touches (main did not touch them)
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.test.ts b/src/plugin-sdk/provider-auth-claude-compat.test.ts
+index 472036c4fc7..8f6d742cf19 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.test.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.test.ts
+@@ -311,12 +311,15 @@ describe("readClaudeNativeLoginOwner", () => {
+         ).toBeUndefined();
+       });
+ 
+-      it("refuses an unparsable Keychain payload without consulting the file", () => {
+-        const execSync = vi.fn(() => "not json") as never;
+-        expect(
+-          readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync }),
+-        ).toBeUndefined();
+-      });
++      it.each(["not json", "[]", "42", "null"])(
++        "refuses an unusable Keychain payload (%s) without consulting the file",
++        (payload) => {
++          const execSync = vi.fn(() => payload) as never;
++          expect(
++            readClaudeNativeLoginOwner({ homeDir: stale(), platform: "darwin", execSync }),
++          ).toBeUndefined();
++        },
++      );
+ 
+       it("lets the file stand on a confirmed absence from the password lookup alone", () => {
+         const execSync = vi.fn(() => {
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 85bc103e444..6d8a3373752 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -363,7 +363,8 @@ function isKeychainItemNotFound(error: unknown): boolean {
+   return (
+     typeof error === "object" &&
+     error !== null &&
+-    (error as { status?: unknown }).status === SECURITY_ITEM_NOT_FOUND_STATUS
++    "status" in error &&
++    error.status === SECURITY_ITEM_NOT_FOUND_STATUS
+   );
+ }
+ 
+
+## final head vs evidence tree, whole-PR file list, files that differ
+src/plugin-sdk/provider-auth-claude-compat.test.ts
+src/plugin-sdk/provider-auth-claude-compat.ts
