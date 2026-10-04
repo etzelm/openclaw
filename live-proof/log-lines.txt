@@ -1,0 +1,13 @@
+# Verbatim OpenClaw log lines from the live run (turn 2 of each arm), nothing else. Copied from the three *-turn2-output.txt files in this directory.
+# BEFORE was captured once on origin/main 1836ae2146443e952337bce1bccb41c524ea0639 and is reused: that tree did not change. AFTER and SWITCH were captured again on the amended commit de1dc67b0c2763eac77ec0ab351a738bc5fa7f89.
+
+## BEFORE (origin/main 1836ae2146443e952337bce1bccb41c524ea0639), turn 2
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5-5 promptChars=292 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+
+## AFTER (fix/cli-native-history-owner de1dc67b0c2763eac77ec0ab351a738bc5fa7f89), turn 2
+cli exec: provider=claude-cli model=claude-sonnet-5-5 promptChars=762 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+
+## SWITCH (AFTER tree, synthetic account record and fake credential), turn 2
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5-5 promptChars=251 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
