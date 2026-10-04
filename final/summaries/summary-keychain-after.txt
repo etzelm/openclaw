@@ -1,0 +1,108 @@
+######## after / keychain-allowed
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (Keychain item readable, account A)
+{"at":"2026-10-04T22:22:51.256Z","pid":23527,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:22:51.259Z","pid":23527,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:22:51.260Z","pid":23527,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"ce791f187152c6685b63d397b3db3cf6f0c024b8f2e48e5a37c753031c291f39","promptFile":"$RUN/fake-claude.log.user-23527-1.txt"}
+=== turn2 (Keychain item readable, fresh claude session)
+{"at":"2026-10-04T22:22:58.490Z","pid":23696,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:22:58.493Z","pid":23696,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:22:58.496Z","pid":23696,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":516,"sha256":"71ac7559d501c5491bb93c5657324a134a26fd7834c87d341bcf23a5e69a6ad0","promptFile":"$RUN/fake-claude.log.user-23696-1.txt"}
+[shimmed security lookups per turn: count, kind, mode]
+10 === turn1 (Keychain item readable, account A) | "kind":"password","mode":"present"
+10 === turn2 (Keychain item readable, fresh claude session) | "kind":"password","mode":"present"
+[prompt canaries per user message]
+user-23527-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-23696-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+######## after / keychain-ambiguous-prep
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (both Keychain lookups time out, stale account-A credentials file on disk)
+{"at":"2026-10-04T22:23:04.682Z","pid":23884,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:04.684Z","pid":23884,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:04.685Z","pid":23884,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"71c960969e14c597fff2473b6e0badbb430384f6b13ed6148736c0c4972aaf02","promptFile":"$RUN/fake-claude.log.user-23884-1.txt"}
+=== turn2 (both Keychain lookups time out, stale file still on disk)
+{"at":"2026-10-04T22:23:11.564Z","pid":24527,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:11.567Z","pid":24527,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:11.568Z","pid":24527,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"ba8033f89cc953f3a56b1bdbe1012a64bc7f706d62cd40cfe153bcee501e8828","promptFile":"$RUN/fake-claude.log.user-24527-1.txt"}
+[shimmed security lookups per turn: count, kind, mode]
+1 === turn1 (both Keychain lookups time out, stale account-A credentials file on disk) | "kind":"metadata","mode":"fail"
+1 === turn1 (both Keychain lookups time out, stale account-A credentials file on disk) | "kind":"password","mode":"fail"
+1 === turn2 (both Keychain lookups time out, stale file still on disk) | "kind":"metadata","mode":"fail"
+1 === turn2 (both Keychain lookups time out, stale file still on disk) | "kind":"password","mode":"fail"
+[prompt canaries per user message]
+user-23884-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-24527-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+######## after / keychain-fails-before-send
+turn 1 exit=0
+turn 2 exit=1
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=967 runId=95e22395-4321-4774-86f5-f577193375fc error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=1677 error="CLI history authority changed before execution" errorName=Error
+[fake claude child records]
+=== turn1 (Keychain item readable)
+{"at":"2026-10-04T22:23:17.534Z","pid":25034,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:17.536Z","pid":25034,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:17.538Z","pid":25034,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"71c960969e14c597fff2473b6e0badbb430384f6b13ed6148736c0c4972aaf02","promptFile":"$RUN/fake-claude.log.user-25034-1.txt"}
+=== turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent)
+{"at":"2026-10-04T22:23:24.366Z","pid":25610,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:24.368Z","pid":25610,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:24.373Z","pid":25610,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+[shimmed security lookups per turn: count, kind, mode]
+10 === turn1 (Keychain item readable) | "kind":"password","mode":"present"
+1 === turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent) | "kind":"metadata","mode":"fail"
+1 === turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent) | "kind":"password","mode":"fail"
+8 === turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent) | "kind":"password","mode":"present"
+[prompt canaries per user message]
+user-25034-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+######## after / keychain-fails-at-commit
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=551 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=50 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (Keychain item readable)
+{"at":"2026-10-04T22:23:30.324Z","pid":26150,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:30.328Z","pid":26150,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:30.332Z","pid":26150,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"71c960969e14c597fff2473b6e0badbb430384f6b13ed6148736c0c4972aaf02","promptFile":"$RUN/fake-claude.log.user-26150-1.txt"}
+=== turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed)
+{"at":"2026-10-04T22:23:37.118Z","pid":26741,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:37.120Z","pid":26741,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:37.122Z","pid":26741,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"c0c8ca6b986bf1e0e8c123ed4b095d6da9704738f30d1202a4f21b395fd7ab68","promptFile":"$RUN/fake-claude.log.user-26741-1.txt"}
+{"at":"2026-10-04T22:23:37.128Z","pid":26741,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (Keychain readable again)
+{"at":"2026-10-04T22:23:43.795Z","pid":27094,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:23:43.797Z","pid":27094,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:23:43.798Z","pid":27094,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"ef279d6da42a58c0cdfeb6132a8cb564650c695b76b9644ddb567e2815f365e9","promptFile":"$RUN/fake-claude.log.user-27094-1.txt"}
+[shimmed security lookups per turn: count, kind, mode]
+10 === turn1 (Keychain item readable) | "kind":"password","mode":"present"
+1 === turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed) | "kind":"metadata","mode":"fail"
+1 === turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed) | "kind":"password","mode":"fail"
+9 === turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed) | "kind":"password","mode":"present"
+1 === turn3 (Keychain readable again) | "kind":"password","mode":"present"
+[prompt canaries per user message]
+user-26150-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-26741-1.txt: chars=551 PINEAPPLE-7=1 BANANA-3=1
+user-27094-1.txt: chars=50 PINEAPPLE-7=0 BANANA-3=0

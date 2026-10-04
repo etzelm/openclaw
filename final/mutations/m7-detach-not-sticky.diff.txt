@@ -1,0 +1,14 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index 8f35e8bdb57..b9a7f357a2d 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -252,8 +252,7 @@ export async function prepareCliHistoryBoundary(
+   let detached = false;
+   const nativeLoginMatches = () =>
+     !nativeLoginOwner ||
+-    (!detached &&
+-      nativeEnv !== undefined &&
++    (nativeEnv !== undefined &&
+       resolveNativeCliLoginOwner(provider, nativeEnv) === nativeLoginOwner);
+   // Saved history must never reach another login, so a recovery turn is refused. A turn
+   // without saved history runs on, as it would with no owner at all, but stops coverage.

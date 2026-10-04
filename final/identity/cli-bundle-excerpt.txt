@@ -1,0 +1,14 @@
+Claude Code 2.1.283 bundle (the installed `claude` binary), byte excerpts located by the anchor strings below.
+Emails would be replaced with <email>; none occur in these spans.
+
+### token refresh: profile fields merged into oauthAccount (no accountUuid or emailAddress)
+let se={};if(ie.displayName!==void 0)se.displayName=ie.displayName;if(ie.fullName!==void 0)se.fullName=ie.fullName;if(typeof ie.hasExtraUsageEnabled==="boolean")se.hasExtraUsageEnabled=ie.hasExtraUsageEnabled;if(ie.billingType!==null)se.billingType=ie.billingType;if(ie.accountCreatedAt!==void 0)se.accountCreatedAt=ie.accountCreatedAt;if(ie.subscriptionCreatedAt!==void 0)se.subscriptionCreatedAt=ie.subscriptionCreatedAt;if(ie.rawProfile)se.ccOnboardingFlags=ie.ccOnboardingFlags,se.claudeCodeTrialEndsAt=ie.claudeCodeTrialEndsAt,se.claudeCodeTrialDurationDays=ie.claudeCodeTrialDurationDays,se.seatTier=ie.seatTier,se.profileFetchedAt=Date.now();if(Object.keys(se).length>0)await Ce((ye)=>({...ye,oauthAccount:ye.oauthAccount?{...ye.oauthAccount,...se}:ye.oauthAccount}),A)}return{accessToken:F,refreshToken:L,expiresAt:W,refreshTokenExpiresAt:J,scopes:q,clientId:s,subscriptionType:ie?.subscriptionType??ee?.subscriptionType??null,rateLimitTier:ie?.rateLimitTier??ee?.rateLimi
+
+### environment-seeded account (CLAUDE_CODE_ACCOUNT_UUID and related): written only when oauthAccount is absent
+if(h&&!le().oauthAccount)tNt(h,n);await $i({credentials:e,storageV5:n});let b=le(),v=b.oauthAccount?.profileFetchedAt,A=
+
+### profile fetch: authenticated GET /api/oauth/profile with the access token
+async function AFe(e){let n=`${ln().BASE_API_URL}/api/oauth/profile`;try{let r=await gt.get(n,{headers:{Authorization:`Bearer ${e}`,"Content-Type":"application/json","Cache-Control":"no-cache"},timeout:1e4});return FS(r.data)}catch(r){if(eu(r))p("oauth_profile
+
+### organization lookup: the record before the server
+async function wB(){let e=a.CLAUDE_CODE_ORGANIZATION_UUID;if(e)return e;let r=le().oauthAccount?.organizationUuid;if(r)return r;let s=un()?.accessToken;if(s===void 0||!xp())return null;let h=(await AFe(s))?.organization?.uuid;if(!

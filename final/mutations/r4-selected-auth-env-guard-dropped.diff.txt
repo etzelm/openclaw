@@ -1,0 +1,12 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 729131928f6..64a25406e67 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -234,7 +234,6 @@ export function readClaudeNativeLoginOwner(
+   const env = options.env ?? process.env;
+   if (
+     // A selected API key, token, or cloud provider replaces the native login entirely.
+-    CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => Boolean(env[key]?.trim())) ||
+     // A relative root resolves against the child's cwd, which this process cannot know.
+     [env.CLAUDE_CONFIG_DIR, env.CLAUDE_SECURESTORAGE_CONFIG_DIR].some(
+       (dir) => dir && !path.isAbsolute(dir),

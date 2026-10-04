@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 729131928f6..9797401ef05 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -397,7 +397,7 @@ function probeClaudeKeychainPassword(
+   }
+   try {
+     const parsed: unknown = JSON.parse(result.trim());
+-    return isRecord(parsed) ? { state: "ok", value: parsed } : { state: "unknown" };
++    return isRecord(parsed) ? { state: "ok", value: parsed } : { state: "absent" };
+   } catch {
+     return { state: "unknown" };
+   }

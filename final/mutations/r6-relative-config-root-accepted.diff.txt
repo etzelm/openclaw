@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 729131928f6..5e814c9f964 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -237,7 +237,7 @@ export function readClaudeNativeLoginOwner(
+     CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => Boolean(env[key]?.trim())) ||
+     // A relative root resolves against the child's cwd, which this process cannot know.
+     [env.CLAUDE_CONFIG_DIR, env.CLAUDE_SECURESTORAGE_CONFIG_DIR].some(
+-      (dir) => dir && !path.isAbsolute(dir),
++      (dir) => dir && false,
+     ) ||
+     // oauthAccount is config-scoped, so it cannot name a credential from an independent
+     // secure-storage root, and an API key helper replaces the login entirely.

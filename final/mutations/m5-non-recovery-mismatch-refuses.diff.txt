@@ -1,0 +1,16 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index 8f35e8bdb57..c0834fa4c41 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -261,10 +261,7 @@ export async function prepareCliHistoryBoundary(
+     if (nativeLoginMatches()) {
+       return;
+     }
+-    if (recovering) {
+-      throw new Error(message ?? "CLI history authority changed before execution");
+-    }
+-    detached = true;
++    throw new Error(message ?? "CLI history authority changed before execution");
+   };
+   const assertProofCurrent = () => {
+     const current: InternalSessionEntry | undefined = loadSessionEntryReadOnly(target);

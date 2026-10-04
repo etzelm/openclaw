@@ -1,0 +1,13 @@
+diff --git a/extensions/anthropic/cli.runtime.ts b/extensions/anthropic/cli.runtime.ts
+index acc8ffad9c1..a8692804e6b 100644
+--- a/extensions/anthropic/cli.runtime.ts
++++ b/extensions/anthropic/cli.runtime.ts
+@@ -470,7 +470,7 @@ export async function* executeClaudeCli(
+       });
+       await session.transport.initialize();
+     }
+-    context.assertCurrent?.();
++    (context.assertStreamCurrent ?? context.assertCurrent)?.();
+     if (session.closed || session.currentTurn !== turn) {
+       throw turn.error ?? new Error("Claude CLI closed before its prompt was accepted.");
+     }

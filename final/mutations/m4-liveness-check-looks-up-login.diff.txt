@@ -1,0 +1,16 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index 8f35e8bdb57..d2e107d4354 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -291,7 +291,10 @@ export async function prepareCliHistoryBoundary(
+     authFingerprint: boundary.authFingerprint,
+     lifecycleRevision: snapshot.lifecycleRevision,
+     bindsNativeLogin: nativeLoginOwner !== undefined,
+-    assertCurrent: assertWriterCurrent,
++    assertCurrent: () => {
++      assertWriterCurrent();
++      checkNativeLoginBoundary(true);
++    },
+     assertReadable: () => {
+       assertWriterCurrent();
+       assertProofCurrent();

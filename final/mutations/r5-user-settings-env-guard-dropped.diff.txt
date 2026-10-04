@@ -1,0 +1,14 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 729131928f6..67aa23645e4 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -243,8 +243,7 @@ export function readClaudeNativeLoginOwner(
+     // secure-storage root, and an API key helper replaces the login entirely.
+     path.dirname(resolveClaudeCliCredentialsPath(homeDir, env)) !==
+       resolveClaudeCliConfigDir(homeDir, env) ||
+-    readClaudeApiKeyHelper(homeDir, env) ||
+-    userSettingsSelectNonNativeAuth(homeDir, env)
++    readClaudeApiKeyHelper(homeDir, env)
+   ) {
+     return undefined;
+   }

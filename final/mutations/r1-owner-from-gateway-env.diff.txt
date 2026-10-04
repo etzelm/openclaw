@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index 8f35e8bdb57..45eb003f680 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -105,7 +105,7 @@ export async function prepareCliHistoryBoundary(
+     !childEnv ||
+     resolveCliExecutionTarget({ params, backendId: provider }).kind === "node"
+       ? undefined
+-      : resolveNativeCliLoginOwner(provider, childEnv);
++      : resolveNativeCliLoginOwner(provider, process.env);
+   // Native reuse epochs intentionally tolerate identity-less OAuth and stable
+   // SecretRefs. History cannot: use the resolved static credential or a named
+   // OAuth account, never a profile name, reference, or opaque CLI login alone.

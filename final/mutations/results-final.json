@@ -1,0 +1,413 @@
+[
+ {
+  "id": "m1-coverage-ignores-owner",
+  "file": "src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > looks the login up at each boundary and coverage commit, never at a liveness check",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "m2-commit-throws-on-owner-change",
+  "file": "src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "m3-worker-facts-ignore-owner",
+  "file": "src/config/sessions/cli-history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established"
+  ]
+ },
+ {
+  "id": "m4-liveness-check-looks-up-login",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > looks the login up at each boundary and coverage commit, never at a liveness check",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "m5-non-recovery-mismatch-refuses",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "m6-recovery-mismatch-detaches",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant"
+  ]
+ },
+ {
+  "id": "m7-detach-not-sticky",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "m8-no-boundary-at-execution",
+  "file": "src/agents/cli-runner/execute.ts",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "exits": [
+   "execute.native-history-owner.test",
+   "1"
+  ],
+  "failed": [
+   "execute.native-history-owner.test.ts > native login history owner at execution > binds the spawned environment and checks the login at launch, with no recovery prompt",
+   "execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing when the launch boundary refuses the login",
+   "execute.native-history-owner.test.ts > native login history owner at execution > uses the readable proof and recovery boundaries for a fresh recovery turn"
+  ]
+ },
+ {
+  "id": "m9-process-spawn-skips-boundary",
+  "file": "src/agents/cli-runner/execute-process.ts",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "exits": [
+   "execute.native-history-owner.test",
+   "1"
+  ],
+  "failed": [
+   "execute.native-history-owner.test.ts > native login history owner at execution > binds the spawned environment and checks the login at launch, with no recovery prompt",
+   "execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing when the launch boundary refuses the login",
+   "execute.native-history-owner.test.ts > native login history owner at execution > uses the readable proof and recovery boundaries for a fresh recovery turn"
+  ]
+ },
+ {
+  "id": "m10-bind-ignores-recovery",
+  "file": "src/agents/cli-runner/execute.ts",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "exits": [
+   "execute.native-history-owner.test",
+   "1"
+  ],
+  "failed": [
+   "execute.native-history-owner.test.ts > native login history owner at execution > uses the readable proof and recovery boundaries for a fresh recovery turn"
+  ]
+ },
+ {
+  "id": "m11-plugin-boundary-dropped",
+  "file": "src/agents/cli-runner/execute-plugin.ts",
+  "tests": [
+   "src/agents/cli-runner/execute-plugin.test.ts"
+  ],
+  "exits": [
+   "execute-plugin.test",
+   "1"
+  ],
+  "failed": [
+   "execute-plugin.test.ts > plugin-owned CLI execution host boundary > adds the host boundary check to the plugin's spawn and send check, not its stream check"
+  ]
+ },
+ {
+  "id": "m12-plugin-stream-gets-boundary",
+  "file": "src/agents/cli-runner/execute-plugin.ts",
+  "tests": [
+   "src/agents/cli-runner/execute-plugin.test.ts"
+  ],
+  "exits": [
+   "execute-plugin.test",
+   "1"
+  ],
+  "failed": [
+   "execute-plugin.test.ts > plugin-owned CLI execution host boundary > adds the host boundary check to the plugin's spawn and send check, not its stream check"
+  ]
+ },
+ {
+  "id": "r1-owner-from-gateway-env",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > does not credit Gateway-login history to a backend-selected account",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > has no native owner when the child authenticates another way",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps history unknown when the native login cannot be proven",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > looks the login up at each boundary and coverage commit, never at a liveness check",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > reseeds a fresh session for the same native login",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > resolves the owner under the run's skill env overrides, as execution does",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "r2-login-memo-1s",
+  "file": "src/agents/cli-credentials.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > does not credit Gateway-login history to a backend-selected account",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > refuses history after the native login changes",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > resolves the owner under the run's skill env overrides, as execution does",
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ]
+ },
+ {
+  "id": "r3-reader-uses-process-env",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one"
+  ]
+ },
+ {
+  "id": "r4-selected-auth-env-guard-dropped",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts",
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1",
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > has no native owner when the child authenticates another way",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login"
+  ]
+ },
+ {
+  "id": "r5-user-settings-env-guard-dropped",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login"
+  ]
+ },
+ {
+  "id": "r6-relative-config-root-accepted",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner for a relative config root the child would resolve against its own cwd"
+  ]
+ },
+ {
+  "id": "k1-metadata-failure-as-absence",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence"
+  ]
+ },
+ {
+  "id": "k2-password-failure-as-absence",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read"
+  ]
+ },
+ {
+  "id": "k3-any-exit-status-as-not-found",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item"
+  ]
+ },
+ {
+  "id": "k4-non-object-payload-as-absence",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "exits": [
+   "provider-auth-claude-compat.test",
+   "1"
+  ],
+  "failed": [
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (42) without consulting the file",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload ([]) without consulting the file",
+   "provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload (null) without consulting the file"
+  ]
+ },
+ {
+  "id": "w1-warm-session-not-keyed-on-owner",
+  "file": "src/agents/cli-runner/live-session-fingerprint.ts",
+  "tests": [
+   "src/agents/cli-runner/cli-live-session-registry.test.ts"
+  ],
+  "exits": [
+   "cli-live-session-registry.test",
+   "1"
+  ],
+  "failed": [
+   "cli-live-session-registry.test.ts > generic plugin-owned live session registry > does not reuse a warm process across a native login owner change"
+  ]
+ },
+ {
+  "id": "c1-runtime-events-on-boundary-check",
+  "file": "extensions/anthropic/cli.runtime.ts",
+  "tests": [
+   "extensions/anthropic/cli-runtime.test.ts"
+  ],
+  "exits": [
+   "cli-runtime.test",
+   "1"
+  ],
+  "failed": [
+   "cli-runtime.test.ts > Claude native stdio boundary > keeps an awaited hook decision on the stream check once the prompt was delivered"
+  ]
+ },
+ {
+  "id": "c2-runtime-send-on-stream-check",
+  "file": "extensions/anthropic/cli.runtime.ts",
+  "tests": [
+   "extensions/anthropic/cli-runtime.test.ts"
+  ],
+  "exits": [
+   "cli-runtime.test",
+   "1"
+  ],
+  "failed": [
+   "cli-runtime.test.ts > Claude native stdio boundary > sends user input only after a fresh boundary check, not the stream check"
+  ]
+ },
+ {
+  "id": "s1-prep-ignores-skill-env",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts"
+  ],
+  "exits": [
+   "history-boundary.test",
+   "1"
+  ],
+  "failed": [
+   "history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > resolves the owner under the run's skill env overrides, as execution does"
+  ]
+ }
+]

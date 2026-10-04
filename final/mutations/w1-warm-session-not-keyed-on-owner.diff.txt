@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/live-session-fingerprint.ts b/src/agents/cli-runner/live-session-fingerprint.ts
+index 1deed596650..eccb18dc59f 100644
+--- a/src/agents/cli-runner/live-session-fingerprint.ts
++++ b/src/agents/cli-runner/live-session-fingerprint.ts
+@@ -93,7 +93,7 @@ export function buildCliLiveSessionFingerprint(params: {
+       credentialFingerprint: context.preparedBackend.secretInput?.fingerprint,
+       // A warm child keeps the login it started with. Reuse it only while the native owner
+       // this run was prepared under is the one it was started under.
+-      nativeLoginOwnerHash: context.cliHistoryWriter?.bindsNativeLogin
++      nativeLoginOwnerHash: false
+         ? sha256Hex(context.cliHistoryWriter.authFingerprint)
+         : undefined,
+       skillsFingerprint,

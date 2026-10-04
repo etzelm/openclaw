@@ -1,0 +1,14 @@
+diff --git a/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts b/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+index 860e755575b..a2acc4aca50 100644
+--- a/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
++++ b/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+@@ -67,9 +67,6 @@ export function advanceCliHistoryBoundaryRangeInTransaction(
+     return false;
+   }
+   assertCurrent();
+-  if (confirmsOwner?.() === false) {
+-    return false;
+-  }
+   writeSessionEntry(
+     database,
+     scope.sessionKey,

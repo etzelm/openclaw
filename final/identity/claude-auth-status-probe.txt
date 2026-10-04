@@ -1,0 +1,17 @@
+Real Claude CLI 2.1.283, fully synthetic login files in a throwaway CLAUDE_CONFIG_DIR (fake token, hand-written
+account record). Run as: env -i HOME=<empty dir> PATH=... USER=nobody CLAUDE_CONFIG_DIR=<throwaway> claude auth status --json
+projectsDirectory and configDirectory are dropped from the JSON; they name the throwaway directory.
+
+claude --version: 2.1.283 (Claude Code)
+--- synthetic credential A, account record A
+exit=0 ms=327
+{"loggedIn": true, "authMethod": "claude.ai", "apiProvider": "firstParty", "analyticsDisabled": false, "email": "record-a@example.invalid", "orgId": "22222222-2222-2222-2222-222222222222", "orgName": "Org record-a", "subscriptionType": "pro"}
+--- same credential A, account record edited to B
+exit=0 ms=1673
+{"loggedIn": true, "authMethod": "claude.ai", "apiProvider": "firstParty", "analyticsDisabled": false, "email": "record-b@example.invalid", "orgId": "44444444-4444-4444-4444-444444444444", "orgName": "Org record-b", "subscriptionType": "pro"}
+--- credential replaced with B, record B
+exit=0 ms=156
+{"loggedIn": true, "authMethod": "claude.ai", "apiProvider": "firstParty", "analyticsDisabled": false, "email": "record-b@example.invalid", "orgId": "44444444-4444-4444-4444-444444444444", "orgName": "Org record-b", "subscriptionType": "pro"}
+--- credential removed, record B kept
+exit=1 ms=135
+{"loggedIn": false, "authMethod": "none", "apiProvider": "firstParty", "analyticsDisabled": false}

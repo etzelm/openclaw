@@ -1,0 +1,13 @@
+=== turn1 (account A)
+{"at":"2026-10-04T22:19:01.556Z","pid":9830,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:19:01.558Z","pid":9830,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:19:01.559Z","pid":9830,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"a550c214932cbd3ec1e1bb42431098c15a72d1f3fb8c36f91bcba3684d16eeaa","promptFile":"$RUN/fake-claude.log.user-9830-1.txt"}
+=== turn2 (account A at launch and at send; login reassigned to B after the prompt was delivered, before the turn is committed)
+{"at":"2026-10-04T22:19:08.747Z","pid":10383,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:19:08.752Z","pid":10383,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:19:08.753Z","pid":10383,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":83,"sha256":"856ebc91417903cafc2701a15017fb55f7974098f1cf280030c97a820b2e31d6","promptFile":"$RUN/fake-claude.log.user-10383-1.txt"}
+{"at":"2026-10-04T22:19:08.760Z","pid":10383,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (back on account A)
+{"at":"2026-10-04T22:19:16.062Z","pid":10915,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-04T22:19:16.064Z","pid":10915,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-04T22:19:16.065Z","pid":10915,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"e8df40ff60408aa451c441143696447f264c64d3afa9233ca2e59a5e19280de6","promptFile":"$RUN/fake-claude.log.user-10915-1.txt"}

@@ -1,0 +1,20 @@
+diff --git a/src/agents/cli-credentials.ts b/src/agents/cli-credentials.ts
+index 317df17b3b3..67ed5ab3e91 100644
+--- a/src/agents/cli-credentials.ts
++++ b/src/agents/cli-credentials.ts
+@@ -517,5 +517,14 @@ export function resolveNativeCliLoginOwner(
+   /** Environment the CLI process receives; the Gateway process is not the identity source. */
+   env: NodeJS.ProcessEnv,
+ ): string | undefined {
+-  return backendId === "claude-cli" ? readClaudeNativeLoginOwner({ env }) : undefined;
++  const m = ((globalThis as Record<string, unknown>).__ocMemo ??= {}) as { at?: number; v?: string };
++  if (backendId !== "claude-cli") {
++    return undefined;
++  }
++  if (m.at !== undefined && Date.now() - m.at < 1000) {
++    return m.v;
++  }
++  m.at = Date.now();
++  m.v = readClaudeNativeLoginOwner({ env });
++  return m.v;
+ }

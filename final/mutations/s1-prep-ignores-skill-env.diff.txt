@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index 8f35e8bdb57..135b8ab0e0c 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -41,7 +41,7 @@ function resolvePreparedChildEnv(
+   preparedBackend: Parameters<typeof resolveCliChildEnv>[0],
+ ): Record<string, string> {
+   const restoreSkillEnv =
+-    params.skillsSnapshot && !params.controlOperation
++    false && params.skillsSnapshot && !params.controlOperation
+       ? applySkillEnvOverridesFromSnapshot({
+           snapshot: params.skillsSnapshot,
+           config: params.config,

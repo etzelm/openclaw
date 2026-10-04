@@ -1,0 +1,13 @@
+diff --git a/src/config/sessions/cli-history-boundary.ts b/src/config/sessions/cli-history-boundary.ts
+index 5f77aa98ee5..d9baefdc5a5 100644
+--- a/src/config/sessions/cli-history-boundary.ts
++++ b/src/config/sessions/cli-history-boundary.ts
+@@ -38,7 +38,7 @@ export function runWithCliHistoryWriter<T>(writer: CliHistoryWriter | undefined,
+ export function resolveCliHistoryCoverageWriter(
+   writer: CliHistoryWriter | undefined,
+ ): Pick<CliHistoryWriter, "runId" | "authFingerprint" | "lifecycleRevision"> | undefined {
+-  return writer && writer.confirmsOwner?.() !== false
++  return writer
+     ? {
+         runId: writer.runId,
+         authFingerprint: writer.authFingerprint,

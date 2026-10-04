@@ -1,0 +1,11 @@
+One real token refresh on a logged-in Claude CLI 2.1.283 account (file-backed login; the Keychain held no item).
+A single `claude -p --model haiku "Reply with the single word ok."` call triggered the refresh.
+Only 12-hex-digit SHA-256 prefixes of the token values and of the record's accountUuid are shown; no token
+material or account identifier is recorded.
+
+before: access=c6ff2883e8f2 refresh=012d67280c6b expiresInMin=-1724 refreshExpiresInH=147.0 recordUuidHash=f2407884eb8a profileFetchedAgoMin=2204
+claude exit=0
+after:  access=762f52786265 refresh=95cc8d067b06 expiresInMin=479 refreshExpiresInH=147.0 recordUuidHash=f2407884eb8a profileFetchedAgoMin=0
+
+Both the access token and the refresh token changed; the account record's uuid did not. The access token had
+expired 1724 minutes before the call: the CLI refreshes only when it runs.
