@@ -1,0 +1,143 @@
+[
+ {
+  "mutation": "M1 writer.assertCurrent skips the native login lookup",
+  "exit": 1,
+  "failed": [
+   "CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "CLI transcript account boundary > native CLI login owner > looks the login up on every authority check",
+   "CLI transcript account boundary > native CLI login owner > refuses to cover a turn whose login changed after preparation"
+  ]
+ },
+ {
+  "mutation": "M2 owner resolved from the Gateway process env, not the child env",
+  "exit": 1,
+  "failed": [
+   "CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "CLI transcript account boundary > native CLI login owner > does not credit Gateway-login history to a backend-selected account",
+   "CLI transcript account boundary > native CLI login owner > has no native owner when the child authenticates another way",
+   "CLI transcript account boundary > native CLI login owner > keeps history unknown when the native login cannot be proven",
+   "CLI transcript account boundary > native CLI login owner > looks the login up on every authority check",
+   "CLI transcript account boundary > native CLI login owner > refuses history after the native login changes",
+   "CLI transcript account boundary > native CLI login owner > refuses to cover a turn whose login changed after preparation",
+   "CLI transcript account boundary > native CLI login owner > rejects the read for a reassigned or revoked login, uncached, at the same instant",
+   "CLI transcript account boundary > native CLI login owner > reseeds a fresh session for the same native login",
+   "CLI transcript account boundary > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login"
+  ]
+ },
+ {
+  "mutation": "M2b rechecks read the Gateway process env, not the bound env",
+  "exit": 1,
+  "failed": [
+   "CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "CLI transcript account boundary > native CLI login owner > looks the login up on every authority check",
+   "CLI transcript account boundary > native CLI login owner > refuses history after the native login changes",
+   "CLI transcript account boundary > native CLI login owner > refuses to cover a turn whose login changed after preparation",
+   "CLI transcript account boundary > native CLI login owner > rejects the read for a reassigned or revoked login, uncached, at the same instant",
+   "CLI transcript account boundary > native CLI login owner > reseeds a fresh session for the same native login",
+   "CLI transcript account boundary > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login"
+  ]
+ },
+ {
+  "mutation": "M3 one second memo restored on the authority check",
+  "exit": 1,
+  "failed": [
+   "CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects",
+   "CLI transcript account boundary > native CLI login owner > looks the login up on every authority check",
+   "CLI transcript account boundary > native CLI login owner > rejects the read for a reassigned or revoked login, uncached, at the same instant"
+  ]
+ },
+ {
+  "mutation": "M6 stream check looks the login up",
+  "exit": 1,
+  "failed": [
+   "CLI transcript account boundary > native CLI login owner > keeps output-event checks off the login lookup"
+  ]
+ },
+ {
+  "mutation": "M4 execution does not install the native assertion without a recovery prompt",
+  "exit": 1,
+  "failed": [
+   "native login history owner at execution > binds the spawned environment and checks the login before spawning, with no recovery prompt",
+   "native login history owner at execution > spawns nothing when the native login check fails"
+  ]
+ },
+ {
+  "mutation": "M5 execution does not rebind the writer to the spawned environment",
+  "exit": 1,
+  "failed": [
+   "native login history owner at execution > binds the spawned environment and checks the login before spawning, with no recovery prompt",
+   "native login history owner at execution > spawns nothing when the executing environment selects another owner"
+  ]
+ },
+ {
+  "mutation": "M7 reader resolves the config dir from the process env",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment",
+   "readClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks",
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login",
+   "readClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split",
+   "readClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one"
+  ]
+ },
+ {
+  "mutation": "M8 selected-auth guard dropped",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login",
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login",
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login",
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login",
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login"
+  ]
+ },
+ {
+  "mutation": "M8b selected-auth guard dropped",
+  "exit": 1,
+  "failed": [
+   "CLI transcript account boundary > native CLI login owner > has no native owner when the child authenticates another way"
+  ]
+ },
+ {
+  "mutation": "M14 user settings env guard dropped",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login"
+  ]
+ },
+ {
+  "mutation": "M9 warm sessions not keyed on the native owner",
+  "exit": 1,
+  "failed": [
+   "generic plugin-owned live session registry > does not reuse a warm process across a native login owner change"
+  ]
+ },
+ {
+  "mutation": "M10 Claude runtime gates events on the boundary check",
+  "exit": 1,
+  "failed": [
+   "Claude native stdio boundary > keeps an awaited hook decision on the stream check once the prompt was delivered"
+  ]
+ },
+ {
+  "mutation": "M11 Claude runtime sends the prompt after only the stream check",
+  "exit": 1,
+  "failed": [
+   "Claude native stdio boundary > sends user input only after a fresh boundary check, not the stream check"
+  ]
+ },
+ {
+  "mutation": "M12 plugin host hands no stream check",
+  "exit": 1,
+  "failed": [
+   "plugin-owned CLI execution host boundary > hands the plugin a stream check that keeps run authority but skips the spawn-boundary caller check"
+  ]
+ },
+ {
+  "mutation": "M13 relative config root accepted",
+  "exit": 1,
+  "failed": [
+   "readClaudeNativeLoginOwner > supplied environment > has no owner for a relative config root the child would resolve against its own cwd"
+  ]
+ }
+]

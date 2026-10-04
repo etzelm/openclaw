@@ -1,0 +1,12 @@
+[agent/cli-backend] claude-cli transcript probe v4 miss (sessionId-deterministic path, grace 250ms): sessionId=fake-claude-session expectedPath=$RUN/home/.claude/projects/-Users-openclaw-work-pr164796-harness-runs-after-revoke-before-send-workspace/fake-claude-session.jsonl fileExists=false
+[agents/agent-command] cli session reset: provider=claude-cli reason=transcript-missing sessionKey=agent:main:explicit:harness-session
+[agent/cli-backend] claude-cli transcript probe v4 miss (sessionId-deterministic path, grace 250ms): sessionId=fake-claude-session expectedPath=$RUN/home/.claude/projects/-Users-openclaw-work-pr164796-harness-runs-after-revoke-before-send-workspace/fake-claude-session.jsonl fileExists=false
+[agent/cli-backend] cli session reset: provider=claude-cli reason=missing-transcript
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[agent/cli-backend] cli live session start: provider=claude-cli model=claude-sonnet-5 activeSessions=1
+[agent/cli-backend] cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=3018 runId=366b4077-2402-4dc4-90e9-3862caee58fe error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=3723 error="CLI history authority changed before execution" errorName=Error
+[state/agent-db] agent database clean-close receipt: active-leases
+[state/agent-db] agent database clean-close receipt: written
+[openclaw] The CLI command failed.
+[openclaw] For help, run `openclaw doctor`.

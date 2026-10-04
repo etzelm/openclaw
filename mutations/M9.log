@@ -1,0 +1,130 @@
+
+ RUN  v5.0.1 $W/mut
+
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > keeps owner identity deterministic and isolated across sessions 5ms
+ ×  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > does not reuse a warm process across a native login owner change 4ms
+   → expected '2c7e491b6afd8d8b1bc88d8a81d0731385e92…' not to be '2c7e491b6afd8d8b1bc88d8a81d0731385e92…' // Object.is equality
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > keeps fresh and resumed process fingerprints identical without hiding prompt changes 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > exposes only an active registered generation and never revives a removed owner 5ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects registration after admission revocation 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects registration after caller revocation 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects registration after signal revocation 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > fences caller-revoked live access while allowing its owned cleanup 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rechecks caller authority after registered process cleanup (revoked=false) 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rechecks caller authority after registered process cleanup (revoked=true) 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > refuses replacement when the retained process has not exited by the cleanup deadline 3ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > refuses replacement when the registered process has not exited by the cleanup deadline 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > joins natural retirement that starts while restart is awaiting the previous owner 54ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects the same process handle under a different owner (retired=false) 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects the same process handle under a different owner (retired=true) 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects required generation reuse after system prompt changes without closing its only process 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > rejects required generation reuse after invocation name changes without closing its only process 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > refuses plugin restart when the exact live generation is required 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after refresh epoch with identical bytes 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after body at the same path and epoch 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after body and refresh epoch 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after external snapshot without a digest 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after external snapshot with an empty digest 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after unprepared snapshot refresh epoch 9ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > preserves required-generation skill identity after known-empty snapshot refresh epoch 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > transfers admitted MCP authority to the original private process before capture 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > fences MCP capture when admission authority closes during process transfer 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > fences MCP capture when caller authority closes during process transfer 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > a captured process cannot resume withou… 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > an uncaptured process cannot inherit a … 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > keeps claimed native skill resources until subprocess exit and cleans exactly once 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains natural cleanup until replacement is safe (fails=false) 51ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains natural cleanup until replacement is safe (fails=true) 53ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains the natural cleanup result through settlement: agent-error 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains the natural cleanup result through settlement: agent-and-cleanup-error 5ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains the natural cleanup result through settlement: cleanup-error 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains the natural cleanup result through settlement: delivered-cleanup-error 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > retains the natural cleanup result through settlement: stalled 2ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > does not let a previous turn close a process activated by its successor 1ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > evicts an idle owner at capacity and fails closed when every owner is active 3ms
+ ✓  agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > admits only local plugin-owned structured execution to reusable sessions 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 40 passed (41)
+   Start at  10:28:12
+   Duration  18.08s (transform 90%, import 7%, tests 1%, worker 1%, setup 1%)
+
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/agents/cli-runner/cli-live-session-registry.test.ts --maxWorkers=2
+[test] starting test/vitest/vitest.agents-support.config.ts
+[vitest-workers] local cache miss after 1810ms
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js (48:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js:48:1 ]
+    │
+ 48 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js (11:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js:11:1 ]
+    │
+ 11 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js (6:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js:6:1 ]
+   │
+ 6 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js (12:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js:12:1 ]
+    │
+ 12 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js (9:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js:9:1 ]
+   │
+ 9 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[vitest-workers] prepared 62fb0a7a0358 in 14030ms (14493 inputs, 18467 outputs)
+stderr | unknown test
+[sqlite-test-lifecycle] src/agents/cli-runner/cli-live-session-registry.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/agents/cli-runner/cli-live-session-registry.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/agents/cli-runner/cli-live-session-registry.test.ts: retiring openclaw.agentDatabaseLifecycle
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > does not reuse a warm process across a native login owner change
+AssertionError: expected '2c7e491b6afd8d8b1bc88d8a81d0731385e92…' not to be '2c7e491b6afd8d8b1bc88d8a81d0731385e92…' // Object.is equality
+ ❯ src/agents/cli-runner/cli-live-session-registry.test.ts:<redacted len=6>
+    175|     };
+    176|     expect(withOwner("a".repeat(64))).toBe(withOwner("a".repeat(64)));
+    177|     expect(withOwner("b".repeat(64))).not.toBe(withOwner("a".repeat(64…
+       |                                           ^
+    178|     expect(withOwner(undefined)).not.toBe(withOwner("a".repeat(64)));
+    179|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 20.21s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

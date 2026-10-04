@@ -1,0 +1,129 @@
+
+ RUN  v5.0.1 $W/mut
+
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > establishes coverage before the first transcript header and user row exist 1468ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > retains same-account raw and compacted history without exposing private metadata 689ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > distinguishes OAuth account identity from rotating or identity-less tokens 940ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > reseeds a fresh session for the same native login 1137ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > refuses history after the native login changes 1143ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps history unknown when the native login cannot be proven 1051ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login 2674ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > does not credit Gateway-login history to a backend-selected account 1124ms
+ ×  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > has no native owner when the child authenticates another way 1056ms
+   → expected true to be false // Object.is equality
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > has no native owner without a prepared backend to derive the child environment from 1007ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > does not let the native login stand in for a forwarded credential 633ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > does not apply this host's login to a node-placed CLI 856ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > rejects the read for a reassigned or revoked login, uncached, at the same instant 1387ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > looks the login up on every authority check 1077ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > keeps output-event checks off the login lookup 1023ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > binds execution to the login the spawned environment selects 1212ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > refuses to cover a turn whose login changed after preparation 1212ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > compares resolved static tokens rather than the unchanged SecretRef 936ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > revokes retained read and coverage capabilities when their admitted run closes 998ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > detaches background persistence without lending it the closed CLI history proof 1030ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > cannot launder mixed history by returning to the original account 1008ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > refuses legacy, import, and downgrade gaps: unrecorded append 755ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > refuses legacy, import, and downgrade gaps: rewrite 817ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > refuses legacy, import, and downgrade gaps: missing provenance 1005ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > refuses legacy, import, and downgrade gaps: old version 940ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > never treats an authless runtime or borrowed native session as a new trusted history 684ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > only an empty reset can establish a fresh account boundary 911ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > admits a finished writer's successor while refusing the live writer 1446ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > rechecks a revived foreign writer after metadata planning yields 687ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > fences recovered history and CLI persistence after orchestrator-prior takes over 1315ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > fences recovered history and CLI persistence after orchestrator-replacement takes over 745ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > fences recovered history and CLI persistence after direct-cli-recovery takes over 640ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 31 passed (32)
+   Start at  10:27:30
+   Duration  37.48s (tests 91%, transform 5%, import 4%, setup 1%)
+
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/agents/cli-runner/history-boundary.test.ts --maxWorkers=2
+[vitest-workers] local cache miss after 1805ms
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js (48:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js:48:1 ]
+    │
+ 48 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js (6:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js:6:1 ]
+   │
+ 6 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js (11:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js:11:1 ]
+    │
+ 11 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js (9:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js:9:1 ]
+   │
+ 9 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js (12:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js:12:1 ]
+    │
+ 12 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+[vitest-workers] prepared a6091aa7dd0e in 13626ms (14493 inputs, 18467 outputs)
+[test] starting test/vitest/vitest.infra.config.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > native CLI login owner > has no native owner when the child authenticates another way
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/agents/cli-runner/history-boundary.test.ts:377:44
+    375|       await f.run(
+    376|         undefined,
+    377|         async (allowed) => expect(allowed).toBe(false),
+       |                                            ^
+    378|         native,
+    379|         undefined,
+ ❯ src/agents/cli-runner/history-boundary.test.ts:105:60
+ ❯ runWithCliHistoryWriter src/config/sessions/cli-history-boundary.ts:28:36
+ ❯ src/agents/cli-runner/history-boundary.test.ts:105:22
+ ❯ withRun src/agents/cli-runner/history-boundary.test.ts:68:14
+ ❯ Object.run src/agents/cli-runner/history-boundary.test.ts:97:12
+ ❯ src/agents/cli-runner/history-boundary.test.ts:375:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 53.49s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

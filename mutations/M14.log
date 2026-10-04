@@ -1,0 +1,58 @@
+
+ RUN  v5.0.1 $W/mut
+
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > names the owner from the account record once a credential is present 20ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > falls back to the email when the account has no uuid 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > keeps the owner when the plan or token changes 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > does not trust a leftover account record without a credential 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > has no owner without an account record 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > fails closed when the credential root differs from the account config root 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split 2ms
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login 3ms
+   → expected 'uuid:uuid-a' to be undefined
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner for a relative config root the child would resolve against its own cwd 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > has no owner when an API key helper replaces the login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > reads the Keychain login without trusting the file beside it 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > uses the credentials file when no Keychain item exists 2ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  10:28:10
+   Duration  677ms (worker 43%, setup 25%, transform 17%, tests 13%, import 2%)
+
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/plugin-sdk/provider-auth-claude-compat.test.ts --maxWorkers=2
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login
+AssertionError: expected 'uuid:uuid-a' to be undefined
+
+- Expected:
+undefined
+
++ Received:
+"uuid:uuid-a"
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:169:72
+    167|           JSON.stringify({ env: { [key]: "synthetic" } }),
+    168|         );
+    169|         expect(readClaudeNativeLoginOwner({ platform: "linux", env }))…
+       |                                                                        ^
+    170|       }
+    171|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+[test] failed 1 Vitest shard in 1.46s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

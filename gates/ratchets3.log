@@ -1,0 +1,15 @@
+## check:line-cap-ratchet --base b7645ddfada
+$ node --import ./scripts/tsx.mjs scripts/check-line-cap-ratchet.mts --base b7645ddfada
+Line-cap ratchet OK: 24 changed source files; no new violations or over-cap growth.
+## check:test-mock-exports --base b7645ddfada
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base b7645ddfada
+Mock factory ratchet OK: 10808 grandfathered factories.
+## check:assertion-safety --base b7645ddfada
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base b7645ddfada
+assertion SAFETY ratchet OK: 2996 files, 7399 grandfathered assertions.
+## check:database-worker-ratchet --base b7645ddfada
+$ node --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base b7645ddfada
+SQLite worker ratchet OK: no T1 call-count growth against b7645ddfadae984b2160f10a1f0591963ffc45bf.
+## check:test-timeout-race-ratchet --base b7645ddfada
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base b7645ddfada
+test timeout race ratchet OK: 134 files, 323 grandfathered sites.

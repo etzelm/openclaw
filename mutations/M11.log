@@ -1,0 +1,144 @@
+
+ RUN  v5.0.1 $W/mut
+
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > closes its whole process tree within the host cancellation window when native parent and child ignore EOF and … 1616ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > closes its whole process tree within the host cancellation window when native parent exits immediately on EOF 98ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > starts a fresh process after host cleanup when the execution fingerprint changes 135ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > refuses replacement when the retired predecessor's cleanup failed 44ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > refuses process startup when the admitted owner rejects capture activation 2ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > keeps an interim result open until native background agents report their final answer 49ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's deny decision for background-bash-success (replay: undefined, type: undefined) 50ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's allow decision for background-bash-batched (replay: undefined, type: undefined) 48ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's allow decision for background-bash-early (replay: undefined, type: undefined) 48ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's allow decision for background-bash-inline (replay: undefined, type: undefined) 47ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's allow decision for background-bash-overlap (replay: true, type: undefined) 49ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's allow decision for background-bash-overlap (replay: false, type: undefined) 51ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > retains host policy's allow decision for background-bash-overlap (replay: false, type: local_agent) 49ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > distinguishes explicit=false when Bash first appears backgrounded 50ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > distinguishes explicit=true when Bash first appears backgrounded 48ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > rejects a pending Bash continuation on abort and starts the next turn in a fresh process 610ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > rejects a pending Bash continuation on process exit and starts the next turn in a fresh process 95ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > keeps a selected token in a reopenable one-use descriptor and closes its process tree 570ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > keeps a selected api_key in a reopenable one-use descriptor and closes its process tree 587ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > denies an awaited hook decision when its admitted authority is revoked 59ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > preserves native resume and plugin controls while sending the private system prompt only over stdin 43ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > leaves admitted OpenClaw MCP tools with their own host policy 41ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > declines unsupported MCP elicitation without interrupting the native turn 44ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > ignores replayed records until the lifecycle acknowledges the current input UUID 43ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > rejects an already aborted run before reading its credential or creating a native process 2ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > revalidates the admitted owner after native initialization before sending any user input 48ms
+ ×  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > sends user input only after a fresh boundary check, not the stream check 53ms
+   → expected [ { type: 'result', …(4) } ] to be Error: Synthetic account reassigned befor… // Object.is equality
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > keeps an awaited hook decision on the stream check once the prompt was delivered 42ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > reuses one child while delivering private context and host permissions for each turn 43ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > answers a native user question once when both hook and permission callbacks request it 44ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > keeps bypass arguments and native allow rules behind the admitted host policy 43ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > cancels a pending native permission without blocking the protocol reader 65ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > fences background permission decisions after the next turn starts 43ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > frames a large native record across UTF-8 byte boundaries without corrupting it 47ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > reports a native exit with bounded process diagnostics instead of a successful empty reply 44ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > ends background-bash-queued-error immediately while native background work remains listed 85ms
+ ✓  extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > ends background-bash-queued-raw-result immediately while native background work remains listed 82ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 36 passed (37)
+   Start at  10:28:58
+   Duration  21.82s (transform 71%, tests 24%, import 4%, worker 1%, setup 1%)
+
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts extensions/anthropic/cli-runtime.test.ts --maxWorkers=2
+[test] starting test/vitest/vitest.extension-providers.config.ts
+[vitest-workers] local cache miss after 1759ms
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js (48:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js:48:1 ]
+    │
+ 48 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js (6:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js:6:1 ]
+   │
+ 6 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js (11:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js:11:1 ]
+    │
+ 11 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js (9:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js:9:1 ]
+   │
+ 9 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js (12:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js:12:1 ]
+    │
+ 12 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+[vitest-workers] prepared 25381a0e3707 in 13802ms (14493 inputs, 18467 outputs)
+stderr | unknown test
+[sqlite-test-lifecycle] extensions/anthropic/cli-runtime.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/anthropic/cli-runtime.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] extensions/anthropic/cli-runtime.test.ts: retiring openclaw.cron.receiptAuthority
+[sqlite-test-lifecycle] extensions/anthropic/cli-runtime.test.ts: retiring openclaw.agentDatabaseLifecycle
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > sends user input only after a fresh boundary check, not the stream check
+AssertionError: expected [ { type: 'result', …(4) } ] to be Error: Synthetic account reassigned befor… // Object.is equality
+
+- Expected:
+Error {
+  "message": "Synthetic account reassigned before send.",
+}
+
++ Received:
+[
+  {
+    "is_error": false,
+    "result": "{\"pid\":49683,\"turn\":1,\"user\":\"synthetic user input\",\"initialize\":{\"subtype\":\"initialize\",\"appendSystemPrompt\":\"synthetic operator instructions\",\"excludeDynamicSections\":false,\"hooks\":{\"UserPromptSubmit\":[{\"hookCallbackIds\":[\"UserPromptSubmit\"]}],\"PreToolUse\":[{\"hookCallbackIds\":[\"PreToolUse\"]}]}},\"argv\":[\"--print\",\"--input-format\",\"stream-json\",\"--output-format\",\"stream-json\",\"--verbose\",\"--include-partial-messages\",\"--replay-user-messages\",\"--permission-prompt-tool\",\"stdio\",\"--permission-mode\",\"default\",\"--setting-sources\",\"user\",\"--model\",\"claude-sonnet-4-6\"],\"permission\":{\"behavior\":\"deny\",\"message\":\"Fixture denied.\",\"toolUseID\":\"tool-1\"}}",
+    "session_id": "<redacted len=15>",
+    "subtype": "success",
+    "type": "result",
+  },
+]
+
+ ❯ extensions/anthropic/cli-runtime.test.ts:699:47
+    697|       await writeFile(path.join(context.cwd, "initialize.release"), "r…
+    698|     }
+    699|     expect(await withinTest(outcome, signal)).toBe(reason);
+       |                                               ^
+    700|     await expect(access(path.join(context.cwd, "user.received"))).reje…
+    701|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 23.93s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

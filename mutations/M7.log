@@ -1,0 +1,131 @@
+
+ RUN  v5.0.1 $W/mut
+
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > names the owner from the account record once a credential is present 21ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > falls back to the email when the account has no uuid 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > keeps the owner when the plan or token changes 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > does not trust a leftover account record without a credential 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > has no owner without an account record 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > fails closed when the credential root differs from the account config root 1ms
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one 5ms
+   → expected 'uuid:uuid-process' to be 'uuid:uuid-child' // Object.is equality
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks 2ms
+   → expected 'uuid:uuid-process' to be undefined // Object.is equality
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split 2ms
+   → expected undefined to be 'uuid:uuid-a' // Object.is equality
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login 2ms
+   → expected undefined to be 'uuid:uuid-a' // Object.is equality
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner for a relative config root the child would resolve against its own cwd 1ms
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment 4ms
+   → expected '/usr/bin/security find-generic-passwo…' to contain '-a "child-user"'
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > has no owner when an API key helper replaces the login 2ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > reads the Keychain login without trusting the file beside it 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read 1ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > macOS Keychain > uses the credentials file when no Keychain item exists 1ms
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 16 passed (21)
+   Start at  10:27:12
+   Duration  688ms (worker 43%, setup 24%, transform 17%, tests 13%, import 2%)
+
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/plugin-sdk/provider-auth-claude-compat.test.ts --maxWorkers=2
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one
+AssertionError: expected 'uuid:uuid-process' to be 'uuid:uuid-child' // Object.is equality
+
+Expected: "uuid:uuid-child"
+Received: "uuid:uuid-process"
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:122:9
+    120|       expect(
+    121|         readClaudeNativeLoginOwner({ platform: "linux", env: { CLAUDE_…
+    122|       ).toBe("uuid:uuid-child");
+       |         ^
+    123|     });
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks
+AssertionError: expected 'uuid:uuid-process' to be undefined // Object.is equality
+
+- Expected:
+undefined
+
++ Received:
+"uuid:uuid-process"
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:130:91
+    128|       vi.stubEnv("CLAUDE_CONFIG_DIR", processDir);
+    129|       const emptyHome = tempDirs.make("openclaw-claude-empty-home-");
+    130|       expect(readClaudeNativeLoginOwner({ platform: "linux", env: { HO…
+       |                                                                                           ^
+    131|         undefined,
+    132|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split
+AssertionError: expected undefined to be 'uuid:uuid-a' // Object.is equality
+
+- Expected:
+"uuid:uuid-a"
+
++ Received:
+undefined
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:139:70
+    137|       loginIn(configDir, "uuid-a");
+    138|       const env = { CLAUDE_CONFIG_DIR: configDir };
+    139|       expect(readClaudeNativeLoginOwner({ platform: "linux", env })).t…
+       |                                                                      ^
+    140|       fs.writeFileSync(
+    141|         path.join(configDir, "settings.json"),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login
+AssertionError: expected undefined to be 'uuid:uuid-a' // Object.is equality
+
+- Expected:
+"uuid:uuid-a"
+
++ Received:
+undefined
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:163:70
+    161|         JSON.stringify({ env: { UNRELATED: "1" } }),
+    162|       );
+    163|       expect(readClaudeNativeLoginOwner({ platform: "linux", env })).t…
+       |                                                                      ^
+    164|       for (const key of ["ANTHROPIC_AUTH_TOKEN", "<redacted len=56>"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > readClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment
+AssertionError: expected '/usr/bin/security find-generic-passwo…' to contain '-a "child-user"'
+
+Expected: "-a "child-user""
+Received: "/usr/bin/security find-generic-password -a "openclaw" -w -s "Claude Code-credentials""
+
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:215:25
+    213|       expect(commands.length).toBeGreaterThan(0);
+    214|       for (const command of commands) {
+    215|         expect(command).toContain('-a "child-user"');
+       |                         ^
+    216|         expect(command).toMatch(/-s "Claude Code-credentials-[0-9a-f]{…
+    217|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+[test] failed 1 Vitest shard in 1.44s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
