@@ -24,9 +24,14 @@ import {
   resolveAdmittedRunActiveAssertion,
 } from "../admitted-run-context.js";
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
+import { resolveNativeCliLoginOwner } from "../cli-credentials.js";
 import { buildSessionContext, SessionManager } from "../sessions/session-manager.js";
-import { createCliRunCurrentAssertion } from "./execution-target.js";
+import { createCliRunCurrentAssertion, resolveCliExecutionTarget } from "./execution-target.js";
 import type { PreparedCliRunContext } from "./types.js";
+
+// assertReadable also runs for every stdout chunk of a recovery turn, so the native login
+// lookup (file reads, and a Keychain subprocess on macOS) is memoized for a short window.
+const NATIVE_OWNER_RECHECK_MS = 1000;
 
 /**
  * History belongs to the local transcript, not the latest native handle. Cover only
@@ -63,6 +68,13 @@ export async function prepareCliHistoryBoundary(
   const currentUserIsLast = !admission || watermark.maxSeq === admission.rawSeq;
   const stored = snapshot.cliHistoryBoundary;
   const credential = identity.credential;
+  const provider = normalizeProviderId(params.provider);
+  // A forwarded credential decides which account runs. Without one, the CLI runs under this
+  // host's native login, unless it is node-placed and runs under the node's login instead.
+  const nativeLoginOwner =
+    credential || resolveCliExecutionTarget({ params, backendId: provider }).kind === "node"
+      ? undefined
+      : resolveNativeCliLoginOwner(provider);
   // Native reuse epochs intentionally tolerate identity-less OAuth and stable
   // SecretRefs. History cannot: use the resolved static credential or a named
   // OAuth account, never a profile name, reference, or opaque CLI login alone.
@@ -83,9 +95,11 @@ export async function prepareCliHistoryBoundary(
         ? ["api_key", credential.provider, credential.key]
         : credential?.type === "token" && credential.token?.trim()
           ? ["token", credential.provider, credential.token]
-          : undefined;
+          : nativeLoginOwner
+            ? ["native-login", nativeLoginOwner]
+            : undefined;
   const fingerprint = owner
-    ? sha256Hex(JSON.stringify(["cli-history-v1", normalizeProviderId(params.provider), owner]))
+    ? sha256Hex(JSON.stringify(["cli-history-v1", provider, owner]))
     : undefined;
   const writerRunId = params.expectedWriterRunId ?? params.runId;
   let allowed = Boolean(
@@ -197,6 +211,7 @@ export async function prepareCliHistoryBoundary(
     }
     assertActive();
   };
+  let nativeOwnerCheckedAtMs: number | undefined;
   const writer: CliHistoryWriter = {
     target: { ...target },
     runId: writerRunId,
@@ -205,6 +220,22 @@ export async function prepareCliHistoryBoundary(
     assertCurrent: assertWriterCurrent,
     assertReadable: () => {
       assertWriterCurrent();
+      // A native login can change between preparation and execution; the
+      // fingerprint proves only the login observed at preparation. The first call
+      // resolves fresh, later calls inside the window reuse that passing result.
+      if (nativeLoginOwner) {
+        const now = Date.now();
+        if (
+          nativeOwnerCheckedAtMs === undefined ||
+          now < nativeOwnerCheckedAtMs ||
+          now - nativeOwnerCheckedAtMs >= NATIVE_OWNER_RECHECK_MS
+        ) {
+          if (resolveNativeCliLoginOwner(provider) !== nativeLoginOwner) {
+            throw new Error("CLI history authority changed before execution");
+          }
+          nativeOwnerCheckedAtMs = now;
+        }
+      }
       const current: InternalSessionEntry | undefined = loadSessionEntryReadOnly(target);
       const proof = current?.cliHistoryBoundary;
       const tip = readSessionTranscriptWatermark(target);

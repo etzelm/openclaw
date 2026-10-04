@@ -13,6 +13,7 @@ import {
 import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
 import { resolveOsHomeRelativePath } from "../infra/home-dir.js";
 import { loadJsonFileThroughSymlink } from "../infra/json-file.js";
+import { readClaudeNativeLoginOwner } from "../plugin-sdk/provider-auth-claude-compat.js";
 import type { OAuthProvider } from "./auth-profiles/types.js";
 
 const CODEX_CLI_AUTH_FILENAME = "auth.json";
@@ -503,4 +504,13 @@ export function readGeminiCliCredentialsCached(options?: {
     },
     readSourceFingerprint: () => readFileMtimeMs(credPath),
   });
+}
+
+/**
+ * Non-secret owner reference of the native login a local run of this CLI
+ * backend would use. Undefined when the backend has no readable native login
+ * or the login cannot be proven; callers must then treat history as unknown.
+ */
+export function resolveNativeCliLoginOwner(backendId: string): string | undefined {
+  return backendId === "claude-cli" ? readClaudeNativeLoginOwner() : undefined;
 }

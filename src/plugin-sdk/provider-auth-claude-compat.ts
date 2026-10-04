@@ -180,6 +180,57 @@ function readClaudeAccountEmail(homeDir?: string): string | undefined {
   return normalizeOptionalString(email);
 }
 
+/**
+ * Non-secret owner reference of the login a local `claude` process would use,
+ * or undefined when that login cannot be proven. The account record in
+ * `.claude.json` names an owner only when a credential the CLI would actually
+ * read is present, so a leftover record never identifies a login. Never
+ * returns token material and never uses the interactive Keychain path.
+ */
+export function readClaudeNativeLoginOwner(
+  options: {
+    homeDir?: string;
+    platform?: NodeJS.Platform;
+    execSync?: typeof execSync;
+  } = {},
+): string | undefined {
+  const { homeDir } = options;
+  if (
+    // oauthAccount is config-scoped, so it cannot name a credential from an independent
+    // secure-storage root, and an API key helper replaces the login entirely.
+    path.dirname(resolveClaudeCliCredentialsPath(homeDir)) !== resolveClaudeCliConfigDir(homeDir) ||
+    readClaudeApiKeyHelper(homeDir)
+  ) {
+    return undefined;
+  }
+  const execSyncImpl = options.execSync ?? execSync;
+  const service = resolveClaudeCliKeychainService(homeDir);
+  let stored: ClaudeCliCredential | null = null;
+  if ((options.platform ?? process.platform) === "darwin") {
+    stored = parseClaudeCliOauthCredential(
+      readClaudeKeychain(execSyncImpl, CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS, service)?.claudeAiOauth,
+    );
+    if (!stored && hasClaudeKeychainItem(execSyncImpl, service)) {
+      // The live login sits in a Keychain item this process cannot read; a credentials
+      // file beside it would be stale.
+      return undefined;
+    }
+  }
+  stored ??= parseClaudeCliOauthCredential(
+    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliCredentialsPath(homeDir)))
+      .claudeAiOauth,
+  );
+  if (!stored) {
+    return undefined;
+  }
+  const account = asNonArrayRecord(
+    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliAccountPath(homeDir))).oauthAccount,
+  );
+  const accountUuid = normalizeOptionalString(account.accountUuid);
+  const email = normalizeOptionalString(account.emailAddress);
+  return accountUuid ? `uuid:${accountUuid}` : email ? `email:${email}` : undefined;
+}
+
 function withClaudeAccountEmail(
   credential: ClaudeCliCredential | null,
   homeDir?: string,

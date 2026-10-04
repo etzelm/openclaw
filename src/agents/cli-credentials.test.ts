@@ -10,6 +10,7 @@ let readCodexCliActiveApiKey: typeof import("./cli-credentials.js").readCodexCli
 let readCodexCliCredentialsCached: typeof import("./cli-credentials.js").readCodexCliCredentialsCached;
 let readGeminiCliCredentialsCached: typeof import("./cli-credentials.js").readGeminiCliCredentialsCached;
 let readMiniMaxCliCredentialsCached: typeof import("./cli-credentials.js").readMiniMaxCliCredentialsCached;
+let resolveNativeCliLoginOwner: typeof import("./cli-credentials.js").resolveNativeCliLoginOwner;
 
 function createJwtWithExp(expSeconds: number): string {
   // Signature verification is out of scope; expiration extraction only needs a
@@ -38,6 +39,7 @@ describe("cli credentials", () => {
       readCodexCliCredentialsCached,
       readGeminiCliCredentialsCached,
       readMiniMaxCliCredentialsCached,
+      resolveNativeCliLoginOwner,
     } = await import("./cli-credentials.js"));
   });
 
@@ -699,6 +701,32 @@ describe("cli credentials", () => {
       });
       expect(creds?.accountId).toBeUndefined();
       expect(creds?.email).toBeUndefined();
+    } finally {
+      fs.rmSync(tempHome, { recursive: true, force: true });
+    }
+  });
+
+  it("resolves a native login owner only for backends that own one", () => {
+    // A readable Claude login must not leak into other backends' history ownership.
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-native-owner-"));
+    try {
+      vi.stubEnv("HOME", tempHome);
+      fs.mkdirSync(path.join(tempHome, ".claude"), { recursive: true });
+      fs.writeFileSync(
+        path.join(tempHome, ".claude.json"),
+        JSON.stringify({ oauthAccount: { accountUuid: "uuid-a" } }),
+      );
+      fs.writeFileSync(
+        path.join(tempHome, ".claude", ".credentials.json"),
+        JSON.stringify({
+          claudeAiOauth: {
+            accessToken: "synthetic",
+            expiresAt: Date.parse("2030-01-01T00:00:00Z"),
+          },
+        }),
+      );
+      expect(resolveNativeCliLoginOwner("google-gemini-cli")).toBeUndefined();
+      expect(resolveNativeCliLoginOwner("codex-cli")).toBeUndefined();
     } finally {
       fs.rmSync(tempHome, { recursive: true, force: true });
     }

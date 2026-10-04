@@ -22,6 +22,7 @@ import type { InternalSessionEntry } from "../../config/sessions/types.js";
 import { useSessionStoreTempDirs } from "../../test-utils/session-state-cleanup.js";
 import { prepareSystemAgentRunAdmission } from "../admitted-run-context.js";
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
+import * as cliCredentials from "../cli-credentials.js";
 import { persistCliSessionBindingResult } from "../cli-session-store.js";
 import { claimAgentSessionWriter } from "../embedded-agent-runner/run/session-bootstrap.js";
 import { CURRENT_SESSION_VERSION, SessionManager } from "../sessions/session-manager.js";
@@ -217,6 +218,139 @@ describe("CLI transcript account boundary", () => {
       {},
       { ...credential, accountId: "account-b" },
     );
+  });
+
+  describe("native CLI login owner", () => {
+    const native = { provider: "claude-cli" };
+    const login = (owner: string | undefined) =>
+      vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner").mockReturnValue(owner);
+    const seedNative = async (f: Awaited<ReturnType<typeof fixture>>) => {
+      login("uuid:account-a");
+      await f.run(
+        undefined,
+        async (allowed) => {
+          expect(allowed).toBe(true);
+          f.manager().appendMessage({ role: "user", content: "native canary", timestamp: 1 });
+        },
+        native,
+      );
+    };
+
+    it("reseeds a fresh session for the same native login", async () => {
+      const f = await fixture();
+      await seedNative(f);
+      await f.run(
+        undefined,
+        async (allowed, params) => {
+          expect(allowed).toBe(true);
+          expect(await history(allowed, params)).toContain("native canary");
+        },
+        native,
+      );
+    });
+
+    it("refuses history after the native login changes", async () => {
+      const f = await fixture();
+      await seedNative(f);
+      login("uuid:account-b");
+      await f.run(
+        undefined,
+        async (allowed, params) => {
+          expect(allowed).toBe(false);
+          expect(await history(allowed, params)).toBeUndefined();
+        },
+        native,
+      );
+    });
+
+    it("keeps history unknown when the native login cannot be proven", async () => {
+      const f = await fixture();
+      login(undefined);
+      await f.run(undefined, async (allowed) => expect(allowed).toBe(false), native);
+    });
+
+    it("does not let the native login stand in for a forwarded credential", async () => {
+      const f = await fixture();
+      const lookup = login("uuid:account-a");
+      const identityLess = {
+        type: "oauth" as const,
+        provider: "claude-cli",
+        access: "synthetic-access",
+        refresh: "synthetic-refresh",
+        expires: Date.now() + 60_000,
+      };
+      await f.run(undefined, async (allowed) => expect(allowed).toBe(false), native, identityLess);
+      expect(lookup).not.toHaveBeenCalled();
+    });
+
+    it("does not apply this host's login to a node-placed CLI", async () => {
+      const f = await fixture();
+      const lookup = login("uuid:account-a");
+      await f.run(undefined, async (allowed) => expect(allowed).toBe(false), {
+        ...native,
+        sessionEntry: { execHost: "node", execNode: "node-a" } as never,
+      });
+      expect(lookup).not.toHaveBeenCalled();
+    });
+
+    it("rejects the read when the login changes after preparation", async () => {
+      const f = await fixture();
+      const lookup = login("uuid:account-a");
+      let now = 1_000_000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      const runId = "boundary-native-recheck";
+      await patchSessionEntryCore(f.target, (entry) => ({ ...entry, activeWriterRunId: runId }));
+      await f.withRun(
+        runId,
+        async (params) => {
+          const writer = await prepareCliHistoryBoundary(params, {});
+          if (!writer) {
+            throw new Error("Missing admitted history writer");
+          }
+          writer.assertReadable();
+          now += 1000;
+          lookup.mockReturnValue("uuid:account-b");
+          expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+          now += 1000;
+          lookup.mockReturnValue(undefined);
+          expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+          lookup.mockReturnValue("uuid:account-a");
+          writer.assertReadable();
+        },
+        native,
+      );
+    });
+
+    it("reuses the native login lookup inside the recheck window, then refuses a changed login", async () => {
+      const f = await fixture();
+      const lookup = login("uuid:account-a");
+      let now = 1_000_000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      const runId = "boundary-native-recheck-window";
+      await patchSessionEntryCore(f.target, (entry) => ({ ...entry, activeWriterRunId: runId }));
+      await f.withRun(
+        runId,
+        async (params) => {
+          const writer = await prepareCliHistoryBoundary(params, {});
+          if (!writer) {
+            throw new Error("Missing admitted history writer");
+          }
+          lookup.mockClear();
+          writer.assertReadable();
+          expect(lookup).toHaveBeenCalledTimes(1);
+          for (let chunk = 0; chunk < 5; chunk += 1) {
+            now += 100;
+            writer.assertReadable();
+          }
+          expect(lookup).toHaveBeenCalledTimes(1);
+          lookup.mockReturnValue("uuid:account-b");
+          now += 600;
+          expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+          expect(lookup).toHaveBeenCalledTimes(2);
+        },
+        native,
+      );
+    });
   });
 
   it("compares resolved static tokens rather than the unchanged SecretRef", async () => {
