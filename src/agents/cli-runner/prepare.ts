@@ -1630,7 +1630,7 @@ async function prepareCliRunContextWithinReadFence(
       ? await prepareCliHistoryBoundary(historyParams, authCredential, preparedBackendFinal)
       : undefined;
     // Explicit caller-owned memory remains input; it cannot authorize borrowed durable history.
-    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter !== undefined;
+    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter?.replaysHistory;
     // Native compatibility and transcript account ownership are independent gates.
     const rawTranscriptReseedReason = !historyAllowed
       ? "auth-unknown"

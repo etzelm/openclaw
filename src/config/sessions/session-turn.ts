@@ -2,7 +2,11 @@ import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import { createSqliteLifecycleAggregateError } from "../../infra/sqlite-lifecycle-errors.js";
 import { retainSqliteWorkerErrorCode } from "../../infra/sqlite-worker-contract.js";
 import { captureOpenClawAgentDatabaseExecution } from "../../state/openclaw-agent-execution.js";
-import { getCliHistoryWriter, resolveCliHistoryCoverageWriter } from "./cli-history-boundary.js";
+import {
+  cliHistoryWriterFacts,
+  getCliHistoryWriter,
+  resolveCliHistoryCoverageWriter,
+} from "./cli-history-boundary.js";
 import { assertSessionGoalOperationTime } from "./goals-operations.js";
 import { publishCommittedSessionIdentity } from "./session-accessor.sqlite-identity.js";
 import { captureSessionPendingInputWorkerCustody } from "./session-accessor.sqlite-pending-inputs.js";
@@ -78,7 +82,8 @@ export async function appendSessionTurnInWorker(
           }
         : undefined,
     },
-    cliWriter: resolveCliHistoryCoverageWriter(cliWriter),
+    // Preparation only reads; the owner is confirmed for the commit itself, below.
+    cliWriter: cliWriter && cliHistoryWriterFacts(cliWriter),
     custody: custody?.facts,
     relocation: custody?.relocation,
   };
@@ -203,7 +208,12 @@ export async function appendSessionTurnInWorker(
           };
         });
         assertCurrent();
-        return commit(() => worker.execute({ type: "session.turn.commit", input: plan }));
+        return commit(() => {
+          // Confirm the owner as the last host step before the worker's transaction, after
+          // every awaited step above, so a login change during preparation never covers rows.
+          plan.cliWriter = resolveCliHistoryCoverageWriter(cliWriter);
+          return worker.execute({ type: "session.turn.commit", input: plan });
+        });
       },
       onAcknowledged(candidate) {
         if (candidate.custody) {

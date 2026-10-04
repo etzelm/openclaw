@@ -25,7 +25,7 @@ import {
   resolveAdmittedRunActiveAssertion,
 } from "../admitted-run-context.js";
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
-import { resolveNativeCliLoginOwner } from "../cli-credentials.js";
+import { readAttestedNativeCliLoginOwner, resolveNativeCliLoginOwner } from "../cli-credentials.js";
 import { buildSessionContext, SessionManager } from "../sessions/session-manager.js";
 import { resolveCliChildEnv } from "./execution-env.js";
 import { createCliRunCurrentAssertion, resolveCliExecutionTarget } from "./execution-target.js";
@@ -100,12 +100,17 @@ export async function prepareCliHistoryBoundary(
   // A forwarded credential decides which account runs. Without one, the CLI runs under the
   // native login its own environment selects, unless it is node-placed and runs under the
   // node's login instead. The Gateway process environment is never the identity source.
-  const nativeLoginOwner =
+  // The owner is the account the provider attests for that login's credential.
+  const nativeLogin =
     credential ||
     !childEnv ||
     resolveCliExecutionTarget({ params, backendId: provider }).kind === "node"
       ? undefined
-      : resolveNativeCliLoginOwner(provider, childEnv);
+      : await resolveNativeCliLoginOwner(provider, childEnv);
+  if (nativeLogin) {
+    assertCurrent();
+  }
+  const nativeLoginOwner = nativeLogin?.owner;
   // Native reuse epochs intentionally tolerate identity-less OAuth and stable
   // SecretRefs. History cannot: use the resolved static credential or a named
   // OAuth account, never a profile name, reference, or opaque CLI login alone.
@@ -242,29 +247,51 @@ export async function prepareCliHistoryBoundary(
     }
     assertActive();
   };
-  // The fingerprint proves only the login observed at preparation. Each spawn, prompt send
-  // and coverage commit resolves it again, uncached, from the environment the child runs
-  // under: execution rebinds this to the exact environment it spawns with. Run and write
-  // liveness checks do not, so a turn costs a lookup per boundary, not one per write.
+  // The fingerprint proves only the owner attested at preparation. Each spawn, prompt send
+  // and coverage commit rereads the credential from the environment the child runs under
+  // (execution rebinds this to the exact environment it spawns with) and accepts it only
+  // if this process attested that exact credential to the same owner. These checks are
+  // synchronous and never wait on the network. Run and write liveness checks do not
+  // reread, so a turn costs a lookup per boundary, not one per write.
   let nativeEnv: NodeJS.ProcessEnv | undefined = childEnv;
-  // Set once the spawn environment selects another login: the run keeps going but never
-  // advances coverage, so its rows stay outside the owner's replayable history.
+  // Set once the run saw a login attested to someone else, or one that could not be
+  // attested after the run: the run keeps going but never advances coverage, so its rows
+  // stay outside the owner's replayable history.
   let detached = false;
+  // A boundary that sees a credential this process has not attested yet (normally the
+  // CLI's own token refresh) attests it in the background. Coverage waits until it settles.
+  let pendingAttestation: Promise<void> | undefined;
+  const readNativeOwner = () =>
+    nativeEnv === undefined ? undefined : readAttestedNativeCliLoginOwner(provider, nativeEnv);
   const nativeLoginMatches = () =>
     !nativeLoginOwner ||
-    (!detached &&
-      nativeEnv !== undefined &&
-      resolveNativeCliLoginOwner(provider, nativeEnv) === nativeLoginOwner);
-  // Saved history must never reach another login, so a recovery turn is refused. A turn
+    (!detached && !pendingAttestation && readNativeOwner() === nativeLoginOwner);
+  // Saved history must never reach an unproven login, so a recovery turn is refused. A turn
   // without saved history runs on, as it would with no owner at all, but stops coverage.
   const checkNativeLoginBoundary = (recovering: boolean, message?: string) => {
-    if (nativeLoginMatches()) {
+    const current = !nativeLoginOwner || detached ? undefined : readNativeOwner();
+    if (!nativeLoginOwner || current === nativeLoginOwner) {
       return;
     }
     if (recovering) {
       throw new Error(message ?? "CLI history authority changed before execution");
     }
-    detached = true;
+    if (detached || current !== undefined || nativeEnv === undefined) {
+      detached = true;
+      return;
+    }
+    pendingAttestation ??= resolveNativeCliLoginOwner(provider, nativeEnv)
+      .then(
+        (attestation) => {
+          detached ||= attestation.owner !== nativeLoginOwner;
+        },
+        () => {
+          detached = true;
+        },
+      )
+      .finally(() => {
+        pendingAttestation = undefined;
+      });
   };
   const assertProofCurrent = () => {
     const current: InternalSessionEntry | undefined = loadSessionEntryReadOnly(target);
@@ -291,6 +318,13 @@ export async function prepareCliHistoryBoundary(
     authFingerprint: boundary.authFingerprint,
     lifecycleRevision: snapshot.lifecycleRevision,
     bindsNativeLogin: nativeLoginOwner !== undefined,
+    // Claude CLI rotates a refresh-due token before it accepts a prompt, after the send
+    // check could prove it, so such a turn runs without saved history.
+    replaysHistory: !(
+      nativeLoginOwner &&
+      nativeLogin?.refreshDueAt !== undefined &&
+      nativeLogin.refreshDueAt <= Date.now()
+    ),
     assertCurrent: assertWriterCurrent,
     assertReadable: () => {
       assertWriterCurrent();
@@ -304,8 +338,22 @@ export async function prepareCliHistoryBoundary(
       nativeEnv = env;
       checkNativeLoginBoundary(
         recovering,
-        "CLI history authority changed before execution: the spawn environment selects a different Claude login than the one recorded at preparation",
+        "CLI history authority changed before execution: the spawn environment selects a different Claude login than the one attested at preparation",
       );
+    },
+    settleNativeLogin: async () => {
+      await pendingAttestation;
+      // A token that entered its refresh window may have been rotated after the send check.
+      // Attest whatever the child left behind so the commit checks can prove it.
+      if (
+        nativeLoginOwner &&
+        nativeEnv !== undefined &&
+        !detached &&
+        nativeLogin?.refreshDueAt !== undefined &&
+        nativeLogin.refreshDueAt <= Date.now()
+      ) {
+        await resolveNativeCliLoginOwner(provider, nativeEnv).catch(() => undefined);
+      }
     },
   };
   const authority = getAdmittedRunDelegatedAuthority(params.admittedRunContext);

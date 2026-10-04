@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import { userInfo } from "node:os";
 import path from "node:path";
@@ -211,25 +211,112 @@ function readClaudeAccountEmail(homeDir?: string): string | undefined {
   return normalizeOptionalString(email);
 }
 
+type ClaudeNativeLoginOptions = {
+  homeDir?: string;
+  platform?: NodeJS.Platform;
+  execSync?: typeof execSync;
+  /** Environment the `claude` process receives. Defaults to the Gateway process. */
+  env?: NodeJS.ProcessEnv;
+};
+
+/** Anthropic's account lookup for a Claude OAuth access token, the one Claude CLI itself uses. */
+const CLAUDE_OAUTH_PROFILE_URL = "https://api.anthropic.com/api/oauth/profile";
+const CLAUDE_OAUTH_PROFILE_TIMEOUT_MS = 3_000;
+// Claude CLI refreshes a token within 5 minutes of expiry when it starts, before it accepts
+// a prompt. Add slack so a token that is refresh-due by send time is already treated so here.
+const CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS = 10 * 60_000;
+const CLAUDE_NATIVE_LOGIN_ATTESTATION_LIMIT = 64;
+// Fingerprints are keyed per process, so they name a token only inside this process and
+// are never persisted. A token belongs to one account for its whole life, so an entry can
+// only stop matching (rotation, logout), never start naming someone else.
+const claudeNativeLoginAttestationKey = randomBytes(32);
+const claudeNativeLoginAttestations = new Map<string, string>();
+
+function fingerprintClaudeNativeLoginToken(token: string): string {
+  return createHmac("sha256", claudeNativeLoginAttestationKey).update(token).digest("hex");
+}
+
 /**
- * Non-secret owner reference of the login a local `claude` process would use,
- * or undefined when that login cannot be proven. The account record in
- * `.claude.json` names an owner only when a credential the CLI would actually
- * read is present, so a leftover record never identifies a login. The record
- * is not bound to the credential: the opaque OAuth tokens carry no account id
- * and rotate on refresh, and Claude CLI reports the same record as its own
- * identity. Never returns token material and never uses the interactive
- * Keychain path.
+ * Owner of the login a local `claude` process would use, as Anthropic attested it for the
+ * exact access token it reads (Keychain, then the credentials file), or undefined when no
+ * attestation in this process covers that token. Synchronous and local: never makes a
+ * network call, so a rotated or replaced token has no owner until
+ * {@link attestClaudeNativeLoginOwner} runs again. Never returns token material and never
+ * uses the interactive Keychain path.
  */
 export function readClaudeNativeLoginOwner(
-  options: {
-    homeDir?: string;
-    platform?: NodeJS.Platform;
-    execSync?: typeof execSync;
-    /** Environment the `claude` process receives. Defaults to the Gateway process. */
-    env?: NodeJS.ProcessEnv;
-  } = {},
+  options: ClaudeNativeLoginOptions = {},
 ): string | undefined {
+  const token = readClaudeNativeLoginCredential(options);
+  return token
+    ? claudeNativeLoginAttestations.get(fingerprintClaudeNativeLoginToken(token.value))
+    : undefined;
+}
+
+/**
+ * Attest the owner of the login a local `claude` process would use: the account uuid
+ * Anthropic's OAuth profile endpoint returns for the access token itself. The token goes
+ * only to that endpoint, with a short timeout, and is never logged, stored or refreshed
+ * here. Any failure, an expired token, or a response without an account uuid yields no
+ * owner. `refreshDueAt` is when Claude CLI starts rotating the token, which it does before
+ * it accepts a prompt, so a check at send time can see a token attested only after the run.
+ */
+export async function attestClaudeNativeLoginOwner(
+  options: ClaudeNativeLoginOptions & {
+    /** Test seam; production always calls the global fetch on the Anthropic endpoint. */
+    fetchFn?: typeof fetch;
+    now?: number;
+  } = {},
+): Promise<{ owner?: string; refreshDueAt?: number }> {
+  const token = readClaudeNativeLoginCredential(options);
+  if (!token) {
+    return {};
+  }
+  const refreshDueAt = token.expires - CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS;
+  const fingerprint = fingerprintClaudeNativeLoginToken(token.value);
+  const attested = claudeNativeLoginAttestations.get(fingerprint);
+  if (attested || token.expires <= (options.now ?? Date.now())) {
+    return { ...(attested ? { owner: attested } : {}), refreshDueAt };
+  }
+  let owner: string | undefined;
+  try {
+    // The timeout signal also bounds reading the body.
+    const response = await (options.fetchFn ?? globalThis.fetch)(CLAUDE_OAUTH_PROFILE_URL, {
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        Accept: "application/json",
+        "User-Agent": "openclaw",
+      },
+      redirect: "error",
+      signal: AbortSignal.timeout(CLAUDE_OAUTH_PROFILE_TIMEOUT_MS),
+    });
+    if (response.ok) {
+      const account = asNonArrayRecord(asNonArrayRecord(await response.json()).account);
+      const uuid = normalizeOptionalString(account.uuid);
+      owner = uuid ? `uuid:${uuid}` : undefined;
+    }
+  } catch {
+    // Network, timeout and parse failures all mean no owner. The error is dropped, not
+    // surfaced, so nothing derived from the request can reach a log.
+    owner = undefined;
+  }
+  if (owner) {
+    claudeNativeLoginAttestations.delete(fingerprint);
+    claudeNativeLoginAttestations.set(fingerprint, owner);
+    if (claudeNativeLoginAttestations.size > CLAUDE_NATIVE_LOGIN_ATTESTATION_LIMIT) {
+      const oldest = claudeNativeLoginAttestations.keys().next().value;
+      if (oldest !== undefined) {
+        claudeNativeLoginAttestations.delete(oldest);
+      }
+    }
+  }
+  return { ...(owner ? { owner } : {}), refreshDueAt };
+}
+
+/** The access token a local `claude` process would authenticate with, or undefined. */
+function readClaudeNativeLoginCredential(
+  options: ClaudeNativeLoginOptions,
+): { value: string; expires: number } | undefined {
   const { homeDir } = options;
   const env = options.env ?? process.env;
   if (
@@ -239,8 +326,8 @@ export function readClaudeNativeLoginOwner(
     [env.CLAUDE_CONFIG_DIR, env.CLAUDE_SECURESTORAGE_CONFIG_DIR].some(
       (dir) => dir && !path.isAbsolute(dir),
     ) ||
-    // oauthAccount is config-scoped, so it cannot name a credential from an independent
-    // secure-storage root, and an API key helper replaces the login entirely.
+    // Left out of scope: a credential root split from the config root. An API key helper
+    // replaces the login entirely.
     path.dirname(resolveClaudeCliCredentialsPath(homeDir, env)) !==
       resolveClaudeCliConfigDir(homeDir, env) ||
     readClaudeApiKeyHelper(homeDir, env) ||
@@ -273,16 +360,10 @@ export function readClaudeNativeLoginOwner(
     asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliCredentialsPath(homeDir, env)))
       .claudeAiOauth,
   );
-  if (!stored) {
+  if (!stored || stored.type === "api_key_helper") {
     return undefined;
   }
-  const account = asNonArrayRecord(
-    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliAccountPath(homeDir, env)))
-      .oauthAccount,
-  );
-  const accountUuid = normalizeOptionalString(account.accountUuid);
-  const email = normalizeOptionalString(account.emailAddress);
-  return accountUuid ? `uuid:${accountUuid}` : email ? `email:${email}` : undefined;
+  return { value: stored.type === "oauth" ? stored.access : stored.token, expires: stored.expires };
 }
 
 function withClaudeAccountEmail(

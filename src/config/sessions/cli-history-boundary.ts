@@ -26,6 +26,13 @@ export type CliExecutionHistoryWriter = CliHistoryWriter & {
   checkNativeLoginBoundary: (recovering: boolean) => void;
   /** Resolve the native login owner from the environment execution actually spawns with. */
   bindExecutionEnv: (env: NodeJS.ProcessEnv, recovering: boolean) => void;
+  /** False when this turn must run without saved history; coverage still applies. */
+  replaysHistory: boolean;
+  /**
+   * After the child exits and before its rows commit: attest any credential the run
+   * rotated to. Never rejects; a login it cannot attest to the owner stops coverage.
+   */
+  settleNativeLogin: () => Promise<void>;
 };
 
 const cliHistoryWriter = new AsyncLocalStorage<CliHistoryWriter>();
@@ -34,17 +41,22 @@ export function runWithCliHistoryWriter<T>(writer: CliHistoryWriter | undefined,
   return writer ? cliHistoryWriter.run(writer, run) : cliHistoryWriter.exit(run);
 }
 
+/** The serializable account facts a worker needs to advance coverage for this writer. */
+export function cliHistoryWriterFacts(
+  writer: CliHistoryWriter,
+): Pick<CliHistoryWriter, "runId" | "authFingerprint" | "lifecycleRevision"> {
+  return {
+    runId: writer.runId,
+    authFingerprint: writer.authFingerprint,
+    lifecycleRevision: writer.lifecycleRevision,
+  };
+}
+
 /** Hosts dispatching a worker commit hand it account facts only while the owner still holds. */
 export function resolveCliHistoryCoverageWriter(
   writer: CliHistoryWriter | undefined,
 ): Pick<CliHistoryWriter, "runId" | "authFingerprint" | "lifecycleRevision"> | undefined {
-  return writer && writer.confirmsOwner?.() !== false
-    ? {
-        runId: writer.runId,
-        authFingerprint: writer.authFingerprint,
-        lifecycleRevision: writer.lifecycleRevision,
-      }
-    : undefined;
+  return writer && writer.confirmsOwner?.() !== false ? cliHistoryWriterFacts(writer) : undefined;
 }
 
 export function getCliHistoryWriter(

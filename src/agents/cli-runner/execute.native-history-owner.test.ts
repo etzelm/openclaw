@@ -28,6 +28,8 @@ function writerStub(bindsNativeLogin: boolean) {
     confirmsOwner: vi.fn(() => true),
     checkNativeLoginBoundary: vi.fn(() => void calls.push("checkNativeLoginBoundary")),
     bindExecutionEnv: vi.fn(() => void calls.push("bindExecutionEnv")),
+    replaysHistory: true,
+    settleNativeLogin: vi.fn(async () => void calls.push("settleNativeLogin")),
   };
   return { writer, calls };
 }
@@ -72,8 +74,14 @@ describe("native login history owner at execution", () => {
         env: expect.objectContaining({ CLAUDE_CONFIG_DIR: "/fixture/backend-selected" }),
       }),
     );
-    // Bind to the final environment, then one fresh boundary check at launch, then the spawn.
-    expect(calls).toEqual(["bindExecutionEnv", "checkNativeLoginBoundary", "spawn"]);
+    // Bind to the final environment, one fresh boundary check at launch, the spawn, and the
+    // post-run attestation of any token the child rotated, before its rows commit.
+    expect(calls).toEqual([
+      "bindExecutionEnv",
+      "checkNativeLoginBoundary",
+      "spawn",
+      "settleNativeLogin",
+    ]);
     expect(writer.checkNativeLoginBoundary).toHaveBeenCalledWith(false);
     // Liveness checks never go through the login lookup.
     expect(writer.assertCurrent).not.toHaveBeenCalled();
@@ -88,6 +96,17 @@ describe("native login history owner at execution", () => {
     const context = nativeContext(writer, true, calls);
     await expect(executePreparedCliRun(context)).rejects.toThrow("CLI history authority changed");
     expect(calls).not.toContain("spawn");
+  });
+
+  it("settles the native login even when the run fails", async () => {
+    const { writer, calls } = writerStub(true);
+    const context = nativeContext(writer, false, calls);
+    supervisorSpawnMock.mockImplementation(async () => {
+      calls.push("spawn");
+      throw new Error("child failed");
+    });
+    await expect(executePreparedCliRun(context)).rejects.toThrow();
+    expect(calls.slice(-2)).toEqual(["spawn", "settleNativeLogin"]);
   });
 
   it("spawns nothing when the executing environment selects another owner", async () => {
