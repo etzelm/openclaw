@@ -221,7 +221,7 @@ describe("requester settle wake park (#154252)", () => {
     loadConfigMock.mockReset().mockReturnValue({
       agents: {
         defaults: { subagents: { archiveAfterMinutes: 0 } },
-        list: [{ id: "main" }, { id: "research" }],
+        entries: { main: {}, research: {} },
       },
       session: { mainKey: "main", scope: "per-sender" },
     });
@@ -456,7 +456,8 @@ describe("requester settle wake park (#154252)", () => {
     expect(probeGaps).toHaveLength(2);
     for (const gap of probeGaps) {
       expect(gap).toBeGreaterThanOrEqual(PARK_PROBE_MS);
-      expect(gap).toBeLessThanOrEqual(PARK_PROBE_MS + TICK_MS);
+      // The sweeper resumes on 60s ticks, so a probe due between ticks waits up to two of them.
+      expect(gap).toBeLessThanOrEqual(PARK_PROBE_MS + 2 * TICK_MS);
     }
     expect(parkWarns()).toHaveLength(1);
     expect(parkWarns()[0]?.meta).toMatchObject({
