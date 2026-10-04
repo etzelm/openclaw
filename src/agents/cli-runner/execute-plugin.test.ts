@@ -106,6 +106,38 @@ describe("plugin-owned CLI execution host boundary", () => {
     );
   });
 
+  it("hands the plugin a stream check that keeps run authority but skips the spawn-boundary caller check", async () => {
+    const { context } = await createExecution({ runId: "plugin-stream-check" });
+    const boundary = vi.fn();
+    const stream = vi.fn();
+    context.params.assertCurrent = boundary;
+    let observed: CliBackendExecuteContext | undefined;
+    const execute: CliBackendExecute = async function* (execution) {
+      observed = execution;
+      boundary.mockClear();
+      execution.assertStreamCurrent?.();
+      execution.assertStreamCurrent?.();
+      expect(stream).toHaveBeenCalledTimes(2);
+      expect(boundary).not.toHaveBeenCalled();
+      execution.assertCurrent?.();
+      expect(boundary).toHaveBeenCalledTimes(1);
+      yield SUCCESS_RESULT;
+    };
+    await runPlugin(context, execute, { assertStreamCaller: stream });
+    expect(observed?.assertStreamCurrent).toBeTypeOf("function");
+  });
+
+  it("offers no stream check unless the host binds the run to an account", async () => {
+    const { context } = await createExecution({ runId: "plugin-no-stream-check" });
+    let observed: CliBackendExecuteContext | undefined;
+    const execute: CliBackendExecute = async function* (execution) {
+      observed = execution;
+      yield SUCCESS_RESULT;
+    };
+    await runPlugin(context, execute);
+    expect(observed?.assertStreamCurrent).toBeUndefined();
+  });
+
   it.each([false, true])(
     "runs plugin user questions with current caller authority (revoked=%s)",
     async (revoked) => {

@@ -47,6 +47,7 @@ type ExecuteCliProcessOptions = {
 export async function executeCliProcess(params: {
   context: PreparedCliRunContext;
   assertCurrent: () => void;
+  assertStreamCaller?: () => void;
   backend: CliBackendConfig;
   deps: CliExecuteDeps;
   events: CliEventHandlers;
@@ -217,6 +218,7 @@ export async function executeCliProcess(params: {
     } else if (context.executionTarget.kind === "plugin") {
       result = await executePluginOwnedProcess({
         context,
+        ...(params.assertStreamCaller ? { assertStreamCaller: params.assertStreamCaller } : {}),
         execute: context.executionTarget.execute,
         watchdogClock: params.deps.watchdogClock,
         executionCommand: params.executionCommand,

@@ -6,8 +6,20 @@ export type CliHistoryWriter = {
   runId: string;
   authFingerprint: string;
   lifecycleRevision?: string;
+  /** Run authority plus, for a native login owner, a fresh login lookup. Guards coverage commits. */
   assertCurrent: () => void;
+  /** assertCurrent plus the stored coverage proof, before saved history reaches the CLI. */
   assertReadable: () => void;
+};
+
+/** The writer as the executing run holds it; workers only ever see the base capability. */
+export type CliExecutionHistoryWriter = CliHistoryWriter & {
+  /** True when ownership comes from a native login resolved from the child environment. */
+  bindsNativeLogin: boolean;
+  /** Cheaper check for output events after the prompt was delivered; never looks up the login. */
+  assertStream: (recovering: boolean) => void;
+  /** Resolve the native login owner from the environment execution actually spawns with. */
+  bindExecutionEnv: (env: NodeJS.ProcessEnv) => void;
 };
 
 const cliHistoryWriter = new AsyncLocalStorage<CliHistoryWriter>();

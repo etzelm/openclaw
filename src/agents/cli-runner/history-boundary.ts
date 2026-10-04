@@ -2,8 +2,8 @@ import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
 import {
   isKnownCliHistoryBoundary,
   runWithCliHistoryWriter,
+  type CliExecutionHistoryWriter,
   type CliHistoryBoundary,
-  type CliHistoryWriter,
 } from "../../config/sessions/cli-history-boundary.js";
 import {
   loadSessionEntryReadOnly,
@@ -26,12 +26,9 @@ import {
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
 import { resolveNativeCliLoginOwner } from "../cli-credentials.js";
 import { buildSessionContext, SessionManager } from "../sessions/session-manager.js";
+import { resolveCliChildEnv } from "./execution-env.js";
 import { createCliRunCurrentAssertion, resolveCliExecutionTarget } from "./execution-target.js";
 import type { PreparedCliRunContext } from "./types.js";
-
-// assertReadable also runs for every stdout chunk of a recovery turn, so the native login
-// lookup (file reads, and a Keychain subprocess on macOS) is memoized for a short window.
-const NATIVE_OWNER_RECHECK_MS = 1000;
 
 /**
  * History belongs to the local transcript, not the latest native handle. Cover only
@@ -41,8 +38,14 @@ const NATIVE_OWNER_RECHECK_MS = 1000;
  */
 export async function prepareCliHistoryBoundary(
   params: PreparedCliRunContext["params"],
-  identity: { credential?: AuthProfileCredential },
-): Promise<CliHistoryWriter | undefined> {
+  credential: AuthProfileCredential | undefined,
+  /**
+   * The prepared backend the CLI child will run from. A native login owner is resolved only
+   * from the environment it yields (resolveCliChildEnv, the same function execution spawns
+   * with); without it no owner can be established and history is refused.
+   */
+  preparedBackend?: Parameters<typeof resolveCliChildEnv>[0],
+): Promise<CliExecutionHistoryWriter | undefined> {
   const source = params.sessionTarget;
   if (
     params.sessionManager ||
@@ -67,14 +70,18 @@ export async function prepareCliHistoryBoundary(
   const priorMaxSeq = admission ? admission.rawSeq - 1 : watermark.maxSeq;
   const currentUserIsLast = !admission || watermark.maxSeq === admission.rawSeq;
   const stored = snapshot.cliHistoryBoundary;
-  const credential = identity.credential;
+  const childEnv =
+    !credential && preparedBackend ? resolveCliChildEnv(preparedBackend).env : undefined;
   const provider = normalizeProviderId(params.provider);
-  // A forwarded credential decides which account runs. Without one, the CLI runs under this
-  // host's native login, unless it is node-placed and runs under the node's login instead.
+  // A forwarded credential decides which account runs. Without one, the CLI runs under the
+  // native login its own environment selects, unless it is node-placed and runs under the
+  // node's login instead. The Gateway process environment is never the identity source.
   const nativeLoginOwner =
-    credential || resolveCliExecutionTarget({ params, backendId: provider }).kind === "node"
+    credential ||
+    !childEnv ||
+    resolveCliExecutionTarget({ params, backendId: provider }).kind === "node"
       ? undefined
-      : resolveNativeCliLoginOwner(provider);
+      : resolveNativeCliLoginOwner(provider, childEnv);
   // Native reuse epochs intentionally tolerate identity-less OAuth and stable
   // SecretRefs. History cannot: use the resolved static credential or a named
   // OAuth account, never a profile name, reference, or opaque CLI login alone.
@@ -211,48 +218,67 @@ export async function prepareCliHistoryBoundary(
     }
     assertActive();
   };
-  let nativeOwnerCheckedAtMs: number | undefined;
-  const writer: CliHistoryWriter = {
+  // The fingerprint proves only the login observed at preparation. Every authority check
+  // resolves it again, uncached, from the environment the child runs under: execution
+  // rebinds this to the exact environment it spawns with.
+  let nativeEnv: NodeJS.ProcessEnv | undefined = childEnv;
+  const assertNativeLoginCurrent = (message = "CLI history authority changed before execution") => {
+    if (
+      nativeLoginOwner &&
+      (!nativeEnv || resolveNativeCliLoginOwner(provider, nativeEnv) !== nativeLoginOwner)
+    ) {
+      throw new Error(message);
+    }
+  };
+  const assertProofCurrent = () => {
+    const current: InternalSessionEntry | undefined = loadSessionEntryReadOnly(target);
+    const proof = current?.cliHistoryBoundary;
+    const tip = readSessionTranscriptWatermark(target);
+    if (
+      !current ||
+      current.sessionId !== target.sessionId ||
+      current.lifecycleRevision !== snapshot.lifecycleRevision ||
+      current.activeWriterRunId !== writerRunId ||
+      !isKnownCliHistoryBoundary(proof) ||
+      proof.sessionId !== target.sessionId ||
+      proof.writerRunId !== writerRunId ||
+      proof.authFingerprint !== boundary.authFingerprint ||
+      proof.generation !== tip.generation ||
+      proof.maxSeq !== tip.maxSeq
+    ) {
+      throw new Error("CLI history authority changed before execution");
+    }
+  };
+  const writer: CliExecutionHistoryWriter = {
     target: { ...target },
     runId: writerRunId,
     authFingerprint: boundary.authFingerprint,
     lifecycleRevision: snapshot.lifecycleRevision,
-    assertCurrent: assertWriterCurrent,
+    bindsNativeLogin: nativeLoginOwner !== undefined,
+    // Also guards every coverage commit, so a turn run under a switched login is never
+    // recorded as covered by the owner observed at preparation.
+    assertCurrent: () => {
+      assertWriterCurrent();
+      assertNativeLoginCurrent();
+    },
     assertReadable: () => {
       assertWriterCurrent();
-      // A native login can change between preparation and execution; the
-      // fingerprint proves only the login observed at preparation. The first call
-      // resolves fresh, later calls inside the window reuse that passing result.
-      if (nativeLoginOwner) {
-        const now = Date.now();
-        if (
-          nativeOwnerCheckedAtMs === undefined ||
-          now < nativeOwnerCheckedAtMs ||
-          now - nativeOwnerCheckedAtMs >= NATIVE_OWNER_RECHECK_MS
-        ) {
-          if (resolveNativeCliLoginOwner(provider) !== nativeLoginOwner) {
-            throw new Error("CLI history authority changed before execution");
-          }
-          nativeOwnerCheckedAtMs = now;
-        }
+      assertNativeLoginCurrent();
+      assertProofCurrent();
+    },
+    // Output events arrive after the prompt was delivered. They keep the run and recovery
+    // proof checks but not the native login lookup, which can cost a subprocess per call.
+    assertStream: (recovering) => {
+      assertWriterCurrent();
+      if (recovering) {
+        assertProofCurrent();
       }
-      const current: InternalSessionEntry | undefined = loadSessionEntryReadOnly(target);
-      const proof = current?.cliHistoryBoundary;
-      const tip = readSessionTranscriptWatermark(target);
-      if (
-        !current ||
-        current.sessionId !== target.sessionId ||
-        current.lifecycleRevision !== snapshot.lifecycleRevision ||
-        current.activeWriterRunId !== writerRunId ||
-        !isKnownCliHistoryBoundary(proof) ||
-        proof.sessionId !== target.sessionId ||
-        proof.writerRunId !== writerRunId ||
-        proof.authFingerprint !== boundary.authFingerprint ||
-        proof.generation !== tip.generation ||
-        proof.maxSeq !== tip.maxSeq
-      ) {
-        throw new Error("CLI history authority changed before execution");
-      }
+    },
+    bindExecutionEnv: (env) => {
+      nativeEnv = env;
+      assertNativeLoginCurrent(
+        "CLI history authority changed before execution: the spawn environment selects a different Claude login than the one recorded at preparation",
+      );
     },
   };
   const authority = getAdmittedRunDelegatedAuthority(params.admittedRunContext);

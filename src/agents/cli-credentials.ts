@@ -508,9 +508,14 @@ export function readGeminiCliCredentialsCached(options?: {
 
 /**
  * Non-secret owner reference of the native login a local run of this CLI
- * backend would use. Undefined when the backend has no readable native login
- * or the login cannot be proven; callers must then treat history as unknown.
+ * backend would use under `env`. Undefined when the backend has no readable
+ * native login or the login cannot be proven; callers must then treat history
+ * as unknown.
  */
-export function resolveNativeCliLoginOwner(backendId: string): string | undefined {
-  return backendId === "claude-cli" ? readClaudeNativeLoginOwner() : undefined;
+export function resolveNativeCliLoginOwner(
+  backendId: string,
+  /** Environment the CLI process receives; the Gateway process is not the identity source. */
+  env: NodeJS.ProcessEnv,
+): string | undefined {
+  return backendId === "claude-cli" ? readClaudeNativeLoginOwner({ env }) : undefined;
 }

@@ -1,11 +1,11 @@
 // Proves preparation seeds saved history into a fresh Claude CLI session only for the native login that owns it.
+import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runWithCliHistoryWriter } from "../../config/sessions/cli-history-boundary.js";
 import { patchSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { prepareSystemAgentRunAdmission } from "../admitted-run-context.js";
 import { testing as cliBackendsTesting } from "../cli-backends.test-support.js";
-import * as cliCredentials from "../cli-credentials.js";
 import {
   buildDefaultTestCliBackend,
   createCliRunnerPrepareFixture,
@@ -22,17 +22,38 @@ import {
 } from "./prepare.test-support.js";
 
 const getRuntimeConfigMock = vi.hoisted(() => vi.fn(() => ({})));
+// mock-isolation: preparation here needs an empty runtime config, not the host's.
 vi.mock("../../config/config.js", async () => ({
   getRuntimeConfig: getRuntimeConfigMock,
   resolveGatewayPort: (await import("../../config/paths.js")).resolveGatewayPort,
 }));
+// mock-isolation: no sandbox may be provisioned for the temp workspace.
 vi.mock("../sandbox.js", () => ({ ensureSandboxWorkspaceForSession: vi.fn(async () => null) }));
+// mock-isolation: no global hook runner may observe or alter the prepared run.
 vi.mock("../../plugins/hook-runner-global.js", () => ({ getGlobalHookRunner: vi.fn(() => null) }));
 
 describe("native Claude login history on preparation", () => {
   let fixture: ReturnType<typeof createCliRunnerPrepareFixture>;
-  const login = (owner: string | undefined) =>
-    vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner").mockReturnValue(owner);
+  // A real synthetic login on disk, selected through the Claude config dir the child inherits.
+  const login = (owner: string | undefined) => {
+    const dir = path.join(fixture.session.dir, "claude-config");
+    vi.stubEnv("CLAUDE_CONFIG_DIR", dir);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.rmSync(path.join(dir, ".credentials.json"), { force: true });
+    if (owner === undefined) {
+      return;
+    }
+    fs.writeFileSync(
+      path.join(dir, ".claude.json"),
+      JSON.stringify({ oauthAccount: { accountUuid: owner } }),
+    );
+    fs.writeFileSync(
+      path.join(dir, ".credentials.json"),
+      JSON.stringify({
+        claudeAiOauth: { accessToken: "synthetic", expiresAt: Date.parse("2030-01-01T00:00:00Z") },
+      }),
+    );
+  };
 
   beforeEach(() => {
     setRawCliBackendForPrepareTest({
@@ -81,6 +102,7 @@ describe("native Claude login history on preparation", () => {
     cliBackendsTesting.resetDepsForTest();
     resetCliRunnerPrepareTestDeps();
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
     await fixture.cleanup();
   });
 
@@ -107,7 +129,8 @@ describe("native Claude login history on preparation", () => {
           sessionFile: sessionTarget.sessionKey,
           sessionTarget,
         },
-        {},
+        undefined,
+        { backend: { command: "claude" } },
       );
       expect(writer).toBeDefined();
       await runWithCliHistoryWriter(writer, async () =>

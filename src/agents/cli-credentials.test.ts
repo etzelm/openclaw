@@ -725,8 +725,8 @@ describe("cli credentials", () => {
           },
         }),
       );
-      expect(resolveNativeCliLoginOwner("google-gemini-cli")).toBeUndefined();
-      expect(resolveNativeCliLoginOwner("codex-cli")).toBeUndefined();
+      expect(resolveNativeCliLoginOwner("google-gemini-cli", process.env)).toBeUndefined();
+      expect(resolveNativeCliLoginOwner("codex-cli", process.env)).toBeUndefined();
     } finally {
       fs.rmSync(tempHome, { recursive: true, force: true });
     }

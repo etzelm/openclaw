@@ -14,6 +14,22 @@ const CLAUDE_CLI_KEYCHAIN_SERVICE = "Claude Code-credentials";
 const CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS = 2_000;
 const CLAUDE_CLI_KEYCHAIN_ACCOUNT_FALLBACK = "claude-code-user";
 const MACOS_SECURITY_PATH = "/usr/bin/security";
+// Any of these in the child environment means the Claude CLI authenticates some other
+// way than its stored login, so the stored account is not who runs.
+const CLAUDE_NON_NATIVE_AUTH_ENV_KEYS = [
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_API_TOKEN",
+  "ANTHROPIC_AUTH_TOKEN",
+  "ANTHROPIC_OAUTH_TOKEN",
+  "CLAUDE_CODE_OAUTH_REFRESH_TOKEN",
+  "CLAUDE_CODE_OAUTH_TOKEN",
+  "CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR",
+  "CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR",
+  "CLAUDE_CODE_USE_BEDROCK",
+  "CLAUDE_CODE_USE_VERTEX",
+  "CLAUDE_CODE_USE_FOUNDRY",
+  "ANTHROPIC_UNIX_SOCKET",
+] as const;
 // Pinned Claude SDK YK() accepts this exact ASCII set and otherwise uses the fallback.
 const SAFE_KEYCHAIN_ACCOUNT_PATTERN = /^[a-zA-Z0-9._-]+$/u;
 
@@ -63,52 +79,67 @@ type ClaudeCliCache = {
 
 let claudeCliCache: ClaudeCliCache | null = null;
 
-function resolveClaudeCliConfigDir(homeDir?: string): string {
+// Every resolver below reads the environment it is given. Default is the Gateway process;
+// the native owner lookup passes the environment the child Claude actually receives.
+function resolveClaudeCliConfigDir(homeDir?: string, env: NodeJS.ProcessEnv = process.env): string {
   if (homeDir !== undefined) {
-    return path.join(resolveOsHomeRelativePath(homeDir), ".claude");
+    return path.join(resolveOsHomeRelativePath(homeDir, { env }), ".claude");
   }
-  const configuredDir = process.env.CLAUDE_CONFIG_DIR;
+  const configuredDir = env.CLAUDE_CONFIG_DIR;
   return configuredDir
     ? path.resolve(configuredDir)
-    : path.join(resolveOsHomeRelativePath("~"), ".claude");
+    : path.join(resolveOsHomeRelativePath("~", { env }), ".claude");
 }
 
-function resolveClaudeCliPath(homeDir: string | undefined, fileName: string): string {
-  return path.join(resolveClaudeCliConfigDir(homeDir), fileName);
+function resolveClaudeCliPath(
+  homeDir: string | undefined,
+  fileName: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  return path.join(resolveClaudeCliConfigDir(homeDir, env), fileName);
 }
 
-function resolveClaudeCliCredentialsPath(homeDir?: string): string {
+function resolveClaudeCliCredentialsPath(
+  homeDir?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
   if (homeDir !== undefined) {
-    return path.join(resolveClaudeCliConfigDir(homeDir), CLAUDE_CLI_CREDENTIALS_FILE);
+    return path.join(resolveClaudeCliConfigDir(homeDir, env), CLAUDE_CLI_CREDENTIALS_FILE);
   }
-  const secureStorageDir = process.env.CLAUDE_SECURESTORAGE_CONFIG_DIR;
+  const secureStorageDir = env.CLAUDE_SECURESTORAGE_CONFIG_DIR;
   if (secureStorageDir === undefined) {
-    return resolveClaudeCliPath(undefined, CLAUDE_CLI_CREDENTIALS_FILE);
+    return resolveClaudeCliPath(undefined, CLAUDE_CLI_CREDENTIALS_FILE, env);
   }
   // Claude treats an explicit empty override as the default credential store,
   // even when CLAUDE_CONFIG_DIR points at a separate settings directory.
   const credentialDir = secureStorageDir
     ? path.resolve(secureStorageDir)
-    : path.join(resolveOsHomeRelativePath("~"), ".claude");
+    : path.join(resolveOsHomeRelativePath("~", { env }), ".claude");
   return path.join(credentialDir, CLAUDE_CLI_CREDENTIALS_FILE);
 }
 
-function resolveClaudeCliAccountPath(homeDir?: string): string {
+function resolveClaudeCliAccountPath(
+  homeDir?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
   if (homeDir !== undefined) {
-    return path.join(resolveOsHomeRelativePath(homeDir), ".claude.json");
+    return path.join(resolveOsHomeRelativePath(homeDir, { env }), ".claude.json");
   }
-  const configuredDir = process.env.CLAUDE_CONFIG_DIR;
+  const configuredDir = env.CLAUDE_CONFIG_DIR;
   return configuredDir
     ? path.join(path.resolve(configuredDir), ".claude.json")
-    : path.join(resolveOsHomeRelativePath("~"), ".claude.json");
+    : path.join(resolveOsHomeRelativePath("~", { env }), ".claude.json");
 }
 
-function resolveClaudeCliKeychainService(homeDir?: string): string {
+function resolveClaudeCliKeychainService(
+  homeDir?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
   if (homeDir !== undefined) {
     return CLAUDE_CLI_KEYCHAIN_SERVICE;
   }
-  const secureStorageDir = process.env.CLAUDE_SECURESTORAGE_CONFIG_DIR;
-  const configDir = process.env.CLAUDE_CONFIG_DIR;
+  const secureStorageDir = env.CLAUDE_SECURESTORAGE_CONFIG_DIR;
+  const configDir = env.CLAUDE_CONFIG_DIR;
   const selectedDir = secureStorageDir !== undefined ? secureStorageDir : configDir;
   if (!selectedDir) {
     return CLAUDE_CLI_KEYCHAIN_SERVICE;
@@ -192,39 +223,51 @@ export function readClaudeNativeLoginOwner(
     homeDir?: string;
     platform?: NodeJS.Platform;
     execSync?: typeof execSync;
+    /** Environment the `claude` process receives. Defaults to the Gateway process. */
+    env?: NodeJS.ProcessEnv;
   } = {},
 ): string | undefined {
   const { homeDir } = options;
+  const env = options.env ?? process.env;
   if (
+    // A selected API key, token, or cloud provider replaces the native login entirely.
+    CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => Boolean(env[key]?.trim())) ||
+    // A relative root resolves against the child's cwd, which this process cannot know.
+    [env.CLAUDE_CONFIG_DIR, env.CLAUDE_SECURESTORAGE_CONFIG_DIR].some(
+      (dir) => dir && !path.isAbsolute(dir),
+    ) ||
     // oauthAccount is config-scoped, so it cannot name a credential from an independent
     // secure-storage root, and an API key helper replaces the login entirely.
-    path.dirname(resolveClaudeCliCredentialsPath(homeDir)) !== resolveClaudeCliConfigDir(homeDir) ||
-    readClaudeApiKeyHelper(homeDir)
+    path.dirname(resolveClaudeCliCredentialsPath(homeDir, env)) !==
+      resolveClaudeCliConfigDir(homeDir, env) ||
+    readClaudeApiKeyHelper(homeDir, env) ||
+    userSettingsSelectNonNativeAuth(homeDir, env)
   ) {
     return undefined;
   }
   const execSyncImpl = options.execSync ?? execSync;
-  const service = resolveClaudeCliKeychainService(homeDir);
+  const service = resolveClaudeCliKeychainService(homeDir, env);
   let stored: ClaudeCliCredential | null = null;
   if ((options.platform ?? process.platform) === "darwin") {
     stored = parseClaudeCliOauthCredential(
-      readClaudeKeychain(execSyncImpl, CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS, service)?.claudeAiOauth,
+      readClaudeKeychain(execSyncImpl, CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS, service, env)?.claudeAiOauth,
     );
-    if (!stored && hasClaudeKeychainItem(execSyncImpl, service)) {
+    if (!stored && hasClaudeKeychainItem(execSyncImpl, service, env)) {
       // The live login sits in a Keychain item this process cannot read; a credentials
       // file beside it would be stale.
       return undefined;
     }
   }
   stored ??= parseClaudeCliOauthCredential(
-    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliCredentialsPath(homeDir)))
+    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliCredentialsPath(homeDir, env)))
       .claudeAiOauth,
   );
   if (!stored) {
     return undefined;
   }
   const account = asNonArrayRecord(
-    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliAccountPath(homeDir))).oauthAccount,
+    asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliAccountPath(homeDir, env)))
+      .oauthAccount,
   );
   const accountUuid = normalizeOptionalString(account.accountUuid);
   const email = normalizeOptionalString(account.emailAddress);
@@ -249,9 +292,27 @@ function withClaudeAccountEmail(
   return email ? { ...credential, email } : credential;
 }
 
-function readClaudeApiKeyHelper(homeDir?: string): ClaudeCliCredential | null {
+/**
+ * Claude's user settings `env` block outranks the spawned environment, so it can select an
+ * API key, token or cloud provider too. The bundled backend loads user settings only.
+ */
+function userSettingsSelectNonNativeAuth(homeDir?: string, env: NodeJS.ProcessEnv = process.env) {
+  const settings = asNonArrayRecord(
+    loadJsonFileThroughSymlink(resolveClaudeCliPath(homeDir, CLAUDE_CLI_USER_SETTINGS_FILE, env)),
+  );
+  const settingsEnv = asNonArrayRecord(settings.env);
+  return CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => {
+    const value = settingsEnv[key];
+    return typeof value === "string" && value.trim() !== "";
+  });
+}
+
+function readClaudeApiKeyHelper(
+  homeDir?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): ClaudeCliCredential | null {
   const raw = loadJsonFileThroughSymlink(
-    resolveClaudeCliPath(homeDir, CLAUDE_CLI_USER_SETTINGS_FILE),
+    resolveClaudeCliPath(homeDir, CLAUDE_CLI_USER_SETTINGS_FILE, env),
   );
   const helper = asNonArrayRecord(raw).apiKeyHelper;
   return typeof helper === "string" && helper.trim()
@@ -267,9 +328,10 @@ function readClaudeKeychain(
   execSyncImpl: typeof execSync,
   timeout: number | undefined,
   service: string,
+  env: NodeJS.ProcessEnv = process.env,
 ): Record<string, unknown> | null {
   try {
-    const account = resolveClaudeCliKeychainAccount();
+    const account = resolveClaudeCliKeychainAccount(env);
     const result = execSyncImpl(
       `${MACOS_SECURITY_PATH} find-generic-password -a "${account}" -w -s "${service}"`,
       {
@@ -285,9 +347,13 @@ function readClaudeKeychain(
   }
 }
 
-function hasClaudeKeychainItem(execSyncImpl: typeof execSync, service: string): boolean {
+function hasClaudeKeychainItem(
+  execSyncImpl: typeof execSync,
+  service: string,
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
   try {
-    const account = resolveClaudeCliKeychainAccount();
+    const account = resolveClaudeCliKeychainAccount(env);
     execSyncImpl(`${MACOS_SECURITY_PATH} find-generic-password -a "${account}" -s "${service}"`, {
       encoding: "utf8",
       timeout: CLAUDE_CLI_KEYCHAIN_TIMEOUT_MS,
@@ -299,10 +365,10 @@ function hasClaudeKeychainItem(execSyncImpl: typeof execSync, service: string): 
   }
 }
 
-function resolveClaudeCliKeychainAccount(): string {
+function resolveClaudeCliKeychainAccount(env: NodeJS.ProcessEnv = process.env): string {
   let account: string | undefined;
   try {
-    account = process.env.USER || userInfo().username;
+    account = env.USER || userInfo().username;
   } catch {
     account = undefined;
   }

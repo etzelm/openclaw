@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
@@ -34,6 +35,7 @@ import type { PreparedCliRunContext } from "./types.js";
 const sessionDirs = useSessionStoreTempDirs(afterAll, "cli-history-boundary-");
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 async function fixture(withHeader = true) {
@@ -88,17 +90,18 @@ async function fixture(withHeader = true) {
     action: (allowed: boolean, params: PreparedCliRunContext["params"]) => Promise<T>,
     overrides: Partial<PreparedCliRunContext["params"]> = {},
     credential?: AuthProfileCredential,
+    preparedBackend?: Parameters<typeof prepareCliHistoryBoundary>[2],
   ) => {
     const runId = "boundary-run-" + ++runNumber;
     await patchSessionEntryCore(target, (entry) => ({ ...entry, activeWriterRunId: runId }));
     return await withRun(
       runId,
       async (params) => {
-        const writer = await prepareCliHistoryBoundary(params, {
-          credential:
-            credential ??
-            (epoch ? { type: "token", provider: "test-cli", token: epoch } : undefined),
-        });
+        const writer = await prepareCliHistoryBoundary(
+          params,
+          credential ?? (epoch ? { type: "token", provider: "test-cli", token: epoch } : undefined),
+          preparedBackend,
+        );
         return await runWithCliHistoryWriter(writer, () => action(Boolean(writer), params));
       },
       overrides,
@@ -222,10 +225,45 @@ describe("CLI transcript account boundary", () => {
 
   describe("native CLI login owner", () => {
     const native = { provider: "claude-cli" };
-    const login = (owner: string | undefined) =>
-      vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner").mockReturnValue(owner);
-    const seedNative = async (f: Awaited<ReturnType<typeof fixture>>) => {
-      login("uuid:account-a");
+    // Synthetic logins on disk, selected the way the child Claude selects them: by its config dir.
+    const loginIn = (dir: string, accountUuid: string | undefined) => {
+      fs.mkdirSync(dir, { recursive: true });
+      if (accountUuid === undefined) {
+        fs.rmSync(path.join(dir, ".credentials.json"), { force: true });
+        return;
+      }
+      fs.writeFileSync(
+        path.join(dir, ".claude.json"),
+        JSON.stringify({ oauthAccount: { accountUuid } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, ".credentials.json"),
+        JSON.stringify({
+          claudeAiOauth: {
+            accessToken: "synthetic",
+            expiresAt: Date.parse("2030-01-01T00:00:00Z"),
+          },
+        }),
+      );
+    };
+    const backendUsing = (configDir: string | undefined, env: Record<string, string> = {}) => ({
+      backend: {
+        command: "claude",
+        env: { ...(configDir ? { CLAUDE_CONFIG_DIR: configDir } : {}), ...env },
+      },
+    });
+    const logins = () => {
+      const gateway = sessionDirs.make();
+      const backend = sessionDirs.make();
+      loginIn(gateway, "uuid:gateway-account");
+      // The Gateway process has its own login; only the child environment may decide ownership.
+      vi.stubEnv("CLAUDE_CONFIG_DIR", gateway);
+      return { gateway, backend };
+    };
+    const seedNative = async (
+      f: Awaited<ReturnType<typeof fixture>>,
+      prepared: ReturnType<typeof backendUsing>,
+    ) => {
       await f.run(
         undefined,
         async (allowed) => {
@@ -233,45 +271,127 @@ describe("CLI transcript account boundary", () => {
           f.manager().appendMessage({ role: "user", content: "native canary", timestamp: 1 });
         },
         native,
+        undefined,
+        prepared,
+      );
+    };
+    const prepareWith = async (
+      f: Awaited<ReturnType<typeof fixture>>,
+      prepared: ReturnType<typeof backendUsing> | undefined,
+    ) => {
+      let seeded: string | undefined;
+      let allowed = false;
+      await f.run(
+        undefined,
+        async (ok, params) => {
+          allowed = ok;
+          seeded = await history(ok, params);
+        },
+        native,
+        undefined,
+        prepared,
+      );
+      return { allowed, seeded };
+    };
+    /** Prepares a native writer on its own run id so assertions can be driven directly. */
+    const withNativeWriter = async (
+      f: Awaited<ReturnType<typeof fixture>>,
+      runId: string,
+      prepared: ReturnType<typeof backendUsing>,
+      action: (writer: NonNullable<Awaited<ReturnType<typeof prepareCliHistoryBoundary>>>) => void,
+    ) => {
+      await patchSessionEntryCore(f.target, (entry) => ({ ...entry, activeWriterRunId: runId }));
+      await f.withRun(
+        runId,
+        async (params) => {
+          const writer = await prepareCliHistoryBoundary(params, undefined, prepared);
+          if (!writer) {
+            throw new Error("Missing admitted history writer");
+          }
+          await runWithCliHistoryWriter(writer, async () => action(writer));
+        },
+        native,
       );
     };
 
     it("reseeds a fresh session for the same native login", async () => {
       const f = await fixture();
-      await seedNative(f);
-      await f.run(
-        undefined,
-        async (allowed, params) => {
-          expect(allowed).toBe(true);
-          expect(await history(allowed, params)).toContain("native canary");
-        },
-        native,
-      );
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      await seedNative(f, backendUsing(backend));
+      const next = await prepareWith(f, backendUsing(backend));
+      expect(next.allowed).toBe(true);
+      expect(next.seeded).toContain("native canary");
     });
 
     it("refuses history after the native login changes", async () => {
       const f = await fixture();
-      await seedNative(f);
-      login("uuid:account-b");
-      await f.run(
-        undefined,
-        async (allowed, params) => {
-          expect(allowed).toBe(false);
-          expect(await history(allowed, params)).toBeUndefined();
-        },
-        native,
-      );
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      await seedNative(f, backendUsing(backend));
+      loginIn(backend, "uuid:account-b");
+      const next = await prepareWith(f, backendUsing(backend));
+      expect(next.allowed).toBe(false);
+      expect(next.seeded).toBeUndefined();
     });
 
     it("keeps history unknown when the native login cannot be proven", async () => {
       const f = await fixture();
-      login(undefined);
+      const { backend } = logins();
+      loginIn(backend, undefined);
+      expect((await prepareWith(f, backendUsing(backend))).allowed).toBe(false);
+    });
+
+    it("resolves ownership from the backend-selected config dir, not the Gateway login", async () => {
+      const f = await fixture();
+      const { backend } = logins();
+      loginIn(backend, "uuid:backend-account");
+      await seedNative(f, backendUsing(backend));
+      // Same backend selection keeps the owner.
+      const same = await prepareWith(f, backendUsing(backend));
+      expect(same.allowed).toBe(true);
+      expect(same.seeded).toContain("native canary");
+      // Dropping the override runs the child under the Gateway login: another account.
+      const gatewayChild = await prepareWith(f, backendUsing(undefined));
+      expect(gatewayChild.allowed).toBe(false);
+      expect(gatewayChild.seeded).toBeUndefined();
+    });
+
+    it("does not credit Gateway-login history to a backend-selected account", async () => {
+      const f = await fixture();
+      const { backend } = logins();
+      loginIn(backend, "uuid:backend-account");
+      await seedNative(f, backendUsing(undefined));
+      const next = await prepareWith(f, backendUsing(backend));
+      expect(next.allowed).toBe(false);
+      expect(next.seeded).toBeUndefined();
+    });
+
+    it("has no native owner when the child authenticates another way", async () => {
+      const f = await fixture();
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      const keyed = backendUsing(backend, { ANTHROPIC_API_KEY: "synthetic-key" });
+      await f.run(
+        undefined,
+        async (allowed) => expect(allowed).toBe(false),
+        native,
+        undefined,
+        keyed,
+      );
+    });
+
+    it("has no native owner without a prepared backend to derive the child environment from", async () => {
+      const f = await fixture();
+      logins();
       await f.run(undefined, async (allowed) => expect(allowed).toBe(false), native);
     });
 
     it("does not let the native login stand in for a forwarded credential", async () => {
       const f = await fixture();
-      const lookup = login("uuid:account-a");
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
       const identityLess = {
         type: "oauth" as const,
         provider: "claude-cli",
@@ -279,77 +399,126 @@ describe("CLI transcript account boundary", () => {
         refresh: "synthetic-refresh",
         expires: Date.now() + 60_000,
       };
-      await f.run(undefined, async (allowed) => expect(allowed).toBe(false), native, identityLess);
+      await f.run(
+        undefined,
+        async (allowed) => expect(allowed).toBe(false),
+        native,
+        identityLess,
+        backendUsing(backend),
+      );
       expect(lookup).not.toHaveBeenCalled();
     });
 
     it("does not apply this host's login to a node-placed CLI", async () => {
       const f = await fixture();
-      const lookup = login("uuid:account-a");
-      await f.run(undefined, async (allowed) => expect(allowed).toBe(false), {
-        ...native,
-        sessionEntry: { execHost: "node", execNode: "node-a" } as never,
-      });
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
+      await f.run(
+        undefined,
+        async (allowed) => expect(allowed).toBe(false),
+        { ...native, sessionEntry: { execHost: "node", execNode: "node-a" } as never },
+        undefined,
+        backendUsing(backend),
+      );
       expect(lookup).not.toHaveBeenCalled();
     });
 
-    it("rejects the read when the login changes after preparation", async () => {
+    it("rejects the read for a reassigned or revoked login, uncached, at the same instant", async () => {
       const f = await fixture();
-      const lookup = login("uuid:account-a");
-      let now = 1_000_000;
-      vi.spyOn(Date, "now").mockImplementation(() => now);
-      const runId = "boundary-native-recheck";
-      await patchSessionEntryCore(f.target, (entry) => ({ ...entry, activeWriterRunId: runId }));
-      await f.withRun(
-        runId,
-        async (params) => {
-          const writer = await prepareCliHistoryBoundary(params, {});
-          if (!writer) {
-            throw new Error("Missing admitted history writer");
-          }
-          writer.assertReadable();
-          now += 1000;
-          lookup.mockReturnValue("uuid:account-b");
-          expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
-          now += 1000;
-          lookup.mockReturnValue(undefined);
-          expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
-          lookup.mockReturnValue("uuid:account-a");
-          writer.assertReadable();
-        },
-        native,
-      );
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      // A frozen clock: any time-windowed reuse would still be inside its window.
+      vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+      await withNativeWriter(f, "boundary-native-fresh", backendUsing(backend), (writer) => {
+        writer.assertReadable();
+        loginIn(backend, "uuid:account-b");
+        expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+        loginIn(backend, undefined);
+        expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+        loginIn(backend, "uuid:account-a");
+        writer.assertReadable();
+        loginIn(backend, "uuid:account-b");
+        loginIn(backend, "uuid:account-a");
+        writer.assertReadable();
+      });
     });
 
-    it("reuses the native login lookup inside the recheck window, then refuses a changed login", async () => {
+    it("looks the login up on every authority check", async () => {
       const f = await fixture();
-      const lookup = login("uuid:account-a");
-      let now = 1_000_000;
-      vi.spyOn(Date, "now").mockImplementation(() => now);
-      const runId = "boundary-native-recheck-window";
-      await patchSessionEntryCore(f.target, (entry) => ({ ...entry, activeWriterRunId: runId }));
-      await f.withRun(
-        runId,
-        async (params) => {
-          const writer = await prepareCliHistoryBoundary(params, {});
-          if (!writer) {
-            throw new Error("Missing admitted history writer");
-          }
-          lookup.mockClear();
-          writer.assertReadable();
-          expect(lookup).toHaveBeenCalledTimes(1);
-          for (let chunk = 0; chunk < 5; chunk += 1) {
-            now += 100;
-            writer.assertReadable();
-          }
-          expect(lookup).toHaveBeenCalledTimes(1);
-          lookup.mockReturnValue("uuid:account-b");
-          now += 600;
-          expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
-          expect(lookup).toHaveBeenCalledTimes(2);
-        },
-        native,
-      );
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
+      await withNativeWriter(f, "boundary-native-every-call", backendUsing(backend), (writer) => {
+        lookup.mockClear();
+        writer.assertReadable();
+        writer.assertReadable();
+        writer.assertCurrent();
+        expect(lookup).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    it("keeps output-event checks off the login lookup", async () => {
+      const f = await fixture();
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
+      await withNativeWriter(f, "boundary-native-stream", backendUsing(backend), (writer) => {
+        lookup.mockClear();
+        for (let event = 0; event < 20; event += 1) {
+          writer.assertStream(true);
+          writer.assertStream(false);
+        }
+        expect(lookup).not.toHaveBeenCalled();
+      });
+    });
+
+    it("binds execution to the login the spawned environment selects", async () => {
+      const f = await fixture();
+      const { gateway, backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      await withNativeWriter(f, "boundary-native-bind", backendUsing(backend), (writer) => {
+        expect(writer.bindsNativeLogin).toBe(true);
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend });
+        writer.assertCurrent();
+        // A login reassigned after the bind is caught by the next boundary check.
+        loginIn(backend, "uuid:account-b");
+        expect(() => writer.assertCurrent()).toThrow("CLI history authority changed");
+        loginIn(backend, "uuid:account-a");
+        writer.assertCurrent();
+        // Execution drifting to another config dir is refused before anything is spawned.
+        expect(() => writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: gateway })).toThrow(
+          "CLI history authority changed",
+        );
+        expect(() => writer.assertCurrent()).toThrow("CLI history authority changed");
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend });
+        writer.assertCurrent();
+      });
+    });
+
+    it("refuses to cover a turn whose login changed after preparation", async () => {
+      const f = await fixture();
+      const { backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      await seedNative(f, backendUsing(backend));
+      const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary;
+      await withNativeWriter(f, "boundary-native-coverage", backendUsing(backend), (writer) => {
+        // An empty first turn authorizes coverage, so assertCurrent alone must catch the switch.
+        loginIn(backend, "uuid:account-b");
+        expect(() =>
+          f
+            .manager()
+            .appendMessage({ role: "user", content: "turn under account b", timestamp: 2 }),
+        ).toThrow("CLI history authority changed");
+        const boundary = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary;
+        expect(boundary).toMatchObject({
+          state: "known",
+          maxSeq: (before as { maxSeq: number }).maxSeq,
+        });
+        loginIn(backend, "uuid:account-a");
+        f.manager().appendMessage({ role: "user", content: "turn under account a", timestamp: 3 });
+        expect(writer.authFingerprint).toBeDefined();
+      });
     });
   });
 
@@ -486,9 +655,7 @@ describe("CLI transcript account boundary", () => {
   it("admits a finished writer's successor while refusing the live writer", async () => {
     const f = await fixture();
     await f.seed();
-    const identity = {
-      credential: { type: "token" as const, provider: "test-cli", token: "epoch-a" },
-    };
+    const identity = { type: "token" as const, provider: "test-cli", token: "epoch-a" };
     await f.withRun("orchestrator-prior", async (params) => {
       await claimAgentSessionWriter(params);
       await f.withRun("direct-cli-blocked", async (direct) => {
@@ -574,7 +741,9 @@ describe("CLI transcript account boundary", () => {
       await f.withRun("direct-cli-recovery", async (params) => {
         await expect(
           prepareCliHistoryBoundary(params, {
-            credential: { type: "token", provider: "test-cli", token: "epoch-a" },
+            type: "token",
+            provider: "test-cli",
+            token: "epoch-a",
           }),
         ).rejects.toThrow("CLI history owner changed before preparation");
       });
@@ -595,7 +764,9 @@ describe("CLI transcript account boundary", () => {
       await f.withRun("direct-cli-recovery", async (params) => {
         params.sessionEntry = loadSessionEntryReadOnly(f.target);
         const writer = await prepareCliHistoryBoundary(params, {
-          credential: { type: "token", provider: "test-cli", token: "epoch-a" },
+          type: "token",
+          provider: "test-cli",
+          token: "epoch-a",
         });
         expect(writer).toBeDefined();
         if (!writer) {
