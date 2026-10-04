@@ -1,0 +1,35 @@
+$ pnpm test src/agents/agent-scope-config.test.ts --maxWorkers=1
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > resolves ambient owner: configured system agent before a legacy… 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > resolves ambient owner: configured system agent before a retain… 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > keeps the system agent on the shared root and every other agent on its subdirectory 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > agrees with the shared-root resolver for every configured owner shape 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > keeps a system agent that is not the legacy owner on its subdirectory 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > follows the recorded legacy auth owner when it is the system agent 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > keeps authored workspaces authoritative for owner and non-owner agents 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > does not give the shared root to any agent without a designated owner 1ms
+ ✓  agents-core  src/agents/agent-scope-config.test.ts > agent roster resolution > system agent workspace in a converged explicit roster > keeps the owner on the default workspace when no shared root is configured 1ms
+ Test Files  1 passed (1)
+      Tests  56 passed (56)
+   Duration  824ms (worker 38%, transform 25%, setup 20%, tests 15%, import 2%)
+[test] passed 1 Vitest shard in 1.63s
+real 2.25
+
+$ pnpm test src/agents/agent-workspace-turn-seam.test.ts --maxWorkers=1
+ ✓  agents-core  src/agents/agent-workspace-turn-seam.test.ts > operator and wake turn workspace agreement > hands main the same workspace on both turn paths 11ms
+ ✓  agents-core  src/agents/agent-workspace-turn-seam.test.ts > operator and wake turn workspace agreement > hands dev the same workspace on both turn paths 2ms
+ ✓  agents-core  src/agents/agent-workspace-turn-seam.test.ts > operator and wake turn workspace agreement > keeps the operator session binding reusable for the wake turn 3ms
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Duration  18.42s (transform 93%, import 5%, worker 1%, setup 1%)
+[test] passed 1 Vitest shard in 20.06s
+real 20.65
+
+$ pnpm test src/agents/agent-delete-safety.test.ts --maxWorkers=1
+ ✓  agents-core  src/agents/agent-delete-safety.test.ts > shared workspace deletion safety > converged roster whose system agent has no workspace of its own > reports the system agent as sharing the root with an agent inside it 2ms
+ ✓  agents-core  src/agents/agent-delete-safety.test.ts > shared workspace deletion safety > converged roster whose system agent has no workspace of its own > reports no overlap for the system agent when every other workspace is outside the root 1ms
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Duration  5.21s (transform 71%, tests 19%, worker 4%, import 3%, setup 3%)
+[test] passed 1 Vitest shard in 6.80s
+real 7.40
+

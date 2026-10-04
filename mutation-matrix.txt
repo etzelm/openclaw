@@ -1,0 +1,35 @@
+M0 revert the fix (legacy data owner only)
+  exit=1 Tests  6 failed | 53 passed (59)
+   - agent-scope-config.test.ts > agrees with the shared-root resolver for every configured owner shape
+   - agent-scope-config.test.ts > follows the recorded legacy auth owner when it is the system agent
+   - agent-scope-config.test.ts > keeps the owner on the default workspace when no shared root is configured
+   - agent-scope-config.test.ts > keeps the system agent on the shared root and every other agent on its subdirectory
+   - agent-workspace-turn-seam.test.ts > operator and wake turn workspace agreement > hands main the same workspace on both turn paths
+   - agent-workspace-turn-seam.test.ts > operator and wake turn workspace agreement > keeps the operator session binding reusable for the wake turn
+M1 owner = first roster agent instead of the designated one
+  exit=1 Tests  3 failed | 56 passed (59)
+   - agent-scope-config.test.ts > does not give the shared root to any agent without a designated owner
+   - agent-scope-config.test.ts > follows the recorded legacy auth owner when it is the system agent
+   - agent-scope-config.test.ts > keeps a system agent that is not the legacy owner on its subdirectory
+M2 owner id check dropped (every agent gets the root)
+  exit=1 Tests  5 failed | 54 passed (59)
+   - agent-scope-config.test.ts > agent roster resolution > keeps a raw legacy marker owner on the inherited workspace
+   - agent-scope-config.test.ts > follows the recorded legacy auth owner when it is the system agent
+   - agent-scope-config.test.ts > keeps the owner on the default workspace when no shared root is configured
+   - agent-scope-config.test.ts > keeps the system agent on the shared root and every other agent on its subdirectory
+   - agent-scope-config.test.ts > agent roster resolution > uses the workspace owner persisted by Doctor without migration provenance
+M3 owner branch ahead of the authored workspace
+  exit=1 Tests  1 failed | 58 passed (59)
+   - agent-scope-config.test.ts > keeps authored workspaces authoritative for owner and non-owner agents
+M4 any designated system agent takes the root (legacy-owner check dropped)
+  exit=1 Tests  3 failed | 1 passed (4)
+   - legacy-inherited-auth-dir.test.ts > legacy inherited auth ownership > keeps migrated main data separate from a different recorded runtime default
+   - legacy-inherited-auth-dir.test.ts > legacy inherited auth ownership > keeps migrated ops data separate from a different recorded runtime default
+   - legacy-inherited-auth-dir.test.ts > legacy inherited auth ownership > keeps unpinned legacy data locators independent of explicit runtime selection
+M5 recorded auth owner ignored (owner is always main)
+  exit=1 Tests  1 failed | 58 passed (59)
+   - agent-scope-config.test.ts > follows the recorded legacy auth owner when it is the system agent
+
+M4 (own tests only) any designated system agent takes the root (legacy-owner check dropped)
+  exit=1 Tests  1 failed | 58 passed (59)
+   - agent-scope-config.test.ts > keeps a system agent that is not the legacy owner on its subdirectory

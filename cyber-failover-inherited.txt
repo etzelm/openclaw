@@ -1,0 +1,18 @@
+$ pnpm test src/agents/embedded-agent-runner/run-entry.cyber-failover.runner.test.ts --maxWorkers=1
+(first run: tree with only agent-scope-config.ts reverted to base; second run: the PR tree)
+   → expected SqliteWorkerError: Shared-state admission… { code: '…' } to be FailoverError: daybreak overloaded after … { …(17) } // Object.is equality
+AssertionError: expected SqliteWorkerError: Shared-state admission… { code: '…' } to be FailoverError: daybreak overloaded after … { …(17) } // Object.is equality
+SqliteWorkerError: Shared-state admission requires the host broker
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+[test] FAILED (exit 1)
+real 37.09
+base exit 1
+   → expected SqliteWorkerError: Shared-state admission… { code: '…' } to be FailoverError: daybreak overloaded after … { …(17) } // Object.is equality
+AssertionError: expected SqliteWorkerError: Shared-state admission… { code: '…' } to be FailoverError: daybreak overloaded after … { …(17) } // Object.is equality
+SqliteWorkerError: Shared-state admission requires the host broker
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+[test] FAILED (exit 1)
+real 14.05
+after exit 1
