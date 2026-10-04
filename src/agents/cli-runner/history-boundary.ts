@@ -19,6 +19,7 @@ import type { InternalSessionEntry } from "../../config/sessions/types.js";
 import { hasLiveAgentRunContext } from "../../infra/agent-run-registry.js";
 import { bindAgentRunTerminalWriteContext } from "../../infra/agent-run-terminal-writes.js";
 import { sha256Hex } from "../../infra/crypto-digest.js";
+import { applySkillEnvOverridesFromSnapshot } from "../../skills/runtime/env-overrides.js";
 import {
   getAdmittedRunDelegatedAuthority,
   resolveAdmittedRunActiveAssertion,
@@ -29,6 +30,29 @@ import { buildSessionContext, SessionManager } from "../sessions/session-manager
 import { resolveCliChildEnv } from "./execution-env.js";
 import { createCliRunCurrentAssertion, resolveCliExecutionTarget } from "./execution-target.js";
 import type { PreparedCliRunContext } from "./types.js";
+
+/**
+ * Execution layers the run's skill env overrides onto the process environment right before it
+ * builds the child environment. Apply the same snapshot here, synchronously, so preparation
+ * resolves the login the child will actually run under.
+ */
+function resolvePreparedChildEnv(
+  params: PreparedCliRunContext["params"],
+  preparedBackend: Parameters<typeof resolveCliChildEnv>[0],
+): Record<string, string> {
+  const restoreSkillEnv =
+    params.skillsSnapshot && !params.controlOperation
+      ? applySkillEnvOverridesFromSnapshot({
+          snapshot: params.skillsSnapshot,
+          config: params.config,
+        })
+      : undefined;
+  try {
+    return resolveCliChildEnv(preparedBackend).env;
+  } finally {
+    restoreSkillEnv?.();
+  }
+}
 
 /**
  * History belongs to the local transcript, not the latest native handle. Cover only
@@ -71,7 +95,7 @@ export async function prepareCliHistoryBoundary(
   const currentUserIsLast = !admission || watermark.maxSeq === admission.rawSeq;
   const stored = snapshot.cliHistoryBoundary;
   const childEnv =
-    !credential && preparedBackend ? resolveCliChildEnv(preparedBackend).env : undefined;
+    !credential && preparedBackend ? resolvePreparedChildEnv(params, preparedBackend) : undefined;
   const provider = normalizeProviderId(params.provider);
   // A forwarded credential decides which account runs. Without one, the CLI runs under the
   // native login its own environment selects, unless it is node-placed and runs under the
@@ -218,17 +242,29 @@ export async function prepareCliHistoryBoundary(
     }
     assertActive();
   };
-  // The fingerprint proves only the login observed at preparation. Every authority check
-  // resolves it again, uncached, from the environment the child runs under: execution
-  // rebinds this to the exact environment it spawns with.
+  // The fingerprint proves only the login observed at preparation. Each spawn, prompt send
+  // and coverage commit resolves it again, uncached, from the environment the child runs
+  // under: execution rebinds this to the exact environment it spawns with. Run and write
+  // liveness checks do not, so a turn costs a lookup per boundary, not one per write.
   let nativeEnv: NodeJS.ProcessEnv | undefined = childEnv;
-  const assertNativeLoginCurrent = (message = "CLI history authority changed before execution") => {
-    if (
-      nativeLoginOwner &&
-      (!nativeEnv || resolveNativeCliLoginOwner(provider, nativeEnv) !== nativeLoginOwner)
-    ) {
-      throw new Error(message);
+  // Set once the spawn environment selects another login: the run keeps going but never
+  // advances coverage, so its rows stay outside the owner's replayable history.
+  let detached = false;
+  const nativeLoginMatches = () =>
+    !nativeLoginOwner ||
+    (!detached &&
+      nativeEnv !== undefined &&
+      resolveNativeCliLoginOwner(provider, nativeEnv) === nativeLoginOwner);
+  // Saved history must never reach another login, so a recovery turn is refused. A turn
+  // without saved history runs on, as it would with no owner at all, but stops coverage.
+  const checkNativeLoginBoundary = (recovering: boolean, message?: string) => {
+    if (nativeLoginMatches()) {
+      return;
     }
+    if (recovering) {
+      throw new Error(message ?? "CLI history authority changed before execution");
+    }
+    detached = true;
   };
   const assertProofCurrent = () => {
     const current: InternalSessionEntry | undefined = loadSessionEntryReadOnly(target);
@@ -255,28 +291,19 @@ export async function prepareCliHistoryBoundary(
     authFingerprint: boundary.authFingerprint,
     lifecycleRevision: snapshot.lifecycleRevision,
     bindsNativeLogin: nativeLoginOwner !== undefined,
-    // Also guards every coverage commit, so a turn run under a switched login is never
-    // recorded as covered by the owner observed at preparation.
-    assertCurrent: () => {
-      assertWriterCurrent();
-      assertNativeLoginCurrent();
-    },
+    assertCurrent: assertWriterCurrent,
     assertReadable: () => {
       assertWriterCurrent();
-      assertNativeLoginCurrent();
       assertProofCurrent();
     },
-    // Output events arrive after the prompt was delivered. They keep the run and recovery
-    // proof checks but not the native login lookup, which can cost a subprocess per call.
-    assertStream: (recovering) => {
-      assertWriterCurrent();
-      if (recovering) {
-        assertProofCurrent();
-      }
-    },
-    bindExecutionEnv: (env) => {
+    // Asked once per coverage commit. A changed or unresolvable login keeps the commit's
+    // rows but leaves coverage where it is, so a produced reply is never discarded.
+    confirmsOwner: nativeLoginMatches,
+    checkNativeLoginBoundary: (recovering) => checkNativeLoginBoundary(recovering),
+    bindExecutionEnv: (env, recovering) => {
       nativeEnv = env;
-      assertNativeLoginCurrent(
+      checkNativeLoginBoundary(
+        recovering,
         "CLI history authority changed before execution: the spawn environment selects a different Claude login than the one recorded at preparation",
       );
     },

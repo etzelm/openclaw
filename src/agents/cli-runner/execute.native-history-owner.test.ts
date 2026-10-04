@@ -25,7 +25,8 @@ function writerStub(bindsNativeLogin: boolean) {
     bindsNativeLogin,
     assertCurrent: vi.fn(() => void calls.push("assertCurrent")),
     assertReadable: vi.fn(() => void calls.push("assertReadable")),
-    assertStream: vi.fn(),
+    confirmsOwner: vi.fn(() => true),
+    checkNativeLoginBoundary: vi.fn(() => void calls.push("checkNativeLoginBoundary")),
     bindExecutionEnv: vi.fn(() => void calls.push("bindExecutionEnv")),
   };
   return { writer, calls };
@@ -47,7 +48,9 @@ function nativeContext(writer: CliExecutionHistoryWriter, history = false, calls
   if (history) {
     context.openClawHistoryPrompt = "saved history";
   }
-  supervisorSpawnMock.mockImplementation(async () => {
+  // The supervisor runs beforeSpawn as its synchronous launch admission.
+  supervisorSpawnMock.mockImplementation(async (input) => {
+    input.beforeSpawn?.();
     calls?.push("spawn");
     return createManagedRun({ ...createSuccessfulProcessExit(), durationMs: 1, stdout: "done" });
   });
@@ -55,7 +58,7 @@ function nativeContext(writer: CliExecutionHistoryWriter, history = false, calls
 }
 
 describe("native login history owner at execution", () => {
-  it("binds the spawned environment and checks the login before spawning, with no recovery prompt", async () => {
+  it("binds the spawned environment and checks the login at launch, with no recovery prompt", async () => {
     const { writer, calls } = writerStub(true);
     const context = nativeContext(writer, false, calls);
     await expect(executePreparedCliRun(context)).resolves.toMatchObject({ text: "done" });
@@ -63,30 +66,28 @@ describe("native login history owner at execution", () => {
     expect(vi.mocked(writer.bindExecutionEnv).mock.calls[0]?.[0]).toMatchObject({
       CLAUDE_CONFIG_DIR: "/fixture/backend-selected",
     });
+    expect(vi.mocked(writer.bindExecutionEnv).mock.calls[0]?.[1]).toBe(false);
     expect(supervisorSpawnMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         env: expect.objectContaining({ CLAUDE_CONFIG_DIR: "/fixture/backend-selected" }),
       }),
     );
-    const bound = calls.indexOf("bindExecutionEnv");
-    const spawned = calls.indexOf("spawn");
-    const lastCheck = calls.lastIndexOf("assertCurrent");
-    // Bind to the final environment, then a fresh check, then the spawn.
-    expect(bound).toBeGreaterThanOrEqual(0);
-    expect(spawned).toBeGreaterThan(bound);
-    expect(lastCheck).toBeGreaterThan(bound);
-    expect(lastCheck).toBeLessThan(spawned);
+    // Bind to the final environment, then one fresh boundary check at launch, then the spawn.
+    expect(calls).toEqual(["bindExecutionEnv", "checkNativeLoginBoundary", "spawn"]);
+    expect(writer.checkNativeLoginBoundary).toHaveBeenCalledWith(false);
+    // Liveness checks never go through the login lookup.
+    expect(writer.assertCurrent).not.toHaveBeenCalled();
     expect(writer.assertReadable).not.toHaveBeenCalled();
   });
 
-  it("spawns nothing when the native login check fails", async () => {
-    const { writer } = writerStub(true);
-    vi.mocked(writer.assertCurrent).mockImplementation(() => {
+  it("spawns nothing when the launch boundary refuses the login", async () => {
+    const { writer, calls } = writerStub(true);
+    vi.mocked(writer.checkNativeLoginBoundary).mockImplementation(() => {
       throw new Error("CLI history authority changed before execution");
     });
-    const context = nativeContext(writer);
+    const context = nativeContext(writer, true, calls);
     await expect(executePreparedCliRun(context)).rejects.toThrow("CLI history authority changed");
-    expect(supervisorSpawnMock).not.toHaveBeenCalled();
+    expect(calls).not.toContain("spawn");
   });
 
   it("spawns nothing when the executing environment selects another owner", async () => {
@@ -94,16 +95,18 @@ describe("native login history owner at execution", () => {
     vi.mocked(writer.bindExecutionEnv).mockImplementation(() => {
       throw new Error("CLI history authority changed before execution");
     });
-    const context = nativeContext(writer);
+    const context = nativeContext(writer, true);
     await expect(executePreparedCliRun(context)).rejects.toThrow("CLI history authority changed");
     expect(supervisorSpawnMock).not.toHaveBeenCalled();
   });
 
-  it("uses the readable proof for a fresh recovery turn", async () => {
+  it("uses the readable proof and recovery boundaries for a fresh recovery turn", async () => {
     const { writer } = writerStub(true);
     const context = nativeContext(writer, true);
     await executePreparedCliRun(context);
     expect(writer.assertReadable).toHaveBeenCalled();
+    expect(vi.mocked(writer.bindExecutionEnv).mock.calls[0]?.[1]).toBe(true);
+    expect(writer.checkNativeLoginBoundary).toHaveBeenCalledWith(true);
   });
 
   it("leaves a credential-owned writer on the run's own authority outside recovery", async () => {
@@ -112,5 +115,7 @@ describe("native login history owner at execution", () => {
     await executePreparedCliRun(context);
     expect(writer.assertCurrent).not.toHaveBeenCalled();
     expect(writer.assertReadable).not.toHaveBeenCalled();
+    expect(writer.checkNativeLoginBoundary).not.toHaveBeenCalled();
+    expect(supervisorSpawnMock.mock.lastCall?.[0]).not.toHaveProperty("beforeSpawn");
   });
 });

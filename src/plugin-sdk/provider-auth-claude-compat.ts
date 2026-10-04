@@ -215,8 +215,11 @@ function readClaudeAccountEmail(homeDir?: string): string | undefined {
  * Non-secret owner reference of the login a local `claude` process would use,
  * or undefined when that login cannot be proven. The account record in
  * `.claude.json` names an owner only when a credential the CLI would actually
- * read is present, so a leftover record never identifies a login. Never
- * returns token material and never uses the interactive Keychain path.
+ * read is present, so a leftover record never identifies a login. The record
+ * is not bound to the credential: the opaque OAuth tokens carry no account id
+ * and rotate on refresh, and Claude CLI reports the same record as its own
+ * identity. Never returns token material and never uses the interactive
+ * Keychain path.
  */
 export function readClaudeNativeLoginOwner(
   options: {

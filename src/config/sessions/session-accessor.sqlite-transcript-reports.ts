@@ -23,7 +23,7 @@ import {
 import type { IncognitoAgentDatabaseExecution } from "../../state/openclaw-agent-execution-incognito.js";
 import { captureOpenClawAgentDatabaseExecution } from "../../state/openclaw-agent-execution.js";
 import { openOpenClawAgentSqliteWorkerStore } from "../../state/openclaw-agent-worker-store.js";
-import { getCliHistoryWriter } from "./cli-history-boundary.js";
+import { getCliHistoryWriter, resolveCliHistoryCoverageWriter } from "./cli-history-boundary.js";
 import type {
   SessionTranscriptWriteScope,
   TranscriptAppendRefusal,
@@ -391,18 +391,11 @@ async function withReportWorker<T>(
         cliWriter?.assertCurrent();
       };
       const { env: _env, ...workerResolved } = resolved;
+      const coverageWriter = resolveCliHistoryCoverageWriter(cliWriter);
       const target: TranscriptReportWorkerTarget = {
         resolved: workerResolved,
         sessionEntryCurrentSource: sessionEntryCurrent?.source,
-        ...(cliWriter
-          ? {
-              cliWriter: {
-                runId: cliWriter.runId,
-                authFingerprint: cliWriter.authFingerprint,
-                lifecycleRevision: cliWriter.lifecycleRevision,
-              },
-            }
-          : {}),
+        ...(coverageWriter ? { cliWriter: coverageWriter } : {}),
         fence: {
           expectedLifecycleRevision: fenced.expectedLifecycleRevision,
           expectedWriterRunId: fenced.expectedWriterRunId,

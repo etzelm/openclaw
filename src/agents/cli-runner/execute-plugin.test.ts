@@ -106,24 +106,26 @@ describe("plugin-owned CLI execution host boundary", () => {
     );
   });
 
-  it("hands the plugin a stream check that keeps run authority but skips the spawn-boundary caller check", async () => {
+  it("adds the host boundary check to the plugin's spawn and send check, not its stream check", async () => {
     const { context } = await createExecution({ runId: "plugin-stream-check" });
+    const caller = vi.fn();
     const boundary = vi.fn();
-    const stream = vi.fn();
-    context.params.assertCurrent = boundary;
+    context.params.assertCurrent = caller;
     let observed: CliBackendExecuteContext | undefined;
     const execute: CliBackendExecute = async function* (execution) {
       observed = execution;
+      caller.mockClear();
       boundary.mockClear();
       execution.assertStreamCurrent?.();
       execution.assertStreamCurrent?.();
-      expect(stream).toHaveBeenCalledTimes(2);
+      expect(caller).toHaveBeenCalledTimes(2);
       expect(boundary).not.toHaveBeenCalled();
       execution.assertCurrent?.();
+      expect(caller).toHaveBeenCalledTimes(3);
       expect(boundary).toHaveBeenCalledTimes(1);
       yield SUCCESS_RESULT;
     };
-    await runPlugin(context, execute, { assertStreamCaller: stream });
+    await runPlugin(context, execute, { assertBoundary: boundary });
     expect(observed?.assertStreamCurrent).toBeTypeOf("function");
   });
 

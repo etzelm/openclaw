@@ -2,7 +2,7 @@ import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import { createSqliteLifecycleAggregateError } from "../../infra/sqlite-lifecycle-errors.js";
 import { retainSqliteWorkerErrorCode } from "../../infra/sqlite-worker-contract.js";
 import { captureOpenClawAgentDatabaseExecution } from "../../state/openclaw-agent-execution.js";
-import { getCliHistoryWriter } from "./cli-history-boundary.js";
+import { getCliHistoryWriter, resolveCliHistoryCoverageWriter } from "./cli-history-boundary.js";
 import { assertSessionGoalOperationTime } from "./goals-operations.js";
 import { publishCommittedSessionIdentity } from "./session-accessor.sqlite-identity.js";
 import { captureSessionPendingInputWorkerCustody } from "./session-accessor.sqlite-pending-inputs.js";
@@ -78,13 +78,7 @@ export async function appendSessionTurnInWorker(
           }
         : undefined,
     },
-    cliWriter: cliWriter
-      ? {
-          runId: cliWriter.runId,
-          authFingerprint: cliWriter.authFingerprint,
-          lifecycleRevision: cliWriter.lifecycleRevision,
-        }
-      : undefined,
+    cliWriter: resolveCliHistoryCoverageWriter(cliWriter),
     custody: custody?.facts,
     relocation: custody?.relocation,
   };

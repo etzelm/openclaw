@@ -119,26 +119,24 @@ export async function executePreparedCliRun(
   options?: ExecutePreparedCliRunOptions,
 ): Promise<CliOutput> {
   // Fresh recovery retains its exact account/read authority across every await
-  // and through the process/plugin execution callbacks, not just preparation. A native
-  // login owner is bound the same way with or without a recovery prompt, so no spawn,
-  // send or coverage commit proceeds under a login other than the prepared owner.
+  // and through the process/plugin execution callbacks, not just preparation.
   const historyWriter = inputContext.cliHistoryWriter;
   const recoversHistory = Boolean(
     !cliSessionIdToUse && inputContext.openClawHistoryPrompt && historyWriter,
   );
-  const historyAssertion = recoversHistory
-    ? historyWriter?.assertReadable
-    : historyWriter?.bindsNativeLogin
-      ? historyWriter.assertCurrent
-      : undefined;
-  const context = historyAssertion
-    ? { ...inputContext, params: { ...inputContext.params, assertCurrent: historyAssertion } }
-    : inputContext;
+  const context =
+    recoversHistory && historyWriter
+      ? {
+          ...inputContext,
+          params: { ...inputContext.params, assertCurrent: historyWriter.assertReadable },
+        }
+      : inputContext;
   const params = context.params as PreparedCliRunInternalParams;
   const assertCurrent = createCliRunCurrentAssertion(params);
-  // Output events follow prompt delivery; they skip the per-call native login lookup.
-  const assertStreamCaller = historyWriter?.bindsNativeLogin
-    ? () => historyWriter.assertStream(recoversHistory)
+  // A native login owner is looked up fresh at each spawn and prompt send, never per
+  // liveness check or output event.
+  const assertBoundary = historyWriter?.bindsNativeLogin
+    ? () => historyWriter.checkNativeLoginBoundary(recoversHistory)
     : undefined;
   assertCurrent();
   const backend = context.preparedBackend.backend;
@@ -376,7 +374,7 @@ export async function executePreparedCliRun(
       // Anthropic's separate host-managed usage tier instead of normal CLI use.
       delete env.CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST;
       // The history writer's native owner must be the one this final environment selects.
-      context.cliHistoryWriter?.bindExecutionEnv(env);
+      context.cliHistoryWriter?.bindExecutionEnv(env, recoversHistory);
 
       let executionCommand = backend.command;
       let executionArgv0: string | undefined;
@@ -535,7 +533,7 @@ export async function executePreparedCliRun(
       runOutput = await executeCliProcess({
         context,
         assertCurrent,
-        ...(assertStreamCaller ? { assertStreamCaller } : {}),
+        ...(assertBoundary ? { assertBoundary } : {}),
         backend,
         deps: executeDeps,
         events,

@@ -6,26 +6,45 @@ export type CliHistoryWriter = {
   runId: string;
   authFingerprint: string;
   lifecycleRevision?: string;
-  /** Run authority plus, for a native login owner, a fresh login lookup. Guards coverage commits. */
   assertCurrent: () => void;
-  /** assertCurrent plus the stored coverage proof, before saved history reaches the CLI. */
   assertReadable: () => void;
+  /**
+   * Fresh owner check, asked once per coverage commit. False keeps the commit's rows but
+   * does not advance coverage. Absent means the owner cannot change during the run.
+   */
+  confirmsOwner?: () => boolean;
 };
 
 /** The writer as the executing run holds it; workers only ever see the base capability. */
 export type CliExecutionHistoryWriter = CliHistoryWriter & {
   /** True when ownership comes from a native login resolved from the child environment. */
   bindsNativeLogin: boolean;
-  /** Cheaper check for output events after the prompt was delivered; never looks up the login. */
-  assertStream: (recovering: boolean) => void;
+  /**
+   * Fresh native login check for a spawn or prompt send. A changed or unresolvable login
+   * refuses a recovery turn and stops coverage for any other turn.
+   */
+  checkNativeLoginBoundary: (recovering: boolean) => void;
   /** Resolve the native login owner from the environment execution actually spawns with. */
-  bindExecutionEnv: (env: NodeJS.ProcessEnv) => void;
+  bindExecutionEnv: (env: NodeJS.ProcessEnv, recovering: boolean) => void;
 };
 
 const cliHistoryWriter = new AsyncLocalStorage<CliHistoryWriter>();
 
 export function runWithCliHistoryWriter<T>(writer: CliHistoryWriter | undefined, run: () => T): T {
   return writer ? cliHistoryWriter.run(writer, run) : cliHistoryWriter.exit(run);
+}
+
+/** Hosts dispatching a worker commit hand it account facts only while the owner still holds. */
+export function resolveCliHistoryCoverageWriter(
+  writer: CliHistoryWriter | undefined,
+): Pick<CliHistoryWriter, "runId" | "authFingerprint" | "lifecycleRevision"> | undefined {
+  return writer && writer.confirmsOwner?.() !== false
+    ? {
+        runId: writer.runId,
+        authFingerprint: writer.authFingerprint,
+        lifecycleRevision: writer.lifecycleRevision,
+      }
+    : undefined;
 }
 
 export function getCliHistoryWriter(

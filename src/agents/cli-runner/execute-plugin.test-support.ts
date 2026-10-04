@@ -74,7 +74,7 @@ export function runPlugin(
     sessionId?: string;
     useResume?: boolean;
     forceNewSession?: boolean;
-    assertStreamCaller?: () => void;
+    assertBoundary?: () => void;
     liveSession?: boolean;
     mcpCapture?: Parameters<typeof executePluginOwnedProcess>[0]["mcpCapture"];
     requiredGeneration?: string;
@@ -104,7 +104,7 @@ export function runPlugin(
     sessionId: options.sessionId ?? "sdk-session",
     mcpCapture: options.mcpCapture,
     ...(options.forceNewSession ? { forceNewSession: true } : {}),
-    ...(options.assertStreamCaller ? { assertStreamCaller: options.assertStreamCaller } : {}),
+    ...(options.assertBoundary ? { assertBoundary: options.assertBoundary } : {}),
     ...(options.liveSession || options.requiredGeneration
       ? {
           liveSession: { requiredGeneration: options.requiredGeneration },

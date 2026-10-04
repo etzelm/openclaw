@@ -4,6 +4,12 @@ import { DatabaseSync } from "node:sqlite";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
+  clearRuntimeConfigSnapshot,
+  getRuntimeConfigSnapshot,
+  getRuntimeConfigSourceSnapshot,
+  setRuntimeConfigSnapshot,
+} from "../../config/runtime-snapshot.js";
+import {
   getCliHistoryWriter,
   runWithCliHistoryWriter,
 } from "../../config/sessions/cli-history-boundary.js";
@@ -20,6 +26,7 @@ import {
   runWithoutOwnedSessionTranscriptWrites,
 } from "../../config/sessions/transcript-write-context.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
+import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import { useSessionStoreTempDirs } from "../../test-utils/session-state-cleanup.js";
 import { prepareSystemAgentRunAdmission } from "../admitted-run-context.js";
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
@@ -357,6 +364,65 @@ describe("CLI transcript account boundary", () => {
       expect(gatewayChild.seeded).toBeUndefined();
     });
 
+    it("resolves the owner under the run's skill env overrides, as execution does", async () => {
+      const f = await fixture();
+      const skill = sessionDirs.make();
+      loginIn(skill, "uuid:skill-account");
+      // The Gateway process has no login of its own; only the skill env selects one.
+      vi.stubEnv("HOME", sessionDirs.make());
+      vi.stubEnv("CLAUDE_CONFIG_DIR", undefined);
+      // Skill env overrides read the live runtime config, as execution does.
+      const runtime = getRuntimeConfigSnapshot();
+      const source = getRuntimeConfigSourceSnapshot();
+      const config = {
+        ...runtime,
+        skills: { entries: { "login-skill": { env: { CLAUDE_CONFIG_DIR: skill } } } },
+      } as OpenClawConfig;
+      setRuntimeConfigSnapshot(config, config);
+      const withSkill = {
+        ...native,
+        skillsSnapshot: { prompt: "", skills: [{ name: "login-skill" }] },
+        config,
+      };
+      const prepared = backendUsing(undefined);
+      try {
+        await f.run(
+          undefined,
+          async (allowed) => {
+            expect(allowed).toBe(true);
+            f.manager().appendMessage({ role: "user", content: "skill canary", timestamp: 1 });
+          },
+          withSkill,
+          undefined,
+          prepared,
+        );
+        expect(process.env.CLAUDE_CONFIG_DIR).toBeUndefined();
+        await f.run(
+          undefined,
+          async (allowed, params) => {
+            expect(allowed).toBe(true);
+            expect(await history(allowed, params)).toContain("skill canary");
+          },
+          withSkill,
+          undefined,
+          prepared,
+        );
+        await f.run(
+          undefined,
+          async (allowed) => expect(allowed).toBe(false),
+          native,
+          undefined,
+          prepared,
+        );
+      } finally {
+        if (runtime) {
+          setRuntimeConfigSnapshot(runtime, source ?? runtime);
+        } else {
+          clearRuntimeConfigSnapshot();
+        }
+      }
+    });
+
     it("does not credit Gateway-login history to a backend-selected account", async () => {
       const f = await fixture();
       const { backend } = logins();
@@ -424,52 +490,50 @@ describe("CLI transcript account boundary", () => {
       expect(lookup).not.toHaveBeenCalled();
     });
 
-    it("rejects the read for a reassigned or revoked login, uncached, at the same instant", async () => {
+    it("rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant", async () => {
       const f = await fixture();
       const { backend } = logins();
       loginIn(backend, "uuid:account-a");
       // A frozen clock: any time-windowed reuse would still be inside its window.
       vi.spyOn(Date, "now").mockReturnValue(1_000_000);
       await withNativeWriter(f, "boundary-native-fresh", backendUsing(backend), (writer) => {
-        writer.assertReadable();
+        writer.checkNativeLoginBoundary(true);
         loginIn(backend, "uuid:account-b");
-        expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+        expect(() => writer.checkNativeLoginBoundary(true)).toThrow(
+          "CLI history authority changed",
+        );
         loginIn(backend, undefined);
-        expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
+        expect(() => writer.checkNativeLoginBoundary(true)).toThrow(
+          "CLI history authority changed",
+        );
         loginIn(backend, "uuid:account-a");
-        writer.assertReadable();
+        writer.checkNativeLoginBoundary(true);
         loginIn(backend, "uuid:account-b");
         loginIn(backend, "uuid:account-a");
-        writer.assertReadable();
+        writer.checkNativeLoginBoundary(true);
       });
     });
 
-    it("looks the login up on every authority check", async () => {
+    it("looks the login up at each boundary and coverage commit, never at a liveness check", async () => {
       const f = await fixture();
       const { backend } = logins();
       loginIn(backend, "uuid:account-a");
+      await seedNative(f, backendUsing(backend));
       const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
       await withNativeWriter(f, "boundary-native-every-call", backendUsing(backend), (writer) => {
         lookup.mockClear();
-        writer.assertReadable();
-        writer.assertReadable();
-        writer.assertCurrent();
-        expect(lookup).toHaveBeenCalledTimes(3);
-      });
-    });
-
-    it("keeps output-event checks off the login lookup", async () => {
-      const f = await fixture();
-      const { backend } = logins();
-      loginIn(backend, "uuid:account-a");
-      const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
-      await withNativeWriter(f, "boundary-native-stream", backendUsing(backend), (writer) => {
-        lookup.mockClear();
-        for (let event = 0; event < 20; event += 1) {
-          writer.assertStream(true);
-          writer.assertStream(false);
+        for (let check = 0; check < 20; check += 1) {
+          writer.assertCurrent();
+          writer.assertReadable();
         }
         expect(lookup).not.toHaveBeenCalled();
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, true);
+        writer.checkNativeLoginBoundary(true);
+        writer.checkNativeLoginBoundary(false);
+        expect(lookup).toHaveBeenCalledTimes(3);
+        lookup.mockClear();
+        f.manager().appendMessage({ role: "user", content: "covered turn", timestamp: 2 });
+        expect(lookup).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -479,24 +543,54 @@ describe("CLI transcript account boundary", () => {
       loginIn(backend, "uuid:account-a");
       await withNativeWriter(f, "boundary-native-bind", backendUsing(backend), (writer) => {
         expect(writer.bindsNativeLogin).toBe(true);
-        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend });
-        writer.assertCurrent();
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, true);
+        writer.checkNativeLoginBoundary(true);
         // A login reassigned after the bind is caught by the next boundary check.
         loginIn(backend, "uuid:account-b");
-        expect(() => writer.assertCurrent()).toThrow("CLI history authority changed");
-        loginIn(backend, "uuid:account-a");
-        writer.assertCurrent();
-        // Execution drifting to another config dir is refused before anything is spawned.
-        expect(() => writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: gateway })).toThrow(
+        expect(() => writer.checkNativeLoginBoundary(true)).toThrow(
           "CLI history authority changed",
         );
-        expect(() => writer.assertCurrent()).toThrow("CLI history authority changed");
-        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend });
-        writer.assertCurrent();
+        loginIn(backend, "uuid:account-a");
+        writer.checkNativeLoginBoundary(true);
+        // A recovery turn drifting to another config dir is refused before anything is spawned.
+        expect(() => writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: gateway }, true)).toThrow(
+          "CLI history authority changed",
+        );
+        expect(() => writer.checkNativeLoginBoundary(true)).toThrow(
+          "CLI history authority changed",
+        );
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, true);
+        writer.checkNativeLoginBoundary(true);
+        expect(writer.confirmsOwner?.()).toBe(true);
       });
     });
 
-    it("refuses at send and at the coverage commit once the login can no longer be established", async () => {
+    it("runs a turn without saved history under another login but never covers it", async () => {
+      const f = await fixture();
+      const { gateway, backend } = logins();
+      loginIn(backend, "uuid:account-a");
+      await seedNative(f, backendUsing(backend));
+      const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary as { maxSeq: number };
+      await withNativeWriter(f, "boundary-native-late-env", backendUsing(backend), (writer) => {
+        // A late override (for example a skill env) selects another login: no refusal.
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: gateway }, false);
+        writer.checkNativeLoginBoundary(false);
+        // Detachment is sticky even if the environment returns to the prepared login.
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, false);
+        expect(writer.confirmsOwner?.()).toBe(false);
+        f.manager().appendMessage({ role: "user", content: "late login turn", timestamp: 2 });
+        expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+          state: "known",
+          maxSeq: before.maxSeq,
+        });
+      });
+      expect(JSON.stringify(f.manager().getEntries())).toContain("late login turn");
+      const next = await prepareWith(f, backendUsing(backend));
+      expect(next.allowed).toBe(false);
+      expect(next.seeded).toBeUndefined();
+    });
+
+    it("keeps a reply but stops coverage once the login can no longer be established", async () => {
       const f = await fixture();
       const { backend } = logins();
       loginIn(backend, "uuid:account-a");
@@ -508,46 +602,70 @@ describe("CLI transcript account boundary", () => {
       vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner").mockImplementation((id, env) =>
         unknown ? undefined : real(id, env),
       );
-      await withNativeWriter(f, "boundary-native-unknown", backendUsing(backend), (writer) => {
-        writer.assertReadable();
-        unknown = true;
-        expect(() => writer.assertReadable()).toThrow("CLI history authority changed");
-        expect(() => writer.assertCurrent()).toThrow("CLI history authority changed");
-        expect(() =>
-          f.manager().appendMessage({ role: "user", content: "turn while unknown", timestamp: 2 }),
-        ).toThrow("CLI history authority changed");
-        expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
-          state: "known",
-          maxSeq: before.maxSeq,
-        });
-        unknown = false;
-        writer.assertCurrent();
+      const runId = "boundary-native-unknown";
+      await patchSessionEntryCore(f.target, (entry) => ({ ...entry, activeWriterRunId: runId }));
+      await f.withRun(
+        runId,
+        async (params) => {
+          const writer = await prepareCliHistoryBoundary(params, undefined, backendUsing(backend));
+          if (!writer) {
+            throw new Error("Missing admitted history writer");
+          }
+          await runWithCliHistoryWriter(writer, async () => {
+            writer.checkNativeLoginBoundary(true);
+            unknown = true;
+            expect(() => writer.checkNativeLoginBoundary(true)).toThrow(
+              "CLI history authority changed",
+            );
+            const result = await persistCliAssistantTranscript({
+              runParams: { ...params, persistAssistantTranscript: true },
+              text: "reply produced while the login was unknown",
+              modelId: "test-model",
+              stopReason: "stop",
+            });
+            expect(result.terminalAnchor).toBeDefined();
+          });
+        },
+        native,
+      );
+      expect(JSON.stringify(f.manager().getEntries())).toContain(
+        "reply produced while the login was unknown",
+      );
+      expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+        state: "known",
+        maxSeq: before.maxSeq,
       });
+      unknown = false;
+      const next = await prepareWith(f, backendUsing(backend));
+      expect(next.allowed).toBe(false);
+      expect(next.seeded).toBeUndefined();
     });
 
-    it("refuses to cover a turn whose login changed after preparation", async () => {
+    it("records a turn whose login changed after preparation without covering it", async () => {
       const f = await fixture();
       const { backend } = logins();
       loginIn(backend, "uuid:account-a");
       await seedNative(f, backendUsing(backend));
       const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary;
       await withNativeWriter(f, "boundary-native-coverage", backendUsing(backend), (writer) => {
-        // An empty first turn authorizes coverage, so assertCurrent alone must catch the switch.
         loginIn(backend, "uuid:account-b");
-        expect(() =>
-          f
-            .manager()
-            .appendMessage({ role: "user", content: "turn under account b", timestamp: 2 }),
-        ).toThrow("CLI history authority changed");
-        const boundary = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary;
-        expect(boundary).toMatchObject({
+        f.manager().appendMessage({ role: "user", content: "turn under account b", timestamp: 2 });
+        expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
           state: "known",
           maxSeq: (before as { maxSeq: number }).maxSeq,
         });
+        // Coverage is contiguous: once a row is skipped, a later row cannot be covered either.
         loginIn(backend, "uuid:account-a");
         f.manager().appendMessage({ role: "user", content: "turn under account a", timestamp: 3 });
+        expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+          maxSeq: (before as { maxSeq: number }).maxSeq,
+        });
         expect(writer.authFingerprint).toBeDefined();
       });
+      expect(JSON.stringify(f.manager().getEntries())).toContain("turn under account b");
+      const next = await prepareWith(f, backendUsing(backend));
+      expect(next.allowed).toBe(false);
+      expect(next.seeded).toBeUndefined();
     });
   });
 
