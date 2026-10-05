@@ -14,7 +14,8 @@ import {
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
 vi.mock("./subagent-registry-helpers.js", { spy: true });
-vi.mock("../../agent-bundle-mcp-tools.js", () => ({
+vi.mock("../../agent-bundle-mcp-tools.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../agent-bundle-mcp-tools.js")>()),
   retireSessionMcpRuntimeForSessionKey: vi.fn(async () => true),
 }));
 
