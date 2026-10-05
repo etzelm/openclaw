@@ -1,0 +1,169 @@
+## sandbox seam before Doctor (any case; the unpinned config is identical)
+launch workspace (listConfiguredOwnerInputs; the operator, agent RPC and cron turns ran here): <profile>/workspace
+resolver workspace (resolveAgentWorkspaceDir; persona, bootstrap and memory files): <profile>/workspace/main
+
+[launch workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[launch workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c (ro); /agent <- <profile>/workspace (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: READ sibling dev/SOUL.md | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[launch workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: READ sibling dev/SOUL.md | write /workspace/dev/PROBE.md: WROTE sibling dev/PROBE.md on the host
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-106b7b90d42232baed2a01dd336b9514 (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-106b7b90d42232baed2a01dd336b9514/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-106b7b90d42232baed2a01dd336b9514; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-106b7b90d42232baed2a01dd336b9514; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-106b7b90d42232baed2a01dd336b9514 (ro); /agent <- <profile>/workspace/main (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-106b7b90d42232baed2a01dd336b9514/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[resolver workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace/main (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+## sandbox seam after Doctor, root case (pinned to the shared root)
+launch workspace (listConfiguredOwnerInputs; the operator, agent RPC and cron turns ran here): <profile>/workspace
+resolver workspace (resolveAgentWorkspaceDir; persona, bootstrap and memory files): <profile>/workspace
+
+[launch workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[launch workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c (ro); /agent <- <profile>/workspace (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-0f8a4cd4b29e7b270b5ec3cbc91c566c/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: READ sibling dev/SOUL.md | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[launch workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: READ sibling dev/SOUL.md | write /workspace/dev/PROBE.md: WROTE sibling dev/PROBE.md on the host
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-a13f84e8877e8829f5d39230f40404db (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-a13f84e8877e8829f5d39230f40404db/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-a13f84e8877e8829f5d39230f40404db; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-a13f84e8877e8829f5d39230f40404db; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-a13f84e8877e8829f5d39230f40404db (ro); /agent <- <profile>/workspace (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-a13f84e8877e8829f5d39230f40404db/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: READ sibling dev/SOUL.md | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[resolver workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: READ sibling dev/SOUL.md | write /workspace/dev/PROBE.md: WROTE sibling dev/PROBE.md on the host
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+## sandbox seam after Doctor, subdir case (pinned to the agent directory)
+launch workspace (listConfiguredOwnerInputs; the operator, agent RPC and cron turns ran here): <profile>/workspace/main
+resolver workspace (resolveAgentWorkspaceDir; persona, bootstrap and memory files): <profile>/workspace/main
+
+[launch workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-a0d08277f019f76193333475ca33738b (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-a0d08277f019f76193333475ca33738b/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-a0d08277f019f76193333475ca33738b; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-a0d08277f019f76193333475ca33738b; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[launch workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-a0d08277f019f76193333475ca33738b (ro); /agent <- <profile>/workspace/main (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-a0d08277f019f76193333475ca33738b/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[launch workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace/main (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-3ac993af7837c67d20892ee80d903e58 (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-3ac993af7837c67d20892ee80d903e58/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-3ac993af7837c67d20892ee80d903e58; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-3ac993af7837c67d20892ee80d903e58; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-3ac993af7837c67d20892ee80d903e58 (ro); /agent <- <profile>/workspace/main (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-3ac993af7837c67d20892ee80d903e58/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[resolver workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace/main (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+## sandbox seam after Doctor, neither case (pinned to the agent directory)
+launch workspace (listConfiguredOwnerInputs; the operator, agent RPC and cron turns ran here): <profile>/workspace/main
+resolver workspace (resolveAgentWorkspaceDir; persona, bootstrap and memory files): <profile>/workspace/main
+
+[launch workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-190756758746a5b8e137f95fd0b30693 (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-190756758746a5b8e137f95fd0b30693/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-190756758746a5b8e137f95fd0b30693; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-190756758746a5b8e137f95fd0b30693; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[launch workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-190756758746a5b8e137f95fd0b30693 (ro); /agent <- <profile>/workspace/main (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-190756758746a5b8e137f95fd0b30693/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[launch workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace/main (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-8a64bb1f922e1d60f53ba3b34024b264 (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-8a64bb1f922e1d60f53ba3b34024b264/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-8a64bb1f922e1d60f53ba3b34024b264; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-8a64bb1f922e1d60f53ba3b34024b264; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-8a64bb1f922e1d60f53ba3b34024b264 (ro); /agent <- <profile>/workspace/main (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-8a64bb1f922e1d60f53ba3b34024b264/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[resolver workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace/main (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+## sandbox seam after Doctor, both case (left unchanged, warning)
+launch workspace (listConfiguredOwnerInputs; the operator, agent RPC and cron turns ran here): <profile>/workspace
+resolver workspace (resolveAgentWorkspaceDir; persona, bootstrap and memory files): <profile>/workspace/main
+
+[launch workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-2acf7e36b78096d4371d4adbb2509962 (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-2acf7e36b78096d4371d4adbb2509962/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-2acf7e36b78096d4371d4adbb2509962; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-2acf7e36b78096d4371d4adbb2509962; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[launch workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-2acf7e36b78096d4371d4adbb2509962 (ro); /agent <- <profile>/workspace (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-2acf7e36b78096d4371d4adbb2509962/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: READ sibling dev/SOUL.md | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[launch workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: READ sibling dev/SOUL.md | write /workspace/dev/PROBE.md: WROTE sibling dev/PROBE.md on the host
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=none] mounts: /workspace <- <profile>/sandboxes/workspace-2068e10ec04b54cfc4e4bc3ce24361bd (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-2068e10ec04b54cfc4e4bc3ce24361bd/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/sandboxes/workspace-2068e10ec04b54cfc4e4bc3ce24361bd; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/sandboxes/workspace-2068e10ec04b54cfc4e4bc3ce24361bd; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.
+
+[resolver workspace, workspaceAccess=ro] mounts: /workspace <- <profile>/sandboxes/workspace-2068e10ec04b54cfc4e4bc3ce24361bd (ro); /agent <- <profile>/workspace/main (ro)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/sandboxes/workspace-2068e10ec04b54cfc4e4bc3ce24361bd/dev/SOUL.md' | write /workspace/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /workspace/dev/PROBE.md
+  guest /agent/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /agent/dev/PROBE.md: denied: Sandbox path is read-only; cannot write files: /agent/dev/PROBE.md
+
+[resolver workspace, workspaceAccess=rw] mounts: /workspace <- <profile>/workspace/main (rw)
+  control: guest reads /workspace/CONTROL.md in its own mount: ok
+  guest /workspace/dev/SOUL.md: denied: ENOENT: no such file or directory, lstat '<profile>/workspace/main/dev/SOUL.md' | write /workspace/dev/PROBE.md: sibling untouched (write stayed inside its own mount)
+  guest /agent/dev/SOUL.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/SOUL.md. Use a path under /workspace/ instead. | write /agent/dev/PROBE.md: denied: Path escapes sandbox root (~/workspace/main; container root /workspace): /agent/dev/PROBE.md. Use a path under /workspace/ instead.

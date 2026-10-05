@@ -1,0 +1,21 @@
+$ OPENCLAW_VITEST_MAX_WORKERS=8 pnpm test src/agents/   (tree c45c8b5e456f)
+ Test Files  460 passed | 2 skipped (462)
+      Tests  5137 passed | 3 skipped (5140)
+ Test Files  38 passed (38)
+      Tests  330 passed (330)
+ Test Files  352 passed | 1 skipped (353)
+      Tests  5190 passed | 6 skipped (5196)
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+ Test Files  503 passed | 4 skipped (507)
+      Tests  7640 passed | 41 skipped (7681)
+ × |agents-embedded-agent| src/agents/embedded-agent-runner/run-entry.cyber-failover.runner.test.ts > runEmbeddedAgentEntry cyber failover against the real fallback runner > propagates a recognized provider error thrown after the Daybreak retry delivered 334ms
+   → expected SqliteWorkerError: Shared-state admission… { code: '…' } to be FailoverError: daybreak overloaded after … { …(17) } // Object.is equality
+ × |agents-embedded-agent| src/agents/embedded-agent-runner/run-entry.cyber-failover.runner.test.ts > runEmbeddedAgentEntry cyber failover against the real fallback runner > keeps primary auth usable after a denied Daybreak retry with default config 298ms
+AssertionError: expected SqliteWorkerError: Shared-state admission… { code: '…' } to be FailoverError: daybreak overloaded after … { …(17) } // Object.is equality
+SqliteWorkerError: Shared-state admission requires the host broker
+ Test Files  1 failed | 72 passed (73)
+      Tests  2 failed | 908 passed (910)
+[test] failed 6 Vitest shards in 1325.18s
+real 1325.81
+exit=1

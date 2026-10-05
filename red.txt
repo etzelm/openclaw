@@ -1,0 +1,38 @@
+$ (src/commands/doctor-config-flow.ts reverted to base, tests kept) pnpm test src/commands/doctor-config-flow.workspace-persistence.test.ts --maxWorkers=1   (tree c45c8b5e456f)
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > refuses retired config until the bridge release migrates it 340ms
+│  - Moved agents.list → keyed agents.entries.               │
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > upgrades the oldest supported July config and persists it only once 6148ms
+│  - Moved agents.entries.ops.memorySearch →                           │
+│  - Moved agents.entries.ops.sandbox.browser.enableNoVnc →            │
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > persists per-agent migrations with explicit ownership (entries, writable update: false) 4403ms
+│  - Moved agents.list[0].memorySearch → agents.list[0].memory.search.  │
+│  - Moved agents.list[0].sandbox.browser.enableNoVnc →                 │
+│  - Moved agents.list → keyed agents.entries.                          │
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > persists per-agent migrations with explicit ownership (list, writable update: true) 4407ms
+│  - Moved agents.list → keyed agents.entries.                             │
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > preserves the markerless main agent's implicit workspace through Doctor persistence 4431ms
+│  - Normalized agents.list id "Main" → agents.entries.main.               │
+│  - Moved agents.list → keyed agents.entries.                             │
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > preserves the markerless  Main  agent's shared workspace through Doctor persistence 4485ms
+│  Normalized agents.list id "Ops" → agents.entries.ops.              │
+│  Moved agents.list → keyed agents.entries.                          │
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > repairs noncanonical workspace and heartbeat values through persistence 3744ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > keeps the legacy owner on the shared workspace across later health writes 2653ms
+ × |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > pins a converged system agent to the shared workspace that holds its files 3675ms
+   → expected undefined to be '<tmp>' // Object.is equality
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > persists cron runtime policy on the retained owner before rewriting its model 7509ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > refuses retired Talk selectors in parsed config before recovery 1126ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > refuses retired Talk selectors in prefixed config before recovery 1154ms
+ FAIL  |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > pins a converged system agent to the shared workspace that holds its files
+AssertionError: expected undefined to be '<tmp>' // Object.is equality
+ ❯ src/commands/doctor-config-flow.workspace-persistence.test.ts:381:56
+    380|         const after = (await readConfigFileSnapshot()).config;
+    381|         expect(after.agents?.entries?.main?.workspace).toBe(workspace);
+    382|         expect(resolveAgentWorkspaceDir(after, "main")).toBe(workspace…
+    383|         const launch = listConfiguredOwnerInputs(after, workspace).fin…
+ ❯ src/commands/doctor-config-flow.workspace-persistence.test.ts:362:7
+ ❯ src/commands/doctor-config-flow.workspace-persistence.test.ts:361:5
+      Tests  1 failed | 11 passed (12)
+[test] FAILED (exit 1)
+exit=1
+git status after restore: []

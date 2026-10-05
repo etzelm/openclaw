@@ -1,0 +1,9 @@
+# tree c45c8b5e456f: sole-agent config, then openclaw agents add dev
+before: {"defaults":{"workspace":"<profile>/workspace"},"entries":{"main":{}}}
+Updated config: $OPENCLAW_HOME/openclaw.json
+  Backup: $OPENCLAW_HOME/openclaw.json.bak
+Agent: dev
+Workspace: $OPENCLAW_HOME/workspace/dev
+Agent dir: $OPENCLAW_HOME/state/agents/dev/agent
+exit=0
+after: {"defaults":{"workspace":"<profile>/workspace","systemAgent":{"agentId":"main"},"heartbeat":{"agentId":"main"}},"ownership":"explicit","entries":{"main":{"workspace":"<profile>/workspace"},"dev":{"name":"dev","workspace":"<profile>/workspace/dev","agentDir":"<profile>/state/agents/dev/agent","identity":{"name":"dev"}}}}

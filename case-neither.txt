@@ -1,0 +1,124 @@
+# case: neither
+profile ready: case=neither
+
+## user files before (sha256 prefix)
+c8815c26ac19a76b  dev/SOUL.md
+
+## gateway before
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "none (template persona)"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "none (template persona)"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "none (template persona)"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## base build (upstream main 66bd35b4e5f2): openclaw doctor --fix --non-interactive
+exit=0
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│  Agent "dev": Memory system not found in workspace.                                    │
+agents.entries.main = {} | agents.entries.dev = {}
+
+## patched build: openclaw doctor (no --fix)
+exit=0
+│  Set agents.entries.main.workspace to $OPENCLAW_HOME/workspace/main so  │
+│  its working directory, persona, and memory use one workspace.          │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+--
+│  Run "openclaw doctor --fix" to pin the system agent's workspace.  │
+│                                                                    │
+├────────────────────────────────────────────────────────────────────╯
+[warning] core/doctor/node-hosting-preconditions gateway.bind - Gateway is only bound to loopback. Set gateway.publicOrigin to your public HTTPS origin, configure plugins.entries.device-pair.config.publicUrl, enable tailscale serve, or set gateway.bind=lan.
+agents.entries.main = {} | agents.entries.dev = {}
+
+## patched build: openclaw doctor --fix --non-interactive
+exit=0
+│  Set agents.entries.main.workspace to $OPENCLAW_HOME/workspace/main so  │
+│  its working directory, persona, and memory use one workspace.          │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+agents.entries.main = {"workspace":"<profile>/workspace/main"} | agents.entries.dev = {}
+
+## patched build: openclaw agents list --json (main, dev workspace)
+main -> <profile>/workspace/main
+dev -> <profile>/workspace/dev
+
+## gateway after
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "none (template persona)"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "none (template persona)"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "none (template persona)"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## user files after (sha256 prefix)
+f1ca0312afae15de  SOUL.md
+f1ca0312afae15de  main/SOUL.md
+c8815c26ac19a76b  dev/SOUL.md

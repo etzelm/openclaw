@@ -1,0 +1,32 @@
+### tree c45c8b5e456f: pnpm test src/commands/doctor/shared/system-agent-workspace-repair.test.ts --maxWorkers=1
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins the shared root when only it holds the agent's files 652ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins the agent directory when only it holds the agent's files 5ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins the directory its persona already resolves to when neither holds files 603ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns without choosing when both directories hold files 4ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps the system agent off a shared root another agent already owns 3ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns instead of writing when the roster lives in an include 3ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns instead of failing Doctor when a workspace cannot be read 17ms
+ ✓ |commands| src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > leaves an authored workspace and a sole agent alone 3ms
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Duration  9.37s (transform 74%, tests 14%, import 7%, worker 3%, setup 2%)
+[test] passed 1 Vitest shard in 11.36s
+real 11.98
+### tree c45c8b5e456f: pnpm test src/commands/doctor-config-flow.workspace-persistence.test.ts --maxWorkers=1
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > refuses retired config until the bridge release migrates it 303ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > upgrades the oldest supported July config and persists it only once 6433ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > persists per-agent migrations with explicit ownership (entries, writable update: false) 4742ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > persists per-agent migrations with explicit ownership (list, writable update: true) 4815ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > preserves the markerless main agent's implicit workspace through Doctor persistence 4732ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > preserves the markerless  Main  agent's shared workspace through Doctor persistence 4597ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > repairs noncanonical workspace and heartbeat values through persistence 3793ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > keeps the legacy owner on the shared workspace across later health writes 2720ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > pins a converged system agent to the shared workspace that holds its files 3865ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > persists cron runtime policy on the retained owner before rewriting its model 7487ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > refuses retired Talk selectors in parsed config before recovery 1126ms
+ ✓ |commands| src/commands/doctor-config-flow.workspace-persistence.test.ts > Doctor workspace persistence > refuses retired Talk selectors in prefixed config before recovery 1096ms
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Duration  53.37s (tests 86%, transform 11%, import 2%, worker 1%)
+[test] passed 1 Vitest shard in 56.42s
+real 57.02

@@ -1,0 +1,40 @@
+Mutation matrix, tree c45c8b5e456f, files: src/commands/doctor/shared/system-agent-workspace-repair.test.ts src/commands/doctor-config-flow.workspace-persistence.test.ts
+
+M1 Doctor flow never calls the repair: exit=1 KILLED
+  ['Tests  1 failed | 19 passed (20)']
+  failed: Doctor workspace persistence > pins a converged system agent to the shared workspace that holds its files
+M2 always pin the agent directory: exit=1 KILLED
+  ['Tests  2 failed | 18 passed (20)']
+  failed: Doctor workspace persistence > pins a converged system agent to the shared workspace that holds its files
+  failed: repairSystemAgentWorkspacePin > pins the shared root when only it holds the agent's files
+M3 always pin the shared root: exit=1 KILLED
+  ['Tests  3 failed | 17 passed (20)']
+  failed: repairSystemAgentWorkspacePin > keeps the system agent off a shared root another agent already owns
+  failed: repairSystemAgentWorkspacePin > pins the agent directory when only it holds the agent's files
+  failed: repairSystemAgentWorkspacePin > pins the directory its persona already resolves to when neither holds files
+M4 guess when both directories hold files: exit=1 KILLED
+  ['Tests  1 failed | 19 passed (20)']
+  failed: repairSystemAgentWorkspacePin > warns without choosing when both directories hold files
+M5 seeded template persona files count as user content: exit=1 KILLED
+  ['Tests  3 failed | 17 passed (20)']
+  failed: repairSystemAgentWorkspacePin > pins the directory its persona already resolves to when neither holds files
+  failed: repairSystemAgentWorkspacePin > pins the shared root when only it holds the agent's files
+  failed: repairSystemAgentWorkspacePin > warns instead of failing Doctor when a workspace cannot be read
+M6 overwrite an authored workspace: exit=1 KILLED
+  ['Tests  1 failed | 19 passed (20)']
+  failed: repairSystemAgentWorkspacePin > leaves an authored workspace and a sole agent alone
+M7 act when launch and agent directory agree: exit=1 KILLED
+  ['Tests  2 failed | 18 passed (20)']
+  failed: Doctor workspace persistence > repairs noncanonical workspace and heartbeat values through persistence
+  failed: repairSystemAgentWorkspacePin > leaves an authored workspace and a sole agent alone
+M8 pin onto a root another agent owns: exit=1 KILLED
+  ['Tests  1 failed | 19 passed (20)']
+  failed: repairSystemAgentWorkspacePin > keeps the system agent off a shared root another agent already owns
+M9 write into an included roster: exit=1 KILLED
+  ['Tests  1 failed | 19 passed (20)']
+  failed: repairSystemAgentWorkspacePin > warns instead of writing when the roster lives in an include
+M10 let an unreadable workspace abort Doctor: exit=1 KILLED
+  ['Tests  1 failed | 19 passed (20)']
+  failed: repairSystemAgentWorkspacePin > warns instead of failing Doctor when a workspace cannot be read
+
+working tree restored: clean

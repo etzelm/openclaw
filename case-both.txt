@@ -1,0 +1,140 @@
+# case: both
+profile ready: case=both
+
+## user files before (sha256 prefix)
+ad41d5489edec715  SOUL.md
+1365ee567b46c64a  MEMORY.md
+2253daed8b60a164  memory/2026-10-01.md
+06de15d2f196c540  main/SOUL.md
+5ce5a3a1295bb699  main/memory/2026-10-01.md
+c8815c26ac19a76b  dev/SOUL.md
+
+## gateway before
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## base build (upstream main 66bd35b4e5f2): openclaw doctor --fix --non-interactive
+exit=0
+◇  Workspace ───────────────────────────────────────────────────────────╮
+│  Agent "main": - Tip: back up the agent workspace in a private git    │
+│  /concepts/agent-workspace#git-backup-recommended-private             │
+◇  Workspace ──────────────────────────────────────────────────────────────╮
+│  Agent "dev": - Tip: back up the agent workspace in a private git repo;  │
+│  /concepts/agent-workspace#git-backup-recommended-private                │
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│  Agent "dev": Memory system not found in workspace.                                    │
+agents.entries.main = {} | agents.entries.dev = {}
+
+## patched build: openclaw doctor (no --fix)
+exit=0
+│  Agent "main" has workspace files in both $OPENCLAW_HOME/workspace (its  │
+│  working directory) and $OPENCLAW_HOME/workspace/main (its persona and   │
+│  memory). Doctor left both unchanged; set agents.entries.main.workspace  │
+│  to the directory to keep.                                               │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+agents.entries.main = {} | agents.entries.dev = {}
+
+## patched build: openclaw doctor --fix --non-interactive
+exit=0
+│  Agent "main" has workspace files in both $OPENCLAW_HOME/workspace (its  │
+│  working directory) and $OPENCLAW_HOME/workspace/main (its persona and   │
+│  memory). Doctor left both unchanged; set agents.entries.main.workspace  │
+│  to the directory to keep.                                               │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+agents.entries.main = {} | agents.entries.dev = {}
+
+## patched build: openclaw agents list --json (main, dev workspace)
+main -> <profile>/workspace/main
+dev -> <profile>/workspace/dev
+
+## gateway after
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## user files after (sha256 prefix)
+ad41d5489edec715  SOUL.md
+1365ee567b46c64a  MEMORY.md
+2253daed8b60a164  memory/2026-10-01.md
+06de15d2f196c540  main/SOUL.md
+5ce5a3a1295bb699  main/memory/2026-10-01.md
+c8815c26ac19a76b  dev/SOUL.md
