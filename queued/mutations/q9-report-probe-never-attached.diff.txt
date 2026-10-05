@@ -1,0 +1,11 @@
+--- /dev/stdin	2026-10-04 22:52:29
++++ $W/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts	2026-10-04 22:52:29
+@@ -86,7 +86,7 @@
+     context.admit(stage, (request, dispatch) =>
+       requestSessionEntryCurrentAdmission(
+         target.sessionEntryCurrentSource,
+-        ownerProbe && stage === "commit" && isRecord(request.facts)
++        false && ownerProbe && stage === "commit" && isRecord(request.facts)
+           ? { ...request, facts: { ...request.facts, publication: ownerProbe.fact } }
+           : request,
+         { database },

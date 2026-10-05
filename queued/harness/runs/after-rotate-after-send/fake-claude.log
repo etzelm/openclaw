@@ -1,0 +1,16 @@
+=== turn1 (account A)
+{"at":"2026-10-05T05:43:45.223Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T05:43:45.591Z","pid":19559,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T05:43:45.593Z","pid":19559,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T05:43:45.608Z","pid":19559,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"9f1eda7bc76d6f026e56f59f719fd9a8d47ab1044d61d4487aff7b64196376e3","promptFile":"$RUN/fake-claude.log.user-19559-1.txt"}
+=== turn2 (account A's token is valid for hours; the child rotates it to a new account-A token after the prompt arrives)
+{"at":"2026-10-05T05:43:51.889Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T05:43:52.222Z","pid":19642,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T05:43:52.224Z","pid":19642,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T05:43:52.237Z","pid":19642,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"aa5c99f60877055c963cce6314649d7c9a5b1bce1265b20d2469446e0b44be69","promptFile":"$RUN/fake-claude.log.user-19642-1.txt"}
+{"at":"2026-10-05T05:43:52.242Z","pid":19642,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (account A, the rotated token, fresh claude session)
+{"at":"2026-10-05T05:43:58.247Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T05:43:58.463Z","pid":19720,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T05:43:58.465Z","pid":19720,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T05:43:58.466Z","pid":19720,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"9df94b271c64479dc5fac79423aafc17510d552f05edd2e1e8ab976db2846e6b","promptFile":"$RUN/fake-claude.log.user-19720-1.txt"}

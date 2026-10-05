@@ -1,0 +1,11 @@
+--- /dev/stdin	2026-10-04 22:48:59
++++ $W/src/config/sessions/cli-history-boundary.ts	2026-10-04 22:48:59
+@@ -92,7 +92,7 @@
+   try {
+     holds = writer?.confirmsOwner?.() === true;
+   } catch {
+-    // An owner that cannot be confirmed does not hold.
++    holds = true;
+   }
+   Atomics.store(new Int32Array(fact.verdict), 0, holds ? 1 : 0);
+   return true;

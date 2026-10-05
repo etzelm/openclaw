@@ -1,0 +1,192 @@
+# turn exit codes | per turn promptChars/historyPrompt (/REFUSED = 'CLI history authority changed before execution') | per delivered user message chars:PINEAPPLE-7 count,BANANA-3 count | stored boundary after the last turn | profile requests that reached the STUB
+grep: base-allowed/turns.log: No such file or directory
+grep: base-allowed/turn*.err: No such file or directory
+grep: base-allowed/turn*.err: No such file or directory
+grep: base-allowed/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-allowed/transcript-and-boundary.txt: No such file or directory
+grep: base-allowed/fake-claude.log: No such file or directory
+allowed | base | | -/- | |  | stubProfileRequests=
+allowed | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+grep: base-different-account/turns.log: No such file or directory
+grep: base-different-account/turn*.err: No such file or directory
+grep: base-different-account/turn*.err: No such file or directory
+grep: base-different-account/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-different-account/transcript-and-boundary.txt: No such file or directory
+grep: base-different-account/fake-claude.log: No such file or directory
+different-account | base | | -/- | |  | stubProfileRequests=
+different-account | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+grep: base-revoked/turns.log: No such file or directory
+grep: base-revoked/turn*.err: No such file or directory
+grep: base-revoked/turn*.err: No such file or directory
+grep: base-revoked/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-revoked/transcript-and-boundary.txt: No such file or directory
+grep: base-revoked/fake-claude.log: No such file or directory
+revoked | base | | -/- | |  | stubProfileRequests=
+revoked | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=1
+grep: base-reassign-before-send/turns.log: No such file or directory
+grep: base-reassign-before-send/turn*.err: No such file or directory
+grep: base-reassign-before-send/turn*.err: No such file or directory
+grep: base-reassign-before-send/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-reassign-before-send/transcript-and-boundary.txt: No such file or directory
+grep: base-reassign-before-send/fake-claude.log: No such file or directory
+reassign-before-send | base | | -/- | |  | stubProfileRequests=
+reassign-before-send | after | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=2
+grep: base-revoke-before-send/turns.log: No such file or directory
+grep: base-revoke-before-send/turn*.err: No such file or directory
+grep: base-revoke-before-send/turn*.err: No such file or directory
+grep: base-revoke-before-send/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-revoke-before-send/transcript-and-boundary.txt: No such file or directory
+grep: base-revoke-before-send/fake-claude.log: No such file or directory
+revoke-before-send | base | | -/- | |  | stubProfileRequests=
+revoke-before-send | after | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=2
+grep: base-empty-first-turn-switch/turns.log: No such file or directory
+grep: base-empty-first-turn-switch/turn*.err: No such file or directory
+grep: base-empty-first-turn-switch/turn*.err: No such file or directory
+grep: base-empty-first-turn-switch/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-empty-first-turn-switch/transcript-and-boundary.txt: No such file or directory
+grep: base-empty-first-turn-switch/fake-claude.log: No such file or directory
+empty-first-turn-switch | base | | -/- | |  | stubProfileRequests=
+empty-first-turn-switch | after | exit=0 exit=0 | 82/none 48/none | 82:0,1 48:0,0 | {"state":"unknown"} | stubProfileRequests=3
+grep: base-coverage-switch/turns.log: No such file or directory
+grep: base-coverage-switch/turn*.err: No such file or directory
+grep: base-coverage-switch/turn*.err: No such file or directory
+grep: base-coverage-switch/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-coverage-switch/transcript-and-boundary.txt: No such file or directory
+grep: base-coverage-switch/fake-claude.log: No such file or directory
+coverage-switch | base | | -/- | |  | stubProfileRequests=
+coverage-switch | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3
+grep: base-skill-config-dir/turns.log: No such file or directory
+grep: base-skill-config-dir/turn*.err: No such file or directory
+grep: base-skill-config-dir/turn*.err: No such file or directory
+grep: base-skill-config-dir/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-skill-config-dir/transcript-and-boundary.txt: No such file or directory
+grep: base-skill-config-dir/fake-claude.log: No such file or directory
+skill-config-dir | base | | -/- | |  | stubProfileRequests=
+skill-config-dir | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+grep: base-skill-config-dir-persistent/turns.log: No such file or directory
+grep: base-skill-config-dir-persistent/turn*.err: No such file or directory
+grep: base-skill-config-dir-persistent/turn*.err: No such file or directory
+grep: base-skill-config-dir-persistent/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-skill-config-dir-persistent/transcript-and-boundary.txt: No such file or directory
+grep: base-skill-config-dir-persistent/fake-claude.log: No such file or directory
+skill-config-dir-persistent | base | | -/- | |  | stubProfileRequests=
+skill-config-dir-persistent | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+grep: base-keychain-allowed/turns.log: No such file or directory
+grep: base-keychain-allowed/turn*.err: No such file or directory
+grep: base-keychain-allowed/turn*.err: No such file or directory
+grep: base-keychain-allowed/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-keychain-allowed/transcript-and-boundary.txt: No such file or directory
+grep: base-keychain-allowed/fake-claude.log: No such file or directory
+keychain-allowed | base | | -/- | |  | stubProfileRequests=
+keychain-allowed | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+grep: base-keychain-ambiguous-prep/turns.log: No such file or directory
+grep: base-keychain-ambiguous-prep/turn*.err: No such file or directory
+grep: base-keychain-ambiguous-prep/turn*.err: No such file or directory
+grep: base-keychain-ambiguous-prep/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-keychain-ambiguous-prep/transcript-and-boundary.txt: No such file or directory
+grep: base-keychain-ambiguous-prep/fake-claude.log: No such file or directory
+keychain-ambiguous-prep | base | | -/- | |  | stubProfileRequests=
+keychain-ambiguous-prep | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+grep: base-keychain-fails-before-send/turns.log: No such file or directory
+grep: base-keychain-fails-before-send/turn*.err: No such file or directory
+grep: base-keychain-fails-before-send/turn*.err: No such file or directory
+grep: base-keychain-fails-before-send/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-keychain-fails-before-send/transcript-and-boundary.txt: No such file or directory
+grep: base-keychain-fails-before-send/fake-claude.log: No such file or directory
+keychain-fails-before-send | base | | -/- | |  | stubProfileRequests=
+keychain-fails-before-send | after | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=2
+grep: base-keychain-fails-at-commit/turns.log: No such file or directory
+grep: base-keychain-fails-at-commit/turn*.err: No such file or directory
+grep: base-keychain-fails-at-commit/turn*.err: No such file or directory
+grep: base-keychain-fails-at-commit/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-keychain-fails-at-commit/transcript-and-boundary.txt: No such file or directory
+grep: base-keychain-fails-at-commit/fake-claude.log: No such file or directory
+keychain-fails-at-commit | base | | -/- | |  | stubProfileRequests=
+keychain-fails-at-commit | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3
+grep: base-skill-config-dir-added/turns.log: No such file or directory
+grep: base-skill-config-dir-added/turn*.err: No such file or directory
+grep: base-skill-config-dir-added/turn*.err: No such file or directory
+grep: base-skill-config-dir-added/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-skill-config-dir-added/transcript-and-boundary.txt: No such file or directory
+grep: base-skill-config-dir-added/fake-claude.log: No such file or directory
+skill-config-dir-added | base | | -/- | |  | stubProfileRequests=
+skill-config-dir-added | after | exit=0 exit=0 exit=0 exit=0 | 85/none 516/present 48/none 48/none | 85:1,0 516:1,0 48:0,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=4
+grep: base-record-credential-mismatch/turns.log: No such file or directory
+grep: base-record-credential-mismatch/turn*.err: No such file or directory
+grep: base-record-credential-mismatch/turn*.err: No such file or directory
+grep: base-record-credential-mismatch/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-record-credential-mismatch/transcript-and-boundary.txt: No such file or directory
+grep: base-record-credential-mismatch/fake-claude.log: No such file or directory
+record-credential-mismatch | base | | -/- | |  | stubProfileRequests=
+record-credential-mismatch | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+grep: base-record-relabel/turns.log: No such file or directory
+grep: base-record-relabel/turn*.err: No such file or directory
+grep: base-record-relabel/turn*.err: No such file or directory
+grep: base-record-relabel/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-record-relabel/transcript-and-boundary.txt: No such file or directory
+grep: base-record-relabel/fake-claude.log: No such file or directory
+record-relabel | base | | -/- | |  | stubProfileRequests=
+record-relabel | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+grep: base-profile-timeout/turns.log: No such file or directory
+grep: base-profile-timeout/turn*.err: No such file or directory
+grep: base-profile-timeout/turn*.err: No such file or directory
+grep: base-profile-timeout/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-profile-timeout/transcript-and-boundary.txt: No such file or directory
+grep: base-profile-timeout/fake-claude.log: No such file or directory
+profile-timeout | base | | -/- | |  | stubProfileRequests=
+profile-timeout | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+grep: base-profile-401/turns.log: No such file or directory
+grep: base-profile-401/turn*.err: No such file or directory
+grep: base-profile-401/turn*.err: No such file or directory
+grep: base-profile-401/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-profile-401/transcript-and-boundary.txt: No such file or directory
+grep: base-profile-401/fake-claude.log: No such file or directory
+profile-401 | base | | -/- | |  | stubProfileRequests=
+profile-401 | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+grep: base-expired-unattested/turns.log: No such file or directory
+grep: base-expired-unattested/turn*.err: No such file or directory
+grep: base-expired-unattested/turn*.err: No such file or directory
+grep: base-expired-unattested/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-expired-unattested/transcript-and-boundary.txt: No such file or directory
+grep: base-expired-unattested/fake-claude.log: No such file or directory
+expired-unattested | base | | -/- | |  | stubProfileRequests=
+expired-unattested | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=1
+grep: base-refresh-due/turns.log: No such file or directory
+grep: base-refresh-due/turn*.err: No such file or directory
+grep: base-refresh-due/turn*.err: No such file or directory
+grep: base-refresh-due/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-refresh-due/transcript-and-boundary.txt: No such file or directory
+grep: base-refresh-due/fake-claude.log: No such file or directory
+refresh-due | base | | -/- | |  | stubProfileRequests=
+refresh-due | after | exit=0 exit=0 exit=0 | 85/none 83/none 655/present | 85:1,0 83:0,1 655:1,1 | {"state":"known","maxSeq":6} | stubProfileRequests=4
+grep: base-rotate-after-send/turns.log: No such file or directory
+grep: base-rotate-after-send/turn*.err: No such file or directory
+grep: base-rotate-after-send/turn*.err: No such file or directory
+grep: base-rotate-after-send/turn*.err: No such file or directory
+./outcomes.sh: line 9: [: -gt: unary operator expected
+tail: base-rotate-after-send/transcript-and-boundary.txt: No such file or directory
+grep: base-rotate-after-send/fake-claude.log: No such file or directory
+rotate-after-send | base | | -/- | |  | stubProfileRequests=
+rotate-after-send | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3
+queued-reassign | base | exit=0 exit=0 exit=0 | 85/none 551/present 655/present | 85:1,0 551:1,1 655:1,1 | {"state":"known","maxSeq":6} | stubProfileRequests=3
+queued-reassign | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3

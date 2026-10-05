@@ -1,0 +1,44 @@
+$ pnpm test src/config/sessions/cli-history-owner-probe.test.ts
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/config/sessions/cli-history-owner-probe.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m$W[39m
+
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > does not hold until the host answers 1ms
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > holds only when the host's live owner check holds 0ms
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > answers a probe that has no live owner check or no writer as not holding 0ms
+ ×  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > treats an owner check that throws as not holding 3ms
+[31m   → expected true to be false // Object.is equality[39m
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > leaves other admission facts and malformed probes unanswered 0ms
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > asks workers to probe only for writers with a live owner check 0ms
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+ FAIL   runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > treats an owner check that throws as not holding
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/config/sessions/cli-history-owner-probe.test.ts:48:27
+    [90m 46|[39m     });
+    [90m 47|[39m     expect(answerCliHistoryOwnerProbe(probe.fact, failing)).toBe(true);
+    [90m 48|[39m     expect(probe.holds()).toBe(false);
+    [90m   |[39m                           [31m^[39m
+    [90m 49|[39m   });
+    [90m 50|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 22:49:00
+[2m   Duration [22m 501ms[2m (worker 85%, transform 7%, setup 5%, tests 2%, import 1%)[22m
+
+[test] failed 1 Vitest shard in 1.22s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

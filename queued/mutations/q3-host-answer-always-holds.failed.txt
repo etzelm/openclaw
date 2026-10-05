@@ -1,0 +1,8 @@
+CLI history owner probe > answers a probe that has no live owner check or no writer as not holding
+CLI history owner probe > holds only when the host's live owner check holds
+CLI history owner probe > treats an owner check that throws as not holding
+native CLI login owner > confirms the owner for a worker commit only after its awaited preparation
+native CLI login owner > covers a transcript report only while the owner holds as the write is sent
+native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued
+native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued
+native CLI login owner > keeps a reply but stops coverage once the login can no longer be established

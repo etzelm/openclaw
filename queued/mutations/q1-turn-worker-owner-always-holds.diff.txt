@@ -1,0 +1,11 @@
+--- /dev/stdin	2026-10-04 22:46:20
++++ $W/src/config/sessions/session-turn.worker.ts	2026-10-04 22:46:20
+@@ -35,7 +35,7 @@
+       context.admit("transaction", probe.fact);
+       probed = true;
+     }
+-    return probe.holds();
++    return true;
+   };
+   const owned = () =>
+     runWithCliHistoryWriter(

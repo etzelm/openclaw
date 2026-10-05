@@ -1,0 +1,14 @@
+--- /dev/stdin	2026-10-04 22:55:08
++++ $W/src/config/sessions/session-turn.worker.ts	2026-10-04 22:55:08
+@@ -31,10 +31,7 @@
+   const probe = createCliHistoryOwnerProbe();
+   let probed = false;
+   const confirmsOwner = () => {
+-    if (!probed) {
+-      context.admit("transaction", probe.fact);
+-      probed = true;
+-    }
++    context.admit("transaction", probe.fact);
+     return probe.holds();
+   };
+   const owned = () =>

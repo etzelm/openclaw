@@ -1,0 +1,84 @@
+$ pnpm test src/config/sessions/cli-history-owner-probe.test.ts
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/config/sessions/cli-history-owner-probe.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m$W[39m
+
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > does not hold until the host answers 1ms
+ ×  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > holds only when the host's live owner check holds 3ms
+[31m   → expected true to be false // Object.is equality[39m
+ ×  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > answers a probe that has no live owner check or no writer as not holding 0ms
+[31m   → expected true to be false // Object.is equality[39m
+ ×  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > treats an owner check that throws as not holding 0ms
+[31m   → expected true to be false // Object.is equality[39m
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > leaves other admission facts and malformed probes unanswered 0ms
+ ✓  runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > asks workers to probe only for writers with a live owner check 0ms
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+ FAIL   runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > holds only when the host's live owner check holds
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/config/sessions/cli-history-owner-probe.test.ts:30:26
+    [90m 28|[39m     const lost = createCliHistoryOwnerProbe();
+    [90m 29|[39m     expect(answerCliHistoryOwnerProbe(lost.fact, writer(() => false)))…
+    [90m 30|[39m     expect(lost.holds()).toBe(false);
+    [90m   |[39m                          [31m^[39m
+    [90m 31|[39m   });
+    [90m 32|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+ FAIL   runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > answers a probe that has no live owner check or no writer as not holding
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/config/sessions/cli-history-owner-probe.test.ts:36:31
+    [90m 34|[39m     const unchecked = createCliHistoryOwnerProbe();
+    [90m 35|[39m     expect(answerCliHistoryOwnerProbe(unchecked.fact, writer())).toBe(…
+    [90m 36|[39m     expect(unchecked.holds()).toBe(false);
+    [90m   |[39m                               [31m^[39m
+    [90m 37|[39m     const orphaned = createCliHistoryOwnerProbe();
+    [90m 38|[39m     expect(answerCliHistoryOwnerProbe(orphaned.fact, undefined)).toBe(…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+ FAIL   runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > treats an owner check that throws as not holding
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/config/sessions/cli-history-owner-probe.test.ts:48:27
+    [90m 46|[39m     });
+    [90m 47|[39m     expect(answerCliHistoryOwnerProbe(probe.fact, failing)).toBe(true);
+    [90m 48|[39m     expect(probe.holds()).toBe(false);
+    [90m   |[39m                           [31m^[39m
+    [90m 49|[39m   });
+    [90m 50|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 22:48:07
+[2m   Duration [22m 789ms[2m (worker 89%, transform 7%, setup 3%, tests 1%)[22m
+
+[test] failed 1 Vitest shard in 1.59s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

@@ -1,0 +1,12 @@
+--- /dev/stdin	2026-10-04 22:49:01
++++ $W/src/config/sessions/session-turn.ts	2026-10-04 22:49:01
+@@ -130,9 +130,6 @@
+       assertCurrent,
+       candidateKind: "session-turn",
+       onTransactionFacts(facts) {
+-        if (answerCliHistoryOwnerProbe(facts, cliWriter)) {
+-          return true;
+-        }
+         if (!isRecord(facts) || facts.kind !== "session-turn-custody") {
+           return false;
+         }
