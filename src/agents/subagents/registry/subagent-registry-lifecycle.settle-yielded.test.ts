@@ -101,6 +101,30 @@ describe("settling a yielded run through the completion owner", () => {
     expect(readLifecycleRun(entry).execution.outcome).toEqual({ status: "ok" });
   });
 
+  it("never stamps a reason on a collector whose completion was already frozen", async () => {
+    const frozen = { status: "done" as const, structured: { answer: 1 } };
+    const finished = createRunEntry({
+      collect: true,
+      endedAt: 4_000,
+      outcome: { status: "ok" },
+      collectorCompletion: frozen,
+    });
+    await createController(finished).completeSubagentRun(
+      request(finished, { settleYielded: true }),
+    );
+    expect(readLifecycleRun(finished).collectorCompletion).toEqual(frozen);
+
+    const yielded = createRunEntry({
+      collect: true,
+      endedAt: 4_000,
+      pauseReason: "sessions_yield",
+      collectorCompletion: frozen,
+    });
+    await createController(yielded).completeSubagentRun(request(yielded, { settleYielded: true }));
+    expect(readLifecycleRun(yielded).execution.outcome).toMatchObject({ status: "error" });
+    expect(readLifecycleRun(yielded).collectorCompletion).toEqual(frozen);
+  });
+
   it("keeps a kill claim published while the settle request is still preparing", async () => {
     const entry = createRunEntry({ endedAt: 4_000, pauseReason: "sessions_yield" });
     const controller = createController(entry);

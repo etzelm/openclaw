@@ -714,9 +714,12 @@ function planTerminalCompletion(
     }
   }
   if (entry.collect) {
-    updateSwarmCollectorCompletion(entry, params.getRuntimeConfig(), {
-      entry: prepared.collectorSession?.entry,
-    });
+    updateSwarmCollectorCompletion(
+      entry,
+      params.getRuntimeConfig(),
+      { entry: prepared.collectorSession?.entry },
+      completeParams.settleYielded === true ? "yielded_without_result" : undefined,
+    );
   } else {
     updateSubagentArchiveAtMs(entry, params.getRuntimeConfig());
   }

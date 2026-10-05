@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // Preserve module setup before modules that consume it.
 // oxfmt-ignore
 import { makeRestartRecoveryRun as makeRunRecord, useSubagentRestartRecoveryFixture } from "./subagent-restart-recovery.test-support.js";
+import { codeModeSwarmHandlers } from "../../code-mode-swarm.runtime.js";
+import type { ToolSearchToolContext } from "../../tool-search-types.js";
 import { createAgentsWaitTool } from "../../tools/agents-wait-tool.js";
 import { createSubagentsTool } from "../../tools/subagents-tool.js";
 import { observeSubagentExecution } from "./subagent-execution-observation.js";
@@ -11,6 +13,7 @@ import { writeSubagentSessionEntry } from "./subagent-registry.persistence.test-
 import { loadSubagentRegistryFromSqlite } from "./subagent-registry.store.sqlite.js";
 import {
   addSubagentRunForTests,
+  finalizeInterruptedSubagentRun,
   initSubagentRegistry,
   resetSubagentRegistryForTests,
   testing,
@@ -42,7 +45,12 @@ describe("yielded run settlement", () => {
     const tool = createAgentsWaitTool({ agentSessionKey: "agent:main:main", agentId: "main" });
     const result = await tool.execute("wait", { ids: [runId], timeoutSeconds: 0 });
     return result.details as {
-      completed: Array<{ status: string; error?: string }>;
+      completed: Array<{
+        status: string;
+        error?: string;
+        schemaError?: string;
+        reason?: string;
+      }>;
       pending: string[];
     };
   };
@@ -52,7 +60,10 @@ describe("yielded run settlement", () => {
     { shape: "execution.outcome absent", outcome: undefined },
     { shape: "execution.outcome ok with endedAt", outcome: { status: "ok" as const } },
   ];
-  const legacyYieldedCollector = (outcome?: { status: "ok" }) =>
+  const legacyYieldedCollector = (
+    outcome?: { status: "ok" },
+    overrides: Partial<SubagentRunRecord> = {},
+  ) =>
     makeRunRecord({
       runId: "legacy-yielded-collector",
       childSessionKey: COLLECTOR_KEY,
@@ -65,6 +76,7 @@ describe("yielded run settlement", () => {
       startedAt: T0 - 5 * MINUTE_MS,
       endedAt: T0 - 4 * MINUTE_MS,
       ...(outcome ? { outcome } : {}),
+      ...overrides,
     });
 
   it.each(LEGACY_SHAPES)(
@@ -126,12 +138,33 @@ describe("yielded run settlement", () => {
         },
       });
       expect(settled?.endedReason).toBe("subagent-error");
-      expect(settled?.collectorCompletion?.status).toBe("failed");
+      expect(settled?.collectorCompletion).toMatchObject({
+        status: "failed",
+        reason: "yielded_without_result",
+      });
       const waited = await waitSurface("legacy-yielded-collector");
       expect(waited.pending).toEqual([]);
       expect(waited.completed).toMatchObject([
-        { status: "failed", error: expect.stringContaining("no recorded collectorCompletion") },
+        {
+          status: "failed",
+          error: expect.stringContaining("no recorded collectorCompletion"),
+          reason: "yielded_without_result",
+        },
       ]);
+      // The agents.run wait bridge returns the same completion.
+      await expect(
+        codeModeSwarmHandlers.agentWait({
+          request: {
+            id: "bridge:agentWait:1",
+            method: "agentWait",
+            args: ["legacy-yielded-collector"],
+          },
+          ctx: { sessionKey: "agent:main:main", agentId: "main" } as ToolSearchToolContext,
+        }),
+      ).resolves.toMatchObject({
+        status: "failed",
+        reason: "yielded_without_result",
+      });
       for (const control of [orchestrator, legacyLeaf]) {
         expect(persisted(control.runId), control.runId).toMatchObject({
           pauseReason: "sessions_yield",
@@ -141,6 +174,74 @@ describe("yielded run settlement", () => {
       }
     },
   );
+
+  it("records both schemaError and reason on a legacy collector with an outputSchema", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(T0);
+    await writeSubagentSessionEntry({
+      stateDir: fixture.stateDir,
+      agentId: "main",
+      sessionKey: COLLECTOR_KEY,
+      sessionId: "sess-legacy-collector",
+      defaultSessionId: "sess-legacy-collector",
+    });
+    await addSubagentRunForTests(
+      legacyYieldedCollector(undefined, {
+        outputSchema: { type: "object", properties: { answer: { type: "number" } } },
+      }),
+    );
+    await restartRegistry();
+
+    await testing.sweepOnceForTests();
+    await fixture.settle();
+
+    expect(persisted("legacy-yielded-collector")?.collectorCompletion).toEqual({
+      status: "failed",
+      schemaError: "structured_output was not called",
+      reason: "yielded_without_result",
+    });
+    const waited = await waitSurface("legacy-yielded-collector");
+    expect(waited.completed).toMatchObject([
+      {
+        status: "failed",
+        schemaError: "structured_output was not called",
+        reason: "yielded_without_result",
+      },
+    ]);
+  });
+
+  it("carries no reason on a collector that fails for any other cause", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(T0);
+    await addSubagentRunForTests(
+      makeRunRecord({
+        runId: "ordinary-failed-collector",
+        childSessionKey: "agent:main:subagent:ordinary-collector",
+        requesterAgentId: "main",
+        collect: true,
+        groupId: "group-ordinary",
+        swarmRequesterSessionKey: "agent:main:main",
+        expectsCompletionMessage: false,
+        startedAt: T0 - MINUTE_MS,
+      }),
+    );
+    await finalizeInterruptedSubagentRun({
+      runId: "ordinary-failed-collector",
+      error: "interrupted by restart",
+    });
+    await fixture.settle();
+
+    expect(persisted("ordinary-failed-collector")?.collectorCompletion).toEqual({
+      status: "failed",
+    });
+    const waited = await waitSurface("ordinary-failed-collector");
+    expect(waited.completed).toHaveLength(1);
+    expect(waited.completed[0]).toMatchObject({
+      status: "failed",
+      error: "interrupted by restart",
+    });
+    expect("reason" in (waited.completed[0] ?? {})).toBe(false);
+  });
 
   it("never reports a yielded run as done or finished while its waiter pends", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
