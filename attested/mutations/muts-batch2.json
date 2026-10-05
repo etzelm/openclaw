@@ -1,0 +1,52 @@
+[
+ {
+  "id": "a8-error-status-accepted",
+  "origin": "new",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    if (response.ok) {",
+  "new": "    if (response.status !== 0) {",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ]
+ },
+ {
+  "id": "w3-report-worker-ignores-owner-stamp",
+  "origin": "new",
+  "file": "src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts",
+  "old": "command.input.cliHistoryOwnerConfirmed === true ? target.cliWriter : undefined",
+  "new": "target.cliWriter",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ]
+ },
+ {
+  "id": "w4-report-host-stamps-owner-unchecked",
+  "origin": "new",
+  "file": "src/config/sessions/session-accessor.sqlite-transcript-reports.ts",
+  "old": "cliHistoryOwnerConfirmed:\n                                          cliWriter.confirmsOwner?.() !== false,",
+  "new": "cliHistoryOwnerConfirmed: true,",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ]
+ },
+ {
+  "id": "s2-seam-attests-every-backend",
+  "origin": "new",
+  "file": "src/agents/cli-credentials.ts",
+  "old": "  return backendId === \"claude-cli\" ? await attestClaudeNativeLoginOwner({ env }) : {};",
+  "new": "  return await attestClaudeNativeLoginOwner({ env });",
+  "tests": [
+   "src/agents/cli-credentials.test.ts"
+  ]
+ },
+ {
+  "id": "m3-worker-facts-ignore-owner",
+  "origin": "earlier",
+  "file": "src/config/sessions/cli-history-boundary.ts",
+  "old": "  return writer && writer.confirmsOwner?.() !== false ? cliHistoryWriterFacts(writer) : undefined;",
+  "new": "  return writer ? cliHistoryWriterFacts(writer) : undefined;",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ]
+ }
+]

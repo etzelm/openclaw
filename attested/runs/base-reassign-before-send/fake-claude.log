@@ -1,0 +1,9 @@
+=== turn1 (account A)
+{"at":"2026-10-05T00:39:25.860Z","pid":1008,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T00:39:25.862Z","pid":1008,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T00:39:25.864Z","pid":1008,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"c64ccc72e65eccd409fe5b04b45e614858e3f3f6786cf735fa7156508793d5d2","promptFile":"$RUN/fake-claude.log.user-1008-1.txt"}
+=== turn2 (account A at launch; login reassigned to B while claude initializes, before the prompt is sent)
+{"at":"2026-10-05T00:39:33.687Z","pid":3645,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T00:39:33.689Z","pid":3645,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T00:39:33.696Z","pid":3645,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+{"at":"2026-10-05T00:39:33.697Z","pid":3645,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"chars":48,"sha256":"7e8fc806e1d995f73365015376ff5be2c6807dc223a9c4b4f9a328a063afef81","promptFile":"$RUN/fake-claude.log.user-3645-1.txt"}

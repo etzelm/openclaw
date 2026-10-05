@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/execute-plugin.ts b/src/agents/cli-runner/execute-plugin.ts
+index 7a2f2315a97..82b66e4443d 100644
+--- a/src/agents/cli-runner/execute-plugin.ts
++++ b/src/agents/cli-runner/execute-plugin.ts
+@@ -596,7 +596,7 @@ export async function executePluginOwnedProcess(params: {
+       useResume: params.useResume,
+       abortSignal: signal,
+       assertCurrent: assertBoundaryCurrent,
+-      ...(assertBoundary ? { assertStreamCurrent: assertCurrent } : {}),
++      ...(assertBoundary ? { assertStreamCurrent: assertBoundaryCurrent } : {}),
+       timeoutMs: run.timeoutMs,
+       ...(run.executionMode ? { executionMode: run.executionMode } : {}),
+       ...(run.cliToolAvailability ? { toolAvailability: run.cliToolAvailability } : {}),

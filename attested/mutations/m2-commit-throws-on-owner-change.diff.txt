@@ -1,0 +1,13 @@
+diff --git a/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts b/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+index 860e755575b..0f1828369ff 100644
+--- a/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
++++ b/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+@@ -68,7 +68,7 @@ export function advanceCliHistoryBoundaryRangeInTransaction(
+   }
+   assertCurrent();
+   if (confirmsOwner?.() === false) {
+-    return false;
++    throw new Error("CLI history authority changed before execution");
+   }
+   writeSessionEntry(
+     database,

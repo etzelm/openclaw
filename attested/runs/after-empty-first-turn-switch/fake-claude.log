@@ -1,0 +1,12 @@
+=== turn1 (prepared under A; login reassigned to B before the prompt is sent; first turn, no recovery prompt)
+{"at":"2026-10-05T01:46:17.675Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:18.068Z","pid":50242,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:18.070Z","pid":50242,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:18.075Z","pid":50242,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+{"at":"2026-10-05T01:46:18.105Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-B","status":200}
+{"at":"2026-10-05T01:46:18.105Z","pid":50242,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"chars":82,"sha256":"0f201046fa44dd8f38e2bed256e4b682d02a6a5674bdfe0c2ae7d7aaf065f749","promptFile":"$RUN/fake-claude.log.user-50242-1.txt"}
+=== turn2 (back on account A)
+{"at":"2026-10-05T01:46:24.593Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:24.838Z","pid":50336,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:24.840Z","pid":50336,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:24.841Z","pid":50336,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"06fe7413feb46526868025ceaa04a745f3cbc75a8bb7246a5133b2270832fd7c","promptFile":"$RUN/fake-claude.log.user-50336-1.txt"}

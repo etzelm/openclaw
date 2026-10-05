@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..2b005f7618a 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -224,7 +224,7 @@ const CLAUDE_OAUTH_PROFILE_URL = "https://api.anthropic.com/api/oauth/profile";
+ const CLAUDE_OAUTH_PROFILE_TIMEOUT_MS = 3_000;
+ // Claude CLI refreshes a token within 5 minutes of expiry when it starts, before it accepts
+ // a prompt. Add slack so a token that is refresh-due by send time is already treated so here.
+-const CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS = 10 * 60_000;
++const CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS = 0;
+ const CLAUDE_NATIVE_LOGIN_ATTESTATION_LIMIT = 64;
+ // Fingerprints are keyed per process, so they name a token only inside this process and
+ // are never persisted. A token belongs to one account for its whole life, so an entry can

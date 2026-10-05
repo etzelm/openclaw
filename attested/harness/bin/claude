@@ -1,0 +1,98 @@
+#!/usr/bin/env node
+// Synthetic Claude Code child for the native-login history harness. It speaks the stream-json
+// control protocol, records what crossed its stdin, and can rewrite the login on disk at
+// chosen moments to model reassignment or revocation while a run is in flight.
+import fs from "node:fs";
+import crypto from "node:crypto";
+import readline from "node:readline";
+import path from "node:path";
+import { execSync } from "node:child_process";
+
+if (process.argv.includes("--version")) {
+  console.log("2.1.290 (Claude Code)");
+  process.exit(0);
+}
+const log = process.env.FAKE_CLAUDE_LOG;
+// The login this child would be running under right now, read the way Claude reads it.
+const loginNow = () => {
+  const configDir = process.env.CLAUDE_CONFIG_DIR;
+  const account = configDir
+    ? path.join(configDir, ".claude.json")
+    : path.join(process.env.HOME ?? "", ".claude.json");
+  const credential = configDir
+    ? path.join(configDir, ".credentials.json")
+    : path.join(process.env.HOME ?? "", ".claude", ".credentials.json");
+  let uuid = null;
+  try {
+    uuid = JSON.parse(fs.readFileSync(account, "utf8")).oauthAccount.accountUuid;
+  } catch {}
+  // The account the credential itself belongs to: synthetic tokens are "synthetic-<account>[~n]".
+  let credentialAccount = null;
+  try {
+    const token = JSON.parse(fs.readFileSync(credential, "utf8")).claudeAiOauth.accessToken;
+    credentialAccount = String(token).replace(/^synthetic-/, "").replace(/~\d+$/, "");
+  } catch {}
+  return {
+    loginAccount: uuid,
+    credentialAccount,
+    loginCredentialPresent: fs.existsSync(credential),
+  };
+};
+const record = (event, extra = {}) => {
+  if (log) {
+    fs.appendFileSync(
+      log,
+      JSON.stringify({
+        at: new Date().toISOString(),
+        pid: process.pid,
+        event,
+        configDir: process.env.CLAUDE_CONFIG_DIR ?? null,
+        ...loginNow(),
+        ...extra,
+      }) + "\n",
+    );
+  }
+};
+const hook = (name) => {
+  const command = process.env[name];
+  if (command) {
+    execSync(command, { stdio: "ignore" });
+    record("hook-ran", { hook: name });
+  }
+};
+const send = (value) => process.stdout.write(JSON.stringify(value) + "\n");
+record("spawn", { argc: process.argv.length - 2 });
+let userMessages = 0;
+for await (const line of readline.createInterface({ input: process.stdin })) {
+  const message = JSON.parse(line);
+  if (message.type === "control_request" && message.request.subtype === "initialize") {
+    record("initialize");
+    hook("FAKE_ON_INIT");
+    send({
+      type: "control_response",
+      response: {
+        subtype: "success",
+        request_id: message.request_id,
+        response: { commands: [], models: [] },
+      },
+    });
+  } else if (message.type === "user") {
+    userMessages += 1;
+    const content = String(message.message.content);
+    const file = `${process.env.FAKE_CLAUDE_LOG}.user-${process.pid}-${userMessages}.txt`;
+    fs.writeFileSync(file, content);
+    record("user-message-received", {
+      chars: content.length,
+      sha256: crypto.createHash("sha256").update(content).digest("hex"),
+      promptFile: file,
+    });
+    hook("FAKE_ON_USER");
+    send({
+      type: "result",
+      subtype: "success",
+      is_error: false,
+      result: process.env.FAKE_REPLY ?? "STORED",
+      session_id: "fake-claude-session",
+    });
+  }
+}

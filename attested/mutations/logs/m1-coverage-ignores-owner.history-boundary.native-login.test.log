@@ -1,0 +1,133 @@
+$ pnpm test src/agents/cli-runner/history-boundary.native-login.test.ts
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/agents/cli-runner/history-boundary.native-login.test.ts
+[test] starting test/vitest/vitest.agents-support.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m$W[39m
+
+[vitest-workers] local cache hit after 2888ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared ce0c5bb14f74 in 2933ms (14498 inputs, 18482 outputs)
+ ✓  agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > reseeds a fresh session for the same native login 1694ms
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mrefuses history after the native login changes[33m 784[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mkeeps history unknown when the native login cannot be proven[33m 735[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mresolves ownership from the backend-selected config dir, not the Gateway login[33m 1410[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mresolves the owner under the run's skill env overrides, as execution does[33m 1628[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mdoes not credit Gateway-login history to a backend-selected account[33m 1428[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mhas no native owner when the child authenticates another way[33m 747[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mhas no native owner without a prepared backend to derive the child environment from[33m 1396[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mdoes not let the native login stand in for a forwarded credential[33m 753[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mdoes not apply this host's login to a node-placed CLI[33m 980[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mrejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant[33m 1570[2mms[22m[39m
+ [31m×[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mlooks the login up at each boundary and coverage commit, never at a liveness check[33m 1262[2mms[22m[39m
+[31m   → expected "readAttestedNativeCliLoginOwner" to be called 1 times, but got 0 times[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mbinds execution to the login the spawned environment selects[33m 1256[2mms[22m[39m
+ [31m×[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mruns a turn without saved history under another login but never covers it[33m 1472[2mms[22m[39m
+[31m   → expected { version: 1, …(6) } to match object { state: 'known', maxSeq: 1 }
+(5 matching properties omitted from actual)[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mkeeps a reply but stops coverage once the login can no longer be established[33m 1607[2mms[22m[39m
+ [31m×[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mrecords a turn whose login changed after preparation without covering it[33m 1187[2mms[22m[39m
+[31m   → expected { version: 1, …(6) } to match object { state: 'known', maxSeq: 1 }
+(5 matching properties omitted from actual)[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mowns history by the attested credential, never by the account record beside it[33m 2351[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mhas no owner when the profile endpoint does not attest the credential[33m 1275[2mms[22m[39m
+ ✓  agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses a recovery send on a rotated token it has not attested yet 1732ms
+ ✓  agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows 1264ms
+ ✓  agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account 1202ms
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mconfirms the owner for a worker commit only after its awaited preparation[33m 1572[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mruns a refresh-due turn without saved history but keeps covering it[33m 1305[2mms[22m[39m
+ ✓  agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no owner for an expired token this process never attested 1416ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/agents/cli-runner/history-boundary.native-login.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/agents/cli-runner/history-boundary.native-login.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/agents/cli-runner/history-boundary.native-login.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/agents/cli-runner/history-boundary.native-login.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/agents/cli-runner/history-boundary.native-login.test.ts: retiring openclaw.cron.receiptAuthority
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mlooks the login up at each boundary and coverage commit, never at a liveness check
+[31m[1mAssertionError[22m: expected "readAttestedNativeCliLoginOwner" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m355:22[22m[39m
+    [90m353|[39m       lookup.mockClear();
+    [90m354|[39m       f.manager().appendMessage({ role: "user", content: "covered turn…
+    [90m355|[39m       expect(lookup).toHaveBeenCalledTimes(1);
+    [90m   |[39m                      [31m^[39m
+    [90m356|[39m       // Boundary and commit checks are local: no attestation, no netw…
+    [90m357|[39m       expect(attest).not.toHaveBeenCalled();
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m138:65[22m[39m
+ ❯ runWithCliHistoryWriter src/config/sessions/cli-history-boundary.ts:41:36
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m138:15[22m[39m
+[90m [2m❯[22m Object.withRun src/agents/cli-runner/history-boundary.test-support.ts:[2m50:14[22m[39m
+[90m [2m❯[22m withNativeWriter src/agents/cli-runner/history-boundary.native-login.test.ts:[2m131:5[22m[39m
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m340:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mruns a turn without saved history under another login but never covers it
+[31m[1mAssertionError[22m: expected { version: 1, …(6) } to match object { state: 'known', maxSeq: 1 }
+(5 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "maxSeq": 1,[39m
+[31m+   "maxSeq": 2,[39m
+[2m    "state": "known",[22m
+[2m  }[22m
+
+[36m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m400:70[22m[39m
+    398|       expect(writer.confirmsOwner?.()).toBe(false);
+    399|       f.manager().appendMessage({ role: "user", content: "late login t…
+    400|       expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).t…
+       |                                                                      ^
+    401|         state: "known",
+    402|         maxSeq: before.maxSeq,
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m138:65[22m[39m
+ ❯ runWithCliHistoryWriter src/config/sessions/cli-history-boundary.ts:41:36
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m138:15[22m[39m
+[90m [2m❯[22m Object.withRun src/agents/cli-runner/history-boundary.test-support.ts:[2m50:14[22m[39m
+[90m [2m❯[22m withNativeWriter src/agents/cli-runner/history-boundary.native-login.test.ts:[2m131:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m agents-support [49m[39m src/agents/cli-runner/history-boundary.native-login.test.ts[2m > [22mnative CLI login owner[2m > [22mrecords a turn whose login changed after preparation without covering it
+[31m[1mAssertionError[22m: expected { version: 1, …(6) } to match object { state: 'known', maxSeq: 1 }
+(5 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "maxSeq": 1,[39m
+[31m+   "maxSeq": 2,[39m
+[2m    "state": "known",[22m
+[2m  }[22m
+
+[36m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m471:70[22m[39m
+    469|       loginIn(backend, "uuid:account-b");
+    470|       f.manager().appendMessage({ role: "user", content: "turn under a…
+    471|       expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).t…
+       |                                                                      ^
+    472|         state: "known",
+    473|         maxSeq: (before as { maxSeq: number }).maxSeq,
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m138:65[22m[39m
+ ❯ runWithCliHistoryWriter src/config/sessions/cli-history-boundary.ts:41:36
+[90m [2m❯[22m src/agents/cli-runner/history-boundary.native-login.test.ts:[2m138:15[22m[39m
+[90m [2m❯[22m Object.withRun src/agents/cli-runner/history-boundary.test-support.ts:[2m50:14[22m[39m
+[90m [2m❯[22m withNativeWriter src/agents/cli-runner/history-boundary.native-login.test.ts:[2m131:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m21 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 17:35:47
+[2m   Duration [22m 40.89s[2m (tests 80%, transform 15%, import 4%, worker 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 43.48s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

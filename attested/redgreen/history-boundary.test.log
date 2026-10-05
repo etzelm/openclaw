@@ -1,0 +1,36 @@
+$ pnpm test src/agents/cli-runner/history-boundary.test.ts   (tests from c276e5e3b6c, production from 769c35116e0)
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/agents/cli-runner/history-boundary.test.ts
+[vitest-workers] local cache hit after 4662ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared c106559ff3b8 in 4710ms (14498 inputs, 18482 outputs)
+[test] starting test/vitest/vitest.infra.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m$W[39m
+
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mestablishes coverage before the first transcript header and user row exist[33m 1654[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mretains same-account raw and compacted history without exposing private metadata[33m 770[2mms[22m[39m
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > distinguishes OAuth account identity from rotating or identity-less tokens 1095ms
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > compares resolved static tokens rather than the unchanged SecretRef 1120ms
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mrevokes retained read and coverage capabilities when their admitted run closes[33m 1284[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mdetaches background persistence without lending it the closed CLI history proof[33m 1339[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mcannot launder mixed history by returning to the original account[33m 1162[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mrefuses legacy, import, and downgrade gaps: unrecorded append[33m 1280[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mrefuses legacy, import, and downgrade gaps: rewrite[33m 4548[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mrefuses legacy, import, and downgrade gaps: missing provenance[33m 1101[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mrefuses legacy, import, and downgrade gaps: old version[33m 1178[2mms[22m[39m
+ ✓  infra  src/agents/cli-runner/history-boundary.test.ts > CLI transcript account boundary > never treats an authless runtime or borrowed native session as a new trusted history 1240ms
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22monly an empty reset can establish a fresh account boundary[33m 1219[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22madmits a finished writer's successor while refusing the live writer[33m 1740[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mrechecks a revived foreign writer after metadata planning yields[33m 1579[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mfences recovered history and CLI persistence after orchestrator-prior takes over[33m 1601[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mfences recovered history and CLI persistence after orchestrator-replacement takes over[33m 856[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/agents/cli-runner/history-boundary.test.ts[2m > [22mCLI transcript account boundary[2m > [22mfences recovered history and CLI persistence after direct-cli-recovery takes over[33m 1543[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 18:42:32
+[2m   Duration [22m 32.59s[2m (tests 83%, transform 10%, import 6%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 44.51s

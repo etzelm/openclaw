@@ -1,0 +1,20 @@
+diff --git a/src/agents/cli-credentials.ts b/src/agents/cli-credentials.ts
+index 9b9478207cb..c8315d92543 100644
+--- a/src/agents/cli-credentials.ts
++++ b/src/agents/cli-credentials.ts
+@@ -541,5 +541,14 @@ export function readAttestedNativeCliLoginOwner(
+   backendId: string,
+   env: NodeJS.ProcessEnv,
+ ): string | undefined {
+-  return backendId === "claude-cli" ? readClaudeNativeLoginOwner({ env }) : undefined;
++  const m = ((globalThis as Record<string, unknown>).__ocMemo ??= {}) as { at?: number; v?: string };
++  if (backendId !== "claude-cli") {
++    return undefined;
++  }
++  if (m.at !== undefined && Date.now() - m.at < 1000) {
++    return m.v;
++  }
++  m.at = Date.now();
++  m.v = readClaudeNativeLoginOwner({ env });
++  return m.v;
+ }

@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..a5d4e13342b 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -303,7 +303,7 @@ export async function attestClaudeNativeLoginOwner(
+   if (owner) {
+     claudeNativeLoginAttestations.delete(fingerprint);
+     claudeNativeLoginAttestations.set(fingerprint, owner);
+-    if (claudeNativeLoginAttestations.size > CLAUDE_NATIVE_LOGIN_ATTESTATION_LIMIT) {
++    if (claudeNativeLoginAttestations.size > Number.POSITIVE_INFINITY) {
+       const oldest = claudeNativeLoginAttestations.keys().next().value;
+       if (oldest !== undefined) {
+         claudeNativeLoginAttestations.delete(oldest);

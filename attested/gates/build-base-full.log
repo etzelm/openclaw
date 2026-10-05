@@ -1,0 +1,783 @@
+$ node --import ./scripts/tsx.mjs scripts/build-all.mts
+[build-all] native-protocol
+[build-all] native-protocol done in 94ms
+[build-all] plugins:assets:build
+$ node --import ./scripts/tsx.mjs scripts/bundled-plugin-assets.mts --phase build --defer-isolated
+[canvas] build: node scripts/bundle-a2ui.mjs
+<DIR>/a2ui.bundle.js  chunk │ size: 397.74 kB
+<DIR>/a2ui-v0.9.bundle.js  chunk │ size: 496.55 kB
+
+✔ rolldown v1.2.9 Finished in 180.85 ms
+[discord] build: node --import ../../scripts/tsx.mjs ../../scripts/build-discord-activity-sdk.mts && cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/discord
+[slack] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/slack
+[workboard] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/workboard
+[build-all] plugins:assets:build done in 5.21s
+[build-all] tsdown-ai
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 21.0s of this 21.2s build (99%).
+The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - openclaw-native-declarations buildStart (92%, 19.6s, 1 call)
+Additional hook time came from the hooks below and from hooks under 1s.
+3 hooks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - tsdown:deps resolveId (843 calls)
+  - rolldown-plugin-dts:resolver resolveId (928 calls)
+  - rolldown-plugin-dts:fake-js transform (136 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+[tsdown-build] invocation 1/1 finished in 22.0s
+[build-all] tsdown-ai done in 24.4s
+[build-all] tsdown-packages
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=54303; no output for 60s
+[tsdown-build] still running pid=54303; no output for 30s
+[tsdown-build] still running pid=54303; no output for 30s
+[tsdown-build] invocation 1/1 finished in 127.6s
+[build-all] tsdown-packages done in 2m 10.1s
+[build-all] tsdown-unified
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 10.2s of this 10.8s build (94%).
+The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - tsdown:deps generateBundle (75%, 8.1s, 1 call)
+Additional hook time came from the hooks below and from hooks under 1s.
+1 hook is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
+  - tsdown:deps resolveId (2110 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 10.3s of this 10.8s build (95%).
+The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - tsdown:deps generateBundle (74%, 8.0s, 1 call)
+Additional hook time came from the hooks below and from hooks under 1s.
+1 hook is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
+  - tsdown:deps resolveId (2720 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2400 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mA[0m[38;5;249mS[0m[38;5;249mM[0m[38;5;249m_[0m[38;5;249mC[0m[38;5;249mO[0m[38;5;249mN[0m[38;5;249mS[0m[38;5;249mT[0m[38;5;249mS[0m[38;5;249m[[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                               ──┬─  
+ [38;5;240m     │[0m                                 ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2423 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mE[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249ms[0m[38;5;249m[[0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                                 ──┬─  
+ [38;5;240m     │[0m                                   ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2400 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mA[0m[38;5;249mS[0m[38;5;249mM[0m[38;5;249m_[0m[38;5;249mC[0m[38;5;249mO[0m[38;5;249mN[0m[38;5;249mS[0m[38;5;249mT[0m[38;5;249mS[0m[38;5;249m[[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                               ──┬─  
+ [38;5;240m     │[0m                                 ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2423 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mE[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249ms[0m[38;5;249m[[0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                                 ──┬─  
+ [38;5;240m     │[0m                                   ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
+
+node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66352:28) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+       [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66352:29 [38;5;246m][0m
+       [38;5;246m│[0m
+ [38;5;246m66352 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249m`[0m[38;5;249m([0m[38;5;249m$[0m[38;5;249m{[0m[38;5;249me[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249m}[0m[38;5;249m)[0m[38;5;249m`[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m      │[0m                             ──┬─  
+ [38;5;240m      │[0m                               ╰─── Use of direct `eval` here.
+ [38;5;240m      │[0m 
+ [38;5;240m      │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m───────╯[0m
+
+node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66359:28) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+       [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66359:29 [38;5;246m][0m
+       [38;5;246m│[0m
+ [38;5;246m66359 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249m`[0m[38;5;249m([0m[38;5;249m$[0m[38;5;249m{[0m[38;5;249me[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249m}[0m[38;5;249m)[0m[38;5;249m`[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m      │[0m                             ──┬─  
+ [38;5;240m      │[0m                               ╰─── Use of direct `eval` here.
+ [38;5;240m      │[0m 
+ [38;5;240m      │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m───────╯[0m
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2400 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mA[0m[38;5;249mS[0m[38;5;249mM[0m[38;5;249m_[0m[38;5;249mC[0m[38;5;249mO[0m[38;5;249mN[0m[38;5;249mS[0m[38;5;249mT[0m[38;5;249mS[0m[38;5;249m[[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                               ──┬─  
+ [38;5;240m     │[0m                                 ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2423 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mE[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249ms[0m[38;5;249m[[0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                                 ──┬─  
+ [38;5;240m     │[0m                                   ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
+
+[tsdown-build] invocation 1/1 finished in 20.4s
+[build-all] tsdown-unified done in 22.1s
+[build-all] write-unified-entry-dts
+[tsdown-unified] openclaw-dts-base: cache miss (record-unavailable)
+[tsdown-unified] openclaw-dts-extensions-1: cache miss (record-unavailable)
+[tsdown-unified] openclaw-dts-extensions-2: cache miss (record-unavailable)
+[tsdown-unified] openclaw-dts-extensions-3: cache miss (record-unavailable)
+[tsdown-unified] openclaw-dts-extensions-4: cache miss (record-unavailable)
+[tsdown-unified] openclaw-dts-extensions-5: cache miss (record-unavailable)
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=56030; no output for 59s
+[tsdown-build] invocation 1/6 finished in 82.9s
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=56643; no output for 60s
+[tsdown-build] invocation 2/6 finished in 79.0s
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=57716; no output for 59s
+[tsdown-build] still running pid=57716; no output for 30s
+[tsdown-build] invocation 3/6 finished in 92.4s
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=58998; no output for 60s
+[tsdown-build] still running pid=58998; no output for 30s
+[tsdown-build] invocation 4/6 finished in 91.0s
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=61027; no output for 60s
+[tsdown-build] invocation 5/6 finished in 86.6s
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=61870; no output for 60s
+[tsdown-build] still running pid=61870; no output for 30s
+[tsdown-build] invocation 6/6 finished in 90.6s
+[build-all] write-unified-entry-dts done in 8m 59.1s
+[build-all] external-plugins:local-dist
+[plugin-npm-runtime-build] build assets diffs: node --import tsx ../../scripts/build-diffs-viewer-runtime.mts curated
+[plugin-npm-runtime-build] build assets diffs-language-pack: node --import tsx ../../scripts/build-diffs-viewer-runtime.mts full
+[plugin-npm-runtime-build] build assets discord: node --import ../../scripts/tsx.mjs ../../scripts/build-discord-activity-sdk.mts && cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/discord
+[plugin-npm-runtime-build] build assets slack: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/slack
+[external-plugin-local-dist] built 96 plugins in 11949ms
+[build-all] external-plugins:local-dist done in 12.3s
+[build-all] check-cli-bootstrap-imports
+CLI bootstrap import guard passed.
+[build-all] check-cli-bootstrap-imports done in 13.4s
+[build-all] plugins:assets:copy
+$ node --import ./scripts/tsx.mjs scripts/bundled-plugin-assets.mts --phase copy
+[browser] copy: node scripts/copy-chrome-extension.mjs
+[canvas] copy: node scripts/copy-a2ui.mjs
+[discord] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/discord --copy
+[slack] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/slack --copy
+[workboard] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/workboard --copy
+[build-all] plugins:assets:copy done in 4.44s
+[build-all] runtime-postbuild
+[plugin-control-plane-loads] verified 53 built modules with native require and checked doctor closures
+runtime-postbuild: 13 phases completed in 9585ms (slowest: previous release update compat chunks 3246ms)
+[build-all] runtime-postbuild done in 10.8s
+[build-all] build-stamp
+[build-all] build-stamp done in 2.31s
+[build-all] runtime-postbuild-stamp
+[build-all] runtime-postbuild-stamp done in 383ms
+[build-all] write-plugin-sdk-entry-dts
+[tsdown-plugin-sdk] openclaw-dts-plugin-sdk-1: cache miss (record-unavailable)
+[tsdown-plugin-sdk] openclaw-dts-plugin-sdk-2: cache miss (record-unavailable)
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=63464; no output for 58s
+[tsdown-build] still running pid=63464; no output for 30s
+[tsdown-build] still running pid=63464; no output for 30s
+[tsdown-build] invocation 1/2 finished in 141.7s
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] invocation 2/2 finished in 1.4s
+[build-all] write-plugin-sdk-entry-dts done in 2m 42.2s
+[build-all] check-plugin-sdk-exports
+Public plugin SDK declaration graph: 4448352/5315536 bytes (5250000-byte ratchet + 65536-byte output variance).
+OK: All 151 public plugin-sdk subpaths verified.
+[build-all] check-plugin-sdk-exports done in 5.11s
+[build-all] ui:build
+$ node scripts/ui.js build
+vite v8.3.1 building client environment for production...
+transforming...
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "$W/packages/media-core/src/mime.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "$W/packages/media-core/src/file-name.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 162ms of this 6.2s build (3%).
+1 hook is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
+  - openclaw-mermaid-classic-bundle load (2055 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+✓ 4119 modules transformed.
+rendering chunks...
+Control UI precompression: starting
+Control UI precompression: 392 assets (784 sidecars) written
+Control UI precompression complete: 463 assets (926 sidecars)
+computing gzip size...
+../dist/control-ui.build-63853-iZoYjS/assets/chat-attachment-image.worker-P4E63gj9.js              0.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/custom-light-DyDTxevI.webp                            1.52 kB
+../dist/control-ui.build-63853-iZoYjS/assets/crt-light-DbR0bpR3.webp                               1.64 kB
+../dist/control-ui.build-63853-iZoYjS/assets/custom-dark-B0roIpAb.webp                             1.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/phosphor-light-B6L1EVnW.webp                          1.83 kB
+../dist/control-ui.build-63853-iZoYjS/assets/phosphor-dark-DO_664om.webp                           3.12 kB
+../dist/control-ui.build-63853-iZoYjS/assets/crt-dark-Tui5yPvX.webp                                3.26 kB
+../dist/control-ui.build-63853-iZoYjS/assets/frame-BoCsE8xn.js                                     4.41 kB
+../dist/control-ui.build-63853-iZoYjS/assets/absolutely-light-CraDJas4.webp                        4.93 kB
+../dist/control-ui.build-63853-iZoYjS/assets/absolutely-dark-BCt4vgFE.webp                         7.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/manuscript-light-BtjxM-_G.webp                        7.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/diff.worker-DPVjjZX9.js                               8.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/manuscript-dark-CkdelLyK.webp                        12.25 kB
+../dist/control-ui.build-63853-iZoYjS/assets/miami-light-CK76ftVr.webp                            12.91 kB
+../dist/control-ui.build-63853-iZoYjS/assets/knot-light-bmQq9AbN.webp                             13.39 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tide-light-CtKGylEa.webp                             13.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/beacon-light-C8Uuyhzu.webp                           14.84 kB
+../dist/control-ui.build-63853-iZoYjS/assets/knot-dark-D6MXlduA.webp                              17.41 kB
+../dist/control-ui.build-63853-iZoYjS/assets/rose-light-xf8VQLmW.webp                             20.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/miami-dark-CxsR_EPe.webp                             21.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tide-dark-B6z-RwsR.webp                              22.01 kB
+../dist/control-ui.build-63853-iZoYjS/assets/beacon-dark-BUxx3gLL.webp                            22.76 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dash-light-BdkMy7z2.webp                             24.84 kB
+../dist/control-ui.build-63853-iZoYjS/index.html                                                  25.31 kB │ gzip:   6.35 kB
+../dist/control-ui.build-63853-iZoYjS/assets/rose-dark-D9X1-O20.webp                              26.66 kB
+../dist/control-ui.build-63853-iZoYjS/assets/claw-light-crdey3iy.webp                             27.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dash-dark-BQSVDng9.webp                              29.15 kB
+../dist/control-ui.build-63853-iZoYjS/assets/claw-dark-DPmO9vJN.webp                              34.36 kB
+../dist/control-ui.build-63853-iZoYjS/social-card.png                                            142.28 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mermaid.min-DjFTGxJ3.js                           3,453.23 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-chrome-setup-DEA9Gvpf.css                      0.18 kB │ gzip:   0.13 kB
+../dist/control-ui.build-63853-iZoYjS/assets/skills-page-BQ5d-20G.css                              0.23 kB │ gzip:   0.17 kB
+../dist/control-ui.build-63853-iZoYjS/assets/terminal-page-DzAc6IHZ.css                            0.25 kB │ gzip:   0.16 kB
+../dist/control-ui.build-63853-iZoYjS/assets/device-page-DzxF6N-U.css                              0.37 kB │ gzip:   0.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-new-D-SpiTTi.css                      0.56 kB │ gzip:   0.26 kB
+../dist/control-ui.build-63853-iZoYjS/assets/browser-QJsz_Ze0.css                                  0.73 kB │ gzip:   0.33 kB
+../dist/control-ui.build-63853-iZoYjS/assets/markdown-file-tooltip-jvyPxCJD.css                    0.74 kB │ gzip:   0.38 kB
+../dist/control-ui.build-63853-iZoYjS/assets/website-DHaa5x94.css                                  0.82 kB │ gzip:   0.39 kB
+../dist/control-ui.build-63853-iZoYjS/assets/capacity-meter-Bpyn5Saf.css                           0.95 kB │ gzip:   0.39 kB
+../dist/control-ui.build-63853-iZoYjS/assets/assistant-panel-content-DzJupYdl.css                  1.13 kB │ gzip:   0.40 kB
+../dist/control-ui.build-63853-iZoYjS/assets/credential-editor-CxfZfu4o.css                        1.15 kB │ gzip:   0.42 kB
+../dist/control-ui.build-63853-iZoYjS/assets/board-document-B0Y4zGJq.css                           1.18 kB │ gzip:   0.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-Dh5vtL-G.css                     1.19 kB │ gzip:   0.46 kB
+../dist/control-ui.build-63853-iZoYjS/assets/lane-table-CSTpz4OW.css                               1.21 kB │ gzip:   0.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-dashboard-BZzcciLT.css                     1.52 kB │ gzip:   0.56 kB
+../dist/control-ui.build-63853-iZoYjS/assets/agents-home-page-DfcNNRNz.css                         1.80 kB │ gzip:   0.66 kB
+../dist/control-ui.build-63853-iZoYjS/assets/wizard-step-controls-CYe5XwZR.css                     1.86 kB │ gzip:   0.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/logs-page-Bu6yianf.css                                1.87 kB │ gzip:   0.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/report-Cegj5HJR.css                                   2.00 kB │ gzip:   0.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/onboarding-memory-import-DuWLEvoz.css                 2.02 kB │ gzip:   0.64 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-embed-CiDYfKFT.css                             2.18 kB │ gzip:   0.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/profile-page-C73ipYq-.css                             2.28 kB │ gzip:   0.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-session-rail-BmiGPeTv.css                        2.58 kB │ gzip:   0.88 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-processes-panel-CjcY3LAS.css                     3.14 kB │ gzip:   0.90 kB
+../dist/control-ui.build-63853-iZoYjS/assets/update-run-view-CS3ezHvV.css                          3.22 kB │ gzip:   0.90 kB
+../dist/control-ui.build-63853-iZoYjS/assets/connection-page-Cwi7GDhW.css                          3.31 kB │ gzip:   0.96 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sparkline-tile-CaHeaFDQ.css                           3.48 kB │ gzip:   1.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/portals-page-3o_n6XI9.css                             3.58 kB │ gzip:   1.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-subagents-panel-C5iQ8m24.css                     3.72 kB │ gzip:   1.03 kB
+../dist/control-ui.build-63853-iZoYjS/assets/lobsterdex-page-BYmxmm_r.css                          3.80 kB │ gzip:   1.19 kB
+../dist/control-ui.build-63853-iZoYjS/assets/apps-page-W4BVT2Dy.css                                4.08 kB │ gzip:   1.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/devices-page-Do3i-SE3.css                             4.44 kB │ gzip:   1.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/memory-import-page-744kZiKS.css                       4.48 kB │ gzip:   1.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/about-page-B5fnhNH8.css                               4.81 kB │ gzip:   1.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sidebar-update-runtime-Bpn2ByHA.css                   4.86 kB │ gzip:   1.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/logbook-view-CcweRaNm.css                             5.68 kB │ gzip:   1.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/meetings-page-C6CzIO_R.css                            5.76 kB │ gzip:   1.46 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dashboards-page-oN0QjD8g.css                          5.78 kB │ gzip:   1.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/secrets-page-DwICXUvq.css                             5.79 kB │ gzip:   1.39 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugins-page-D_KVIBAs.css                             6.76 kB │ gzip:   1.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/agents-page-DFluc6jm.css                              7.03 kB │ gzip:   1.84 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sidebar-agent-roster-C0Gti9Fd.css                     7.44 kB │ gzip:   1.51 kB
+../dist/control-ui.build-63853-iZoYjS/assets/link-reader-hovercard-CzYUpnNa.css                    8.05 kB │ gzip:   1.88 kB
+../dist/control-ui.build-63853-iZoYjS/assets/wizard-login-controller-BdUDtfpq.css                  8.30 kB │ gzip:   1.95 kB
+../dist/control-ui.build-63853-iZoYjS/assets/approval-hO9W1yf6.css                                 8.34 kB │ gzip:   2.02 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-sidebar-region-BT887V4g.css                      8.75 kB │ gzip:   1.90 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-session-summary-C-mJ1E_e.css               9.50 kB │ gzip:   2.02 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-progress-hovercard-CWlzJYa-.css               9.98 kB │ gzip:   1.90 kB
+../dist/control-ui.build-63853-iZoYjS/assets/command-palette-NBC8ATMP.css                         10.65 kB │ gzip:   2.54 kB
+../dist/control-ui.build-63853-iZoYjS/assets/custodian-surface-DnMjYBCR.css                       10.97 kB │ gzip:   2.59 kB
+../dist/control-ui.build-63853-iZoYjS/assets/systems-page-CG-xKQDS.css                            11.51 kB │ gzip:   2.62 kB
+../dist/control-ui.build-63853-iZoYjS/assets/view-status-CPVPeI0Y.css                             11.51 kB │ gzip:   2.37 kB
+../dist/control-ui.build-63853-iZoYjS/assets/board-view-DsuslJec.css                              14.75 kB │ gzip:   3.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sessions-page-6hLZrAfW.css                           16.47 kB │ gzip:   3.24 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tool-catalog-DcVygOsX.css                            16.75 kB │ gzip:   3.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-CXHNz0Bh.css                  19.04 kB │ gzip:   4.12 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-page-8XvJGjX6.css                             21.17 kB │ gzip:   4.52 kB
+../dist/control-ui.build-63853-iZoYjS/assets/skill-workshop-page-fZsq8iy4.css                     21.81 kB │ gzip:   4.40 kB
+../dist/control-ui.build-63853-iZoYjS/assets/activity-page-WLXiwpab.css                           27.21 kB │ gzip:   4.95 kB
+../dist/control-ui.build-63853-iZoYjS/assets/usage-DnwnFBXW.css                                   33.66 kB │ gzip:   6.28 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugins-hub-header-DHe0mUyq.css                      41.38 kB │ gzip:   7.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-new-styles-BizUf9yk.css              53.93 kB │ gzip:  10.15 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-transcript-styles-B_dd5Ueo.css                  62.77 kB │ gzip:  10.42 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-styles-C_Ls1c0m.css             63.37 kB │ gzip:  10.37 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-DlutqHOO.css                    81.07 kB │ gzip:  14.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-styles-BUKloRB0.css          279.60 kB │ gzip:  45.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-core-DXrbl-jW.css                        311.75 kB │ gzip:  51.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/index-B-MGll1F.js                                     0.04 kB │ gzip:   0.06 kB
+../dist/control-ui.build-63853-iZoYjS/assets/approval-t2xr4qDL.js                                  0.14 kB │ gzip:   0.15 kB │ map:    10.56 kB
+../dist/control-ui.build-63853-iZoYjS/assets/__vite-browser-external-2447137e-Bt5J11Ku.js          0.16 kB │ gzip:   0.16 kB │ map:     0.38 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-transcript-styles-Dzr3t9kA.js                    0.20 kB │ gzip:   0.17 kB │ map:    81.83 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-new-styles-V-9CW1Ga.js                0.21 kB │ gzip:   0.18 kB │ map:    76.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/board-layout-BmeSfx17.js                              0.26 kB │ gzip:   0.23 kB │ map:    11.19 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-styles-BRrYkFSc.js               0.33 kB │ gzip:   0.20 kB │ map:    81.37 kB
+../dist/control-ui.build-63853-iZoYjS/assets/system-info-BnaFj1i6.js                               0.34 kB │ gzip:   0.27 kB │ map:     0.56 kB
+../dist/control-ui.build-63853-iZoYjS/assets/desktop-focus-window-CZymz-q1.js                      0.34 kB │ gzip:   0.26 kB │ map:     0.63 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mcp-app-routing-BgYnMbQw.js                           0.36 kB │ gzip:   0.28 kB │ map:     0.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/reasoned-disabled-control-DpSDk7bH.js                 0.38 kB │ gzip:   0.28 kB │ map:     0.69 kB
+../dist/control-ui.build-63853-iZoYjS/assets/route-view-DE1yw9NW.js                                0.40 kB │ gzip:   0.29 kB │ map:     0.60 kB
+../dist/control-ui.build-63853-iZoYjS/assets/provider-usage-request-C63ogLzX.js                    0.43 kB │ gzip:   0.30 kB │ map:     1.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/diff-B5t7Hm-P.js                                      0.43 kB │ gzip:   0.33 kB │ map:     1.19 kB
+../dist/control-ui.build-63853-iZoYjS/assets/slots-Bi_U3AJt.js                                     0.48 kB │ gzip:   0.33 kB │ map:     5.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/theme-color-DAo4KRoc.js                               0.50 kB │ gzip:   0.38 kB │ map:     1.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/transcript-search-DLWHb5O9.js                         0.50 kB │ gzip:   0.36 kB │ map:     1.86 kB
+../dist/control-ui.build-63853-iZoYjS/assets/user-prefs-request-C1yMm3NT.js                        0.54 kB │ gzip:   0.39 kB │ map:     1.72 kB
+../dist/control-ui.build-63853-iZoYjS/assets/cloud-worker-stop.runtime-ebostOqa.js                 0.57 kB │ gzip:   0.39 kB │ map:     1.60 kB
+../dist/control-ui.build-63853-iZoYjS/assets/gateway-websocket-url-cYJwVUmD.js                     0.58 kB │ gzip:   0.33 kB │ map:     1.26 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-gateway-health.runtime-GyDqqyGU.js             0.67 kB │ gzip:   0.45 kB │ map:     2.33 kB
+../dist/control-ui.build-63853-iZoYjS/assets/brainfuck-rZhEezO0.js                                 0.74 kB │ gzip:   0.41 kB │ map:     2.35 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dock-destination-controls-CJ_OvRNC.js                 0.76 kB │ gzip:   0.46 kB │ map:     2.00 kB
+../dist/control-ui.build-63853-iZoYjS/assets/theme-artwork-loader-BgzeeZj0.js                      0.78 kB │ gzip:   0.49 kB │ map:     1.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-disabled-BRMVUQCP.js                       0.79 kB │ gzip:   0.47 kB │ map:     1.80 kB
+../dist/control-ui.build-63853-iZoYjS/assets/properties-CmMnR_Ok.js                                0.80 kB │ gzip:   0.44 kB │ map:     2.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/rolldown-runtime-8BhlS34s.js                          0.80 kB │ gzip:   0.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/custodian-alert-store-DMTYYmJp.js                     0.81 kB │ gzip:   0.42 kB │ map:     2.78 kB
+../dist/control-ui.build-63853-iZoYjS/assets/scrollbar-styles-Bm5cFrDf.js                          0.82 kB │ gzip:   0.38 kB │ map:     1.11 kB
+../dist/control-ui.build-63853-iZoYjS/assets/cmake-D52hYidm.js                                     0.89 kB │ gzip:   0.55 kB │ map:     3.19 kB
+../dist/control-ui.build-63853-iZoYjS/assets/capacity-meter-XfSnBoWa.js                            0.90 kB │ gzip:   0.47 kB │ map:     3.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sandbox-host-Dm6XHU23.js                              0.90 kB │ gzip:   0.50 kB │ map:     2.84 kB
+../dist/control-ui.build-63853-iZoYjS/assets/update-failure-report-DAKrJIbD.js                     0.90 kB │ gzip:   0.49 kB │ map:     2.53 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugin-help-value-DKef1jAX.js                         0.91 kB │ gzip:   0.58 kB │ map:     2.53 kB
+../dist/control-ui.build-63853-iZoYjS/assets/response-body-DLE2wSW8.js                             0.91 kB │ gzip:   0.56 kB │ map:     2.74 kB
+../dist/control-ui.build-63853-iZoYjS/assets/asciiarmor-DqwIP8wN.js                                0.91 kB │ gzip:   0.49 kB │ map:     2.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/near-viewport-observer-WgGck829.js                    0.92 kB │ gzip:   0.46 kB │ map:     2.36 kB
+../dist/control-ui.build-63853-iZoYjS/assets/protobuf-NGTE4n-r.js                                  0.94 kB │ gzip:   0.61 kB │ map:     2.45 kB
+../dist/control-ui.build-63853-iZoYjS/assets/stream-auto-follow-controller-BZ0UzGsg.js             0.95 kB │ gzip:   0.49 kB │ map:     2.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/http-CZiL40Fa.js                                      0.98 kB │ gzip:   0.50 kB │ map:     3.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/settings-select-row-BY1TVdeN.js                       0.99 kB │ gzip:   0.49 kB │ map:     2.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/solr-CtCgyZ-O.js                                      0.99 kB │ gzip:   0.54 kB │ map:     3.23 kB
+../dist/control-ui.build-63853-iZoYjS/assets/usage-BQd4o5lO.js                                     1.01 kB │ gzip:   0.57 kB │ map:     3.96 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ref-contract-BO7lUkK-.js                              1.05 kB │ gzip:   0.57 kB │ map:    12.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/settings-model-6_98zA2b.js                            1.07 kB │ gzip:   0.56 kB │ map:     4.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-diff-highlight.runtime-DOy9RuUf.js               1.08 kB │ gzip:   0.65 kB │ map:     3.88 kB
+../dist/control-ui.build-63853-iZoYjS/assets/agent-avatar-CkafUPc0.js                              1.08 kB │ gzip:   0.57 kB │ map:     2.00 kB
+../dist/control-ui.build-63853-iZoYjS/assets/troff-BQNyxWC7.js                                     1.09 kB │ gzip:   0.53 kB │ map:     3.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/route-loader-CgGtagHb.js                              1.12 kB │ gzip:   0.63 kB │ map:     3.60 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-styles-BEa3vGDW.js             1.15 kB │ gzip:   0.36 kB │ map:   388.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/toml-CNMTuoya.js                                      1.18 kB │ gzip:   0.63 kB │ map:     3.77 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-session-menu.runtime-Bhg9YfRh.js               1.20 kB │ gzip:   0.60 kB │ map:     4.33 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sessions-hub-header-c5mLq0ef.js                       1.26 kB │ gzip:   0.58 kB │ map:     2.61 kB
+../dist/control-ui.build-63853-iZoYjS/assets/spreadsheet-NicZe-2f.js                               1.27 kB │ gzip:   0.63 kB │ map:     3.92 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pasted-text-excerpt-Br3AWZ25.js                       1.29 kB │ gzip:   0.69 kB │ map:     3.52 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugin-capabilities.runtime-DZpyQw3T.js               1.31 kB │ gzip:   0.68 kB │ map:     4.37 kB
+../dist/control-ui.build-63853-iZoYjS/assets/channel-avatar-CtqitHhf.js                            1.34 kB │ gzip:   0.63 kB │ map:     2.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/decision-model-picker--v2yrDAb.js                     1.37 kB │ gzip:   0.68 kB │ map:     3.86 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mbox-DJTpBvrI.js                                      1.53 kB │ gzip:   0.76 kB │ map:     4.92 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-notifications-CuGUBXj5.js                      1.61 kB │ gzip:   0.81 kB │ map:     6.00 kB
+../dist/control-ui.build-63853-iZoYjS/assets/server-prefs-profile-runtime-2xDM0AzR.js              1.61 kB │ gzip:   0.84 kB │ map:     5.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-native-runtime-recovery-6RbBQnMc.js              1.63 kB │ gzip:   0.74 kB │ map:     3.94 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sieve-BHLeM6VM.js                                     1.74 kB │ gzip:   0.86 kB │ map:     5.93 kB
+../dist/control-ui.build-63853-iZoYjS/assets/rpm-6ru8X0RE.js                                       1.75 kB │ gzip:   0.92 kB │ map:     4.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/markdown-file-tooltip-CHy4_H-Y.js                     1.75 kB │ gzip:   0.95 kB │ map:     5.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/state-DB36vxyi.js                                     1.75 kB │ gzip:   0.85 kB │ map:     8.04 kB
+../dist/control-ui.build-63853-iZoYjS/assets/update-triage.runtime-JY65g_Qx.js                     1.76 kB │ gzip:   0.91 kB │ map:     4.46 kB
+../dist/control-ui.build-63853-iZoYjS/assets/load-Bor_N9Z4.js                                      1.78 kB │ gzip:   0.97 kB │ map:     6.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/factor-Q1Z7buKY.js                                    1.80 kB │ gzip:   0.70 kB │ map:     4.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/browser-document-B-2bsMZp.js                          1.81 kB │ gzip:   0.94 kB │ map:     4.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/eiffel-BPoKCvky.js                                    1.82 kB │ gzip:   1.00 kB │ map:     4.92 kB
+../dist/control-ui.build-63853-iZoYjS/assets/browser-bootstrap.runtime-DKvV1ciS.js                 1.86 kB │ gzip:   1.05 kB │ map:     5.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/z80-BOBAzJas.js                                       1.89 kB │ gzip:   0.88 kB │ map:     4.76 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-apps-tXxaVXUq.js                                   1.95 kB │ gzip:   0.98 kB │ map:     3.41 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mumps-D0jN0dp_.js                                     1.97 kB │ gzip:   1.05 kB │ map:     6.37 kB
+../dist/control-ui.build-63853-iZoYjS/assets/elm-Cw50aCOi.js                                       2.01 kB │ gzip:   0.92 kB │ map:     7.46 kB
+../dist/control-ui.build-63853-iZoYjS/assets/skills-shared-Ckgeg1Y8.js                             2.02 kB │ gzip:   0.88 kB │ map:     5.25 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mathematica-1hKRFuCQ.js                               2.05 kB │ gzip:   0.92 kB │ map:     6.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dockerfile-05JOL5Sz.js                                2.06 kB │ gzip:   0.76 kB │ map:     6.41 kB
+../dist/control-ui.build-63853-iZoYjS/assets/turtle-Uiatt2dA.js                                    2.08 kB │ gzip:   0.98 kB │ map:     6.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ebnf-DwPn32cL.js                                      2.11 kB │ gzip:   0.90 kB │ map:     6.64 kB
+../dist/control-ui.build-63853-iZoYjS/assets/smalltalk-DY21_MKY.js                                 2.15 kB │ gzip:   0.96 kB │ map:     6.59 kB
+../dist/control-ui.build-63853-iZoYjS/assets/terminal-page-CiUBOMa-.js                             2.15 kB │ gzip:   1.09 kB │ map:     5.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/fcl-BKSPRit5.js                                       2.16 kB │ gzip:   1.05 kB │ map:     6.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ntriples-D5FXROHs.js                                  2.20 kB │ gzip:   0.80 kB │ map:     7.66 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-BGBah-M9.js                                      2.20 kB │ gzip:   1.39 kB │ map:     5.19 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dtd-BziCxTDe.js                                       2.22 kB │ gzip:   0.96 kB │ map:     6.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugins-hub-header-CdaBbdlJ.js                        2.22 kB │ gzip:   0.88 kB │ map:    39.56 kB
+../dist/control-ui.build-63853-iZoYjS/assets/octave-Y-3Aqrep.js                                    2.25 kB │ gzip:   1.18 kB │ map:     5.78 kB
+../dist/control-ui.build-63853-iZoYjS/assets/yacas-CJ_G-h-R.js                                     2.28 kB │ gzip:   1.19 kB │ map:     7.21 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-form.tiers-C9CdqgM1.js                         2.33 kB │ gzip:   1.08 kB │ map:     8.13 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pascal-D6MnNqKh.js                                    2.39 kB │ gzip:   1.27 kB │ map:     5.70 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-workspace-recovery.runtime-Bw5N3TK5.js        2.40 kB │ gzip:   1.18 kB │ map:     7.65 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugin-contracts-runtime-Dh1zG0zu.js                  2.41 kB │ gzip:   1.11 kB │ map:     9.96 kB
+../dist/control-ui.build-63853-iZoYjS/assets/simple-mode-B3ouou4l.js                               2.41 kB │ gzip:   1.19 kB │ map:     7.83 kB
+../dist/control-ui.build-63853-iZoYjS/assets/apl-CZuIt2s3.js                                       2.43 kB │ gzip:   1.34 kB │ map:     6.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-startup.runtime-v3iJxwTC.js                    2.45 kB │ gzip:   0.85 kB │ map:     4.41 kB
+../dist/control-ui.build-63853-iZoYjS/assets/panel-empty-state-Zd_5C6Rb.js                         2.45 kB │ gzip:   0.97 kB │ map:     3.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/commonlisp-JmRDT1qt.js                                2.45 kB │ gzip:   1.19 kB │ map:     6.74 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tcl-VS4aPR64.js                                       2.48 kB │ gzip:   1.32 kB │ map:     6.55 kB
+../dist/control-ui.build-63853-iZoYjS/assets/lane-table-DqNGXqqz.js                                2.54 kB │ gzip:   0.96 kB │ map:     8.25 kB
+../dist/control-ui.build-63853-iZoYjS/assets/appearance-picker-CKoSe7Ct.js                         2.55 kB │ gzip:   1.07 kB │ map:     5.31 kB
+../dist/control-ui.build-63853-iZoYjS/assets/shell-B-6dKEO3.js                                     2.56 kB │ gzip:   1.30 kB │ map:     7.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/theme-catalog-hILUjPN6.js                             2.60 kB │ gzip:   1.18 kB │ map:    10.72 kB
+../dist/control-ui.build-63853-iZoYjS/assets/gateway-scope-upgrade.runtime-BFWHav_t.js             2.62 kB │ gzip:   1.03 kB │ map:     8.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/webidl-y3TQ_6xd.js                                    2.62 kB │ gzip:   1.37 kB │ map:     7.77 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-debug-BG5bFRuq.js                                  2.63 kB │ gzip:   1.22 kB │ map:     5.07 kB
+../dist/control-ui.build-63853-iZoYjS/assets/setup-schema-CD6IW-2d.js                              2.63 kB │ gzip:   1.34 kB │ map:    11.02 kB
+../dist/control-ui.build-63853-iZoYjS/assets/puppet-DvF9Rcyj.js                                    2.65 kB │ gzip:   1.29 kB │ map:     9.04 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pig-DksdPhxP.js                                       2.65 kB │ gzip:   1.49 kB │ map:     6.65 kB
+../dist/control-ui.build-63853-iZoYjS/assets/input-dialog-DJhMgkLq.js                              2.66 kB │ gzip:   1.11 kB │ map:     7.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/forth-CsObqcja.js                                     2.67 kB │ gzip:   1.42 kB │ map:     6.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pending-session-create-B1ZUbNO2.js                    2.74 kB │ gzip:   1.26 kB │ map:     6.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-update-actions-CCAmhG9k.js                         2.78 kB │ gzip:   1.36 kB │ map:     4.61 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-Cbf4oGMY.js                                      2.78 kB │ gzip:   1.60 kB │ map:     5.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/composer-draft-retirement.runtime-ikRuWFyW.js         2.83 kB │ gzip:   1.16 kB │ map:     9.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/velocity-DgFe8a_l.js                                  2.84 kB │ gzip:   1.20 kB │ map:     8.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tiddlywiki-ByLaO-PH.js                                2.92 kB │ gzip:   1.18 kB │ map:    11.14 kB
+../dist/control-ui.build-63853-iZoYjS/assets/modelica-DDfpmrWA.js                                  2.94 kB │ gzip:   1.38 kB │ map:     8.11 kB
+../dist/control-ui.build-63853-iZoYjS/assets/oz-Dw3yM8mc.js                                        3.03 kB │ gzip:   1.38 kB │ map:     9.52 kB
+../dist/control-ui.build-63853-iZoYjS/assets/website-b_F8qE3O.js                                   3.03 kB │ gzip:   1.42 kB │ map:     8.16 kB
+../dist/control-ui.build-63853-iZoYjS/assets/r-C3MfMtNT.js                                         3.06 kB │ gzip:   1.45 kB │ map:     9.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/stex-B74o6kub.js                                      3.22 kB │ gzip:   1.26 kB │ map:    11.32 kB
+../dist/control-ui.build-63853-iZoYjS/assets/link-reader-response-DqwIMyN3.js                      3.24 kB │ gzip:   1.42 kB │ map:     6.31 kB
+../dist/control-ui.build-63853-iZoYjS/assets/lua-Bjba4a35.js                                       3.26 kB │ gzip:   1.50 kB │ map:     7.80 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-form.search-BJAuFq6w.js                        3.27 kB │ gzip:   1.46 kB │ map:    13.56 kB
+../dist/control-ui.build-63853-iZoYjS/assets/usage-Df7eWuIU.js                                     3.30 kB │ gzip:   1.16 kB │ map:    52.63 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-snapshot-database-BjSjsAEG.js                 3.30 kB │ gzip:   1.23 kB │ map:    10.70 kB
+../dist/control-ui.build-63853-iZoYjS/assets/macos-titlebar-controls.runtime-CS1oGNqM.js           3.31 kB │ gzip:   1.16 kB │ map:     7.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/cypher-QpSxMRXq.js                                    3.33 kB │ gzip:   1.60 kB │ map:     8.57 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-link-menu.runtime-jjzesQvA.js                  3.34 kB │ gzip:   1.46 kB │ map:     7.55 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tiki-Cb29ipmL.js                                      3.35 kB │ gzip:   1.35 kB │ map:    12.46 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-memory-import-ByKBpSpM.js                          3.39 kB │ gzip:   1.43 kB │ map:     5.24 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sparql-CUbWMhsH.js                                    3.47 kB │ gzip:   1.70 kB │ map:     9.55 kB
+../dist/control-ui.build-63853-iZoYjS/assets/vhdl-bNtYFHwV.js                                      3.47 kB │ gzip:   1.61 kB │ map:     9.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/theme-palette-BW4PgGUl.js                             3.53 kB │ gzip:   1.37 kB │ map:     8.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-v8Zi46bm.js                                      3.54 kB │ gzip:   1.83 kB │ map:     6.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/svg-icon-rasterizer-BFsqBDlK.js                       3.56 kB │ gzip:   1.72 kB │ map:    11.05 kB
+../dist/control-ui.build-63853-iZoYjS/assets/exec-approval-DhoBe9BL.js                             3.56 kB │ gzip:   1.50 kB │ map:     9.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-progress-uQdMCTC9.js                          3.56 kB │ gzip:   1.41 kB │ map:     9.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/nav-drawer-swipe.runtime-2BTxxYjD.js                  3.63 kB │ gzip:   1.39 kB │ map:    10.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mscgen-o_TRe-wI.js                                    3.64 kB │ gzip:   1.07 kB │ map:     9.74 kB
+../dist/control-ui.build-63853-iZoYjS/assets/debug-overlay-CLBFFoVD.js                             3.73 kB │ gzip:   1.62 kB │ map:     6.64 kB
+../dist/control-ui.build-63853-iZoYjS/assets/vb-B2Eic2VJ.js                                        3.82 kB │ gzip:   1.95 kB │ map:    11.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/q-CCMT7mWg.js                                         3.82 kB │ gzip:   1.78 kB │ map:     9.86 kB
+../dist/control-ui.build-63853-iZoYjS/assets/d-BVOXk3sl.js                                         3.83 kB │ gzip:   1.79 kB │ map:    10.92 kB
+../dist/control-ui.build-63853-iZoYjS/assets/swift-DkbHzSG0.js                                     3.92 kB │ gzip:   1.94 kB │ map:    10.87 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dock-panel-styles-CCnnppV_.js                         3.97 kB │ gzip:   1.20 kB │ map:     4.13 kB
+../dist/control-ui.build-63853-iZoYjS/assets/coffeescript-ZFd3ZVx8.js                              4.00 kB │ gzip:   1.79 kB │ map:    13.80 kB
+../dist/control-ui.build-63853-iZoYjS/assets/fortran-D0Jwcahz.js                                   4.00 kB │ gzip:   2.03 kB │ map:     9.77 kB
+../dist/control-ui.build-63853-iZoYjS/assets/asn1-CSpwQvlk.js                                      4.10 kB │ gzip:   2.05 kB │ map:    11.05 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dylan-of2Ivqm3.js                                     4.17 kB │ gzip:   1.73 kB │ map:    14.04 kB
+../dist/control-ui.build-63853-iZoYjS/assets/gateway-vitals-Bce1wOBL.js                            4.19 kB │ gzip:   1.54 kB │ map:     9.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/asterisk-CdkrETgV.js                                  4.20 kB │ gzip:   1.84 kB │ map:     9.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/livescript-U057igS5.js                                4.22 kB │ gzip:   1.73 kB │ map:    10.04 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ttcn-cfg-DWX5Nemw.js                                  4.24 kB │ gzip:   1.84 kB │ map:    11.17 kB
+../dist/control-ui.build-63853-iZoYjS/assets/agents-home-page-BSh9OKkt.js                          4.24 kB │ gzip:   1.60 kB │ map:    11.45 kB
+../dist/control-ui.build-63853-iZoYjS/assets/groovy-CuXwF6x7.js                                    4.26 kB │ gzip:   1.85 kB │ map:    12.84 kB
+../dist/control-ui.build-63853-iZoYjS/assets/haskell-DHF7m3rz.js                                   4.31 kB │ gzip:   2.02 kB │ map:    12.11 kB
+../dist/control-ui.build-63853-iZoYjS/assets/report-CZiuxzcv.js                                    4.58 kB │ gzip:   1.96 kB │ map:    15.13 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mcp-app-confirm-Ca_bfAGC.js                           4.63 kB │ gzip:   1.74 kB │ map:     8.01 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sparkline-tile-WlajHQpo.js                            4.65 kB │ gzip:   1.79 kB │ map:    16.16 kB
+../dist/control-ui.build-63853-iZoYjS/assets/gas-CSFUAurG.js                                       4.68 kB │ gzip:   1.36 kB │ map:    13.78 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-outbox-receipts-CYfly6re.js                      4.76 kB │ gzip:   2.03 kB │ map:    18.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/first-run-activation-receipt-CuSwtlot.js              4.80 kB │ gzip:   1.97 kB │ map:    17.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugin-help-BTDbRriV.js                               4.89 kB │ gzip:   2.11 kB │ map:    14.36 kB
+../dist/control-ui.build-63853-iZoYjS/assets/widget-sandbox-host-CBk6k75J.js                       4.92 kB │ gzip:   1.53 kB │ map:    13.62 kB
+../dist/control-ui.build-63853-iZoYjS/assets/logbook-controller-CDuE81iU.js                        4.96 kB │ gzip:   1.79 kB │ map:    19.06 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mllike-Bu6D5i0x.js                                    4.96 kB │ gzip:   1.67 kB │ map:    12.82 kB
+../dist/control-ui.build-63853-iZoYjS/assets/request-usage-snapshot-0MTO-IO1.js                    4.96 kB │ gzip:   2.25 kB │ map:    20.91 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ttcn-Bf3i5UEf.js                                      5.00 kB │ gzip:   2.27 kB │ map:    13.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/lobsterdex-page-DxeWAXD1.js                           5.08 kB │ gzip:   1.94 kB │ map:    17.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/permissions-page-B0eMY3Sf.js                          5.10 kB │ gzip:   1.56 kB │ map:    11.24 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-DgJBCaeA.js                                      5.16 kB │ gzip:   2.49 kB │ map:    10.83 kB
+../dist/control-ui.build-63853-iZoYjS/assets/crystal-B2OBIKGd.js                                   5.18 kB │ gzip:   2.23 kB │ map:    17.87 kB
+../dist/control-ui.build-63853-iZoYjS/assets/debug-overlay-layout.runtime-CXB7GQZW.js              5.20 kB │ gzip:   1.82 kB │ map:    15.39 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ruby-DrNj4Hrn.js                                      5.22 kB │ gzip:   2.25 kB │ map:    16.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ecl-BmkYUJLN.js                                       5.25 kB │ gzip:   2.42 kB │ map:    12.07 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-discussion-panel-BkZHxopM.js                  5.26 kB │ gzip:   1.99 kB │ map:    14.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/browser-CI_8dE-J.js                                   5.38 kB │ gzip:   1.84 kB │ map:    13.44 kB
+../dist/control-ui.build-63853-iZoYjS/assets/julia-CfStu5wc.js                                     5.43 kB │ gzip:   2.30 kB │ map:    16.15 kB
+../dist/control-ui.build-63853-iZoYjS/assets/vbscript-B58SZYoT.js                                  5.57 kB │ gzip:   2.65 kB │ map:    17.63 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-placement-move-dialog-seo01DFA.js             5.78 kB │ gzip:   1.78 kB │ map:    16.84 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-chrome-setup-C9OtPexh.js                       5.80 kB │ gzip:   1.84 kB │ map:    13.41 kB
+../dist/control-ui.build-63853-iZoYjS/assets/provider-usage-CrC-tsM4.js                            5.93 kB │ gzip:   2.04 kB │ map:    15.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/update-run-view-f08EbnY2.js                           6.00 kB │ gzip:   2.08 kB │ map:    16.21 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mirc-Cx5z6OrJ.js                                      6.05 kB │ gzip:   2.82 kB │ map:    11.52 kB
+../dist/control-ui.build-63853-iZoYjS/assets/question-page-registration-BJ0n5l8q.js                6.28 kB │ gzip:   2.04 kB │ map:    14.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/roster-element-DdztVNh0.js                            6.28 kB │ gzip:   2.56 kB │ map:    19.51 kB
+../dist/control-ui.build-63853-iZoYjS/assets/xquery-BZ8GHY3V.js                                    6.29 kB │ gzip:   2.65 kB │ map:    21.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-pane-placement.runtime-CTi7Vi1k.js               6.36 kB │ gzip:   2.32 kB │ map:    15.94 kB
+../dist/control-ui.build-63853-iZoYjS/assets/cobol-v-vbCXbt.js                                     6.37 kB │ gzip:   3.15 kB │ map:    11.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/python-Co-oWxhj.js                                    6.40 kB │ gzip:   2.77 kB │ map:    21.51 kB
+../dist/control-ui.build-63853-iZoYjS/assets/assistant-panel-content-E1j84JrG.js                   6.45 kB │ gzip:   1.96 kB │ map:    15.49 kB
+../dist/control-ui.build-63853-iZoYjS/assets/scheme-BNktZpsL.js                                    6.51 kB │ gzip:   2.51 kB │ map:    15.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sidebar-people.runtime-5R49FVjg.js                    6.64 kB │ gzip:   2.46 kB │ map:    17.95 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-dashboard-CogkCxb2.js                      6.75 kB │ gzip:   2.32 kB │ map:    10.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pug-BJ9q_C7V.js                                       6.77 kB │ gzip:   2.08 kB │ map:    20.06 kB
+../dist/control-ui.build-63853-iZoYjS/assets/update-confirmation.runtime-Cv4G3mqv.js               6.79 kB │ gzip:   2.24 kB │ map:    20.19 kB
+../dist/control-ui.build-63853-iZoYjS/assets/board-document-4leMaUli.js                            6.85 kB │ gzip:   2.33 kB │ map:    19.17 kB
+../dist/control-ui.build-63853-iZoYjS/assets/textile-CigAm-LA.js                                   6.88 kB │ gzip:   2.54 kB │ map:    20.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-device-settings-D70q9z2b.js                    6.88 kB │ gzip:   2.67 kB │ map:    24.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/page-operations-RnKhBqzx.js                           6.89 kB │ gzip:   2.29 kB │ map:    29.08 kB
+../dist/control-ui.build-63853-iZoYjS/assets/keyboard-shortcuts-dialog-Cw-ATfp_.js                 6.90 kB │ gzip:   2.46 kB │ map:    15.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-session-summary-DzLQPhsk.js                6.97 kB │ gzip:   2.45 kB │ map:    29.62 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-transcripts-CzLgn0b8.js                            7.18 kB │ gzip:   2.87 kB │ map:    10.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/nsis-C0kVBT_2.js                                      7.19 kB │ gzip:   3.17 kB │ map:     9.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/about-page-IJIR0KuU.js                                7.27 kB │ gzip:   2.57 kB │ map:    24.00 kB
+../dist/control-ui.build-63853-iZoYjS/assets/youtube-video-card-C9-PzwV2.js                        7.29 kB │ gzip:   2.37 kB │ map:    11.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/nginx-NLs6x0Nm.js                                     7.54 kB │ gzip:   2.83 kB │ map:    12.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/debug-overlay-content-CgW2X-Y6.js                     7.74 kB │ gzip:   2.80 kB │ map:    22.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/powershell-BjSJShZW.js                                7.83 kB │ gzip:   3.38 kB │ map:    16.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/native-conversation-bridge-CHVRXlF7.js                7.94 kB │ gzip:   3.40 kB │ map:    30.38 kB
+../dist/control-ui.build-63853-iZoYjS/assets/haxe-W4XnxWfV.js                                      8.00 kB │ gzip:   3.05 kB │ map:    27.72 kB
+../dist/control-ui.build-63853-iZoYjS/assets/erlang-IAwUA5rr.js                                    8.00 kB │ gzip:   3.00 kB │ map:    27.14 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tooltip-emzt__yc.js                                   8.33 kB │ gzip:   2.90 kB │ map:    21.91 kB
+../dist/control-ui.build-63853-iZoYjS/assets/verilog-ChfNWxmV.js                                   8.60 kB │ gzip:   3.64 kB │ map:    30.11 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-_FO8vpd1.js                                      8.63 kB │ gzip:   3.73 kB │ map:   102.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/onboarding-memory-import-DEfDieFD.js                  9.34 kB │ gzip:   2.83 kB │ map:    25.44 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sas-SYA7WzvL.js                                       9.46 kB │ gzip:   4.21 kB │ map:    18.08 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sidebar-agent-roster-B59OtcOK.js                      9.47 kB │ gzip:   3.02 kB │ map:    30.30 kB
+../dist/control-ui.build-63853-iZoYjS/assets/clojure-CQulayJg.js                                   9.56 kB │ gzip:   4.15 kB │ map:    21.00 kB
+../dist/control-ui.build-63853-iZoYjS/assets/custodian-page-BWoP4-EO.js                            9.66 kB │ gzip:   2.79 kB │ map:    20.35 kB
+../dist/control-ui.build-63853-iZoYjS/assets/perl-CMrxjaCi.js                                      9.87 kB │ gzip:   3.59 kB │ map:    43.72 kB
+../dist/control-ui.build-63853-iZoYjS/assets/idl-fIUlL8fB.js                                       9.97 kB │ gzip:   4.52 kB │ map:    15.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/catalog-terminal-start-CLhbRTax.js                   10.18 kB │ gzip:   3.30 kB │ map:    38.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/gherkin-DX-eNKsk.js                                  10.29 kB │ gzip:   5.21 kB │ map:    14.24 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-devices-kGODygEe.js                               10.31 kB │ gzip:   4.00 kB │ map:    16.87 kB
+../dist/control-ui.build-63853-iZoYjS/assets/labs-page-C_bYGJmB.js                                10.32 kB │ gzip:   3.77 kB │ map:    28.55 kB
+../dist/control-ui.build-63853-iZoYjS/assets/worktrees-page-Cvg3r_FN.js                           10.37 kB │ gzip:   3.27 kB │ map:    26.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/wizard-step-controls-DbLNyyAZ.js                     10.61 kB │ gzip:   3.31 kB │ map:    28.94 kB
+../dist/control-ui.build-63853-iZoYjS/assets/logs-page-nhZ4uApK.js                                10.68 kB │ gzip:   3.76 kB │ map:    32.35 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-session-rail-Cm_QnUTk.js                        10.93 kB │ gzip:   3.56 kB │ map:    29.15 kB
+../dist/control-ui.build-63853-iZoYjS/assets/logbook-view-C5rb928_.js                             11.08 kB │ gzip:   2.90 kB │ map:    29.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dashboards-page-6ZH7m9Oa.js                          11.16 kB │ gzip:   3.51 kB │ map:    33.65 kB
+../dist/control-ui.build-63853-iZoYjS/assets/view-pairing.runtime-DU9VKDWm.js                     11.23 kB │ gzip:   2.64 kB │ map:    19.55 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-processes-panel-BIalqg3a.js                     11.34 kB │ gzip:   3.50 kB │ map:    30.12 kB
+../dist/control-ui.build-63853-iZoYjS/assets/consent-dialog-zIq96NKA.js                           11.48 kB │ gzip:   4.05 kB │ map:    26.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sidebar-update-runtime-BnVOvUwE.js                   11.50 kB │ gzip:   3.00 kB │ map:    31.36 kB
+../dist/control-ui.build-63853-iZoYjS/assets/canvas-widget-view-BXMW_6ch.js                       11.59 kB │ gzip:   3.86 kB │ map:    30.53 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-group-defaults-dialog-CSLh39PK.js            11.72 kB │ gzip:   2.80 kB │ map:    23.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-Dadut7W4.js                                     11.87 kB │ gzip:   5.37 kB │ map:    31.46 kB
+../dist/control-ui.build-63853-iZoYjS/assets/browser-Czr-mlsq.js                                  11.90 kB │ gzip:   4.47 kB │ map:    40.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/debug-page-DShpaLo5.js                               12.09 kB │ gzip:   3.54 kB │ map:    28.99 kB
+../dist/control-ui.build-63853-iZoYjS/assets/settings-targets-UC5pxd_N.js                         12.30 kB │ gzip:   3.05 kB │ map:    23.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/credential-editor-3Q_7pTqb.js                        12.74 kB │ gzip:   3.27 kB │ map:    29.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-B7IANYhN.js                     12.82 kB │ gzip:   4.68 kB │ map:   140.94 kB
+../dist/control-ui.build-63853-iZoYjS/assets/panel-tab-strip-DQByG1dz.js                          12.86 kB │ gzip:   4.46 kB │ map:    35.02 kB
+../dist/control-ui.build-63853-iZoYjS/assets/apps-page-D1mlz3um.js                                13.86 kB │ gzip:   5.22 kB │ map:    27.00 kB
+../dist/control-ui.build-63853-iZoYjS/assets/approvals-page-CrebpE26.js                           13.91 kB │ gzip:   3.54 kB │ map:    30.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/markdown-mermaid-CRivdAeH.js                         14.21 kB │ gzip:   5.39 kB │ map:    32.80 kB
+../dist/control-ui.build-63853-iZoYjS/assets/settings-sidebar-BSbjs1EI.js                         14.28 kB │ gzip:   4.96 kB │ map:    42.79 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-BVuFZphE.js                                     14.56 kB │ gzip:   5.95 kB │ map:    34.96 kB
+../dist/control-ui.build-63853-iZoYjS/assets/wizard-login-controller-BHJ0SwRv.js                  15.12 kB │ gzip:   4.40 kB │ map:    59.51 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-form.node.shared-B5qkxSXO.js                  15.63 kB │ gzip:   6.04 kB │ map:    66.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/search-page-Cm1oJ1BJ.js                              15.76 kB │ gzip:   5.01 kB │ map:    45.17 kB
+../dist/control-ui.build-63853-iZoYjS/assets/device-page-NvLZ3PQV.js                              15.80 kB │ gzip:   3.69 kB │ map:    35.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-CTO3mArf.js                                     16.43 kB │ gzip:   7.59 kB │ map:    22.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-organizer-operations.runtime-Bi-H14C2.js     16.44 kB │ gzip:   4.25 kB │ map:    57.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/approval-page-registration-B_f7G6ha.js               16.65 kB │ gzip:   4.54 kB │ map:    38.82 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugin-page-BV1d-WSc.js                              16.69 kB │ gzip:   4.84 kB │ map:    42.44 kB
+../dist/control-ui.build-63853-iZoYjS/assets/javascript-Cilf6QWD.js                               17.12 kB │ gzip:   5.84 kB │ map:    63.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/portals-page-DVCj8OLR.js                             17.50 kB │ gzip:   4.85 kB │ map:    42.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-sidebar-region.runtime-DRNBiW8s.js              17.91 kB │ gzip:   5.65 kB │ map:    58.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/link-reader-hovercard-C0ea7zO6.js                    19.02 kB │ gzip:   6.04 kB │ map:    65.57 kB
+../dist/control-ui.build-63853-iZoYjS/assets/secrets-page-Dl9Pdq2L.js                             19.50 kB │ gzip:   5.57 kB │ map:    65.07 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-subagents-panel-CLWH97e8.js                     19.53 kB │ gzip:   6.20 kB │ map:    62.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/connection-page-DwUz1Zqo.js                          20.22 kB │ gzip:   5.72 kB │ map:    54.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/gateway-runtime-BgKoreC2.js                          20.42 kB │ gzip:   7.65 kB │ map:   110.07 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-question-panel-CK785FIw.js                      20.49 kB │ gzip:   5.99 kB │ map:    46.48 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-BLSIDd_T.js                                     20.91 kB │ gzip:   9.50 kB │ map:    35.44 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-ChOYDWbN.js                                     21.19 kB │ gzip:   9.84 kB │ map:    37.51 kB
+../dist/control-ui.build-63853-iZoYjS/assets/clike-NSnJbUQf.js                                    22.19 kB │ gzip:   7.84 kB │ map:    56.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-w43P__y1.js                                     23.31 kB │ gzip:  10.65 kB │ map:    37.66 kB
+../dist/control-ui.build-63853-iZoYjS/assets/stylus-B7kK8WT_.js                                   23.71 kB │ gzip:   8.77 kB │ map:    55.62 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-loader-CmolqmXO.js                        24.24 kB │ gzip:   7.74 kB │ map:    68.59 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-BUdikTWC.js                   24.52 kB │ gzip:   9.73 kB │ map:   162.80 kB
+../dist/control-ui.build-63853-iZoYjS/assets/css-BEjrXOhK.js                                      24.84 kB │ gzip:   8.38 kB │ map:    53.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/file-editor-view-vIzYnw_X.js                         25.64 kB │ gzip:   8.98 kB │ map:   130.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/code-language-kpoDYAgN.js                            25.79 kB │ gzip:   5.46 kB │ map:    55.23 kB
+../dist/control-ui.build-63853-iZoYjS/assets/memory-import-page-KWGh0onn.js                       26.17 kB │ gzip:   6.51 kB │ map:    71.38 kB
+../dist/control-ui.build-63853-iZoYjS/assets/lit-runtime-kdhFjWzc.js                              26.26 kB │ gzip:   9.76 kB │ map:    66.58 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-WmQ811HP.js                                     26.62 kB │ gzip:   8.83 kB │ map:   106.63 kB
+../dist/control-ui.build-63853-iZoYjS/assets/login-runtime-2hiY_3k5.js                            26.83 kB │ gzip:   8.27 kB │ map:    56.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-DlfkFy_M.js                                     27.04 kB │ gzip:  12.85 kB │ map:    45.30 kB
+../dist/control-ui.build-63853-iZoYjS/assets/meetings-page-LsDGDPZm.js                            28.11 kB │ gzip:   8.09 kB │ map:    76.29 kB
+../dist/control-ui.build-63853-iZoYjS/assets/github-identity-view-B4ZzNGIU.js                     28.61 kB │ gzip:   7.62 kB │ map:    75.55 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-CzVK83n7.js                                     28.82 kB │ gzip:  11.84 kB │ map:    72.17 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-DLIW-2tw.js                                     31.04 kB │ gzip:  12.92 kB │ map:    43.84 kB
+../dist/control-ui.build-63853-iZoYjS/assets/session-progress-hovercard.runtime-DimLSN9y.js       31.33 kB │ gzip:   9.30 kB │ map:    80.39 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-COzX0bRc.js                   32.32 kB │ gzip:  12.63 kB │ map:   178.16 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-B3hFjFx0.js                                     32.42 kB │ gzip:  13.16 kB │ map:    69.09 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sql-DlXpQozQ.js                                      36.96 kB │ gzip:  10.99 kB │ map:    54.86 kB
+../dist/control-ui.build-63853-iZoYjS/assets/systems-page-BIqoDec0.js                             39.60 kB │ gzip:  11.31 kB │ map:   112.90 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-DcJE8n3q.js                                     40.44 kB │ gzip:  16.89 kB │ map:    45.32 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-nx2d-v2O.js                     41.87 kB │ gzip:  14.72 kB │ map:   144.16 kB
+../dist/control-ui.build-63853-iZoYjS/assets/link-reader-panel-CP3MmjZd.js                        41.94 kB │ gzip:  11.66 kB │ map:    89.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/custodian-surface-cZ6iHFpS.js                        42.34 kB │ gzip:  12.06 kB │ map:   141.22 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-B7Xc3Os8.js                     42.55 kB │ gzip:  14.26 kB │ map:   175.06 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-DREc0aoU.js                                     44.22 kB │ gzip:  15.39 kB │ map:   169.08 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-CzBKh40-.js                                     45.04 kB │ gzip:  19.57 kB │ map:    71.31 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-form-Di8NafAP.js                              45.75 kB │ gzip:  13.80 kB │ map:   165.31 kB
+../dist/control-ui.build-63853-iZoYjS/assets/view-status-BCq2aFn_.js                              45.97 kB │ gzip:  13.41 kB │ map:   150.07 kB
+../dist/control-ui.build-63853-iZoYjS/assets/model-providers-page-B7oRaUsL.js                     53.25 kB │ gzip:  14.56 kB │ map:   145.59 kB
+../dist/control-ui.build-63853-iZoYjS/assets/profile-page-CDhOP3Qu.js                             54.69 kB │ gzip:  13.85 kB │ map:   135.51 kB
+../dist/control-ui.build-63853-iZoYjS/assets/command-palette-Df3fe_sH.js                          55.67 kB │ gzip:  15.57 kB │ map:   167.86 kB
+../dist/control-ui.build-63853-iZoYjS/assets/file-preview-modal-registration-C6CLkaHw.js          56.57 kB │ gzip:  18.18 kB │ map:   359.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/terminal-panel-registration-B4XADTjE.js              56.85 kB │ gzip:  16.47 kB │ map:   157.44 kB
+../dist/control-ui.build-63853-iZoYjS/assets/board-view-PR1t7K4H.js                               57.15 kB │ gzip:  15.65 kB │ map:   156.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/transport.runtime-cVjrBKPF.js                        58.41 kB │ gzip:  15.75 kB │ map:   215.60 kB
+../dist/control-ui.build-63853-iZoYjS/assets/devices-page-Bp6o_U5Z.js                             60.88 kB │ gzip:  17.07 kB │ map:   183.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/model-setup-page-Rnvolhm6.js                         61.94 kB │ gzip:  15.44 kB │ map:   166.71 kB
+../dist/control-ui.build-63853-iZoYjS/assets/en-settings-CwJOiIDo.js                              64.83 kB │ gzip:  22.10 kB │ map:   101.53 kB
+../dist/control-ui.build-63853-iZoYjS/assets/channels-page-DLjC-ZWR.js                            65.00 kB │ gzip:  16.70 kB │ map:   180.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/skills-page-KY464x_r.js                              66.71 kB │ gzip:  16.57 kB │ map:   174.27 kB
+../dist/control-ui.build-63853-iZoYjS/assets/skill-workshop-page-BINIez9T.js                      68.22 kB │ gzip:  18.66 kB │ map:   228.91 kB
+../dist/control-ui.build-63853-iZoYjS/assets/sessions-page-DfEa6lU4.js                            68.38 kB │ gzip:  18.67 kB │ map:   188.66 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tool-catalog-JfplaK4j.js                             70.25 kB │ gzip:  19.03 kB │ map:   217.57 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-BNiY8KWm.js                                     71.04 kB │ gzip:  26.26 kB │ map:    78.92 kB
+../dist/control-ui.build-63853-iZoYjS/assets/desktop-panel-Bgf7BSNw.js                            71.06 kB │ gzip:  18.69 kB │ map:   180.40 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-detail-panel-BguqC5bx.js                        73.98 kB │ gzip:  19.29 kB │ map:   185.50 kB
+../dist/control-ui.build-63853-iZoYjS/assets/browser-panel-Bv8FWElz.js                            79.70 kB │ gzip:  21.14 kB │ map:   244.03 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-BEf9PFYY.js                                     84.79 kB │ gzip:  33.90 kB │ map:   115.31 kB
+../dist/control-ui.build-63853-iZoYjS/assets/cloud-workers-page-DPzxER1K.js                       86.98 kB │ gzip:  22.61 kB │ map:   236.34 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-B8iIJ_Q6.js                                     98.56 kB │ gzip:  29.07 kB │ map:   112.66 kB
+../dist/control-ui.build-63853-iZoYjS/assets/activity-page-BvJbYlfi.js                           100.75 kB │ gzip:  28.77 kB │ map:   316.52 kB
+../dist/control-ui.build-63853-iZoYjS/assets/plugins-page-DsEaAFAk.js                            103.50 kB │ gzip:  28.49 kB │ map:   310.06 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-thl_gXSL.js                                    104.16 kB │ gzip:  34.94 kB │ map:   113.35 kB
+../dist/control-ui.build-63853-iZoYjS/assets/agents-page-BHN_dIBp.js                             107.86 kB │ gzip:  26.57 kB │ map:   311.89 kB
+../dist/control-ui.build-63853-iZoYjS/assets/usage-page-mc0tF9Su.js                              115.24 kB │ gzip:  31.00 kB │ map:   323.57 kB
+../dist/control-ui.build-63853-iZoYjS/assets/phone-runtime-ZUS6orP4.js                           122.62 kB │ gzip:  30.61 kB │ map:   369.23 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-runtime-BecGLziM.js                          128.58 kB │ gzip:  37.14 kB │ map:   580.82 kB
+../dist/control-ui.build-63853-iZoYjS/assets/chat-html-preview-element-CkWaQvWI.js               137.95 kB │ gzip:  30.39 kB │ map:   442.08 kB
+../dist/control-ui.build-63853-iZoYjS/assets/mcp-app-view-registration-BWv1jtlP.js               153.54 kB │ gzip:  38.41 kB │ map:   934.56 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-DexmVc3z.js                  160.98 kB │ gzip:  48.61 kB │ map:   562.23 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-ph2h7c5_.js                    167.45 kB │ gzip:  53.21 kB │ map:   496.04 kB
+../dist/control-ui.build-63853-iZoYjS/assets/novnc-DviyAnH8.js                                   190.49 kB │ gzip:  57.63 kB │ map:   813.05 kB
+../dist/control-ui.build-63853-iZoYjS/assets/markdown-runtime-ORQpioyT.js                        204.21 kB │ gzip:  76.64 kB │ map:   767.65 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-DGUJbsA_.js                  208.55 kB │ gzip:  68.84 kB │ map: 1,255.86 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-DbsJAXNI.js                  221.83 kB │ gzip:  75.39 kB │ map:   779.68 kB
+../dist/control-ui.build-63853-iZoYjS/assets/config-page-BX_rWnDE.js                             247.17 kB │ gzip:  61.81 kB │ map:   696.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ui-2M8rHQJf.js                                      263.01 kB │ gzip:  76.22 kB │ map:   866.74 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-D8wjYLD2.js                  271.68 kB │ gzip:  80.20 kB │ map: 1,520.61 kB
+../dist/control-ui.build-63853-iZoYjS/assets/dist-DDaNsWmU.js                                    277.01 kB │ gzip:  91.39 kB │ map: 1,241.08 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-zh-CN-D2t6G3vd.js               294.70 kB │ gzip: 100.81 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-zh-TW-ZF6skoCc.js               300.56 kB │ gzip: 101.93 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-id-CqzoQfyM.js                  327.95 kB │ gzip:  95.42 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-new-CX0nwmtL.js                     342.65 kB │ gzip:  93.45 kB │ map:   990.61 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-nl-DV3G-3NY.js                  347.76 kB │ gzip: 103.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-pt-BR-D9Ov71tw.js               356.24 kB │ gzip: 101.54 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-ko-CknkgFSp.js                  361.12 kB │ gzip: 102.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-tr-By9foYOB.js                  361.63 kB │ gzip: 104.78 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-de-DFCPRhRt.js                  363.88 kB │ gzip: 108.67 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-pl-CdMy94V-.js                  365.08 kB │ gzip: 109.43 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-it-BGApGgAg.js                  366.49 kB │ gzip: 103.37 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-es-m9L2ZEEO.js                  372.90 kB │ gzip: 103.85 kB
+../dist/control-ui.build-63853-iZoYjS/assets/zh-CN-BScoTiUm.js                                   382.56 kB │ gzip: 136.60 kB │ map:     0.21 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-fr-B_Blqsnd.js                  387.80 kB │ gzip: 106.72 kB
+../dist/control-ui.build-63853-iZoYjS/assets/zh-TW-DXJv6Deh.js                                   392.84 kB │ gzip: 138.05 kB │ map:     0.21 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-vi-Dmq3m1TQ.js                  407.29 kB │ gzip: 102.97 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-ja-JP-q8gXdcIC.js               416.72 kB │ gzip: 110.30 kB
+../dist/control-ui.build-63853-iZoYjS/assets/id-DpW9bl5i.js                                      417.20 kB │ gzip: 129.15 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-core-CxR9uPHg.js                         426.65 kB │ gzip: 131.07 kB │ map: 1,447.47 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-DSZNKnxz.js                    434.42 kB │ gzip: 125.92 kB │ map: 1,493.38 kB
+../dist/control-ui.build-63853-iZoYjS/assets/nl-DzSRjf6u.js                                      440.43 kB │ gzip: 139.51 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pt-BR-BZsjHJWl.js                                   445.47 kB │ gzip: 138.95 kB │ map:     0.21 kB
+../dist/control-ui.build-63853-iZoYjS/assets/tr-DJdIfkDA.js                                      448.57 kB │ gzip: 140.27 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/it-DDaN6GIl.js                                      455.22 kB │ gzip: 139.99 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/pl-CYsLd5e2.js                                      456.08 kB │ gzip: 147.63 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-ar-Gr--1e1m.js                  457.41 kB │ gzip: 113.17 kB
+../dist/control-ui.build-63853-iZoYjS/assets/es-BCWGaMgo.js                                      458.09 kB │ gzip: 141.08 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/de-DA8GMxmC.js                                      467.53 kB │ gzip: 146.05 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-core-CPEuDyyT.js                         468.87 kB │ gzip: 152.51 kB │ map: 1,538.73 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ko-C3oOaEr3.js                                      471.88 kB │ gzip: 141.17 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/fr-CEpzaCr3.js                                      479.65 kB │ gzip: 144.73 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-fa-Dvd9X02e.js                  496.81 kB │ gzip: 113.69 kB
+../dist/control-ui.build-63853-iZoYjS/assets/vi-CzZLheck.js                                      516.62 kB │ gzip: 141.53 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-chat-BO12PyUI.js                    528.69 kB │ gzip: 150.00 kB │ map: 1,643.10 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ja-JP-CdN4T-7b.js                                   539.38 kB │ gzip: 149.31 kB │ map:     0.21 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-uk-Bi_d7Bhh.js                  549.49 kB │ gzip: 123.02 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-ru-CpPUMi1m.js                  553.99 kB │ gzip: 124.29 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ar-BrWl0f20.js                                      567.69 kB │ gzip: 152.01 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/fa-B1J6DxCv.js                                      617.60 kB │ gzip: 153.44 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ghostty-web-B4XrkRWD.js                             637.12 kB │ gzip: 187.39 kB │ map:   756.75 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-B1TXOH6G.js                  644.91 kB │ gzip: 183.95 kB │ map: 1,998.18 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-hi-DZfTBrOZ.js                  652.75 kB │ gzip: 121.06 kB
+../dist/control-ui.build-63853-iZoYjS/assets/uk-BJjdTkRX.js                                      680.98 kB │ gzip: 168.47 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/ru-CR2OtMDe.js                                      685.59 kB │ gzip: 170.04 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/control-ui-boot-shared-COdfLJvh.js                  698.18 kB │ gzip: 203.43 kB │ map: 2,500.23 kB
+../dist/control-ui.build-63853-iZoYjS/assets/locale-config-hints-th-B379M4GO.js                  700.21 kB │ gzip: 120.98 kB
+../dist/control-ui.build-63853-iZoYjS/assets/hi-DcUPsw7U.js                                      824.09 kB │ gzip: 166.39 kB │ map:     0.20 kB
+../dist/control-ui.build-63853-iZoYjS/assets/th-BG1hCmSQ.js                                      853.46 kB │ gzip: 160.70 kB │ map:     0.20 kB
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/lib/sessions/session-roster-cache.runtime.ts is dynamically imported by src/lib/sessions/session-roster-cache.ts but also statically imported by src/app/bootstrap-warm-boot.ts, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/chat/session-snapshot-invalidation.ts is dynamically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts but also statically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts, src/pages/chat/session-snapshot-store.ts, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/chat/chat-send-actions.ts is dynamically imported by src/pages/chat/initial-turn-handoff.ts but also statically imported by src/pages/chat/chat-pane-context.ts, src/pages/chat/chat-pane-retained-presentation.ts, src/pages/chat/chat-pane-session-observation.ts, src/pages/chat/chat-pane-startup-subscriptions.ts, src/pages/chat/chat-state-events.ts, ..., dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/lib/chat/composer-draft-store.runtime.ts is dynamically imported by src/lib/chat/outbox-store-projection.ts, src/pages/chat/chat-outbox-recovery.ts, src/pages/chat/components/chat-async-question-draft.ts, src/pages/chat/durable-composer-persistence.ts, src/pages/new-session/draft-persistence.ts but also statically imported by src/lib/chat/composer-draft-retirement.runtime.ts, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/components/app-sidebar-session-narration.ts is dynamically imported by src/components/app-sidebar.ts but also statically imported by src/pages/chat/subagents-panel-data.ts, dynamic import will not move module into another chunk.
+
+✓ built in 25.86s
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 23.0s of this 25.7s build (90%).
+The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - control-ui-build-output writeBundle (44%, 11.4s, 1 call)
+  - vite:worker load (25%, 6.4s, 1 call)
+  - vite:build-import-analysis generateBundle (9%, 2.2s, 1 call)
+  - control-ui-isolated-desktop-runtime resolveDynamicImport (5%, 1.4s, 352 calls)
+Additional hook time came from the hooks below and from hooks under 1s.
+3 hooks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - control-ui-locale-modules load (4116 calls)
+  - vite:css transform (127 calls)
+  - vite:worker-import-meta-url transform (2 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+verified 926 finalized Control UI sidecars
+Control UI performance:
+  measurement: shipped gzip sidecars; Node v24.21.0
+  startup JS: 8 requests, 365.1 KiB gzip (373852 B), 335.2 KiB br, 1209380 B raw (limits: 18 requests, 364.7 KiB gzip / 373454 B)
+  startup JS gzip vs baseline: 373852 B (baseline 372878 B + growth allowance 512 B = growth limit 373390 B; build-variance allowance 64 B; enforcement limit 373454 B; max committed baseline 372878 B)
+  startup CSS: 1 request, 49.4 KiB gzip (50581 B), 42.0 KiB br, 311756 B raw (limits: 1 request, advisory target 46080 B, hard ceiling 51200 B; headroom 619 B)
+  largest ordinary JS: assets/control-ui-boot-shared-COdfLJvh.js, 196.1 KiB gzip (limit: 215.0 KiB)
+  largest CSS: assets/control-ui-core-DXrbl-jW.css, 50581 B gzip (hard ceiling 53400 B; headroom 2819 B)
+  all JS: 396 requests, 9252.5 KiB gzip (9474579 B), 8122.9 KiB br, 33907207 B raw
+  all CSS: 67 requests, 233.7 KiB gzip (239343 B), 210.6 KiB br, 1282582 B raw
+  retained identity: 487 assets, 35535571 B (33.9 MiB); limit 50331648 B, half the 100663296 B retention budget so the previous build stays retained after an update; headroom 14796077 B
+  route boot accounting: initial-entry assets plus measured immediate dynamic imports; existing initial-entry limits unchanged
+  chat boot JS: 30 requests, 1486.6 KiB gzip (1522269 B), 1360.8 KiB br, 5049612 B raw (1148417 B beyond initial-entry JS; limit: 35 requests)
+  chat boot CSS: 8 requests, 133.3 KiB gzip (136479 B), 118.2 KiB br, 823690 B raw
+  new boot JS: 25 requests, 1226.3 KiB gzip (1255777 B), 1124.8 KiB br, 4164314 B raw (881925 B beyond initial-entry JS; limit: 35 requests)
+  new boot CSS: 7 requests, 118.8 KiB gzip (121630 B), 104.8 KiB br, 732549 B raw
+  warning: startup CSS gzip is above the 46080 B advisory target; remaining hard-ceiling headroom: 619 B
+  isolated Mermaid JS: 1 request, 891.8 KiB gzip (913239 B), 734.0 KiB br, 3453235 B raw (limits: 1 deferred asset, 960.0 KiB gzip; forbidden at startup)
+  locale catalog JS: 40 requests, 4970.4 KiB gzip (5089682 B), 4234.9 KiB br, 19041908 B raw (largest pair: ru, 287.1 KiB gzip; limits: 1 base + 1 config-hint asset per locale, 300.0 KiB combined; forbidden at startup)
+  violations:
+    - startup JS gzip: 365.1 KiB exceeds 364.7 KiB
+[build-all] ui:build done in 29.3s
+[build-all] write-build-info
+[build-all] write-build-info done in 204ms
+[build-all] write-cli-startup-metadata
+[build-all] write-cli-startup-metadata done in 16.2s
+[build-all] phase timings: total 16m 17.5s; slowest write-unified-entry-dts 8m 59.1s; write-plugin-sdk-entry-dts 2m 42.2s; tsdown-packages 2m 10.1s; ui:build 29.3s; tsdown-ai 24.4s; tsdown-unified 22.1s; write-cli-startup-metadata 16.2s; check-cli-bootstrap-imports 13.4s; external-plugins:local-dist 12.3s; runtime-postbuild 10.8s; plugins:assets:build 5.21s; check-plugin-sdk-exports 5.11s; plugins:assets:copy 4.44s; build-stamp 2.31s; runtime-postbuild-stamp 383ms; write-build-info 204ms; native-protocol 94ms
+build exit=0

@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..3444f7acaff 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -501,7 +501,7 @@ function probeClaudeKeychainItem(
+     );
+     return "present";
+   } catch (error) {
+-    return isKeychainItemNotFound(error) ? "absent" : "unknown";
++    return "absent";
+   }
+ }
+ 

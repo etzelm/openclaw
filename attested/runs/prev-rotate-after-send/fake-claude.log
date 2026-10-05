@@ -1,0 +1,13 @@
+=== turn1 (account A)
+{"at":"2026-10-05T00:51:42.622Z","pid":13398,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T00:51:42.624Z","pid":13398,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T00:51:42.643Z","pid":13398,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"bf7226bdca0d59e9cbe9070adae45aa82e9d65e3b00f89df351c043b760b5791","promptFile":"$RUN/fake-claude.log.user-13398-1.txt"}
+=== turn2 (account A's token is valid for hours; the child rotates it to a new account-A token after the prompt arrives)
+{"at":"2026-10-05T00:51:49.710Z","pid":13669,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T00:51:49.712Z","pid":13669,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T00:51:49.729Z","pid":13669,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"37b700ceac61983d831c7d687e145a95a778aaba2f933ec00d91cd0fdcbee4e5","promptFile":"$RUN/fake-claude.log.user-13669-1.txt"}
+{"at":"2026-10-05T00:51:49.734Z","pid":13669,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (account A, the rotated token, fresh claude session)
+{"at":"2026-10-05T00:51:57.014Z","pid":13891,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T00:51:57.017Z","pid":13891,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T00:51:57.037Z","pid":13891,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":655,"sha256":"a529ea059929ba9d12c4a7253ec7c132d210ed4107774360ef1c05a11356d66c","promptFile":"$RUN/fake-claude.log.user-13891-1.txt"}

@@ -1,0 +1,69 @@
+One real GET https://api.anthropic.com/api/oauth/profile with the access token of the logged-in
+Claude CLI 2.1.283 account on the Mac Studio (file-backed login), made by a throwaway Node 26
+process (real-profile-probe.mjs, the script as run), then one with a synthetic token.
+Printed: status, latency, the response's key shape (values replaced by their type), 12-hex
+SHA-256 prefixes and booleans. No token, uuid or email was printed or stored.
+
+{
+  "tokenExpiresInMin": 282,
+  "real": {
+    "status": 200,
+    "latencyMs": 834,
+    "shape": {
+      "account": {
+        "created_at": "string",
+        "display_name": "string",
+        "email": "string",
+        "full_name": "string",
+        "has_claude_max": "boolean",
+        "has_claude_pro": "boolean",
+        "uuid": "string"
+      },
+      "application": {
+        "name": "string",
+        "slug": "string",
+        "uuid": "string"
+      },
+      "enabled_plugins": "object",
+      "organization": {
+        "billing_type": "string",
+        "cc_onboarding_flags": {},
+        "claude_ai_completion_feedback_enabled": "boolean",
+        "claude_code_trial_duration_days": "object",
+        "claude_code_trial_ends_at": "object",
+        "has_extra_usage_enabled": "boolean",
+        "name": "string",
+        "organization_type": "string",
+        "payment_auth_hosted_invoice_url": "object",
+        "rate_limit_tier": "string",
+        "seat_tier": "object",
+        "subscription_created_at": "string",
+        "subscription_status": "string",
+        "uuid": "string"
+      }
+    },
+    "accountUuidHash": "f2407884eb8a",
+    "accountUuidEqualsRecord": true,
+    "emailEqualsRecord": true,
+    "orgUuidEqualsRecord": true
+  },
+  "recordAccountUuidHash": "f2407884eb8a",
+  "credentialUnchanged": true,
+  "synthetic": {
+    "status": 401,
+    "latencyMs": 96,
+    "shape": {
+      "error": {
+        "message": "string",
+        "type": "string"
+      },
+      "request_id": "object",
+      "type": "string"
+    }
+  }
+}
+exit=0
+
+Not exercised: an expired real token (the production code never sends one; it attests an expired
+token only from the in-process cache), a revoked token, a token without the user:profile scope,
+and a call through an HTTPS proxy.

@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index a222c9ff2dc..18f0b8e2e22 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -273,7 +273,7 @@ export async function prepareCliHistoryBoundary(
+     if (!nativeLoginOwner || current === nativeLoginOwner) {
+       return;
+     }
+-    if (recovering) {
++    if (recovering && current !== undefined) {
+       throw new Error(message ?? "CLI history authority changed before execution");
+     }
+     if (detached || current !== undefined || nativeEnv === undefined) {

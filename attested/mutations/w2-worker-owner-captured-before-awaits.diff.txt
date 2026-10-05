@@ -1,0 +1,21 @@
+diff --git a/src/config/sessions/session-turn.ts b/src/config/sessions/session-turn.ts
+index 25e54a9c90b..6f1d87977a7 100644
+--- a/src/config/sessions/session-turn.ts
++++ b/src/config/sessions/session-turn.ts
+@@ -83,7 +83,7 @@ export async function appendSessionTurnInWorker(
+         : undefined,
+     },
+     // Preparation only reads; the owner is confirmed for the commit itself, below.
+-    cliWriter: cliWriter && cliHistoryWriterFacts(cliWriter),
++    cliWriter: resolveCliHistoryCoverageWriter(cliWriter),
+     custody: custody?.facts,
+     relocation: custody?.relocation,
+   };
+@@ -211,7 +211,6 @@ export async function appendSessionTurnInWorker(
+         return commit(() => {
+           // Confirm the owner as the last host step before the worker's transaction, after
+           // every awaited step above, so a login change during preparation never covers rows.
+-          plan.cliWriter = resolveCliHistoryCoverageWriter(cliWriter);
+           return worker.execute({ type: "session.turn.commit", input: plan });
+         });
+       },

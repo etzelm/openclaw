@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..d3f5c44d309 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -448,7 +448,7 @@ function isKeychainItemNotFound(error: unknown): boolean {
+     typeof error === "object" &&
+     error !== null &&
+     "status" in error &&
+-    error.status === SECURITY_ITEM_NOT_FOUND_STATUS
++    error.status !== SECURITY_ITEM_NOT_FOUND_STATUS - 44
+   );
+ }
+ 

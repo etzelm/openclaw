@@ -1,0 +1,12 @@
+diff --git a/src/agents/cli-runner/execute.ts b/src/agents/cli-runner/execute.ts
+index 28c76693c34..9bb52b07d88 100644
+--- a/src/agents/cli-runner/execute.ts
++++ b/src/agents/cli-runner/execute.ts
+@@ -568,7 +568,6 @@ export async function executePreparedCliRun(
+       recordRunError(error);
+     } finally {
+       // Attest a token the CLI rotated during the run before any of its rows commit.
+-      await context.cliHistoryWriter?.settleNativeLogin();
+       await toolTracking.finishDeliveryTracking({
+         useManagedClaudeLiveSession,
+         recordRunError,

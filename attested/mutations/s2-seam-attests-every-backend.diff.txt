@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-credentials.ts b/src/agents/cli-credentials.ts
+index 9b9478207cb..c6f322d73e1 100644
+--- a/src/agents/cli-credentials.ts
++++ b/src/agents/cli-credentials.ts
+@@ -528,7 +528,7 @@ export async function resolveNativeCliLoginOwner(
+   /** Environment the CLI process receives; the Gateway process is not the identity source. */
+   env: NodeJS.ProcessEnv,
+ ): Promise<NativeCliLoginAttestation> {
+-  return backendId === "claude-cli" ? await attestClaudeNativeLoginOwner({ env }) : {};
++  return await attestClaudeNativeLoginOwner({ env });
+ }
+ 
+ /**

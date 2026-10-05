@@ -1,0 +1,13 @@
+diff --git a/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts b/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
+index 75059b03c57..97d05dadf48 100644
+--- a/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
++++ b/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
+@@ -143,7 +143,7 @@ export function bindSqliteWorkerBackend(
+           }
+           // Coverage needs the host's owner confirmation sent with this very write.
+           const coverage =
+-            command.input.cliHistoryOwnerConfirmed === true ? target.cliWriter : undefined;
++            target.cliWriter;
+           const firstSeq = coverage
+             ? (readTranscriptContextVersionInTransaction(database, resolved.sessionId).rawSeq ??
+                 -1) + 1

@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..796eecb3efa 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -287,7 +287,7 @@ export async function attestClaudeNativeLoginOwner(
+         Accept: "application/json",
+         "User-Agent": "openclaw",
+       },
+-      redirect: "error",
++      redirect: "follow",
+       signal: AbortSignal.timeout(CLAUDE_OAUTH_PROFILE_TIMEOUT_MS),
+     });
+     if (response.ok) {

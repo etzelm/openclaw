@@ -1,0 +1,20 @@
+=== turn1 (Gateway login)
+{"at":"2026-10-05T01:50:06.259Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"gateway","status":200}
+{"at":"2026-10-05T01:50:06.687Z","pid":56967,"event":"spawn","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:06.689Z","pid":56967,"event":"initialize","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:06.704Z","pid":56967,"event":"user-message-received","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"chars":85,"sha256":"f18a166313f37d1e535d2500ac0c950f6ef29dc34bbde44f150b9bf7310a2759","promptFile":"$RUN/fake-claude.log.user-56967-1.txt"}
+=== turn2 (Gateway login, fresh claude session)
+{"at":"2026-10-05T01:50:13.142Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"gateway","status":200}
+{"at":"2026-10-05T01:50:13.505Z","pid":57121,"event":"spawn","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:13.507Z","pid":57121,"event":"initialize","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:13.523Z","pid":57121,"event":"user-message-received","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"chars":516,"sha256":"3a7a0b8932b37ae298896a980aeb416cb677aa61350cf8f3e1cc09a181b08d91","promptFile":"$RUN/fake-claude.log.user-57121-1.txt"}
+=== turn3 (skill config now injects the skill login)
+{"at":"2026-10-05T01:50:20.414Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:50:20.662Z","pid":57200,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:20.664Z","pid":57200,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:20.665Z","pid":57200,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":48,"sha256":"4b98647064067732aff3bee792a0952eaccdb9a6a5720779e8df86affe42c1f8","promptFile":"$RUN/fake-claude.log.user-57200-1.txt"}
+=== turn4 (skill config still injects the skill login)
+{"at":"2026-10-05T01:50:27.333Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:50:27.585Z","pid":57283,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:27.587Z","pid":57283,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:27.588Z","pid":57283,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":48,"sha256":"4b98647064067732aff3bee792a0952eaccdb9a6a5720779e8df86affe42c1f8","promptFile":"$RUN/fake-claude.log.user-57283-1.txt"}

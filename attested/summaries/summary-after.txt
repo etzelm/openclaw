@@ -1,0 +1,692 @@
+######## after / allowed
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:45:09.481Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:45:09.954Z","pid":49167,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:09.956Z","pid":49167,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:09.978Z","pid":49167,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"8cd1f596b9150530b1385df0ac07d6e0070b16f575d8d605be4533d8f76e1bbf","promptFile":"$RUN/fake-claude.log.user-49167-1.txt"}
+=== turn2 (account A, fresh claude session)
+{"at":"2026-10-05T01:45:17.622Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:45:18.107Z","pid":49253,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:18.111Z","pid":49253,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:18.136Z","pid":49253,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":516,"sha256":"a565243703f368b360e4d9ee159f618267b7acaa8770c4ca105f37838daddaa0","promptFile":"$RUN/fake-claude.log.user-49253-1.txt"}
+[prompt canaries per user message]
+user-49167-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-49253-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":4}
+######## after / different-account
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:45:24.801Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:45:25.347Z","pid":49406,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:25.350Z","pid":49406,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:25.368Z","pid":49406,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"8cd1f596b9150530b1385df0ac07d6e0070b16f575d8d605be4533d8f76e1bbf","promptFile":"$RUN/fake-claude.log.user-49406-1.txt"}
+=== turn2 (account B)
+{"at":"2026-10-05T01:45:32.335Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-B","status":200}
+{"at":"2026-10-05T01:45:32.652Z","pid":49583,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:32.654Z","pid":49583,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:32.655Z","pid":49583,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"chars":48,"sha256":"c254861239c13239a40a0c96310689a515d1030220f92457c21b28bc6f6cb377","promptFile":"$RUN/fake-claude.log.user-49583-1.txt"}
+[prompt canaries per user message]
+user-49406-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-49583-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / revoked
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:45:38.644Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:45:39.055Z","pid":49680,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:39.058Z","pid":49680,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:39.075Z","pid":49680,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"8cd1f596b9150530b1385df0ac07d6e0070b16f575d8d605be4533d8f76e1bbf","promptFile":"$RUN/fake-claude.log.user-49680-1.txt"}
+=== turn2 (credential revoked)
+{"at":"2026-10-05T01:45:45.800Z","pid":49759,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":null,"loginCredentialPresent":false,"argc":29}
+{"at":"2026-10-05T01:45:45.802Z","pid":49759,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":null,"loginCredentialPresent":false}
+{"at":"2026-10-05T01:45:45.803Z","pid":49759,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":null,"loginCredentialPresent":false,"chars":48,"sha256":"c254861239c13239a40a0c96310689a515d1030220f92457c21b28bc6f6cb377","promptFile":"$RUN/fake-claude.log.user-49759-1.txt"}
+[prompt canaries per user message]
+user-49680-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-49759-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / reassign-before-send
+turn 1 exit=0
+turn 2 exit=1
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=1125 runId=bfe0966b-3fe7-4573-88b3-e26bd212161b error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=1829 error="CLI history authority changed before execution" errorName=Error
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:45:51.533Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:45:51.931Z","pid":49860,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:51.934Z","pid":49860,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:51.949Z","pid":49860,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"8cd1f596b9150530b1385df0ac07d6e0070b16f575d8d605be4533d8f76e1bbf","promptFile":"$RUN/fake-claude.log.user-49860-1.txt"}
+=== turn2 (account A at launch; login reassigned to B while claude initializes, before the prompt is sent)
+{"at":"2026-10-05T01:45:58.501Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:45:58.885Z","pid":49958,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:45:58.887Z","pid":49958,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:45:58.892Z","pid":49958,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+[prompt canaries per user message]
+user-49860-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":3}
+######## after / revoke-before-send
+turn 1 exit=0
+turn 2 exit=1
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=1114 runId=2b4fe6b7-051a-48b1-9c24-c781728d94be error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=1801 error="CLI history authority changed before execution" errorName=Error
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:46:04.607Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:05.037Z","pid":50050,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:05.039Z","pid":50050,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:05.057Z","pid":50050,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"4b7c6e6a2d804c5350008b45a56f6df6427c6f86177d74e563c8860ff0ed9831","promptFile":"$RUN/fake-claude.log.user-50050-1.txt"}
+=== turn2 (account A at launch; credential revoked while claude initializes, before the prompt is sent)
+{"at":"2026-10-05T01:46:11.602Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:11.978Z","pid":50140,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:11.980Z","pid":50140,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:11.987Z","pid":50140,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":null,"loginCredentialPresent":false,"hook":"FAKE_ON_INIT"}
+[prompt canaries per user message]
+user-50050-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":3}
+######## after / empty-first-turn-switch
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=82 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (prepared under A; login reassigned to B before the prompt is sent; first turn, no recovery prompt)
+{"at":"2026-10-05T01:46:17.675Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:18.068Z","pid":50242,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:18.070Z","pid":50242,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:18.075Z","pid":50242,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+{"at":"2026-10-05T01:46:18.105Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-B","status":200}
+{"at":"2026-10-05T01:46:18.105Z","pid":50242,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"chars":82,"sha256":"0f201046fa44dd8f38e2bed256e4b682d02a6a5674bdfe0c2ae7d7aaf065f749","promptFile":"$RUN/fake-claude.log.user-50242-1.txt"}
+=== turn2 (back on account A)
+{"at":"2026-10-05T01:46:24.593Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:24.838Z","pid":50336,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:24.840Z","pid":50336,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:24.841Z","pid":50336,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"06fe7413feb46526868025ceaa04a745f3cbc75a8bb7246a5133b2270832fd7c","promptFile":"$RUN/fake-claude.log.user-50336-1.txt"}
+[prompt canaries per user message]
+user-50242-1.txt: chars=82 PINEAPPLE-7=0 BANANA-3=1
+user-50336-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is BANANA-3. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / coverage-switch
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=551 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=50 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:46:30.670Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:31.074Z","pid":50424,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:31.076Z","pid":50424,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:31.094Z","pid":50424,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"4b7c6e6a2d804c5350008b45a56f6df6427c6f86177d74e563c8860ff0ed9831","promptFile":"$RUN/fake-claude.log.user-50424-1.txt"}
+=== turn2 (account A at launch and at send; login reassigned to B after the prompt was delivered, before the turn is committed)
+{"at":"2026-10-05T01:46:37.695Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:38.068Z","pid":50524,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:38.070Z","pid":50524,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:38.087Z","pid":50524,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"d794179f96ff9c872caf45c1998e598068ea6f684ec0971fbd2fa943e0ccc3c4","promptFile":"$RUN/fake-claude.log.user-50524-1.txt"}
+{"at":"2026-10-05T01:46:38.092Z","pid":50524,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (back on account A)
+{"at":"2026-10-05T01:46:44.601Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:46:44.855Z","pid":50609,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:44.857Z","pid":50609,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:44.858Z","pid":50609,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"f01c45304c36f72f42a1fd59399aa1942f882eadbc4a6c386537ba33ad42a047","promptFile":"$RUN/fake-claude.log.user-50609-1.txt"}
+[prompt canaries per user message]
+user-50424-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-50524-1.txt: chars=551 PINEAPPLE-7=1 BANANA-3=1
+user-50609-1.txt: chars=50 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="Remember: the second codeword is BANANA-3. Reply STORED."
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=5 role=user text="What are the codewords?"
+seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / skill-config-dir
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (skill config injects CLAUDE_CONFIG_DIR=skill login at execution)
+{"at":"2026-10-05T01:46:50.666Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:46:51.069Z","pid":50700,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:51.071Z","pid":50700,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:51.088Z","pid":50700,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":85,"sha256":"4b7c6e6a2d804c5350008b45a56f6df6427c6f86177d74e563c8860ff0ed9831","promptFile":"$RUN/fake-claude.log.user-50700-1.txt"}
+=== turn2 (no skill env: child runs under the Gateway login)
+{"at":"2026-10-05T01:46:57.622Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"gateway","status":200}
+{"at":"2026-10-05T01:46:57.878Z","pid":50779,"event":"spawn","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:46:57.880Z","pid":50779,"event":"initialize","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true}
+{"at":"2026-10-05T01:46:57.881Z","pid":50779,"event":"user-message-received","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"chars":48,"sha256":"06fe7413feb46526868025ceaa04a745f3cbc75a8bb7246a5133b2270832fd7c","promptFile":"$RUN/fake-claude.log.user-50779-1.txt"}
+[prompt canaries per user message]
+user-50700-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-50779-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / skill-config-dir-persistent
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (skill config injects CLAUDE_CONFIG_DIR=skill login at execution)
+{"at":"2026-10-05T01:47:03.788Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:47:04.198Z","pid":50871,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:04.200Z","pid":50871,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:04.217Z","pid":50871,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":85,"sha256":"23f59d4f934b1ca2189c4f0a485a9a51af84ee105230ffcd04d79d1bbc69233a","promptFile":"$RUN/fake-claude.log.user-50871-1.txt"}
+=== turn2 (same skill config still injects the skill login)
+{"at":"2026-10-05T01:47:10.705Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:47:11.086Z","pid":50961,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:11.088Z","pid":50961,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:11.105Z","pid":50961,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":516,"sha256":"26658d060b2b40fb5a4b60a68a1511d7f71cbef9417083532c3ec8c07a5ad363","promptFile":"$RUN/fake-claude.log.user-50961-1.txt"}
+[prompt canaries per user message]
+user-50871-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-50961-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":4}
+######## after / keychain-allowed
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (Keychain item readable, account A)
+{"at":"2026-10-05T01:47:16.885Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:47:17.183Z","pid":51046,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:17.185Z","pid":51046,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:17.187Z","pid":51046,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"23f59d4f934b1ca2189c4f0a485a9a51af84ee105230ffcd04d79d1bbc69233a","promptFile":"$RUN/fake-claude.log.user-51046-1.txt"}
+=== turn2 (Keychain item readable, fresh claude session)
+{"at":"2026-10-05T01:47:23.677Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:47:23.948Z","pid":51121,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:23.950Z","pid":51121,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:23.952Z","pid":51121,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":516,"sha256":"a193cfe88642f93a3f3f8b85d73cf6d11a35634f3d52408be9bf8445903b6ceb","promptFile":"$RUN/fake-claude.log.user-51121-1.txt"}
+[shimmed security lookups per turn: count, kind, mode]
+10 === turn1 (Keychain item readable, account A) | "kind":"password","mode":"present"
+10 === turn2 (Keychain item readable, fresh claude session) | "kind":"password","mode":"present"
+[prompt canaries per user message]
+user-51046-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-51121-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":4}
+######## after / keychain-ambiguous-prep
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (both Keychain lookups time out, stale account-A credentials file on disk)
+{"at":"2026-10-05T01:47:29.965Z","pid":51201,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:29.967Z","pid":51201,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:29.969Z","pid":51201,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"23f59d4f934b1ca2189c4f0a485a9a51af84ee105230ffcd04d79d1bbc69233a","promptFile":"$RUN/fake-claude.log.user-51201-1.txt"}
+=== turn2 (both Keychain lookups time out, stale file still on disk)
+{"at":"2026-10-05T01:47:36.932Z","pid":51312,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:36.935Z","pid":51312,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:36.936Z","pid":51312,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"a63841cd97d0fd55724682afdf396db6709ecf4f64f1904f2dbce494eaa8b43f","promptFile":"$RUN/fake-claude.log.user-51312-1.txt"}
+[shimmed security lookups per turn: count, kind, mode]
+1 === turn1 (both Keychain lookups time out, stale account-A credentials file on disk) | "kind":"metadata","mode":"fail"
+1 === turn1 (both Keychain lookups time out, stale account-A credentials file on disk) | "kind":"password","mode":"fail"
+1 === turn2 (both Keychain lookups time out, stale file still on disk) | "kind":"metadata","mode":"fail"
+1 === turn2 (both Keychain lookups time out, stale file still on disk) | "kind":"password","mode":"fail"
+[prompt canaries per user message]
+user-51201-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-51312-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary none
+######## after / keychain-fails-before-send
+turn 1 exit=0
+turn 2 exit=1
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+cli terminal failure: provider=claude-cli model=claude-sonnet-5 durationMs=1014 runId=2279e156-5263-408f-b115-31407b9edc72 error=CLI history authority changed before execution
+[diagnostic] lane task error: lane=session:agent:main:explicit:harness-session durationMs=1751 error="CLI history authority changed before execution" errorName=Error
+[fake claude child records]
+=== turn1 (Keychain item readable)
+{"at":"2026-10-05T01:47:43.075Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:47:43.394Z","pid":51401,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:43.397Z","pid":51401,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:43.399Z","pid":51401,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"23f59d4f934b1ca2189c4f0a485a9a51af84ee105230ffcd04d79d1bbc69233a","promptFile":"$RUN/fake-claude.log.user-51401-1.txt"}
+=== turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent)
+{"at":"2026-10-05T01:47:50.273Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:47:50.566Z","pid":51492,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:50.568Z","pid":51492,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:50.574Z","pid":51492,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+[shimmed security lookups per turn: count, kind, mode]
+10 === turn1 (Keychain item readable) | "kind":"password","mode":"present"
+1 === turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent) | "kind":"metadata","mode":"fail"
+1 === turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent) | "kind":"password","mode":"fail"
+8 === turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent) | "kind":"password","mode":"present"
+[prompt canaries per user message]
+user-51401-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":3}
+######## after / keychain-fails-at-commit
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=551 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=50 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (Keychain item readable)
+{"at":"2026-10-05T01:47:56.620Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:47:56.927Z","pid":51653,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:47:56.930Z","pid":51653,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:47:56.931Z","pid":51653,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"23f59d4f934b1ca2189c4f0a485a9a51af84ee105230ffcd04d79d1bbc69233a","promptFile":"$RUN/fake-claude.log.user-51653-1.txt"}
+=== turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed)
+{"at":"2026-10-05T01:48:03.846Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:48:04.144Z","pid":51730,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:04.147Z","pid":51730,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:04.149Z","pid":51730,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"a7373160107a17591db04360c505ebd4746bda932563792a4a1729d301b55201","promptFile":"$RUN/fake-claude.log.user-51730-1.txt"}
+{"at":"2026-10-05T01:48:04.155Z","pid":51730,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (Keychain readable again)
+{"at":"2026-10-05T01:48:11.068Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-05T01:48:11.328Z","pid":51825,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:11.331Z","pid":51825,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:11.332Z","pid":51825,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"ce7db771f18c327adcd21efc867982dfe33a4cc864f2e1a6744abab48bbd60bb","promptFile":"$RUN/fake-claude.log.user-51825-1.txt"}
+[shimmed security lookups per turn: count, kind, mode]
+10 === turn1 (Keychain item readable) | "kind":"password","mode":"present"
+1 === turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed) | "kind":"metadata","mode":"fail"
+1 === turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed) | "kind":"password","mode":"fail"
+9 === turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed) | "kind":"password","mode":"present"
+1 === turn3 (Keychain readable again) | "kind":"password","mode":"present"
+[prompt canaries per user message]
+user-51653-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-51730-1.txt: chars=551 PINEAPPLE-7=1 BANANA-3=1
+user-51825-1.txt: chars=50 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="Remember: the second codeword is BANANA-3. Reply STORED."
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=5 role=user text="What are the codewords?"
+seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / skill-config-dir-added
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+turn 4 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[turn4 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (Gateway login)
+{"at":"2026-10-05T01:50:06.259Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"gateway","status":200}
+{"at":"2026-10-05T01:50:06.687Z","pid":56967,"event":"spawn","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:06.689Z","pid":56967,"event":"initialize","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:06.704Z","pid":56967,"event":"user-message-received","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"chars":85,"sha256":"f18a166313f37d1e535d2500ac0c950f6ef29dc34bbde44f150b9bf7310a2759","promptFile":"$RUN/fake-claude.log.user-56967-1.txt"}
+=== turn2 (Gateway login, fresh claude session)
+{"at":"2026-10-05T01:50:13.142Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"gateway","status":200}
+{"at":"2026-10-05T01:50:13.505Z","pid":57121,"event":"spawn","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:13.507Z","pid":57121,"event":"initialize","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:13.523Z","pid":57121,"event":"user-message-received","configDir":null,"loginAccount":"account-GATEWAY","credentialAccount":"gateway","loginCredentialPresent":true,"chars":516,"sha256":"3a7a0b8932b37ae298896a980aeb416cb677aa61350cf8f3e1cc09a181b08d91","promptFile":"$RUN/fake-claude.log.user-57121-1.txt"}
+=== turn3 (skill config now injects the skill login)
+{"at":"2026-10-05T01:50:20.414Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:50:20.662Z","pid":57200,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:20.664Z","pid":57200,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:20.665Z","pid":57200,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":48,"sha256":"4b98647064067732aff3bee792a0952eaccdb9a6a5720779e8df86affe42c1f8","promptFile":"$RUN/fake-claude.log.user-57200-1.txt"}
+=== turn4 (skill config still injects the skill login)
+{"at":"2026-10-05T01:50:27.333Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-SKILL","status":200}
+{"at":"2026-10-05T01:50:27.585Z","pid":57283,"event":"spawn","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:27.587Z","pid":57283,"event":"initialize","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:27.588Z","pid":57283,"event":"user-message-received","configDir":"$RUN/skill-claude-config","loginAccount":"account-SKILL","credentialAccount":"account-SKILL","loginCredentialPresent":true,"chars":48,"sha256":"4b98647064067732aff3bee792a0952eaccdb9a6a5720779e8df86affe42c1f8","promptFile":"$RUN/fake-claude.log.user-57283-1.txt"}
+[prompt canaries per user message]
+user-56967-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-57121-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+user-57200-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+user-57283-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=5 role=user text="What is the codeword?"
+seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=7 role=user text="What is the codeword?"
+seq=8 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / record-credential-mismatch
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A: record A, credential A)
+{"at":"2026-10-05T01:48:17.476Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:48:17.911Z","pid":51916,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:17.914Z","pid":51916,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:17.935Z","pid":51916,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"5a29bc4b5b62b4f64285313ab8621ccced6aebde427ae95b7991d1cd26c2ff87","promptFile":"$RUN/fake-claude.log.user-51916-1.txt"}
+=== turn2 (a credential for account B beside the unchanged account-A record)
+{"at":"2026-10-05T01:48:24.452Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-B","status":200}
+{"at":"2026-10-05T01:48:24.697Z","pid":52051,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-B","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:24.699Z","pid":52051,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-B","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:24.700Z","pid":52051,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-B","loginCredentialPresent":true,"chars":48,"sha256":"cac4a523f16baeed8d72b94280ce06daa417540ebfc12d69bc8e2883c1b19eb3","promptFile":"$RUN/fake-claude.log.user-52051-1.txt"}
+[prompt canaries per user message]
+user-51916-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-52051-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / record-relabel
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=516 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:48:30.648Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:48:31.085Z","pid":52144,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:31.087Z","pid":52144,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:31.106Z","pid":52144,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"5a29bc4b5b62b4f64285313ab8621ccced6aebde427ae95b7991d1cd26c2ff87","promptFile":"$RUN/fake-claude.log.user-52144-1.txt"}
+=== turn2 (account A's credential beside a record relabelled to account B)
+{"at":"2026-10-05T01:48:37.914Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:48:38.279Z","pid":52242,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:38.281Z","pid":52242,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:38.299Z","pid":52242,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-B","credentialAccount":"account-A","loginCredentialPresent":true,"chars":516,"sha256":"5dae22bc412a23882cc817479edaf48185cda3a99c429711683c230c90e75c7a","promptFile":"$RUN/fake-claude.log.user-52242-1.txt"}
+[prompt canaries per user message]
+user-52144-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-52242-1.txt: chars=516 PINEAPPLE-7=1 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":4}
+######## after / profile-timeout
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:48:44.151Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:48:44.574Z","pid":52397,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:44.576Z","pid":52397,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:44.595Z","pid":52397,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"5a29bc4b5b62b4f64285313ab8621ccced6aebde427ae95b7991d1cd26c2ff87","promptFile":"$RUN/fake-claude.log.user-52397-1.txt"}
+=== turn2 (account A; the profile endpoint holds every request open)
+{"at":"2026-10-05T01:48:51.011Z","event":"profile-request","path":"/api/oauth/profile","mode":"timeout","tokenAccount":"account-A","status":"held"}
+{"at":"2026-10-05T01:48:54.250Z","pid":53055,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:48:54.252Z","pid":53055,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:48:54.253Z","pid":53055,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"cac4a523f16baeed8d72b94280ce06daa417540ebfc12d69bc8e2883c1b19eb3","promptFile":"$RUN/fake-claude.log.user-53055-1.txt"}
+[prompt canaries per user message]
+user-52397-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-53055-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / profile-401
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:48:59.815Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:00.209Z","pid":53483,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:00.212Z","pid":53483,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:00.228Z","pid":53483,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"5a29bc4b5b62b4f64285313ab8621ccced6aebde427ae95b7991d1cd26c2ff87","promptFile":"$RUN/fake-claude.log.user-53483-1.txt"}
+=== turn2 (account A; the profile endpoint rejects the token with 401)
+{"at":"2026-10-05T01:49:06.822Z","event":"profile-request","path":"/api/oauth/profile","mode":"401","tokenAccount":"account-A","status":401}
+{"at":"2026-10-05T01:49:07.061Z","pid":54005,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:07.063Z","pid":54005,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:07.064Z","pid":54005,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"c0b114e6fa7899a0d4e9dc2a05265b21d411724c7ee0b9afb722581d440cf672","promptFile":"$RUN/fake-claude.log.user-54005-1.txt"}
+[prompt canaries per user message]
+user-53483-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-54005-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / expired-unattested
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:49:12.625Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:13.021Z","pid":54446,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:13.023Z","pid":54446,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:13.040Z","pid":54446,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"64c9002cfc624d76ce0943ca69b0ddd4d4814d588074cc978e0dc4241398b245","promptFile":"$RUN/fake-claude.log.user-54446-1.txt"}
+=== turn2 (account A's token was rotated elsewhere and has already expired; this process never attested it)
+{"at":"2026-10-05T01:49:19.976Z","pid":54558,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:19.979Z","pid":54558,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:19.980Z","pid":54558,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"c0b114e6fa7899a0d4e9dc2a05265b21d411724c7ee0b9afb722581d440cf672","promptFile":"$RUN/fake-claude.log.user-54558-1.txt"}
+[prompt canaries per user message]
+user-54446-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-54558-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="What is the codeword?"
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}
+######## after / refresh-due
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=83 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[turn3 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=655 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:49:26.076Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:26.482Z","pid":54648,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:26.484Z","pid":54648,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:26.501Z","pid":54648,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"64c9002cfc624d76ce0943ca69b0ddd4d4814d588074cc978e0dc4241398b245","promptFile":"$RUN/fake-claude.log.user-54648-1.txt"}
+=== turn2 (account A's token expires in 2 minutes; the child rotates it to a new account-A token at initialize, as Claude CLI does before answering initialize)
+{"at":"2026-10-05T01:49:33.211Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:33.586Z","pid":54742,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:33.588Z","pid":54742,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:33.594Z","pid":54742,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+{"at":"2026-10-05T01:49:33.626Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:33.626Z","pid":54742,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":83,"sha256":"c1e3ee21fdff5024b689c940be0b2df974222945ea7ddc48ac12ba2b8d429452","promptFile":"$RUN/fake-claude.log.user-54742-1.txt"}
+=== turn3 (account A, the rotated token, fresh claude session)
+{"at":"2026-10-05T01:49:40.134Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:40.500Z","pid":55096,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:40.502Z","pid":55096,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:40.519Z","pid":55096,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":655,"sha256":"201d5a78649d41d041c303c42ed768a205f65bbd88f31244a6d4f6d4b605e3eb","promptFile":"$RUN/fake-claude.log.user-55096-1.txt"}
+[prompt canaries per user message]
+user-54648-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-54742-1.txt: chars=83 PINEAPPLE-7=0 BANANA-3=1
+user-55096-1.txt: chars=655 PINEAPPLE-7=1 BANANA-3=1
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="Remember: the second codeword is BANANA-3. Reply STORED."
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=5 role=user text="What are the codewords?"
+seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"known","maxSeq":6}
+######## after / rotate-after-send
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=551 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=50 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A)
+{"at":"2026-10-05T01:49:46.319Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:46.721Z","pid":55609,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:46.723Z","pid":55609,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:46.740Z","pid":55609,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"64c9002cfc624d76ce0943ca69b0ddd4d4814d588074cc978e0dc4241398b245","promptFile":"$RUN/fake-claude.log.user-55609-1.txt"}
+=== turn2 (account A's token is valid for hours; the child rotates it to a new account-A token after the prompt arrives)
+{"at":"2026-10-05T01:49:53.155Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:53.518Z","pid":56089,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:53.524Z","pid":56089,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:53.541Z","pid":56089,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"448ddf4219668131bb4f475e0fc12c05c747744532bd5dc3532079dfeca359d7","promptFile":"$RUN/fake-claude.log.user-56089-1.txt"}
+{"at":"2026-10-05T01:49:53.547Z","pid":56089,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+=== turn3 (account A, the rotated token, fresh claude session)
+{"at":"2026-10-05T01:50:00.056Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:50:00.309Z","pid":56625,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:50:00.311Z","pid":56625,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:50:00.312Z","pid":56625,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":50,"sha256":"4dffe1c1f66b280bce1016060614ca5ec11bbfbbb191d56e789d4bda2718c0a0","promptFile":"$RUN/fake-claude.log.user-56625-1.txt"}
+[prompt canaries per user message]
+user-55609-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0
+user-56089-1.txt: chars=551 PINEAPPLE-7=1 BANANA-3=1
+user-56625-1.txt: chars=50 PINEAPPLE-7=0 BANANA-3=0
+[transcript rows and stored boundary after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="Remember: the second codeword is BANANA-3. Reply STORED."
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=5 role=user text="What are the codewords?"
+seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_entry_snapshots]
+cliHistoryBoundary {"state":"unknown"}

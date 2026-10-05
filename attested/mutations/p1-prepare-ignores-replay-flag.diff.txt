@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/prepare.ts b/src/agents/cli-runner/prepare.ts
+index 1982a39c500..4cbf97061f7 100644
+--- a/src/agents/cli-runner/prepare.ts
++++ b/src/agents/cli-runner/prepare.ts
+@@ -1630,7 +1630,7 @@ async function prepareCliRunContextWithinReadFence(
+       ? await prepareCliHistoryBoundary(historyParams, authCredential, preparedBackendFinal)
+       : undefined;
+     // Explicit caller-owned memory remains input; it cannot authorize borrowed durable history.
+-    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter?.replaysHistory;
++    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter !== undefined;
+     // Native compatibility and transcript account ownership are independent gates.
+     const rawTranscriptReseedReason = !historyAllowed
+       ? "auth-unknown"

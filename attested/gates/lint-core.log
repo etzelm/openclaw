@@ -1,0 +1,108 @@
+$ pnpm lint:core
+$ node --import ./scripts/tsx.mjs scripts/run-oxlint-shards.mts --only=core
+[oxlint] shard concurrency 1 (cpus=32, memGB=512)
+[oxlint:core] starting
+[oxlint:core] still running after 30s
+[oxlint:core] still running after 60s
+[oxlint:core] still running after 90s
+[oxlint:core] still running after 120s
+[oxlint:core] still running after 150s
+[oxlint:core] still running after 180s
+[oxlint:core] still running after 210s
+
+  x eslint(max-lines): File has too many lines (1059).
+      ,-[src/channels/message/ingress-queue.test.ts:1202:4]
+ 1201 |   });
+ 1202 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  x eslint(max-lines): File has too many lines (1067).
+      ,-[src/gateway/server-methods.authorization.test.ts:1130:4]
+ 1129 |   });
+ 1130 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  x eslint(max-lines): File has too many lines (1190).
+      ,-[src/gateway/server-methods/chat-send-profile-binding.test.ts:1208:4]
+ 1207 |   );
+ 1208 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  x eslint(max-lines): File has too many lines (1027).
+      ,-[src/gateway/worker-environments/worker-turn-launcher.test.ts:1088:4]
+ 1087 |   });
+ 1088 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  x eslint(max-lines): File has too many lines (718).
+     ,-[src/gateway/server-methods/chat-metadata-runtime.ts:773:2]
+ 772 |   };
+ 773 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  x eslint(max-lines): File has too many lines (701).
+     ,-[src/state/openclaw-database-preflight.ts:725:2]
+ 724 |   return result;
+ 725 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  x eslint(max-lines): File has too many lines (707).
+     ,-[src/gateway/server-methods/chat-send-admission.ts:743:88]
+ 742 | type ChatSendAdmissionResult = Awaited<ReturnType<typeof admitChatSend>>;
+ 743 | export type AdmittedChatSend = Extract<ChatSendAdmissionResult, { ok: true }>["value"];
+     :                                                                                        ^
+     `----
+  help: Maximum allowed is 700.
+
+  x eslint(max-lines): File has too many lines (735).
+     ,-[src/gateway/session-sharing.ts:761:2]
+ 760 |   };
+ 761 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  x eslint(max-lines): File has too many lines (716).
+     ,-[src/config/sessions/session-accessor.sqlite-entry-cache-publication.ts:756:2]
+ 755 |   };
+ 756 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  x eslint(max-lines): File has too many lines (705).
+     ,-[src/config/sessions/session-entry-read-runtime.ts:734:2]
+ 733 |   }
+ 734 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  x eslint(max-lines): File has too many lines (701).
+     ,-[src/plugins/compat/registry-records.ts:703:52]
+ 702 |   },
+ 703 | ] as const satisfies readonly PluginCompatRecord[];
+     :                                                    ^
+     `----
+  help: Maximum allowed is 700.
+
+Found 0 warnings and 11 errors.
+Finished in 227.8s on 30613 files with 264 rules using 1 threads.
+[oxlint:core] failed (exit 1)
+[oxlint] FAILED (exit 1)
+[ELIFECYCLE] Command failed with exit code 1.
+real 229.20
+user 421.77
+sys 8.82

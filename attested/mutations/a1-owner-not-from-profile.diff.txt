@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..8a790859bfc 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -293,7 +293,7 @@ export async function attestClaudeNativeLoginOwner(
+     if (response.ok) {
+       const account = asNonArrayRecord(asNonArrayRecord(await response.json()).account);
+       const uuid = normalizeOptionalString(account.uuid);
+-      owner = uuid ? `uuid:${uuid}` : undefined;
++      owner = "uuid:uuid-a";
+     }
+   } catch {
+     // Network, timeout and parse failures all mean no owner. The error is dropped, not

@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index a222c9ff2dc..42fd47c6313 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -320,7 +320,7 @@ export async function prepareCliHistoryBoundary(
+     bindsNativeLogin: nativeLoginOwner !== undefined,
+     // Claude CLI rotates a refresh-due token before it accepts a prompt, after the send
+     // check could prove it, so such a turn runs without saved history.
+-    replaysHistory: !(
++    replaysHistory: true || !(
+       nativeLoginOwner &&
+       nativeLogin?.refreshDueAt !== undefined &&
+       nativeLogin.refreshDueAt <= Date.now()

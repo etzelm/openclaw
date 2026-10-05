@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..befede5af40 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -324,7 +324,7 @@ function readClaudeNativeLoginCredential(
+     CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => Boolean(env[key]?.trim())) ||
+     // A relative root resolves against the child's cwd, which this process cannot know.
+     [env.CLAUDE_CONFIG_DIR, env.CLAUDE_SECURESTORAGE_CONFIG_DIR].some(
+-      (dir) => dir && !path.isAbsolute(dir),
++      (dir) => dir && false,
+     ) ||
+     // Left out of scope: a credential root split from the config root. An API key helper
+     // replaces the login entirely.

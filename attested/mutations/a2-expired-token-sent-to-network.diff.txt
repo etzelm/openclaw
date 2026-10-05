@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..f6ff920d887 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -275,7 +275,7 @@ export async function attestClaudeNativeLoginOwner(
+   const refreshDueAt = token.expires - CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS;
+   const fingerprint = fingerprintClaudeNativeLoginToken(token.value);
+   const attested = claudeNativeLoginAttestations.get(fingerprint);
+-  if (attested || token.expires <= (options.now ?? Date.now())) {
++  if (attested) {
+     return { ...(attested ? { owner: attested } : {}), refreshDueAt };
+   }
+   let owner: string | undefined;

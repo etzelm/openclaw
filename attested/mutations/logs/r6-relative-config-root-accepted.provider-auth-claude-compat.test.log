@@ -1,0 +1,78 @@
+$ pnpm test src/plugin-sdk/provider-auth-claude-compat.test.ts
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/plugin-sdk/provider-auth-claude-compat.test.ts
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m$W[39m
+
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mnames the account Anthropic attests for the credential[32m 41[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mowns a credential for account B by B even beside an account record for A[32m 7[2mms[22m[39m
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded 9ms
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an HTTP 401[32m 11[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an HTTP 500[32m 5[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a body without an account uuid[32m 6[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a body that is not JSON[32m 5[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a network error that echoes the request[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner when the profile lookup times out[32m 5[2mms[22m[39m
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > answers the synchronous check only for a token this process attested 6ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > never asks the network for an expired token, but keeps an owner attested before 5ms
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mattestation cache[2m > [22mevicts the oldest attestation beyond its bound[32m 72[2mms[22m[39m
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > keeps the owner when the plan or token changes 6ms
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mdoes not trust a leftover account record without a credential[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mneeds no account record[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mfails closed when the credential root differs from the account config root[32m 5[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mreads the config dir the child receives, not the process one[32m 6[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mdoes not fall back to the process env for variables the child lacks[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mreads the child's API key helper and secure-storage split[32m 7[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the user settings env block selects another login[32m 5[2mms[22m[39m
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login 4ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login 3ms
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login[32m 4[2mms[22m[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner for a relative config root the child would resolve against its own cwd[32m 5[2mms[22m[39m
+[31m   → expected 'uuid:uuid-a' to be undefined[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mderives the Keychain service and account from the child's environment[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner when an API key helper replaces the login[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mreads the Keychain login without trusting the file beside it[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mfails closed when the Keychain item exists but cannot be read[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22muses the credentials file when no Keychain item exists[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses when both lookups fail for a reason other than absence[32m 16[2mms[22m[39m
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item 47ms
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (not json) without consulting the file[32m 5[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload ([]) without consulting the file[32m 5[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (42) without consulting the file[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (null) without consulting the file[32m 4[2mms[22m[39m
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand on a confirmed absence from the password lookup alone 3ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand when a failed password lookup is followed by a confirmed absence 4ms
+ ✓  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > reads the Keychain login when the password lookup succeeds 6ms
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner for a relative config root the child would resolve against its own cwd
+[31m[1mAssertionError[22m: expected 'uuid:uuid-a' to be undefined[39m
+
+[32m- Expected:[39m
+undefined
+
+[31m+ Received:[39m
+"uuid:uuid-a"
+
+[36m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m346:9[22m[39m
+    [90m344|[39m       expect(
+    [90m345|[39m         await attest({ platform: "linux", env: { CLAUDE_CONFIG_DIR: re…
+    [90m346|[39m       ).toBeUndefined();
+    [90m   |[39m         [31m^[39m
+    [90m347|[39m     });
+    [90m348|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m39 passed[39m[22m[90m (40)[39m
+[2m   Start at [22m 17:47:53
+[2m   Duration [22m 1.42s[2m (tests 33%, worker 33%, setup 20%, transform 12%, import 1%)[22m
+
+[test] failed 1 Vitest shard in 2.55s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

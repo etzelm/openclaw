@@ -1,0 +1,488 @@
+$ pnpm test src/plugin-sdk/provider-auth-claude-compat.test.ts   (tests from c276e5e3b6c, production from 769c35116e0)
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/plugin-sdk/provider-auth-claude-compat.test.ts
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m$W[39m
+
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mnames the account Anthropic attests for the credential[32m 40[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mowns a credential for account B by B even beside an account record for A[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an HTTP 401[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an HTTP 500[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an error status whose body still names an account[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a body without an account uuid[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a body that is not JSON[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a network error that echoes the request[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner when the profile lookup times out[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > answers the synchronous check only for a token this process attested 4ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > never asks the network for an expired token, but keeps an owner attested before 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mattestation cache[2m > [22mevicts the oldest attestation beyond its bound[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > keeps the owner when the plan or token changes 3ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mdoes not trust a leftover account record without a credential[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mneeds no account record[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mfails closed when the credential root differs from the account config root[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mreads the config dir the child receives, not the process one[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mdoes not fall back to the process env for variables the child lacks[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mreads the child's API key helper and secure-storage split[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the user settings env block selects another login[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login[32m 49[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner for a relative config root the child would resolve against its own cwd[32m 3[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mderives the Keychain service and account from the child's environment[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner when an API key helper replaces the login[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mreads the Keychain login without trusting the file beside it[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mfails closed when the Keychain item exists but cannot be read[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22muses the credentials file when no Keychain item exists[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses when both lookups fail for a reason other than absence[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (not json) without consulting the file[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload ([]) without consulting the file[32m 1[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (42) without consulting the file[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ [31m×[39m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (null) without consulting the file[32m 2[2mms[22m[39m
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand on a confirmed absence from the password lookup alone 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand when a failed password lookup is followed by a confirmed absence 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+ ×  plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > reads the Keychain login when the password lookup succeeds 2ms
+[31m   → attestClaudeNativeLoginOwner is not a function[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 41 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mnames the account Anthropic attests for the credential
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m77:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mowns a credential for account B by B even beside an account record for A
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m85:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m93:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an HTTP 401
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an HTTP 500
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after an error status whose body still names an account
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a body without an account uuid
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a body that is not JSON
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner, and caches nothing, after a network error that echoes the request
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m122:26[22m[39m
+    [90m120|[39m   ])("has no owner, and caches nothing, after %s", async (_label, resp…
+    [90m121|[39m     const homeDir = makeHome({ credentials: credentials() });
+    [90m122|[39m     const result = await attestClaudeNativeLoginOwner({
+    [90m   |[39m                          [31m^[39m
+    [90m123|[39m       homeDir,
+    [90m124|[39m       platform: "linux",
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner when the profile lookup times out
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m145:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > answers the synchronous check only for a token this process attested
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m153:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > never asks the network for an expired token, but keeps an owner attested before
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m171:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mattestation cache[2m > [22mevicts the oldest attestation beyond its bound
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m197:13[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > keeps the owner when the plan or token changes
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m223:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mdoes not trust a leftover account record without a credential
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m231:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mneeds no account record
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m237:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mfails closed when the credential root differs from the account config root
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m253:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mreads the config dir the child receives, not the process one
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m274:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mdoes not fall back to the process env for variables the child lacks
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m285:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mreads the child's API key helper and secure-storage split
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m292:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the user settings env block selects another login
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m316:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m336:15[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mhas no owner for a relative config root the child would resolve against its own cwd
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m349:15[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22msupplied environment[2m > [22mderives the Keychain service and account from the child's environment
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m361:13[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mhas no owner when an API key helper replaces the login
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m380:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mreads the Keychain login without trusting the file beside it
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m397:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mfails closed when the Keychain item exists but cannot be read
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m412:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22muses the credentials file when no Keychain item exists
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m423:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses when both lookups fail for a reason other than absence
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m447:24[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when the password lookup fails and the metadata lookup confirms the item
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m459:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/41]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (not json) without consulting the file
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload ([]) without consulting the file
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (42) without consulting the file
+[41m[1m FAIL [22m[49m [30m[45m plugin-sdk [49m[39m src/plugin-sdk/provider-auth-claude-compat.test.ts[2m > [22mattestClaudeNativeLoginOwner[2m > [22mmacOS Keychain[2m > [22mambiguous lookups with a stale credentials file[2m > [22mrefuses an unusable Keychain payload (null) without consulting the file
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m466:24[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand on a confirmed absence from the password lookup alone
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m474:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand when a failed password lookup is followed by a confirmed absence
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m487:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/41]⎯[22m[39m
+
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > reads the Keychain login when the password lookup succeeds
+[31m[1mTypeError[22m: attestClaudeNativeLoginOwner is not a function[39m
+[36m [2m❯[22m attest src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m63:17[22m[39m
+    [90m 61|[39m   fetchFn: typeof fetch = profileFetch() as never,
+    [90m 62|[39m ) {
+    [90m 63|[39m   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options }))…
+    [90m   |[39m                 [31m^[39m
+    [90m 64|[39m }
+    [90m 65|[39m
+[90m [2m❯[22m src/plugin-sdk/provider-auth-claude-compat.test.ts:[2m494:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/41]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m41 failed[39m[22m[90m (41)[39m
+[2m   Start at [22m 18:42:22
+[2m   Duration [22m 1.18s[2m (worker 39%, setup 22%, tests 20%, transform 17%, import 2%)[22m
+
+[test] failed 1 Vitest shard in 2.19s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

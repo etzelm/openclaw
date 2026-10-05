@@ -1,0 +1,13 @@
+diff --git a/extensions/anthropic/cli.runtime.ts b/extensions/anthropic/cli.runtime.ts
+index acc8ffad9c1..d2ca55971f9 100644
+--- a/extensions/anthropic/cli.runtime.ts
++++ b/extensions/anthropic/cli.runtime.ts
+@@ -92,7 +92,7 @@ function activeTurn(session: ClaudeCliSession): ClaudeCliTurn | undefined {
+     return undefined;
+   }
+   try {
+-    (turn.context.assertStreamCurrent ?? turn.context.assertCurrent)?.();
++    turn.context.assertCurrent?.();
+     return turn;
+   } catch {
+     return undefined;

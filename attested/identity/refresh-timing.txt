@@ -1,0 +1,34 @@
+When does Claude CLI 2.1.283 refresh an expired access token relative to the stream-json
+initialize handshake that OpenClaw's Claude runtime waits for before it sends the prompt?
+
+refresh-timing-probe.sh (as run, mode "expired"): the real claude binary, a scratch
+CLAUDE_CONFIG_DIR and HOME holding a synthetic login whose access token expired one hour earlier,
+and HTTPS_PROXY pointing at a local CONNECT proxy that logs each connection and refuses it, so
+nothing reached Anthropic and no real credential was read or changed. Times are milliseconds from
+the script's start; the child was spawned at 390.
+
+{"ms":390,"event":"spawn"}
+{"ms":391,"event":"send-initialize"}
+{"ms":603,"proxy":"CONNECT platform.claude.com:443 HTTP/1.1"}
+{"ms":629,"proxy":"CONNECT api.anthropic.com:443 HTTP/1.1"}
+{"ms":629,"proxy":"CONNECT api.anthropic.com:443 HTTP/1.1"}
+{"ms":641,"stderr":"Ignoring 6 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. ..."}
+{"ms":742,"proxy":"CONNECT platform.claude.com:443 HTTP/1.1"}
+{"ms":742,"proxy":"CONNECT api.anthropic.com:443 HTTP/1.1"}
+{"ms":742,"proxy":"CONNECT api.anthropic.com:443 HTTP/1.1"}
+{"ms":743,"proxy":"CONNECT api.anthropic.com:443 HTTP/1.1"}
+{"ms":747,"stdout":"control_response","subtype":"success"}
+{"ms":747,"event":"send-user"}
+{"ms":791,"stdout":"system","subtype":"init"}
+... (api_retry records and refused api.anthropic.com connections until the 30 s kill)
+
+platform.claude.com is the CLI's OAuth token host (TOKEN_URL https://platform.claude.com/v1/oauth/token
+in the bundle). The CLI tried to refresh 213 ms after spawn and again at 742 ms, both before it
+answered initialize at 747 ms, so before any prompt could be sent. The bundle's refresh test is
+`now + 300000 >= expiresAt` (5 minutes before expiry). With a real refresh the rotated token can
+therefore already be on disk when the host checks the login at prompt send.
+
+The stderr line is cut here; it names the probe's working directory, a personal path. The
+"mode valid" variant was not run. A real successful refresh was not exercised: the CLI accepts
+CLAUDE_CODE_CUSTOM_OAUTH_URL only for approved endpoints, so it cannot be pointed at a stub, and
+forcing a refresh of the real login would rotate its single-use refresh token.

@@ -1,0 +1,10 @@
+=== turn1 (account A)
+{"at":"2026-10-05T01:48:59.815Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-05T01:49:00.209Z","pid":53483,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:00.212Z","pid":53483,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:00.228Z","pid":53483,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"5a29bc4b5b62b4f64285313ab8621ccced6aebde427ae95b7991d1cd26c2ff87","promptFile":"$RUN/fake-claude.log.user-53483-1.txt"}
+=== turn2 (account A; the profile endpoint rejects the token with 401)
+{"at":"2026-10-05T01:49:06.822Z","event":"profile-request","path":"/api/oauth/profile","mode":"401","tokenAccount":"account-A","status":401}
+{"at":"2026-10-05T01:49:07.061Z","pid":54005,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29}
+{"at":"2026-10-05T01:49:07.063Z","pid":54005,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-05T01:49:07.064Z","pid":54005,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":48,"sha256":"c0b114e6fa7899a0d4e9dc2a05265b21d411724c7ee0b9afb722581d440cf672","promptFile":"$RUN/fake-claude.log.user-54005-1.txt"}

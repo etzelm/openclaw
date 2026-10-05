@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..e5049d29f9c 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -290,7 +290,7 @@ export async function attestClaudeNativeLoginOwner(
+       redirect: "error",
+       signal: AbortSignal.timeout(CLAUDE_OAUTH_PROFILE_TIMEOUT_MS),
+     });
+-    if (response.ok) {
++    if (response.status !== 0) {
+       const account = asNonArrayRecord(asNonArrayRecord(await response.json()).account);
+       const uuid = normalizeOptionalString(account.uuid);
+       owner = uuid ? `uuid:${uuid}` : undefined;

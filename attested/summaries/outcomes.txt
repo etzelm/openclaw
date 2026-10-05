@@ -1,0 +1,64 @@
+# turn exit codes | per turn promptChars/historyPrompt (/REFUSED = 'CLI history authority changed before execution') | per delivered user message chars:PINEAPPLE-7 count,BANANA-3 count | stored boundary after the last turn | profile requests that reached the STUB
+allowed | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+allowed | prev | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+allowed | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+different-account | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+different-account | prev | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=0
+different-account | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+revoked | base | exit=0 exit=0 | 85/none 48/none | 48:0,0 85:1,0 | none | stubProfileRequests=0
+revoked | prev | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=0
+revoked | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=1
+reassign-before-send | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+reassign-before-send | prev | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=0
+reassign-before-send | after | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=2
+revoke-before-send | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+revoke-before-send | prev | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=0
+revoke-before-send | after | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=2
+empty-first-turn-switch | base | exit=0 exit=0 | 82/none 48/none | 82:0,1 48:0,0 | none | stubProfileRequests=0
+empty-first-turn-switch | prev | exit=0 exit=0 | 82/none 48/none | 82:0,1 48:0,0 | {"state":"unknown"} | stubProfileRequests=0
+empty-first-turn-switch | after | exit=0 exit=0 | 82/none 48/none | 82:0,1 48:0,0 | {"state":"unknown"} | stubProfileRequests=3
+coverage-switch | base | exit=0 exit=0 exit=0 | 85/none 83/none 50/none | 83:0,1 50:0,0 85:1,0 | none | stubProfileRequests=0
+coverage-switch | prev | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=0
+coverage-switch | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3
+skill-config-dir | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+skill-config-dir | prev | exit=0 exit=0 | 85/none 48/none | 48:0,0 85:1,0 | {"state":"unknown"} | stubProfileRequests=0
+skill-config-dir | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+skill-config-dir-persistent | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+skill-config-dir-persistent | prev | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+skill-config-dir-persistent | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+keychain-allowed | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+keychain-allowed | prev | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+keychain-allowed | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+keychain-ambiguous-prep | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+keychain-ambiguous-prep | prev | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+keychain-ambiguous-prep | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+keychain-fails-before-send | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+keychain-fails-before-send | prev | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=0
+keychain-fails-before-send | after | exit=0 exit=1 | 85/none 516/present/REFUSED | 85:1,0 | {"state":"known","maxSeq":3} | stubProfileRequests=2
+keychain-fails-at-commit | base | exit=0 exit=0 exit=0 | 85/none 83/none 50/none | 85:1,0 83:0,1 50:0,0 | none | stubProfileRequests=0
+keychain-fails-at-commit | prev | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=0
+keychain-fails-at-commit | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3
+skill-config-dir-added | base | exit=0 exit=0 exit=0 exit=0 | 85/none 48/none 48/none 48/none | 85:1,0 48:0,0 48:0,0 48:0,0 | none | stubProfileRequests=0
+skill-config-dir-added | prev | exit=0 exit=0 exit=0 exit=0 | 85/none 516/present 48/none 48/none | 85:1,0 516:1,0 48:0,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=0
+skill-config-dir-added | after | exit=0 exit=0 exit=0 exit=0 | 85/none 516/present 48/none 48/none | 85:1,0 516:1,0 48:0,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=4
+record-credential-mismatch | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+record-credential-mismatch | prev | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+record-credential-mismatch | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+record-relabel | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+record-relabel | prev | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=0
+record-relabel | after | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=2
+profile-timeout | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+profile-timeout | prev | exit=0 exit=0 | 85/none 516/present | 516:1,0 85:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+profile-timeout | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+profile-401 | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+profile-401 | prev | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+profile-401 | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=2
+expired-unattested | base | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | none | stubProfileRequests=0
+expired-unattested | prev | exit=0 exit=0 | 85/none 516/present | 85:1,0 516:1,0 | {"state":"known","maxSeq":4} | stubProfileRequests=0
+expired-unattested | after | exit=0 exit=0 | 85/none 48/none | 85:1,0 48:0,0 | {"state":"unknown"} | stubProfileRequests=1
+refresh-due | base | exit=0 exit=0 exit=0 | 85/none 83/none 50/none | 85:1,0 83:0,1 50:0,0 | none | stubProfileRequests=0
+refresh-due | prev | exit=0 exit=0 exit=0 | 85/none 551/present 655/present | 85:1,0 551:1,1 655:1,1 | {"state":"known","maxSeq":6} | stubProfileRequests=0
+refresh-due | after | exit=0 exit=0 exit=0 | 85/none 83/none 655/present | 85:1,0 83:0,1 655:1,1 | {"state":"known","maxSeq":6} | stubProfileRequests=4
+rotate-after-send | base | exit=0 exit=0 exit=0 | 85/none 83/none 50/none | 85:1,0 83:0,1 50:0,0 | none | stubProfileRequests=0
+rotate-after-send | prev | exit=0 exit=0 exit=0 | 85/none 551/present 655/present | 85:1,0 551:1,1 655:1,1 | {"state":"known","maxSeq":6} | stubProfileRequests=0
+rotate-after-send | after | exit=0 exit=0 exit=0 | 85/none 551/present 50/none | 85:1,0 551:1,1 50:0,0 | {"state":"unknown"} | stubProfileRequests=3

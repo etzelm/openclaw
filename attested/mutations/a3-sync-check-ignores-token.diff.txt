@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..0abff838c9d 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -249,7 +249,7 @@ export function readClaudeNativeLoginOwner(
+ ): string | undefined {
+   const token = readClaudeNativeLoginCredential(options);
+   return token
+-    ? claudeNativeLoginAttestations.get(fingerprintClaudeNativeLoginToken(token.value))
++    ? claudeNativeLoginAttestations.values().next().value
+     : undefined;
+ }
+ 

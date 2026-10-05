@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/history-boundary.ts b/src/agents/cli-runner/history-boundary.ts
+index a222c9ff2dc..8cfb2028a4c 100644
+--- a/src/agents/cli-runner/history-boundary.ts
++++ b/src/agents/cli-runner/history-boundary.ts
+@@ -352,7 +352,7 @@ export async function prepareCliHistoryBoundary(
+         nativeLogin?.refreshDueAt !== undefined &&
+         nativeLogin.refreshDueAt <= Date.now()
+       ) {
+-        await resolveNativeCliLoginOwner(provider, nativeEnv).catch(() => undefined);
++        await Promise.resolve();
+       }
+     },
+   };

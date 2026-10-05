@@ -1,0 +1,13 @@
+diff --git a/src/plugin-sdk/provider-auth-claude-compat.ts b/src/plugin-sdk/provider-auth-claude-compat.ts
+index 5b18a0e63b3..8fced55e890 100644
+--- a/src/plugin-sdk/provider-auth-claude-compat.ts
++++ b/src/plugin-sdk/provider-auth-claude-compat.ts
+@@ -318,7 +318,7 @@ function readClaudeNativeLoginCredential(
+   options: ClaudeNativeLoginOptions,
+ ): { value: string; expires: number } | undefined {
+   const { homeDir } = options;
+-  const env = options.env ?? process.env;
++  const env = process.env;
+   if (
+     // A selected API key, token, or cloud provider replaces the native login entirely.
+     CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => Boolean(env[key]?.trim())) ||

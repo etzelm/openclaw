@@ -1,0 +1,498 @@
+[
+ {
+  "id": "m1-coverage-ignores-owner",
+  "file": "src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts",
+  "old": "  if (confirmsOwner?.() === false) {\n    return false;\n  }\n",
+  "new": "",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m2-commit-throws-on-owner-change",
+  "file": "src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts",
+  "old": "  if (confirmsOwner?.() === false) {\n    return false;\n  }\n",
+  "new": "  if (confirmsOwner?.() === false) {\n    throw new Error(\"CLI history authority changed before execution\");\n  }\n",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m3-worker-facts-ignore-owner",
+  "file": "src/config/sessions/cli-history-boundary.ts",
+  "old": "  return writer && writer.confirmsOwner?.() !== false\n",
+  "new": "  return writer\n",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m4-liveness-check-looks-up-login",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    assertCurrent: assertWriterCurrent,\n",
+  "new": "    assertCurrent: () => {\n      assertWriterCurrent();\n      checkNativeLoginBoundary(true);\n    },\n",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m5-non-recovery-mismatch-refuses",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    if (recovering) {\n      throw new Error(message ?? \"CLI history authority changed before execution\");\n    }\n    detached = true;\n",
+  "new": "    throw new Error(message ?? \"CLI history authority changed before execution\");\n",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m6-recovery-mismatch-detaches",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    if (recovering) {\n      throw new Error(message ?? \"CLI history authority changed before execution\");\n    }\n    detached = true;\n",
+  "new": "    detached = true;\n",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m7-detach-not-sticky",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    (!detached &&\n      nativeEnv !== undefined &&",
+  "new": "    (nativeEnv !== undefined &&",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m8-no-boundary-at-execution",
+  "file": "src/agents/cli-runner/execute.ts",
+  "old": "        ...(assertBoundary ? { assertBoundary } : {}),\n",
+  "new": "",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m9-process-spawn-skips-boundary",
+  "file": "src/agents/cli-runner/execute-process.ts",
+  "old": "          ...(params.assertBoundary ? { beforeSpawn: params.assertBoundary } : {}),\n",
+  "new": "",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m10-bind-ignores-recovery",
+  "file": "src/agents/cli-runner/execute.ts",
+  "old": "      context.cliHistoryWriter?.bindExecutionEnv(env, recoversHistory);",
+  "new": "      context.cliHistoryWriter?.bindExecutionEnv(env, false);",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m11-plugin-boundary-dropped",
+  "file": "src/agents/cli-runner/execute-plugin.ts",
+  "old": "      assertCurrent: assertBoundaryCurrent,\n",
+  "new": "      assertCurrent,\n",
+  "tests": [
+   "src/agents/cli-runner/execute-plugin.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "m12-plugin-stream-gets-boundary",
+  "file": "src/agents/cli-runner/execute-plugin.ts",
+  "old": "      ...(assertBoundary ? { assertStreamCurrent: assertCurrent } : {}),\n",
+  "new": "      ...(assertBoundary ? { assertStreamCurrent: assertBoundaryCurrent } : {}),\n",
+  "tests": [
+   "src/agents/cli-runner/execute-plugin.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "r1-owner-from-gateway-env",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "      : resolveNativeCliLoginOwner(provider, childEnv);",
+  "new": "      : resolveNativeCliLoginOwner(provider, process.env);",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "r2-login-memo-1s",
+  "file": "src/agents/cli-credentials.ts",
+  "old": "  return backendId === \"claude-cli\" ? readClaudeNativeLoginOwner({ env }) : undefined;",
+  "new": "  const m = ((globalThis as Record<string, unknown>).__ocMemo ??= {}) as { at?: number; v?: string };\n  if (backendId !== \"claude-cli\") {\n    return undefined;\n  }\n  if (m.at !== undefined && Date.now() - m.at < 1000) {\n    return m.v;\n  }\n  m.at = Date.now();\n  m.v = readClaudeNativeLoginOwner({ env });\n  return m.v;",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "r3-reader-uses-process-env",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "  const env = options.env ?? process.env;",
+  "new": "  const env = process.env;",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "r4-selected-auth-env-guard-dropped",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    CLAUDE_NON_NATIVE_AUTH_ENV_KEYS.some((key) => Boolean(env[key]?.trim())) ||\n",
+  "new": "",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts",
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "r5-user-settings-env-guard-dropped",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    readClaudeApiKeyHelper(homeDir, env) ||\n    userSettingsSelectNonNativeAuth(homeDir, env)\n",
+  "new": "    readClaudeApiKeyHelper(homeDir, env)\n",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "r6-relative-config-root-accepted",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "      (dir) => dir && !path.isAbsolute(dir),",
+  "new": "      (dir) => dir && false,",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "k1-metadata-failure-as-absence",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    return isKeychainItemNotFound(error) ? \"absent\" : \"unknown\";",
+  "new": "    return \"absent\";",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "k2-password-failure-as-absence",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    return isKeychainItemNotFound(error) ? { state: \"absent\" } : { state: \"unknown\" };",
+  "new": "    return { state: \"absent\" };",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "k3-any-exit-status-as-not-found",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    error.status === SECURITY_ITEM_NOT_FOUND_STATUS\n",
+  "new": "    error.status !== SECURITY_ITEM_NOT_FOUND_STATUS - 44\n",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "k4-non-object-payload-as-absence",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    return isRecord(parsed) ? { state: \"ok\", value: parsed } : { state: \"unknown\" };",
+  "new": "    return isRecord(parsed) ? { state: \"ok\", value: parsed } : { state: \"absent\" };",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "w1-warm-session-not-keyed-on-owner",
+  "file": "src/agents/cli-runner/live-session-fingerprint.ts",
+  "old": "      nativeLoginOwnerHash: context.cliHistoryWriter?.bindsNativeLogin\n",
+  "new": "      nativeLoginOwnerHash: false\n",
+  "tests": [
+   "src/agents/cli-runner/cli-live-session-registry.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "c1-runtime-events-on-boundary-check",
+  "file": "extensions/anthropic/cli.runtime.ts",
+  "old": "    (turn.context.assertStreamCurrent ?? turn.context.assertCurrent)?.();",
+  "new": "    turn.context.assertCurrent?.();",
+  "tests": [
+   "extensions/anthropic/cli-runtime.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "c2-runtime-send-on-stream-check",
+  "file": "extensions/anthropic/cli.runtime.ts",
+  "old": "    context.assertCurrent?.();\n    if (session.closed || session.currentTurn !== turn) {",
+  "new": "    (context.assertStreamCurrent ?? context.assertCurrent)?.();\n    if (session.closed || session.currentTurn !== turn) {",
+  "tests": [
+   "extensions/anthropic/cli-runtime.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "s1-prep-ignores-skill-env",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    params.skillsSnapshot && !params.controlOperation\n",
+  "new": "    false && params.skillsSnapshot && !params.controlOperation\n",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "earlier"
+ },
+ {
+  "id": "a1-owner-not-from-profile",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "      owner = uuid ? `uuid:${uuid}` : undefined;",
+  "new": "      owner = \"uuid:uuid-a\";",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a2-expired-token-sent-to-network",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "  if (attested || token.expires <= (options.now ?? Date.now())) {",
+  "new": "  if (attested) {",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a3-sync-check-ignores-token",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    ? claudeNativeLoginAttestations.get(fingerprintClaudeNativeLoginToken(token.value))",
+  "new": "    ? claudeNativeLoginAttestations.values().next().value",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a4-no-timeout",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "      signal: AbortSignal.timeout(CLAUDE_OAUTH_PROFILE_TIMEOUT_MS),\n",
+  "new": "",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a5-redirect-followed",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "      redirect: \"error\",",
+  "new": "      redirect: \"follow\",",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a6-cache-unbounded",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    if (claudeNativeLoginAttestations.size > CLAUDE_NATIVE_LOGIN_ATTESTATION_LIMIT) {",
+  "new": "    if (claudeNativeLoginAttestations.size > Number.POSITIVE_INFINITY) {",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a7-no-refresh-margin",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "const CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS = 10 * 60_000;",
+  "new": "const CLAUDE_NATIVE_LOGIN_REFRESH_MARGIN_MS = 0;",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts",
+   "src/agents/cli-runner/prepare-native-history.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a8-error-status-accepted",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "    if (response.ok) {",
+  "new": "    if (response.status !== 0) {",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "a9-record-owner-fallback",
+  "file": "src/plugin-sdk/provider-auth-claude-compat.ts",
+  "old": "  return token\n    ? claudeNativeLoginAttestations.get(fingerprintClaudeNativeLoginToken(token.value))\n    : undefined;",
+  "new": "  return token\n    ? (claudeNativeLoginAttestations.get(fingerprintClaudeNativeLoginToken(token.value)) ??\n      (normalizeOptionalString(asNonArrayRecord(asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliAccountPath(options.homeDir, options.env ?? process.env))).oauthAccount).accountUuid) ? `uuid:${normalizeOptionalString(asNonArrayRecord(asNonArrayRecord(loadJsonFileThroughSymlink(resolveClaudeCliAccountPath(options.homeDir, options.env ?? process.env))).oauthAccount).accountUuid)}` : undefined))\n    : undefined;",
+  "tests": [
+   "src/plugin-sdk/provider-auth-claude-compat.test.ts",
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "b1-recovery-accepts-unattested",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    if (recovering) {\n      throw new Error(message ?? \"CLI history authority changed before execution\");",
+  "new": "    if (recovering && current !== undefined) {\n      throw new Error(message ?? \"CLI history authority changed before execution\");",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "b2-pending-does-not-hold-coverage",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    (!detached && !pendingAttestation && readNativeOwner() === nativeLoginOwner);",
+  "new": "    (!detached && readNativeOwner() === nativeLoginOwner);",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "b3-pending-result-ignored",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "          detached ||= attestation.owner !== nativeLoginOwner;",
+  "new": "          detached ||= false;",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "b4-settle-skips-refresh-window",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "        await resolveNativeCliLoginOwner(provider, nativeEnv).catch(() => undefined);",
+  "new": "        await Promise.resolve();",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "b5-refresh-due-replays-history",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    replaysHistory: !(",
+  "new": "    replaysHistory: true || !(",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts",
+   "src/agents/cli-runner/prepare-native-history.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "b6-unattested-non-recovery-detaches-at-once",
+  "file": "src/agents/cli-runner/history-boundary.ts",
+  "old": "    if (detached || current !== undefined || nativeEnv === undefined) {",
+  "new": "    if (true) {",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "e1-settle-not-called",
+  "file": "src/agents/cli-runner/execute.ts",
+  "old": "      await context.cliHistoryWriter?.settleNativeLogin();\n",
+  "new": "",
+  "tests": [
+   "src/agents/cli-runner/execute.native-history-owner.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "p1-prepare-ignores-replay-flag",
+  "file": "src/agents/cli-runner/prepare.ts",
+  "old": "    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter?.replaysHistory;",
+  "new": "    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter !== undefined;",
+  "tests": [
+   "src/agents/cli-runner/prepare-native-history.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "s2-seam-attests-every-backend",
+  "file": "src/agents/cli-credentials.ts",
+  "old": "  return backendId === \"claude-cli\"\n    ? await attestClaudeNativeLoginOwner({ env })\n    : {};",
+  "new": "  return await attestClaudeNativeLoginOwner({ env });",
+  "tests": [
+   "src/agents/cli-credentials.test.ts"
+  ],
+  "origin": "new"
+ },
+ {
+  "id": "w2-worker-owner-captured-before-awaits",
+  "origin": "new",
+  "file": "src/config/sessions/session-turn.ts",
+  "edits": [
+   {
+    "old": "    cliWriter: cliWriter && cliHistoryWriterFacts(cliWriter),",
+    "new": "    cliWriter: resolveCliHistoryCoverageWriter(cliWriter),"
+   },
+   {
+    "old": "          plan.cliWriter = resolveCliHistoryCoverageWriter(cliWriter);\n",
+    "new": ""
+   }
+  ],
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ]
+ },
+ {
+  "id": "w3-report-worker-ignores-owner-stamp",
+  "origin": "new",
+  "file": "src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts",
+  "old": "command.input.cliHistoryOwnerConfirmed === true ? target.cliWriter : undefined",
+  "new": "target.cliWriter",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ]
+ },
+ {
+  "id": "w4-report-host-stamps-owner-unchecked",
+  "origin": "new",
+  "file": "src/config/sessions/session-accessor.sqlite-transcript-reports.ts",
+  "old": "cliHistoryOwnerConfirmed: cliWriter.confirmsOwner?.() !== false,",
+  "new": "cliHistoryOwnerConfirmed: true,",
+  "tests": [
+   "src/agents/cli-runner/history-boundary.native-login.test.ts"
+  ]
+ }
+]

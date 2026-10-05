@@ -1,0 +1,13 @@
+diff --git a/src/agents/cli-runner/execute.ts b/src/agents/cli-runner/execute.ts
+index 28c76693c34..11f9acb65ab 100644
+--- a/src/agents/cli-runner/execute.ts
++++ b/src/agents/cli-runner/execute.ts
+@@ -374,7 +374,7 @@ export async function executePreparedCliRun(
+       // Anthropic's separate host-managed usage tier instead of normal CLI use.
+       delete env.CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST;
+       // The history writer's native owner must be the one this final environment selects.
+-      context.cliHistoryWriter?.bindExecutionEnv(env, recoversHistory);
++      context.cliHistoryWriter?.bindExecutionEnv(env, false);
+ 
+       let executionCommand = backend.command;
+       let executionArgv0: string | undefined;

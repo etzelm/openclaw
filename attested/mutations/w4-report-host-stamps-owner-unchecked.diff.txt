@@ -1,0 +1,14 @@
+diff --git a/src/config/sessions/session-accessor.sqlite-transcript-reports.ts b/src/config/sessions/session-accessor.sqlite-transcript-reports.ts
+index f2964fc4fec..c3651c5d61c 100644
+--- a/src/config/sessions/session-accessor.sqlite-transcript-reports.ts
++++ b/src/config/sessions/session-accessor.sqlite-transcript-reports.ts
+@@ -441,8 +441,7 @@ async function withReportWorker<T>(
+                                       ...command,
+                                       input: {
+                                         ...command.input,
+-                                        cliHistoryOwnerConfirmed:
+-                                          cliWriter.confirmsOwner?.() !== false,
++                                        cliHistoryOwnerConfirmed: true,
+                                       },
+                                     },
+                                 executeOptions,
