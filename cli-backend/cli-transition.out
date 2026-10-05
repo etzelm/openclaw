@@ -1,0 +1,49 @@
+profile ready: case=subdir
+## config: model + entries before
+{"model":{"primary":"claude-cli/claude-sonnet-5"},"workspace":"<profile>/workspace","entries":{"main":{},"dev":{}}}
+
+## Gateway run 1 (before pin): two operator turns on agent:main:main via the claude-cli backend (stub claude)
+turn-before-1: stub received the turn
+turn-before-2: stub received the turn
+
+## stub log after run 1
+{"pid":34388,"ev":"spawn","cwd":"~/work/pr165112r2/src","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":34470,"ev":"spawn","cwd":"<profile>/workspace","mode":"new-session","sessionId":"e8dd546f-367b-4de5-a656-96b4e3c3e169","argvHead":["--model","--session-id"]}
+{"pid":34470,"ev":"control","subtype":"initialize"}
+{"pid":34470,"ev":"turn","cwd":"<profile>/workspace","sessionId":"e8dd546f-367b-4de5-a656-96b4e3c3e169","prompt":"turn-before-1","turnsInProcess":1}
+{"pid":34470,"ev":"turn","cwd":"<profile>/workspace","sessionId":"e8dd546f-367b-4de5-a656-96b4e3c3e169","prompt":"turn-before-2","turnsInProcess":2}
+
+## openclaw doctor --fix --non-interactive (pins agents.entries.main.workspace)
+│  Set agents.entries.main.workspace to                                 │
+│  <profile>/workspace/main so its working  │
+│  directory, persona, and memory use one workspace.                    │
+│                                                                       │
+--
+Updated config: $OPENCLAW_HOME/openclaw.json
+  Backup: $OPENCLAW_HOME/openclaw.json.bak
+│
+◇  Claude CLI ────────────────────────────╮
+--
+Updated config: $OPENCLAW_HOME/openclaw.json
+  Backup: $OPENCLAW_HOME/openclaw.json.bak
+│
+◇  Workspace ───────────────────────────────────────────────────────────╮
+agents.entries = {"main":{"workspace":"<profile>/workspace/main"},"dev":{}}
+
+## Gateway run 2 (after pin, new Gateway process, same session store): two operator turns
+turn-after-1: stub received the turn
+turn-after-2: stub received the turn
+
+## stub log new lines after run 2
+{"pid":34712,"ev":"spawn","cwd":"~/work/pr165112r2/src","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":34795,"ev":"spawn","cwd":"/private/tmp/openclaw/openclaw-isolated-completion-84769247-55a9-4b69-bcfd-86bed02040d9-D6b0EQ","mode":"new-session","sessionId":"stub-session","argvHead":["--model"]}
+{"pid":34796,"ev":"spawn","cwd":"<profile>/workspace/main","mode":"new-session","sessionId":"5c529bcd-5cbe-4b8f-8edc-72c8fa523433","argvHead":["--model","--session-id"]}
+{"pid":34796,"ev":"control","subtype":"initialize"}
+{"pid":34796,"ev":"turn","cwd":"<profile>/workspace/main","sessionId":"5c529bcd-5cbe-4b8f-8edc-72c8fa523433","prompt":"turn-after-1","turnsInProcess":1}
+{"pid":34796,"ev":"turn","cwd":"<profile>/workspace/main","sessionId":"5c529bcd-5cbe-4b8f-8edc-72c8fa523433","prompt":"turn-after-2","turnsInProcess":2}
+
+## gateway log: session invalidation lines
+2026-10-05T08:17:13.797-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=393 trigger=unknown useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+2026-10-05T08:17:13.906-07:00 [agent/cli-backend] cli session reset: provider=claude-cli reason=cwd
+2026-10-05T08:17:13.922-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=22 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:cwd historyPrompt=none
+2026-10-05T08:17:16.228-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=22 trigger=user useResume=true session=present resumeSession=aa13c5d54329 reuse=reusable historyPrompt=none

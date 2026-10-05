@@ -1,0 +1,241 @@
+# case: include (head 06db3c06ae8)
+profile ready: case=include
+
+## workspace files before (sha256 prefix)
+c8815c26ac19a76b  ./dev/SOUL.md
+06de15d2f196c540  ./main/SOUL.md
+5ce5a3a1295bb699  ./main/memory/2026-10-01.md
+
+## config before: agents.defaults.workspace / defaults include / entries
+openclaw.json agents.defaults = {"$include":"./defaults.json5"}
+defaults.json5 workspace = ${WORKSPACE_ROOT}
+agents.entries = {"main":{},"dev":{}}
+
+## agents list (before)
+main -> <profile>/workspace/main
+dev -> <profile>/workspace/dev
+
+## gateway before
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## openclaw doctor --non-interactive
+exit=0
+│                                                                      │
+│  Set agents.entries.main.workspace to ${WORKSPACE_ROOT}/main so its  │
+│  working directory, persona, and memory use one workspace.           │
+│                                                                      │
+├──────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor ───────────────────────────────────────────────────────────╮
+--
+│  Run "openclaw doctor --fix" to apply these changes.               │
+│  Run "openclaw doctor --fix" to pin the system agent's workspace.  │
+│                                                                    │
+├────────────────────────────────────────────────────────────────────╯
+[warning] core/doctor/node-hosting-preconditions gateway.bind - Gateway is only bound to loopback. Set gateway.publicOrigin to your public HTTPS origin, configure plugins.entries.device-pair.config.publicUrl, enable tailscale serve, or set gateway.bind=lan.
+  fix: If an edge proxy fronts node onboarding, allow /j/* and /__openclaw__/worker without edge identity auth, and preserve WebSocket upgrade on /__openclaw__/worker. Both routes enforce their own credentials.
+--
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "dev": Memory system not found in workspace.                                    │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+
+## openclaw doctor --fix --non-interactive
+exit=0
+│                                                                      │
+│  Set agents.entries.main.workspace to ${WORKSPACE_ROOT}/main so its  │
+│  working directory, persona, and memory use one workspace.           │
+│                                                                      │
+├──────────────────────────────────────────────────────────────────────╯
+Updated config: $OPENCLAW_HOME/openclaw.json
+  Backup: $OPENCLAW_HOME/openclaw.json.bak
+--
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "main": Memory system not found in workspace.                                   │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+--
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "dev": Memory system not found in workspace.                                    │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+
+DOCTOR TREE IDENTICAL: sha256 of every file under the workspace is the same before and after doctor + doctor --fix (29 files)
+
+## config after
+openclaw.json agents.defaults = {"$include":"./defaults.json5"}
+agents.entries = {"main":{"workspace":"${WORKSPACE_ROOT}/main"},"dev":{}}
+defaults.json5 sha256 7b98645cf9f12033
+
+## agents list (after)
+main -> <profile>/workspace/main
+dev -> <profile>/workspace/dev
+
+## gateway after
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## workspace files after gateway (sha256 prefix)
+28d25bf82af4c0e2  ./.git/HEAD
+cae33efdb02cf774  ./.git/config
+85ab6c163d43a17e  ./.git/description
+0223497a0b8b033a  ./.git/hooks/applypatch-msg.sample
+efc1401b0e99d1ff  ./.git/hooks/commit-msg.sample
+9159720099ad5595  ./.git/hooks/fsmonitor-watchman.sample
+81765af2daef3230  ./.git/hooks/post-update.sample
+e15c5b469ea3e0a6  ./.git/hooks/pre-applypatch.sample
+57185b7b9f05239d  ./.git/hooks/pre-commit.sample
+d3825a70337940eb  ./.git/hooks/pre-merge-commit.sample
+ecce9c7e04d3f5dd  ./.git/hooks/pre-push.sample
+4febce8677900523  ./.git/hooks/pre-rebase.sample
+a4c3d2b9c7bb3fd8  ./.git/hooks/pre-receive.sample
+e9ddcaa4189fddd2  ./.git/hooks/prepare-commit-msg.sample
+a53d0741798b287c  ./.git/hooks/push-to-checkout.sample
+44ebfc923dc5466b  ./.git/hooks/sendemail-validate.sample
+8d5f2fa83e103cf0  ./.git/hooks/update.sample
+6671fe83b7a07c89  ./.git/info/exclude
+490fc2b32865dd31  ./AGENTS.md
+0bcb8c9187e32c87  ./BOOTSTRAP.md
+59b223766c8dd978  ./IDENTITY.md
+f1ca0312afae15de  ./SOUL.md
+46e0d8c937df7b10  ./USER.md
+c8815c26ac19a76b  ./dev/SOUL.md
+490fc2b32865dd31  ./main/AGENTS.md
+59b223766c8dd978  ./main/IDENTITY.md
+06de15d2f196c540  ./main/SOUL.md
+46e0d8c937df7b10  ./main/USER.md
+5ce5a3a1295bb699  ./main/memory/2026-10-01.md
+SEEDED FILES INTACT: every seeded user file (3) is still at its path with the same sha256; extra files in the listing above were created by Gateway startup template seeding, not by Doctor
+
+## WORKSPACE_ROOT changed to <profile>/moved (config untouched)
+main -> <profile>/moved/main
+dev -> <profile>/moved/dev
+
+## gateway moved
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/moved/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-MOVED-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/moved/main/AGENTS.md",
+    "<profile>/moved/main/SOUL.md",
+    "<profile>/moved/main/IDENTITY.md",
+    "<profile>/moved/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/moved/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-MOVED-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/moved/main/AGENTS.md",
+    "<profile>/moved/main/SOUL.md",
+    "<profile>/moved/main/IDENTITY.md",
+    "<profile>/moved/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/moved/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-MOVED-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/moved/main/AGENTS.md",
+    "<profile>/moved/main/SOUL.md",
+    "<profile>/moved/main/IDENTITY.md",
+    "<profile>/moved/main/USER.md"
+  ]
+}

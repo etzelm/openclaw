@@ -1,0 +1,118 @@
+{
+  "browser": {
+    "enabled": false
+  },
+  "update": {
+    "checkOnStart": false
+  },
+  "discovery": {
+    "mdns": {
+      "mode": "off"
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "none"
+    },
+    "controlUi": {
+      "enabled": false
+    },
+    "tailscale": {
+      "mode": "off"
+    }
+  },
+  "plugins": {
+    "enabled": true,
+    "entries": {
+      "browser": {
+        "enabled": false
+      }
+    },
+    "slots": {
+      "memory": "none"
+    }
+  },
+  "memory": {
+    "search": {
+      "enabled": false
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "openai": {
+        "baseUrl": "http://127.0.0.1:20101/v1",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "OPENAI_API_KEY"
+        },
+        "api": "openai-responses",
+        "agentRuntime": {
+          "id": "openclaw"
+        },
+        "request": {
+          "allowPrivateNetwork": true
+        },
+        "models": [
+          {
+            "id": "gpt-5.6-luna",
+            "name": "gpt-5.6-luna",
+            "api": "openai-responses",
+            "agentRuntime": {
+              "id": "openclaw"
+            },
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "contextTokens": 96000,
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openai/gpt-5.6-luna"
+      },
+      "models": {
+        "openai/gpt-5.6-luna": {
+          "agentRuntime": {
+            "id": "openclaw"
+          },
+          "params": {
+            "transport": "sse",
+            "openaiWsWarmup": false
+          }
+        }
+      },
+      "workspace": "<profile>/workspace",
+      "heartbeat": {
+        "every": "0m"
+      },
+      "skills": [],
+      "modelPolicy": {},
+      "systemAgent": {
+        "agentId": "main"
+      }
+    },
+    "ownership": "explicit",
+    "entries": {
+      "main": {},
+      "dev": {}
+    }
+  }
+}

@@ -1,0 +1,175 @@
+┌  OpenClaw doctor
+Pre-repair state retained for manual recovery at <profile>/state.update-captures/doctor-c8f5c7a8-adad-4202-b3b5-daf63dd66a4d/manifest.json.
+canvas migration declares no data resources; its private state is not in the recovery set
+codex migration declares no data resources; its private state is not in the recovery set
+crabbox migration declares no data resources; its private state is not in the recovery set
+discord migration declares no data resources; its private state is not in the recovery set
+line migration declares no data resources; its private state is not in the recovery set
+matrix migration declares no data resources; its private state is not in the recovery set
+memory-core migration declares no data resources; its private state is not in the recovery set
+memory-lancedb migration declares no data resources; its private state is not in the recovery set
+voice-call migration declares no data resources; its private state is not in the recovery set
+workboard migration declares no data resources; its private state is not in the recovery set
+zalouser migration declares no data resources; its private state is not in the recovery set
+[state/agent-db] agent database integrity gate
+[state/agent-db] agent database clean-close receipt: written
+[state/agent-db] agent database clean-close receipt: written
+│
+◇  Doctor changes ───────────────────────────────────────────────╮
+│                                                                │
+│  openai/gpt-5.6-luna model configured, enabled automatically.  │
+│                                                                │
+├────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes ───────────────────────────────────────────────────────╮
+│                                                                        │
+│  Set agents.entries.main.workspace to ~/workspace/main so its working  │
+│  directory, persona, and memory use one workspace.                     │
+│                                                                        │
+├────────────────────────────────────────────────────────────────────────╯
+Updated config: $OPENCLAW_HOME/openclaw.json
+  Backup: $OPENCLAW_HOME/openclaw.json.bak
+[warning] core/doctor/node-hosting-preconditions gateway.bind - Gateway is only bound to loopback. Set gateway.publicOrigin to your public HTTPS origin, configure plugins.entries.device-pair.config.publicUrl, enable tailscale serve, or set gateway.bind=lan.
+  fix: If an edge proxy fronts node onboarding, allow /j/* and /__openclaw__/worker without edge identity auth, and preserve WebSocket upgrade on /__openclaw__/worker. Both routes enforce their own credentials.
+│
+◇  Command owner ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  No command owner is configured.                                         │
+│  A command owner is your trusted human operator account, allowed to      │
+│  update OpenClaw with /update, restart the Gateway, change               │
+│  configuration, and approve commands. Chat allowlists do not grant this  │
+│  authority.                                                              │
+│  Run openclaw channels add and complete a channel's setup to choose      │
+│  your operator account, including servers and groups without DM          │
+│  pairing.                                                                │
+│  CLI pairing approval records the first command owner. Control UI        │
+│  pairing approval has a separate owner checkbox.                         │
+│  Fix: set commands.ownerAllowFrom to your channel user id, for example   │
+│  openclaw config set commands.ownerAllowFrom '["telegram:123456789"]'    │
+│  Restart the gateway after changing this if it is already running.       │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+[state/agent-db] agent database clean-close receipt: written
+│
+◇  Session titles ────────────────────────────────────────────────────────╮
+│                                                                         │
+│  - Repaired 1 of 1 missing session title(s) without changing activity.  │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Plugin registry ────────────────────────────────────────────╮
+│                                                              │
+│  Plugin registry refreshed: 86/164 enabled plugins indexed.  │
+│                                                              │
+├──────────────────────────────────────────────────────────────╯
+│
+◇  State integrity ──────────────────────────────────────────────────────╮
+│                                                                        │
+│  - OAuth dir not present ($OPENCLAW_HOME/state/credentials). Skipping  │
+│    create because no WhatsApp/pairing channel config is active.        │
+│                                                                        │
+├────────────────────────────────────────────────────────────────────────╯
+│
+◇  Backups ─────────────────────────────────────────────────────────────╮
+│                                                                       │
+│  No successful backup is recorded.                                    │
+│  Create one now with openclaw backup create.                          │
+│  Schedule versioned backups with openclaw backup enable --repository  │
+│  <dir>.                                                               │
+│                                                                       │
+├───────────────────────────────────────────────────────────────────────╯
+│
+◇  Foreign launchd jobs (macOS) ────────────────────────────────────────╮
+│                                                                       │
+│  Could not inspect foreign launchd jobs: Cannot inspect launchd job   │
+│  ai.openclaw.nas-mount: Could not print domain: 125: Domain does not  │
+│  support specified action. No jobs were removed.                      │
+│                                                                       │
+├───────────────────────────────────────────────────────────────────────╯
+│
+◇  Host desktop ────────────────────────────────────────────────────╮
+│                                                                   │
+│  disabled; enable the Desktop lab with desktop.host.enabled=true  │
+│                                                                   │
+├───────────────────────────────────────────────────────────────────╯
+│
+◇  GitHub projects ───────────────────────────────────────────────────────╮
+│                                                                         │
+│  Set gateway.controlUi.github.token with gateway.controlUi.github.host  │
+│  matching gateway.github.host for private project access. Public        │
+│  github.com can also use GH_TOKEN/GITHUB_TOKEN; otherwise search is     │
+│  public-only.                                                           │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Browser ──────────────────────────────────────────────────────────╮
+│                                                                    │
+│  - System browser profile cookie import is enabled                 │
+│    (browser.allowSystemProfileImport).                             │
+│  - System browser profile discovery skipped by Doctor; importable  │
+│    cookie database count is unavailable.                           │
+│  - Doctor does not access the macOS Keychain; importing asks for   │
+│    consent separately.                                             │
+│                                                                    │
+├────────────────────────────────────────────────────────────────────╯
+│
+◇  Gateway ─────────────────────────────────────────────╮
+│                                                       │
+│  Gateway health will be checked after Doctor repair.  │
+│                                                       │
+├───────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Agent "main": Remember across conversations is effectively enabled for  │
+│  agent "main", but the current memory provider does not support          │
+│  protected private transcript recall. Set                                │
+│  memory.search.rememberAcrossConversations to false or use that          │
+│  provider's own recall path; advanced Active Memory can still use its    │
+│  recall tools.                                                           │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Agent "main": Remember across conversations is effectively enabled for  │
+│  agent "main", but memory search is disabled. Enable memory search or    │
+│  set memory.search.rememberAcrossConversations to false.                 │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ─────────────────────────────────────────────────────────╮
+│                                                                         │
+│  Agent "dev": Remember across conversations is effectively enabled for  │
+│  agent "dev", but the current memory provider does not support          │
+│  protected private transcript recall. Set                               │
+│  memory.search.rememberAcrossConversations to false or use that         │
+│  provider's own recall path; advanced Active Memory can still use its   │
+│  recall tools.                                                          │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ─────────────────────────────────────────────────────────╮
+│                                                                         │
+│  Agent "dev": Remember across conversations is effectively enabled for  │
+│  agent "dev", but memory search is disabled. Enable memory search or    │
+│  set memory.search.rememberAcrossConversations to false.                │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+Updated config: $OPENCLAW_HOME/openclaw.json
+  Backup: $OPENCLAW_HOME/openclaw.json.bak
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "dev": Memory system not found in workspace.                                    │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+│  https://github.com/openclaw/openclaw/commit/7d1fee70e76f2f634f1b41fca927ee663914183a  │
+│                                                                                        │
+├────────────────────────────────────────────────────────────────────────────────────────╯
+[state/agent-db] agent database clean-close receipt: written
+│
+└  Doctor complete.
+

@@ -1,0 +1,26 @@
+# Container route feasibility on the studio (no installs, no containers started)
+date: 2026-10-05T15:51:26Z  host: Mitchells-Mac-Studio.local  user: openclaw
+which docker: /usr/local/bin/docker
+which podman: 
+which container: 
+which colima: 
+which lima: 
+which limactl: 
+which nerdctl: 
+which orbctl: 
+which lxc: 
+which multipass: 
+
+drwxr-xr-x@ 3 <studio-user>  admin  96 Feb 16  2026 /Applications/Docker.app
+--- sockets
+ls: /var/run/docker-openclaw.sock: No such file or directory
+lrwxr-xr-x@ 1 root  daemon  44 Oct  3 16:05 /var/run/docker.sock -> /Users/<studio-user>/.docker/run/docker.sock
+ls: /Users/<studio-user>/.docker/run/docker.sock: Permission denied
+--- daemon owner processes
+<studio-user>    /Applications/Docker.app/Contents/MacOS/com.docker.backend
+<studio-user>    /Applications/Docker.app/Contents/MacOS/com.docker.backend services
+--- docker API as this account (read-only version query)
+
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+
+failed to connect to the docker API at unix:///var/run/docker-openclaw.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker-openclaw.sock: connect: no such file or directory

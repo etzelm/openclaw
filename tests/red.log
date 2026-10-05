@@ -1,0 +1,30 @@
+
+[41m[1m FAIL [22m[49m [30m[42m commands [49m[39m src/commands/doctor-config-flow.workspace-persistence.test.ts[2m > [22mDoctor workspace persistence[2m > [22mkeeps the authored env root when agents.defaults comes from an include
+[31m[1mAssertionError[22m: expected '/var/folders/fx/dlr4cvc97t5fxh09rptph…' to be '${WORKSPACE_ROOT}/main' // Object.is equality[39m
+
+Expected: [32m"[7m${WORKSPACE_ROOT}[27m/main"[39m
+Received: [31m"[7m/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-config-Wvb7fT/shared-workspace[27m/main"[39m
+
+[36m [2m❯[22m src/commands/doctor-config-flow.workspace-persistence.test.ts:[2m455:57[22m[39m
+    [90m453|[39m           };
+    [90m454|[39m           expect(written.agents.defaults).toEqual({ $include: "./defau…
+    [90m455|[39m           expect(written.agents.entries.main.workspace).toBe("${WORKSP…
+    [90m   |[39m                                                         [31m^[39m
+    [90m456|[39m           const after = (await readConfigFileSnapshot()).config;
+    [90m457|[39m           expect(resolveAgentWorkspaceDir(after, "main")).toBe(path.jo…
+[90m [2m❯[22m withEnvAsync src/test-utils/env.ts:[2m147:12[22m[39m
+[90m [2m❯[22m src/commands/doctor-config-flow.workspace-persistence.test.ts:[2m429:7[22m[39m
+[90m [2m❯[22m withEnvAsync src/test-utils/env.ts:[2m147:12[22m[39m
+[90m [2m❯[22m src/commands/doctor-config-preflight.test-support.ts:[2m171:14[22m[39m
+[90m [2m❯[22m withTempHomeCore src/plugin-sdk/test-helpers/temp-home.ts:[2m74:12[22m[39m
+[90m [2m❯[22m withTempHome src/config/test-helpers.ts:[2m18:12[22m[39m
+[90m [2m❯[22m src/commands/doctor-config-flow.workspace-persistence.test.ts:[2m426:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[2m | [22m[33m12 skipped[39m[90m (14)[39m
+[2m   Start at [22m 07:39:56
+[2m   Duration [22m 11.29s[2m (tests 76%, transform 12%, import 9%, worker 2%, setup 1%)[22m
+

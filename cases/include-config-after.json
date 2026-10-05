@@ -1,0 +1,114 @@
+{
+  "browser": {
+    "enabled": false
+  },
+  "update": {
+    "checkOnStart": false
+  },
+  "discovery": {
+    "mdns": {
+      "mode": "off"
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "none"
+    },
+    "controlUi": {
+      "enabled": false
+    },
+    "tailscale": {
+      "mode": "off"
+    }
+  },
+  "plugins": {
+    "enabled": true,
+    "entries": {
+      "browser": {
+        "enabled": false
+      },
+      "openai": {
+        "enabled": true
+      }
+    },
+    "slots": {
+      "memory": "none"
+    }
+  },
+  "memory": {
+    "search": {
+      "enabled": false
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "openai": {
+        "baseUrl": "http://127.0.0.1:20171/v1",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "OPENAI_API_KEY"
+        },
+        "api": "openai-responses",
+        "agentRuntime": {
+          "id": "openclaw"
+        },
+        "request": {
+          "allowPrivateNetwork": true
+        },
+        "models": [
+          {
+            "id": "gpt-5.6-luna",
+            "name": "gpt-5.6-luna",
+            "api": "openai-responses",
+            "agentRuntime": {
+              "id": "openclaw"
+            },
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "contextTokens": 96000,
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "$include": "./defaults.json5"
+    },
+    "ownership": "explicit",
+    "entries": {
+      "main": {
+        "workspace": "${WORKSPACE_ROOT}/main"
+      },
+      "dev": {}
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-10-05T15:20:40.873Z",
+    "lastRunVersion": "2026.9.8",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.9.8",
+    "migrations": {
+      "modelPolicyAllowlist": true,
+      "utilityModelSeparation": true
+    }
+  }
+}

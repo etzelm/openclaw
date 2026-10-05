@@ -1,0 +1,145 @@
+[
+  [
+    "read",
+    {
+      "path": "pr165112-control.txt"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "/workspace/pr165112-control.txt"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "/agent/pr165112-control.txt"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "../dev/SOUL.md"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "/workspace/../dev/SOUL.md"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "/agent/../dev/SOUL.md"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "/workspace/dev/SOUL.md"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "/agent/dev/SOUL.md"
+    }
+  ],
+  [
+    "write",
+    {
+      "path": "pr165112-own-write.txt",
+      "content": "own-write\n"
+    }
+  ],
+  [
+    "read",
+    {
+      "path": "pr165112-own-write.txt"
+    }
+  ],
+  [
+    "write",
+    {
+      "path": "../dev/pr165112-write-probe-rel.txt",
+      "content": "x\n"
+    }
+  ],
+  [
+    "write",
+    {
+      "path": "/workspace/dev/pr165112-write-probe-ws.txt",
+      "content": "x\n"
+    }
+  ],
+  [
+    "write",
+    {
+      "path": "/agent/dev/pr165112-write-probe-agent.txt",
+      "content": "x\n"
+    }
+  ],
+  [
+    "write",
+    {
+      "path": "../dev/SOUL.md",
+      "content": "TAMPERED-BY-WRITE-TOOL\n"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "pwd; echo ---mounts; grep -E ' /(workspace|agent) ' /proc/mounts; echo ---ls; ls -la / /workspace /agent 2>&1 | head -60"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "cat pr165112-control.txt; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "cat ../dev/SOUL.md; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "cat /workspace/dev/SOUL.md; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "cat /agent/dev/SOUL.md; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "touch ../dev/pr165112-exec-touch-rel.txt; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "touch /workspace/dev/pr165112-exec-touch-ws.txt; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "touch /agent/dev/pr165112-exec-touch-agent.txt; echo rc=$?"
+    }
+  ],
+  [
+    "exec",
+    {
+      "command": "echo EXEC-TAMPER >> /workspace/dev/SOUL.md; echo rc=$?; echo EXEC-TAMPER2 >> /agent/dev/SOUL.md; echo rc=$?"
+    }
+  ]
+]

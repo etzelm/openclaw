@@ -1,0 +1,179 @@
+profile ready: case=include
+## installed updater
+OpenClaw 2026.9.8 (fc23bc8)
+<work>/gprefix/lib
+└── openclaw@2026.9.8
+
+
+## candidate artifact
+-rw-r--r--  1 openclaw  openclaw  105635840 Oct  5 08:33 <work>/pack/openclaw-candidate.tgz
+openclaw 2026.9.8 updateAdmissionProtocol= 1
+
+## workspace before
+c8815c26ac19a76b  ./dev/SOUL.md
+06de15d2f196c540  ./main/SOUL.md
+5ce5a3a1295bb699  ./main/memory/2026-10-01.md
+
+## config before
+agents.defaults.workspace = undefined | defaults = {"$include":"./defaults.json5"} | entries = {"main":{},"dev":{}}
+
+## published 2026.9.8: openclaw update --dry-run --tag <candidate.tgz> --yes --no-restart
+Update dry-run
+No changes were applied.
+
+  Root: <work>/gprefix/lib/node_modules/openclaw
+  Install kind: package
+  Mode: npm
+  Channel: stable
+  Tag/spec: <work>/pack/openclaw-candidate.tgz
+  Current version: 2026.9.8
+  Target version: unresolved (The package artifact is not staged during a dry-run.)
+
+Planned actions:
+  - Run global package manager update with spec <work>/pack/openclaw-candidate.tgz
+  - Run plugin update sync after core update
+  - Refresh shell completion cache (if needed)
+  - Skip restart (because --no-restart is set)
+
+Notes:
+  - Configured plugin availability will be checked against the staged package before update checks or activation; this preview does not stage the target.
+  - Non-registry package specs skip npm version lookup and downgrade previews.
+
+ℹ️ OpenClaw update skipped: dry-run.
+Report: <profile>/state/update-reports/3fb603ed-aef2-4bef-9ed1-2dd10f6921c5.md
+Update mode: npm
+
+## published 2026.9.8: openclaw update --tag <candidate.tgz> --yes --no-restart
+exit=0
+◇  Command owner ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  No command owner is configured.                                         │
+│  A command owner is your trusted human operator account, allowed to      │
+│  update OpenClaw with /update, restart the Gateway, change               │
+│  configuration, and approve commands. Chat allowlists do not grant this  │
+│  authority.                                                              │
+│  Run openclaw channels add and complete a channel's setup to choose      │
+│  your operator account, including servers and groups without DM          │
+│  pairing.                                                                │
+│  CLI pairing approval records the first command owner. Control UI        │
+│  pairing approval has a separate owner checkbox.                         │
+│  Fix: set commands.ownerAllowFrom to your channel user id, for example   │
+│  openclaw config set commands.ownerAllowFrom '["telegram:123456789"]'    │
+│  Restart the gateway after changing this if it is already running.       │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Agent "main": Remember across conversations is effectively enabled for  │
+│  agent "main", but the current memory provider does not support          │
+│  protected private transcript recall. Set                                │
+│  memory.search.rememberAcrossConversations to false or use that          │
+│  provider's own recall path; advanced Active Memory can still use its    │
+│  recall tools.                                                           │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Agent "main": Remember across conversations is effectively enabled for  │
+│  agent "main", but memory search is disabled. Enable memory search or    │
+│  set memory.search.rememberAcrossConversations to false.                 │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ─────────────────────────────────────────────────────────╮
+│                                                                         │
+│  Agent "dev": Remember across conversations is effectively enabled for  │
+│  agent "dev", but the current memory provider does not support          │
+│  protected private transcript recall. Set                               │
+│  memory.search.rememberAcrossConversations to false or use that         │
+│  provider's own recall path; advanced Active Memory can still use its   │
+│  recall tools.                                                          │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ─────────────────────────────────────────────────────────╮
+│                                                                         │
+│  Agent "dev": Remember across conversations is effectively enabled for  │
+│  agent "dev", but memory search is disabled. Enable memory search or    │
+│  set memory.search.rememberAcrossConversations to false.                │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+└  Doctor complete.
+
+✅ OpenClaw updated to 2026.9.8 (from 2026.9.8).
+Report: <profile>/state/update-reports/7e1b5e23-8c01-44c2-8c34-954af680dcfc.md
+Update mode: npm
+Admission: candidate (2026.9.8).
+Admission checks: config: ok, database-schema: ok, node-runtime: ok, plugin-availability: ok.
+Databases snapshotted at <work>/gprefix/lib/node_modules/.openclaw.package-backup-45405-1791215091899.databases. Verified successful activation removes these snapshots; otherwise retain them with the update's recovery artifacts.
+~/state/state/openclaw.sqlite -> <work>/gprefix/lib/node_modules/.openclaw.package-backup-45405-1791215091899.databases/payload/posix<profile>/state/state/openclaw.sqlite; schema 19; 1486848 bytes; SHA-256 c084014761e2ccb25b50ba807e05a5b86355eeea15ce07bc6e9b2ad8ea654d3e
+Post-migration write inventory: 3 databases; SHA-256 c3a724f599bce22e30311b0b619cee24469b69d82cd6ef251c082926b9dfc509. Snapshots: <work>/gprefix/lib/node_modules/.openclaw.package-backup-45405-1791215091899.databases.
+Database write fingerprint: ~/state/agents/dev/agent/openclaw-agent.sqlite; absent
+Database write fingerprint: ~/state/agents/main/agent/openclaw-agent.sqlite; absent
+Database write fingerprint: ~/state/state/openclaw.sqlite; 56c434ed4c22842d20967fae5b8435eff6fc61e70e70c38806eb5985ca86400e
+Snapshot location: ~/openclaw-update-canary-T3amfp (explicit-tmpdir). Snapshot requires 72 MiB for 2 MiB SQLite and 0 B plugin files and scratch space. Checked ~: 176 GiB available; ~/state.update-captures: 176 GiB available; /tmp: 176 GiB available.
+Doctor changed config keys: agents, meta, plugins, wizard.
+Warning: Doctor migration: Recorded webhook listener decisions; removed pins will not be recreated.
+Warning: Doctor migration: openai/gpt-5.6-luna model configured, enabled automatically.
+Warning: Doctor migration: Set agents.entries.main.workspace to ${WORKSPACE_ROOT}/main so its working directory, persona, and memory use one workspace.
+Phases: requested (138ms) → staging (10ms) → validating (78.61s) → activating (137.06s)
+Warning: service management skipped: non-default state dir or config path. Rerun with HOME set to the OS account home, without OPENCLAW_HOME, and with OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH either unset or pointing at the canonical paths for that account home and profile to manage the gateway service during update.
+Warning: Deferred model retirement repair completed after plugin convergence.
+Warning: core/doctor/node-hosting-preconditions: Gateway is only bound to loopback. Set gateway.publicOrigin to your public HTTPS origin, configure plugins.entries.device-pair.config.publicUrl, enable tailscale serve, or set gateway.bind=lan.
+After verifying your history, preview recovery rollback retirement with openclaw update cleanup --dry-run for state <profile>/state. Keep the same state/config overrides.
+Finishing update: checking package backup retention and cleanup.
+
+## after: installed version
+OpenClaw 2026.9.8 (06db3c0)
+<work>/gprefix/lib
+└── openclaw@2026.9.8
+
+
+## config after
+agents.defaults.workspace = undefined | defaults = {"$include":"./defaults.json5"} | entries = {"main":{"workspace":"${WORKSPACE_ROOT}/main"},"dev":{}}
+Library
+defaults.json5
+node-compile-cache
+openclaw.json
+openclaw.json.bak
+openclaw.json.pre-update
+state
+workspace
+
+## workspace after
+WORKSPACE IDENTICAL (sha256)
+
+## update status
+OpenClaw update status
+
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Item             │ Value                                                                                             │
+├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Install          │ npm                                                                                               │
+│ Channel          │ stable (default)                                                                                  │
+│ Package recovery │ complete (8ef64f37-ed3f-4496-9c82-5c9c9a144b2e)                                                   │
+│ Update           │ npm · up to date · npm latest 2026.9.8                                                            │
+└──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Last recorded update (2026-10-05T15:43:58.641Z):
+✅ OpenClaw updated to 2026.9.8 (from 2026.9.8).
+Admission: candidate (2026.9.8).
+Admission checks: config: ok, database-schema: ok, node-runtime: ok, plugin-availability: ok.
+Databases snapshotted at <work>/gprefix/lib/node_modules/.openclaw.package-backup-45405-1791215091899.databases. Verified successful activation removes these snapshots; otherwise retain them with the update's recovery artifacts.
+~/state/state/openclaw.sqlite -> <work>/gprefix/lib/node_modules/.openclaw.package-backup-45405-1791215091899.databases/payload/posix<profile>/state/state/openclaw.sqlite; schema 19; 1486848 bytes; SHA-256 c084014761e2ccb25b50ba807e05a5b86355eeea15ce07bc6e9b2ad8ea654d3e
+Post-migration write inventory: 3 databases; SHA-256 c3a724f599bce22e30311b0b619cee24469b69d82cd6ef251c082926b9dfc509. Snapshots: <work>/gprefix/lib/node_modules/.openclaw.package-backup-45405-1791215091899.databases.
+Database write fingerprint: ~/state/agents/dev/agent/openclaw-agent.sqlite; absent
+Database write fingerprint: ~/state/agents/main/agent/openclaw-agent.sqlite; absent
+Database write fingerprint: ~/state/state/openclaw.sqlite; 56c434ed4c22842d20967fae5b8435eff6fc61e70e70c38806eb5985ca86400e
+Snapshot location: ~/openclaw-update-canary-T3amfp (explicit-tmpdir). Snapshot requires 72 MiB for 2 MiB SQLite and 0 B plugin files and scratch space. Checked ~: 176 GiB available; ~/state.update-captures: 176 GiB available; /tmp: 176 GiB available.
+Doctor changed config keys: agents, meta, plugins, wizard.
+Warning: Doctor migration: Recorded webhook listener decisions; removed pins will not be recreated.
+Warning: Doctor migration: openai/gpt-5.6-luna model configured, enabled automatically.
+Warning: Doctor migration: Set agents.entries.main.workspace to ${WORKSPACE_ROOT}/main so its working directory, persona, and memory use one workspace.
+Phases: requested (138ms) → staging (10ms) → validating (78.61s) → activating (137.06s)
+Warning: service management skipped: non-default state dir or config path. Rerun with HOME set to the OS account home, without OPENCLAW_HOME, and with OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH either unset or pointing at the canonical paths for that account home and profile to manage the gateway service during update.
+Warning: Deferred model retirement repair completed after plugin convergence.
+Warning: core/doctor/node-hosting-preconditions: Gateway is only bound to loopback. Set gateway.publicOrigin to your public HTTPS origin, configure plugins.entries.device-pair.config.publicUrl, enable tailscale serve, or set gateway.bind=lan.

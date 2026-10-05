@@ -1,0 +1,214 @@
+# case: agentsmd (head 06db3c06ae8)
+profile ready: case=agentsmd
+
+## workspace files before (sha256 prefix)
+1365ee567b46c64a  ./MEMORY.md
+ad41d5489edec715  ./SOUL.md
+c8815c26ac19a76b  ./dev/SOUL.md
+15c262f5adb727af  ./main/AGENTS.md
+2253daed8b60a164  ./memory/2026-10-01.md
+
+## config before: agents.defaults.workspace / defaults include / entries
+openclaw.json agents.defaults = {"workspace":"<profile>/workspace"}
+agents.entries = {"main":{},"dev":{}}
+
+## agents list (before)
+main -> <profile>/workspace/main
+dev -> <profile>/workspace/dev
+
+## gateway before
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-AGENTS"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-AGENTS"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-AGENTS"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## openclaw doctor --non-interactive
+exit=0
+│                                                                          │
+│  Agent "main" has workspace files in both $OPENCLAW_HOME/workspace (its  │
+│  working directory) and $OPENCLAW_HOME/workspace/main (its persona and   │
+│  memory). Doctor left both unchanged; set agents.entries.main.workspace  │
+│  to the directory to keep.                                               │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+--
+│
+◇  Workspace ───────────────────────────────────────────────────────────╮
+│                                                                       │
+│  Agent "main": - Tip: back up the agent workspace in a private git    │
+│  repo; keep ~/.openclaw out of git (credentials, sessions). Details:  │
+│  /concepts/agent-workspace#git-backup-recommended-private             │
+│                                                                       │
+├───────────────────────────────────────────────────────────────────────╯
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "main": Memory system not found in workspace.                                   │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+--
+│
+◇  Workspace ──────────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Agent "dev": - Tip: back up the agent workspace in a private git repo;  │
+│  keep ~/.openclaw out of git (credentials, sessions). Details:           │
+│  /concepts/agent-workspace#git-backup-recommended-private                │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "dev": Memory system not found in workspace.                                    │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+
+## openclaw doctor --fix --non-interactive
+exit=0
+│                                                                          │
+│  Agent "main" has workspace files in both $OPENCLAW_HOME/workspace (its  │
+│  working directory) and $OPENCLAW_HOME/workspace/main (its persona and   │
+│  memory). Doctor left both unchanged; set agents.entries.main.workspace  │
+│  to the directory to keep.                                               │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+--
+│
+◇  Workspace ───────────────────────────────────────────────────────────╮
+│                                                                       │
+│  Agent "main": - Tip: back up the agent workspace in a private git    │
+│  repo; keep ~/.openclaw out of git (credentials, sessions). Details:  │
+│  /concepts/agent-workspace#git-backup-recommended-private             │
+│                                                                       │
+├───────────────────────────────────────────────────────────────────────╯
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "main": Memory system not found in workspace.                                   │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+--
+│
+◇  Workspace ──────────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Agent "dev": - Tip: back up the agent workspace in a private git repo;  │
+│  keep ~/.openclaw out of git (credentials, sessions). Details:           │
+│  /concepts/agent-workspace#git-backup-recommended-private                │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "dev": Memory system not found in workspace.                                    │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+
+DOCTOR TREE IDENTICAL: sha256 of every file under the workspace is the same before and after doctor + doctor --fix (12 files)
+
+## config after
+openclaw.json agents.defaults = {"workspace":"<profile>/workspace"}
+agents.entries = {"main":{},"dev":{}}
+
+## agents list (after)
+main -> <profile>/workspace/main
+dev -> <profile>/workspace/dev
+
+## gateway after
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-AGENTS"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-AGENTS"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-SUBDIR-AGENTS"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/AGENTS.md",
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}
+
+## workspace files after gateway (sha256 prefix)
+490fc2b32865dd31  ./AGENTS.md
+59b223766c8dd978  ./IDENTITY.md
+1365ee567b46c64a  ./MEMORY.md
+ad41d5489edec715  ./SOUL.md
+46e0d8c937df7b10  ./USER.md
+c8815c26ac19a76b  ./dev/SOUL.md
+15c262f5adb727af  ./main/AGENTS.md
+0bcb8c9187e32c87  ./main/BOOTSTRAP.md
+59b223766c8dd978  ./main/IDENTITY.md
+f1ca0312afae15de  ./main/SOUL.md
+46e0d8c937df7b10  ./main/USER.md
+2253daed8b60a164  ./memory/2026-10-01.md
+SEEDED FILES INTACT: every seeded user file (5) is still at its path with the same sha256; extra files in the listing above were created by Gateway startup template seeding, not by Doctor

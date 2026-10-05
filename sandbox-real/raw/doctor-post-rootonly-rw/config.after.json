@@ -1,0 +1,196 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 28412,
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "pr165112-synthetic-token"
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "openai": {
+        "baseUrl": "http://127.0.0.1:28411/v1",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "OPENAI_API_KEY"
+        },
+        "api": "openai-responses",
+        "agentRuntime": {
+          "id": "openclaw"
+        },
+        "request": {
+          "allowPrivateNetwork": true
+        },
+        "models": [
+          {
+            "id": "gpt-5.6-luna",
+            "name": "gpt-5.6-luna",
+            "api": "openai-responses",
+            "agentRuntime": {
+              "id": "openclaw"
+            },
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "contextTokens": 96000,
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "ownership": "explicit",
+    "defaults": {
+      "workspace": "<profile>/workspace",
+      "systemAgent": {
+        "agentId": "main"
+      },
+      "model": {
+        "primary": "openai/gpt-5.6-luna"
+      },
+      "models": {
+        "openai/gpt-5.6-luna": {
+          "agentRuntime": {
+            "id": "openclaw"
+          },
+          "params": {
+            "transport": "sse",
+            "openaiWsWarmup": false
+          }
+        }
+      },
+      "modelPolicy": {
+        "allow": [
+          "openai/gpt-5.6-luna"
+        ]
+      }
+    },
+    "entries": {
+      "main": {},
+      "dev": {}
+    }
+  },
+  "meta": {
+    "migrations": {
+      "modelPolicyAllowlist": true,
+      "webhookListeners": true,
+      "utilityModelSeparation": true
+    },
+    "lastTouchedVersion": "2026.9.8"
+  },
+  "plugins": {
+    "entries": {
+      "openai": {
+        "enabled": true
+      }
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-10-05T15:05:25.375Z",
+    "lastRunVersion": "2026.9.8",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "skills": {
+    "entries": {
+      "1password": {
+        "enabled": false
+      },
+      "bear-notes": {
+        "enabled": false
+      },
+      "blogwatcher": {
+        "enabled": false
+      },
+      "blucli": {
+        "enabled": false
+      },
+      "camsnap": {
+        "enabled": false
+      },
+      "coding-agent": {
+        "enabled": false
+      },
+      "eightctl": {
+        "enabled": false
+      },
+      "gemini": {
+        "enabled": false
+      },
+      "gifgrep": {
+        "enabled": false
+      },
+      "gog": {
+        "enabled": false
+      },
+      "goplaces": {
+        "enabled": false
+      },
+      "himalaya": {
+        "enabled": false
+      },
+      "mcporter": {
+        "enabled": false
+      },
+      "model-usage": {
+        "enabled": false
+      },
+      "obsidian": {
+        "enabled": false
+      },
+      "openai-whisper": {
+        "enabled": false
+      },
+      "openhue": {
+        "enabled": false
+      },
+      "oracle": {
+        "enabled": false
+      },
+      "ordercli": {
+        "enabled": false
+      },
+      "sag": {
+        "enabled": false
+      },
+      "sherpa-onnx-tts": {
+        "enabled": false
+      },
+      "songsee": {
+        "enabled": false
+      },
+      "sonoscli": {
+        "enabled": false
+      },
+      "spotify-player": {
+        "enabled": false
+      },
+      "summarize": {
+        "enabled": false
+      },
+      "tmux": {
+        "enabled": false
+      },
+      "trello": {
+        "enabled": false
+      },
+      "xurl": {
+        "enabled": false
+      }
+    }
+  }
+}

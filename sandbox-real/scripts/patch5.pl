@@ -1,0 +1,10 @@
+undef $/;
+my $d = "$ENV{HOME}/Library/Caches/pr165112-sandbox/h";
+open(F, "<", "$d/harness.mjs") or die; my $s = <F>; close F;
+$s =~ s/const responses = probes\.map\(\(\[n, a\]\) => mk\(n, a\)\);\n/const responses = [{ text: "recap" }, ...probes.map(([n, a]) => mk(n, a))];\n/ or die "no responses";
+open(F, ">", "$d/harness.mjs") or die; print F $s; close F;
+open(F, "<", "$d/summarize.mjs") or die; $s = <F>; close F;
+$s =~ s/const first = parse\(rows\[0\]\);\n/const first = rows.map(parse).find((b) => (b.tools ?? []).length > 0) ?? parse(rows[0]);\n/ or die "no first";
+$s =~ s/\/working directory\|workspace\/i/\/working directory|sandbox|\\\/agent|\\\/workspace\/i/ or die "no re";
+$s =~ s/slice\(0, 12\)/slice(0, 25)/ or die "no slice";
+open(F, ">", "$d/summarize.mjs") or die; print F $s; close F;
