@@ -40,7 +40,10 @@ describe("settleUnreachableYieldedSubagentRun", () => {
         expectedEntry: entry,
         endedAt: PAUSED_AT,
         settleYielded: true,
-        outcome: { status: "error", error: expect.stringContaining("Collector yielded") },
+        outcome: {
+          status: "error",
+          error: expect.stringContaining("no recorded collectorCompletion"),
+        },
       }),
       "sweeper-unreachable-yield",
     );

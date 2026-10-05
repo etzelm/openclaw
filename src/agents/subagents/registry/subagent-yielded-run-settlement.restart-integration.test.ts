@@ -120,14 +120,17 @@ describe("yielded run settlement", () => {
         status: "terminal",
         startedAt: T0 - 5 * MINUTE_MS,
         endedAt: T0 - 4 * MINUTE_MS,
-        outcome: { status: "error", error: expect.stringContaining("Collector yielded") },
+        outcome: {
+          status: "error",
+          error: expect.stringContaining("no recorded collectorCompletion"),
+        },
       });
       expect(settled?.endedReason).toBe("subagent-error");
       expect(settled?.collectorCompletion?.status).toBe("failed");
       const waited = await waitSurface("legacy-yielded-collector");
       expect(waited.pending).toEqual([]);
       expect(waited.completed).toMatchObject([
-        { status: "failed", error: expect.stringContaining("Collector yielded") },
+        { status: "failed", error: expect.stringContaining("no recorded collectorCompletion") },
       ]);
       for (const control of [orchestrator, legacyLeaf]) {
         expect(persisted(control.runId), control.runId).toMatchObject({

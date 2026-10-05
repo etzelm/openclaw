@@ -15,7 +15,7 @@ describe("resolveYieldedRunContinuation", () => {
   it("never lets a continuation reach a collector without a recorded result", () => {
     expect(resolveYieldedRunContinuation(yielded({ runId: "c", collect: true }))).toEqual({
       state: "unreachable",
-      error: expect.stringContaining("Collector yielded"),
+      error: expect.stringContaining("no recorded collectorCompletion"),
     });
   });
 

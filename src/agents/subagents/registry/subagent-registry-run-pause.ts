@@ -13,7 +13,7 @@ import type { SubagentRunRecord } from "./subagent-registry.types.js";
 import { isSameSubagentRunOwner, latestSubagentRun } from "./subagent-run-generation.js";
 
 const COLLECTOR_YIELD_ERROR =
-  "Collector yielded without recording a result, and no continuation can resume a collector. Run it again and end its turn normally.";
+  "Collector yielded under a build that predates the admission gate, so it has no recorded collectorCompletion and nothing can continue it. Rerun the collector and have it end its turn normally instead of calling sessions_yield.";
 
 type YieldedRunContinuation = { state: "continuable" } | { state: "unreachable"; error: string };
 
