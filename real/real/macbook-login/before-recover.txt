@@ -1,0 +1,17 @@
+# BEFORE 0816aa1b57d (PR merge-base), same real login, same harness
+--- turn 1: Remember this for later: the vault codeword is PINEAPPLE-1870742729. Reply with only the word STORED.
+turn 1 exit=0
+claude project dirs left after drop: 0
+--- turn 2: What is the vault codeword I told you earlier in this conversation? Do not use any tools and do not search files, memory or sessions: answer only from this conversation. Reply with only the codeword, or UNKNOWN if you do not know it.
+turn 2 exit=0
+canary=PINEAPPLE-1870742729
+after turn 1: cliHistoryBoundary none
+after turn 2: cliHistoryBoundary none
+-- turn1.err
+[agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=128 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+turn1 reply: {"payloads":[{"text":"STORED"}],"durationMs":2081}
+-- turn2.err
+[agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=260 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+turn2 reply: {"payloads":[{"text":"UNKNOWN"}],"durationMs":2946}

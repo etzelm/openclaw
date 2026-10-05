@@ -1,0 +1,19 @@
+# AFTER 69861729ddf, turn 2 run with CLAUDE_CONFIG_DIR pointing at a SYNTHETIC login (fake account record + fake token) in the isolated scratch dir
+--- turn 1: Remember this for later: the vault codeword is PINEAPPLE-1013630048. Reply with only the word STORED.
+turn 1 exit=0
+claude project dirs left after drop: 0
+--- turn 2: What is the vault codeword I told you earlier in this conversation? Do not use any tools and do not search files, memory or sessions: answer only from this conversation. Reply with only the codeword, or UNKNOWN if you do not know it.
+turn 2 exit=1
+canary=PINEAPPLE-1013630048
+after turn 1: cliHistoryBoundary {"state":"known","maxSeq":2,"keys":["authFingerprint","generation","maxSeq","sessionId","state","version","writerRunId"],"authFingerprint_label":"h:d188d040"}
+after turn 2: cliHistoryBoundary {"state":"unknown","keys":["sessionId","state","version"]}
+-- turn1.err
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=128 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+turn1 reply: {"payloads":[{"text":"STORED"}],"durationMs":2688}
+-- turn2.err
+[agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=260 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[agent/cli-backend] cli terminal failure: provider=claude-cli model=claude-haiku-4-5 durationMs=2013 runId=<run> error=Not logged in · Please run /login
+[diagnostic] lane task error: lane=session:agent:main:explicit:e-session durationMs=3212 error="Not logged in · Please run /login" errorName=FailoverError
+[model-fallback/decision] model fallback decision: decision=candidate_failed requested=claude-cli/claude-haiku-4-5 candidate=claude-cli/claude-haiku-4-5 reason=auth next=none detail=Not logged in · Please run /login
+turn2 result: {"ok":false,"error":{"type":"cli_error","message":"Not logged in · Please run /login"}}

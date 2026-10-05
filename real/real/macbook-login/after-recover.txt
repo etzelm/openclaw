@@ -1,0 +1,15 @@
+# AFTER 69861729ddf (branch), real claude 2.1.283, real api.anthropic.com profile attestation, model claude-cli/claude-haiku-4-5
+--- turn 1: Remember this for later: the vault codeword is PINEAPPLE-1296762355. Reply with only the word STORED.
+turn 1 exit=0
+claude project dirs left after drop: 0
+--- turn 2: What is the vault codeword I told you earlier in this conversation? Do not use any tools and do not search files, memory or sessions: answer only from this conversation. Reply with only the codeword, or UNKNOWN if you do not know it.
+turn 2 exit=0
+canary=PINEAPPLE-1296762355
+after turn 1: cliHistoryBoundary {"state":"known","maxSeq":2,"keys":["authFingerprint","generation","maxSeq","sessionId","state","version","writerRunId"],"authFingerprint_label":"h:d188d040"}
+after turn 2: cliHistoryBoundary {"state":"known","maxSeq":4,"keys":["authFingerprint","generation","maxSeq","sessionId","state","version","writerRunId"],"authFingerprint_label":"h:d188d040"}
+-- turn1.err
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=128 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+turn1 reply: {"payloads":[{"text":"STORED"}],"durationMs":2739}
+-- turn2.err
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-4-5 promptChars=771 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+turn2 reply: {"payloads":[{"text":"PINEAPPLE-1296762355"}],"durationMs":3401}
