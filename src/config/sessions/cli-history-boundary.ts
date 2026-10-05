@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import type { SessionTranscriptRuntimeTarget } from "./session-accessor.types.js";
 
 export type CliHistoryWriter = {
@@ -42,21 +43,59 @@ export function runWithCliHistoryWriter<T>(writer: CliHistoryWriter | undefined,
 }
 
 /** The serializable account facts a worker needs to advance coverage for this writer. */
-export function cliHistoryWriterFacts(
-  writer: CliHistoryWriter,
-): Pick<CliHistoryWriter, "runId" | "authFingerprint" | "lifecycleRevision"> {
+export type CliHistoryWriterFacts = Pick<
+  CliHistoryWriter,
+  "runId" | "authFingerprint" | "lifecycleRevision"
+> & {
+  /** The host holds a live owner check the worker must ask for inside its transaction. */
+  confirmOwner?: boolean;
+};
+
+export function cliHistoryWriterFacts(writer: CliHistoryWriter): CliHistoryWriterFacts {
   return {
     runId: writer.runId,
     authFingerprint: writer.authFingerprint,
     lifecycleRevision: writer.lifecycleRevision,
+    ...(writer.confirmsOwner ? { confirmOwner: true } : {}),
   };
 }
 
-/** Hosts dispatching a worker commit hand it account facts only while the owner still holds. */
-export function resolveCliHistoryCoverageWriter(
+const OWNER_PROBE = "cli-history-owner-probe";
+
+/**
+ * Worker side of the in-transaction owner check. The worker puts `fact` on a transaction or
+ * commit admission request; the host answers into the shared cell before it grants, so
+ * `holds()` is read only after that grant. No answer means the owner does not hold.
+ */
+export function createCliHistoryOwnerProbe() {
+  const verdict = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
+  return {
+    fact: { kind: OWNER_PROBE, verdict: verdict.buffer },
+    holds: () => Atomics.load(verdict, 0) === 1,
+  };
+}
+
+/** Host side: answer a worker's owner probe synchronously, right before its admission grant. */
+export function answerCliHistoryOwnerProbe(
+  fact: unknown,
   writer: CliHistoryWriter | undefined,
-): Pick<CliHistoryWriter, "runId" | "authFingerprint" | "lifecycleRevision"> | undefined {
-  return writer && writer.confirmsOwner?.() !== false ? cliHistoryWriterFacts(writer) : undefined;
+): boolean {
+  if (
+    !isRecord(fact) ||
+    fact.kind !== OWNER_PROBE ||
+    !(fact.verdict instanceof SharedArrayBuffer) ||
+    fact.verdict.byteLength !== Int32Array.BYTES_PER_ELEMENT
+  ) {
+    return false;
+  }
+  let holds = false;
+  try {
+    holds = writer?.confirmsOwner?.() === true;
+  } catch {
+    // An owner that cannot be confirmed does not hold.
+  }
+  Atomics.store(new Int32Array(fact.verdict), 0, holds ? 1 : 0);
+  return true;
 }
 
 export function getCliHistoryWriter(

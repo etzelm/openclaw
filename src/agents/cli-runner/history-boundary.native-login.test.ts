@@ -1,6 +1,8 @@
 // Proves the native Claude login owner is the account Anthropic attests for the credential.
 import fs from "node:fs";
 import path from "node:path";
+import { deserialize } from "node:v8";
+import { Worker } from "node:worker_threads";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearRuntimeConfigSnapshot,
@@ -637,6 +639,101 @@ describe("native CLI login owner", () => {
       expect(coveredSeq()).toBe(start + 1);
     });
     expect(JSON.stringify(f.manager().getEntries())).toContain("report under account b");
+  });
+
+  // Runs `flip` right after the host hands the SQLite worker a command of this type, so the
+  // login changes while that command is queued and before its transaction asks the host.
+  const afterCommandQueued = (type: string, flip: () => void) => {
+    const post = Reflect.get(Worker.prototype, "postMessage") as Worker["postMessage"];
+    const state = { flipped: false };
+    vi.spyOn(Worker.prototype, "postMessage").mockImplementation(function (
+      this: Worker,
+      ...args: Parameters<Worker["postMessage"]>
+    ) {
+      post.apply(this, args);
+      const request = args[0] as { type?: string; input?: unknown } | undefined;
+      if (!state.flipped && request?.type === "execute" && request.input instanceof Uint8Array) {
+        const command = deserialize(request.input) as {
+          type?: string;
+          input?: { command?: { type?: string } };
+        };
+        // Domain workers wrap the report command; the turn worker takes it directly.
+        if ((command.input?.command ?? command).type === type) {
+          state.flipped = true;
+          flip();
+        }
+      }
+    });
+    return state;
+  };
+
+  it("does not cover a turn commit whose login is reassigned while the command is queued", async () => {
+    const f = await fixture();
+    const { backend } = logins();
+    loginIn(backend, "uuid:account-a");
+    await seedNative(f, backendUsing(backend));
+    const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary as { maxSeq: number };
+    await withNativeWriter(f, "boundary-native-queued-turn", backendUsing(backend), async () => {
+      const queued = afterCommandQueued("session.turn.commit", () =>
+        loginIn(backend, "uuid:account-b", { rotate: true, recordAccount: "uuid:account-a" }),
+      );
+      await persistSessionTranscriptTurn(f.target, {
+        expectedSessionId: f.target.sessionId,
+        messages: [{ message: { role: "user", content: "queued under account b", timestamp: 2 } }],
+      });
+      expect(queued.flipped).toBe(true);
+    });
+    expect(JSON.stringify(f.manager().getEntries())).toContain("queued under account b");
+    expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+      maxSeq: before.maxSeq,
+    });
+  });
+
+  it("does not cover a transcript report whose login is reassigned while the command is queued", async () => {
+    const f = await fixture();
+    const { backend } = logins();
+    loginIn(backend, "uuid:account-a");
+    await seedNative(f, backendUsing(backend));
+    const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary as { maxSeq: number };
+    await withNativeWriter(f, "boundary-native-queued-report", backendUsing(backend), async () => {
+      const queued = afterCommandQueued("append", () =>
+        loginIn(backend, "uuid:account-b", { rotate: true, recordAccount: "uuid:account-a" }),
+      );
+      await expect(
+        appendSessionTranscriptReport(f.target, {
+          kind: "custom",
+          customTypes: ["status"],
+          selectReport: () => ({ customType: "status", content: "queued report b", display: true }),
+        }),
+      ).resolves.toMatchObject({ ok: true });
+      expect(queued.flipped).toBe(true);
+    });
+    expect(JSON.stringify(f.manager().getEntries())).toContain("queued report b");
+    expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+      maxSeq: before.maxSeq,
+    });
+  });
+
+  it("looks the login up once for a worker turn commit, however many rows it covers", async () => {
+    const f = await fixture();
+    const { backend } = logins();
+    loginIn(backend, "uuid:account-a");
+    await seedNative(f, backendUsing(backend));
+    const before = loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary as { maxSeq: number };
+    const lookup = vi.spyOn(cliCredentials, "readAttestedNativeCliLoginOwner");
+    await withNativeWriter(f, "boundary-native-one-lookup", backendUsing(backend), async () => {
+      lookup.mockClear();
+      await persistSessionTranscriptTurn(f.target, {
+        expectedSessionId: f.target.sessionId,
+        messages: [1, 2, 3].map((n) => ({
+          message: { role: "user" as const, content: `covered row ${n}`, timestamp: 1 + n },
+        })),
+      });
+      expect(lookup).toHaveBeenCalledTimes(1);
+    });
+    expect(loadSessionEntryReadOnly(f.target)?.cliHistoryBoundary).toMatchObject({
+      maxSeq: before.maxSeq + 3,
+    });
   });
 
   it("runs a refresh-due turn without saved history but keeps covering it", async () => {

@@ -1,9 +1,9 @@
 import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CliHistoryWriterFacts } from "./cli-history-boundary.js";
 import type {
   SessionTranscriptTurnMutation,
   SessionTranscriptTurnMutationResult,
 } from "./goals-operations.types.js";
-import type { CliHistoryWriterFacts } from "./session-accessor.sqlite-cli-history-boundary.js";
 import type { SessionEntryReplacementPublication } from "./session-accessor.sqlite-entry-cache.types.js";
 import type {
   SessionPendingInputWorkerFacts,

@@ -1,4 +1,5 @@
 import path from "node:path";
+import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import { err, ok, type Result } from "@openclaw/normalization-core/result";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { runtimeProcessEntrypoints } from "../../infra/runtime-process-entrypoints.js";
@@ -23,7 +24,11 @@ import {
 import type { IncognitoAgentDatabaseExecution } from "../../state/openclaw-agent-execution-incognito.js";
 import { captureOpenClawAgentDatabaseExecution } from "../../state/openclaw-agent-execution.js";
 import { openOpenClawAgentSqliteWorkerStore } from "../../state/openclaw-agent-worker-store.js";
-import { cliHistoryWriterFacts, getCliHistoryWriter } from "./cli-history-boundary.js";
+import {
+  answerCliHistoryOwnerProbe,
+  cliHistoryWriterFacts,
+  getCliHistoryWriter,
+} from "./cli-history-boundary.js";
 import type {
   SessionTranscriptWriteScope,
   TranscriptAppendRefusal,
@@ -399,7 +404,7 @@ async function withReportWorker<T>(
             const target: TranscriptReportWorkerTarget = {
               resolved: workerResolved,
               sessionEntryCurrentSource: sessionEntryCurrent?.source,
-              // Account facts only: each write confirms the owner as it is sent, below.
+              // Account facts only: the worker asks the host to confirm the owner on each commit.
               ...(cliWriter ? { cliWriter: cliHistoryWriterFacts(cliWriter) } : {}),
               fence: {
                 expectedLifecycleRevision: fenced.expectedLifecycleRevision,
@@ -419,54 +424,40 @@ async function withReportWorker<T>(
                     runtimeProcessEntrypoints.sessionTranscriptReports,
                   ),
                   input: target,
-                  assertAdmission: (request) =>
-                    request.stage === "transaction" || request.stage === "commit"
-                      ? assertSessionEntryCurrentAdmission(request, sessionEntryCurrent)
-                      : request,
+                  assertAdmission: (request) => {
+                    const admitted =
+                      request.stage === "transaction" || request.stage === "commit"
+                        ? assertSessionEntryCurrentAdmission(request, sessionEntryCurrent)
+                        : request;
+                    // The worker's coverage check, answered by the host right before the grant.
+                    answerCliHistoryOwnerProbe(
+                      isRecord(admitted.facts) ? admitted.facts.publication : undefined,
+                      cliWriter,
+                    );
+                    return admitted;
+                  },
                 },
               );
             return settleReportOperation(
               () =>
                 worker.run(
                   (operation) =>
-                    run(
-                      cliWriter
-                        ? {
-                            // Confirm the owner as the last host step before each write.
-                            execute: (command, executeOptions) =>
-                              operation.execute(
-                                command.type === "prepare"
-                                  ? command
-                                  : {
-                                      ...command,
-                                      input: {
-                                        ...command.input,
-                                        cliHistoryOwnerConfirmed:
-                                          cliWriter.confirmsOwner?.() !== false,
-                                      },
-                                    },
-                                executeOptions,
-                              ),
-                          }
-                        : operation,
-                      assertCurrent,
-                      (publication) => {
-                        if (publication.cliHistoryChanged || publication.sessionEntryChanged) {
-                          publishSessionEntryWorkerMetadataInvalidation({
-                            agentId: resolved.agentId,
-                            storePath: execution.path,
-                            databaseIdentity,
-                            sessionKey: resolved.sessionKey,
-                          });
-                        }
-                        if (publication.projectionNeedsReconcile) {
-                          startSessionTranscriptIndexReconcile({
-                            ...options,
-                            preferredSessionId: resolved.sessionId,
-                          });
-                        }
-                      },
-                    ),
+                    run(operation, assertCurrent, (publication) => {
+                      if (publication.cliHistoryChanged || publication.sessionEntryChanged) {
+                        publishSessionEntryWorkerMetadataInvalidation({
+                          agentId: resolved.agentId,
+                          storePath: execution.path,
+                          databaseIdentity,
+                          sessionKey: resolved.sessionKey,
+                        });
+                      }
+                      if (publication.projectionNeedsReconcile) {
+                        startSessionTranscriptIndexReconcile({
+                          ...options,
+                          preferredSessionId: resolved.sessionId,
+                        });
+                      }
+                    }),
                   assertCurrent,
                 ),
               () => worker.close(),

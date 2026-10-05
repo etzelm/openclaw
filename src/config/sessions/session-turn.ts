@@ -3,9 +3,9 @@ import { createSqliteLifecycleAggregateError } from "../../infra/sqlite-lifecycl
 import { retainSqliteWorkerErrorCode } from "../../infra/sqlite-worker-contract.js";
 import { captureOpenClawAgentDatabaseExecution } from "../../state/openclaw-agent-execution.js";
 import {
+  answerCliHistoryOwnerProbe,
   cliHistoryWriterFacts,
   getCliHistoryWriter,
-  resolveCliHistoryCoverageWriter,
 } from "./cli-history-boundary.js";
 import { assertSessionGoalOperationTime } from "./goals-operations.js";
 import { publishCommittedSessionIdentity } from "./session-accessor.sqlite-identity.js";
@@ -82,7 +82,7 @@ export async function appendSessionTurnInWorker(
           }
         : undefined,
     },
-    // Preparation only reads; the owner is confirmed for the commit itself, below.
+    // The worker asks the host to confirm the owner inside its commit transaction.
     cliWriter: cliWriter && cliHistoryWriterFacts(cliWriter),
     custody: custody?.facts,
     relocation: custody?.relocation,
@@ -130,6 +130,9 @@ export async function appendSessionTurnInWorker(
       assertCurrent,
       candidateKind: "session-turn",
       onTransactionFacts(facts) {
+        if (answerCliHistoryOwnerProbe(facts, cliWriter)) {
+          return true;
+        }
         if (!isRecord(facts) || facts.kind !== "session-turn-custody") {
           return false;
         }
@@ -208,12 +211,7 @@ export async function appendSessionTurnInWorker(
           };
         });
         assertCurrent();
-        return commit(() => {
-          // Confirm the owner as the last host step before the worker's transaction, after
-          // every awaited step above, so a login change during preparation never covers rows.
-          plan.cliWriter = resolveCliHistoryCoverageWriter(cliWriter);
-          return worker.execute({ type: "session.turn.commit", input: plan });
-        });
+        return commit(() => worker.execute({ type: "session.turn.commit", input: plan }));
       },
       onAcknowledged(candidate) {
         if (candidate.custody) {
