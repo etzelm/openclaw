@@ -1,0 +1,13 @@
+diff --git a/extensions/memory-wiki/src/query-reader.worker.ts b/extensions/memory-wiki/src/query-reader.worker.ts
+index 51110160aa4..9e1847333b3 100644
+--- a/extensions/memory-wiki/src/query-reader.worker.ts
++++ b/extensions/memory-wiki/src/query-reader.worker.ts
+@@ -15,7 +15,7 @@ serveWorkerTasks(async (input, channel, control): Promise<WikiPageReadResult> =>
+     ? async () => {
+         const reply = await channel.request(null);
+         reply.consumed();
+-        return reply.input === WIKI_SCAN_YIELD;
++        return false;
+       }
+     : undefined;
+   try {

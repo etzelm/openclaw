@@ -14,12 +14,12 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 353ms
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 59ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 379ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 55ms
    → expected [ undefined, undefined ] to deeply equal [ undefined, undefined, …(2) ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 117ms
-   → expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 347ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments 130ms
+   → expected [ 'search', 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'list', …(3) ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 367ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -36,18 +36,18 @@ AssertionError: expected [ undefined, undefined ] to deeply equal [ undefined, u
 -   undefined,
   ]
 
- ❯ extensions/memory-wiki/src/query-scheduling.test.ts:82:68
-     80|
-     81|     // Each scan is a listing task and one batch task.
-     82|     expect(run.mock.calls.map(([, options]) => options.timeoutMs)).toE…
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:86:68
+     84|
+     85|     // Each scan is a listing task and one scan task.
+     86|     expect(run.mock.calls.map(([, options]) => options.timeoutMs)).toE…
        |                                                                    ^
-     83|       Array(4).fill(undefined),
-     84|     );
+     87|       Array(4).fill(undefined),
+     88|     );
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
 
- FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results
-AssertionError: expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments
+AssertionError: expected [ 'search', 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'list', …(3) ]
 
 - Expected
 + Received
@@ -55,28 +55,26 @@ AssertionError: expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'searc
   [
 -   "list",
     "search",
--   "search",
--   "search",
 -   "list",
--   "keys",
--   "keys",
+    "search",
+-   "list",
 -   "keys",
 +   "lookup",
   ]
 
- ❯ extensions/memory-wiki/src/query-scheduling.test.ts:122:47
-    120|       "relativePaths" in submitted ? (submitted.relativePaths as strin…
-    121|     );
-    122|     expect(tasks.map(({ select }) => select)).toEqual([
-       |                                               ^
-    123|       "list",
-    124|       ...Array(3).fill("search"),
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:132:91
+    130|     });
+    131|
+    132|     expect(run.mock.calls.map(([submitted]) => (submitted as { select:…
+       |                                                                                           ^
+    133|       "list",
+    134|       "search",
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
 
 
  Test Files  1 failed (1)
       Tests  2 failed | 2 passed (4)
-   Start at  13:17:06
-   Duration  3.56s (transform 39%, import 29%, tests 26%, setup 7%)
+   Start at  14:57:38
+   Duration  3.68s (transform 38%, import 29%, tests 27%, setup 7%)
 

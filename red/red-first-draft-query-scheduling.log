@@ -14,13 +14,13 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 359ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 358ms
    → expected [ 'search', 'page' ] to deeply equal [ 'search' ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 64ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 58ms
    → expected [ undefined, undefined ] to deeply equal [ undefined, undefined, …(2) ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 118ms
-   → expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 343ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments 131ms
+   → expected [ 'search', 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'list', …(3) ]
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 348ms
    → expected 1 to be 2 // Object.is equality
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
@@ -36,13 +36,13 @@ AssertionError: expected [ 'search', 'page' ] to deeply equal [ 'search' ]
 +   "page",
   ]
 
- ❯ extensions/memory-wiki/src/query-scheduling.test.ts:68:62
-     66|     expect(page?.path).toBe("sources/page-4.md");
-     67|     expect(scanSettled).toBe(false);
-     68|     expect(dispatch.mock.calls.map(([task]) => task.select)).toEqual([…
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:72:62
+     70|     expect(page?.path).toBe("sources/page-4.md");
+     71|     expect(scanSettled).toBe(false);
+     72|     expect(dispatch.mock.calls.map(([task]) => task.select)).toEqual([…
        |                                                              ^
-     69|     release();
-     70|     expect((await scan).length).toBeGreaterThan(0);
+     73|     release();
+     74|     expect((await scan).length).toBeGreaterThan(0);
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
 
@@ -59,18 +59,18 @@ AssertionError: expected [ undefined, undefined ] to deeply equal [ undefined, u
 -   undefined,
   ]
 
- ❯ extensions/memory-wiki/src/query-scheduling.test.ts:82:68
-     80|
-     81|     // Each scan is a listing task and one batch task.
-     82|     expect(run.mock.calls.map(([, options]) => options.timeoutMs)).toE…
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:86:68
+     84|
+     85|     // Each scan is a listing task and one scan task.
+     86|     expect(run.mock.calls.map(([, options]) => options.timeoutMs)).toE…
        |                                                                    ^
-     83|       Array(4).fill(undefined),
-     84|     );
+     87|       Array(4).fill(undefined),
+     88|     );
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
 
- FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results
-AssertionError: expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments
+AssertionError: expected [ 'search', 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'list', …(3) ]
 
 - Expected
 + Received
@@ -78,22 +78,20 @@ AssertionError: expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'searc
   [
 -   "list",
     "search",
--   "search",
--   "search",
 -   "list",
--   "keys",
--   "keys",
+    "search",
+-   "list",
 -   "keys",
 +   "lookup",
   ]
 
- ❯ extensions/memory-wiki/src/query-scheduling.test.ts:122:47
-    120|       "relativePaths" in submitted ? (submitted.relativePaths as strin…
-    121|     );
-    122|     expect(tasks.map(({ select }) => select)).toEqual([
-       |                                               ^
-    123|       "list",
-    124|       ...Array(3).fill("search"),
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:132:91
+    130|     });
+    131|
+    132|     expect(run.mock.calls.map(([submitted]) => (submitted as { select:…
+       |                                                                                           ^
+    133|       "list",
+    134|       "search",
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
 
@@ -106,19 +104,19 @@ AssertionError: expected 1 to be 2 // Object.is equality
 - 2
 + 1
 
- ❯ extensions/memory-wiki/src/query-scheduling.test.ts:159:33
-    157|
-    158|     expect(new Set(run.mock.contexts).size).toBe(1);
-    159|     expect(admitted.maxWorkers).toBe(2);
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:169:33
+    167|
+    168|     expect(new Set(run.mock.contexts).size).toBe(1);
+    169|     expect(admitted.maxWorkers).toBe(2);
        |                                 ^
-    160|     expect(admitted.pendingTasks).toBe(3);
-    161|     // Shared compute can admit fewer than two on a small host; never …
+    170|     expect(admitted.pendingTasks).toBe(3);
+    171|     // Shared compute can admit fewer than two on a small host; never …
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
 
 
  Test Files  1 failed (1)
       Tests  4 failed (4)
-   Start at  13:58:20
-   Duration  3.87s (transform 43%, import 26%, tests 24%, setup 6%)
+   Start at  15:50:14
+   Duration  4.07s (transform 45%, import 26%, tests 23%, setup 6%)
 

@@ -1,37 +1,24 @@
 #!/bin/bash
-# Mutation check at the head: each mutant changes one line of query-reader.ts; the new
-# scheduling and shared-compute tests must fail on every one.
+# Mutation check at the head: each mutant changes one construct; the changed test files
+# must fail on every one.
 export PATH="$HOME/homebrew/bin:$PATH"
 cd ~/work/oss-166304 || exit 1
 E=~/work/oss-166304-r4
-F=extensions/memory-wiki/src/query-reader.ts
-T="extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-shared-compute.test.ts"
+S=extensions/memory-wiki/src
+T="$S/query-scheduling.test.ts $S/query-shared-compute.test.ts $S/query-reader.test.ts"
 mkdir -p "$E/mutants"
-run_mut() { name=$1; python3 -c "$2" || { echo "$name: patch failed"; return; }; git diff -- "$F" > "$E/mutants/$name.diff"; pnpm test $T 2>&1 | sed 's/\x1b\[[0-9;]*m//g' > "$E/mutants/$name.log"; echo "$name: $(grep -E 'Tests ' "$E/mutants/$name.log")"; grep -E "×" "$E/mutants/$name.log" | sed 's/.*> //'; git checkout -- "$F"; }
+run_mut() { name=$1; file=$2; old=$3; new=$4
+  OLD="$old" NEW="$new" python3 -c 'import os,pathlib,sys;p=pathlib.Path(sys.argv[1]);s=p.read_text();o=os.environ["OLD"];assert s.count(o)==1,o;p.write_text(s.replace(o,os.environ["NEW"]))' "$file" || { echo "$name: patch failed"; return; }
+  git diff -- "$file" > "$E/mutants/$name.diff"
+  pnpm test $T 2>&1 | sed 's/\x1b\[[0-9;]*m//g' > "$E/mutants/$name.log"
+  echo "$name: $(grep -E 'Tests ' "$E/mutants/$name.log")"; grep -E "×" "$E/mutants/$name.log" | sed 's/.*> //'
+  git checkout -- "$file"; }
 {
   echo "HEAD=$(git rev-parse HEAD) $(date -u +%Y-%m-%dT%H:%M:%SZ)"; git status --short
-  run_mut M1-merge-order-reversed 'import pathlib;p=pathlib.Path("'$F'");s=p.read_text();o="sortWikiSearchResults([...results, ...read.results])";assert s.count(o)==1;p.write_text(s.replace(o,"sortWikiSearchResults([...read.results, ...results])"))'
-  run_mut M2-one-unbatched-task 'import pathlib,re;p=pathlib.Path("'$F'");s=p.read_text();n=re.subn(r"const WIKI_SCAN_BATCH_PAGES = \d+;","const WIKI_SCAN_BATCH_PAGES = Number.POSITIVE_INFINITY;",s);assert n[1]==1;p.write_text(n[0])'
-  run_mut M3-parallel-batches 'import pathlib;p=pathlib.Path("'$F'");s=p.read_text()
-o="""    let results: WikiSearchResult[] = [];
-    for (const batch of scanBatches(relativePaths)) {
-      const { query, mode, maxResults } = task;
-      const read = await runPoolTask(
-        { select: "search", rootDir, visibility, relativePaths: batch, query, mode, maxResults },
-        signal,
-      );"""
-assert s.count(o)==1
-n="""    let results: WikiSearchResult[] = [];
-    const { query, mode, maxResults } = task;
-    const reads = await Promise.all(
-      [...scanBatches(relativePaths)].map((batch) =>
-        runPoolTask(
-          { select: "search", rootDir, visibility, relativePaths: batch, query, mode, maxResults },
-          signal,
-        ),
-      ),
-    );
-    for (const read of reads) {"""
-p.write_text(s.replace(o,n))'
+  run_mut M1-segment-merge-reversed $S/query-pages.ts 'sortWikiSearchResults([...results, ...found])' 'sortWikiSearchResults([...found, ...results])'
+  run_mut M2-task-merge-reversed $S/query-reader.ts 'sortWikiSearchResults([...results, ...read.results])' 'sortWikiSearchResults([...read.results, ...results])'
+  run_mut M3-host-never-yields $S/query-reader.ts 'input: yieldSignal.aborted ? WIKI_SCAN_YIELD : null,' 'input: null,'
+  run_mut M4-worker-ignores-yield $S/query-reader.worker.ts 'return reply.input === WIKI_SCAN_YIELD;' 'return false;'
+  run_mut M5-no-lookup-recheck $S/query-reader.ts 'const current = page && resolveQueryableWikiPageByLookup([page], task.lookup);' 'const current = page;'
   git status --short; echo MUTANTS DONE
 } > "$E/mutants/mutants-run.log" 2>&1

@@ -109,10 +109,16 @@ echo "# uptime at the start of every phase (UTC | phase | sample); machine: <hos
   H search --vault "$V10" --query "$QUERY" --out "$E/after/search.json" --label head > "$E/after/search.stdout" 2>&1; echo "exit=$?"
   grep -E '"(searchWallMs|wallMs|eventLoopUtilization|callingThreadCpuMs|resultCount)"' "$E/before-r4/search.stdout" "$E/after/search.stdout" | head -20
   compare "$R3/before/search.json" "$E/after/search.json" > "$E/after/results-compare-base.json"; head -6 "$E/after/results-compare-base.json"
+  log "20K SEARCH, default capacity: previous head then head (worker heap at twice the vault)"
+  restore_plugin "$PREV"; record_tree "$E/before-r4-20k" "$PREV"
+  H search --vault "$VBIG" --query "$QUERY" --out "$E/before-r4-20k/search.json" --label previous-head > "$E/before-r4-20k/search.stdout" 2>&1; echo "exit=$?"
+  restore_plugin HEAD; record_tree "$E/after-20k" "$HEAD_SHA"
+  H search --vault "$VBIG" --query "$QUERY" --out "$E/after-20k/search.json" --label head > "$E/after-20k/search.stdout" 2>&1; echo "exit=$?"
   log "10K CONCURRENT exact reads at the head"
   H concurrent --vault "$V10" --query "$QUERY" --out "$E/after/concurrent.json" --label head > "$E/after/concurrent.stdout" 2>&1; echo "exit=$?"; cat "$E/after/concurrent.stdout"
 
-  log "DEADLINE OWNERSHIP at the head, 20,000 pages (base and pool-timeout cells are revision 3's)"
+  log "DEADLINE OWNERSHIP at the head, 20,000 pages (the base and pool-timeout cells run in evidence2.sh)"
+  record_tree "$E/budget/head" "$HEAD_SHA"
   for step in cli-search cli-get tool; do
     log "budget head $step"
     H budget --vault "$VBIG" --query "$QUERY" --lookup page-14321 --step $step --out "$E/budget/head/$step.json" --label head > "$E/budget/head/$step.stdout" 2>&1
@@ -121,6 +127,7 @@ echo "# uptime at the start of every phase (UTC | phase | sample); machine: <hos
   compare "$R3/budget/base/cli-search.json" "$E/budget/head/cli-search.json" > "$E/budget/results-compare.json"; head -6 "$E/budget/results-compare.json"
 
   log "COMPAT at the head on copies of the base-compiled vault"
+  record_tree "$E/compat/head" "$HEAD_SHA"
   tree_hash "$VC" > "$E/compat/vault-compat-now.sha256"
   diff "$R3/compat/tree-after-base-compile.sha256" "$E/compat/vault-compat-now.sha256" && echo "source vault unchanged since the base compile"
   rm -rf "$VC-r4-head" "$VC-r4-apply-head"; cp -R "$VC" "$VC-r4-head"; cp -R "$VC" "$VC-r4-apply-head"

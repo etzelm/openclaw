@@ -1,0 +1,323 @@
+diff --git a/extensions/memory-wiki/src/query-pages.ts b/extensions/memory-wiki/src/query-pages.ts
+index 63af20c9c99..4d5930adb9e 100644
+--- a/extensions/memory-wiki/src/query-pages.ts
++++ b/extensions/memory-wiki/src/query-pages.ts
+@@ -19,7 +19,8 @@ const QUERY_PAGE_READ_CONCURRENCY = 16;
+ /** Serializable sandbox scope for bridge pages; `null` admits every page. */
+ export type WikiPageVisibility = { scopedAgentId: string };
+ 
+-type WikiPageReadScope = {
++/** A scan's scope as callers pass it to the reader pool. */
++export type WikiPageReadScope = {
+   rootDir: string;
+   /** Explicit page paths; the whole vault when absent. */
+   relativePaths?: string[];
+@@ -28,16 +29,22 @@ type WikiPageReadScope = {
+   visibility: WikiPageVisibility | null;
+ };
+ 
+-export type WikiPageReadTask = WikiPageReadScope &
+-  (
+-    | { select: "search"; query: string; mode: WikiSearchMode; maxResults: number }
+-    | { select: "lookup"; lookup: string }
+-    | { select: "page" }
+-  );
++/** What a lookup resolves on: the page's path and id. */
++export type WikiPageKey = Pick<QueryableWikiPage, "relativePath" | "id">;
++
++/** One read: list the vault, or read, parse and project an explicit list of pages. */
++export type WikiPageReadTask =
++  | { select: "list"; rootDir: string; excludePaths?: string[] }
++  | ({ rootDir: string; relativePaths: string[]; visibility: WikiPageVisibility | null } & (
++      | { select: "search"; query: string; mode: WikiSearchMode; maxResults: number }
++      | { select: "keys" }
++      | { select: "page" }
++    ));
+ 
+ export type WikiPageReadResult =
++  | { select: "list"; relativePaths: string[] }
+   | { select: "search"; results: WikiSearchResult[] }
+-  | { select: "lookup"; page: QueryableWikiPage | null }
++  | { select: "keys"; keys: WikiPageKey[] }
+   | { select: "page"; page: QueryableWikiPage | null }
+   | { select: "refused"; code: FsSafeError["code"]; message: string };
+ 
+@@ -56,6 +63,14 @@ async function listWikiMarkdownFiles(rootDir: string): Promise<string[]> {
+   return files.flat().toSorted((left, right) => left.localeCompare(right));
+ }
+ 
++export function excludeWikiPagePaths(relativePaths: string[], excludePaths?: string[]): string[] {
++  if (!excludePaths?.length) {
++    return relativePaths;
++  }
++  const excluded = new Set(excludePaths);
++  return relativePaths.filter((relativePath) => !excluded.has(relativePath));
++}
++
+ /** Read and parse pages in listing order, keeping only each page's projection. */
+ async function readQueryableWikiPagesByPaths<T>(
+   rootDir: string,
+@@ -119,9 +134,10 @@ function isWikiPageVisible(page: QueryableWikiPage, visibility: WikiPageVisibili
+   );
+ }
+ 
+-function resolveQueryableWikiPageByLookup<
+-  Page extends Pick<QueryableWikiPage, "relativePath" | "id">,
+->(pages: Page[], lookup: string): Page | null {
++export function resolveQueryableWikiPageByLookup<Page extends WikiPageKey>(
++  pages: Page[],
++  lookup: string,
++): Page | null {
+   const key = normalizeLookupKey(lookup);
+   const withExtension = key.endsWith(".md") ? key : `${key}.md`;
+   return (
+@@ -140,10 +156,10 @@ type WikiPageReadSelection<Task extends WikiPageReadTask> = Extract<
+ >;
+ 
+ /**
+- * Read, parse and score pages for one query task. Each page is projected as it is
+- * read (a scoring result, a lookup key, or the one requested page), so a whole-vault
+- * read retains no page text or parse; boundary refusals propagate as `FsSafeError`,
+- * and the cancellation checkpoint stops the scan between pages.
++ * List the vault, or read, parse and score pages for one query task. Each page is
++ * projected as it is read (a scoring result, a lookup key, or the one requested page),
++ * so a read retains no page text or parse; boundary refusals propagate as
++ * `FsSafeError`, and the cancellation checkpoint stops the read between pages.
+  */
+ export function readWikiPagesTask<Task extends WikiPageReadTask>(
+   task: Task,
+@@ -158,15 +174,13 @@ async function runWikiPageReadTask(
+   signal?: WikiPageReadCancellation,
+ ): Promise<Exclude<WikiPageReadResult, { select: "refused" }>> {
+   signal?.throwIfAborted();
+-  let relativePaths = task.relativePaths ?? (await listWikiMarkdownFiles(task.rootDir));
+-  if (task.excludePaths?.length) {
+-    const excluded = new Set(task.excludePaths);
+-    relativePaths = relativePaths.filter((relativePath) => !excluded.has(relativePath));
++  if (task.select === "list") {
++    const files = await listWikiMarkdownFiles(task.rootDir);
++    return { select: "list", relativePaths: excludeWikiPagePaths(files, task.excludePaths) };
+   }
++  const { relativePaths } = task;
+   const visible = (page: QueryableWikiPage) =>
+     isWikiPageVisible(page, task.visibility) ? page : null;
+-  const readPage = async (relativePath: string) =>
+-    (await readQueryableWikiPagesByPaths(task.rootDir, [relativePath], visible, signal))[0] ?? null;
+   if (task.select === "search") {
+     const results = await readQueryableWikiPagesByPaths(
+       task.rootDir,
+@@ -182,17 +196,20 @@ async function runWikiPageReadTask(
+     );
+     return { select: "search", results: sortWikiSearchResults(results).slice(0, task.maxResults) };
+   }
+-  if (task.select === "lookup") {
+-    // Resolve on keys first; the matched page is read again so only it is retained.
++  if (task.select === "keys") {
+     const keys = await readQueryableWikiPagesByPaths(
+       task.rootDir,
+       relativePaths,
+       (page) => (visible(page) ? { relativePath: page.relativePath, id: page.id } : null),
+       signal,
+     );
+-    const match = resolveQueryableWikiPageByLookup(keys, task.lookup);
+-    return { select: "lookup", page: match ? await readPage(match.relativePath) : null };
++    return { select: "keys", keys };
+   }
+-  const [relativePath] = relativePaths;
+-  return { select: "page", page: relativePath ? await readPage(relativePath) : null };
++  const pages = await readQueryableWikiPagesByPaths(
++    task.rootDir,
++    relativePaths.slice(0, 1),
++    visible,
++    signal,
++  );
++  return { select: "page", page: pages[0] ?? null };
+ }
+diff --git a/extensions/memory-wiki/src/query-reader.ts b/extensions/memory-wiki/src/query-reader.ts
+index ecd32d293ed..1ec23ad24f1 100644
+--- a/extensions/memory-wiki/src/query-reader.ts
++++ b/extensions/memory-wiki/src/query-reader.ts
+@@ -3,10 +3,46 @@
+ // on the calling thread (query.ts) so they never wait behind a scan.
+ import { resolveRuntimeWorkerUrl, WorkerTaskPool } from "openclaw/plugin-sdk/process-runtime";
+ import { FsSafeError } from "openclaw/plugin-sdk/security-runtime";
+-import type { WikiPageReadResult, WikiPageReadTask } from "./query-pages.js";
++import {
++  excludeWikiPagePaths,
++  readWikiPagesTask,
++  resolveQueryableWikiPageByLookup,
++  type WikiPageKey,
++  type WikiPageReadResult,
++  type WikiPageReadScope,
++  type WikiPageReadTask,
++} from "./query-pages.js";
++import {
++  sortWikiSearchResults,
++  type QueryableWikiPage,
++  type WikiSearchMode,
++  type WikiSearchResult,
++} from "./query-scoring.js";
+ 
+-/** Whole-vault scans; the one-page variant is read on the calling thread. */
+-export type WikiPageScanTask = Exclude<WikiPageReadTask, { select: "page" }>;
++/**
++ * Pages one pool task reads. A scan runs as a sequence of these tasks and returns its
++ * shared compute permit after each one, so a pool waiting for that permit (memory-core
++ * retrieval among them) is admitted between batches instead of after the whole scan.
++ * Admission is first come, first served across pools, so on a one-permit host a waiting
++ * task can wait for one batch of each scan queued ahead of it. Batches are bounded in
++ * pages, not bytes. Each batch costs a host round trip; 64 pages keeps one short enough
++ * that a pool submitting several tasks a second is not queued up behind a scan.
++ */
++const WIKI_SCAN_BATCH_PAGES = 64;
++
++/** A whole-vault scan as callers submit it; the reader runs it in bounded batches. */
++export type WikiPageScanTask = WikiPageReadScope &
++  (
++    | { select: "search"; query: string; mode: WikiSearchMode; maxResults: number }
++    | { select: "lookup"; lookup: string }
++  );
++
++export type WikiPageScanResult =
++  | { select: "search"; results: WikiSearchResult[] }
++  | { select: "lookup"; page: QueryableWikiPage | null };
++
++/** What the pool runs: the listing and the per-batch reads; one-page reads stay in-thread. */
++type WikiPagePoolTask = Exclude<WikiPageReadTask, { select: "page" }>;
+ 
+ const memoryWikiQueryReaderEntrypoint = {
+   currentModuleUrl: import.meta.url,
+@@ -15,15 +51,15 @@ const memoryWikiQueryReaderEntrypoint = {
+   package: { name: "@openclaw/memory-wiki", distWorkerPath: "src/query-reader.worker.js" },
+ } as const;
+ 
+-let pool: WorkerTaskPool<WikiPageScanTask, WikiPageReadResult> | undefined;
++let pool: WorkerTaskPool<WikiPagePoolTask, WikiPageReadResult> | undefined;
+ 
+-function resolvePool(): WorkerTaskPool<WikiPageScanTask, WikiPageReadResult> {
++function resolvePool(): WorkerTaskPool<WikiPagePoolTask, WikiPageReadResult> {
+   // A pool that is closing stays referenced until close settles, so a read issued
+   // during stop() fails with the pool's own closed error instead of opening an orphan.
+-  pool ??= new WorkerTaskPool<WikiPageScanTask, WikiPageReadResult>({
++  pool ??= new WorkerTaskPool<WikiPagePoolTask, WikiPageReadResult>({
+     workerUrl: resolveRuntimeWorkerUrl(memoryWikiQueryReaderEntrypoint),
+     // Two workers: a lookup can overtake a long search and two scans overlap; a third
+-    // queues. A scan worker's heap grows with the vault (about 270 MB on a 140 MB,
++    // queues. Each worker is a V8 isolate (about 110 MB heap peak while scanning a 140 MB,
+     // 10,000-page vault), which is why the pool does not grow with the core count.
+     maxWorkers: 2,
+     sharedCompute: true,
+@@ -32,30 +68,25 @@ function resolvePool(): WorkerTaskPool<WikiPageScanTask, WikiPageReadResult> {
+ }
+ 
+ /** Pool admission accounting: UTF-16 code units of the strings the task carries. */
+-function estimateWikiPageReadBytes(task: WikiPageScanTask): number {
++function estimateWikiPageReadBytes(task: WikiPagePoolTask): number {
+   let chars = task.rootDir.length;
+-  for (const relativePath of task.relativePaths ?? []) {
++  const paths = task.select === "list" ? (task.excludePaths ?? []) : task.relativePaths;
++  for (const relativePath of paths) {
+     chars += relativePath.length;
+   }
+-  for (const relativePath of task.excludePaths ?? []) {
+-    chars += relativePath.length;
++  if (task.select === "search") {
++    chars += task.query.length;
+   }
+-  chars += task.select === "search" ? task.query.length : task.lookup.length;
+   return chars * 2;
+ }
+ 
+-/**
+- * Run one whole-vault scan in the reader pool and return its typed selection.
+- * Deadlines stay with the caller, as on main: the wiki_search tool's 30 s deadline and
+- * turn cancellation arrive through `signal`; a caller that passes none waits for the scan.
+- */
+-export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
++async function runPoolTask<Task extends WikiPagePoolTask>(
+   task: Task,
+-  options: { signal?: AbortSignal } = {},
++  signal: AbortSignal | undefined,
+ ): Promise<Extract<WikiPageReadResult, { select: Task["select"] }>> {
+   const result = await resolvePool().run(task, {
+     inputBytes: estimateWikiPageReadBytes(task),
+-    ...(options.signal ? { signal: options.signal } : {}),
++    ...(signal ? { signal } : {}),
+   });
+   if (result.select === "refused") {
+     throw new FsSafeError(result.code, result.message);
+@@ -67,6 +98,74 @@ export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
+   return result as Extract<WikiPageReadResult, { select: Task["select"] }>;
+ }
+ 
++function* scanBatches(relativePaths: string[]): Generator<string[]> {
++  for (let start = 0; start < relativePaths.length; start += WIKI_SCAN_BATCH_PAGES) {
++    yield relativePaths.slice(start, start + WIKI_SCAN_BATCH_PAGES);
++  }
++}
++
++/**
++ * Run one whole-vault scan in the reader pool and return its typed selection. The
++ * vault is listed once, then read one batch per pool task, one batch at a time.
++ * Deadlines stay with the caller, as on main: the wiki_search tool's 30 s deadline and
++ * turn cancellation arrive through `signal`; a caller that passes none waits for the scan.
++ */
++export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
++  task: Task,
++  options: { signal?: AbortSignal } = {},
++): Promise<Extract<WikiPageScanResult, { select: Task["select"] }>> {
++  const { rootDir, visibility } = task;
++  const { signal } = options;
++  const relativePaths = task.relativePaths
++    ? excludeWikiPagePaths(task.relativePaths, task.excludePaths)
++    : (
++        await runPoolTask(
++          {
++            select: "list",
++            rootDir,
++            ...(task.excludePaths ? { excludePaths: task.excludePaths } : {}),
++          },
++          signal,
++        )
++      ).relativePaths;
++  type Selection = Extract<WikiPageScanResult, { select: Task["select"] }>;
++  if (task.select === "search") {
++    let results: WikiSearchResult[] = [];
++    for (const batch of scanBatches(relativePaths)) {
++      const { query, mode, maxResults } = task;
++      const read = await runPoolTask(
++        { select: "search", rootDir, visibility, relativePaths: batch, query, mode, maxResults },
++        signal,
++      );
++      // Each batch arrives sorted and cut to maxResults, and a page its batch cut already
++      // trails maxResults better pages. The sort is stable, so ties keep listing order
++      // exactly as one whole-vault sort does.
++      results = sortWikiSearchResults([...results, ...read.results]).slice(0, maxResults);
++    }
++    // SAFETY: This branch handles the search task, so the reply is its variant.
++    return { select: "search", results } as Selection;
++  }
++  const keys: WikiPageKey[] = [];
++  for (const batch of scanBatches(relativePaths)) {
++    const read = await runPoolTask(
++      { select: "keys", rootDir, visibility, relativePaths: batch },
++      signal,
++    );
++    keys.push(...read.keys);
++  }
++  // Resolve over the whole listing, then read the matched page on the calling thread
++  // like any other single-page read.
++  const match = resolveQueryableWikiPageByLookup(keys, task.lookup);
++  const { page } = match
++    ? await readWikiPagesTask(
++        { select: "page", rootDir, visibility, relativePaths: [match.relativePath] },
++        signal,
++      )
++    : { page: null };
++  // SAFETY: The only other scan task is a lookup, so the reply is its variant.
++  return { select: "lookup", page } as Selection;
++}
++
+ /** Plugin stop releases the workers; a read after the close settles recreates the pool. */
+ export async function closeMemoryWikiQueryReader(): Promise<void> {
+   const current = pool;

@@ -26,6 +26,20 @@ mkdir -p "$E/red" "$E/compat/log-diff"
     grep -E '✓|×|→|Tests ' "$E/red/red-$label-query-scheduling.log"
   done
   restore_plugin HEAD; git status --short
+  FIXED=832afc5b07d17847c16c8316b66a82db0b2b283b
+  log "CPU: fixed 64-page batch tasks ($FIXED) against the head, three alternating runs, GC traced"
+  mkdir -p "$E/cpu"
+  git diff 19353569c95d0e77c33b30bcf7b4c6bb097087cf "$FIXED" -- extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-pages.ts > "$E/cpu/fixed-batches-variant.diff"
+  for rep in 1 2 3; do
+    for tree in head fixed-batches; do
+      sha=$HEAD_SHA; [ $tree = fixed-batches ] && sha=$FIXED
+      restore_plugin "$sha"
+      node --trace-gc --max-old-space-size=8192 --import tsx "$E/harness.mts" search --vault ~/work/oss-166304-vault-10k --query "cobalt lantern ledger harbor" --out "$E/cpu/$tree-$rep.json" --label "$tree" > "$E/cpu/$tree-$rep.gc.log" 2>&1
+      W=$(grep -oE "^\[[0-9]+:0x[0-9a-f]+\]" "$E/cpu/$tree-$rep.gc.log" | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+      echo "$tree run $rep: $(node -e 'const j=require(process.argv[1]);console.log("processCpuMs",j.processCpuMs,"searchWallMs",j.searchWallMs,"workerHeapPeakMb",j.memoryMb.workerHeapUsedPeak)' "$E/cpu/$tree-$rep.json") busiest-isolate scavenges $(grep -F "$W" "$E/cpu/$tree-$rep.gc.log" | grep -c Scavenge) mark-compacts $(grep -F "$W" "$E/cpu/$tree-$rep.gc.log" | grep -c Mark-Compact) of-which-low-memory-notification $(grep -F "$W" "$E/cpu/$tree-$rep.gc.log" | grep -c 'low memory notification')"
+    done
+  done
+  restore_plugin HEAD; git status --short
   log "COMPAT: update_metadata on two fresh copies (base, head), log.jsonl diff with timestamps normalized"
   for tree in base head; do
     sha=$BASE; [ $tree = head ] && sha=$HEAD_SHA

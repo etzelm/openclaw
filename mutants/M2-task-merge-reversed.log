@@ -1,0 +1,58 @@
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-shared-compute.test.ts extensions/memory-wiki/src/query-reader.test.ts
+[test] starting test/vitest/vitest.extension-memory.config.ts
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+[vitest-workers] local cache hit after 2474ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 9bba3a2d08f7 in 2513ms (14604 inputs, 18662 outputs)
+ ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > yields a scan at its next checkpoint to a pool waiting for the only permit 957ms
+   → expected '[{"corpus":"wiki","path":"sources/pag…' to be '[{"corpus":"wiki","path":"sources/pag…' // Object.is equality
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 470ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 65ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 677ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments 265ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 484ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 634ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 435ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 444ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 65ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 74ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 119ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 96ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 421ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 405ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns no page when a lookup's match changes before it is read again 76ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 369ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > yields a scan at its next checkpoint to a pool waiting for the only permit
+AssertionError: expected '[{"corpus":"wiki","path":"sources/pag…' to be '[{"corpus":"wiki","path":"sources/pag…' // Object.is equality
+
+Expected: "[{"corpus":"wiki","path":"sources/page-0000.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger cobalt.","searchMode":"auto","id":"source.page-0"},{"corpus":"wiki","path":"sources/page-0001.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-1"},{"corpus":"wiki","path":"sources/page-0002.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-2"},{"corpus":"wiki","path":"sources/page-0003.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger cobalt.","searchMode":"auto","id":"source.page-3"},{"corpus":"wiki","path":"sources/page-0004.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-4"}]"
+Received: "[{"corpus":"wiki","path":"sources/page-0064.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-64"},{"corpus":"wiki","path":"sources/page-0065.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-65"},{"corpus":"wiki","path":"sources/page-0066.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger cobalt.","searchMode":"auto","id":"source.page-66"},{"corpus":"wiki","path":"sources/page-0067.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-67"},{"corpus":"wiki","path":"sources/page-0068.md","title":"Lantern","kind":"source","score":17,"snippet":"cobalt lantern ledger.","searchMode":"auto","id":"source.page-68"}]"
+
+ ❯ extensions/memory-wiki/src/query-shared-compute.test.ts:93:42
+     91|     ]);
+     92|     expect(new Set(events.slice(6))).toEqual(new Set(["checkpoint cont…
+     93|     expect(JSON.stringify(scan.results)).toBe(
+       |                                          ^
+     94|       JSON.stringify(await wholeVaultReference(rootDir, scanTask(rootD…
+     95|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 18 passed (19)
+   Start at  15:49:11
+   Duration  10.09s (transform 57%, tests 28%, import 11%, setup 4%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 11.59s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

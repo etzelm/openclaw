@@ -1,22 +1,22 @@
 
-=== phase 2 start; HEAD=832afc5b07d17847c16c8316b66a82db0b2b283b BASE=ebc4e6de603c5c1ce55086f13565e21feb1c297d
-2026-10-07T20:35:36Z
---- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
+=== phase 2 start; HEAD=af0d2a13c409aa86fa8b9635550df2d7330884c0 BASE=ebc4e6de603c5c1ce55086f13565e21feb1c297d
+2026-10-07T22:19:28Z
+--- load: 15:19  up 3 days, 23:16, 1 user, load averages: 5.75 4.68 4.41
 
 === CONTENTION on base main (the scan runs on the calling thread and takes no permit)
-2026-10-07T20:35:36Z
---- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
+2026-10-07T22:19:28Z
+--- load: 15:19  up 3 days, 23:16, 1 user, load averages: 5.75 4.68 4.41
 
 === CONTENTION (base) 10k
-2026-10-07T20:35:36Z
---- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
+2026-10-07T22:19:29Z
+--- load: 15:19  up 3 days, 23:16, 1 user, load averages: 5.75 4.68 4.41
     "limit": 1,
   "idleRetrievalMs": 1,
-  "scanWallMs": 13275,
+  "scanWallMs": 13443,
     "count": 12,
-    "p50": 7,
-    "p99": 14,
-    "max": 14,
+    "p50": 1,
+    "p99": 10,
+    "max": 10,
     "overMemorySearchDeadline30s": 0,
     "settledBeforeScanEnded": 12
 {
@@ -27,15 +27,15 @@
   "afterCount": 10,
 
 === CONTENTION (base) 20k
-2026-10-07T20:36:07Z
---- load: 13:36  up 3 days, 21:33, 1 user, load averages: 4.25 3.95 3.96
+2026-10-07T22:20:01Z
+--- load: 15:20  up 3 days, 23:16, 1 user, load averages: 4.19 4.41 4.32
     "limit": 1,
   "idleRetrievalMs": 2,
-  "scanWallMs": 53451,
+  "scanWallMs": 53754,
     "count": 49,
-    "p50": 5,
-    "p99": 31,
-    "max": 31,
+    "p50": 12,
+    "p99": 34,
+    "max": 34,
     "overMemorySearchDeadline30s": 0,
     "settledBeforeScanEnded": 49
 {
@@ -46,8 +46,8 @@
   "afterCount": 10,
 
 === 10K SEARCH BEFORE (base main)
-2026-10-07T20:37:59Z
---- load: 13:37  up 3 days, 21:34, 1 user, load averages: 2.78 3.50 3.78
+2026-10-07T22:21:53Z
+--- load: 15:21  up 3 days, 23:18, 1 user, load averages: 3.04 3.90 4.13
 exit=0
 {
   "comparison": "JSON.stringify of every result object, all fields, in order",
@@ -57,19 +57,19 @@ exit=0
   "afterCount": 10,
 
 === 10K CONCURRENT BEFORE-PR (single-worker variant a5af25c3924b21935856b4ff9f4e0be08d071a89)
-2026-10-07T20:38:29Z
---- load: 13:38  up 3 days, 21:35, 1 user, load averages: 2.53 3.38 3.72
+2026-10-07T22:22:24Z
+--- load: 15:22  up 3 days, 23:19, 1 user, load averages: 3.62 3.93 4.13
 exit=0
 {
   "label": "before-pr",
   "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T20:38:58.224Z",
+  "capturedAt": "2026-10-07T22:22:54.245Z",
   "vault": {
     "path": "~/work/oss-166304-vault-10k",
     "compiled": false
   },
   "query": "cobalt lantern ledger harbor",
-  "scanWallMs": 12774,
+  "scanWallMs": 13133,
   "scanResultCount": 10,
   "scanError": null,
   "reads": {
@@ -79,54 +79,54 @@ exit=0
     "allFound": true
   },
   "readMs": {
-    "p50": 7300,
-    "p99": 12275,
-    "max": 12275,
-    "min": 2804
+    "p50": 7657,
+    "p99": 12633,
+    "max": 12633,
+    "min": 3161
   }
 }
 
 === budget base cli-search
-2026-10-07T20:38:58Z
---- load: 13:38  up 3 days, 21:35, 1 user, load averages: 3.01 3.42 3.73
+2026-10-07T22:22:54Z
+--- load: 15:22  up 3 days, 23:19, 1 user, load averages: 3.70 3.93 4.12
 exit=0
     "path": "~/work/oss-166304-vault-big"
   "outcome": "resolved",
-  "wallMs": 53628,
+  "wallMs": 53665,
   "error": null,
   "resultCount": 10
 
 === budget base cli-get
-2026-10-07T20:39:54Z
---- load: 13:39  up 3 days, 21:36, 1 user, load averages: 3.51 3.50 3.74
+2026-10-07T22:23:51Z
+--- load: 15:23  up 3 days, 23:20, 1 user, load averages: 3.33 3.82 4.07
 exit=0
     "path": "~/work/oss-166304-vault-big"
   "outcome": "resolved",
-  "wallMs": 49023,
+  "wallMs": 49880,
   "error": null,
     "path": "entities/page-14321.md",
 
 === budget base tool
-2026-10-07T20:40:46Z
---- load: 13:40  up 3 days, 21:37, 1 user, load averages: 3.45 3.47 3.71
+2026-10-07T22:24:43Z
+--- load: 15:24  up 3 days, 23:21, 1 user, load averages: 2.70 3.58 3.97
 exit=0
     "path": "~/work/oss-166304-vault-big"
   "outcome": "rejected",
-  "wallMs": 30049,
+  "wallMs": 30040,
   "error": "Error: wiki_search timed out after 30s"
 
 === budget pool-timeout cli-search
-2026-10-07T20:41:19Z
---- load: 13:41  up 3 days, 21:38, 1 user, load averages: 2.74 3.29 3.63
+2026-10-07T22:25:16Z
+--- load: 15:25  up 3 days, 23:22, 1 user, load averages: 2.72 3.51 3.93
 exit=0
     "path": "~/work/oss-166304-vault-big"
   "outcome": "rejected",
-  "wallMs": 30016,
+  "wallMs": 30013,
   "error": "Error: wiki_search timed out after 30s"
 
 === budget pool-timeout cli-get
-2026-10-07T20:41:52Z
---- load: 13:41  up 3 days, 21:38, 1 user, load averages: 2.53 3.18 3.58
+2026-10-07T22:25:49Z
+--- load: 15:25  up 3 days, 23:22, 1 user, load averages: 3.48 3.61 3.94
 exit=0
     "path": "~/work/oss-166304-vault-big"
   "outcome": "rejected",
@@ -134,12 +134,12 @@ exit=0
   "error": "Error: wiki page lookup timed out after 30s"
 
 === budget pool-timeout tool
-2026-10-07T20:42:25Z
---- load: 13:42  up 3 days, 21:39, 1 user, load averages: 3.09 3.24 3.58
+2026-10-07T22:26:22Z
+--- load: 15:26  up 3 days, 23:23, 1 user, load averages: 2.83 3.44 3.87
 exit=0
     "path": "~/work/oss-166304-vault-big"
   "outcome": "rejected",
-  "wallMs": 30071,
+  "wallMs": 30041,
   "error": "Error: wiki_search timed out after 30s"
 {
   "comparison": "JSON.stringify of every result object, all fields, in order",
@@ -149,18 +149,18 @@ exit=0
   "afterCount": 10,
 
 === COMPAT base on copies of the base-compiled vault
-2026-10-07T20:42:58Z
---- load: 13:42  up 3 days, 21:39, 1 user, load averages: 3.51 3.34 3.61
+2026-10-07T22:26:55Z
+--- load: 15:26  up 3 days, 23:23, 1 user, load averages: 2.96 3.41 3.84
 base cli-search exit=0
     "path": "~/work/oss-166304-vault-compat-r4-base"
   "outcome": "resolved",
-  "wallMs": 2017,
+  "wallMs": 1957,
   "error": null,
   "resultCount": 10
 base cli-get exit=0
     "path": "~/work/oss-166304-vault-compat-r4-base"
   "outcome": "resolved",
-  "wallMs": 1716,
+  "wallMs": 1786,
   "error": null,
     "path": "concepts/page-1234.md",
 base queries left the tree identical
@@ -173,28 +173,28 @@ head queries left the tree identical
   "afterCount": 10,
 base cli-apply exit=0
   "outcome": "resolved",
-  "wallMs": 60509,
+  "wallMs": 92348,
   "error": null,
     "changed": true,
     "pagePath": "concepts/page-1234.md",
 --- update_metadata, timestamps normalized, base versus head (same sitting):
 5c5
-< ee2d33c5129b6ef654b2ee95bb857ac382f12944b64365fd54e13d732878a925  ./.openclaw-wiki/log.jsonl
+< af4a741cd0b3eb0b5a654071d7a8a8d45c8c9fd394e398b735055334024353e9  ./.openclaw-wiki/log.jsonl
 ---
-> ac5484c3d8659e39bd4d22c82ae40b941277111d4dd1e3149757d55b999197bb  ./.openclaw-wiki/log.jsonl
+> 3c5267b168392264b6d1e6d73c63505d8caba13da5cb600d3922aecff2a13383  ./.openclaw-wiki/log.jsonl
 (empty above means no change)
 
 === BUILD: root bundled build (pnpm build)
-2026-10-07T20:44:14Z
---- load: 13:44  up 3 days, 21:41, 1 user, load averages: 5.03 4.14 3.91
+2026-10-07T22:28:44Z
+--- load: 15:28  up 3 days, 23:25, 1 user, load averages: 3.15 3.76 3.96
 pnpm build exit=0
-[build-all] phase timings: total 55s; slowest tsdown-unified 15.3s; ui:build 7.89s; check-cli-bootstrap-imports 6.95s; write-unified-entry-dts 6.40s; runtime-postbuild 4.34s; write-cli-startup-metadata (reused) 3.55s; external-plugins:local-dist 2.94s; tsdown-ai (reused) 1.51s; tsdown-packages (reused) 1.48s; plugins:assets:build 1.32s; plugins:assets:copy 1.18s; check-plugin-sdk-exports 950ms; build-stamp 904ms; runtime-postbuild-stamp 179ms; write-build-info 94ms; native-protocol 49ms
--rw-r--r--  1 openclaw  openclaw  745 Oct  7 13:44 dist/extensions/memory-wiki/src/query-reader.worker.js
+[build-all] phase timings: total 56s; slowest tsdown-unified 15.7s; ui:build 7.94s; check-cli-bootstrap-imports 7.19s; write-unified-entry-dts 6.28s; runtime-postbuild 4.41s; write-cli-startup-metadata (reused) 3.58s; external-plugins:local-dist 3s; tsdown-ai (reused) 1.59s; tsdown-packages (reused) 1.54s; plugins:assets:build 1.34s; plugins:assets:copy 1.22s; check-plugin-sdk-exports 945ms; build-stamp 910ms; runtime-postbuild-stamp 174ms; write-build-info 93ms; native-protocol 49ms
+-rw-r--r--  1 openclaw  openclaw  944 Oct  7 15:29 dist/extensions/memory-wiki/src/query-reader.worker.js
 --- worker imports
 from "../../../fs-safe-RQzDLrgq.mjs"
 from "../../../worker-task-server-DSC0g5JY.mjs"
-from "../../../query-pages-wDN1eC6i.mjs"
+from "../../../query-pages-Cor8G9XG.mjs"
 
 === PHASE 2 DONE
-2026-10-07T20:45:14Z
---- load: 13:45  up 3 days, 21:42, 1 user, load averages: 15.95 7.30 5.10
+2026-10-07T22:29:44Z
+--- load: 15:29  up 3 days, 23:26, 1 user, load averages: 9.85 5.35 4.52

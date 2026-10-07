@@ -1,13 +1,17 @@
-HEAD=832afc5b07d17847c16c8316b66a82db0b2b283b 2026-10-07T20:57:26Z
-M1-merge-order-reversed: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
-      Tests  1 failed | 4 passed (5)
-runs a scan as bounded batch tasks, one at a time, with whole-vault results 173ms
-M2-one-unbatched-task: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
-      Tests  2 failed | 3 passed (5)
-admits another shared-compute pool between scan batches on a one-permit host 855ms
-runs a scan as bounded batch tasks, one at a time, with whole-vault results 120ms
-M3-parallel-batches: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
-      Tests  2 failed | 3 passed (5)
-admits another shared-compute pool between scan batches on a one-permit host 836ms
-runs a scan as bounded batch tasks, one at a time, with whole-vault results 429ms
+HEAD=af0d2a13c409aa86fa8b9635550df2d7330884c0 2026-10-07T22:48:44Z
+M1-segment-merge-reversed: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 18 passed (19)
+reads an uncontended scan as one task that checkpoints between segments 213ms
+M2-task-merge-reversed: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 18 passed (19)
+yields a scan at its next checkpoint to a pool waiting for the only permit 957ms
+M3-host-never-yields: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 18 passed (19)
+yields a scan at its next checkpoint to a pool waiting for the only permit 848ms
+M4-worker-ignores-yield: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 18 passed (19)
+yields a scan at its next checkpoint to a pool waiting for the only permit 845ms
+M5-no-lookup-recheck: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 18 passed (19)
+returns no page when a lookup's match changes before it is read again 79ms
 MUTANTS DONE

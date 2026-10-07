@@ -14,12 +14,12 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host 434ms
+ ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > yields a scan at its next checkpoint to a pool waiting for the only permit 422ms
    → expected [ 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
- FAIL   extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host
+ FAIL   extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > yields a scan at its next checkpoint to a pool waiting for the only permit
 AssertionError: expected [ 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
 
 - Expected
@@ -29,24 +29,24 @@ AssertionError: expected [ 'wiki search', …(2) ] to deeply equal [ 'wiki list'
 -   "wiki list",
     "wiki search",
     "retrieval queued",
+-   "checkpoint yield",
     "retrieval admitted",
--   "wiki search",
 -   "wiki search",
   ]
 
- ❯ extensions/memory-wiki/src/query-shared-compute.test.ts:66:20
-     64|
-     65|     // Without the release between batches the retrieval task waited f…
-     66|     expect(events).toEqual([
-       |                    ^
-     67|       "wiki list",
-     68|       "wiki search",
+ ❯ extensions/memory-wiki/src/query-shared-compute.test.ts:84:32
+     82|     // The first checkpoint yields; the retrieval task takes the permi…
+     83|     // resubmits the unread pages, and the resumed scan has nothing le…
+     84|     expect(events.slice(0, 6)).toEqual([
+       |                                ^
+     85|       "wiki list",
+     86|       "wiki search",
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 
 
  Test Files  1 failed (1)
       Tests  1 failed (1)
-   Start at  13:17:01
-   Duration  1.23s (tests 41%, transform 23%, setup 21%, import 14%)
+   Start at  14:57:32
+   Duration  1.28s (tests 39%, transform 23%, setup 22%, import 16%)
 

@@ -1,17 +1,18 @@
 
-=== post phase start; HEAD=832afc5b07d17847c16c8316b66a82db0b2b283b
-2026-10-07T20:58:15Z
---- load: 13:58  up 3 days, 21:55, 1 user, load averages: 2.92 3.18 3.86
+=== post phase start; HEAD=af0d2a13c409aa86fa8b9635550df2d7330884c0
+2026-10-07T22:50:10Z
+--- load: 15:50  up 3 days, 23:47, 1 user, load averages: 3.77 3.06 3.30
 
 === RED: head extensions/memory-wiki/src/query-scheduling.test.ts against the first-draft variant (a5af25c3924b21935856b4ff9f4e0be08d071a89)
-2026-10-07T20:58:15Z
---- load: 13:58  up 3 days, 21:55, 1 user, load averages: 2.92 3.18 3.86
+2026-10-07T22:50:10Z
+--- load: 15:50  up 3 days, 23:47, 1 user, load averages: 3.77 3.06 3.30
 M  extensions/memory-wiki/README.md
 M  extensions/memory-wiki/src/cli.ts
 M  extensions/memory-wiki/src/gateway.ts
 M  extensions/memory-wiki/src/query-pages.ts
 M  extensions/memory-wiki/src/query-reader.test.ts
 M  extensions/memory-wiki/src/query-reader.ts
+M  extensions/memory-wiki/src/query-reader.worker.ts
 M  extensions/memory-wiki/src/query-scoring.ts
 D  extensions/memory-wiki/src/query-shared-compute.test.ts
 M  extensions/memory-wiki/src/query.abort.test.ts
@@ -19,24 +20,25 @@ M  extensions/memory-wiki/src/query.reads.test.ts
 M  extensions/memory-wiki/src/query.ts
 M  extensions/memory-wiki/src/tool.ts
 exit=1
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 359ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 358ms
    → expected [ 'search', 'page' ] to deeply equal [ 'search' ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 64ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 58ms
    → expected [ undefined, undefined ] to deeply equal [ undefined, undefined, …(2) ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 118ms
-   → expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 343ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments 131ms
+   → expected [ 'search', 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'list', …(3) ]
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 348ms
    → expected 1 to be 2 // Object.is equality
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
       Tests  4 failed (4)
 
 === RED: head extensions/memory-wiki/src/query-scheduling.test.ts against the pool-timeout variant (492827c8100fcb88a9f88e7c565311c798cfa65a)
-2026-10-07T20:58:24Z
---- load: 13:58  up 3 days, 21:55, 1 user, load averages: 5.41 3.69 4.03
+2026-10-07T22:50:19Z
+--- load: 15:50  up 3 days, 23:47, 1 user, load averages: 3.66 3.06 3.30
 M  extensions/memory-wiki/README.md
 M  extensions/memory-wiki/src/query-pages.ts
 M  extensions/memory-wiki/src/query-reader.test.ts
 M  extensions/memory-wiki/src/query-reader.ts
+M  extensions/memory-wiki/src/query-reader.worker.ts
 M  extensions/memory-wiki/src/query-scoring.ts
 D  extensions/memory-wiki/src/query-shared-compute.test.ts
 M  extensions/memory-wiki/src/query.abort.test.ts
@@ -44,23 +46,33 @@ M  extensions/memory-wiki/src/query.reads.test.ts
 M  extensions/memory-wiki/src/query.ts
 M  extensions/memory-wiki/src/tool.ts
 exit=1
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 370ms
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 54ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 373ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 56ms
    → expected [ 30000, 30000 ] to deeply equal [ undefined, undefined, …(2) ]
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 113ms
-   → expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 368ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments 128ms
+   → expected [ 'search', 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'list', …(3) ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 373ms
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
       Tests  2 failed | 2 passed (4)
 
+=== CPU: fixed 64-page batch tasks (832afc5b07d17847c16c8316b66a82db0b2b283b) against the head, three alternating runs, GC traced
+2026-10-07T22:50:27Z
+--- load: 15:50  up 3 days, 23:47, 1 user, load averages: 3.60 3.06 3.30
+head run 1: processCpuMs 14761 searchWallMs 13183 workerHeapPeakMb 99 busiest-isolate scavenges 1318 mark-compacts 35 of-which-low-memory-notification 4
+fixed-batches run 1: processCpuMs 17496 searchWallMs 13938 workerHeapPeakMb 100.1 busiest-isolate scavenges 2357 mark-compacts 83 of-which-low-memory-notification 28
+head run 2: processCpuMs 14791 searchWallMs 13217 workerHeapPeakMb 101 busiest-isolate scavenges 1326 mark-compacts 32 of-which-low-memory-notification 2
+fixed-batches run 2: processCpuMs 17111 searchWallMs 13856 workerHeapPeakMb 103.4 busiest-isolate scavenges 2362 mark-compacts 81 of-which-low-memory-notification 28
+head run 3: processCpuMs 14815 searchWallMs 13294 workerHeapPeakMb 102.6 busiest-isolate scavenges 1325 mark-compacts 33 of-which-low-memory-notification 2
+fixed-batches run 3: processCpuMs 17631 searchWallMs 14013 workerHeapPeakMb 94.5 busiest-isolate scavenges 2925 mark-compacts 129 of-which-low-memory-notification 42
+
 === COMPAT: update_metadata on two fresh copies (base, head), log.jsonl diff with timestamps normalized
-2026-10-07T20:58:32Z
---- load: 13:58  up 3 days, 21:55, 1 user, load averages: 5.45 3.75 4.05
+2026-10-07T22:53:27Z
+--- load: 15:53  up 3 days, 23:50, 1 user, load averages: 2.65 2.94 3.21
 base apply exit=0
 head apply exit=0
 diff exit=1
        6 ~/work/oss-166304-r4/compat/log-diff/log-jsonl.ts-normalized.diff
 
 === POST DONE
-2026-10-07T21:00:44Z
---- load: 14:00  up 3 days, 21:57, 1 user, load averages: 4.19 4.13 4.18
+2026-10-07T22:55:41Z
+--- load: 15:55  up 3 days, 23:52, 1 user, load averages: 5.41 4.46 3.81

@@ -1,0 +1,13 @@
+diff --git a/extensions/memory-wiki/src/query-pages.ts b/extensions/memory-wiki/src/query-pages.ts
+index 2bb112ce610..370e9128738 100644
+--- a/extensions/memory-wiki/src/query-pages.ts
++++ b/extensions/memory-wiki/src/query-pages.ts
+@@ -223,7 +223,7 @@ async function runWikiPageReadTask(
+         // A stable sort of the running top followed by the segment keeps ties in listing
+         // order, as one whole-list sort does, and a page cut here already trails
+         // maxResults better pages.
+-        results = sortWikiSearchResults([...results, ...found]).slice(0, task.maxResults);
++        results = sortWikiSearchResults([...found, ...results]).slice(0, task.maxResults);
+       } else {
+         const found = await readQueryableWikiPagesByPaths(
+           task.rootDir,

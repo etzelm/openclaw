@@ -1,0 +1,62 @@
+diff --git a/docs/plugins/memory-wiki.md b/docs/plugins/memory-wiki.md
+index d795c50f0cc..112fb278599 100644
+--- a/docs/plugins/memory-wiki.md
++++ b/docs/plugins/memory-wiki.md
+@@ -302,12 +302,11 @@ The page scan itself (reading, parsing and scoring every page when the compiled
+ digest cannot narrow the search, resolving `wiki_get` basename and id lookups,
+ and `wiki_apply` metadata updates) runs in a plugin-owned pool of two worker
+ threads, so the gateway event loop stays responsive while a large vault is
+-scanned; a third concurrent scan waits for a free worker. Every 64 pages a scan
+-checks whether another task is waiting for its shared compute slot or its
+-worker, such as `memory_search` retrieval on a small host, and if so hands it
+-over and resumes afterwards instead of making it wait for the whole scan. The
+-pool adds no
+-deadline of its own: `wiki_search` keeps its 30-second deadline and turn
++scanned. Every 64 pages a scan checks whether another task is waiting for its
++shared compute slot or its worker, such as `memory_search` retrieval on a small
++host or a third concurrent scan, and if so hands it over and resumes afterwards
++instead of making it wait for the whole scan. The pool adds no deadline of its
++own: `wiki_search` keeps its 30-second deadline and turn
+ cancellation, and CLI, RPC and lookup scans run to completion as before.
+ Single-page reads (`wiki_get` by exact path or claim id) stay on the calling
+ thread and never wait behind a scan.
+diff --git a/extensions/memory-wiki/README.md b/extensions/memory-wiki/README.md
+index a9cf705b840..0282896e16b 100644
+--- a/extensions/memory-wiki/README.md
++++ b/extensions/memory-wiki/README.md
+@@ -241,4 +241,4 @@ unknown ids fail in multi-agent setups.
+ - Rollback quarantine clears immediately for an in-process compile. After a separate compiler process publishes, refresh the plugin lifecycle so the daemon can validate that durable publication.
+ - Pre-publication-epoch cache rows are rebuildable misses, not migrated state; the next compile replaces them.
+ - Obsidian CLI support requires the official `obsidian` CLI to be installed and available on `PATH`.
+-- Whole-vault scans for `wiki_search`, `wiki_get` basename and id lookups and `wiki_apply` metadata updates run in a plugin-owned pool of two worker threads, handing their shared compute slot to a waiting task at the next 64-page checkpoint (deadlines stay with the caller: `wiki_search` keeps its 30-second deadline, other scans run to completion as before); single-page reads (`wiki_get` by exact path or claim id) stay on the calling thread, and the gateway main thread only merges returned results and reads a lookup's one matched page, so the gateway event loop stays responsive and short reads never wait behind a scan.
++- Whole-vault scans for `wiki_search`, `wiki_get` basename and id lookups and `wiki_apply` metadata updates run in a plugin-owned pool of two worker threads, handing their shared compute slot or worker to a waiting task at the next 64-page checkpoint (deadlines stay with the caller: `wiki_search` keeps its 30-second deadline, other scans run to completion as before); single-page reads (`wiki_get` by exact path or claim id) stay on the calling thread, and the gateway main thread only merges returned results and reads a lookup's one matched page, so the gateway event loop stays responsive and short reads never wait behind a scan.
+diff --git a/extensions/memory-wiki/src/query-reader.ts b/extensions/memory-wiki/src/query-reader.ts
+index 2316c2a408b..641e89c673c 100644
+--- a/extensions/memory-wiki/src/query-reader.ts
++++ b/extensions/memory-wiki/src/query-reader.ts
+@@ -1,3 +1,4 @@
++import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+ // Host side of the query reader pool: two lazily created workers that own the
+ // whole-vault scans (search and lookup) for wiki queries. Single-page reads stay
+ // on the calling thread (query.ts) so they never wait behind a scan.
+@@ -28,7 +29,7 @@ import {
+  * The watchdog on a checkpoint reply, which the pool requires: the timer maximum, so a scan
+  * keeps no deadline of its own. Caller deadlines and cancellation arrive through `signal`.
+  */
+-const WIKI_SCAN_CHECKPOINT_WATCHDOG_MS = 2_147_000_000;
++const WIKI_SCAN_CHECKPOINT_WATCHDOG_MS = MAX_TIMER_TIMEOUT_MS;
+ 
+ /**
+  * Answer a scan's checkpoint. The pool aborts `yieldSignal` when another task waits for this
+@@ -124,8 +125,9 @@ async function runPoolTask<Task extends WikiPagePoolTask>(
+ /**
+  * Run one whole-vault scan in the reader pool and return its typed selection. The vault
+  * is listed once, then read by one task that yields at a checkpoint when another task
+- * waits; the host resubmits the unread rest until every page is read. Deadlines stay with the caller, as on main: the wiki_search tool's 30 s deadline and
+- * turn cancellation arrive through `signal`; a caller that passes none waits for the scan.
++ * waits; the host resubmits the unread rest until every page is read. Deadlines stay
++ * with the caller, as on main: the wiki_search tool's 30 s deadline and turn
++ * cancellation arrive through `signal`; a caller that passes none waits for the scan.
+  */
+ export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
+   task: Task,

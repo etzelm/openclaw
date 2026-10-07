@@ -1,0 +1,13 @@
+diff --git a/extensions/memory-wiki/src/query-reader.ts b/extensions/memory-wiki/src/query-reader.ts
+index 2316c2a408b..6d412462d06 100644
+--- a/extensions/memory-wiki/src/query-reader.ts
++++ b/extensions/memory-wiki/src/query-reader.ts
+@@ -192,7 +192,7 @@ export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
+         signal,
+       )
+     : { page: null };
+-  const current = page && resolveQueryableWikiPageByLookup([page], task.lookup);
++  const current = page;
+   // SAFETY: The only other scan task is a lookup, so the reply is its variant.
+   return { select: "lookup", page: current ?? null } as Selection;
+ }

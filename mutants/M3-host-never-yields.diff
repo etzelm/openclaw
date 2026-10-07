@@ -1,0 +1,13 @@
+diff --git a/extensions/memory-wiki/src/query-reader.ts b/extensions/memory-wiki/src/query-reader.ts
+index 2316c2a408b..47646b3ec1b 100644
+--- a/extensions/memory-wiki/src/query-reader.ts
++++ b/extensions/memory-wiki/src/query-reader.ts
+@@ -41,7 +41,7 @@ async function answerScanCheckpoint(
+   { yieldSignal }: { yieldSignal: AbortSignal },
+ ): Promise<WorkerTaskResponse> {
+   return {
+-    input: yieldSignal.aborted ? WIKI_SCAN_YIELD : null,
++    input: null,
+     timeoutMs: WIKI_SCAN_CHECKPOINT_WATCHDOG_MS,
+   };
+ }

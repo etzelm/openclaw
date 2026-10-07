@@ -1,0 +1,13 @@
+diff --git a/extensions/memory-wiki/src/query-reader.ts b/extensions/memory-wiki/src/query-reader.ts
+index 2316c2a408b..604be14d906 100644
+--- a/extensions/memory-wiki/src/query-reader.ts
++++ b/extensions/memory-wiki/src/query-reader.ts
+@@ -166,7 +166,7 @@ export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
+       );
+       // Each task returns its top maxResults in order; merging it after the earlier tasks'
+       // with a stable sort keeps listing order among ties, as the worker's own merge does.
+-      results = sortWikiSearchResults([...results, ...read.results]).slice(0, maxResults);
++      results = sortWikiSearchResults([...read.results, ...results]).slice(0, maxResults);
+       offset += read.readPages;
+     } while (offset < relativePaths.length);
+     // SAFETY: This branch handles the search task, so the reply is its variant.

@@ -1,0 +1,68 @@
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-shared-compute.test.ts extensions/memory-wiki/src/query-reader.test.ts
+[test] starting test/vitest/vitest.extension-memory.config.ts
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+[vitest-workers] local cache hit after 2520ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 2bddc37e40e5 in 2562ms (14604 inputs, 18662 outputs)
+ ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > yields a scan at its next checkpoint to a pool waiting for the only permit 845ms
+   → expected [ 'wiki list', 'wiki search', …(4) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 454ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 679ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > reads an uncontended scan as one task that checkpoints between segments 263ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 471ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 630ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 488ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 418ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 54ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 54ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 64ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 115ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 127ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 66ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 412ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 376ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns no page when a lookup's match changes before it is read again 84ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 380ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > yields a scan at its next checkpoint to a pool waiting for the only permit
+AssertionError: expected [ 'wiki list', 'wiki search', …(4) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
+
+- Expected
++ Received
+
+  [
+    "wiki list",
+    "wiki search",
+    "retrieval queued",
+    "checkpoint yield",
++   "checkpoint yield",
+    "retrieval admitted",
+-   "wiki search",
+  ]
+
+ ❯ extensions/memory-wiki/src/query-shared-compute.test.ts:84:32
+     82|     // The first checkpoint yields; the retrieval task takes the permi…
+     83|     // resubmits the unread pages, and the resumed scan has nothing le…
+     84|     expect(events.slice(0, 6)).toEqual([
+       |                                ^
+     85|       "wiki list",
+     86|       "wiki search",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 18 passed (19)
+   Start at  15:49:35
+   Duration  10.19s (transform 57%, tests 27%, import 12%, setup 4%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 11.71s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

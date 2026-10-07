@@ -14,35 +14,37 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 534ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 629ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 384ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 455ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 55ms
- ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 55ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 558ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 644ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 479ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 438ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 53ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 53ms
    → undefined is not iterable (cannot read property Symbol(Symbol.iterator))
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 75ms
- ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 111ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 64ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 115ms
    → promise resolved "{ select: 'page', page: { …(33) } }" instead of rejecting
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 120ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 72ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 364ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 360ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 331ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 124ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 65ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 384ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 349ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns no page when a lookup's match changes before it is read again 76ms
+   → expected { …(33) } to be null
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 348ms
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph
 TypeError: undefined is not iterable (cannot read property Symbol(Symbol.iterator))
- ❯ extensions/memory-wiki/src/query-reader.test.ts:262:23
-    260|
-    261|     expect(search.results.map((result) => result.path)).toContain("ent…
-    262|     expect(keys.keys).toContainEqual({ relativePath: "entities/keeper.…
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:263:23
+    261|
+    262|     expect(search.results.map((result) => result.path)).toContain("ent…
+    263|     expect(keys.keys).toContainEqual({ relativePath: "entities/keeper.…
        |                       ^
-    263|     expect(extractLinks).not.toHaveBeenCalled();
-    264|   });
+    264|     expect(extractLinks).not.toHaveBeenCalled();
+    265|   });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
 
  FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading
 AssertionError: promise resolved "{ select: 'page', page: { …(33) } }" instead of rejecting
@@ -54,7 +56,7 @@ AssertionError: promise resolved "{ select: 'page', page: { …(33) } }" instead
 -   "message": "rejected promise",
 + {
 +   "page": {
-+     "absolutePath": "<tmp>/concepts/non-ascii.md",
++     "absolutePath": "/private<tmp>/concepts/non-ascii.md",
 +     "aliases": [],
 +     "bestUsedFor": [],
 +     "bridgeAgentIds": [],
@@ -112,19 +114,162 @@ AssertionError: promise resolved "{ select: 'page', page: { …(33) } }" instead
 +   "select": "page",
   }
 
- ❯ extensions/memory-wiki/src/query-reader.test.ts:305:6
-    303|     await expect(
-    304|       readWikiPagesTask({ rootDir, relativePaths, visibility: null, se…
-    305|     ).rejects.toMatchObject({
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:306:6
+    304|     await expect(
+    305|       readWikiPagesTask({ rootDir, relativePaths, visibility: null, se…
+    306|     ).rejects.toMatchObject({
        |      ^
-    306|       name: "FsSafeError",
-    307|       code: expect.stringMatching(/symlink|path-mismatch/u),
+    307|       name: "FsSafeError",
+    308|       code: expect.stringMatching(/symlink|path-mismatch/u),
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns no page when a lookup's match changes before it is read again
+AssertionError: expected { …(33) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "absolutePath": "/private<tmp>/sources/page-4.md",
+  "aliases": [],
+  "bestUsedFor": [],
+  "bridgeAgentIds": [],
+  "bridgeRelativePath": undefined,
+  "bridgeWorkspaceDir": undefined,
+  "canonicalId": undefined,
+  "claims": [
+    {
+      "confidence": 0.4,
+      "evidence": [
+        {
+          "kind": "source",
+          "note": "tally",
+          "sourceId": "source.page-4",
+        },
+      ],
+      "id": "claim.page-4.a",
+      "status": "contested",
+      "text": "Lantern ledger entry 4 records the harbor tally.",
+    },
+    {
+      "evidence": [],
+      "id": "claim.page-4.b",
+      "status": "supported",
+      "text": "Cobalt note 4.",
+    },
+  ],
+  "confidence": undefined,
+  "contradictions": [],
+  "entityType": undefined,
+  "hasFrontmatter": true,
+  "id": "source.page-4",
+  "kind": "source",
+  "lastRefreshedAt": undefined,
+  "linkTargets": [],
+  "notEnoughFor": [],
+  "pageType": "source",
+  "parsed": {
+    "body": "
+# Harbor ledger 4
+
+Lantern ledger body 4 cobalt cobalt cobalt cobalt 
+<!-- openclaw:wiki:related:start -->
+related lantern
+<!-- openclaw:wiki:related:end -->
+",
+    "frontmatter": {
+      "aliases": [],
+      "claims": [
+        {
+          "confidence": 0.4,
+          "evidence": [
+            {
+              "kind": "source",
+              "note": "tally",
+              "sourceId": "source.page-4",
+            },
+          ],
+          "id": "claim.page-4.a",
+          "status": "contested",
+          "text": "Lantern ledger entry 4 records the harbor tally.",
+        },
+        {
+          "id": "claim.page-4.b",
+          "status": "supported",
+          "text": "Cobalt note 4.",
+        },
+      ],
+      "id": "source.page-4",
+      "pageType": "source",
+      "sourceIds": [
+        "source.page-5",
+      ],
+      "title": "Harbor ledger 4",
+      "updatedAt": "2026-05-01T00:00:00.000Z",
+    },
+    "hasFrontmatter": true,
+  },
+  "personCard": undefined,
+  "privacyTier": undefined,
+  "provenanceMode": undefined,
+  "questions": [],
+  "raw": "---
+pageType: source
+id: source.page-4
+title: Harbor ledger 4
+sourceIds:
+  - source.page-5
+aliases: []
+updatedAt: 2026-05-01T00:00:00.000Z
+claims:
+  - id: claim.page-4.a
+    text: Lantern ledger entry 4 records the harbor tally.
+    status: contested
+    confidence: 0.4
+    evidence:
+      - kind: source
+        sourceId: source.page-4
+        note: tally
+  - id: claim.page-4.b
+    text: Cobalt note 4.
+    status: supported
+---
+
+# Harbor ledger 4
+
+Lantern ledger body 4 cobalt cobalt cobalt cobalt 
+<!-- openclaw:wiki:related:start -->
+related lantern
+<!-- openclaw:wiki:related:end -->
+",
+  "relationships": [],
+  "relativePath": "sources/page-4.md",
+  "sourceIds": [
+    "source.page-5",
+  ],
+  "sourcePath": undefined,
+  "sourceType": undefined,
+  "title": "Harbor ledger 4",
+  "unsafeLocalConfiguredPath": undefined,
+  "unsafeLocalRelativePath": undefined,
+  "updatedAt": "2026-05-01T00:00:00.000Z",
+}
+
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:460:23
+    458|     });
+    459|
+    460|     expect(byId.page).toBeNull();
+       |                       ^
+    461|     expect(byPath.page?.relativePath).toBe("sources/page-4.md");
+    462|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
 
 
  Test Files  1 failed (1)
-      Tests  2 failed | 11 passed (13)
-   Start at  13:17:14
-   Duration  6.31s (tests 58%, transform 22%, import 16%, setup 4%)
+      Tests  3 failed | 11 passed (14)
+   Start at  14:57:46
+   Duration  6.57s (tests 59%, transform 21%, import 16%, setup 4%)
 
