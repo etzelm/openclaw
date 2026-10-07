@@ -14,21 +14,21 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 87ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 225ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 48ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 47ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 88ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 219ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 45ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 48ms
  ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 96ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 53ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 248ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 289ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 283ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 55ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 63ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 64ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 240ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 276ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 292ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 53ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 62ms
  ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 115ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 341ms
- ×  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 63ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 346ms
+ ×  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 61ms
    → expected "scanWikiPageSummary" to not be called at all, but actually been called 4 times
 
 Received:
@@ -37,19 +37,19 @@ Received:
 
     Array [
       Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/concepts/beta.md",
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/sources/alpha.md",
         "includeLinks": false,
         "raw": "---
-    pageType: concept
-    id: concept.beta
-    title: Beta
+    pageType: source
+    id: source.alpha
+    title: Alpha
     ---
     
-    # Beta
+    # Alpha
     
-    another readable line
+    readable line
     ",
-        "relativePath": "concepts/beta.md",
+        "relativePath": "sources/alpha.md",
       },
     ]
 
@@ -57,47 +57,7 @@ Received:
 
     Array [
       Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/sources/alpha.md",
-        "includeLinks": false,
-        "raw": "---
-    pageType: source
-    id: source.alpha
-    title: Alpha
-    ---
-    
-    # Alpha
-    
-    readable line
-    ",
-        "relativePath": "sources/alpha.md",
-      },
-    ]
-
-  3rd scanWikiPageSummary call:
-
-    Array [
-      Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/sources/alpha.md",
-        "includeLinks": false,
-        "raw": "---
-    pageType: source
-    id: source.alpha
-    title: Alpha
-    ---
-    
-    # Alpha
-    
-    readable line
-    ",
-        "relativePath": "sources/alpha.md",
-      },
-    ]
-
-  4th scanWikiPageSummary call:
-
-    Array [
-      Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/concepts/beta.md",
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/concepts/beta.md",
         "includeLinks": false,
         "raw": "---
     pageType: concept
@@ -110,6 +70,46 @@ Received:
     another readable line
     ",
         "relativePath": "concepts/beta.md",
+      },
+    ]
+
+  3rd scanWikiPageSummary call:
+
+    Array [
+      Object {
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/concepts/beta.md",
+        "includeLinks": false,
+        "raw": "---
+    pageType: concept
+    id: concept.beta
+    title: Beta
+    ---
+    
+    # Beta
+    
+    another readable line
+    ",
+        "relativePath": "concepts/beta.md",
+      },
+    ]
+
+  4th scanWikiPageSummary call:
+
+    Array [
+      Object {
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/sources/alpha.md",
+        "includeLinks": false,
+        "raw": "---
+    pageType: source
+    id: source.alpha
+    title: Alpha
+    ---
+    
+    # Alpha
+    
+    readable line
+    ",
+        "relativePath": "sources/alpha.md",
       },
     ]
 
@@ -128,19 +128,19 @@ Received:
 
     Array [
       Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/concepts/beta.md",
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/sources/alpha.md",
         "includeLinks": false,
         "raw": "---
-    pageType: concept
-    id: concept.beta
-    title: Beta
+    pageType: source
+    id: source.alpha
+    title: Alpha
     ---
     
-    # Beta
+    # Alpha
     
-    another readable line
+    readable line
     ",
-        "relativePath": "concepts/beta.md",
+        "relativePath": "sources/alpha.md",
       },
     ]
 
@@ -148,47 +148,7 @@ Received:
 
     Array [
       Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/sources/alpha.md",
-        "includeLinks": false,
-        "raw": "---
-    pageType: source
-    id: source.alpha
-    title: Alpha
-    ---
-    
-    # Alpha
-    
-    readable line
-    ",
-        "relativePath": "sources/alpha.md",
-      },
-    ]
-
-  3rd scanWikiPageSummary call:
-
-    Array [
-      Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/sources/alpha.md",
-        "includeLinks": false,
-        "raw": "---
-    pageType: source
-    id: source.alpha
-    title: Alpha
-    ---
-    
-    # Alpha
-    
-    readable line
-    ",
-        "relativePath": "sources/alpha.md",
-      },
-    ]
-
-  4th scanWikiPageSummary call:
-
-    Array [
-      Object {
-        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BcdgWP/concepts/beta.md",
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/concepts/beta.md",
         "includeLinks": false,
         "raw": "---
     pageType: concept
@@ -201,6 +161,46 @@ Received:
     another readable line
     ",
         "relativePath": "concepts/beta.md",
+      },
+    ]
+
+  3rd scanWikiPageSummary call:
+
+    Array [
+      Object {
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/concepts/beta.md",
+        "includeLinks": false,
+        "raw": "---
+    pageType: concept
+    id: concept.beta
+    title: Beta
+    ---
+    
+    # Beta
+    
+    another readable line
+    ",
+        "relativePath": "concepts/beta.md",
+      },
+    ]
+
+  4th scanWikiPageSummary call:
+
+    Array [
+      Object {
+        "absolutePath": "/private/tmp/openclaw/memory-wiki-test-BdQ5JC/sources/alpha.md",
+        "includeLinks": false,
+        "raw": "---
+    pageType: source
+    id: source.alpha
+    title: Alpha
+    ---
+    
+    # Alpha
+    
+    readable line
+    ",
+        "relativePath": "sources/alpha.md",
       },
     ]
 
@@ -220,6 +220,6 @@ Number of calls: 4
 
  Test Files  1 failed (1)
       Tests  1 failed | 14 passed (15)
-   Start at  18:49:12
-   Duration  5.44s (tests 40%, transform 35%, import 20%, setup 5%)
+   Start at  19:37:09
+   Duration  6.10s (transform 38%, tests 35%, import 23%, setup 4%)
 

@@ -1,12 +1,12 @@
 === git
-f6038b3097c077ef2d6b80ac729df53dacb7d8e1
-Tue Oct  6 18:26:08 PDT 2026
+ed494bdcddfb55014c88a9200791d769d8e62a8f
+Tue Oct  6 19:21:47 PDT 2026
 === pnpm vitest run extensions/memory-wiki/
  Test Files  48 passed (48)
       Tests  508 passed | 1 skipped (509)
-   Duration  126.21s (tests 48%, transform 34%, import 11%, setup 7%)
+   Duration  77.32s (tests 74%, transform 14%, import 8%, setup 4%)
 === pnpm check:changed --base origin/main
-Tue Oct  6 18:28:20 PDT 2026
+Tue Oct  6 19:23:09 PDT 2026
 Coercion helper declaration guard passed (112 allowlisted declarations).
 
 [check:changed] deprecated API usage
@@ -22,7 +22,7 @@ deprecated API usage guard passed
 $ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
 [plugin-sdk boundary dts] fresh; skipping
 Found 0 warnings and 0 errors.
-Finished in 98.3s on 10617 files with 264 rules using 1 threads.
+Finished in 99.6s on 10617 files with 264 rules using 1 threads.
 
 [check:changed] lint scripts
 $ pnpm lint:docker-e2e && pnpm lint:tmp:no-raw-http2-imports && node scripts/run-oxlint.mjs --tsconfig config/tsconfig/oxlint.scripts.json scripts
@@ -31,7 +31,7 @@ Docker E2E package boundary/catalog guard passed.
 $ node --import ./scripts/tsx.mjs scripts/check-no-raw-http2-imports.mts
 OK: raw node:http2 imports stay behind the APNs proxy wrapper.
 Found 0 warnings and 0 errors.
-Finished in 20.2s on 1331 files with 264 rules using 1 threads.
+Finished in 20.1s on 1331 files with 264 rules using 1 threads.
 
 [check:changed] database-first legacy-store guard
 $ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
@@ -51,7 +51,7 @@ check:changed exit=0
 === git diff --check
 diff --check clean
 === pnpm changed:lanes --json
-Tue Oct  6 18:35:52 PDT 2026
+Tue Oct  6 19:29:43 PDT 2026
 $ node scripts/changed-lanes.mjs --json --base origin/main
 {
   "paths": [
@@ -109,42 +109,42 @@ $ node scripts/changed-lanes.mjs --json --base origin/main
   ]
 }
 === per-file test cost (pnpm test <file> --maxWorkers=1)
-Tue Oct  6 18:35:52 PDT 2026
+Tue Oct  6 19:29:44 PDT 2026
 --- extensions/memory-wiki/src/query.reads.test.ts
  Test Files  1 passed (1)
       Tests  15 passed (15)
-   Duration  25.80s (transform 83%, tests 11%, import 5%, setup 1%)
-real 27.69
-user 42.76
+   Duration  26.07s (transform 83%, tests 11%, import 5%, setup 1%)
+real 28.28
+user 43.00
 --- extensions/memory-wiki/src/query-reader.test.ts
  Test Files  1 passed (1)
       Tests  13 passed (13)
-   Duration  9.72s (transform 48%, tests 38%, import 12%, setup 3%)
-real 11.84
-user 11.79
+   Duration  10.13s (transform 47%, tests 38%, import 12%, setup 3%)
+real 12.68
+user 12.60
 --- extensions/memory-wiki/src/query.abort.test.ts
  Test Files  1 passed (1)
       Tests  2 passed (2)
-   Duration  6.30s (transform 75%, import 18%, setup 4%, tests 2%)
-real 8.43
-user 8.86
+   Duration  10.10s (transform 78%, import 17%, setup 4%, tests 2%)
+real 13.19
+user 12.80
 --- extensions/memory-wiki/index.test.ts
  Test Files  1 passed (1)
       Tests  10 passed (10)
-   Duration  6.78s (transform 75%, import 18%, setup 4%, tests 2%)
-real 8.94
-user 9.36
+   Duration  10.31s (transform 76%, import 18%, setup 4%, tests 2%)
+real 13.60
+user 13.92
 --- extensions/memory-wiki/src/query.test.ts
  Test Files  1 passed (1)
       Tests  65 passed (65)
-   Duration  12.39s (tests 50%, transform 38%, import 9%, setup 2%)
-real 14.53
-user 11.80
+   Duration  16.55s (transform 46%, tests 41%, import 11%, setup 2%)
+real 19.80
+user 17.12
 --- extensions/memory-wiki/src/apply.test.ts
  Test Files  1 passed (1)
       Tests  9 passed (9)
-   Duration  8.20s (transform 59%, tests 23%, import 14%, setup 3%)
-real 10.36
-user 10.36
-Tue Oct  6 18:37:14 PDT 2026
+   Duration  11.76s (transform 62%, tests 20%, import 14%, setup 3%)
+real 15.03
+user 14.56
+Tue Oct  6 19:31:26 PDT 2026
 EXIT=0

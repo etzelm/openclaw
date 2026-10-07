@@ -1,10 +1,10 @@
 
 === git state at start (status must be empty)
-2026-10-07T01:46:14Z
-f6038b3097c077ef2d6b80ac729df53dacb7d8e1
+2026-10-07T02:31:27Z
+ed494bdcddfb55014c88a9200791d769d8e62a8f
 
 === machine
-2026-10-07T01:46:15Z
+2026-10-07T02:31:27Z
 Darwin <host> 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:05:42 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T6031 arm64
 v24.21.0
 Apple M3 Ultra
@@ -12,54 +12,54 @@ Apple M3 Ultra
 549755813888
 
 === generate vault (10000 pages)
-2026-10-07T01:46:15Z
+2026-10-07T02:31:27Z
 {"generated":{"vault":"~/work/oss-166304-vault-","pages":10000,"lines":120,"claims":60,"bytes":278665698}}
 273M	~/work/oss-166304-vault-
    10000
 
 === AFTER (10000 pages): harness at HEAD
-2026-10-07T01:46:27Z
+2026-10-07T02:31:48Z
 after exit=0
 {
   "label": "after",
   "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T01:47:24.148Z",
+  "capturedAt": "2026-10-07T02:33:17.034Z",
   "vault": {
     "path": "~/work/oss-166304-vault-",
     "compiled": false
   },
   "query": "cobalt lantern ledger harbor",
-  "warmupMs": 26580,
-  "searchWallMs": 26441,
-  "eventLoopUtilization": 0.003,
-  "mainThreadCpuMs": 47,
-  "processCpuMs": 28104,
+  "warmupMs": 41910,
+  "searchWallMs": 40625,
+  "eventLoopUtilization": 0.005,
+  "mainThreadCpuMs": 143,
+  "processCpuMs": 43201,
   "eventLoopDelayMs": {
-    "p50": 12,
-    "p99": 12.1,
-    "max": 12.6,
+    "p50": 11.7,
+    "p99": 12.2,
+    "max": 23.6,
     "mean": 11.3
   },
   "probe": {
-    "samples": 262,
+    "samples": 402,
     "fsAccessLatencyMs": {
       "p50": 0,
-      "p99": 0.1,
-      "max": 0.1
+      "p99": 0.2,
+      "max": 0.4
     },
     "timerLatenessMs": {
-      "p50": 0.9,
+      "p50": 1,
       "p99": 2.6,
       "max": 2.9
     }
   },
   "memoryMb": {
-    "mainThreadHeapUsedPeak": 151,
-    "processRssPeak": 1327.6,
-    "processRssMinusMainHeapPeak": 1176.7,
+    "mainThreadHeapUsedPeak": 164.5,
+    "processRssPeak": 1314.1,
+    "processRssMinusMainHeapPeak": 1149.6,
     "workerThreads": 1,
-    "workerHeapUsedPeak": 462.4,
-    "workerHeapSamples": 262
+    "workerHeapUsedPeak": 476.6,
+    "workerHeapSamples": 402
   },
     {
       "corpus": "wiki",
@@ -82,7 +82,7 @@ after exit=0
       ],
 
 === BEFORE (10000 pages): restore extensions/memory-wiki to base 8e667761db3e749252a770d0c31006c436ec4b26 (production and tests)
-2026-10-07T01:47:24Z
+2026-10-07T02:33:17Z
 M  extensions/memory-wiki/README.md
 M  extensions/memory-wiki/index.test.ts
 M  extensions/memory-wiki/index.ts
@@ -105,40 +105,40 @@ before exit=0
 {
   "label": "before",
   "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T01:48:20.798Z",
+  "capturedAt": "2026-10-07T02:34:46.974Z",
   "vault": {
     "path": "~/work/oss-166304-vault-",
     "compiled": false
   },
   "query": "cobalt lantern ledger harbor",
-  "warmupMs": 26492,
-  "searchWallMs": 27019,
+  "warmupMs": 42398,
+  "searchWallMs": 42709,
   "eventLoopUtilization": 1,
-  "mainThreadCpuMs": 26936,
-  "processCpuMs": 29816,
+  "mainThreadCpuMs": 42135,
+  "processCpuMs": 46998,
   "eventLoopDelayMs": {
-    "p50": 21.6,
-    "p99": 43.4,
-    "max": 78.4,
-    "mean": 23.3
+    "p50": 28,
+    "p99": 93.2,
+    "max": 119.5,
+    "mean": 32
   },
   "probe": {
-    "samples": 225,
+    "samples": 321,
     "fsAccessLatencyMs": {
-      "p50": 2.6,
-      "p99": 26.6,
-      "max": 29.9
+      "p50": 4.6,
+      "p99": 80,
+      "max": 98.4
     },
     "timerLatenessMs": {
-      "p50": 14.8,
-      "p99": 30.6,
-      "max": 33
+      "p50": 14.7,
+      "p99": 74.5,
+      "max": 89.4
     }
   },
   "memoryMb": {
-    "mainThreadHeapUsedPeak": 1273,
-    "processRssPeak": 1825.1,
-    "processRssMinusMainHeapPeak": 1432.6,
+    "mainThreadHeapUsedPeak": 1279.6,
+    "processRssPeak": 1729.6,
+    "processRssMinusMainHeapPeak": 1322.1,
     "workerThreads": 0,
     "workerHeapUsedPeak": null,
     "workerHeapSamples": 0
@@ -164,7 +164,7 @@ before exit=0
       ],
 
 === compare every result object (10000 pages)
-2026-10-07T01:48:20Z
+2026-10-07T02:34:47Z
 {
   "comparison": "JSON.stringify of every result object, all fields, in order",
   "beforeCount": 10,
@@ -178,29 +178,35 @@ before exit=0
     "kind",
     "score",
 
-=== BASE test cost while the plugin is restored to base (pnpm test <file> --maxWorkers=1)
-2026-10-07T01:48:20Z
---- base: extensions/memory-wiki/src/query.test.ts
+=== BASE test cost while the plugin is restored to base: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1)
+2026-10-07T02:34:47Z
+--- base (warm): extensions/memory-wiki/src/query.test.ts
  Test Files  1 passed (1)
       Tests  65 passed (65)
-   Duration  23.68s (transform 71%, tests 23%, import 5%, setup 1%)
-real 26.30
-user 37.78
---- base: extensions/memory-wiki/src/apply.test.ts
+   Duration  15.66s (transform 50%, tests 36%, import 11%, setup 3%)
+real 19.08
+user 15.38
+--- base (warm): extensions/memory-wiki/src/apply.test.ts
  Test Files  1 passed (1)
       Tests  9 passed (9)
-   Duration  7.42s (transform 62%, tests 21%, import 14%, setup 4%)
-real 9.54
-user 8.93
---- base: extensions/memory-wiki/src/query.reads.test.ts
+   Duration  11.52s (transform 68%, import 16%, tests 13%, setup 3%)
+real 14.81
+user 14.08
+--- base (warm): extensions/memory-wiki/src/query.reads.test.ts
  Test Files  1 passed (1)
       Tests  16 passed (16)
-   Duration  8.46s (transform 55%, tests 28%, import 14%, setup 3%)
-real 10.63
-user 9.51
+   Duration  12.51s (transform 64%, tests 19%, import 15%, setup 3%)
+real 15.07
+user 13.98
+--- base (warm): extensions/memory-wiki/index.test.ts
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Duration  7.34s (transform 76%, import 18%, setup 4%, tests 2%)
+real 9.46
+user 9.39
 
 === RED: HEAD test files against base production code
-2026-10-07T01:49:07Z
+2026-10-07T02:37:04Z
 M  extensions/memory-wiki/README.md
 M  extensions/memory-wiki/index.test.ts
 M  extensions/memory-wiki/index.ts
@@ -214,95 +220,95 @@ D  extensions/memory-wiki/src/query-scoring.ts
 M  extensions/memory-wiki/src/query-shared-memory.ts
 M  extensions/memory-wiki/src/query.ts
 red (query.reads) vitest exit=1
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 87ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 225ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 48ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 47ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 88ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 219ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 45ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 48ms
  ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 96ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 53ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 248ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 289ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 283ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 55ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 63ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 64ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 240ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 276ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 292ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 53ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 62ms
  ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 115ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 341ms
- ×  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 63ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 346ms
+ ×  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 61ms
    → expected "scanWikiPageSummary" to not be called at all, but actually been called 4 times
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
  FAIL   extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304)
 AssertionError: expected "scanWikiPageSummary" to not be called at all, but actually been called 4 times
  Test Files  1 failed (1)
       Tests  1 failed | 14 passed (15)
-   Duration  5.44s (tests 40%, transform 35%, import 20%, setup 5%)
+   Duration  6.10s (transform 38%, tests 35%, import 23%, setup 4%)
 red (query.abort) vitest exit=1
  FAIL   extension-memory  extensions/memory-wiki/src/query.abort.test.ts [ extensions/memory-wiki/src/query.abort.test.ts ]
 Error: Cannot find module '/extensions/memory-wiki/src/query-reader.ts' imported from ~/work/oss-166304/extensions/memory-wiki/src/query.abort.test.ts
 Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
  Test Files  1 failed (1)
       Tests  no tests
-   Duration  692ms (setup 61%, transform 38%, worker 1%)
+   Duration  676ms (setup 62%, transform 37%, worker 1%)
 
 === restore HEAD (status must be empty)
-2026-10-07T01:49:23Z
+2026-10-07T02:37:20Z
 
 === GREEN: same test files at HEAD
-2026-10-07T01:49:23Z
+2026-10-07T02:37:21Z
 green (query.reads) vitest exit=0
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 378ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 252ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 386ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 255ms
  ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 46ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 47ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 109ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 50ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 223ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 285ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 267ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 46ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 115ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 51ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 258ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 269ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 277ms
  ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 53ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 60ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 63ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 119ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 353ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 61ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 61ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 61ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 125ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 339ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 65ms
  Test Files  1 passed (1)
       Tests  15 passed (15)
-   Duration  5.26s (tests 47%, transform 27%, import 21%, setup 5%)
+   Duration  5.34s (tests 47%, transform 27%, import 22%, setup 5%)
 green (query.abort) vitest exit=0
- ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > stops parsing vault pages after cancellation during a scan 80ms
- ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > rejects a whole-vault search aborted after its read was dispatched to the pool 55ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > stops parsing vault pages after cancellation during a scan 84ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > rejects a whole-vault search through the pool's cancellation of its dispatched task 57ms
  Test Files  1 passed (1)
       Tests  2 passed (2)
-   Duration  2.96s (transform 48%, import 38%, setup 9%, tests 5%)
+   Duration  3.77s (transform 51%, import 38%, setup 7%, tests 4%)
 
 === generate vault (2500 pages)
-2026-10-07T01:49:40Z
+2026-10-07T02:37:39Z
 {"generated":{"vault":"~/work/oss-166304-vault-","pages":2500,"lines":120,"claims":60,"bytes":69563511}}
  68M	~/work/oss-166304-vault-
     2500
 
 === AFTER (2500 pages): harness at HEAD
-2026-10-07T01:49:44Z
+2026-10-07T02:37:44Z
 after exit=0
 {
   "label": "after",
   "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T01:50:01.527Z",
+  "capturedAt": "2026-10-07T02:38:01.663Z",
   "vault": {
     "path": "~/work/oss-166304-vault-",
     "compiled": false
   },
   "query": "cobalt lantern ledger harbor",
-  "warmupMs": 6926,
-  "searchWallMs": 6718,
+  "warmupMs": 6862,
+  "searchWallMs": 6710,
   "eventLoopUtilization": 0.003,
-  "mainThreadCpuMs": 13,
-  "processCpuMs": 7407,
+  "mainThreadCpuMs": 14,
+  "processCpuMs": 7232,
   "eventLoopDelayMs": {
-    "p50": 12,
+    "p50": 11.9,
     "p99": 12.1,
-    "max": 12.5,
-    "mean": 11.4
+    "max": 12.4,
+    "mean": 11.2
   },
   "probe": {
     "samples": 67,
@@ -312,17 +318,17 @@ after exit=0
       "max": 0
     },
     "timerLatenessMs": {
-      "p50": 1.1,
+      "p50": 1,
       "p99": 2.7,
       "max": 2.7
     }
   },
   "memoryMb": {
     "mainThreadHeapUsedPeak": 150.1,
-    "processRssPeak": 990.6,
-    "processRssMinusMainHeapPeak": 840.5,
+    "processRssPeak": 985.4,
+    "processRssMinusMainHeapPeak": 835.3,
     "workerThreads": 1,
-    "workerHeapUsedPeak": 185.7,
+    "workerHeapUsedPeak": 185.6,
     "workerHeapSamples": 67
   },
     {
@@ -346,7 +352,7 @@ after exit=0
       ],
 
 === BEFORE (2500 pages): restore extensions/memory-wiki to base 8e667761db3e749252a770d0c31006c436ec4b26 (production and tests)
-2026-10-07T01:50:01Z
+2026-10-07T02:38:01Z
 M  extensions/memory-wiki/README.md
 M  extensions/memory-wiki/index.test.ts
 M  extensions/memory-wiki/index.ts
@@ -369,40 +375,40 @@ before exit=0
 {
   "label": "before",
   "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T01:50:18.275Z",
+  "capturedAt": "2026-10-07T02:38:18.536Z",
   "vault": {
     "path": "~/work/oss-166304-vault-",
     "compiled": false
   },
   "query": "cobalt lantern ledger harbor",
-  "warmupMs": 6731,
-  "searchWallMs": 6758,
+  "warmupMs": 6763,
+  "searchWallMs": 6816,
   "eventLoopUtilization": 1,
-  "mainThreadCpuMs": 6737,
-  "processCpuMs": 7510,
+  "mainThreadCpuMs": 6797,
+  "processCpuMs": 7596,
   "eventLoopDelayMs": {
-    "p50": 20.4,
-    "p99": 40.9,
-    "max": 56.6,
-    "mean": 22.6
+    "p50": 20.8,
+    "p99": 46,
+    "max": 67.6,
+    "mean": 23.2
   },
   "probe": {
     "samples": 57,
     "fsAccessLatencyMs": {
-      "p50": 5.2,
-      "p99": 30.1,
-      "max": 30.1
+      "p50": 5.3,
+      "p99": 29.6,
+      "max": 29.6
     },
     "timerLatenessMs": {
-      "p50": 10.6,
-      "p99": 26.3,
-      "max": 26.3
+      "p50": 13.2,
+      "p99": 31.1,
+      "max": 31.1
     }
   },
   "memoryMb": {
-    "mainThreadHeapUsedPeak": 450.5,
-    "processRssPeak": 753.5,
-    "processRssMinusMainHeapPeak": 541.7,
+    "mainThreadHeapUsedPeak": 439,
+    "processRssPeak": 801.2,
+    "processRssMinusMainHeapPeak": 571.1,
     "workerThreads": 0,
     "workerHeapUsedPeak": null,
     "workerHeapSamples": 0
@@ -428,7 +434,7 @@ before exit=0
       ],
 
 === compare every result object (2500 pages)
-2026-10-07T01:50:18Z
+2026-10-07T02:38:18Z
 {
   "comparison": "JSON.stringify of every result object, all fields, in order",
   "beforeCount": 10,
@@ -443,9 +449,52 @@ before exit=0
     "score",
 
 === restore HEAD (status must be empty)
-2026-10-07T01:50:18Z
+2026-10-07T02:38:18Z
+
+=== HEAD test cost: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1)
+2026-10-07T02:38:18Z
+--- head (warm): extensions/memory-wiki/src/query.reads.test.ts
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Duration  13.72s (transform 56%, tests 27%, import 13%, setup 3%)
+real 17.07
+user 16.53
+--- head (warm): extensions/memory-wiki/src/query-reader.test.ts
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Duration  14.66s (transform 52%, tests 33%, import 12%, setup 3%)
+real 17.99
+user 17.79
+--- head (warm): extensions/memory-wiki/src/query.abort.test.ts
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Duration  10.65s (transform 77%, import 17%, setup 4%, tests 2%)
+real 14.06
+user 13.83
+--- head (warm): extensions/memory-wiki/index.test.ts
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Duration  10.45s (transform 76%, import 18%, setup 4%, tests 2%)
+real 13.59
+user 13.19
+--- head (warm): extensions/memory-wiki/src/query.test.ts
+ Test Files  1 passed (1)
+      Tests  65 passed (65)
+   Duration  16.49s (transform 46%, tests 40%, import 11%, setup 3%)
+real 20.13
+user 17.54
+--- head (warm): extensions/memory-wiki/src/apply.test.ts
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Duration  12.58s (transform 63%, tests 18%, import 16%, setup 3%)
+real 15.75
+user 15.38
+
+=== cold first read at HEAD on the 2,500-page vault (first wiki_get after process start versus second and third)
+2026-10-07T02:41:53Z
+{"label":"cold-first-read","machine":"darwin arm64 node v24.21.0","capturedAt":"2026-10-07T02:41:58.479Z","vault":"~/work/oss-166304-vault-","lookup":"entities/page-1.md","readMs":{"first":376,"second":7,"third":23},"note":"first read spawns the reader worker from TypeScript source through tsx; dist loading was not measured"}
 
 === git state at end (status must be empty)
-2026-10-07T01:50:18Z
-f6038b3097c077ef2d6b80ac729df53dacb7d8e1
+2026-10-07T02:41:58Z
+ed494bdcddfb55014c88a9200791d769d8e62a8f
 EXIT=0

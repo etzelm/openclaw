@@ -59,9 +59,10 @@ run_round() {
 
   run_round 10000 ""
 
-  log "BASE test cost while the plugin is restored to base (pnpm test <file> --maxWorkers=1)"
-  for f in extensions/memory-wiki/src/query.test.ts extensions/memory-wiki/src/apply.test.ts extensions/memory-wiki/src/query.reads.test.ts; do
-    echo "--- base: $f"
+  log "BASE test cost while the plugin is restored to base: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1)"
+  for f in extensions/memory-wiki/src/query.test.ts extensions/memory-wiki/src/apply.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/index.test.ts; do
+    pnpm test "$f" --maxWorkers=1 > /dev/null 2>&1
+    echo "--- base (warm): $f"
     /usr/bin/time -p pnpm test "$f" --maxWorkers=1 2>&1 | strip | grep -E 'Test Files|Tests |Duration|^real|^user|FAIL|×' | tail -8
   done
 
@@ -92,6 +93,16 @@ run_round() {
   log "restore HEAD (status must be empty)"
   git restore --source=HEAD --staged --worktree -- extensions/memory-wiki
   git status --short
+
+  log "HEAD test cost: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1)"
+  for f in extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/index.test.ts extensions/memory-wiki/src/query.test.ts extensions/memory-wiki/src/apply.test.ts; do
+    pnpm test "$f" --maxWorkers=1 > /dev/null 2>&1
+    echo "--- head (warm): $f"
+    /usr/bin/time -p pnpm test "$f" --maxWorkers=1 2>&1 | strip | grep -E 'Test Files|Tests |Duration|^real|^user|FAIL|×' | tail -8
+  done
+
+  log "cold first read at HEAD on the 2,500-page vault (first wiki_get after process start versus second and third)"
+  node --import tsx "$E/harness.mts" cold --vault ~/work/oss-166304-vault- --out "$E/cold-first-read.json"
 
   log "git state at end (status must be empty)"
   git rev-parse HEAD; git status --short

@@ -17,8 +17,7 @@ cli_run() {
   for _ in $(seq 1 180); do kill -0 $pid 2>/dev/null || break; sleep 1; done
   if kill -0 $pid 2>/dev/null; then kill -TERM $pid; code="killed-by-watchdog"; else wait $pid; code=$?; fi
   end=$(date +%s.%N)
-  echo "--- $label: node openclaw.mjs $* -> exit=$code wall=$(echo "$end - $start" | bc) s"
-  tail -c 1500 "$E/cli-$label.out" | strip
+  echo "--- $label: node openclaw.mjs $* -> exit=$code wall=$(echo "$end - $start" | bc) s, $(grep -c '"path"' "$E/cli-$label.out") result paths, output head: $(head -c 160 "$E/cli-$label.out" | tr '\n' ' ')"
 }
 {
   log "git state (status must be empty)"; git rev-parse HEAD; git status --short
@@ -35,20 +34,6 @@ cli_run() {
   echo "--- dist/extensions/memory-wiki worker files"; find dist/extensions/memory-wiki -name '*worker*' -exec ls -la {} \;
   echo "--- dist/extensions/memory-wiki listing"; ls dist/extensions/memory-wiki; ls dist/extensions/memory-wiki/src 2>/dev/null | head -20
   echo "--- worker imports"; grep -o 'from "[^"]*"' dist/extensions/memory-wiki/src/query-reader.worker.js | head -10
-
-  log "built CLI: node openclaw.mjs wiki search / wiki get against the 2,500-page vault"
-  STATE=~/work/oss-166304-cli-state; rm -rf "$STATE"; mkdir -p "$STATE"
-  cat > "$STATE/openclaw.json" <<JSON
-{ "plugins": { "entries": { "memory-wiki": { "enabled": true, "config": {
-  "vault": { "scope": "global", "path": "$HOME/work/oss-166304-vault-2500pages" },
-  "search": { "backend": "local", "corpus": "wiki" },
-  "obsidian": { "enabled": false, "useOfficialCli": false },
-  "ingest": { "autoCompile": false } } } } } }
-JSON
-  cli_run search1 wiki search "cobalt lantern ledger" --max-results 3 --json
-  cli_run search2 wiki search "cobalt lantern ledger" --max-results 3 --json
-  cli_run get1 wiki get entities/page-1.md --lines 2
-  rm -rf "$STATE"
 
   log "profiler AFTER: OPENCLAW_LOCAL_CHECK=0 node --import tsx scripts/profile-extension-memory.mts --extension memory-wiki --skip-combined --concurrency 1"
   env OPENCLAW_LOCAL_CHECK=0 node --import tsx scripts/profile-extension-memory.mts --extension memory-wiki --skip-combined --concurrency 1 2>&1 | strip | tee "$E/after/profile.log" | grep -E '^\[extension-memory\]|"maxRssMb"|"deltaFromBaselineMb"|"totalCpuUs"|"qualified"|"baselineMb"'
@@ -67,6 +52,22 @@ JSON
   git restore --source=HEAD --staged --worktree -- extensions/memory-wiki
   git status --short
   git rev-parse HEAD
+
+  log "rebuild dist at HEAD for the built-CLI run"
+  pnpm build 2>&1 | strip > "$E/headbuild.log"
+  echo "pnpm build (head, second time) exit=${PIPESTATUS[0]}"; grep -E '^\[build-all\] phase timings' "$E/headbuild.log"
+  ls -la dist/extensions/memory-wiki/src/query-reader.worker.js
+
+  log "built CLI: node openclaw.mjs wiki status / wiki search / wiki get against the vault left by the evidence run (2,500 generated pages)"
+  STATE=~/work/oss-166304-cli-state; rm -rf "$STATE"; mkdir -p "$STATE"
+  printf '{ "plugins": { "entries": { "memory-wiki": { "enabled": true, "config": { "vault": { "scope": "global", "path": "%s/work/oss-166304-vault-" }, "search": { "backend": "local", "corpus": "wiki" }, "obsidian": { "enabled": false, "useOfficialCli": false }, "ingest": { "autoCompile": false } } } } } }\n' "$HOME" > "$STATE/openclaw.json"
+  echo "vault md files: $(find ~/work/oss-166304-vault- -name '*.md' | wc -l) (2,500 generated pages plus the scaffold's AGENTS.md, WIKI.md, inbox.md, index.md)"
+  echo "--- wiki status --json (vault resolution)"
+  OPENCLAW_STATE_DIR="$STATE" OPENCLAW_CONFIG_PATH="$STATE/openclaw.json" node openclaw.mjs wiki status --json 2>&1 | strip | grep -E '"vaultPath"|"vaultExists"|"vaultScope"'
+  cli_run search1 wiki search "cobalt lantern ledger" --max-results 3 --json
+  cli_run search2 wiki search "cobalt lantern ledger" --max-results 3 --json
+  cli_run get1 wiki get entities/page-1.md --lines 2
+  rm -rf "$STATE"
   echo "EXIT=0"
 } > ~/work/oss-166304-build.log 2>&1
 cp ~/work/oss-166304-build.log "$E/build-run.log"

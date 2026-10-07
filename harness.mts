@@ -291,11 +291,71 @@ async function search() {
   process.exit(0);
 }
 
+// Cold first read: the first single-page wiki_get after process start pays the worker
+// spawn and its module load; the second read on the same process is the warm figure.
+async function cold() {
+  const vault = path.resolve(readArg("vault"));
+  const out = path.resolve(readArg("out"));
+  const load = (file: string) => import(pathToFileURL(path.join(PLUGIN_SRC, file)).href);
+  const compiledCache = await load("compiled-cache.ts");
+  const sourceSync = await load("source-sync-state.ts");
+  const importRuns = await load("import-runs-state.ts");
+  const configModule = await load("config.ts");
+  const vaultModule = await load("vault.ts");
+  const queryModule = await load("query.ts");
+  compiledCache.configureMemoryWikiCompiledCacheStore(
+    compiledCache.createMemoryWikiCompiledCacheStore(() => createMemoryBlobStore<unknown>()),
+  );
+  sourceSync.configureMemoryWikiSourceSyncStateStore(
+    sourceSync.createMemoryWikiSourceSyncStateStore(() => createMemoryKeyedStore()),
+  );
+  importRuns.configureMemoryWikiImportRunStateStore(
+    importRuns.createMemoryWikiImportRunStateStore(() => createMemoryKeyedStore()),
+  );
+  const config = configModule.resolveMemoryWikiConfig(
+    { search: { backend: "local", corpus: "wiki" }, vault: { path: vault } },
+    { homedir: os.homedir() },
+  );
+  await vaultModule.initializeMemoryWikiVault(config);
+  const keepAlive = setInterval(() => {}, 2 ** 30);
+  const timings: number[] = [];
+  for (let index = 0; index < 3; index += 1) {
+    const started = performance.now();
+    const page = await queryModule.getMemoryWikiPage({ config, lookup: "entities/page-1.md" });
+    timings.push(Math.round(performance.now() - started));
+    if (!page) {
+      throw new Error("entities/page-1.md not found");
+    }
+  }
+  clearInterval(keepAlive);
+  const report = {
+    label: "cold-first-read",
+    machine: `${os.platform()} ${os.arch()} node ${process.version}`,
+    capturedAt: new Date().toISOString(),
+    vault,
+    lookup: "entities/page-1.md",
+    readMs: { first: timings[0], second: timings[1], third: timings[2] },
+    note: "first read spawns the reader worker from TypeScript source through tsx; dist loading was not measured",
+  };
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await fs.writeFile(out, JSON.stringify(report, null, 2) + "\n");
+  console.log(JSON.stringify(report));
+  try {
+    const reader = await load("query-reader.ts");
+    await reader.closeMemoryWikiQueryReader();
+  } catch {
+    // The base tree has no reader module; nothing to close.
+  }
+  process.exit(0);
+}
+
 const command = process.argv[2];
 if (command === "generate") {
   await generate();
 } else if (command === "search") {
   await search();
+} else if (command === "cold") {
+  await cold();
 } else {
   throw new Error(`unknown command: ${command}`);
 }
