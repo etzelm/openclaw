@@ -208,6 +208,7 @@ describe("wiki query page reads", () => {
     );
     // Without a compiled digest every search reads the whole vault, and a basename
     // lookup resolves against every page; both parse each page with this function.
+    // Only the lookup's one matched page is parsed here, like any single-page read.
     const scan = vi.spyOn(wikiMarkdown, "scanWikiPageSummary");
 
     const results = await searchMemoryWiki({ config, query: "readable line" });
@@ -219,6 +220,6 @@ describe("wiki query page reads", () => {
         .toSorted((left, right) => left.localeCompare(right)),
     ).toEqual(["concepts/beta.md", relativePath]);
     expect(page?.path).toBe(relativePath);
-    expect(scan).not.toHaveBeenCalled();
+    expect(scan.mock.calls.map(([params]) => params.relativePath)).toEqual([relativePath]);
   });
 });
