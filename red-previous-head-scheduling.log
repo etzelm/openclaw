@@ -1,0 +1,52 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 369ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 62ms
+   → expected [ 30000, 30000 ] to deeply equal [ undefined, undefined ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 360ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through
+AssertionError: expected [ 30000, 30000 ] to deeply equal [ undefined, undefined ]
+
+- Expected
++ Received
+
+  [
+-   undefined,
+-   undefined,
++   30000,
++   30000,
+  ]
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:88:68
+     86|     await readMemoryWikiPages(scanTask(rootDir), { signal: controller.…
+     87|
+     88|     expect(run.mock.calls.map(([, options]) => options.timeoutMs)).toE…
+       |                                                                    ^
+     89|     expect(run.mock.calls.map(([, options]) => options.signal)).toEqua…
+     90|       undefined,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  09:15:44
+   Duration  3.51s (transform 40%, import 30%, tests 24%, setup 6%)
+

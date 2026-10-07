@@ -14,12 +14,12 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read on the calling thread while a whole-vault scan runs in the pool 778ms
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > rejects a scan that exceeds the task bound with the deadline error and keeps serving scans 684ms
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs two whole-vault scans in parallel on two workers and queues a third 828ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 382ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 359ms
 
  Test Files  1 passed (1)
       Tests  3 passed (3)
-   Start at  21:32:24
-   Duration  6.49s (tests 36%, transform 34%, import 24%, setup 6%)
+   Start at  09:15:52
+   Duration  3.51s (transform 40%, import 29%, tests 24%, setup 7%)
 

@@ -1,0 +1,65 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 603ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 570ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 394ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 478ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 70ms
+   → expected [ [ 'page', [ 'sources/page-1.md' ] ] ] to deeply equal []
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 67ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 72ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 108ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 114ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 67ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 382ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 347ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 355ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups
+AssertionError: expected [ [ 'page', [ 'sources/page-1.md' ] ] ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   [
++     "page",
++     [
++       "sources/page-1.md",
++     ],
++   ],
++ ]
+
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:224:19
+    222|
+    223|     expect(exactPage?.path).toBe("sources/page-1.md");
+    224|     expect(exact).toEqual([]);
+       |                   ^
+    225|     expect(basename).toEqual([["lookup", undefined]]);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  10:06:35
+   Duration  6.83s (tests 55%, transform 26%, import 15%, setup 4%)
+

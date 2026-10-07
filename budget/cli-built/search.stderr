@@ -1,0 +1,45 @@
+
+<--- Last few GCs --->
+
+[79392:0x7a5140c000]   856169 ms: Scavenge 3155.6 (3629.5) -> 3086.1 (3599.0) MB, pooled: 308 MB, 7.58 / 0.00 ms  (average mu = 0.957, current mu = 0.962) allocation failure; 
+[79392:0x7a5140c000]   856223 ms: Scavenge 3161.2 (3621.1) -> 3081.8 (3599.7) MB, pooled: 308 MB, 3.25 / 0.00 ms  (average mu = 0.957, current mu = 0.962) allocation failure; 
+
+FATAL ERROR: invalid array length Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x10a292db4 node::(anonymous namespace)::DefaultAbortHandler(char const*, char const*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 2: 0x10a292f84 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 3: 0x1093de5d0 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 4: 0x1093de588 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 5: 0x10959dedc v8::internal::Heap::ShouldOptimizeForLoadTime() const [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 6: 0x1098aa540 v8::internal::Runtime_FatalInvalidSize(int, unsigned long*, v8::internal::Isolate*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 7: 0x109cc2234 Builtins_CEntry_Return1_ArgvOnStack_NoBuiltinExit [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 8: 0x109cafc80 Builtins_StringPrototypeSplit [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 9: 0x12b779c9c 
+10: 0x12b28d7b4 
+11: 0x12b758b0c 
+12: 0x12b75afdc 
+13: 0x109c637e8 Builtins_AsyncFunctionAwaitResolveClosure [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+14: 0x109d38e58 Builtins_PromiseFulfillReactionJob [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+15: 0x109c52bd0 Builtins_RunMicrotasks [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+16: 0x109c227b0 Builtins_JSRunMicrotasksEntry [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+17: 0x109507a8c v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+18: 0x109508134 v8::internal::(anonymous namespace)::InvokeWithTryCatch(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+19: 0x109508224 v8::internal::Execution::TryRunMicrotasks(v8::internal::Isolate*, v8::internal::MicrotaskQueue*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+20: 0x1095290a8 v8::internal::MicrotaskQueue::RunMicrotasks(v8::internal::Isolate*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+21: 0x109528ec4 v8::internal::MicrotaskQueue::PerformCheckpointInternal(v8::Isolate*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+22: 0x10917fff4 node::InternalCallbackScope::Close() [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+23: 0x1091802ec node::InternalMakeCallback(node::Environment*, v8::Local<v8::Object>, v8::Local<v8::Object>, v8::Local<v8::Function>, int, v8::Local<v8::Value>*, node::async_context, v8::Local<v8::Value>) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+24: 0x1091805e0 node::InternalMakeCallback(v8::Isolate*, v8::Local<v8::Object>, v8::Local<v8::Function>, int, v8::Local<v8::Value>*, node::async_context, v8::Local<v8::Value>) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+25: 0x1091df344 node::Environment::CheckImmediate(uv_check_s*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+26: 0x104e783dc uv__run_check [~/homebrew/Cellar/libuv/1.53.0/lib/libuv.1.0.0.dylib]
+27: 0x104e72c80 uv_run [~/homebrew/Cellar/libuv/1.53.0/lib/libuv.1.0.0.dylib]
+28: 0x10918134c node::SpinEventLoopInternal(node::Environment*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+29: 0x10926c7b0 node::NodeMainInstance::Run(node::ExitCode*, node::Environment*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+30: 0x10926c544 node::NodeMainInstance::Run() [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+31: 0x109206d94 node::Start(int, char**) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+32: 0x1920afe80 start [/usr/lib/dyld]
+time: command terminated abnormally
+real 856.34
+user 929.72
+sys 30.05

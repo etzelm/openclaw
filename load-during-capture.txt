@@ -1,30 +1,34 @@
-# uptime at the start and end of every phase (phase | sample); machine: <host>
-2026-10-07T04:26:44Z | git state at start (status must be empty) | 21:26  up 3 days,  5:23, 2 users, load averages: 18.01 16.29 17.44
-2026-10-07T04:26:44Z | machine | 21:26  up 3 days,  5:23, 2 users, load averages: 18.01 16.29 17.44
-2026-10-07T04:26:44Z | generate vault (10,000 pages) | 21:26  up 3 days,  5:23, 2 users, load averages: 18.01 16.29 17.44
-2026-10-07T04:27:03Z | AFTER (new head): 10,000-page search | 21:27  up 3 days,  5:23, 2 users, load averages: 21.40 17.22 17.75
-2026-10-07T04:27:38Z | AFTER (new head): concurrent exact-path reads during a 10,000-page scan | 21:27  up 3 days,  5:24, 2 users, load averages: 22.82 18.27 18.12
-2026-10-07T04:28:12Z | BEFORE-PR (published head a5af25c3924b21935856b4ff9f4e0be08d071a89): restore extensions/memory-wiki, concurrent reads | 21:28  up 3 days,  5:25, 2 users, load averages: 20.68 18.17 18.09
-# uptime at the start and end of every phase (phase | sample); machine: <host>
-2026-10-07T04:28:57Z | git state at start (status must be empty) | 21:28  up 3 days,  5:25, 2 users, load averages: 15.55 17.29 17.77
-2026-10-07T04:28:57Z | machine | 21:28  up 3 days,  5:25, 2 users, load averages: 15.55 17.29 17.77
-2026-10-07T04:28:58Z | generate vault (10,000 pages, 60 body lines and 30 claims per page: the first draft's 120/60 vault scans in about 40 s on this loaded machine, past the 30 s task bound; see bound/) | 21:28  up 3 days,  5:25, 2 users, load averages: 15.55 17.29 17.77
-2026-10-07T04:29:08Z | AFTER (new head): 10,000-page search | 21:29  up 3 days,  5:26, 2 users, load averages: 17.28 17.61 17.88
-2026-10-07T04:29:48Z | AFTER (new head): concurrent exact-path reads during a 10,000-page scan | 21:29  up 3 days,  5:26, 2 users, load averages: 21.03 18.76 18.30
-2026-10-07T04:30:28Z | BEFORE-PR (published head a5af25c3924b21935856b4ff9f4e0be08d071a89): restore extensions/memory-wiki, concurrent reads | 21:30  up 3 days,  5:27, 2 users, load averages: 15.24 17.40 17.81
-2026-10-07T04:31:09Z | BEFORE (base 8e667761db3e749252a770d0c31006c436ec4b26): restore extensions/memory-wiki, 10,000-page search | 21:31  up 3 days,  5:28, 2 users, load averages: 17.72 17.66 17.88
-2026-10-07T04:31:49Z | compare every result object (base versus new head) | 21:31  up 3 days,  5:28, 2 users, load averages: 16.44 17.46 17.80
-2026-10-07T04:31:49Z | RED: new head test files against the published head's production code (a5af25c3924b21935856b4ff9f4e0be08d071a89) | 21:31  up 3 days,  5:28, 2 users, load averages: 16.44 17.46 17.80
-2026-10-07T04:32:17Z | restore HEAD (status must be empty) | 21:32  up 3 days,  5:29, 2 users, load averages: 16.98 17.50 17.81
-2026-10-07T04:32:18Z | GREEN: same test files at the new head | 21:32  up 3 days,  5:29, 2 users, load averages: 17.38 17.58 17.83
-2026-10-07T04:32:45Z | HEAD test cost: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1) | 21:32  up 3 days,  5:29, 2 users, load averages: 15.12 17.08 17.65
-2026-10-07T04:35:30Z | git state at end (status must be empty) | 21:35  up 3 days,  5:32, 2 users, load averages: 13.34 15.35 16.81
-2026-10-07T04:35:30Z | git state (status must be empty) | 21:35  up 3 days,  5:32, 2 users, load averages: 13.34 15.35 16.81
-2026-10-07T04:35:30Z | RED: head test files against base production code (8e667761db3e749252a770d0c31006c436ec4b26) | 21:35  up 3 days,  5:32, 2 users, load averages: 13.34 15.35 16.81
-2026-10-07T04:35:50Z | restore HEAD (status must be empty) | 21:35  up 3 days,  5:32, 2 users, load averages: 12.18 14.94 16.63
-2026-10-07T04:35:50Z | GREEN: same test files at HEAD | 21:35  up 3 days,  5:32, 2 users, load averages: 12.18 14.94 16.63
-2026-10-07T04:36:13Z | git state at end (status must be empty) | 21:36  up 3 days,  5:33, 2 users, load averages: 10.55 14.36 16.38
-2026-10-07T04:36:14Z | git state (status must be empty) | 21:36  up 3 days,  5:33, 2 users, load averages: 10.55 14.36 16.38
-2026-10-07T04:36:14Z | standalone plugin build: node scripts/lib/plugin-npm-runtime-build.mjs extensions/memory-wiki | 21:36  up 3 days,  5:33, 2 users, load averages: 10.55 14.36 16.38
-2026-10-07T04:36:15Z | root bundled build: pnpm build (new head) | 21:36  up 3 days,  5:33, 2 users, load averages: 10.55 14.36 16.38
-2026-10-07T04:41:21Z | build end | 21:41  up 3 days,  5:38, 2 users, load averages: 23.67 17.38 16.93
+# uptime at the start of every phase (UTC | phase | sample); machine: <host>
+2026-10-07T16:07:30Z | git state at start (status must be empty) |  9:07  up 3 days, 17:04, 1 user, load averages: 2.95 2.54 3.55
+2026-10-07T16:07:30Z | machine |  9:07  up 3 days, 17:04, 1 user, load averages: 2.95 2.54 3.55
+2026-10-07T16:07:30Z | GATES: owning lane pnpm vitest run extensions/memory-wiki/ |  9:07  up 3 days, 17:04, 1 user, load averages: 2.95 2.54 3.55
+2026-10-07T16:08:43Z | GATES: pnpm check:changed --base upstream/main |  9:08  up 3 days, 17:05, 1 user, load averages: 3.48 2.85 3.58
+2026-10-07T16:15:30Z | GATES: changed:lanes and diff --check |  9:15  up 3 days, 17:12, 1 user, load averages: 4.10 5.40 4.99
+2026-10-07T16:15:31Z | RED A: head extensions/memory-wiki/src/query-scheduling.test.ts against the first draft's production code (a5af25c3924b21935856b4ff9f4e0be08d071a89) |  9:15  up 3 days, 17:12, 1 user, load averages: 4.10 5.40 4.99
+2026-10-07T16:15:39Z | RED B: head extensions/memory-wiki/src/query-scheduling.test.ts against the previous head's production code (492827c8100fcb88a9f88e7c565311c798cfa65a) |  9:15  up 3 days, 17:12, 1 user, load averages: 3.78 5.29 4.95
+2026-10-07T16:15:47Z | GREEN: extensions/memory-wiki/src/query-scheduling.test.ts at the head |  9:15  up 3 days, 17:12, 1 user, load averages: 3.72 5.25 4.94
+2026-10-07T16:15:55Z | REPEAT: extensions/memory-wiki/src/query-scheduling.test.ts 30 times at the head, then the previous head's file and production 30 times, both under 28 busy-loop processes (nice 5) |  9:15  up 3 days, 17:12, 1 user, load averages: 3.38 5.13 4.90
+2026-10-07T16:31:04Z | BUDGET: generate a 20,000-page vault (120 body lines, 60 claims per page) whose whole-vault scan exceeds 30 s |  9:31  up 3 days, 17:27, 1 user, load averages: 31.06 30.04 22.32
+2026-10-07T16:31:32Z | BUDGET head cli-search |  9:31  up 3 days, 17:28, 1 user, load averages: 29.77 29.78 22.45
+2026-10-07T16:32:26Z | BUDGET head cli-get |  9:32  up 3 days, 17:29, 1 user, load averages: 25.25 28.53 22.44
+2026-10-07T16:33:17Z | BUDGET head tool |  9:33  up 3 days, 17:30, 1 user, load averages: 17.02 26.09 21.90
+2026-10-07T16:33:50Z | BUDGET previous-head cli-search |  9:33  up 3 days, 17:30, 1 user, load averages: 10.71 23.51 21.13
+2026-10-07T16:34:23Z | BUDGET previous-head cli-get |  9:34  up 3 days, 17:31, 1 user, load averages: 7.52 21.51 20.49
+2026-10-07T16:34:56Z | BUDGET previous-head tool |  9:34  up 3 days, 17:31, 1 user, load averages: 5.46 19.44 19.77
+2026-10-07T16:35:29Z | BUDGET base cli-search |  9:35  up 3 days, 17:32, 1 user, load averages: 5.32 17.79 19.15
+2026-10-07T16:36:26Z | BUDGET base cli-get |  9:36  up 3 days, 17:33, 1 user, load averages: 3.19 15.11 18.07
+2026-10-07T16:37:19Z | BUDGET base tool |  9:37  up 3 days, 17:34, 1 user, load averages: 2.51 13.10 17.16
+2026-10-07T16:37:52Z | BUDGET compare: cli-search results base versus head |  9:37  up 3 days, 17:34, 1 user, load averages: 2.34 11.89 16.55
+2026-10-07T16:37:52Z | 10K: generate the 10,000-page vault (60 body lines, 30 claims per page) |  9:37  up 3 days, 17:34, 1 user, load averages: 2.34 11.89 16.55
+2026-10-07T16:38:00Z | 10K AFTER (head): search |  9:38  up 3 days, 17:34, 1 user, load averages: 6.92 12.55 16.73
+2026-10-07T16:38:30Z | 10K AFTER (head): concurrent exact-path reads during a scan |  9:38  up 3 days, 17:35, 1 user, load averages: 15.77 14.14 17.16
+2026-10-07T16:38:59Z | 10K BEFORE-PR (first draft a5af25c3924b21935856b4ff9f4e0be08d071a89): concurrent |  9:38  up 3 days, 17:35, 1 user, load averages: 11.60 13.31 16.77
+2026-10-07T16:39:28Z | 10K BEFORE (base ebc4e6de603c5c1ce55086f13565e21feb1c297d): search |  9:39  up 3 days, 17:36, 1 user, load averages: 7.92 12.25 16.27
+2026-10-07T16:39:59Z | 10K compare |  9:39  up 3 days, 17:36, 1 user, load averages: 5.33 11.21 15.75
+2026-10-07T16:39:59Z | COMPAT: a vault initialized and compiled by base code, then queried by base and by head: on-disk tree hash and results |  9:39  up 3 days, 17:36, 1 user, load averages: 5.33 11.21 15.75
+2026-10-07T16:44:00Z | TEST COST: extensions/memory-wiki/src/query-scheduling.test.ts, head file versus previous head file (each warmed once, then timed; pnpm test <file> --maxWorkers=1) |  9:44  up 3 days, 17:40, 1 user, load averages: 3.97 7.98 13.23
+2026-10-07T16:44:41Z | BUILD: standalone plugin build |  9:44  up 3 days, 17:41, 1 user, load averages: 3.99 7.45 12.79
+2026-10-07T16:44:41Z | BUILD: root bundled build (pnpm build) |  9:44  up 3 days, 17:41, 1 user, load averages: 3.99 7.45 12.79
+2026-10-07T16:46:49Z | CLI: built openclaw wiki search and wiki get against the 20,000-page vault (no gateway, temporary state dir) |  9:46  up 3 days, 17:43, 1 user, load averages: 14.66 10.74 13.41
+2026-10-07T17:04:12Z | CLI: 90 s V8 tick profile of the built wiki search on the 20,000-page vault, then the built search on the 2,000-page vault | 10:04  up 3 days, 18:01, 1 user, load averages: 3.08 3.51 6.37
+2026-10-07T17:06:29Z | git state at end (status must be empty) | 10:06  up 3 days, 18:03, 1 user, load averages: 3.21 3.54 5.97

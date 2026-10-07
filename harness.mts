@@ -7,6 +7,7 @@
 //   node --import tsx harness.mts search --vault <dir> --query "<text>" --out <file.json> --label before|after
 //   node --import tsx harness.mts concurrent --vault <dir> --query "<text>" --out <file.json> --label before|after
 //   node --import tsx harness.mts cold --vault <dir> --out <file.json>
+//   node --import tsx harness.mts budget --vault <dir> --query "<text>" --lookup <basename> --step cli-search|cli-get|cli-apply|tool --out <file.json> --label <tree>
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -438,6 +439,81 @@ async function cold() {
   process.exit(0);
 }
 
+// Deadline ownership on a vault whose whole-vault scan takes longer than 30 s. The
+// cli-search and cli-get steps call searchMemoryWiki and getMemoryWikiPage with no
+// signal, the way `openclaw wiki search` and `openclaw wiki get` (cli.ts) call them;
+// the tool step runs the real wiki_search tool, whose own 30 s deadline applies.
+async function budget() {
+  const vault = path.resolve(readArg("vault"));
+  const query = readArg("query");
+  const lookup = readArg("lookup");
+  const step = readArg("step");
+  const out = path.resolve(readArg("out"));
+  const label = readArg("label");
+  const { config, queryModule, close } = await loadPlugin(vault);
+  const load = (file: string) => import(pathToFileURL(path.join(PLUGIN_SRC, file)).href);
+  const keepAlive = setInterval(() => {}, 2 ** 30);
+  const started = performance.now();
+  let outcome: "resolved" | "rejected";
+  let error: string | null = null;
+  let value: unknown = null;
+  try {
+    if (step === "cli-search") {
+      value = await queryModule.searchMemoryWiki({ config, query, maxResults: 10 });
+    } else if (step === "cli-get") {
+      value = await queryModule.getMemoryWikiPage({ config, lookup, lineCount: 3 });
+    } else if (step === "cli-apply") {
+      // `openclaw wiki apply metadata` (cli.ts) calls applyMemoryWikiMutation with no signal.
+      const applyModule = await load("apply.ts");
+      value = await applyModule.applyMemoryWikiMutation({
+        config,
+        mutation: { op: "update_metadata", lookup, status: "reviewed", questions: ["compat check"] },
+      });
+    } else if (step === "tool") {
+      const toolModule = await load("tool.ts");
+      const tool = toolModule.createWikiSearchTool(config);
+      value = await tool.execute("budget", { query, maxResults: 10 }, undefined);
+    } else {
+      throw new Error(`unknown budget step: ${step}`);
+    }
+    outcome = "resolved";
+  } catch (caught) {
+    outcome = "rejected";
+    error = caught instanceof Error ? `${caught.name}: ${caught.message}` : String(caught);
+  }
+  const wallMs = Math.round(performance.now() - started);
+  clearInterval(keepAlive);
+  const summary =
+    step === "cli-search" && Array.isArray(value)
+      ? { resultCount: value.length, results: value }
+      : step === "cli-apply" && value && typeof value === "object"
+        ? { apply: value }
+      : step === "cli-get" && value && typeof value === "object"
+        ? { page: { path: (value as { path?: string }).path, title: (value as { title?: string }).title } }
+        : step === "tool" && value && typeof value === "object"
+          ? { resultCount: ((value as { details?: { results?: unknown[] } }).details?.results ?? []).length }
+          : {};
+  const report = {
+    label,
+    step,
+    machine: `${os.platform()} ${os.arch()} node ${process.version}`,
+    capturedAt: new Date().toISOString(),
+    vault: { path: vault },
+    query: step === "cli-get" || step === "cli-apply" ? undefined : query,
+    lookup: step === "cli-get" || step === "cli-apply" ? lookup : undefined,
+    signal: step === "tool" ? "wiki_search tool deadline (30 s)" : "none (CLI call shape)",
+    outcome,
+    wallMs,
+    error,
+    ...summary,
+  };
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await fs.writeFile(out, JSON.stringify(report, null, 2) + "\n");
+  console.log(JSON.stringify({ ...report, results: undefined }, null, 2));
+  await close();
+  process.exit(0);
+}
+
 const command = process.argv[2];
 if (command === "generate") {
   await generate();
@@ -447,6 +523,8 @@ if (command === "generate") {
   await concurrent();
 } else if (command === "cold") {
   await cold();
+} else if (command === "budget") {
+  await budget();
 } else {
   throw new Error(`unknown command: ${command}`);
 }

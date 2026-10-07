@@ -1,0 +1,16 @@
+diff --git a/extensions/memory-wiki/package.json b/extensions/memory-wiki/package.json
+index 02f1a593c99..737942b35b6 100644
+--- a/extensions/memory-wiki/package.json
++++ b/extensions/memory-wiki/package.json
+@@ -37,7 +37,10 @@
+     },
+     "build": {
+       "bundledDist": true,
+-      "openclawVersion": "2026.9.8"
++      "openclawVersion": "2026.9.8",
++      "workerEntries": [
++        "./src/query-reader.worker.ts"
++      ]
+     },
+     "release": {
+       "publishToClawHub": true,

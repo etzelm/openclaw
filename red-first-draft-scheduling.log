@@ -1,0 +1,70 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 375ms
+   → expected [ 'search', 'page' ] to deeply equal [ 'search' ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 66ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 331ms
+   → expected 1 to be 2 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held
+AssertionError: expected [ 'search', 'page' ] to deeply equal [ 'search' ]
+
+- Expected
++ Received
+
+  [
+    "search",
++   "page",
+  ]
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:75:62
+     73|     expect(page?.path).toBe("sources/page-4.md");
+     74|     expect(scanSettled).toBe(false);
+     75|     expect(dispatch.mock.calls.map(([task]) => task.select)).toEqual([…
+       |                                                              ^
+     76|     release();
+     77|     expect((await scan).length).toBeGreaterThan(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:109:33
+    107|
+    108|     expect(new Set(run.mock.contexts).size).toBe(1);
+    109|     expect(admitted.maxWorkers).toBe(2);
+       |                                 ^
+    110|     expect(admitted.pendingTasks).toBe(3);
+    111|     // Shared compute can admit fewer than two on a small host; never …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  09:15:36
+   Duration  3.46s (transform 40%, import 30%, tests 23%, setup 7%)
+
