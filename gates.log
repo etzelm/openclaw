@@ -1,0 +1,150 @@
+=== git
+f6038b3097c077ef2d6b80ac729df53dacb7d8e1
+Tue Oct  6 18:26:08 PDT 2026
+=== pnpm vitest run extensions/memory-wiki/
+ Test Files  48 passed (48)
+      Tests  508 passed | 1 skipped (509)
+   Duration  126.21s (tests 48%, transform 34%, import 11%, setup 7%)
+=== pnpm check:changed --base origin/main
+Tue Oct  6 18:28:20 PDT 2026
+Coercion helper declaration guard passed (112 allowlisted declarations).
+
+[check:changed] deprecated API usage
+$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
+deprecated API usage guard passed
+
+[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan passed with 0 entries.
+[deadcode] Knip full-tree unused-export scan passed with 0 entries.
+
+[check:changed] lint extensions
+$ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
+[plugin-sdk boundary dts] fresh; skipping
+Found 0 warnings and 0 errors.
+Finished in 98.3s on 10617 files with 264 rules using 1 threads.
+
+[check:changed] lint scripts
+$ pnpm lint:docker-e2e && pnpm lint:tmp:no-raw-http2-imports && node scripts/run-oxlint.mjs --tsconfig config/tsconfig/oxlint.scripts.json scripts
+$ node --import ./scripts/tsx.mjs scripts/check-docker-e2e-boundaries.mts
+Docker E2E package boundary/catalog guard passed.
+$ node --import ./scripts/tsx.mjs scripts/check-no-raw-http2-imports.mts
+OK: raw node:http2 imports stay behind the APNs proxy wrapper.
+Found 0 warnings and 0 errors.
+Finished in 20.2s on 1331 files with 264 rules using 1 threads.
+
+[check:changed] database-first legacy-store guard
+$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
+Database-first legacy-store guard passed.
+
+[check:changed] media download helper guard
+$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+
+[check:changed] runtime sidecar loader guard
+$ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
+runtime-sidecar-loaders: local runtime sidecar loaders look OK.
+
+[check:changed] runtime import cycles
+$ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
+Import cycle check: 0 runtime value cycle(s).
+check:changed exit=0
+=== git diff --check
+diff --check clean
+=== pnpm changed:lanes --json
+Tue Oct  6 18:35:52 PDT 2026
+$ node scripts/changed-lanes.mjs --json --base origin/main
+{
+  "paths": [
+    "config/max-lines-baseline.txt",
+    "docs/plugins/memory-wiki.md",
+    "extensions/memory-wiki/index.test.ts",
+    "extensions/memory-wiki/index.ts",
+    "extensions/memory-wiki/package.json",
+    "extensions/memory-wiki/README.md",
+    "extensions/memory-wiki/src/apply.ts",
+    "extensions/memory-wiki/src/query-pages.ts",
+    "extensions/memory-wiki/src/query-reader.test.ts",
+    "extensions/memory-wiki/src/query-reader.ts",
+    "extensions/memory-wiki/src/query-reader.worker.ts",
+    "extensions/memory-wiki/src/query-scoring.ts",
+    "extensions/memory-wiki/src/query-shared-memory.ts",
+    "extensions/memory-wiki/src/query.abort.test.ts",
+    "extensions/memory-wiki/src/query.reads.test.ts",
+    "extensions/memory-wiki/src/query.ts"
+  ],
+  "lanes": {
+    "core": false,
+    "coreTests": false,
+    "ui": false,
+    "extensions": true,
+    "extensionTests": true,
+    "scripts": false,
+    "testRoot": false,
+    "apps": false,
+    "docs": true,
+    "tooling": true,
+    "liveDockerTooling": false,
+    "bundledChannelConfigMetadata": true,
+    "releaseMetadata": false,
+    "all": false
+  },
+  "extensionImpactFromCore": false,
+  "docsOnly": false,
+  "reasons": [
+    "config/max-lines-baseline.txt: tooling surface",
+    "extensions/memory-wiki/index.test.ts: extension test",
+    "extensions/memory-wiki/index.ts: extension production",
+    "extensions/memory-wiki/package.json: bundled channel config metadata input",
+    "extensions/memory-wiki/package.json: extension production",
+    "extensions/memory-wiki/src/apply.ts: extension production",
+    "extensions/memory-wiki/src/query-pages.ts: extension production",
+    "extensions/memory-wiki/src/query-reader.test.ts: extension test",
+    "extensions/memory-wiki/src/query-reader.ts: extension production",
+    "extensions/memory-wiki/src/query-reader.worker.ts: extension production",
+    "extensions/memory-wiki/src/query-scoring.ts: extension production",
+    "extensions/memory-wiki/src/query-shared-memory.ts: extension production",
+    "extensions/memory-wiki/src/query.abort.test.ts: extension test",
+    "extensions/memory-wiki/src/query.reads.test.ts: extension test",
+    "extensions/memory-wiki/src/query.ts: extension production"
+  ]
+}
+=== per-file test cost (pnpm test <file> --maxWorkers=1)
+Tue Oct  6 18:35:52 PDT 2026
+--- extensions/memory-wiki/src/query.reads.test.ts
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Duration  25.80s (transform 83%, tests 11%, import 5%, setup 1%)
+real 27.69
+user 42.76
+--- extensions/memory-wiki/src/query-reader.test.ts
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Duration  9.72s (transform 48%, tests 38%, import 12%, setup 3%)
+real 11.84
+user 11.79
+--- extensions/memory-wiki/src/query.abort.test.ts
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Duration  6.30s (transform 75%, import 18%, setup 4%, tests 2%)
+real 8.43
+user 8.86
+--- extensions/memory-wiki/index.test.ts
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Duration  6.78s (transform 75%, import 18%, setup 4%, tests 2%)
+real 8.94
+user 9.36
+--- extensions/memory-wiki/src/query.test.ts
+ Test Files  1 passed (1)
+      Tests  65 passed (65)
+   Duration  12.39s (tests 50%, transform 38%, import 9%, setup 2%)
+real 14.53
+user 11.80
+--- extensions/memory-wiki/src/apply.test.ts
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Duration  8.20s (transform 59%, tests 23%, import 14%, setup 3%)
+real 10.36
+user 10.36
+Tue Oct  6 18:37:14 PDT 2026
+EXIT=0

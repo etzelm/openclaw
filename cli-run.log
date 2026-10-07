@@ -1,0 +1,9 @@
+=== built CLI (dist at f6038b3097c077ef2d6b80ac729df53dacb7d8e1) against the 2,504-page vault, 2026-10-07T01:59:28Z
+config: plugins.entries.memory-wiki.config.vault.path = ~/work/oss-166304-vault- (scope global, search backend local, corpus wiki, autoCompile false); OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH point at a scratch state dir
+--- wiki status --json (vault resolution)
+  "vaultScope": "global",
+  "vaultPath": "~/work/oss-166304-vault-",
+  "vaultExists": true,
+--- search1: node openclaw.mjs wiki search "cobalt lantern ledger" --max-results 3 --json -> exit=0 wall=8.642331000 s, 3 results, first path: "path":"concepts/page-258.md",
+--- search2: node openclaw.mjs wiki search "cobalt lantern ledger" --max-results 3 --json -> exit=0 wall=8.693285000 s, 3 results, first path: "path":"concepts/page-258.md",
+--- get1: node openclaw.mjs wiki get entities/page-1.md --lines 2 -> exit=0 wall=2.001928000 s, output head:  # nimbus ledger zephyr 1 

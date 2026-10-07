@@ -1,0 +1,56 @@
+$ node scripts/changed-lanes.mjs --json --base origin/main
+{
+  "paths": [
+    "config/max-lines-baseline.txt",
+    "docs/plugins/memory-wiki.md",
+    "extensions/memory-wiki/index.test.ts",
+    "extensions/memory-wiki/index.ts",
+    "extensions/memory-wiki/package.json",
+    "extensions/memory-wiki/README.md",
+    "extensions/memory-wiki/src/apply.ts",
+    "extensions/memory-wiki/src/query-pages.ts",
+    "extensions/memory-wiki/src/query-reader.test.ts",
+    "extensions/memory-wiki/src/query-reader.ts",
+    "extensions/memory-wiki/src/query-reader.worker.ts",
+    "extensions/memory-wiki/src/query-scoring.ts",
+    "extensions/memory-wiki/src/query-shared-memory.ts",
+    "extensions/memory-wiki/src/query.abort.test.ts",
+    "extensions/memory-wiki/src/query.reads.test.ts",
+    "extensions/memory-wiki/src/query.ts"
+  ],
+  "lanes": {
+    "core": false,
+    "coreTests": false,
+    "ui": false,
+    "extensions": true,
+    "extensionTests": true,
+    "scripts": false,
+    "testRoot": false,
+    "apps": false,
+    "docs": true,
+    "tooling": true,
+    "liveDockerTooling": false,
+    "bundledChannelConfigMetadata": true,
+    "releaseMetadata": false,
+    "all": false
+  },
+  "extensionImpactFromCore": false,
+  "docsOnly": false,
+  "reasons": [
+    "config/max-lines-baseline.txt: tooling surface",
+    "extensions/memory-wiki/index.test.ts: extension test",
+    "extensions/memory-wiki/index.ts: extension production",
+    "extensions/memory-wiki/package.json: bundled channel config metadata input",
+    "extensions/memory-wiki/package.json: extension production",
+    "extensions/memory-wiki/src/apply.ts: extension production",
+    "extensions/memory-wiki/src/query-pages.ts: extension production",
+    "extensions/memory-wiki/src/query-reader.test.ts: extension test",
+    "extensions/memory-wiki/src/query-reader.ts: extension production",
+    "extensions/memory-wiki/src/query-reader.worker.ts: extension production",
+    "extensions/memory-wiki/src/query-scoring.ts: extension production",
+    "extensions/memory-wiki/src/query-shared-memory.ts: extension production",
+    "extensions/memory-wiki/src/query.abort.test.ts: extension test",
+    "extensions/memory-wiki/src/query.reads.test.ts: extension test",
+    "extensions/memory-wiki/src/query.ts: extension production"
+  ]
+}
