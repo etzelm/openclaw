@@ -1,7 +1,12 @@
 # Evidence for openclaw/openclaw#166304
 
 Branch `feat/memory-wiki-worker-vault-scan`, base `8e667761db3e749252a770d0c31006c436ec4b26`
-(`origin/main` after #166329 and #166355 merged), head `ed494bdcddfb55014c88a9200791d769d8e62a8f`.
+(`origin/main` after #166329 and #166355 merged), head `a5af25c3924b21935856b4ff9f4e0be08d071a89`. The behaviour, build, profiler, CLI, red/green
+and test-cost captures were taken at `ed494bdcddfb55014c88a9200791d769d8e62a8f`, whose production
+tree, `dist/` and red/green test files are identical to the final head (the final head differs only
+in `src/query-reader.test.ts`, two test edits, and the first commit's message); `tests.log`,
+`check-changed.log`, `changed-lanes.json` and `gates.log` were re-run at the final head, and the
+earlier `gates.log` (with its cold-cache timing pass) is kept as `gates-ed494bd.log`.
 Machine: Mac Studio (`darwin arm64`), Node `v24.21.0`, pnpm 12.6.0. All captures in this
 directory come from one sitting on one checkout (`~/work/<task>`): the BEFORE runs were
 taken on the same checkout after `git restore --source=8e667761db3 --staged --worktree --
@@ -14,8 +19,8 @@ path exactly as the `wiki_search` tool does; the tool's 30 s deadline is not app
 
 Redactions applied to every file here, keeping each record otherwise whole: the home
 directory is written as `~`, the machine's hostname (which appeared in the `uname -a`
-line of the run logs) as `<host>`, and the profiler's temporary report paths under
-`<tmp> as `<tmp>`. No session ids or credentials appear in these files.
+line of the run logs) as `<host>`, and the profiler's temporary report paths under the
+system temporary directory as `<tmp>`. No session ids or credentials appear in these files.
 
 ## Files
 
@@ -31,17 +36,17 @@ line of the run logs) as `<host>`, and the profiler's temporary report paths und
 | `evidence-run.log` | Full stdout/stderr of the evidence script: both rounds, every restore and status check, the base and head test cost runs, the red and green runs, the cold first read | `evidence.sh` |
 | `red.log`, `green.log` | `query.reads.test.ts` from the branch head run against the base production code (red) and at the head (green) | `pnpm vitest run extensions/memory-wiki/src/query.reads.test.ts` |
 | `red-abort.log`, `green-abort.log` | `query.abort.test.ts` from the branch head run against the base (red: the file cannot load there) and at the head (green) | `pnpm vitest run extensions/memory-wiki/src/query.abort.test.ts` |
-| `tests.log` | Owning lane `pnpm vitest run extensions/memory-wiki/` at the head | `gates.sh` |
-| `check-changed.log` | `pnpm check:changed --base origin/main` at the head | `gates.sh` |
+| `tests.log` | Owning lane `pnpm vitest run extensions/memory-wiki/` at the final head | `gates.sh` |
+| `check-changed.log` | `pnpm check:changed --base origin/main` at the final head | `gates.sh` |
 | `changed-lanes.json` | `pnpm changed:lanes --json --base origin/main` at the head | `gates.sh` |
-| `gates.log` | Full gates script output including `git diff --check` and the head-side per-file test cost | `gates.sh` |
-| `test-cost.md` | Wall time per touched test file (`pnpm test <file> --maxWorkers=1`), each timed run preceded by an untimed warm-up run of the same command, base and head in one sitting | derived from `evidence-run.log` (`gates.log` holds an earlier cold-cache timing pass, superseded) |
+| `gates.log`, `gates-ed494bd.log` | Full gates script output including `git diff --check`, at the final head; `gates-ed494bd.log` is the same script at `ed494bd` and also holds a cold-cache per-file timing pass | `gates.sh` |
+| `test-cost.md` | Wall time per touched test file (`pnpm test <file> --maxWorkers=1`), each timed run preceded by an untimed warm-up run of the same command, base and head in one sitting | derived from `evidence-run.log` (`gates-ed494bd.log` holds a cold-cache timing pass of the same files) |
 | `build-standalone.log` | Standalone plugin build (`node scripts/lib/plugin-npm-runtime-build.mjs extensions/memory-wiki`), whole, including the `entry:` lines that consume `openclaw.build.workerEntries` | `build.sh` |
 | `build.log`, `before/build.log`, `build-run.log` | Root bundled build (`pnpm build`) at the head and at the base, and the script log with the `dist/extensions/memory-wiki` worker listing | `build.sh` |
 | `before/profile.log`, `after/profile.log` | Plugin entrypoint profiler (`OPENCLAW_LOCAL_CHECK=0 node --import tsx scripts/profile-extension-memory.mts --extension memory-wiki --skip-combined --concurrency 1`) on the base build and the head build, one run each, JSON reports whole | `build.sh` |
 | `cli-run.log`, `cli-search1.out`, `cli-search2.out`, `cli-get1.out` | Built CLI (`node openclaw.mjs wiki status --json`, `wiki search`, `wiki get`) run by `build.sh` after it rebuilt `dist/` at the head, against the vault the evidence run left behind (2,500 generated pages plus the four scaffold files); `cli-run.log` is the script log section with the resolved vault path, exit codes and wall times, the `.out` files the command output | `build.sh` |
 | `headbuild.log` | Second `pnpm build` at the head after the base build, so the CLI runs against the branch's `dist/`; the step's own lines (exit code, phase timings, worker file listing) are in `build-run.log` | `build.sh` |
-| `load-during-capture.txt` | `uptime` and the top CPU consumers (`ps -Ao pcpu,etime,comm -r`) sampled on the Studio during the 10,000-page BEFORE capture: the machine's local model server (`llama-server`, about 490% CPU) and a Docker VM were busy throughout this sitting, which inflates every wall time in this round compared with an idle machine; BEFORE and AFTER ran back to back under the same load | manual snapshot during `evidence.sh` |
+| `load-during-capture.txt` | `uptime` and the top CPU consumers (`ps -Ao pcpu,etime,comm -r`) sampled once on the Studio during the 10,000-page BEFORE capture (load average 16.28): the machine's local model server (`llama-server`, about 490% CPU) and a Docker VM ran throughout this sitting but were not sampled per phase, so every wall time in this round is a loaded-machine figure; BEFORE and AFTER ran back to back under that load | manual snapshot during `evidence.sh` |
 | `cold-first-read.json` | First, second and third `getMemoryWikiPage` exact-path read after process start at the head on the 2,500-page vault (the first read spawns the worker) | harness `cold` |
 | `evidence.sh`, `build.sh`, `gates.sh` | The scripts that produced the logs above | copied from `~/work` |
 

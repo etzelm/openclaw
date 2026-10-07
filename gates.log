@@ -1,44 +1,18 @@
-=== git
-ed494bdcddfb55014c88a9200791d769d8e62a8f
-Tue Oct  6 19:21:47 PDT 2026
-=== pnpm vitest run extensions/memory-wiki/
+=== gates start 2026-10-07T03:13:43Z
+a5af25c3924b21935856b4ff9f4e0be08d071a89
+Darwin <host> 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:05:42 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T6031 arm64
+20:13  up 3 days,  4:10, 2 users, load averages: 27.28 19.30 15.17
+=== lane: pnpm vitest run extensions/memory-wiki/
+lane exit=0
+
  Test Files  48 passed (48)
       Tests  508 passed | 1 skipped (509)
-   Duration  77.32s (tests 74%, transform 14%, import 8%, setup 4%)
-=== pnpm check:changed --base origin/main
-Tue Oct  6 19:23:09 PDT 2026
-Coercion helper declaration guard passed (112 allowlisted declarations).
+   Start at  20:13:50
+   Duration  118.82s (tests 56%, transform 25%, import 13%, setup 7%)
 
-[check:changed] deprecated API usage
-$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
-deprecated API usage guard passed
-
-[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
-[deadcode] Knip script unused-export scan passed with 0 entries.
-[deadcode] Knip production unused-export scan passed with 0 entries.
-[deadcode] Knip full-tree unused-export scan passed with 0 entries.
-
-[check:changed] lint extensions
-$ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
-[plugin-sdk boundary dts] fresh; skipping
-Found 0 warnings and 0 errors.
-Finished in 99.6s on 10617 files with 264 rules using 1 threads.
-
-[check:changed] lint scripts
-$ pnpm lint:docker-e2e && pnpm lint:tmp:no-raw-http2-imports && node scripts/run-oxlint.mjs --tsconfig config/tsconfig/oxlint.scripts.json scripts
-$ node --import ./scripts/tsx.mjs scripts/check-docker-e2e-boundaries.mts
-Docker E2E package boundary/catalog guard passed.
-$ node --import ./scripts/tsx.mjs scripts/check-no-raw-http2-imports.mts
-OK: raw node:http2 imports stay behind the APNs proxy wrapper.
-Found 0 warnings and 0 errors.
-Finished in 20.1s on 1331 files with 264 rules using 1 threads.
-
-[check:changed] database-first legacy-store guard
-$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
-Database-first legacy-store guard passed.
-
-[check:changed] media download helper guard
-$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+=== check:changed --base origin/main
+20:15  up 3 days,  4:12, 2 users, load averages: 17.77 18.66 15.50
+check:changed exit=0
 
 [check:changed] runtime sidecar loader guard
 $ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
@@ -47,11 +21,7 @@ runtime-sidecar-loaders: local runtime sidecar loaders look OK.
 [check:changed] runtime import cycles
 $ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
 Import cycle check: 0 runtime value cycle(s).
-check:changed exit=0
-=== git diff --check
-diff --check clean
-=== pnpm changed:lanes --json
-Tue Oct  6 19:29:43 PDT 2026
+=== changed:lanes
 $ node scripts/changed-lanes.mjs --json --base origin/main
 {
   "paths": [
@@ -108,43 +78,7 @@ $ node scripts/changed-lanes.mjs --json --base origin/main
     "extensions/memory-wiki/src/query.ts: extension production"
   ]
 }
-=== per-file test cost (pnpm test <file> --maxWorkers=1)
-Tue Oct  6 19:29:44 PDT 2026
---- extensions/memory-wiki/src/query.reads.test.ts
- Test Files  1 passed (1)
-      Tests  15 passed (15)
-   Duration  26.07s (transform 83%, tests 11%, import 5%, setup 1%)
-real 28.28
-user 43.00
---- extensions/memory-wiki/src/query-reader.test.ts
- Test Files  1 passed (1)
-      Tests  13 passed (13)
-   Duration  10.13s (transform 47%, tests 38%, import 12%, setup 3%)
-real 12.68
-user 12.60
---- extensions/memory-wiki/src/query.abort.test.ts
- Test Files  1 passed (1)
-      Tests  2 passed (2)
-   Duration  10.10s (transform 78%, import 17%, setup 4%, tests 2%)
-real 13.19
-user 12.80
---- extensions/memory-wiki/index.test.ts
- Test Files  1 passed (1)
-      Tests  10 passed (10)
-   Duration  10.31s (transform 76%, import 18%, setup 4%, tests 2%)
-real 13.60
-user 13.92
---- extensions/memory-wiki/src/query.test.ts
- Test Files  1 passed (1)
-      Tests  65 passed (65)
-   Duration  16.55s (transform 46%, tests 41%, import 11%, setup 2%)
-real 19.80
-user 17.12
---- extensions/memory-wiki/src/apply.test.ts
- Test Files  1 passed (1)
-      Tests  9 passed (9)
-   Duration  11.76s (transform 62%, tests 20%, import 14%, setup 3%)
-real 15.03
-user 14.56
-Tue Oct  6 19:31:26 PDT 2026
-EXIT=0
+=== git diff --check origin/main HEAD
+diff --check clean
+=== gates end 2026-10-07T03:28:04Z
+20:28  up 3 days,  4:24, 2 users, load averages: 12.15 14.22 15.67

@@ -76,7 +76,7 @@ $ oxfmt --check --no-error-on-unmatched-pattern -- config/max-lines-baseline.txt
 Checking formatting...
 
 All matched files use the correct format.
-Finished in 173ms on 14 files using 32 threads.
+Finished in 352ms on 14 files using 32 threads.
 
 [check:changed] npm package-lock guard
 Validating 1 npm package lock with 1 job.
@@ -88,19 +88,19 @@ $ node --import ./scripts/tsx.mjs scripts/test-projects-serial.mts src/plugins/d
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > classifies only static value module edges 66ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps broad agent runtime and heavy doctor barrels off doctor enumeration paths 317ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps the runtime doctor migration helper off state DB and plugin-state graphs 35ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps kysely statically unreachable from every plugin closure 601ms
- ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > matches every resolvable artifact's coerced doctor surfaces 1600ms
- ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > declares every state migration identity and phase in module order 86ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > classifies only static value module edges 93ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps broad agent runtime and heavy doctor barrels off doctor enumeration paths 537ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps the runtime doctor migration helper off state DB and plugin-state graphs 114ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps kysely statically unreachable from every plugin closure 1163ms
+ ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > matches every resolvable artifact's coerced doctor surfaces 2633ms
+ ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > declares every state migration identity and phase in module order 178ms
 
  Test Files  2 passed (2)
       Tests  6 passed (6)
-   Start at  19:24:09
-   Duration  4.73s (tests 65%, transform 19%, setup 13%, import 3%)
+   Start at  20:17:07
+   Duration  8.66s (tests 60%, transform 23%, setup 14%, import 3%)
 
-[test] passed 1 Vitest shard in 5.57s
+[test] passed 1 Vitest shard in 9.98s
 
 [check:changed] bundled channel config metadata
 $ node --import ./scripts/tsx.mjs scripts/generate-bundled-channel-config-metadata.ts --check
@@ -158,14 +158,16 @@ deprecated API usage guard passed
 
 [check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
 [deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
 [deadcode] Knip production unused-export scan passed with 0 entries.
 [deadcode] Knip full-tree unused-export scan passed with 0 entries.
 
 [check:changed] lint extensions
 $ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
-[plugin-sdk boundary dts] fresh; skipping
+[plugin-sdk boundary dts] emitted 12135 files
 Found 0 warnings and 0 errors.
-Finished in 99.6s on 10617 files with 264 rules using 1 threads.
+Finished in 158.6s on 10617 files with 264 rules using 1 threads.
 
 [check:changed] lint scripts
 $ pnpm lint:docker-e2e && pnpm lint:tmp:no-raw-http2-imports && node scripts/run-oxlint.mjs --tsconfig config/tsconfig/oxlint.scripts.json scripts
@@ -174,7 +176,7 @@ Docker E2E package boundary/catalog guard passed.
 $ node --import ./scripts/tsx.mjs scripts/check-no-raw-http2-imports.mts
 OK: raw node:http2 imports stay behind the APNs proxy wrapper.
 Found 0 warnings and 0 errors.
-Finished in 20.1s on 1331 files with 264 rules using 1 threads.
+Finished in 27.4s on 1331 files with 264 rules using 1 threads.
 
 [check:changed] database-first legacy-store guard
 $ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
