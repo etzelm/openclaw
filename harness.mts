@@ -5,6 +5,8 @@
 // Usage:
 //   node --import tsx harness.mts generate --vault <dir> --pages N --lines L --claims C
 //   node --import tsx harness.mts search --vault <dir> --query "<text>" --out <file.json> --label before|after
+//   node --import tsx harness.mts concurrent --vault <dir> --query "<text>" --out <file.json> --label before|after
+//   node --import tsx harness.mts cold --vault <dir> --out <file.json>
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -124,6 +126,118 @@ function quantile(sorted: number[], q: number): number {
   if (sorted.length === 0) { return 0; }
   const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(q * sorted.length) - 1));
   return sorted[index]!;
+}
+
+// Load the plugin modules from source, point their stores at memory, and resolve a
+// local-backend wiki-corpus config for the vault; shared by search, concurrent and cold.
+async function loadPlugin(vault: string) {
+  const load = (file: string) => import(pathToFileURL(path.join(PLUGIN_SRC, file)).href);
+  const compiledCache = await load("compiled-cache.ts");
+  const sourceSync = await load("source-sync-state.ts");
+  const importRuns = await load("import-runs-state.ts");
+  const configModule = await load("config.ts");
+  const vaultModule = await load("vault.ts");
+  const queryModule = await load("query.ts");
+  const compileModule = await load("compile.ts");
+  compiledCache.configureMemoryWikiCompiledCacheStore(
+    compiledCache.createMemoryWikiCompiledCacheStore(() => createMemoryBlobStore<unknown>()),
+  );
+  sourceSync.configureMemoryWikiSourceSyncStateStore(
+    sourceSync.createMemoryWikiSourceSyncStateStore(() => createMemoryKeyedStore()),
+  );
+  importRuns.configureMemoryWikiImportRunStateStore(
+    importRuns.createMemoryWikiImportRunStateStore(() => createMemoryKeyedStore()),
+  );
+  const config = configModule.resolveMemoryWikiConfig(
+    { search: { backend: "local", corpus: "wiki" }, vault: { path: vault } },
+    { homedir: os.homedir() },
+  );
+  await vaultModule.initializeMemoryWikiVault(config);
+  const close = async () => {
+    try {
+      const reader = await load("query-reader.ts");
+      await reader.closeMemoryWikiQueryReader();
+    } catch {
+      // The base tree has no reader module; nothing to close.
+    }
+  };
+  return { config, queryModule, compileModule, close };
+}
+
+// Concurrent reads: start one whole-vault search, then issue exact-path wiki_get reads
+// every 500 ms without waiting for the previous one, and time each read individually.
+// BEFORE (published head) queues each read behind the scan on the single worker;
+// AFTER reads the page on the calling thread while the scan runs in the pool.
+async function concurrent() {
+  const vault = path.resolve(readArg("vault"));
+  const query = readArg("query");
+  const out = path.resolve(readArg("out"));
+  const label = readArg("label");
+  const readCount = Number(readArg("reads", "20"));
+  const intervalMs = Number(readArg("interval", "500"));
+  const { config, queryModule, close } = await loadPlugin(vault);
+  const signal = new AbortController().signal;
+  await queryModule.searchMemoryWiki({ config, query: "zzzz-no-such-token-166304", maxResults: 10, signal });
+  const keepAlive = setInterval(() => {}, 2 ** 30);
+  const scanStart = performance.now();
+  let scanWallMs = 0;
+  let scanError: string | null = null;
+  const scan = queryModule
+    .searchMemoryWiki({ config, query, maxResults: 10, signal })
+    .then(
+      (results: unknown[]) => {
+        scanWallMs = performance.now() - scanStart;
+        return results;
+      },
+      (error: unknown) => {
+        // A scan past the 30 s task bound rejects; the reads are still timed.
+        scanWallMs = performance.now() - scanStart;
+        scanError = error instanceof Error ? error.message : String(error);
+        return [] as unknown[];
+      },
+    );
+  const reads: Array<{ index: number; lookup: string; issuedAtMs: number; ms: number; found: boolean }> = [];
+  const pending: Promise<void>[] = [];
+  for (let index = 0; index < readCount; index += 1) {
+    await new Promise<void>((resolve) => setTimeout(resolve, intervalMs));
+    const lookup = `entities/page-${(index * 4 + 1) % 10000}.md`;
+    const issuedAtMs = performance.now() - scanStart;
+    const started = performance.now();
+    pending.push(
+      queryModule
+        .getMemoryWikiPage({ config, lookup, lineCount: 1 })
+        .then((page: unknown) => {
+          reads.push({ index, lookup, issuedAtMs: Math.round(issuedAtMs), ms: Math.round(performance.now() - started), found: page !== null });
+        }),
+    );
+  }
+  const scanResults = await scan;
+  await Promise.all(pending);
+  clearInterval(keepAlive);
+  const sorted = reads.map((read) => read.ms).toSorted((left, right) => left - right);
+  const report = {
+    label,
+    machine: `${os.platform()} ${os.arch()} node ${process.version}`,
+    capturedAt: new Date().toISOString(),
+    vault: { path: vault, compiled: false },
+    query,
+    scanWallMs: Math.round(scanWallMs),
+    scanResultCount: scanResults.length,
+    scanError,
+    reads: { count: reads.length, intervalMs, issuedWhileScanRunning: reads.filter((read) => read.issuedAtMs < scanWallMs).length, allFound: reads.every((read) => read.found) },
+    readMs: {
+      p50: quantile(sorted, 0.5),
+      p99: quantile(sorted, 0.99),
+      max: quantile(sorted, 1),
+      min: sorted[0] ?? 0,
+    },
+    perRead: reads.toSorted((left, right) => left.index - right.index),
+  };
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await fs.writeFile(out, JSON.stringify(report, null, 2) + "\n");
+  console.log(JSON.stringify({ ...report, perRead: undefined }, null, 2));
+  await close();
+  process.exit(0);
 }
 
 async function search() {
@@ -296,27 +410,7 @@ async function search() {
 async function cold() {
   const vault = path.resolve(readArg("vault"));
   const out = path.resolve(readArg("out"));
-  const load = (file: string) => import(pathToFileURL(path.join(PLUGIN_SRC, file)).href);
-  const compiledCache = await load("compiled-cache.ts");
-  const sourceSync = await load("source-sync-state.ts");
-  const importRuns = await load("import-runs-state.ts");
-  const configModule = await load("config.ts");
-  const vaultModule = await load("vault.ts");
-  const queryModule = await load("query.ts");
-  compiledCache.configureMemoryWikiCompiledCacheStore(
-    compiledCache.createMemoryWikiCompiledCacheStore(() => createMemoryBlobStore<unknown>()),
-  );
-  sourceSync.configureMemoryWikiSourceSyncStateStore(
-    sourceSync.createMemoryWikiSourceSyncStateStore(() => createMemoryKeyedStore()),
-  );
-  importRuns.configureMemoryWikiImportRunStateStore(
-    importRuns.createMemoryWikiImportRunStateStore(() => createMemoryKeyedStore()),
-  );
-  const config = configModule.resolveMemoryWikiConfig(
-    { search: { backend: "local", corpus: "wiki" }, vault: { path: vault } },
-    { homedir: os.homedir() },
-  );
-  await vaultModule.initializeMemoryWikiVault(config);
+  const { config, queryModule, close } = await loadPlugin(vault);
   const keepAlive = setInterval(() => {}, 2 ** 30);
   const timings: number[] = [];
   for (let index = 0; index < 3; index += 1) {
@@ -340,12 +434,7 @@ async function cold() {
   await fs.mkdir(path.dirname(out), { recursive: true });
   await fs.writeFile(out, JSON.stringify(report, null, 2) + "\n");
   console.log(JSON.stringify(report));
-  try {
-    const reader = await load("query-reader.ts");
-    await reader.closeMemoryWikiQueryReader();
-  } catch {
-    // The base tree has no reader module; nothing to close.
-  }
+  await close();
   process.exit(0);
 }
 
@@ -354,6 +443,8 @@ if (command === "generate") {
   await generate();
 } else if (command === "search") {
   await search();
+} else if (command === "concurrent") {
+  await concurrent();
 } else if (command === "cold") {
   await cold();
 } else {

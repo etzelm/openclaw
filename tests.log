@@ -14,518 +14,521 @@ Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) 
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > preserves Unicode letters and numbers in wiki slugs 117ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > keeps ASCII behavior unchanged 11ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > retains combining marks so distinct titles do not collapse 29ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > caps long Unicode slugs to a safe filename byte length 10ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > caps composed wiki page filenames to a safe path-component length 3ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > extracts and preserves complete human Notes blocks 4ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > leaves pages without human Notes markers unchanged 6ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > rejects a missing closing marker before extracting or replacing Notes 7ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > rejects a missing opening marker before extracting or replacing Notes 4ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > ignores a standalone marker inside fenced source content 4ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > ignores a standalone marker inside fenced source content 10ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > preserves marker comments embedded in complete human Notes 4ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > ignores source-body marker pairs when extracting and preserving actual Notes 7ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > can omit link extraction without changing parsed content or other metadata 46ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > marks raw and generated source body metadata 8ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > normalizes agent-facing people wiki metadata 7ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > reports and excludes unparsable frontmatter from page scans (#96125) 6ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > reports and excludes sequence frontmatter roots from page scans 3ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > reports and excludes scalar frontmatter roots from page scans 3ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > preserves frontmatter and body for valid YAML (#96125 control) 5ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > accepts a closing fence longer than the opening fence (#97945) 3ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > does not leak [[…]] when a shorter fence-like line appears inside a longer fenced block (#97945) 4ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles an invalid backtick info string without hiding prose links 3ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles an unmatched backtick run without hiding prose links 3ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles a fenced block inside a blockquote without hiding prose links 26ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles a fenced block inside a list without hiding prose links 16ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles a multiline code span without hiding prose links 16ms
- ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles separate multi-backtick code spans without hiding prose links 24ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > imports public memory artifacts and stays idempotent across reruns 257ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > skips generated artifacts from its own vault 78ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > imports bridge artifacts from legacy providers without agent ids 99ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > isolates agent-scoped bridge artifacts while preserving shared ownership 180ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > rejects an unresolved agent-scoped bridge config 3ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > returns a no-op result outside bridge mode 3ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > returns a no-op result when bridge mode is enabled without exported memory artifacts 3ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > imports the public memory event journal when followMemoryEvents is enabled 219ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > salvages bridge page Notes when the source artifact disappears 236ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > keeps stale pages when the memory capability closes during a source read 315ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > renders the empty report without issue sections 754ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > refuses to overwrite bridge source pages through vault symlinks 217ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > warns when unsafe-local is selected without explicit private access 26ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > skips artifact enumeration when readMemoryArtifacts is disabled 4ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > counts only artifacts owned by the resolved agent in agent scope 3ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > scopes global-vault status metadata when called by an agent tool 6ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > rejects status for an unresolved agent-scoped config 21ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes root and directory indexes for native markdown 732ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > reports non-symlink bridge source write safety failures without symlink wording 210ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > discovers pages in nested subdirectories 254ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > does not remove empty directory bridge source collisions as hardlinks 241ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > keeps changed imports compile-required when auto-compile is disabled 379ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > excludes malformed pages from status counts (#96125) 238ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > counts source provenance from the vault 212ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > renderMemoryWikiStatus > includes warnings in the text output 4ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > memory wiki doctor > builds actionable fixes from status warnings 5ms
- ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > memory wiki doctor > suggests bridge fixes when no public artifacts are exported 4ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > replaces bridge source page hardlinks without clobbering their target 255ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > accepts native markdown links that include the relative .md target 711ms
- ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > caps composed bridge source filenames to the filesystem component limit 188ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > serves an unchanged compiled cache without reading the vault 632ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > does not report broken wikilinks for [[…]] patterns inside fenced code blocks or inline code (#97945) 573ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > preserves source page bytes while rebuilding derived artifacts 262ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > excludes malformed pages from indexes, digests, counts, and page writes (#96125) 281ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > rejects root index with sequence-root frontmatt… without changing its bytes 79ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > accepts unmanaged raw markdown source pages without page frontmatter 443ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > registers Obsidian CLI methods with write scope 76ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > rejects directory index with syntax-error front… without changing its bytes 207ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.status resolves its request agent exactly once 19ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.importRuns resolves its request agent exactly once 21ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.importInsights resolves its request agent exactly once 21ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.overview resolves its request agent exactly once 12ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.init resolves its request agent exactly once 16ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.doctor resolves its request agent exactly once 22ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.compile resolves its request agent exactly once 20ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.ingest resolves its request agent exactly once 15ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.lint resolves its request agent exactly once 12ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.bridge.import resolves its request agent exactly once 19ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.unsafeLocal.import resolves its request agent exactly once 14ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.search resolves its request agent exactly once 14ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.apply resolves its request agent exactly once 10ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > rejects directory index with scalar-root frontm… without changing its bytes 155ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.get resolves its request agent exactly once 8ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.search resolves its request agent exactly once 16ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.open resolves its request agent exactly once 9ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.command resolves its request agent exactly once 13ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.daily resolves its request agent exactly once 14ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > keeps only the Obsidian executable probe outside vault resolution 13ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects official Obsidian CLI actions for agent-scoped vaults 20ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > binds manual compilation to the active service generation 12ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps unmarked source pages without frontmatter visible to structure lint 491ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > keeps global vault requests on the shared base config 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > resolves an agent-scoped vault once from each request and live app config 11ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > fails closed for invalid agent-scoped requests 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > fails closed for invalid agent-scoped requests 9ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns recent import runs over the gateway 8ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.importInsights responds without waiting for source sync 8ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.overview responds without waiting for source sync 8ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns explicit rebuilding dashboard availability 12ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns explicit compile-required dashboard availability 9ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns explicit failed dashboard availability 10ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > prefers shared memory corpus guidance when memory tools are available 24ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > prepares a compact compiled digest from SQLite 37ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > hard-bounds oversized structured claims without spl… before model-context injection 23ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > validates required query params for wiki.search 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.importRuns 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.search 12ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.get 5ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.get 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > forwards wiki.search mode and corpus options over the gateway 14ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > passes the default agent scope to shared wiki.search gateway calls 11ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > registers wiki.ingest with admin scope and keeps compile at write scope 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > forwards ingest requests over the gateway 10ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects an invalid wiki.apply operation before source sync or mutation 11ms
- ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > applies wiki mutations over the gateway 28ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > hard-bounds oversized page titles without splitting… before model-context injection 28ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > hard-bounds the complete digest across multiple ind… before model-context injection 21ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > keeps the digest disabled by default 52ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > discovers pages in nested subdirectories during compile 445ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > stabilizes digest ordering for prompt-cache-friendly output 38ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > does no filesystem work during synchronous prompt guidance 4ms
- ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > prepares only the invoking agent's compiled digest 102ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > imports explicit private paths and preserves unsafe-local provenance 297ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > bounds concurrent page reads and stops the queue after abort 188ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps malformed imported source bodies visible to structure lint 534ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > salvages unsafe-local page Notes when configured files disappear 286ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > preserves pages and human notes for unavailable configured paths 271ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps fully truncated tracked imported source pages visible to structure lint 584ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > renders obsidian-friendly links when configured 621ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > keeps prior pages, sync state, and ingest log when a source read fails 175ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > skips generated source pages copied into a configured path 355ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > skips a configured source whose canonical path is inside the active vault 165ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps generated source pages with missing frontmatter visible to structure lint 664ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes related blocks from source ids and shared sources 712ms
- ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > caps composed unsafe-local filenames to the filesystem component limit 173ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > resolves title, slug, fragment, and imported source-path wikilinks 534ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > does not rewrite empty source pages into related-only stubs 477ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > deduplicates before the four-signal cap… 32ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > deduplicates prefixed corrections again… 4ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > does not backfill duplicate corrections… 5ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > keeps empty input empty 4ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > keeps withheld content out of all signa… 3ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps path target matching case-sensitive 646ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > compiled import insights > clusters ChatGPT import pages by topic and extracts digest fields 451ms
- ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > compiled import insights > truncates import insight summaries without leaving lone surrogates 342ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > preserves question marks in Obsidian title and slug wikilinks 545ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > routes bridge mode through bridge sync and merges refresh results 90ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > coalesces separately resolved equivalent configs for one vault 65ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > keeps sharing the active flight while indexes refresh 60ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > clears completed flights so later polls observe new source state 7ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > waits for an existing vault mutation before starting source sync 6ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > serializes different config snapshots for the same vault 56ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > does not relate every page through a broad shared source 1473ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > serializes bridge and unsafe-local syncs for one vault 58ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > allows different agent vaults to sync in parallel 111ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > clears failed flights so a later sync can retry 7ms
- ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > routes unsafe-local mode through unsafe-local sync 8ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > detects duplicate ids, provenance gaps, contradictions, and open questions 585ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes dashboard report pages when createDashboards is enabled 595ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > registers prompt supplement, gateway methods, tools, and wiki cli surface 34ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > registers default-vault tools inside the configured state directory 4ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > resolves every tool factory from keyed agent entries 21ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > forwards protected recall authorization to wiki search and get 3ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > activates an initialized legacy vault before an external compile 87ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes the query reader worker when the plugin service stops 21ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > fences cache publication when the plugin service stops 80ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes queued wiki.importInsights source sync before it can activate a vault 85ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes queued wiki.compile source sync before it can activate a vault 81ms
- ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > clears active owners before a fallible lifecycle identity refresh 85ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > reports unparsable frontmatter as a lint issue instead of failing the whole vault (#96125) 937ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > enforces visibility for all current session storage layouts 370ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > excludes concept and synthesis pages from stale-pages report 1106ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > normalizes string confidence in wiki mutations 11ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > normalizes CLI-style wiki mutation operation aliases 3ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > rejects out-of-range string confidence in wiki mutations 3ms
- ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > falls back when the source mtime is outside the Date range 196ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > registers apply synthesis and writes a synthesis page 1533ms
- ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > skips 1,914 unchanged pages before opening the guarded vault 119ms
- ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > recreates an unchanged source entry when its page is missing 92ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves ingest notes after a transient existing-page read failure 1658ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > keeps the parent --agent spelling compatible 177ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps the previous lint report when atomic publication fails 999ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > skips dashboard report pages when createDashboards is disabled 580ms
- ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > preserves a bridge page and tracked state when its human Notes opening marker is missing 97ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > forwards --agent through every bridge Gateway call 11ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves imported notes after a transient existing-page read failure 99ms
- ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > preserves a unsafe-local page and tracked state when its human Notes closing marker is missing 100ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > leaves imported source pages unchanged after a persistent existing-page read failure 100ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 2067ms
- ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > preserves CRLF human notes without copying marker comments from existing imported content 180ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > skips malformed pages while searching the rest of the vault (#96125) 1250ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the default search limit for non-finite maxResults 292ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > creates synthesis pages with managed summary blocks and refreshed indexes 1232ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes agent directory, relationship, provenance, and privacy reports 958ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > imports OKF concept documents as searchable wiki concept pages 2918ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > rejects a malformed lint report without changing its bytes (syntax-error) 1026ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > does not match generated related blocks during wiki search 321ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > filters standalone structural markers from matching, snippets, and ranking 300ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > updates ingested source pages when the existing page stays missing across retry 1521ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps managed-block content and inline marker prose searchable 386ms
- ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > rejects a malformed lint report without changing its bytes (sequence-root) 1123ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > matches pages when all query terms appear without an exact phrase 300ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > applies a write when an unrelated vault page has malformed frontmatter (#96125) 1330ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > registers OKF import and searches imported concepts 2122ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects apply confidence values outside the documented range 6ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects non-decimal wiki search and get numeric options before dispatch 3ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > prunes repository metadata and dependency subtrees 1239ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > ignores generated related links when computing backlinks on repeated compile 1286ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > matches non-ASCII query terms without an exact phrase 337ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > rejects a malformed write target without replacing its metadata (syntax-error) (#96125) 282ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > rejects a malformed write target without replacing its metadata (sequence-root) (#96125) 294ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > leaves ingested source pages unchanged after a persistent existing-page read failure 1146ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 2708ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > accepts signed and zero-padded wiki get line options 916ms
- ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > retries transient page reads during compile 868ms
- ✓  extension-memory  extensions/memory-wiki/src/compiled-cache.test.ts > Memory Wiki compiled publication ownership > owns every compiled branch without changing persisted text: plain-ascii 98ms
- ✓  extension-memory  extensions/memory-wiki/src/compiled-cache.test.ts > Memory Wiki compiled publication ownership > owns every compiled branch without changing persisted text: 漢字-é-😀-é-�-x-� 12ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > supports people-routing search modes and claim evidence drilldown metadata 1296ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > caps generated concept filenames for long OKF concept paths 1470ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves synthesis notes and frontmatter after a transient existing-page read failure 1233ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki status 42ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki doctor 21ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki init 16ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki compile 16ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki lint 8ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki ingest 3ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki okf import 3ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki search 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > imports public memory artifacts and stays idempotent across reruns 230ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > skips generated artifacts from its own vault 69ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > imports bridge artifacts from legacy providers without agent ids 116ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > isolates agent-scoped bridge artifacts while preserving shared ownership 189ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > rejects an unresolved agent-scoped bridge config 12ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > returns a no-op result outside bridge mode 12ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > returns a no-op result when bridge mode is enabled without exported memory artifacts 37ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > imports the public memory event journal when followMemoryEvents is enabled 114ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > salvages bridge page Notes when the source artifact disappears 409ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > keeps stale pages when the memory capability closes during a source read 431ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > renders the empty report without issue sections 1220ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > refuses to overwrite bridge source pages through vault symlinks 420ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes root and directory indexes for native markdown 1023ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > reports non-symlink bridge source write safety failures without symlink wording 214ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves user notes when the same source is re-ingested 1424ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > keeps changed imports compile-required when auto-compile is disabled 419ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > does not remove empty directory bridge source collisions as hardlinks 249ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > accepts native markdown links that include the relative .md target 682ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > replaces bridge source page hardlinks without clobbering their target 272ms
+ ✓  extension-memory  extensions/memory-wiki/src/bridge.test.ts > syncMemoryWikiBridgeSources > caps composed bridge source filenames to the filesystem component limit 191ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the source page when handwritten Notes are missing the closing marker 710ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > serves an unchanged compiled cache without reading the vault 579ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > does not report broken wikilinks for [[…]] patterns inside fenced code blocks or inline code (#97945) 673ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > preserves source page bytes while rebuilding derived artifacts 460ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the source page when handwritten Notes are missing the opening marker 648ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > excludes malformed pages from indexes, digests, counts, and page writes (#96125) 328ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > accepts unmanaged raw markdown source pages without page frontmatter 644ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > rejects root index with sequence-root frontmatt… without changing its bytes 194ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > rejects directory index with syntax-error front… without changing its bytes 185ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the source page when handwritten Notes are missing the opening and closing marker 603ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > rejects directory index with scalar-root frontm… without changing its bytes 194ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps unmarked source pages without frontmatter visible to structure lint 561ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > imports explicit private paths and preserves unsafe-local provenance 414ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves notes without corrupting source content that contains human markers 845ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > discovers pages in nested subdirectories during compile 744ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps malformed imported source bodies visible to structure lint 756ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > salvages unsafe-local page Notes when configured files disappear 243ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > bounds concurrent page reads and stops the queue after abort 248ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > preserves pages and human notes for unavailable configured paths 270ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > keeps prior pages, sync state, and ingest log when a source read fails 513ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves CRLF notes without copying marker comments from existing source content 1174ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps fully truncated tracked imported source pages visible to structure lint 932ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > renders obsidian-friendly links when configured 924ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > skips generated source pages copied into a configured path 306ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > skips a configured source whose canonical path is inside the active vault 224ms
+ ✓  extension-memory  extensions/memory-wiki/src/unsafe-local.test.ts > syncMemoryWikiUnsafeLocalSources > caps composed unsafe-local filenames to the filesystem component limit 261ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps generated source pages with missing frontmatter visible to structure lint 757ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes related blocks from source ids and shared sources 753ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the whole note when the note text itself contains a marker comment 947ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > does not rewrite empty source pages into related-only stubs 861ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > resolves title, slug, fragment, and imported source-path wikilinks 989ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the note when the note text contains a Markdown heading 1052ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps path target matching case-sensitive 682ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > normalizes string confidence in wiki mutations 9ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > normalizes CLI-style wiki mutation operation aliases 5ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > rejects out-of-range string confidence in wiki mutations 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > accepts CLI-style operation aliases in wiki_apply schema 8ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > allows provenance metadata in wiki_apply claim evidence 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > preserves question marks in Obsidian title and slug wikilinks 868ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > rejects non-object wiki_apply arguments without throwing a TypeError 460ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > enforces visibility for all current session storage layouts 321ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > does not relate every page through a broad shared source 1948ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > keeps wiki pages unchanged for unknown operation update 381ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 1725ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > creates synthesis pages with managed summary blocks and refreshed indexes 1772ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > registers apply synthesis and writes a synthesis page 1932ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > skips malformed pages while searching the rest of the vault (#96125) 1460ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > detects duplicate ids, provenance gaps, contradictions, and open questions 1893ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > keeps the parent --agent spelling compatible 349ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > forwards --agent through every bridge Gateway call 10ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves ingest notes after a transient existing-page read failure 2301ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the default search limit for non-finite maxResults 325ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes dashboard report pages when createDashboards is enabled 1705ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves imported notes after a transient existing-page read failure 241ms
+ ✓  extension-memory  extensions/memory-wiki/src/reserved-index-collision.repro.test.ts > reserved index.md filename collision (repro) > create_synthesis titled Index stays retrievable 2704ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 2806ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > leaves imported source pages unchanged after a persistent existing-page read failure 244ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > does not match generated related blocks during wiki search 425ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest.test.ts > ingestMemoryWikiSource > copies a local text file into sources markdown 1655ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > filters standalone structural markers from matching, snippets, and ranking 475ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > imports OKF concept documents as searchable wiki concept pages 3423ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki status 18ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki doctor 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki init 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki compile 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki lint 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki ingest 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki okf import 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki search 2ms
  ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki get 3ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki apply synthesis 3ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki apply metadata 3ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki bridge import 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki apply synthesis 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki apply metadata 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki bridge import 4ms
  ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki chatgpt import 2ms
  ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > accepts command-local --agent for wiki chatgpt rollback 2ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > uses the sole configured agent for nested wiki commands 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > uses the sole configured agent for nested wiki commands 3ms
  ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > keeps global-vault search scoped to the explicitly selected agent 2ms
  ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > gives actionable agent-selection guidance for a empty roster 3ms
  ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > gives actionable agent-selection guidance for a multi-agent roster 2ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > registers apply metadata and preserves the page body 1379ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps route-question relationship matches in compiled digest prefilter 1002ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > updates page metadata without overwriting existing human notes 2015ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses body text instead of frontmatter for an… for snippets 297ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 2182ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > returns isolated defaults 22ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > keeps default global vaults inside the configured state directory 5ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > applies a write when an unrelated vault page has malformed frontmatter (#96125) 1917ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 2016ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps managed-block content and inline marker prose searchable 526ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > reports unparsable frontmatter as a lint issue instead of failing the whole vault (#96125) 1666ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > applies supported metadata operation update_metadata 3166ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > excludes concept and synthesis pages from stale-pages report 1856ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > rejects a malformed write target without replacing its metadata (syntax-error) (#96125) 535ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 591ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > matches pages when all query terms appear without an exact phrase 548ms
+ ✓  extension-memory  extensions/memory-wiki/src/reserved-index-collision.repro.test.ts > reserved index.md filename collision (repro) > ingest of a file titled Index stays retrievable 1863ms
+ ✓  extension-memory  extensions/memory-wiki/src/reserved-index-collision.repro.test.ts > reserved index.md filename collision (repro) > disambiguates the compiler-owned index stem but leaves shared slug output stable 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > rejects a malformed write target without replacing its metadata (sequence-root) (#96125) 460ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > registers OKF import and searches imported concepts 2503ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects apply confidence values outside the documented range 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects non-decimal wiki search and get numeric options before dispatch 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > matches non-ASCII query terms without an exact phrase 448ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 495ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > updates ingested source pages when the existing page stays missing across retry 2189ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest.test.ts > ingestMemoryWikiSource > ingests a source with many backtick runs without losing its content 1931ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > skips dashboard report pages when createDashboards is disabled 871ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > prunes repository metadata and dependency subtrees 1791ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > keeps the previous lint report when atomic publication fails 1634ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 854ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > applies supported metadata operation metadata 2046ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > accepts signed and zero-padded wiki get line options 1476ms
+ ✓  extension-memory  extensions/memory-wiki/src/agent-vault-isolation.test.ts > agent-scoped memory-wiki tools > keeps apply, search, and get behavior isolated by configured agent 5508ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 609ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > supports people-routing search modes and claim evidence drilldown metadata 1726ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > keeps wiki pages unchanged for out-of-range claim confidence -0.5 540ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > writes agent directory, relationship, provenance, and privacy reports 1513ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > leaves ingested source pages unchanged after a persistent existing-page read failure 1735ms
+ ✓  extension-memory  extensions/memory-wiki/src/ingest.test.ts > ingestMemoryWikiSource > queues behind a held vault mutation instead of writing mid-transaction 1751ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > runs wiki doctor against explicitly selected agent-scoped vaults 3123ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > does not require an agent to probe Obsidian CLI availability 4ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > keeps wiki pages unchanged for out-of-range claim confidence 999 425ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 4226ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > rejects a malformed lint report without changing its bytes (syntax-error) 1695ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > updates page metadata without overwriting existing human notes 2591ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > caps generated concept filenames for long OKF concept paths 2238ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 1675ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps route-question relationship matches in compiled digest prefilter 1459ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > deduplicates before the four-signal cap… 47ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > deduplicates prefixed corrections again… 26ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > registers apply metadata and preserves the page body 1864ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > does not backfill duplicate corrections… 26ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > keeps empty input empty 5ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > projectMemoryWikiImportInsight > keeps withheld content out of all signa… 5ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses body text instead of frontmatter for an… for snippets 353ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > ignores generated related links when computing backlinks on repeated compile 1705ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves synthesis notes and frontmatter after a transient existing-page read failure 1806ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > warns when unsafe-local is selected without explicit private access 21ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > skips artifact enumeration when readMemoryArtifacts is disabled 4ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > counts only artifacts owned by the resolved agent in agent scope 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > scopes global-vault status metadata when called by an agent tool 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > rejects status for an unresolved agent-scoped config 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/lint.test.ts > lintMemoryWikiVault > rejects a malformed lint report without changing its bytes (sequence-root) 1415ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the first line with the most partial to… for snippets 434ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > returns tool-safe relative report paths from wiki_lint 2027ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > compiled import insights > clusters ChatGPT import pages by topic and extracts digest fields 876ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > discovers pages in nested subdirectories 562ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the first all-token line before partial… for snippets 405ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > runs wiki doctor and sets a non-zero exit code when warnings exist 1199ms
+ ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > preserves disjoint metadata updates from concurrent agent turns 2217ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > namespaces concept pages by bundle so repeated OKF paths do not overwrite 2052ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 1546ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses body text when the query has no searcha… for snippets 360ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > excludes malformed pages from status counts (#96125) 447ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > routes active bridge status and doctor through the gateway 277ms
+ ✓  extension-memory  extensions/memory-wiki/src/compile.test.ts > compileMemoryWikiVault > retries transient page reads during compile 1391ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > does not treat a path-alias policy failure as a missing synthesis page 1279ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 2776ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read on the calling thread while a whole-vault scan runs in the pool 9977ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-insights.test.ts > compiled import insights > truncates import insight summaries without leaving lone surrogates 946ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > registers Obsidian CLI methods with write scope 206ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.status resolves its request agent exactly once 26ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.importRuns resolves its request agent exactly once 30ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.importInsights resolves its request agent exactly once 26ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > bounds oversized body lines before search results reach model context 511ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > sanitizes gateway status text output without changing JSON output 453ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.overview resolves its request agent exactly once 25ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.init resolves its request agent exactly once 67ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > resolveMemoryWikiStatus > counts source provenance from the vault 615ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > renderMemoryWikiStatus > includes warnings in the text output 4ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > memory wiki doctor > builds actionable fixes from status warnings 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/status.test.ts > memory wiki doctor > suggests bridge fixes when no public artifacts are exported 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.doctor resolves its request agent exactly once 33ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.compile resolves its request agent exactly once 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.ingest resolves its request agent exactly once 15ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.lint resolves its request agent exactly once 13ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.bridge.import resolves its request agent exactly once 16ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.unsafeLocal.import resolves its request agent exactly once 77ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects malformed gateway responses before rendering 346ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.search resolves its request agent exactly once 28ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.apply resolves its request agent exactly once 14ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.get resolves its request agent exactly once 16ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.search resolves its request agent exactly once 39ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > bounds oversized structured claims before search results reach model context 403ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.open resolves its request agent exactly once 75ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.command resolves its request agent exactly once 13ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.obsidian.daily resolves its request agent exactly once 14ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > keeps only the Obsidian executable probe outside vault resolution 37ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects official Obsidian CLI actions for agent-scoped vaults 33ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > binds manual compilation to the active service generation 16ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > keeps global vault requests on the shared base config 18ms
+ ✓  extension-memory  extensions/memory-wiki/src/corpus-supplement.visibility.test.ts > memory-wiki corpus supplement visibility > enforces bridge ownership through direct and registered corpus fallbacks 2061ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects oversized gateway strings before rendering 265ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > resolves an agent-scoped vault once from each request and live app config 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > fails closed for invalid agent-scoped requests 16ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > fails closed for invalid agent-scoped requests 29ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns recent import runs over the gateway 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.importInsights responds without waiting for source sync 42ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > wiki.overview responds without waiting for source sync 94ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns explicit rebuilding dashboard availability 20ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns explicit compile-required dashboard availability 25ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > returns explicit failed dashboard availability 17ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > bounds UTF-16 surrogate pairs at the snippet b… before search results reach model context 544ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > truncates gateway status text output without splitting surrogate pairs 381ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > validates required query params for wiki.search 21ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.importRuns 16ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.search 70ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault.test.ts > initializeMemoryWikiVault > creates the wiki layout and seed files 500ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > falls back when the source mtime is outside the Date range 180ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.get 22ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects invalid positive integer gateway param for wiki.get 13ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > forwards wiki.search mode and corpus options over the gateway 19ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > passes the default agent scope to shared wiki.search gateway calls 31ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > registers wiki.ingest with admin scope and keeps compile at write scope 35ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > forwards ingest requests over the gateway 13ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > rejects an invalid wiki.apply operation before source sync or mutation 20ms
+ ✓  extension-memory  extensions/memory-wiki/src/gateway.test.ts > memory-wiki gateway methods > applies wiki mutations over the gateway 17ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > skips 1,914 unchanged pages before opening the guarded vault 86ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > ranks fresh supported claims ahead of stale contested claims 322ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 1842ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > recreates an unchanged source entry when its page is missing 76ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > prefers shared memory corpus guidance when memory tools are available 58ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves chatgpt conversation notes after a transient existing-page read failure 1834ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > preserves a bridge page and tracked state when its human Notes opening marker is missing 185ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > prepares a compact compiled digest from SQLite 96ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault.test.ts > initializeMemoryWikiVault > is idempotent when the vault already exists 527ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > surfaces bridge provenance for imported source pages 344ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > preserves a unsafe-local page and tracked state when its human Notes closing marker is missing 165ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > hard-bounds oversized structured claims without spl… before model-context injection 77ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > hard-bounds oversized page titles without splitting… before model-context injection 94ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 400ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-page-shared.test.ts > writeImportedSourcePage > preserves CRLF human notes without copying marker comments from existing imported content 285ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > hard-bounds the complete digest across multiple ind… before model-context injection 146ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > removes stale concept pages when an OKF bundle drops a concept 2486ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > routes bridge mode through bridge sync and merges refresh results 40ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault.test.ts > initializeMemoryWikiVault > reactivates an existing vault without recreating scaffold or rewriting source pages 495ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > keeps the digest disabled by default 139ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > coalesces separately resolved equivalent configs for one vault 65ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > keeps sharing the active flight while indexes refresh 70ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > reports a contract error when the shared manager lacks search() 451ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > clears completed flights so later polls observe new source state 22ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > waits for an existing vault mutation before starting source sync 43ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 518ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > stabilizes digest ordering for prompt-cache-friendly output 173ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > does no filesystem work during synchronous prompt guidance 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > serializes different config snapshots for the same vault 131ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > preserves Unicode letters and numbers in wiki slugs 46ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > serializes bridge and unsafe-local syncs for one vault 65ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > routes active bridge imports through the gateway and keeps disabled bridge imports local 1418ms
+ ✓  extension-memory  extensions/memory-wiki/src/prompt-section.test.ts > Memory Wiki prompt section > prepares only the invoking agent's compiled digest 205ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > includes memory results and backfills wiki capacity for all-corpus search 379ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > keeps ASCII behavior unchanged 28ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > retains combining marks so distinct titles do not collapse 68ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > allows different agent vaults to sync in parallel 186ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > clears failed flights so a later sync can retry 10ms
+ ✓  extension-memory  extensions/memory-wiki/src/source-sync.test.ts > syncMemoryWikiImportedSources > routes unsafe-local mode through unsafe-local sync 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > caps long Unicode slugs to a safe filename byte length 51ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > slugifyWikiSegment > caps composed wiki page filenames to a safe path-component length 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > extracts and preserves complete human Notes blocks 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > leaves pages without human Notes markers unchanged 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > rejects a missing closing marker before extracting or replacing Notes 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > rejects a missing opening marker before extracting or replacing Notes 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > ignores a standalone marker inside fenced source content 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > ignores a standalone marker inside fenced source content 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > preserves marker comments embedded in complete human Notes 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > human Notes blocks > ignores source-body marker pairs when extracting and preserving actual Notes 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > can omit link extraction without changing parsed content or other metadata 65ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > marks raw and generated source body metadata 59ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 530ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > normalizes agent-facing people wiki metadata 91ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > reports and excludes unparsable frontmatter from page scans (#96125) 6ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > reports and excludes sequence frontmatter roots from page scans 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > reports and excludes scalar frontmatter roots from page scans 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > toWikiPageSummary > preserves frontmatter and body for valid YAML (#96125 control) 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > accepts a closing fence longer than the opening fence (#97945) 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > does not leak [[…]] when a shorter fence-like line appears inside a longer fenced block (#97945) 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles an invalid backtick info string without hiding prose links 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles an unmatched backtick run without hiding prose links 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles a fenced block inside a blockquote without hiding prose links 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles a fenced block inside a list without hiding prose links 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles a multiline code span without hiding prose links 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/markdown.test.ts > scanWikiPageSummary linkTargets > handles separate multi-backtick code spans without hiding prose links 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > filters session memory hits outside the caller visibility policy 402ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 3291ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves chatgpt conversation notes containing replacement-pattern dollar sequences 1682ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > filters session memory hits for session-bound non-sandboxed callers 448ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > continues past a directory to a later executable on PATH 187ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > preserves PATH precedence for actual files 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > reports an empty PATH as unavailable 80ms
+ ✓  extension-memory  extensions/memory-wiki/src/chatgpt-import-labels.test.ts > keeps imported label ordering and exclusive work topics across overlapping signals 504ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > skips a non-executable file 51ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps protected session recall inside its trusted corpus (wiki/undefined) 423ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 1030ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-overview.test.ts > compiled wiki overview > groups wiki pages by kind and surfaces claims, questions, and contradictions 1238ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > retains symlinks to executable regular files 111ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 823ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > skips symlinks to directories 121ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > skips dangling symlinks 86ms
+ ↓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > preserves PATHEXT precedence
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps protected session recall inside its trusted corpus (all/wiki) 287ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > does not prune existing pages when current OKF scan has invalid concepts 2124ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps context-free shared searches and reads inside the default agent 282ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 719ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > discovers pages in nested subdirectories 425ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > imports ChatGPT exports with dry-run, apply, and rollback 2334ms
+ ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > leaves a ChatGPT page unchanged after a persistent existing-page read failure 1675ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > buildPageContradictionClusters > clusters Unicode contradiction notes that differ only by punctuation 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > buildPageContradictionClusters > keeps combining-mark contradiction notes in separate clusters 39ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > uses the latest claim evidence timestamp without relying on page freshness 24ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > does not let a newer page timestamp make stale claim evidence fresh 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > falls back to page freshness when claim and evidence timestamps are absent 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > keeps malformed claim timestamps unknown instead of using page freshness 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 29 days old as fresh 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 30 days old as aging 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 89 days old as aging 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 90 days old as stale 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp -1 days old as fresh 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > recovers from a transient concurrent-rewrite path-mismatch by retrying 163ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > returns isolated defaults 21ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > keeps default global vaults inside the configured state directory 4ms
  ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > keeps default agent vaults inside the configured state directory 2ms
  ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > uses the configured state directory for schema-resolved defaults 3ms
  ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > expands ~/ paths and preserves explicit modes 2ms
  ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > resolves normalized agent ids to distinct vault roots 3ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > uses the wiki root before appending the single configured agent 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > uses the wiki root before appending the single configured agent 3ms
  ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > fails closed when a multi-agent scoped vault has no agent context 3ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > fails closed for unknown scoped agents 5ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > rejects unsafe-local access for agent-scoped vaults 3ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > rejects the global Obsidian CLI selector for agent-scoped vaults 2ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > memory-wiki manifest config schema > accepts the documented config shape 8ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > memory-wiki manifest config schema > rejects unsafe-local access for agent-scoped vaults 4ms
- ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > memory-wiki manifest config schema > rejects the global Obsidian CLI selector for agent-scoped vaults 2ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > does not treat a path-alias policy failure as a missing synthesis page 1139ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > namespaces concept pages by bundle so repeated OKF paths do not overwrite 1528ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the first line with the most partial to… for snippets 252ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > runs wiki doctor and sets a non-zero exit code when warnings exist 891ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the first all-token line before partial… for snippets 278ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > routes active bridge status and doctor through the gateway 209ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > sanitizes gateway status text output without changing JSON output 268ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses body text when the query has no searcha… for snippets 288ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects malformed gateway responses before rendering 286ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > bounds oversized body lines before search results reach model context 300ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves chatgpt conversation notes after a transient existing-page read failure 1071ms
- ✓  extension-memory  extensions/memory-wiki/src/apply.test.ts > applyMemoryWikiMutation > preserves disjoint metadata updates from concurrent agent turns 1532ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > runs wiki doctor against explicitly selected agent-scoped vaults 1965ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.agent-scope.test.ts > memory-wiki agent-scoped cli > does not require an agent to probe Obsidian CLI availability 2ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 1106ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > rejects oversized gateway strings before rendering 204ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > bounds oversized structured claims before search results reach model context 330ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > truncates gateway status text output without splitting surrogate pairs 292ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > bounds UTF-16 surrogate pairs at the snippet b… before search results reach model context 325ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > removes stale concept pages when an OKF bundle drops a concept 1669ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > ranks fresh supported claims ahead of stale contested claims 294ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 2216ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > preserves chatgpt conversation notes containing replacement-pattern dollar sequences 1249ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > surfaces bridge provenance for imported source pages 345ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > buildPageContradictionClusters > clusters Unicode contradiction notes that differ only by punctuation 104ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > buildPageContradictionClusters > keeps combining-mark contradiction notes in separate clusters 13ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > uses the latest claim evidence timestamp without relying on page freshness 17ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > does not let a newer page timestamp make stale claim evidence fresh 5ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > falls back to page freshness when claim and evidence timestamps are absent 7ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > assessClaimFreshness > keeps malformed claim timestamps unknown instead of using page freshness 4ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 29 days old as fresh 4ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 30 days old as aging 3ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 89 days old as aging 3ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp 90 days old as stale 3ms
- ✓  extension-memory  extensions/memory-wiki/src/claim-health.test.ts > wiki freshness boundaries > classifies a timestamp -1 days old as fresh 3ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 1390ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > reports a contract error when the shared manager lacks search() 245ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > routes active bridge imports through the gateway and keeps disabled bridge imports local 1271ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > dispatches exact reads as single-page tasks and basename reads as whole-vault lookups 654ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 290ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > includes memory results and backfills wiki capacity for all-corpus search 293ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > filters session memory hits outside the caller visibility policy 253ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > does not prune existing pages when current OKF scan has invalid concepts 1287ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 333ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > filters session memory hits for session-bound non-sandboxed callers 334ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 632ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-notes-read-retry.test.ts > memory-wiki existing-page read retry > leaves a ChatGPT page unchanged after a persistent existing-page read failure 1166ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps protected session recall inside its trusted corpus (wiki/undefined) 278ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 681ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps protected session recall inside its trusted corpus (all/wiki) 244ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 635ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 317ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps context-free shared searches and reads inside the default agent 251ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > imports ChatGPT exports with dry-run, apply, and rollback 1546ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > detects body-only changes on timestamp-shaped markdown lines 1344ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > discovers pages in nested subdirectories 255ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > accepts CLI-style operation aliases in wiki_apply schema 14ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > allows provenance metadata in wiki_apply claim evidence 4ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves user notes when the same source is re-ingested 1560ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > requires appConfig for session-bound shared memory searches 254ms
- ✓  extension-memory  extensions/memory-wiki/src/corpus-supplement.visibility.test.ts > memory-wiki corpus supplement visibility > enforces bridge ownership through direct and registered corpus fallbacks 2044ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 852ms
- ✓  extension-memory  extensions/memory-wiki/src/agent-vault-isolation.test.ts > agent-scoped memory-wiki tools > keeps apply, search, and get behavior isolated by configured agent 4017ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the active session agent for shared memory search 261ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > rejects non-object wiki_apply arguments without throwing a TypeError 359ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 1172ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > allows per-call corpus overrides without changing config defaults 365ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > keeps wiki pages unchanged for unknown operation update 376ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps memory search disabled when the backend is local 292ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > rewrites percent-encoded OKF markdown links and preserves suffixes 1251ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest.test.ts > ingestMemoryWikiSource > copies a local text file into sources markdown 1242ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > preserves a user save after compile before the import run record is written 1436ms
- ✓  extension-memory  extensions/memory-wiki/src/wiki-overview.test.ts > compiled wiki overview > groups wiki pages by kind and surfaces claims, questions, and contradictions 772ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the source page when handwritten Notes are missing the closing marker 1236ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reads wiki pages by relative path and slices line ranges 294ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 1024ms
- ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > serializes mutations for one vault and permits nested work 58ms
- ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > allows distinct agent vaults to mutate in parallel 22ms
- ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > serializes physical aliases of one vault 39ms
- ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > queues detached work after its inherited transaction has ended 2ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > returns provenance for imported wiki source pages 254ms
- ✓  extension-memory  extensions/memory-wiki/src/import-runs.test.ts > memory-wiki import runs > lists import runs from plugin state 117ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > falls back to active memory reads when memory corpus is selected 329ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 1262ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 702ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > imports OKF concept frontmatter with CRLF line endings 1243ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest.test.ts > ingestMemoryWikiSource > ingests a source with many backtick runs without losing its content 1313ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the source page when handwritten Notes are missing the opening marker 1191ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > reports the rollback command when compilation fails after a ChatGPT import 1400ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > continues past a directory to a later executable on PATH 147ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > preserves PATH precedence for actual files 76ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > reports an empty PATH as unavailable 26ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > surfaces shared memory backend failures through the wiki_get tool 957ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > skips a non-executable file 96ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > retains symlinks to executable regular files 45ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > skips symlinks to directories 40ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > skips dangling symlinks 83ms
- ↓  extension-memory  extensions/memory-wiki/src/obsidian.discovery.test.ts > Obsidian CLI filesystem discovery > preserves PATHEXT precedence
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 1136ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > applies supported metadata operation update_metadata 2376ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 1459ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > refuses to write imported OKF concept pages through symlinks 1196ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 482ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest.test.ts > ingestMemoryWikiSource > queues behind a held vault mutation instead of writing mid-transaction 1294ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the source page when handwritten Notes are missing the opening and closing marker 1287ms
- ✓  extension-memory  extensions/memory-wiki/src/vault.test.ts > initializeMemoryWikiVault > creates the wiki layout and seed files 457ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reports genuinely missing shared memory files through the wiki_get tool 1011ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 395ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > preserves user edits made after a re-import when rolling back an updated page 1554ms
- ✓  extension-memory  extensions/memory-wiki/src/vault.test.ts > initializeMemoryWikiVault > is idempotent when the vault already exists 323ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 381ms
- ✓  extension-memory  extensions/memory-wiki/src/vault.test.ts > initializeMemoryWikiVault > reactivates an existing vault without recreating scaffold or rewriting source pages 372ms
- ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > recovers from a transient concurrent-rewrite path-mismatch by retrying 103ms
- ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > refuses to import OKF concept files through hardlinks 1126ms
- ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > rethrows a labeled error when the path-mismatch persists across attempts 103ms
- ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > does not retry persistent non-race guard failures and keeps fatal wording 23ms
- ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > maps symlink and path-alias swaps to the symlink wording without retrying 5ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > applies supported metadata operation metadata 1485ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > keeps existing empty shared memory files distinct from missing files 999ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > keeps wiki pages unchanged for out-of-range claim confidence -0.5 251ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 595ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reports a clean error instead of crashing for malformed wiki_get params 203ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 1630ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves notes without corrupting source content that contains human markers 1451ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > keeps wiki pages unchanged for out-of-range claim confidence 999 435ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > normalizes extensionless shared memory lookups before reading 260ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reports a contract error when the shared manager lacks readFile() 219ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > preserves a page recreated between the rollback move-aside and the snapshot restore 1612ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > defaults non-finite memory line options before memory reads 284ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > does not expose indexed session transcripts through wiki_get 245ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 1264ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > requires appConfig for session-bound shared memory reads 190ms
- ✓  extension-memory  extensions/memory-wiki/cli-metadata.test.ts > memory-wiki cli metadata entry > uses the registrar context config instead of reloading global config 97ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > runObsidianAction > builds the official search argv and bounds the request 24ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > fails closed for unknown scoped agents 37ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > requires appConfig for session-bound shared memory searches 308ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > rethrows a labeled error when the path-mismatch persists across attempts 129ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > rejects unsafe-local access for agent-scoped vaults 35ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > resolveMemoryWikiConfig > rejects the global Obsidian CLI selector for agent-scoped vaults 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > does not retry persistent non-race guard failures and keeps fatal wording 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/vault-page-write.test.ts > writeGuardedVaultPage > maps symlink and path-alias swaps to the symlink wording without retrying 6ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > memory-wiki manifest config schema > accepts the documented config shape 32ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > memory-wiki manifest config schema > rejects unsafe-local access for agent-scoped vaults 6ms
+ ✓  extension-memory  extensions/memory-wiki/src/config.test.ts > memory-wiki manifest config schema > rejects the global Obsidian CLI selector for agent-scoped vaults 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 578ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > uses the active session agent for shared memory search 205ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 1633ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > allows per-call corpus overrides without changing config defaults 366ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 364ms
+ ✓  extension-memory  extensions/memory-wiki/src/time.test.ts > resolveMemoryWikiTimestamp > falls back when injected timestamps are outside Date range 171ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > searchMemoryWiki > keeps memory search disabled when the backend is local 266ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > detects body-only changes on timestamp-shaped markdown lines 1985ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 921ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reads wiki pages by relative path and slices line ranges 279ms
+ ✓  extension-memory  extensions/memory-wiki/src/compiled-cache.test.ts > Memory Wiki compiled publication ownership > owns every compiled branch without changing persisted text: plain-ascii 179ms
+ ✓  extension-memory  extensions/memory-wiki/src/compiled-cache.test.ts > Memory Wiki compiled publication ownership > owns every compiled branch without changing persisted text: 漢字-é-😀-é-�-x-� 12ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > returns provenance for imported wiki source pages 434ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > preserves a user save after compile before the import run record is written 1928ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > falls back to active memory reads when memory corpus is selected 293ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 923ms
+ ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > fails instead of truncating at the entry budget 124ms
+ ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > treats a missing optional directory as empty 12ms
+ ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > prunes ignored subtrees before their descendants consume the budget 161ms
+ ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > reports directory failures when partial scans are requested 12ms
+ ✓  extension-memory  extensions/memory-wiki/cli-metadata.test.ts > memory-wiki cli metadata entry > uses the registrar context config instead of reloading global config 56ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 558ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > rewrites percent-encoded OKF markdown links and preserves suffixes 1711ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > surfaces shared memory backend failures through the wiki_get tool 974ms
+ ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > serializes mutations for one vault and permits nested work 21ms
+ ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > allows distinct agent vaults to mutate in parallel 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > serializes physical aliases of one vault 103ms
+ ✓  extension-memory  extensions/memory-wiki/src/mutation-coordinator.test.ts > withMemoryWikiVaultMutation > queues detached work after its inherited transaction has ended 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > runObsidianAction > builds the official search argv and bounds the request 31ms
  ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > runObsidianAction > builds the official open argv and bounds the request 2ms
  ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > runObsidianAction > builds the official command argv and bounds the request 2ms
  ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > runObsidianAction > builds the official daily argv and bounds the request 2ms
- ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > Obsidian CLI availability > fails cleanly when the obsidian cli is not installed 18ms
- ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 315ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves CRLF notes without copying marker comments from existing source content 1328ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > uses the active session agent for shared memory reads 294ms
- ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > imports ChatGPT exports with out-of-range Unix timestamps 969ms
- ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 1622ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.test.ts > memory-wiki tools > returns tool-safe relative report paths from wiki_lint 1494ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > allows per-call get overrides to bypass wiki and force memory fallback 332ms
- ✓  extension-memory  extensions/memory-wiki/src/corpus-supplement.test.ts > memory-wiki corpus supplement > resolves search and get from each invocation's agent context 11ms
- ✓  extension-memory  extensions/memory-wiki/src/corpus-supplement.test.ts > memory-wiki corpus supplement > fails closed before querying when multi-agent context is missing 4ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > limits sandboxed bridge reads to pages owned by the caller 215ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > preserves global bridge reads for non-sandboxed callers 169ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > resolves sandboxed ownership from the session key and fails closed without it 241ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > filters cross-agent bridge pages out of wiki search results 74ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the whole note when the note text itself contains a marker comment 1031ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps an explicit agent's own session hits for a sessionless library or CLI search 299ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps an explicit agent's own session hits for a sessionless Gateway host search 106ms
- ✓  extension-memory  extensions/memory-wiki/src/time.test.ts > resolveMemoryWikiTimestamp > falls back when injected timestamps are outside Date range 33ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps an explicit agent's own session hits for a sessionless Gateway operator search 106ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > returns recall-granted same-agent private session hits under self visibility 191ms
- ✓  extension-memory  extensions/memory-wiki/src/ingest-human-notes.test.ts > ingestMemoryWikiSource human notes > preserves the note when the note text contains a Markdown heading 828ms
- ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > fails instead of truncating at the entry budget 62ms
- ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > treats a missing optional directory as empty 6ms
- ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > prunes ignored subtrees before their descendants consume the budget 8ms
- ✓  extension-memory  extensions/memory-wiki/src/bounded-walk.test.ts > walkMemoryWikiDirectory > reports directory failures when partial scans are requested 6ms
- ✓  extension-memory  extensions/memory-wiki/src/chatgpt-import-labels.test.ts > keeps imported label ordering and exclusive work topics across overlapping signals 104ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > returns recall-granted same-agent private session hits under tree visibility 928ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps requester visibility for a session search without recall under self visibility 67ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps requester visibility for a session search without recall under tree visibility 102ms
- ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > stops parsing vault pages after cancellation during a scan 164ms
- ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > rejects a whole-vault search through the pool's cancellation of its dispatched task 116ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > returns legacy hits exactly as the manager produced them 79ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > resolves a reference-shaped lookup as a path for a legacy owner 77ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > keeps wiki results when the legacy manager cannot be opened 58ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > keeps wiki results when the native provider cannot be opened 55ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > rejects search results when cleanup revokes the caller 53ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > rejects get results when cleanup revokes the caller 55ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > round-trips a record-only result with revision and citations without inventing a path 71ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > releases a denied provider read without retrying it as a path 70ms
- ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > rejects revoked caller authority after search and closes the query-bound capability 90ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.deadline.test.ts > wiki_search cancellation > rejects stalled search and cancels its work on deadline 14ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.deadline.test.ts > wiki_search cancellation > rejects stalled search and cancels its work on caller 4ms
- ✓  extension-memory  extensions/memory-wiki/src/tool.deadline.test.ts > wiki_search cancellation > rejects stalled search and cancels its work on lifecycle 3ms
- ✓  extension-memory  extensions/memory-wiki/src/reserved-index-collision.repro.test.ts > reserved index.md filename collision (repro) > create_synthesis titled Index stays retrievable 994ms
- ✓  extension-memory  extensions/memory-wiki/src/reserved-index-collision.repro.test.ts > reserved index.md filename collision (repro) > ingest of a file titled Index stays retrievable 243ms
- ✓  extension-memory  extensions/memory-wiki/src/reserved-index-collision.repro.test.ts > reserved index.md filename collision (repro) > disambiguates the compiler-owned index stem but leaves shared slug output stable 2ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > persists source sync entries in plugin state 2259ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > persists only changed rows in a 1,914-entry state snapshot 38ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > preserves bridge pages and persisted state when the opening marker is missing 2258ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > returns a completed rollback without initializing or mutating the vault 2114ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > deletes replaced rows before upserts at the store capacity 13ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > ignores retired JSON when reading current source-sync state 7ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > rejects writes beyond the source-sync state row cap 48ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > preserves previous Notes when a long source page is pruned again 54ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps a replaced source page without following its symlink 12ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > salvages Notes and prunes oversized source pages with bounded reads 88ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > prunes oversized generated pages without creating empty Notes recoveries 66ms
+ ✓  extension-memory  extensions/memory-wiki/src/obsidian.test.ts > Obsidian CLI availability > fails cleanly when the obsidian cli is not installed 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > reports the rollback command when compilation fails after a ChatGPT import 1409ms
+ ✓  extension-memory  extensions/memory-wiki/src/import-runs.test.ts > memory-wiki import runs > lists import runs from plugin state 158ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > rejects a scan that exceeds the task bound with the deadline error and keeps serving scans 8660ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reports genuinely missing shared memory files through the wiki_get tool 858ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > imports OKF concept frontmatter with CRLF line endings 1010ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 1312ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > preserves user edits made after a re-import when rolling back an updated page 1105ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > keeps existing empty shared memory files distinct from missing files 564ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reports a clean error instead of crashing for malformed wiki_get params 305ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > refuses to write imported OKF concept pages through symlinks 921ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > normalizes extensionless shared memory lookups before reading 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > reports a contract error when the shared manager lacks readFile() 173ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > defaults non-finite memory line options before memory reads 175ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > does not expose indexed session transcripts through wiki_get 136ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 1306ms
+ ✓  extension-memory  extensions/memory-wiki/src/okf.test.ts > importMemoryWikiOkfBundle > refuses to import OKF concept files through hardlinks 669ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > requires appConfig for session-bound shared memory reads 179ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > stops parsing vault pages after cancellation during a scan 268ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > uses the active session agent for shared memory reads 109ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > rejects a whole-vault search through the pool's cancellation of its dispatched task 218ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > preserves a page recreated between the rollback move-aside and the snapshot restore 1368ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > getMemoryWikiPage > allows per-call get overrides to bypass wiki and force memory fallback 159ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > registers prompt supplement, gateway methods, tools, and wiki cli surface 14ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > registers default-vault tools inside the configured state directory 4ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > resolves every tool factory from keyed agent entries 13ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > forwards protected recall authorization to wiki search and get 3ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > activates an initialized legacy vault before an external compile 25ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes the query reader worker when the plugin service stops 14ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > fences cache publication when the plugin service stops 18ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > limits sandboxed bridge reads to pages owned by the caller 126ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes queued wiki.importInsights source sync before it can activate a vault 63ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > preserves global bridge reads for non-sandboxed callers 119ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes queued wiki.compile source sync before it can activate a vault 66ms
+ ✓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > clears active owners before a fallible lifecycle identity refresh 33ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > resolves sandboxed ownership from the session key and fails closed without it 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/cli.test.ts > memory-wiki cli > imports ChatGPT exports with out-of-range Unix timestamps 421ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > wiki corpus bridge page agent scoping > filters cross-agent bridge pages out of wiki search results 230ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 1209ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps an explicit agent's own session hits for a sessionless library or CLI search 138ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps an explicit agent's own session hits for a sessionless Gateway host search 157ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps an explicit agent's own session hits for a sessionless Gateway operator search 102ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > returns recall-granted same-agent private session hits under self visibility 149ms
+ ✓  extension-memory  extensions/memory-wiki/src/corpus-supplement.test.ts > memory-wiki corpus supplement > resolves search and get from each invocation's agent context 9ms
+ ✓  extension-memory  extensions/memory-wiki/src/corpus-supplement.test.ts > memory-wiki corpus supplement > fails closed before querying when multi-agent context is missing 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.deadline.test.ts > wiki_search cancellation > rejects stalled search and cancels its work on deadline 11ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.deadline.test.ts > wiki_search cancellation > rejects stalled search and cancels its work on caller 3ms
+ ✓  extension-memory  extensions/memory-wiki/src/tool.deadline.test.ts > wiki_search cancellation > rejects stalled search and cancels its work on lifecycle 2ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs two whole-vault scans in parallel on two workers and queues a third 3552ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > returns recall-granted same-agent private session hits under tree visibility 403ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps requester visibility for a session search without recall under self visibility 70ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > keeps requester visibility for a session search without recall under tree visibility 69ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > returns legacy hits exactly as the manager produced them 61ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > resolves a reference-shaped lookup as a path for a legacy owner 56ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > keeps wiki results when the legacy manager cannot be opened 80ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > shared memory owner selection > keeps wiki results when the native provider cannot be opened 63ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > rejects search results when cleanup revokes the caller 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > rejects get results when cleanup revokes the caller 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > round-trips a record-only result with revision and citations without inventing a path 72ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > releases a denied provider read without retrying it as a path 75ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.test.ts > provider-neutral memory records > rejects revoked caller authority after search and closes the query-bound capability 81ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > declares active cache files without reviving retired JSON inventory 20ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > deletes rebuildable compiled cache files without importing them 13ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > migrates the default state-directory vault without touching the real-home vault 11ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > skips configured vaults that have not been initialized 4ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > does not follow a symlinked legacy cache directory 9ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > preserves bridge pages and persisted state when the opening marker is missing 2593ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > persists source sync entries in plugin state 2610ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > persists only changed rows in a 1,914-entry state snapshot 44ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > deletes replaced rows before upserts at the store capacity 14ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > ignores retired JSON when reading current source-sync state 35ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > rejects writes beyond the source-sync state row cap 98ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > preserves previous Notes when a long source page is pruned again 56ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps a replaced source page without following its symlink 10ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > returns a completed rollback without initializing or mutating the vault 2838ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > salvages Notes and prunes oversized source pages with bounded reads 132ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > prunes oversized generated pages without creating empty Notes recoveries 265ms
  ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps oversized human Notes rather than recovering a truncated annotation 47ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not mistake a fence inside oversized human Notes for the source boundary 40ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > restores malformed oversized pages after a bounded recovery scan 39ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not duplicate unchanged recovered Notes on repeated prunes 28ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not create salvage files for pages without human Notes 15ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not salvage generated pages with whitespace-only Notes 6ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not mistake a fence inside oversized human Notes for the source boundary 96ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > restores malformed oversized pages after a bounded recovery scan 171ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not duplicate unchanged recovered Notes on repeated prunes 24ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not create salvage files for pages without human Notes 6ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not salvage generated pages with whitespace-only Notes 7ms
  ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > prunes pages even when the page file is already missing 5ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > declares active cache files without reviving retired JSON inventory 24ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > deletes rebuildable compiled cache files without importing them 20ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > migrates the default state-directory vault without touching the real-home vault 12ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > skips configured vaults that have not been initialized 5ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > does not follow a symlinked legacy cache directory 10ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > preserves bridge pages and persisted state when the closing marker is missing 2281ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > persists the moving phase before vault initialization 2718ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > prunes inactive state when the entire vault is already missing 2474ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not salvage marker comments inside source content as Notes 25ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps the page when salvage write fails 8ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps the page when read fails with a non-ENOENT error 7ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > rejects projected imports that would exceed the source-sync row cap 4ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > preserves unsafe-local pages and persisted state when the both marker is missing 2692ms
- ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > rejects pruning an oversized source page with an unclosed human Notes marker 60ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > refuses retired source-sync JSON without reading, importing, or archiving it 5017ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > reconciles a crash after rename across a real SQLite reopen 2971ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > refuses retired import-runs JSON without reading, importing, or archiving it 2264ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > persists 32 recovery slots before retrying and preserving the 33rd target 2964ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > queues the whole rollback behind an active vault mutation 358ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > preserves a created page recreated while rollback is removing it 453ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > preserves a trailing blank-line edit on a created page 367ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > preserves trailing spaces on an updated page before restoring its snapshot 531ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > does not touch targets again after the persisted process-restart fence 396ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > scans the recovery directory once for a multi-page rollback 720ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > rejects a symlinked recovery directory without touching external files 196ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reuses an existing publication when local source sync starts with an inactive owner 6395ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > preserves July source rows and explains an empty canonical store without reviving JSON 4261ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > refuses symlink, hardlink, and directory targets without touching them 689ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > refuses a file replaced by a directory at the move boundary 210ms
- ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > refuses a target-parent swap at the move boundary without touching either tree 217ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reuses an active compiled owner during repeated initialization and exact page reads 3436ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > accepts an empty July import run and preserves snapshot rollback 5186ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > explicit activation rejects the compiled snapshot after source-edit 2516ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > explicit activation rejects the compiled snapshot after log-rollback 2624ms
- ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > checks every configured agent vault without borrowing canonical state 3550ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > round-trips compile through async preparation and claim query after restart 4238ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > bounds dashboard projections below the compiled-cache entry limit 188ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > replaces a loaded snapshot when a newer publication commits 2049ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > ignores legacy files and rebuilds only on compile 2264ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > persists snapshots beyond the keyed-state value limit 3738ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > loads an externally compiled generation after lifecycle refresh without polling 4063ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > defers a publication that completes during lifecycle reconciliation 3896ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reads the stable owner row directly without enumerating stale metadata 2116ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > preserves vault identity across atomic edits to user-managed scaffold files 2097ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > rejects claims newer than a restored vault after lifecycle refresh 3526ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > rejects a reserved publication when its identical parent was restored 3649ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > keeps a committed publication when an older writer is rejected 1939ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > loads a prepared snapshot without prompt-path file I/O 1982ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reports transient SQLite read failures as failed dashboard state 3703ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > keeps a restored owner closed when lifecycle reconciliation fails 1968ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > rejects a predecessor snapshot when a vault path is reused 3883ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > atomically replaces one stable owner row when the configured vault moves 2062ms
- ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > deletes cache rows when their agent owner is removed 3587ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > preserves bridge pages and persisted state when the closing marker is missing 3689ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > persists the moving phase before vault initialization 4013ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > prunes inactive state when the entire vault is already missing 3623ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > does not salvage marker comments inside source content as Notes 49ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps the page when salvage write fails 85ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > keeps the page when read fails with a non-ENOENT error 31ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-state.test.ts > memory wiki source sync state > rejects projected imports that would exceed the source-sync row cap 11ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > refuses retired source-sync JSON without reading, importing, or archiving it 6888ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > preserves unsafe-local pages and persisted state when the both marker is missing 3083ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/source-sync-malformed-notes.test.ts > memory wiki source sync malformed human Notes > rejects pruning an oversized source page with an unclosed human Notes marker 115ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > reconciles a crash after rename across a real SQLite reopen 3451ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > refuses retired import-runs JSON without reading, importing, or archiving it 2691ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reuses an existing publication when local source sync starts with an inactive owner 8038ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > persists 32 recovery slots before retrying and preserving the 33rd target 2860ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > queues the whole rollback behind an active vault mutation 412ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > preserves a created page recreated while rollback is removing it 375ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > preserves a trailing blank-line edit on a created page 407ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reuses an active compiled owner during repeated initialization and exact page reads 3016ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > preserves trailing spaces on an updated page before restoring its snapshot 464ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > preserves July source rows and explains an empty canonical store without reviving JSON 4294ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > does not touch targets again after the persisted process-restart fence 468ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > scans the recovery directory once for a multi-page rollback 849ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > rejects a symlinked recovery directory without touching external files 191ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > refuses symlink, hardlink, and directory targets without touching them 585ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > refuses a file replaced by a directory at the move boundary 187ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/chatgpt-import.test.ts > ChatGPT import rollback recovery > refuses a target-parent swap at the move boundary without touching either tree 196ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > explicit activation rejects the compiled snapshot after source-edit 3101ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > accepts an empty July import run and preserves snapshot rollback 5694ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > explicit activation rejects the compiled snapshot after log-rollback 2829ms
+ ✓  extension-database-workers  extensions/memory-wiki/doctor-contract-api.test.ts > memory-wiki Doctor state compatibility > checks every configured agent vault without borrowing canonical state 3746ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > round-trips compile through async preparation and claim query after restart 4581ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > bounds dashboard projections below the compiled-cache entry limit 212ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > replaces a loaded snapshot when a newer publication commits 1913ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > ignores legacy files and rebuilds only on compile 2171ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > persists snapshots beyond the keyed-state value limit 3481ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > loads an externally compiled generation after lifecycle refresh without polling 3509ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > defers a publication that completes during lifecycle reconciliation 3395ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reads the stable owner row directly without enumerating stale metadata 1839ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > preserves vault identity across atomic edits to user-managed scaffold files 1635ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > rejects claims newer than a restored vault after lifecycle refresh 3332ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > rejects a reserved publication when its identical parent was restored 3573ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > keeps a committed publication when an older writer is rejected 1696ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > loads a prepared snapshot without prompt-path file I/O 1732ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > reports transient SQLite read failures as failed dashboard state 3237ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > keeps a restored owner closed when lifecycle reconciliation fails 1663ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > rejects a predecessor snapshot when a vault path is reused 3803ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > atomically replaces one stable owner row when the configured vault moves 1902ms
+ ✓  extension-database-workers  extensions/memory-wiki/src/compiled-cache.integration.test.ts > Memory Wiki compiled cache lifecycle > deletes cache rows when their agent owner is removed 3468ms
 
- Test Files  48 passed (48)
-      Tests  508 passed | 1 skipped (509)
-   Start at  20:13:50
-   Duration  118.82s (tests 56%, transform 25%, import 13%, setup 7%)
+ Test Files  49 passed (49)
+      Tests  511 passed | 1 skipped (512)
+   Start at  21:13:16
+   Duration  109.17s (tests 59%, transform 22%, import 12%, setup 6%)
 

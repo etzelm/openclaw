@@ -1,14 +1,18 @@
 #!/bin/bash
-# Evidence capture for openclaw/openclaw#166304: BEFORE/AFTER through the real
-# searchMemoryWiki seam on two generated vaults in one sitting, the red/green runs,
-# and base-versus-head test cost for the two files that now spawn the worker.
+# Evidence capture for openclaw/openclaw#166433 follow-up (short reads off the scan
+# queue, two-worker pool, 30 s task bound). One sitting at the new head:
+#   concurrent-read harness: BEFORE = published head (a5af25c), AFTER = new head;
+#   10,000-page search pair: BEFORE = base (8e66776), AFTER = new head, every result compared;
+#   red/green for the scheduling tests and the reworked reader tests; warm test cost.
 export PATH="$HOME/homebrew/bin:$PATH"
 cd ~/work/oss-166304 || exit 1
 E=~/work/oss-166304-evidence
 BASE=8e667761db3e749252a770d0c31006c436ec4b26
+PUBLISHED=a5af25c3924b21935856b4ff9f4e0be08d071a89
 QUERY="cobalt lantern ledger harbor"
+V=~/work/oss-166304-vault-
 strip() { sed 's/\x1b\[[0-9;]*m//g'; }
-log() { echo; echo "=== $*"; date -u +%Y-%m-%dT%H:%M:%SZ; }
+log() { echo; echo "=== $*"; date -u +%Y-%m-%dT%H:%M:%SZ; echo "--- load: $(uptime)"; echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $* | $(uptime)" >> "$E/load-during-capture.txt"; }
 compare() {
   node -e '
     const fs = require("node:fs");
@@ -30,79 +34,71 @@ compare() {
     }, null, 2));
   ' "$1" "$2"
 }
-run_round() {
-  local pages=$1 tag=$2 V=~/work/oss-166304-vault-$tag
-  mkdir -p "$E/before$tag" "$E/after$tag"
-  log "generate vault ($pages pages)"
-  rm -rf "$V"
-  node --import tsx "$E/harness.mts" generate --vault "$V" --pages "$pages" --lines 120 --claims 60 | tee "$E/vault-generate$tag.json"
-  du -sh "$V"; find "$V" -name '*.md' | wc -l
-  log "AFTER ($pages pages): harness at HEAD"
-  git rev-parse HEAD > "$E/after$tag/git-head.txt"; git status --short > "$E/after$tag/git-status.txt"
-  node --max-old-space-size=8192 --import tsx "$E/harness.mts" search --vault "$V" --query "$QUERY" --out "$E/after$tag/search.json" --label after > "$E/after$tag/search.stdout" 2>&1
-  echo "after exit=$?"; grep -v '^\s*"\(results\|snippet\)' "$E/after$tag/search.stdout" | head -60
-  log "BEFORE ($pages pages): restore extensions/memory-wiki to base $BASE (production and tests)"
-  git restore --source=$BASE --staged --worktree -- extensions/memory-wiki
-  git status --short | tee "$E/before$tag/git-status.txt"
-  echo "new modules present after restore? (expect: none)"; ls extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-reader.worker.ts extensions/memory-wiki/src/query-scoring.ts 2>&1
-  git rev-parse HEAD > "$E/before$tag/git-head.txt"
-  node --max-old-space-size=8192 --import tsx "$E/harness.mts" search --vault "$V" --query "$QUERY" --out "$E/before$tag/search.json" --label before > "$E/before$tag/search.stdout" 2>&1
-  echo "before exit=$?"; grep -v '^\s*"\(results\|snippet\)' "$E/before$tag/search.stdout" | head -60
-  log "compare every result object ($pages pages)"
-  compare "$E/before$tag/search.json" "$E/after$tag/search.json" | tee "$E/results-compare$tag.json" | head -12
-}
+restore_plugin() { git restore --source="$1" --staged --worktree -- extensions/memory-wiki; }
+record_tree() { git rev-parse HEAD > "$1/git-head.txt"; git status --short > "$1/git-status.txt"; }
+mkdir -p "$E/after" "$E/before" "$E/before-pr"
+echo "# uptime at the start and end of every phase (phase | sample); machine: $(uname -n | sed 's/.*/<host>/')" >> "$E/load-during-capture.txt"
 {
   log "git state at start (status must be empty)"
   git rev-parse HEAD; git status --short
   log "machine"
   uname -a; node --version; sysctl -n machdep.cpu.brand_string hw.ncpu hw.memsize 2>/dev/null
+  echo "--- top CPU consumers"; ps -Ao pcpu,etime,comm -r | head -6
 
-  run_round 10000 ""
+  log "generate vault (10,000 pages, 60 body lines and 30 claims per page: the first draft's 120/60 vault scans in about 40 s on this loaded machine, past the 30 s task bound; see bound/)"
+  rm -rf "$V"
+  node --import tsx "$E/harness.mts" generate --vault "$V" --pages 10000 --lines 60 --claims 30 | tee "$E/vault-generate.json"
+  du -sh "$V"; find "$V" -name '*.md' | wc -l
 
-  log "BASE test cost while the plugin is restored to base: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1)"
-  for f in extensions/memory-wiki/src/query.test.ts extensions/memory-wiki/src/apply.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/index.test.ts; do
-    pnpm test "$f" --maxWorkers=1 > /dev/null 2>&1
-    echo "--- base (warm): $f"
-    /usr/bin/time -p pnpm test "$f" --maxWorkers=1 2>&1 | strip | grep -E 'Test Files|Tests |Duration|^real|^user|FAIL|×' | tail -8
-  done
+  log "AFTER (new head): 10,000-page search"
+  record_tree "$E/after"
+  node --max-old-space-size=8192 --import tsx "$E/harness.mts" search --vault "$V" --query "$QUERY" --out "$E/after/search.json" --label after > "$E/after/search.stdout" 2>&1
+  echo "after search exit=$?"; grep -v '^\s*"\(results\|snippet\)' "$E/after/search.stdout" | head -60
+  log "AFTER (new head): concurrent exact-path reads during a 10,000-page scan"
+  node --max-old-space-size=8192 --import tsx "$E/harness.mts" concurrent --vault "$V" --query "$QUERY" --out "$E/after/concurrent.json" --label after > "$E/after/concurrent.stdout" 2>&1
+  echo "after concurrent exit=$?"; cat "$E/after/concurrent.stdout"
 
-  log "RED: HEAD test files against base production code"
-  git checkout HEAD -- extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query.abort.test.ts
+  log "BEFORE-PR (published head $PUBLISHED): restore extensions/memory-wiki, concurrent reads"
+  restore_plugin "$PUBLISHED"; record_tree "$E/before-pr"; cat "$E/before-pr/git-status.txt"
+  node --max-old-space-size=8192 --import tsx "$E/harness.mts" concurrent --vault "$V" --query "$QUERY" --out "$E/before-pr/concurrent.json" --label before-pr > "$E/before-pr/concurrent.stdout" 2>&1
+  echo "before-pr concurrent exit=$?"; cat "$E/before-pr/concurrent.stdout"
+
+  log "BEFORE (base $BASE): restore extensions/memory-wiki, 10,000-page search"
+  restore_plugin "$BASE"; record_tree "$E/before"; cat "$E/before/git-status.txt"
+  echo "new modules present after restore? (expect: none)"; ls extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-scoring.ts 2>&1
+  node --max-old-space-size=8192 --import tsx "$E/harness.mts" search --vault "$V" --query "$QUERY" --out "$E/before/search.json" --label before > "$E/before/search.stdout" 2>&1
+  echo "before search exit=$?"; grep -v '^\s*"\(results\|snippet\)' "$E/before/search.stdout" | head -60
+  log "compare every result object (base versus new head)"
+  compare "$E/before/search.json" "$E/after/search.json" | tee "$E/results-compare.json" | head -12
+
+  log "RED: new head test files against the published head's production code ($PUBLISHED)"
+  restore_plugin "$PUBLISHED"
+  git checkout HEAD -- extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-reader.test.ts
   git status --short
-  pnpm vitest run extensions/memory-wiki/src/query.reads.test.ts 2>&1 | strip > "$E/red.log"
-  echo "red (query.reads) vitest exit=${PIPESTATUS[0]}"
-  grep -E '✓|×|FAIL|AssertionError|expected|Tests |Test Files|Duration' "$E/red.log" | head -40
-  pnpm vitest run extensions/memory-wiki/src/query.abort.test.ts 2>&1 | strip > "$E/red-abort.log"
-  echo "red (query.abort) vitest exit=${PIPESTATUS[0]}"
-  grep -E '✓|×|FAIL|Error|Tests |Test Files|Duration|Cannot find|not a function' "$E/red-abort.log" | head -40
+  pnpm vitest run extensions/memory-wiki/src/query-scheduling.test.ts 2>&1 | strip > "$E/red-scheduling.log"
+  echo "red (query-scheduling) vitest exit=${PIPESTATUS[0]}"
+  grep -E '✓|×|FAIL|AssertionError|expected|Tests |Test Files|Duration|resolved' "$E/red-scheduling.log" | head -40
+  pnpm vitest run extensions/memory-wiki/src/query-reader.test.ts 2>&1 | strip > "$E/red-reader.log"
+  echo "red (query-reader) vitest exit=${PIPESTATUS[0]}"
+  grep -E '✓|×|FAIL|AssertionError|expected|Tests |Test Files|Duration' "$E/red-reader.log" | head -40
 
   log "restore HEAD (status must be empty)"
-  git restore --source=HEAD --staged --worktree -- extensions/memory-wiki
-  git status --short
+  restore_plugin HEAD; git status --short
 
-  log "GREEN: same test files at HEAD"
-  pnpm vitest run extensions/memory-wiki/src/query.reads.test.ts 2>&1 | strip > "$E/green.log"
-  echo "green (query.reads) vitest exit=${PIPESTATUS[0]}"
-  grep -E '✓|×|FAIL|Tests |Test Files|Duration' "$E/green.log" | head -40
-  pnpm vitest run extensions/memory-wiki/src/query.abort.test.ts 2>&1 | strip > "$E/green-abort.log"
-  echo "green (query.abort) vitest exit=${PIPESTATUS[0]}"
-  grep -E '✓|×|FAIL|Tests |Test Files|Duration' "$E/green-abort.log" | head -40
-
-  run_round 2500 "-2500pages"
-
-  log "restore HEAD (status must be empty)"
-  git restore --source=HEAD --staged --worktree -- extensions/memory-wiki
-  git status --short
+  log "GREEN: same test files at the new head"
+  pnpm vitest run extensions/memory-wiki/src/query-scheduling.test.ts 2>&1 | strip > "$E/green-scheduling.log"
+  echo "green (query-scheduling) vitest exit=${PIPESTATUS[0]}"
+  grep -E '✓|×|FAIL|Tests |Test Files|Duration' "$E/green-scheduling.log" | head -40
+  pnpm vitest run extensions/memory-wiki/src/query-reader.test.ts 2>&1 | strip > "$E/green-reader.log"
+  echo "green (query-reader) vitest exit=${PIPESTATUS[0]}"
+  grep -E '✓|×|FAIL|Tests |Test Files|Duration' "$E/green-reader.log" | head -40
 
   log "HEAD test cost: one untimed warm-up run per file, then the timed run (pnpm test <file> --maxWorkers=1)"
-  for f in extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/index.test.ts extensions/memory-wiki/src/query.test.ts extensions/memory-wiki/src/apply.test.ts; do
+  for f in extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/src/tool.deadline.test.ts; do
     pnpm test "$f" --maxWorkers=1 > /dev/null 2>&1
     echo "--- head (warm): $f"
     /usr/bin/time -p pnpm test "$f" --maxWorkers=1 2>&1 | strip | grep -E 'Test Files|Tests |Duration|^real|^user|FAIL|×' | tail -8
   done
-
-  log "cold first read at HEAD on the 2,500-page vault (first wiki_get after process start versus second and third)"
-  node --import tsx "$E/harness.mts" cold --vault ~/work/oss-166304-vault- --out "$E/cold-first-read.json"
 
   log "git state at end (status must be empty)"
   git rev-parse HEAD; git status --short

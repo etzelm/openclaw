@@ -6,22 +6,26 @@ $ node scripts/check-changed.mjs --base origin/main
 [check:changed] extensions/memory-wiki/package.json: bundled channel config metadata input
 [check:changed] extensions/memory-wiki/package.json: extension production
 [check:changed] extensions/memory-wiki/src/apply.ts: extension production
+[check:changed] extensions/memory-wiki/src/cli.ts: extension production
+[check:changed] extensions/memory-wiki/src/gateway.ts: extension production
 [check:changed] extensions/memory-wiki/src/query-pages.ts: extension production
 [check:changed] extensions/memory-wiki/src/query-reader.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query-reader.ts: extension production
 [check:changed] extensions/memory-wiki/src/query-reader.worker.ts: extension production
+[check:changed] extensions/memory-wiki/src/query-scheduling.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query-scoring.ts: extension production
 [check:changed] extensions/memory-wiki/src/query-shared-memory.ts: extension production
 [check:changed] extensions/memory-wiki/src/query.abort.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query.reads.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query.ts: extension production
+[check:changed] extensions/memory-wiki/src/tool.ts: extension production
 
 [check:changed] conflict markers
 $ node scripts/check-no-conflict-markers.mjs
 
 [check:changed] line-cap growth ratchet
 $ node --import ./scripts/tsx.mjs scripts/check-line-cap-ratchet.mts --base origin/main
-Line-cap ratchet OK: 12 changed source files; no new violations or over-cap growth.
+Line-cap ratchet OK: 16 changed source files; no new violations or over-cap growth.
 
 [check:changed] max-lines suppression ratchet
 $ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base origin/main
@@ -61,7 +65,7 @@ No plugin-sdk wildcard re-exports found in extension API barrels.
 
 [check:changed] extension test core imports
 $ node --import ./scripts/tsx.mjs scripts/check-no-extension-test-core-imports.ts
-OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4561 extension files, 0 plugin helpers checked).
+OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4562 extension files, 0 plugin helpers checked).
 
 [check:changed] duplicate scan target coverage
 $ node scripts/check-duplicates.mjs --coverage
@@ -72,11 +76,11 @@ $ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
 PASS direct dependency pin guard: checked 716 directly declared dependency specs across 198 tracked package manifests; 0 violations.
 
 [check:changed] format changed files
-$ oxfmt --check --no-error-on-unmatched-pattern -- config/max-lines-baseline.txt docs/plugins/memory-wiki.md extensions/memory-wiki/index.test.ts extensions/memory-wiki/index.ts extensions/memory-wiki/package.json extensions/memory-wiki/README.md extensions/memory-wiki/src/apply.ts extensions/memory-wiki/src/query-pages.ts extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-reader.worker.ts extensions/memory-wiki/src/query-scoring.ts extensions/memory-wiki/src/query-shared-memory.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query.ts
+$ oxfmt --check --no-error-on-unmatched-pattern -- config/max-lines-baseline.txt docs/plugins/memory-wiki.md extensions/memory-wiki/index.test.ts extensions/memory-wiki/index.ts extensions/memory-wiki/package.json extensions/memory-wiki/README.md extensions/memory-wiki/src/apply.ts extensions/memory-wiki/src/cli.ts extensions/memory-wiki/src/gateway.ts extensions/memory-wiki/src/query-pages.ts extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-reader.worker.ts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-scoring.ts extensions/memory-wiki/src/query-shared-memory.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query.ts extensions/memory-wiki/src/tool.ts
 Checking formatting...
 
 All matched files use the correct format.
-Finished in 352ms on 14 files using 32 threads.
+Finished in 203ms on 18 files using 32 threads.
 
 [check:changed] npm package-lock guard
 Validating 1 npm package lock with 1 job.
@@ -88,19 +92,19 @@ $ node --import ./scripts/tsx.mjs scripts/test-projects-serial.mts src/plugins/d
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > classifies only static value module edges 93ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps broad agent runtime and heavy doctor barrels off doctor enumeration paths 537ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps the runtime doctor migration helper off state DB and plugin-state graphs 114ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps kysely statically unreachable from every plugin closure 1163ms
- ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > matches every resolvable artifact's coerced doctor surfaces 2633ms
- ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > declares every state migration identity and phase in module order 178ms
+ ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > matches every resolvable artifact's coerced doctor surfaces 1032ms
+ ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > declares every state migration identity and phase in module order 104ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > classifies only static value module edges 37ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps broad agent runtime and heavy doctor barrels off doctor enumeration paths 478ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps the runtime doctor migration helper off state DB and plugin-state graphs 43ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps kysely statically unreachable from every plugin closure 704ms
 
  Test Files  2 passed (2)
       Tests  6 passed (6)
-   Start at  20:17:07
-   Duration  8.66s (tests 60%, transform 23%, setup 14%, import 3%)
+   Start at  21:16:14
+   Duration  4.07s (tests 70%, setup 18%, transform 7%, import 5%)
 
-[test] passed 1 Vitest shard in 9.98s
+[test] passed 1 Vitest shard in 5.01s
 
 [check:changed] bundled channel config metadata
 $ node --import ./scripts/tsx.mjs scripts/generate-bundled-channel-config-metadata.ts --check
@@ -167,7 +171,7 @@ deprecated API usage guard passed
 $ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
 [plugin-sdk boundary dts] emitted 12135 files
 Found 0 warnings and 0 errors.
-Finished in 158.6s on 10617 files with 264 rules using 1 threads.
+Finished in 149.9s on 10618 files with 264 rules using 1 threads.
 
 [check:changed] lint scripts
 $ pnpm lint:docker-e2e && pnpm lint:tmp:no-raw-http2-imports && node scripts/run-oxlint.mjs --tsconfig config/tsconfig/oxlint.scripts.json scripts
@@ -176,7 +180,7 @@ Docker E2E package boundary/catalog guard passed.
 $ node --import ./scripts/tsx.mjs scripts/check-no-raw-http2-imports.mts
 OK: raw node:http2 imports stay behind the APNs proxy wrapper.
 Found 0 warnings and 0 errors.
-Finished in 27.4s on 1331 files with 264 rules using 1 threads.
+Finished in 38.2s on 1331 files with 264 rules using 1 threads.
 
 [check:changed] database-first legacy-store guard
 $ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts

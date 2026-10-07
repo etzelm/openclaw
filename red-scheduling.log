@@ -1,0 +1,143 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read on the calling thread while a whole-vault scan runs in the pool 792ms
+   → expected false to be true // Object.is equality
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > rejects a scan that exceeds the task bound with the deadline error and keeps serving scans 263ms
+   → promise resolved "{ select: 'search', results: [ …(5) ] }" instead of rejecting
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs two whole-vault scans in parallel on two workers and queues a third 917ms
+   → expected 1 to be 2 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read on the calling thread while a whole-vault scan runs in the pool
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:90:31
+     88|     expect(results.length).toBeGreaterThan(0);
+     89|     // The read finished while the scan was still running and never to…
+     90|     expect(settledBeforeScan).toBe(true);
+       |                               ^
+     91|     expect(dispatch.mock.calls.map(([task]) => task.select)).toEqual([…
+     92|     expect(readMs * 5).toBeLessThan(scanMs);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > rejects a scan that exceeds the task bound with the deadline error and keeps serving scans
+AssertionError: promise resolved "{ select: 'search', results: [ …(5) ] }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "results": [
++     {
++       "corpus": "wiki",
++       "id": "source.page-0",
++       "kind": "source",
++       "path": "sources/page-0.md",
++       "score": 30,
++       "searchMode": "auto",
++       "snippet": "cobalt lantern ledger line 0 of page 0 harbor quarry meridian saffron tundra velvet.",
++       "title": "Lantern page 0",
++     },
++     {
++       "corpus": "wiki",
++       "id": "entitie.page-1",
++       "kind": "entity",
++       "path": "entities/page-1.md",
++       "score": 30,
++       "searchMode": "auto",
++       "snippet": "cobalt lantern ledger line 0 of page 1 harbor quarry meridian saffron tundra velvet.",
++       "title": "Lantern page 1",
++     },
++     {
++       "corpus": "wiki",
++       "id": "concept.page-10",
++       "kind": "concept",
++       "path": "concepts/page-10.md",
++       "score": 30,
++       "searchMode": "auto",
++       "snippet": "cobalt lantern ledger line 0 of page 10 harbor quarry meridian saffron tundra velvet.",
++       "title": "Lantern page 10",
++     },
++     {
++       "corpus": "wiki",
++       "id": "source.page-100",
++       "kind": "source",
++       "path": "sources/page-100.md",
++       "score": 30,
++       "searchMode": "auto",
++       "snippet": "cobalt lantern ledger line 0 of page 100 harbor quarry meridian saffron tundra velvet.",
++       "title": "Lantern page 100",
++     },
++     {
++       "corpus": "wiki",
++       "id": "entitie.page-101",
++       "kind": "entity",
++       "path": "entities/page-101.md",
++       "score": 30,
++       "searchMode": "auto",
++       "snippet": "cobalt lantern ledger line 0 of page 101 harbor quarry meridian saffron tundra velvet.",
++       "title": "Lantern page 101",
++     },
++   ],
++   "select": "search",
+  }
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:98:76
+     96|     const { rootDir } = await createScanVault();
+     97|
+     98|     await expect(readMemoryWikiPages(scanTask(rootDir), { timeoutMs: 1…
+       |                                                                            ^
+     99|       "wiki_search timed out after 0.01s",
+    100|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs two whole-vault scans in parallel on two workers and queues a third
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:124:30
+    122|       const results = await Promise.all(scans);
+    123|
+    124|       expect(workersCreated).toBe(2);
+       |                              ^
+    125|       // The third scan waited for a worker and settled after both tha…
+    126|       expect(settledOrder[2]).toBe(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  21:31:56
+   Duration  6.07s (transform 36%, tests 34%, import 24%, setup 6%)
+

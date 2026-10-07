@@ -1,14 +1,13 @@
 # Measured test cost
 
-Command per file: `pnpm test <file> --maxWorkers=1`, run once untimed to warm vitest's transform cache, then once timed with `/usr/bin/time -p` (`real`, `user`). Base is `origin/main` `8e667761db3e749252a770d0c31006c436ec4b26` with `extensions/memory-wiki` restored to it in the same checkout; head is `ed494bdcddfb55014c88a9200791d769d8e62a8f` (test files identical to the final head `a5af25c3924` except `query-reader.test.ts`, which gained 15 lines of test code after this pass). Raw lines: `evidence-run.log` under "BASE test cost" and "HEAD test cost". Machine: Mac Studio, darwin arm64, Node v24.21.0, under the background load recorded in `load-during-capture.txt` (one sample, load average 16.28, during the 10,000-page BEFORE capture; the same processes ran through the sitting but were not sampled per phase), base and head in the same sitting. `gates-ed494bd.log` holds a cold-cache pass of the head files from the same sitting (for example `query-reader.test.ts` 10.13 s there against 14.66 s warm here), so the per-file deltas below sit inside the load noise.
+Command per file: `pnpm test <file> --maxWorkers=1`, run once untimed to warm vitest's transform cache, then once timed with `/usr/bin/time -p` (`real`, `user`). Head `492827c8100fcb88a9f88e7c565311c798cfa65a` on base `origin/main` `8e667761db3e749252a770d0c31006c436ec4b26`. Raw lines: `evidence-run.log` under "HEAD test cost". Machine: Mac Studio, darwin arm64, 32 cores, Node v24.21.0, under the background load recorded per phase in `load-during-capture.txt` (a local model server and a Docker VM were running), so every number is a loaded-machine figure.
 
-| File | Tests (head) | vitest Duration, base | wall (real), base | vitest Duration, head | wall (real), head |
-|---|---|---|---|---|---|
-| `src/query.test.ts` | 65 | 15.66 s | 19.08 s | 16.49 s | 20.13 s |
-| `src/query.reads.test.ts` | 15 (base 16: two vacuous spy assertions folded into the regression test) | 12.51 s | 15.07 s | 13.72 s | 17.07 s |
-| `src/query-reader.test.ts` (new) | 13 | no file | no file | 14.66 s | 17.99 s |
-| `src/query.abort.test.ts` | 2 (base 1) | not timed at base (one test, unchanged) |  | 10.65 s | 14.06 s |
-| `src/apply.test.ts` | 9 | 11.52 s | 14.81 s | 12.58 s | 15.75 s |
-| `index.test.ts` | 10 (base 9) | 7.34 s | 9.46 s | 10.45 s | 13.59 s |
+| File | Tests | vitest Duration | wall (`real`) | `user` |
+|---|---|---|---|---|
+| `src/query-reader.test.ts` | 13 | 13.68 s | 16.79 s | 17.29 s |
+| `src/query-scheduling.test.ts` (new) | 3 | 11.66 s | 14.62 s | see `evidence-run.log` |
+| `src/query.reads.test.ts` | 15 (base 16: the distributed-token candidate test moved to `query-reader.test.ts`, the basename case of the swap test was dropped, the regression test was added) | 12.02 s | 15.05 s | see `evidence-run.log` |
+| `src/query.abort.test.ts` | 2 (base 1) | 9.37 s | 12.28 s | see `evidence-run.log` |
+| `src/tool.deadline.test.ts` | 3 (unchanged) | 8.93 s | 11.98 s | see `evidence-run.log` |
 
-Not measured: CI seconds (no CI run of this branch yet); the base timing of `query.abort.test.ts` (one unchanged test on base, two at the head).
+Not measured in this sitting: base timings (the first draft's sitting measured the unchanged files within one second of their base durations under a comparable load) and CI seconds (no CI run of this head yet). The scheduling tests each write a 400-page vault so that a scan lasts long enough to be observed, and the reader tests retire and respawn workers on purpose; under vitest each spawn loads the plugin graph through tsx in a new thread.
