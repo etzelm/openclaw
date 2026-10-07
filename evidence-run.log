@@ -1,45 +1,38 @@
 
 === git state at start (status must be empty)
-2026-10-07T16:07:30Z
---- load:  9:07  up 3 days, 17:04, 1 user, load averages: 2.95 2.54 3.55
-HEAD=083b81fb217ddb73007837aabc5bb9a2aa702cad BASE=ebc4e6de603c5c1ce55086f13565e21feb1c297d PREV=492827c8100fcb88a9f88e7c565311c798cfa65a FIRST=a5af25c3924b21935856b4ff9f4e0be08d071a89
-083b81fb217 improve(memory-wiki): keep scan deadlines with the caller and make scheduling tests deterministic
+2026-10-07T20:09:08Z
+--- load: 13:09  up 3 days, 21:06, 1 user, load averages: 5.71 4.12 4.04
+HEAD=832afc5b07d17847c16c8316b66a82db0b2b283b BASE=ebc4e6de603c5c1ce55086f13565e21feb1c297d PREV=19353569c95d0e77c33b30bcf7b4c6bb097087cf
+832afc5b07d improve(memory-wiki): release shared compute between bounded wiki scan batches
+19353569c95 improve(memory-wiki): keep scan deadlines with the caller and make scheduling tests deterministic
 058114a30ea improve(memory-wiki): keep short wiki reads off the scan queue and bound scan occupancy
 7f2927d702f docs(memory-wiki): note that whole-vault reads run in a plugin-owned worker
 5cb15b9e5a3 improve(memory-wiki): run whole-vault page reads and scoring in a plugin-owned worker
 ebc4e6de603 perf(gateway): reuse session row publication encoding (#166591)
 
 === machine
-2026-10-07T16:07:30Z
---- load:  9:07  up 3 days, 17:04, 1 user, load averages: 2.95 2.54 3.55
+2026-10-07T20:09:08Z
+--- load: 13:09  up 3 days, 21:06, 1 user, load averages: 5.71 4.12 4.04
 Darwin <host> 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:05:42 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T6031 arm64
 v24.21.0
 Apple M3 Ultra
 32
 549755813888
---- top CPU consumers
- %CPU     ELAPSED COMM
- 33.4 03-17:02:05 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mds_stores
- 17.7 03-17:00:34 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine
- 17.1       00:00 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared
- 12.8       00:00 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared
- 12.8       00:00 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared
-ps: stdout: Broken pipe
 
 === GATES: owning lane pnpm vitest run extensions/memory-wiki/
-2026-10-07T16:07:30Z
---- load:  9:07  up 3 days, 17:04, 1 user, load averages: 2.95 2.54 3.55
+2026-10-07T20:09:09Z
+--- load: 13:09  up 3 days, 21:06, 1 user, load averages: 5.71 4.12 4.04
 lane exit=0
 
- Test Files  49 passed (49)
-      Tests  511 passed | 1 skipped (512)
-   Start at  09:07:35
-   Duration  68.41s (tests 75%, transform 11%, import 9%, setup 4%)
+ Test Files  50 passed (50)
+      Tests  513 passed | 1 skipped (514)
+   Start at  13:09:13
+   Duration  69.20s (tests 76%, transform 11%, import 9%, setup 4%)
 
 
 === GATES: pnpm check:changed --base upstream/main
-2026-10-07T16:08:43Z
---- load:  9:08  up 3 days, 17:05, 1 user, load averages: 3.48 2.85 3.58
+2026-10-07T20:10:22Z
+--- load: 13:10  up 3 days, 21:07, 1 user, load averages: 4.21 4.07 4.03
 check:changed exit=0
 
 [check:changed] runtime sidecar loader guard
@@ -51,32 +44,8 @@ $ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
 Import cycle check: 0 runtime value cycle(s).
 
 === GATES: changed:lanes and diff --check
-2026-10-07T16:15:30Z
---- load:  9:15  up 3 days, 17:12, 1 user, load averages: 4.10 5.40 4.99
-$ node scripts/changed-lanes.mjs --json --base upstream/main
-{
-  "paths": [
-    "config/max-lines-baseline.txt",
-    "docs/plugins/memory-wiki.md",
-    "extensions/memory-wiki/index.test.ts",
-    "extensions/memory-wiki/index.ts",
-    "extensions/memory-wiki/package.json",
-    "extensions/memory-wiki/README.md",
-    "extensions/memory-wiki/src/apply.ts",
-    "extensions/memory-wiki/src/cli.ts",
-    "extensions/memory-wiki/src/gateway.ts",
-    "extensions/memory-wiki/src/query-pages.ts",
-    "extensions/memory-wiki/src/query-reader.test.ts",
-    "extensions/memory-wiki/src/query-reader.ts",
-    "extensions/memory-wiki/src/query-reader.worker.ts",
-    "extensions/memory-wiki/src/query-scheduling.test.ts",
-    "extensions/memory-wiki/src/query-scoring.ts",
-    "extensions/memory-wiki/src/query-shared-memory.ts",
-    "extensions/memory-wiki/src/query.abort.test.ts",
-    "extensions/memory-wiki/src/query.reads.test.ts",
-    "extensions/memory-wiki/src/query.ts",
-    "extensions/memory-wiki/src/tool.ts"
-  ],
+2026-10-07T20:16:55Z
+--- load: 13:16  up 3 days, 21:13, 1 user, load averages: 4.20 5.56 5.13
   "lanes": {
     "core": false,
     "coreTests": false,
@@ -94,246 +63,276 @@ $ node scripts/changed-lanes.mjs --json --base upstream/main
     "all": false
   },
   "extensionImpactFromCore": false,
-  "docsOnly": false,
-  "reasons": [
-    "config/max-lines-baseline.txt: tooling surface",
-    "extensions/memory-wiki/index.test.ts: extension test",
-    "extensions/memory-wiki/index.ts: extension production",
-    "extensions/memory-wiki/package.json: bundled channel config metadata input",
-    "extensions/memory-wiki/package.json: extension production",
-    "extensions/memory-wiki/src/apply.ts: extension production",
-    "extensions/memory-wiki/src/cli.ts: extension production",
-    "extensions/memory-wiki/src/gateway.ts: extension production",
-    "extensions/memory-wiki/src/query-pages.ts: extension production",
-    "extensions/memory-wiki/src/query-reader.test.ts: extension test",
-    "extensions/memory-wiki/src/query-reader.ts: extension production",
-    "extensions/memory-wiki/src/query-reader.worker.ts: extension production",
-    "extensions/memory-wiki/src/query-scheduling.test.ts: extension test",
-    "extensions/memory-wiki/src/query-scoring.ts: extension production",
-    "extensions/memory-wiki/src/query-shared-memory.ts: extension production",
-    "extensions/memory-wiki/src/query.abort.test.ts: extension test",
-    "extensions/memory-wiki/src/query.reads.test.ts: extension test",
-    "extensions/memory-wiki/src/query.ts: extension production",
-    "extensions/memory-wiki/src/tool.ts: extension production"
-  ]
-}
 diff --check clean
 
-=== RED A: head extensions/memory-wiki/src/query-scheduling.test.ts against the first draft's production code (a5af25c3924b21935856b4ff9f4e0be08d071a89)
-2026-10-07T16:15:31Z
---- load:  9:15  up 3 days, 17:12, 1 user, load averages: 4.10 5.40 4.99
+=== RED: the head's changed test files against the previous head's production code (19353569c95d0e77c33b30bcf7b4c6bb097087cf)
+2026-10-07T20:16:56Z
+--- load: 13:16  up 3 days, 21:13, 1 user, load averages: 4.02 5.50 5.11
 M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/src/cli.ts
-M  extensions/memory-wiki/src/gateway.ts
-M  extensions/memory-wiki/src/query-reader.test.ts
+M  extensions/memory-wiki/src/query-pages.ts
 M  extensions/memory-wiki/src/query-reader.ts
 M  extensions/memory-wiki/src/query.ts
-M  extensions/memory-wiki/src/tool.ts
-red A exit=1
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 375ms
-   → expected [ 'search', 'page' ] to deeply equal [ 'search' ]
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 66ms
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 331ms
-   → expected 1 to be 2 // Object.is equality
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
- Test Files  1 failed (1)
-      Tests  2 failed | 1 passed (3)
-
-=== RED B: head extensions/memory-wiki/src/query-scheduling.test.ts against the previous head's production code (492827c8100fcb88a9f88e7c565311c798cfa65a)
-2026-10-07T16:15:39Z
---- load:  9:15  up 3 days, 17:12, 1 user, load averages: 3.78 5.29 4.95
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/src/query-reader.ts
-M  extensions/memory-wiki/src/tool.ts
-red B exit=1
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 369ms
- ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 62ms
-   → expected [ 30000, 30000 ] to deeply equal [ undefined, undefined ]
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 360ms
+red query-shared-compute exit=1
+ ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host 434ms
+   → expected [ 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
  Test Files  1 failed (1)
-      Tests  1 failed | 2 passed (3)
-
-=== GREEN: extensions/memory-wiki/src/query-scheduling.test.ts at the head
-2026-10-07T16:15:47Z
---- load:  9:15  up 3 days, 17:12, 1 user, load averages: 3.72 5.25 4.94
-green exit=0
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 382ms
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 57ms
- ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 359ms
+      Tests  1 failed (1)
+red query-scheduling exit=1
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 353ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 59ms
+   → expected [ undefined, undefined ] to deeply equal [ undefined, undefined, …(2) ]
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 117ms
+   → expected [ 'search', 'lookup' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 347ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+red query-reader exit=1
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 534ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 629ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 384ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 455ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 55ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 55ms
+   → undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 75ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 111ms
+   → promise resolved "{ select: 'page', page: { …(33) } }" instead of rejecting
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 120ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 72ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 364ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 360ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 331ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+red query.reads exit=1
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 372ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 278ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 138ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 56ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 256ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 318ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 299ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 58ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 68ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 382ms
+ ×  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 84ms
+   → expected [] to deeply equal [ 'sources/alpha.md' ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+red query.abort exit=0
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > stops parsing vault pages after cancellation during a scan 83ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > rejects a whole-vault search through the pool's cancellation of its dispatched task 60ms
  Test Files  1 passed (1)
-      Tests  3 passed (3)
+      Tests  2 passed (2)
 
-=== REPEAT: extensions/memory-wiki/src/query-scheduling.test.ts 30 times at the head, then the previous head's file and production 30 times, both under 28 busy-loop processes (nice 5)
-2026-10-07T16:15:55Z
---- load:  9:15  up 3 days, 17:12, 1 user, load averages: 3.38 5.13 4.90
---- load with burners:  9:15  up 3 days, 17:12, 1 user, load averages: 3.38 5.13 4.90
-head: runs=30 passed=30 failed=0
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/src/query-reader.ts
-M  extensions/memory-wiki/src/query-scheduling.test.ts
-M  extensions/memory-wiki/src/tool.ts
-previous-head: runs=30 passed=30 failed=0
---- load after burners:  9:31  up 3 days, 17:27, 1 user, load averages: 31.06 30.04 22.32
-summary.txt
+=== GREEN: the same files at the head
+2026-10-07T20:17:38Z
+--- load: 13:17  up 3 days, 21:14, 1 user, load averages: 3.74 5.26 5.04
+green query-shared-compute exit=0
+ ✓  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host 404ms
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+green query-scheduling exit=0
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 376ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 170ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 365ms
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+green query-reader exit=0
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 533ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 589ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 448ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 483ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 69ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 69ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 69ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 121ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 75ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 417ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 396ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 399ms
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+green query.reads exit=0
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 361ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 291ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 53ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 54ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 112ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 63ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 267ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 303ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 292ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 72ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 60ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 116ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 359ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 75ms
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+green query.abort exit=0
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > stops parsing vault pages after cancellation during a scan 93ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.abort.test.ts > rejects a whole-vault search through the pool's cancellation of its dispatched task 67ms
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
 
-=== BUDGET: generate a 20,000-page vault (120 body lines, 60 claims per page) whose whole-vault scan exceeds 30 s
-2026-10-07T16:31:04Z
---- load:  9:31  up 3 days, 17:27, 1 user, load averages: 31.06 30.04 22.32
-{"generated":{"vault":"~/work/oss-166304-vault-big","pages":20000,"lines":120,"claims":60,"bytes":558719588}}
-547M	~/work/oss-166304-vault-big
---- tree head
+=== CONTENTION (prev 19353569c95d0e77c33b30bcf7b4c6bb097087cf) 10k rep 1
+2026-10-07T20:18:20Z
+--- load: 13:18  up 3 days, 21:15, 1 user, load averages: 3.32 4.96 4.94
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 12942,
+    "count": 12,
+    "p50": 5928,
+    "p99": 11940,
+    "max": 11940,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 0
 
-=== BUDGET head cli-search
-2026-10-07T16:31:32Z
---- load:  9:31  up 3 days, 17:28, 1 user, load averages: 29.77 29.78 22.45
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "resolved",
-  "wallMs": 51475,
-  "error": null,
-  "resultCount": 10
+=== CONTENTION (prev 19353569c95d0e77c33b30bcf7b4c6bb097087cf) 20k rep 1
+2026-10-07T20:18:51Z
+--- load: 13:18  up 3 days, 21:15, 1 user, load averages: 2.98 4.72 4.85
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 51560,
+    "count": 51,
+    "p50": 25517,
+    "p99": 50560,
+    "max": 50560,
+    "overMemorySearchDeadline30s": 21,
+    "settledBeforeScanEnded": 0
 
-=== BUDGET head cli-get
-2026-10-07T16:32:26Z
---- load:  9:32  up 3 days, 17:29, 1 user, load averages: 25.25 28.53 22.44
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "resolved",
-  "wallMs": 48047,
-  "error": null,
-    "path": "entities/page-14321.md",
+=== CONTENTION (head 832afc5b07d17847c16c8316b66a82db0b2b283b) 10k rep 1
+2026-10-07T20:20:41Z
+--- load: 13:20  up 3 days, 21:17, 1 user, load averages: 2.12 3.88 4.50
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 13952,
+    "count": 13,
+    "p50": 34,
+    "p99": 83,
+    "max": 83,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 13
 
-=== BUDGET head tool
-2026-10-07T16:33:17Z
---- load:  9:33  up 3 days, 17:30, 1 user, load averages: 17.02 26.09 21.90
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "rejected",
-  "wallMs": 30040,
-  "error": "Error: wiki_search timed out after 30s"
---- tree previous-head
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/src/query-reader.ts
-M  extensions/memory-wiki/src/query-scheduling.test.ts
-M  extensions/memory-wiki/src/tool.ts
+=== CONTENTION (head 832afc5b07d17847c16c8316b66a82db0b2b283b) 20k rep 1
+2026-10-07T20:21:14Z
+--- load: 13:21  up 3 days, 21:18, 1 user, load averages: 3.15 3.94 4.49
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 57805,
+    "count": 57,
+    "p50": 100,
+    "p99": 361,
+    "max": 361,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 57
 
-=== BUDGET previous-head cli-search
-2026-10-07T16:33:50Z
---- load:  9:33  up 3 days, 17:30, 1 user, load averages: 10.71 23.51 21.13
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "rejected",
-  "wallMs": 30009,
-  "error": "Error: wiki_search timed out after 30s"
+=== CONTENTION (prev 19353569c95d0e77c33b30bcf7b4c6bb097087cf) 10k rep 2
+2026-10-07T20:23:14Z
+--- load: 13:23  up 3 days, 21:20, 1 user, load averages: 2.99 3.67 4.31
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 12981,
+    "count": 12,
+    "p50": 5966,
+    "p99": 11978,
+    "max": 11978,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 0
 
-=== BUDGET previous-head cli-get
-2026-10-07T16:34:23Z
---- load:  9:34  up 3 days, 17:31, 1 user, load averages: 7.52 21.51 20.49
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "rejected",
-  "wallMs": 30011,
-  "error": "Error: wiki page lookup timed out after 30s"
+=== CONTENTION (prev 19353569c95d0e77c33b30bcf7b4c6bb097087cf) 20k rep 2
+2026-10-07T20:23:45Z
+--- load: 13:23  up 3 days, 21:20, 1 user, load averages: 2.54 3.49 4.22
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 51661,
+    "count": 51,
+    "p50": 25607,
+    "p99": 50659,
+    "max": 50659,
+    "overMemorySearchDeadline30s": 21,
+    "settledBeforeScanEnded": 0
 
-=== BUDGET previous-head tool
-2026-10-07T16:34:56Z
---- load:  9:34  up 3 days, 17:31, 1 user, load averages: 5.46 19.44 19.77
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "rejected",
-  "wallMs": 30049,
-  "error": "Error: wiki_search timed out after 30s"
---- tree base
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/index.test.ts
-M  extensions/memory-wiki/index.ts
-M  extensions/memory-wiki/package.json
-M  extensions/memory-wiki/src/apply.ts
-M  extensions/memory-wiki/src/cli.ts
-M  extensions/memory-wiki/src/gateway.ts
-M  extensions/memory-wiki/src/query-pages.ts
-D  extensions/memory-wiki/src/query-reader.test.ts
-D  extensions/memory-wiki/src/query-reader.ts
-D  extensions/memory-wiki/src/query-reader.worker.ts
-D  extensions/memory-wiki/src/query-scheduling.test.ts
-D  extensions/memory-wiki/src/query-scoring.ts
-M  extensions/memory-wiki/src/query-shared-memory.ts
-M  extensions/memory-wiki/src/query.abort.test.ts
-M  extensions/memory-wiki/src/query.reads.test.ts
-M  extensions/memory-wiki/src/query.ts
-M  extensions/memory-wiki/src/tool.ts
+=== CONTENTION (head 832afc5b07d17847c16c8316b66a82db0b2b283b) 10k rep 2
+2026-10-07T20:25:35Z
+--- load: 13:25  up 3 days, 21:22, 1 user, load averages: 2.65 3.26 4.04
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 14099,
+    "count": 14,
+    "p50": 45,
+    "p99": 86,
+    "max": 86,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 14
 
-=== BUDGET base cli-search
-2026-10-07T16:35:29Z
---- load:  9:35  up 3 days, 17:32, 1 user, load averages: 5.32 17.79 19.15
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "resolved",
-  "wallMs": 53745,
-  "error": null,
-  "resultCount": 10
-
-=== BUDGET base cli-get
-2026-10-07T16:36:26Z
---- load:  9:36  up 3 days, 17:33, 1 user, load averages: 3.19 15.11 18.07
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "resolved",
-  "wallMs": 50371,
-  "error": null,
-    "path": "entities/page-14321.md",
-
-=== BUDGET base tool
-2026-10-07T16:37:19Z
---- load:  9:37  up 3 days, 17:34, 1 user, load averages: 2.51 13.10 17.16
-exit=0
-    "path": "~/work/oss-166304-vault-big"
-  "outcome": "rejected",
-  "wallMs": 30041,
-  "error": "Error: wiki_search timed out after 30s"
-
-=== BUDGET compare: cli-search results base versus head
-2026-10-07T16:37:52Z
---- load:  9:37  up 3 days, 17:34, 1 user, load averages: 2.34 11.89 16.55
+=== CONTENTION (head 832afc5b07d17847c16c8316b66a82db0b2b283b) 20k rep 2
+2026-10-07T20:26:08Z
+--- load: 13:26  up 3 days, 21:23, 1 user, load averages: 3.31 3.37 4.05
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 55931,
+    "count": 55,
+    "p50": 102,
+    "p99": 679,
+    "max": 679,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 55
 {
   "comparison": "JSON.stringify of every result object, all fields, in order",
-  "before": "base/cli-search.json",
-  "after": "head/cli-search.json",
+  "before": "contention/prev/10k-rep1.json",
+  "after": "contention/head/10k-rep1.json",
   "beforeCount": 10,
   "afterCount": 10,
-  "identicalResults": true,
-  "differences": [],
-  "fieldsPerResult": [
-    "corpus",
-    "path",
-    "title",
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "contention/prev/20k-rep1.json",
+  "after": "contention/head/20k-rep1.json",
+  "beforeCount": 10,
+  "afterCount": 10,
 
-=== 10K: generate the 10,000-page vault (60 body lines, 30 claims per page)
-2026-10-07T16:37:52Z
---- load:  9:37  up 3 days, 17:34, 1 user, load averages: 2.34 11.89 16.55
-{"generated":{"vault":"~/work/oss-166304-vault-10k","pages":10000,"lines":60,"claims":30,"bytes":140518134}}
-156M	~/work/oss-166304-vault-10k
-
-=== 10K AFTER (head): search
-2026-10-07T16:38:00Z
---- load:  9:38  up 3 days, 17:34, 1 user, load averages: 6.92 12.55 16.73
+=== 10K SEARCH, default capacity: previous head then head
+2026-10-07T20:28:09Z
+--- load: 13:28  up 3 days, 21:25, 1 user, load averages: 3.32 3.36 3.96
 exit=0
+exit=0
+~/work/oss-166304-r4/before-r4/search.stdout:  "searchWallMs": 13125,
+~/work/oss-166304-r4/before-r4/search.stdout:  "eventLoopUtilization": 0.002,
+~/work/oss-166304-r4/after/search.stdout:  "searchWallMs": 14253,
+~/work/oss-166304-r4/after/search.stdout:  "eventLoopUtilization": 0.004,
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "oss-166304-r3-v2/before/search.json",
+  "after": "oss-166304-r4/after/search.json",
+  "beforeCount": 10,
+  "afterCount": 10,
 
-=== 10K AFTER (head): concurrent exact-path reads during a scan
-2026-10-07T16:38:30Z
---- load:  9:38  up 3 days, 17:35, 1 user, load averages: 15.77 14.14 17.16
+=== 10K CONCURRENT exact reads at the head
+2026-10-07T20:29:09Z
+--- load: 13:29  up 3 days, 21:26, 1 user, load averages: 3.07 3.28 3.88
 exit=0
 {
-  "label": "after",
+  "label": "head",
   "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T16:38:59.296Z",
+  "capturedAt": "2026-10-07T20:29:40.309Z",
   "vault": {
     "path": "~/work/oss-166304-vault-10k",
     "compiled": false
   },
   "query": "cobalt lantern ledger harbor",
-  "scanWallMs": 13314,
+  "scanWallMs": 13913,
   "scanResultCount": 10,
   "scanError": null,
   "reads": {
@@ -346,273 +345,174 @@ exit=0
     "p50": 3,
     "p99": 10,
     "max": 10,
-    "min": 3
+    "min": 2
   }
 }
 
-=== 10K BEFORE-PR (first draft a5af25c3924b21935856b4ff9f4e0be08d071a89): concurrent
-2026-10-07T16:38:59Z
---- load:  9:38  up 3 days, 17:35, 1 user, load averages: 11.60 13.31 16.77
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/src/cli.ts
-M  extensions/memory-wiki/src/gateway.ts
-M  extensions/memory-wiki/src/query-reader.test.ts
-M  extensions/memory-wiki/src/query-reader.ts
-D  extensions/memory-wiki/src/query-scheduling.test.ts
-M  extensions/memory-wiki/src/query.ts
-M  extensions/memory-wiki/src/tool.ts
+=== DEADLINE OWNERSHIP at the head, 20,000 pages (base and pool-timeout cells are revision 3's)
+2026-10-07T20:29:40Z
+--- load: 13:29  up 3 days, 21:26, 1 user, load averages: 2.77 3.19 3.83
+
+=== budget head cli-search
+2026-10-07T20:29:40Z
+--- load: 13:29  up 3 days, 21:26, 1 user, load averages: 2.77 3.19 3.83
 exit=0
-{
-  "label": "before-pr",
-  "machine": "darwin arm64 node v24.21.0",
-  "capturedAt": "2026-10-07T16:39:28.909Z",
-  "vault": {
-    "path": "~/work/oss-166304-vault-10k",
-    "compiled": false
-  },
-  "query": "cobalt lantern ledger harbor",
-  "scanWallMs": 13280,
-  "scanResultCount": 10,
-  "scanError": null,
-  "reads": {
-    "count": 20,
-    "intervalMs": 500,
-    "issuedWhileScanRunning": 20,
-    "allFound": true
-  },
-  "readMs": {
-    "p50": 7809,
-    "p99": 12780,
-    "max": 12780,
-    "min": 3312
-  }
-}
-
-=== 10K BEFORE (base ebc4e6de603c5c1ce55086f13565e21feb1c297d): search
-2026-10-07T16:39:28Z
---- load:  9:39  up 3 days, 17:36, 1 user, load averages: 7.92 12.25 16.27
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/index.test.ts
-M  extensions/memory-wiki/index.ts
-M  extensions/memory-wiki/package.json
-M  extensions/memory-wiki/src/apply.ts
-M  extensions/memory-wiki/src/cli.ts
-M  extensions/memory-wiki/src/gateway.ts
-M  extensions/memory-wiki/src/query-pages.ts
-D  extensions/memory-wiki/src/query-reader.test.ts
-D  extensions/memory-wiki/src/query-reader.ts
-D  extensions/memory-wiki/src/query-reader.worker.ts
-D  extensions/memory-wiki/src/query-scheduling.test.ts
-D  extensions/memory-wiki/src/query-scoring.ts
-M  extensions/memory-wiki/src/query-shared-memory.ts
-M  extensions/memory-wiki/src/query.abort.test.ts
-M  extensions/memory-wiki/src/query.reads.test.ts
-M  extensions/memory-wiki/src/query.ts
-M  extensions/memory-wiki/src/tool.ts
-ls: extensions/memory-wiki/src/query-reader.ts: No such file or directory
-exit=0
-
-=== 10K compare
-2026-10-07T16:39:59Z
---- load:  9:39  up 3 days, 17:36, 1 user, load averages: 5.33 11.21 15.75
-{
-  "comparison": "JSON.stringify of every result object, all fields, in order",
-  "before": "before/search.json",
-  "after": "after/search.json",
-  "beforeCount": 10,
-  "afterCount": 10,
-  "identicalResults": true,
-  "differences": [],
-  "fieldsPerResult": [
-    "corpus",
-    "path",
-    "title",
-before/search {"searchWallMs":13519,"elu":1,"mainThreadCpuMs":13472,"delay":{"p50":18.1,"p99":22,"max":24.3,"mean":16.9},"probe":{"samples":124,"fsAccessLatencyMs":{"p50":0.4,"p99":17,"max":17.1},"timerLatenessMs":{"p50":2.8,"p99":18.3,"max":18.4}},"memoryMb":{"mainThreadHeapUsedPeak":1067.3,"processRssPeak":1373.8,"processRssMinusMainHeapPeak":751,"workerThreads":0,"workerHeapUsedPeak":null,"workerHeapSamples":0}}
-after/search {"searchWallMs":13344,"elu":0.003,"mainThreadCpuMs":24,"delay":{"p50":12,"p99":12.1,"max":12.7,"mean":11.6},"probe":{"samples":132,"fsAccessLatencyMs":{"p50":0,"p99":0.1,"max":0.1},"timerLatenessMs":{"p50":1.2,"p99":2.5,"max":2.8}},"memoryMb":{"mainThreadHeapUsedPeak":150.7,"processRssPeak":1015.7,"processRssMinusMainHeapPeak":865.1,"workerThreads":1,"workerHeapUsedPeak":274.3,"workerHeapSamples":132}}
-
-=== COMPAT: a vault initialized and compiled by base code, then queried by base and by head: on-disk tree hash and results
-2026-10-07T16:39:59Z
---- load:  9:39  up 3 days, 17:36, 1 user, load averages: 5.33 11.21 15.75
-{"generated":{"vault":"~/work/oss-166304-vault-compat","pages":2000,"lines":40,"claims":20,"bytes":18854125}}
-base compile+search exit=0
-    2019
-base cli-search exit=0
-    "path": "~/work/oss-166304-vault-compat-base"
+    "path": "~/work/oss-166304-vault-big"
   "outcome": "resolved",
-  "wallMs": 1919,
+  "wallMs": 55801,
   "error": null,
   "resultCount": 10
-base cli-get exit=0
-    "path": "~/work/oss-166304-vault-compat-base"
+
+=== budget head cli-get
+2026-10-07T20:30:38Z
+--- load: 13:30  up 3 days, 21:27, 1 user, load averages: 2.31 3.02 3.72
+exit=0
+    "path": "~/work/oss-166304-vault-big"
   "outcome": "resolved",
-  "wallMs": 1774,
+  "wallMs": 51955,
   "error": null,
-    "path": "concepts/page-1234.md",
+    "path": "entities/page-14321.md",
+
+=== budget head tool
+2026-10-07T20:31:33Z
+--- load: 13:31  up 3 days, 21:28, 1 user, load averages: 2.56 2.99 3.67
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "rejected",
+  "wallMs": 30049,
+  "error": "Error: wiki_search timed out after 30s"
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "budget/base/cli-search.json",
+  "after": "budget/head/cli-search.json",
+  "beforeCount": 10,
+  "afterCount": 10,
+
+=== COMPAT at the head on copies of the base-compiled vault
+2026-10-07T20:32:06Z
+--- load: 13:32  up 3 days, 21:29, 1 user, load averages: 2.20 2.86 3.60
+1c1
+< e7217d7488a5e3e4c89f5bfd657a6ad1a81d04ddaeb1a8f23c5e399f0eb59369  ./.openclaw-wiki/log.jsonl
+---
+> f50ba19f128b0a89106a17aafa588c43c79e6c68a07580ea8dd449ce365ef8f7  ./.openclaw-wiki/log.jsonl
+1008,1009c1008,1009
+< 3410633cbbbd0826941b60a978f361e47e35169d9b050409717971bdd2a146e1  ./reports/claim-health.md
+< 252da90c67fafa21a5f98859a29331f7ebbbb13509855034880b21c67c1998bf  ./reports/contradictions.md
+---
+> 32f00f57df1b58ce992c694d057f01a7f31ddb7159c0b3184005ded2d8d0058e  ./reports/claim-health.md
+> 6a29b44d10e2669fca8ad384a94a4c0ac5ceb7b7dbeb99b2d5143d13c2e03932  ./reports/contradictions.md
+1011,1017c1011,1017
+< 84479daa532b81a87dc30b4c393a23e91ae9681920a037c1f156c34793cd4f08  ./reports/low-confidence.md
+< fa729ef58b00e1ec122ea0f3a358587308ac6b86fc61ba3a675ee540ae6f060b  ./reports/open-questions.md
+< 75911b1781be662cbc5dddc0390b51567c5049d04fd03cafceeef65d5868abc6  ./reports/person-agent-directory.md
+< b30ee1fc9de66bb5df3ee92113812396e48129436bfb69cf4ce3242ed06082d7  ./reports/privacy-review.md
+< e60aa37e2af77d2ae118468368a0629139b11f98be0f56b55dc6ee601b0d4594  ./reports/provenance-coverage.md
+< 4dbd2e8c8cfc9b24c0951f2ea75d31c1994b7b8096cd324f091bb988a26d9ef8  ./reports/relationship-graph.md
+< 43a72096a15b59ccefe9190fab3c232947840079eb3f5acd5f6a30033adf8572  ./reports/stale-pages.md
+---
+> fe26680353857a0dabe6f39dc85ff63601ed79dfa0a382e7074e61379f91a080  ./reports/low-confidence.md
+> b597c988a9888c6e2cef972ae66ff9d3cc27e9dbd162ce9abbf095675947f053  ./reports/open-questions.md
+> a0baad6da97312b75f6b0520f3c8a3b701195d438a916dd16be03c8dfc18ec8a  ./reports/person-agent-directory.md
+> 20ab4ae7c280b5318f38fb3dbdcfae7be35d779ed9f565dd1746ebcf5c751dea  ./reports/privacy-review.md
+> 3de97acb066fa342859051b59b12d986c8d9c51fed596dee54e7541a1eaff00b  ./reports/provenance-coverage.md
+> d5c532aed33b14d59ebc62fa3b88fd50bb91f920e7608571ee578dfec927fa68  ./reports/relationship-graph.md
+> 2e33d89b10a795047f300e92469ed0fc51b6f9245ac327fcca241545dc746cab  ./reports/stale-pages.md
 head cli-search exit=0
-    "path": "~/work/oss-166304-vault-compat-head"
+    "path": "~/work/oss-166304-vault-compat-r4-head"
   "outcome": "resolved",
-  "wallMs": 2186,
+  "wallMs": 2439,
   "error": null,
   "resultCount": 10
 head cli-get exit=0
-    "path": "~/work/oss-166304-vault-compat-head"
+    "path": "~/work/oss-166304-vault-compat-r4-head"
   "outcome": "resolved",
-  "wallMs": 1964,
+  "wallMs": 2199,
   "error": null,
     "path": "concepts/page-1234.md",
-base cli-apply exit=0
-  "outcome": "resolved",
-  "wallMs": 60299,
-  "error": null,
-    "changed": true,
-    "pagePath": "concepts/page-1234.md",
+1c1
+< e7217d7488a5e3e4c89f5bfd657a6ad1a81d04ddaeb1a8f23c5e399f0eb59369  ./.openclaw-wiki/log.jsonl
+---
+> f50ba19f128b0a89106a17aafa588c43c79e6c68a07580ea8dd449ce365ef8f7  ./.openclaw-wiki/log.jsonl
+1008,1009c1008,1009
+< 3410633cbbbd0826941b60a978f361e47e35169d9b050409717971bdd2a146e1  ./reports/claim-health.md
+< 252da90c67fafa21a5f98859a29331f7ebbbb13509855034880b21c67c1998bf  ./reports/contradictions.md
+---
+> 32f00f57df1b58ce992c694d057f01a7f31ddb7159c0b3184005ded2d8d0058e  ./reports/claim-health.md
+> 6a29b44d10e2669fca8ad384a94a4c0ac5ceb7b7dbeb99b2d5143d13c2e03932  ./reports/contradictions.md
+1011,1017c1011,1017
+< 84479daa532b81a87dc30b4c393a23e91ae9681920a037c1f156c34793cd4f08  ./reports/low-confidence.md
+< fa729ef58b00e1ec122ea0f3a358587308ac6b86fc61ba3a675ee540ae6f060b  ./reports/open-questions.md
+< 75911b1781be662cbc5dddc0390b51567c5049d04fd03cafceeef65d5868abc6  ./reports/person-agent-directory.md
+< b30ee1fc9de66bb5df3ee92113812396e48129436bfb69cf4ce3242ed06082d7  ./reports/privacy-review.md
+< e60aa37e2af77d2ae118468368a0629139b11f98be0f56b55dc6ee601b0d4594  ./reports/provenance-coverage.md
+< 4dbd2e8c8cfc9b24c0951f2ea75d31c1994b7b8096cd324f091bb988a26d9ef8  ./reports/relationship-graph.md
+< 43a72096a15b59ccefe9190fab3c232947840079eb3f5acd5f6a30033adf8572  ./reports/stale-pages.md
+---
+> fe26680353857a0dabe6f39dc85ff63601ed79dfa0a382e7074e61379f91a080  ./reports/low-confidence.md
+> b597c988a9888c6e2cef972ae66ff9d3cc27e9dbd162ce9abbf095675947f053  ./reports/open-questions.md
+> a0baad6da97312b75f6b0520f3c8a3b701195d438a916dd16be03c8dfc18ec8a  ./reports/person-agent-directory.md
+> 20ab4ae7c280b5318f38fb3dbdcfae7be35d779ed9f565dd1746ebcf5c751dea  ./reports/privacy-review.md
+> 3de97acb066fa342859051b59b12d986c8d9c51fed596dee54e7541a1eaff00b  ./reports/provenance-coverage.md
+> d5c532aed33b14d59ebc62fa3b88fd50bb91f920e7608571ee578dfec927fa68  ./reports/relationship-graph.md
+> 2e33d89b10a795047f300e92469ed0fc51b6f9245ac327fcca241545dc746cab  ./reports/stale-pages.md
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "compat/base/cli-search.json",
+  "after": "compat/head/cli-search.json",
+  "beforeCount": 10,
+  "afterCount": 10,
 head cli-apply exit=0
   "outcome": "resolved",
-  "wallMs": 63674,
+  "wallMs": 63375,
   "error": null,
     "changed": true,
     "pagePath": "concepts/page-1234.md",
---- update_metadata: files whose raw bytes differ between the base-applied and head-applied copies:
-./.openclaw-wiki/log.jsonl
-./concepts/page-1234.md
-./reports/claim-health.md
-./reports/low-confidence.md
-./reports/open-questions.md
-(       5 files)
---- update_metadata: the same comparison with ISO-8601 timestamps normalized:
+--- update_metadata, timestamps normalized, base (revision 3) versus head:
 5c5
 < f4a4e6ec65e9c27d4d638db5d1b578778e6cfabc43182b5b4d385b111e88c003  ./.openclaw-wiki/log.jsonl
 ---
-> f7f119c5edad85f27a8b43ded03a0acc5a51cdc4ef1ba8bddb9f32ca865c752f  ./.openclaw-wiki/log.jsonl
---- tree diff after base compile vs after base queries:
-identical
---- tree diff after base compile vs after head queries:
-identical
-{
-  "comparison": "JSON.stringify of every result object, all fields, in order",
-  "before": "base/cli-search.json",
-  "after": "head/cli-search.json",
-  "beforeCount": 10,
-  "afterCount": 10,
-  "identicalResults": true,
-  "differences": [],
---- persisted-format modules changed between base and head (expect none):
-(end of diffstat)
-diff --git a/extensions/memory-wiki/package.json b/extensions/memory-wiki/package.json
-index 02f1a593c99..737942b35b6 100644
---- a/extensions/memory-wiki/package.json
-+++ b/extensions/memory-wiki/package.json
-@@ -37,7 +37,10 @@
-     },
-     "build": {
-       "bundledDist": true,
--      "openclawVersion": "2026.9.8"
-+      "openclawVersion": "2026.9.8",
-+      "workerEntries": [
-+        "./src/query-reader.worker.ts"
-+      ]
-     },
-     "release": {
-       "publishToClawHub": true,
+> ac5484c3d8659e39bd4d22c82ae40b941277111d4dd1e3149757d55b999197bb  ./.openclaw-wiki/log.jsonl
 
-=== TEST COST: extensions/memory-wiki/src/query-scheduling.test.ts, head file versus previous head file (each warmed once, then timed; pnpm test <file> --maxWorkers=1)
-2026-10-07T16:44:00Z
---- load:  9:44  up 3 days, 17:40, 1 user, load averages: 3.97 7.98 13.23
---- head (warm)
- Test Files  1 passed (1)
+=== TEST COST at the head (pnpm test <file> --maxWorkers=1, warmed once, then timed)
+2026-10-07T20:33:26Z
+--- load: 13:33  up 3 days, 21:30, 1 user, load averages: 4.86 3.97 3.98
+--- extensions/memory-wiki/src/query-shared-compute.test.ts
+      Tests  1 passed (1)
+   Duration  4.95s (transform 75%, tests 16%, setup 5%, import 4%)
+real 7.05
+--- extensions/memory-wiki/src/query-scheduling.test.ts
+      Tests  4 passed (4)
+   Duration  7.44s (transform 63%, tests 20%, import 14%, setup 4%)
+real 9.53
+--- extensions/memory-wiki/src/query-reader.test.ts
+      Tests  13 passed (13)
+   Duration  10.32s (transform 45%, tests 42%, import 11%, setup 2%)
+real 12.39
+--- extensions/memory-wiki/src/query.reads.test.ts
+      Tests  15 passed (15)
+   Duration  8.81s (transform 52%, tests 33%, import 12%, setup 3%)
+real 10.99
+--- extensions/memory-wiki/src/query.abort.test.ts
+      Tests  2 passed (2)
+   Duration  6.15s (transform 75%, import 18%, setup 4%, tests 2%)
+real 8.22
+
+=== TEST COST: previous head's extensions/memory-wiki/src/query-scheduling.test.ts against its own production code
+2026-10-07T20:35:04Z
+--- load: 13:35  up 3 days, 21:31, 1 user, load averages: 3.35 3.71 3.87
       Tests  3 passed (3)
-   Duration  7.25s (transform 65%, tests 17%, import 15%, setup 4%)
-real 9.34
-user 10.32
-M  extensions/memory-wiki/README.md
-M  extensions/memory-wiki/src/query-reader.ts
-M  extensions/memory-wiki/src/query-scheduling.test.ts
-M  extensions/memory-wiki/src/tool.ts
---- previous head (warm)
- Test Files  1 passed (1)
-      Tests  3 passed (3)
-   Duration  8.11s (transform 57%, tests 27%, import 13%, setup 3%)
-real 10.19
-user 11.80
+   Duration  7.15s (transform 64%, tests 17%, import 15%, setup 4%)
+real 9.25
 
 === BUILD: standalone plugin build
-2026-10-07T16:44:41Z
---- load:  9:44  up 3 days, 17:41, 1 user, load averages: 3.99 7.45 12.79
-ℹ entry: extensions/memory-wiki/index.ts, extensions/memory-wiki/src/query-reader.worker.ts, extensions/memory-wiki/api.ts, extensions/memory-wiki/cli-metadata.ts, extensions/memory-wiki/doctor-contract-api.ts
-ℹ target: node24.16.0
-ℹ tsconfig: tsconfig.json
-ℹ Build start
-ℹ extensions/memory-wiki/dist/index.js                                35.76 kB │ gzip:  8.55 kB
-ℹ extensions/memory-wiki/dist/doctor-contract-api.js                   7.30 kB │ gzip:  2.21 kB
-ℹ extensions/memory-wiki/dist/cli-metadata.js                          1.19 kB │ gzip:  0.59 kB
-ℹ extensions/memory-wiki/dist/src/query-reader.worker.js               0.64 kB │ gzip:  0.39 kB
-ℹ extensions/memory-wiki/dist/api.js                                   0.18 kB │ gzip:  0.12 kB
-ℹ extensions/memory-wiki/dist/.setup/presentation-HPAyjXVt.mjs       160.53 kB │ gzip: 37.17 kB
-ℹ extensions/memory-wiki/dist/.setup/cli-ShF93aZC.mjs                 66.70 kB │ gzip: 17.75 kB
-ℹ extensions/memory-wiki/dist/.setup/query-pages-BMLew1XS.mjs         24.67 kB │ gzip:  6.44 kB
-ℹ extensions/memory-wiki/dist/.setup/bounded-walk-P-TxE7z-.mjs        18.87 kB │ gzip:  5.32 kB
-ℹ extensions/memory-wiki/dist/.setup/import-runs-state-Ch3RiHeP.mjs   18.13 kB │ gzip:  4.57 kB
-ℹ extensions/memory-wiki/dist/.setup/config-DmcCAxWw.mjs               7.31 kB │ gzip:  2.20 kB
-ℹ 11 files, total: 341.27 kB
-✔ Build complete in 47ms
-[plugin-npm-runtime-build] built memory-wiki runtime (5 entries)
+2026-10-07T20:35:35Z
+--- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
 standalone exit=0
--rw-r--r--  1 openclaw  openclaw  641 Oct  7 09:44 extensions/memory-wiki/dist/src/query-reader.worker.js
+ℹ entry: extensions/memory-wiki/index.ts, extensions/memory-wiki/src/query-reader.worker.ts, extensions/memory-wiki/api.ts, extensions/memory-wiki/cli-metadata.ts, extensions/memory-wiki/doctor-contract-api.ts
+ℹ extensions/memory-wiki/dist/src/query-reader.worker.js               0.64 kB │ gzip:  0.39 kB
+✔ Build complete in 44ms
+[plugin-npm-runtime-build] built memory-wiki runtime (5 entries)
 
-=== BUILD: root bundled build (pnpm build)
-2026-10-07T16:44:41Z
---- load:  9:44  up 3 days, 17:41, 1 user, load averages: 3.99 7.45 12.79
-pnpm build exit=0
-[build-all] phase timings: total 2m 3.3s; slowest write-unified-entry-dts 1m 13.5s; tsdown-unified 15.9s; ui:build 7.96s; check-cli-bootstrap-imports 7.11s; runtime-postbuild 4.55s; write-cli-startup-metadata (reused) 3.43s; external-plugins:local-dist 3.03s; tsdown-packages (reused) 1.50s; tsdown-ai (reused) 1.49s; plugins:assets:build 1.40s; plugins:assets:copy 1.17s; check-plugin-sdk-exports 972ms; build-stamp 931ms; runtime-postbuild-stamp 191ms; write-build-info 95ms; native-protocol 50ms
--rw-r--r--  1 openclaw  openclaw  745 Oct  7 09:45 dist/extensions/memory-wiki/src/query-reader.worker.js
---- worker imports
-from "../../../fs-safe-RQzDLrgq.mjs"
-from "../../../worker-task-server-DSC0g5JY.mjs"
-from "../../../query-pages-B2ttN49D.mjs"
-
-=== CLI: built openclaw wiki search and wiki get against the 20,000-page vault (no gateway, temporary state dir)
-2026-10-07T16:46:49Z
---- load:  9:46  up 3 days, 17:43, 1 user, load averages: 14.66 10.74 13.41
-~/work/oss-166304-r3.sh: line 226: 79391 Abort trap: 6           /usr/bin/time -p node openclaw.mjs wiki search "$QUERY" --max-results 10 --json > "$E/budget/cli-built/search.json" 2> "$E/budget/cli-built/search.stderr"
-wiki search exit=134
-time: command terminated abnormally
-real 856.34
-user 929.72
-sys 30.05
-unparsed: ~/work/oss-166304-r3/budget/cli-built/search.json: Unexpected end of JSON input
-~/work/oss-166304-r3.sh: line 226: 79882 Abort trap: 6           /usr/bin/time -p node openclaw.mjs wiki get page-14321 --lines 3 > "$E/budget/cli-built/get.txt" 2> "$E/budget/cli-built/get.stderr"
-wiki get exit=134
-time: command terminated abnormally
-real 186.77
-user 251.51
-sys 5.25
-
-=== CLI: 90 s V8 tick profile of the built wiki search on the 20,000-page vault, then the built search on the 2,000-page vault
-2026-10-07T17:04:12Z
---- load: 10:04  up 3 days, 18:01, 1 user, load averages: 3.08 3.51 6.37
-main isolate log: isolate-0x772140c000-80013-v8.log (       5 isolate logs)
-# node --prof-process of the main isolate (largest tick log), built openclaw wiki search on the 20,000-page vault, killed after 90 s
-Statistical profiling result from isolate-0x772140c000-80013-v8.log, (16001 ticks, 41 unaccounted, 0 excluded).
-
- [Shared libraries]:
-   ticks  total  nonlib   name
-     50    0.3%          /usr/lib/system/libsystem_platform.dylib
-     45    0.3%          /usr/lib/system/libsystem_malloc.dylib
-     11    0.1%          /usr/lib/system/libsystem_c.dylib
-      8    0.0%          /usr/lib/libc++.1.dylib
-      7    0.0%          /usr/lib/system/libdyld.dylib
-      1    0.0%          /usr/lib/system/libsystem_kernel.dylib
-      1    0.0%          /usr/lib/libc++abi.dylib
---- readPageSummaries in the built presentation chunk (compare with the anonymous presentation frame line in the profile):
-dist/presentation-DX_yu183.mjs:1540:async function readPageSummaries(rootDir, signal) {
-small wiki search exit=0
-real 42.24
-user 47.49
-sys 1.81
-results: 3 syntheses/page-1491.md concepts/page-566.md concepts/page-1154.md
-
-=== git state at end (status must be empty)
-2026-10-07T17:06:29Z
---- load: 10:06  up 3 days, 18:03, 1 user, load averages: 3.21 3.54 5.97
-083b81fb217ddb73007837aabc5bb9a2aa702cad
-EXIT=0
+=== DONE
+2026-10-07T20:35:36Z
+--- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98

@@ -1,0 +1,200 @@
+
+=== phase 2 start; HEAD=832afc5b07d17847c16c8316b66a82db0b2b283b BASE=ebc4e6de603c5c1ce55086f13565e21feb1c297d
+2026-10-07T20:35:36Z
+--- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
+
+=== CONTENTION on base main (the scan runs on the calling thread and takes no permit)
+2026-10-07T20:35:36Z
+--- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
+
+=== CONTENTION (base) 10k
+2026-10-07T20:35:36Z
+--- load: 13:35  up 3 days, 21:32, 1 user, load averages: 4.71 4.00 3.98
+    "limit": 1,
+  "idleRetrievalMs": 1,
+  "scanWallMs": 13275,
+    "count": 12,
+    "p50": 7,
+    "p99": 14,
+    "max": 14,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 12
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "contention/base/10k-rep1.json",
+  "after": "contention/head/10k-rep1.json",
+  "beforeCount": 10,
+  "afterCount": 10,
+
+=== CONTENTION (base) 20k
+2026-10-07T20:36:07Z
+--- load: 13:36  up 3 days, 21:33, 1 user, load averages: 4.25 3.95 3.96
+    "limit": 1,
+  "idleRetrievalMs": 2,
+  "scanWallMs": 53451,
+    "count": 49,
+    "p50": 5,
+    "p99": 31,
+    "max": 31,
+    "overMemorySearchDeadline30s": 0,
+    "settledBeforeScanEnded": 49
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "contention/base/20k-rep1.json",
+  "after": "contention/head/20k-rep1.json",
+  "beforeCount": 10,
+  "afterCount": 10,
+
+=== 10K SEARCH BEFORE (base main)
+2026-10-07T20:37:59Z
+--- load: 13:37  up 3 days, 21:34, 1 user, load averages: 2.78 3.50 3.78
+exit=0
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "oss-166304-r4/before/search.json",
+  "after": "oss-166304-r4/after/search.json",
+  "beforeCount": 10,
+  "afterCount": 10,
+
+=== 10K CONCURRENT BEFORE-PR (single-worker variant a5af25c3924b21935856b4ff9f4e0be08d071a89)
+2026-10-07T20:38:29Z
+--- load: 13:38  up 3 days, 21:35, 1 user, load averages: 2.53 3.38 3.72
+exit=0
+{
+  "label": "before-pr",
+  "machine": "darwin arm64 node v24.21.0",
+  "capturedAt": "2026-10-07T20:38:58.224Z",
+  "vault": {
+    "path": "~/work/oss-166304-vault-10k",
+    "compiled": false
+  },
+  "query": "cobalt lantern ledger harbor",
+  "scanWallMs": 12774,
+  "scanResultCount": 10,
+  "scanError": null,
+  "reads": {
+    "count": 20,
+    "intervalMs": 500,
+    "issuedWhileScanRunning": 20,
+    "allFound": true
+  },
+  "readMs": {
+    "p50": 7300,
+    "p99": 12275,
+    "max": 12275,
+    "min": 2804
+  }
+}
+
+=== budget base cli-search
+2026-10-07T20:38:58Z
+--- load: 13:38  up 3 days, 21:35, 1 user, load averages: 3.01 3.42 3.73
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "resolved",
+  "wallMs": 53628,
+  "error": null,
+  "resultCount": 10
+
+=== budget base cli-get
+2026-10-07T20:39:54Z
+--- load: 13:39  up 3 days, 21:36, 1 user, load averages: 3.51 3.50 3.74
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "resolved",
+  "wallMs": 49023,
+  "error": null,
+    "path": "entities/page-14321.md",
+
+=== budget base tool
+2026-10-07T20:40:46Z
+--- load: 13:40  up 3 days, 21:37, 1 user, load averages: 3.45 3.47 3.71
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "rejected",
+  "wallMs": 30049,
+  "error": "Error: wiki_search timed out after 30s"
+
+=== budget pool-timeout cli-search
+2026-10-07T20:41:19Z
+--- load: 13:41  up 3 days, 21:38, 1 user, load averages: 2.74 3.29 3.63
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "rejected",
+  "wallMs": 30016,
+  "error": "Error: wiki_search timed out after 30s"
+
+=== budget pool-timeout cli-get
+2026-10-07T20:41:52Z
+--- load: 13:41  up 3 days, 21:38, 1 user, load averages: 2.53 3.18 3.58
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "rejected",
+  "wallMs": 30009,
+  "error": "Error: wiki page lookup timed out after 30s"
+
+=== budget pool-timeout tool
+2026-10-07T20:42:25Z
+--- load: 13:42  up 3 days, 21:39, 1 user, load averages: 3.09 3.24 3.58
+exit=0
+    "path": "~/work/oss-166304-vault-big"
+  "outcome": "rejected",
+  "wallMs": 30071,
+  "error": "Error: wiki_search timed out after 30s"
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "budget/base/cli-search.json",
+  "after": "budget/head/cli-search.json",
+  "beforeCount": 10,
+  "afterCount": 10,
+
+=== COMPAT base on copies of the base-compiled vault
+2026-10-07T20:42:58Z
+--- load: 13:42  up 3 days, 21:39, 1 user, load averages: 3.51 3.34 3.61
+base cli-search exit=0
+    "path": "~/work/oss-166304-vault-compat-r4-base"
+  "outcome": "resolved",
+  "wallMs": 2017,
+  "error": null,
+  "resultCount": 10
+base cli-get exit=0
+    "path": "~/work/oss-166304-vault-compat-r4-base"
+  "outcome": "resolved",
+  "wallMs": 1716,
+  "error": null,
+    "path": "concepts/page-1234.md",
+base queries left the tree identical
+head queries left the tree identical
+{
+  "comparison": "JSON.stringify of every result object, all fields, in order",
+  "before": "compat/base/cli-search.json",
+  "after": "compat/head/cli-search.json",
+  "beforeCount": 10,
+  "afterCount": 10,
+base cli-apply exit=0
+  "outcome": "resolved",
+  "wallMs": 60509,
+  "error": null,
+    "changed": true,
+    "pagePath": "concepts/page-1234.md",
+--- update_metadata, timestamps normalized, base versus head (same sitting):
+5c5
+< ee2d33c5129b6ef654b2ee95bb857ac382f12944b64365fd54e13d732878a925  ./.openclaw-wiki/log.jsonl
+---
+> ac5484c3d8659e39bd4d22c82ae40b941277111d4dd1e3149757d55b999197bb  ./.openclaw-wiki/log.jsonl
+(empty above means no change)
+
+=== BUILD: root bundled build (pnpm build)
+2026-10-07T20:44:14Z
+--- load: 13:44  up 3 days, 21:41, 1 user, load averages: 5.03 4.14 3.91
+pnpm build exit=0
+[build-all] phase timings: total 55s; slowest tsdown-unified 15.3s; ui:build 7.89s; check-cli-bootstrap-imports 6.95s; write-unified-entry-dts 6.40s; runtime-postbuild 4.34s; write-cli-startup-metadata (reused) 3.55s; external-plugins:local-dist 2.94s; tsdown-ai (reused) 1.51s; tsdown-packages (reused) 1.48s; plugins:assets:build 1.32s; plugins:assets:copy 1.18s; check-plugin-sdk-exports 950ms; build-stamp 904ms; runtime-postbuild-stamp 179ms; write-build-info 94ms; native-protocol 49ms
+-rw-r--r--  1 openclaw  openclaw  745 Oct  7 13:44 dist/extensions/memory-wiki/src/query-reader.worker.js
+--- worker imports
+from "../../../fs-safe-RQzDLrgq.mjs"
+from "../../../worker-task-server-DSC0g5JY.mjs"
+from "../../../query-pages-wDN1eC6i.mjs"
+
+=== PHASE 2 DONE
+2026-10-07T20:45:14Z
+--- load: 13:45  up 3 days, 21:42, 1 user, load averages: 15.95 7.30 5.10

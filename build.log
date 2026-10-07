@@ -1,152 +1,148 @@
 $ node --import ./scripts/tsx.mjs scripts/build-all.mts
 [build-all] native-protocol
-[build-all] native-protocol done in 50ms
+[build-all] native-protocol done in 49ms
 [build-all] plugins:assets:build
 [canvas] build: node scripts/bundle-a2ui.mjs
 A2UI bundle up to date; skipping.
 [workboard] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/workboard
 [x] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/x
-[build-all] plugins:assets:build done in 1.40s
+[build-all] plugins:assets:build done in 1.32s
 [build-all] tsdown-ai (cache restored)
 [tsdown-build] invocation 1/1 finished in 0.3s
-[build-all] tsdown-ai done in 1.49s
+[build-all] tsdown-ai done in 1.51s
 [build-all] tsdown-packages (cache restored)
 [tsdown-build] invocation 1/1 finished in 0.3s
-[build-all] tsdown-packages done in 1.50s
+[build-all] tsdown-packages done in 1.48s
 [build-all] tsdown-unified
-[PLUGIN_TIMINGS] Plugin hooks ran for 6.9s of this 7.4s build (93%).
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 6.9s of this 7.4s build (94%).
 The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
-  - tsdown:deps generateBundle (75%, 5.6s, 1 call)
+  - tsdown:deps generateBundle (75%, 5.5s, 1 call)
 Additional hook time came from the hooks below and from hooks under 1s.
 1 hook is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
   - tsdown:deps resolveId (2166 calls)
 See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
 
-[PLUGIN_TIMINGS] Plugin hooks ran for 7.0s of this 7.4s build (93%).
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 7.0s of this 7.4s build (94%).
 The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
-  - tsdown:deps generateBundle (72%, 5.4s, 1 call)
+  - tsdown:deps generateBundle (73%, 5.4s, 1 call)
 Additional hook time came from the hooks below and from hooks under 1s.
 1 hook is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
   - tsdown:deps resolveId (2796 calls)
 See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
 
-node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 ]
-      │
- 2400 │           ASM_CONSTS[start] = eval(func);
-      │                               ──┬─  
-      │                                 ╰─── Use of direct `eval` here.
-      │ 
-      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-──────╯
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2400 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mA[0m[38;5;249mS[0m[38;5;249mM[0m[38;5;249m_[0m[38;5;249mC[0m[38;5;249mO[0m[38;5;249mN[0m[38;5;249mS[0m[38;5;249mT[0m[38;5;249mS[0m[38;5;249m[[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                               ──┬─  
+ [38;5;240m     │[0m                                 ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
 
-node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 ]
-      │
- 2423 │           moduleExports[name] = eval(func);
-      │                                 ──┬─  
-      │                                   ╰─── Use of direct `eval` here.
-      │ 
-      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-──────╯
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2423 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mE[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249ms[0m[38;5;249m[[0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                                 ──┬─  
+ [38;5;240m     │[0m                                   ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
 
-node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 ]
-      │
- 2400 │           ASM_CONSTS[start] = eval(func);
-      │                               ──┬─  
-      │                                 ╰─── Use of direct `eval` here.
-      │ 
-      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-──────╯
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2400 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mA[0m[38;5;249mS[0m[38;5;249mM[0m[38;5;249m_[0m[38;5;249mC[0m[38;5;249mO[0m[38;5;249mN[0m[38;5;249mS[0m[38;5;249mT[0m[38;5;249mS[0m[38;5;249m[[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                               ──┬─  
+ [38;5;240m     │[0m                                 ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
 
-node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 ]
-      │
- 2423 │           moduleExports[name] = eval(func);
-      │                                 ──┬─  
-      │                                   ╰─── Use of direct `eval` here.
-      │ 
-      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-──────╯
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2423 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mE[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249ms[0m[38;5;249m[[0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                                 ──┬─  
+ [38;5;240m     │[0m                                   ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
 
-node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 ]
-      │
- 2400 │           ASM_CONSTS[start] = eval(func);
-      │                               ──┬─  
-      │                                 ╰─── Use of direct `eval` here.
-      │ 
-      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-──────╯
+node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66352:28) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+       [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66352:29 [38;5;246m][0m
+       [38;5;246m│[0m
+ [38;5;246m66352 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249m`[0m[38;5;249m([0m[38;5;249m$[0m[38;5;249m{[0m[38;5;249me[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249m}[0m[38;5;249m)[0m[38;5;249m`[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m      │[0m                             ──┬─  
+ [38;5;240m      │[0m                               ╰─── Use of direct `eval` here.
+ [38;5;240m      │[0m 
+ [38;5;240m      │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m───────╯[0m
 
-node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 ]
-      │
- 2423 │           moduleExports[name] = eval(func);
-      │                                 ──┬─  
-      │                                   ╰─── Use of direct `eval` here.
-      │ 
-      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-──────╯
+node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66359:28) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+       [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66359:29 [38;5;246m][0m
+       [38;5;246m│[0m
+ [38;5;246m66359 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249m`[0m[38;5;249m([0m[38;5;249m$[0m[38;5;249m{[0m[38;5;249me[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249m}[0m[38;5;249m)[0m[38;5;249m`[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m      │[0m                             ──┬─  
+ [38;5;240m      │[0m                               ╰─── Use of direct `eval` here.
+ [38;5;240m      │[0m 
+ [38;5;240m      │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m───────╯[0m
 
-node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66352:28) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-       ╭─[ node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66352:29 ]
-       │
- 66352 │               const value = eval(`(${expr})`);
-       │                             ──┬─  
-       │                               ╰─── Use of direct `eval` here.
-       │ 
-       │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-───────╯
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2400 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mA[0m[38;5;249mS[0m[38;5;249mM[0m[38;5;249m_[0m[38;5;249mC[0m[38;5;249mO[0m[38;5;249mN[0m[38;5;249mS[0m[38;5;249mT[0m[38;5;249mS[0m[38;5;249m[[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                               ──┬─  
+ [38;5;240m     │[0m                                 ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
 
-node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66359:28) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
-       ╭─[ node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66359:29 ]
-       │
- 66359 │               const value = eval(`(${expr})`);
-       │                             ──┬─  
-       │                               ╰─── Use of direct `eval` here.
-       │ 
-       │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
-───────╯
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [33m[EVAL] [0mUse of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m2423 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mE[0m[38;5;249mx[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249ms[0m[38;5;249m[[0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m][0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m     │[0m                                 ──┬─  
+ [38;5;240m     │[0m                                   ╰─── Use of direct `eval` here.
+ [38;5;240m     │[0m 
+ [38;5;240m     │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+[38;5;246m──────╯[0m
 
-[tsdown-build] invocation 1/1 finished in 13.4s
-[build-all] tsdown-unified done in 15.9s
+[tsdown-build] invocation 1/1 finished in 12.9s
+[build-all] tsdown-unified done in 15.3s
 [build-all] write-unified-entry-dts
-[tsdown-unified] openclaw-dts: cache miss (signature-mismatch)
-
- WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
-
-[tsdown-build] still running pid=79002; no output for 60s
-[tsdown-build] invocation 1/1 finished in 67.1s
-[build-all] write-unified-entry-dts done in 1m 13.5s
+[tsdown-unified] openclaw-dts: cache hit (fresh-cache)
+[tsdown-unified] restored complete cached generation
+[build-all] write-unified-entry-dts done in 6.40s
 [build-all] external-plugins:local-dist
 [plugin-npm-runtime-build] build assets diffs: node --import tsx ../../scripts/build-diffs-viewer-runtime.mts curated
 [plugin-npm-runtime-build] build assets diffs-language-pack: node --import tsx ../../scripts/build-diffs-viewer-runtime.mts full
 [plugin-npm-runtime-build] build assets discord: node --import ../../scripts/tsx.mjs ../../scripts/build-discord-activity-sdk.mts
-[external-plugin-local-dist] built 96 plugins in 2845ms
-[build-all] external-plugins:local-dist done in 3.03s
+[external-plugin-local-dist] built 96 plugins in 2740ms
+[build-all] external-plugins:local-dist done in 2.94s
 [build-all] check-cli-bootstrap-imports
 CLI bootstrap import guard passed.
-[build-all] check-cli-bootstrap-imports done in 7.11s
+[build-all] check-cli-bootstrap-imports done in 6.95s
 [build-all] plugins:assets:copy
 [browser] copy: node scripts/copy-chrome-extension.mjs
 [canvas] copy: node scripts/copy-a2ui.mjs
 [workboard] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/workboard --copy
 [x] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/x --copy
-[build-all] plugins:assets:copy done in 1.17s
+[build-all] plugins:assets:copy done in 1.18s
 [build-all] runtime-postbuild
 [plugin-control-plane-loads] verified 53 built modules with native require and checked doctor closures
-runtime-postbuild: 14 phases completed in 4197ms (slowest: previous release update compat chunks 1718ms)
-[build-all] runtime-postbuild done in 4.55s
+runtime-postbuild: 14 phases completed in 3987ms (slowest: previous release update compat chunks 1713ms)
+[build-all] runtime-postbuild done in 4.34s
 [build-all] build-stamp
-[build-all] build-stamp done in 931ms
+[build-all] build-stamp done in 904ms
 [build-all] runtime-postbuild-stamp
-[build-all] runtime-postbuild-stamp done in 191ms
+[build-all] runtime-postbuild-stamp done in 179ms
 [build-all] check-plugin-sdk-exports
 Public plugin SDK declaration graph: 4603241/5315536 bytes (5250000-byte ratchet + 65536-byte output variance).
 OK: All 151 public plugin-sdk subpaths verified.
-[build-all] check-plugin-sdk-exports done in 972ms
+[build-all] check-plugin-sdk-exports done in 950ms
 [build-all] ui:build
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
   - JSON import "./control-ui-i18n-config.json" without import attributes (../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
@@ -160,511 +156,511 @@ rendering chunks...
 Control UI precompression: starting
 Control UI precompression complete: 463 assets (926 sidecars)
 computing gzip size...
-../dist/control-ui.build-79262-elwsim/assets/chat-attachment-image.worker-P4E63gj9.js              0.99 kB
-../dist/control-ui.build-79262-elwsim/assets/custom-light-DyDTxevI.webp                            1.52 kB
-../dist/control-ui.build-79262-elwsim/assets/crt-light-DbR0bpR3.webp                               1.64 kB
-../dist/control-ui.build-79262-elwsim/assets/custom-dark-B0roIpAb.webp                             1.68 kB
-../dist/control-ui.build-79262-elwsim/assets/phosphor-light-B6L1EVnW.webp                          1.83 kB
-../dist/control-ui.build-79262-elwsim/assets/phosphor-dark-DO_664om.webp                           3.12 kB
-../dist/control-ui.build-79262-elwsim/assets/crt-dark-Tui5yPvX.webp                                3.26 kB
-../dist/control-ui.build-79262-elwsim/assets/frame-BoCsE8xn.js                                     4.41 kB
-../dist/control-ui.build-79262-elwsim/assets/absolutely-light-CraDJas4.webp                        4.93 kB
-../dist/control-ui.build-79262-elwsim/assets/absolutely-dark-BCt4vgFE.webp                         7.20 kB
-../dist/control-ui.build-79262-elwsim/assets/manuscript-light-BtjxM-_G.webp                        7.58 kB
-../dist/control-ui.build-79262-elwsim/assets/diff.worker-DPVjjZX9.js                               8.71 kB
-../dist/control-ui.build-79262-elwsim/assets/manuscript-dark-CkdelLyK.webp                        12.25 kB
-../dist/control-ui.build-79262-elwsim/assets/miami-light-CK76ftVr.webp                            12.91 kB
-../dist/control-ui.build-79262-elwsim/assets/knot-light-bmQq9AbN.webp                             13.39 kB
-../dist/control-ui.build-79262-elwsim/assets/tide-light-CtKGylEa.webp                             13.49 kB
-../dist/control-ui.build-79262-elwsim/assets/beacon-light-C8Uuyhzu.webp                           14.84 kB
-../dist/control-ui.build-79262-elwsim/assets/knot-dark-D6MXlduA.webp                              17.41 kB
-../dist/control-ui.build-79262-elwsim/assets/rose-light-xf8VQLmW.webp                             20.09 kB
-../dist/control-ui.build-79262-elwsim/assets/miami-dark-CxsR_EPe.webp                             21.18 kB
-../dist/control-ui.build-79262-elwsim/assets/tide-dark-B6z-RwsR.webp                              22.01 kB
-../dist/control-ui.build-79262-elwsim/assets/beacon-dark-BUxx3gLL.webp                            22.76 kB
-../dist/control-ui.build-79262-elwsim/assets/dash-light-BdkMy7z2.webp                             24.84 kB
-../dist/control-ui.build-79262-elwsim/index.html                                                  25.72 kB │ gzip:   6.36 kB
-../dist/control-ui.build-79262-elwsim/assets/rose-dark-D9X1-O20.webp                              26.66 kB
-../dist/control-ui.build-79262-elwsim/assets/claw-light-crdey3iy.webp                             27.58 kB
-../dist/control-ui.build-79262-elwsim/assets/dash-dark-BQSVDng9.webp                              29.15 kB
-../dist/control-ui.build-79262-elwsim/assets/claw-dark-DPmO9vJN.webp                              34.36 kB
-../dist/control-ui.build-79262-elwsim/social-card.png                                            142.28 kB
-../dist/control-ui.build-79262-elwsim/assets/mermaid.min-DjFTGxJ3.js                           3,453.23 kB
-../dist/control-ui.build-79262-elwsim/assets/native-chrome-setup-DEA9Gvpf.css                      0.18 kB │ gzip:   0.13 kB
-../dist/control-ui.build-79262-elwsim/assets/skills-page-BQ5d-20G.css                              0.23 kB │ gzip:   0.17 kB
-../dist/control-ui.build-79262-elwsim/assets/terminal-page-DzAc6IHZ.css                            0.25 kB │ gzip:   0.16 kB
-../dist/control-ui.build-79262-elwsim/assets/device-page-DzxF6N-U.css                              0.37 kB │ gzip:   0.18 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-new-D-SpiTTi.css                      0.56 kB │ gzip:   0.26 kB
-../dist/control-ui.build-79262-elwsim/assets/browser-QJsz_Ze0.css                                  0.73 kB │ gzip:   0.33 kB
-../dist/control-ui.build-79262-elwsim/assets/markdown-file-tooltip-jvyPxCJD.css                    0.74 kB │ gzip:   0.38 kB
-../dist/control-ui.build-79262-elwsim/assets/website-DHaa5x94.css                                  0.82 kB │ gzip:   0.39 kB
-../dist/control-ui.build-79262-elwsim/assets/capacity-meter-Bpyn5Saf.css                           0.95 kB │ gzip:   0.39 kB
-../dist/control-ui.build-79262-elwsim/assets/assistant-panel-content-DzJupYdl.css                  1.13 kB │ gzip:   0.40 kB
-../dist/control-ui.build-79262-elwsim/assets/credential-editor-CxfZfu4o.css                        1.15 kB │ gzip:   0.42 kB
-../dist/control-ui.build-79262-elwsim/assets/board-document-B0Y4zGJq.css                           1.18 kB │ gzip:   0.47 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-Dh5vtL-G.css                     1.19 kB │ gzip:   0.46 kB
-../dist/control-ui.build-79262-elwsim/assets/lane-table-CSTpz4OW.css                               1.21 kB │ gzip:   0.47 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-dashboard-BZzcciLT.css                     1.52 kB │ gzip:   0.56 kB
-../dist/control-ui.build-79262-elwsim/assets/agents-home-page-DfcNNRNz.css                         1.80 kB │ gzip:   0.66 kB
-../dist/control-ui.build-79262-elwsim/assets/wizard-step-controls-CYe5XwZR.css                     1.86 kB │ gzip:   0.68 kB
-../dist/control-ui.build-79262-elwsim/assets/logs-page-Bu6yianf.css                                1.87 kB │ gzip:   0.73 kB
-../dist/control-ui.build-79262-elwsim/assets/report-Cegj5HJR.css                                   2.00 kB │ gzip:   0.67 kB
-../dist/control-ui.build-79262-elwsim/assets/onboarding-memory-import-DuWLEvoz.css                 2.02 kB │ gzip:   0.64 kB
-../dist/control-ui.build-79262-elwsim/assets/native-embed-CiDYfKFT.css                             2.18 kB │ gzip:   0.71 kB
-../dist/control-ui.build-79262-elwsim/assets/profile-page-C73ipYq-.css                             2.28 kB │ gzip:   0.73 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-session-rail-BmiGPeTv.css                        2.58 kB │ gzip:   0.88 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-processes-panel-CjcY3LAS.css                     3.14 kB │ gzip:   0.90 kB
-../dist/control-ui.build-79262-elwsim/assets/update-run-view-CS3ezHvV.css                          3.22 kB │ gzip:   0.90 kB
-../dist/control-ui.build-79262-elwsim/assets/connection-page-Cwi7GDhW.css                          3.31 kB │ gzip:   0.96 kB
-../dist/control-ui.build-79262-elwsim/assets/sparkline-tile-CaHeaFDQ.css                           3.48 kB │ gzip:   1.22 kB
-../dist/control-ui.build-79262-elwsim/assets/portals-page-3o_n6XI9.css                             3.58 kB │ gzip:   1.09 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-subagents-panel-C5iQ8m24.css                     3.72 kB │ gzip:   1.03 kB
-../dist/control-ui.build-79262-elwsim/assets/lobsterdex-page-BYmxmm_r.css                          3.80 kB │ gzip:   1.19 kB
-../dist/control-ui.build-79262-elwsim/assets/apps-page-W4BVT2Dy.css                                4.08 kB │ gzip:   1.22 kB
-../dist/control-ui.build-79262-elwsim/assets/devices-page-Do3i-SE3.css                             4.44 kB │ gzip:   1.18 kB
-../dist/control-ui.build-79262-elwsim/assets/memory-import-page-744kZiKS.css                       4.48 kB │ gzip:   1.18 kB
-../dist/control-ui.build-79262-elwsim/assets/about-page-DCwoVUHC.css                               4.76 kB │ gzip:   1.47 kB
-../dist/control-ui.build-79262-elwsim/assets/sidebar-update-runtime-Bpn2ByHA.css                   4.86 kB │ gzip:   1.22 kB
-../dist/control-ui.build-79262-elwsim/assets/logbook-view-CcweRaNm.css                             5.68 kB │ gzip:   1.34 kB
-../dist/control-ui.build-79262-elwsim/assets/meetings-page-C6CzIO_R.css                            5.76 kB │ gzip:   1.46 kB
-../dist/control-ui.build-79262-elwsim/assets/dashboards-page-oN0QjD8g.css                          5.78 kB │ gzip:   1.50 kB
-../dist/control-ui.build-79262-elwsim/assets/secrets-page-DwICXUvq.css                             5.79 kB │ gzip:   1.39 kB
-../dist/control-ui.build-79262-elwsim/assets/sidebar-agent-roster-BbA0HhFs.css                     6.71 kB │ gzip:   1.46 kB
-../dist/control-ui.build-79262-elwsim/assets/plugins-page-D_KVIBAs.css                             6.76 kB │ gzip:   1.71 kB
-../dist/control-ui.build-79262-elwsim/assets/agents-page-DFluc6jm.css                              7.03 kB │ gzip:   1.84 kB
-../dist/control-ui.build-79262-elwsim/assets/link-reader-hovercard-CzYUpnNa.css                    8.05 kB │ gzip:   1.88 kB
-../dist/control-ui.build-79262-elwsim/assets/approval-hO9W1yf6.css                                 8.34 kB │ gzip:   2.02 kB
-../dist/control-ui.build-79262-elwsim/assets/wizard-login-controller-CisCH8bF.css                  8.63 kB │ gzip:   2.03 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-sidebar-region-BT887V4g.css                      8.75 kB │ gzip:   1.90 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-session-summary-C-mJ1E_e.css               9.50 kB │ gzip:   2.02 kB
-../dist/control-ui.build-79262-elwsim/assets/session-progress-hovercard-CWlzJYa-.css               9.98 kB │ gzip:   1.90 kB
-../dist/control-ui.build-79262-elwsim/assets/command-palette-NBC8ATMP.css                         10.65 kB │ gzip:   2.54 kB
-../dist/control-ui.build-79262-elwsim/assets/custodian-surface-D4ZqgxUa.css                       10.93 kB │ gzip:   2.59 kB
-../dist/control-ui.build-79262-elwsim/assets/systems-page-CG-xKQDS.css                            11.51 kB │ gzip:   2.62 kB
-../dist/control-ui.build-79262-elwsim/assets/view-status-CPVPeI0Y.css                             11.51 kB │ gzip:   2.37 kB
-../dist/control-ui.build-79262-elwsim/assets/board-view-DB-8dG0_.css                              14.74 kB │ gzip:   3.10 kB
-../dist/control-ui.build-79262-elwsim/assets/sessions-page-C9AWqrKt.css                           15.80 kB │ gzip:   3.19 kB
-../dist/control-ui.build-79262-elwsim/assets/tool-catalog-DcVygOsX.css                            16.75 kB │ gzip:   3.48 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-DIWJGbGi.css                  19.72 kB │ gzip:   4.27 kB
-../dist/control-ui.build-79262-elwsim/assets/config-page-fBgfkU40.css                             21.01 kB │ gzip:   4.49 kB
-../dist/control-ui.build-79262-elwsim/assets/skill-workshop-page-DesVy5lN.css                     21.35 kB │ gzip:   4.37 kB
-../dist/control-ui.build-79262-elwsim/assets/activity-page-C1NgidG7.css                           26.74 kB │ gzip:   4.94 kB
-../dist/control-ui.build-79262-elwsim/assets/usage-BRfw-9yY.css                                   33.59 kB │ gzip:   6.27 kB
-../dist/control-ui.build-79262-elwsim/assets/plugins-hub-header-CY07Sw_v.css                      40.56 kB │ gzip:   7.34 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-new-styles-D5FdYJoO.css              53.99 kB │ gzip:  10.25 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-transcript-styles-XWYQjeWJ.css                  61.82 kB │ gzip:  10.25 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-styles-CO8uPlqn.css             64.23 kB │ gzip:  10.50 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-BNkcmzv4.css                    82.09 kB │ gzip:  14.62 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-styles-DBpIQuUO.css          277.52 kB │ gzip:  45.39 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-core-eUAoOHGB.css                        309.41 kB │ gzip:  51.30 kB
-../dist/control-ui.build-79262-elwsim/assets/index-BKUWRQLw.js                                     0.04 kB │ gzip:   0.06 kB
-../dist/control-ui.build-79262-elwsim/assets/approval-t2xr4qDL.js                                  0.14 kB │ gzip:   0.15 kB │ map:    10.56 kB
-../dist/control-ui.build-79262-elwsim/assets/__vite-browser-external-2447137e-Bt5J11Ku.js          0.16 kB │ gzip:   0.16 kB │ map:     0.38 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-transcript-styles-CQmgNvqu.js                    0.20 kB │ gzip:   0.17 kB │ map:    80.32 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-new-styles-7tZkvAfx.js                0.21 kB │ gzip:   0.18 kB │ map:    75.92 kB
-../dist/control-ui.build-79262-elwsim/assets/board-layout-BmeSfx17.js                              0.26 kB │ gzip:   0.23 kB │ map:    11.19 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-styles-CMDQBMK0.js               0.33 kB │ gzip:   0.20 kB │ map:    82.52 kB
-../dist/control-ui.build-79262-elwsim/assets/system-info-C72_0HmY.js                               0.34 kB │ gzip:   0.27 kB │ map:     0.56 kB
-../dist/control-ui.build-79262-elwsim/assets/desktop-focus-window-B6lDW8Wx.js                      0.34 kB │ gzip:   0.26 kB │ map:     0.63 kB
-../dist/control-ui.build-79262-elwsim/assets/mcp-app-routing-DKqnsOKD.js                           0.36 kB │ gzip:   0.28 kB │ map:     0.71 kB
-../dist/control-ui.build-79262-elwsim/assets/provider-usage-request-DoGkLQFr.js                    0.37 kB │ gzip:   0.28 kB │ map:     1.51 kB
-../dist/control-ui.build-79262-elwsim/assets/reasoned-disabled-control-BddHJODe.js                 0.38 kB │ gzip:   0.28 kB │ map:     0.69 kB
-../dist/control-ui.build-79262-elwsim/assets/route-view-_EwQOFtH.js                                0.40 kB │ gzip:   0.29 kB │ map:     0.60 kB
-../dist/control-ui.build-79262-elwsim/assets/diff-B5t7Hm-P.js                                      0.43 kB │ gzip:   0.33 kB │ map:     1.19 kB
-../dist/control-ui.build-79262-elwsim/assets/slots-CXkYguab.js                                     0.48 kB │ gzip:   0.34 kB │ map:     5.58 kB
-../dist/control-ui.build-79262-elwsim/assets/theme-color-DAo4KRoc.js                               0.50 kB │ gzip:   0.38 kB │ map:     1.50 kB
-../dist/control-ui.build-79262-elwsim/assets/transcript-search-CcBWDaCf.js                         0.50 kB │ gzip:   0.36 kB │ map:     1.86 kB
-../dist/control-ui.build-79262-elwsim/assets/user-prefs-request-Ci5C-i61.js                        0.54 kB │ gzip:   0.38 kB │ map:     1.72 kB
-../dist/control-ui.build-79262-elwsim/assets/cloud-worker-stop.runtime-c4_3fSQ4.js                 0.57 kB │ gzip:   0.39 kB │ map:     1.60 kB
-../dist/control-ui.build-79262-elwsim/assets/gateway-websocket-url-cYJwVUmD.js                     0.58 kB │ gzip:   0.33 kB │ map:     1.26 kB
-../dist/control-ui.build-79262-elwsim/assets/native-gateway-health.runtime-GyDqqyGU.js             0.67 kB │ gzip:   0.45 kB │ map:     2.33 kB
-../dist/control-ui.build-79262-elwsim/assets/brainfuck-rZhEezO0.js                                 0.74 kB │ gzip:   0.41 kB │ map:     2.35 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-disabled-BMhL2jfj.js                       0.78 kB │ gzip:   0.46 kB │ map:     1.73 kB
-../dist/control-ui.build-79262-elwsim/assets/theme-artwork-loader-BXDewnrY.js                      0.78 kB │ gzip:   0.48 kB │ map:     1.99 kB
-../dist/control-ui.build-79262-elwsim/assets/dock-destination-controls-CrySd14F.js                 0.80 kB │ gzip:   0.47 kB │ map:     2.08 kB
-../dist/control-ui.build-79262-elwsim/assets/properties-CmMnR_Ok.js                                0.80 kB │ gzip:   0.44 kB │ map:     2.49 kB
-../dist/control-ui.build-79262-elwsim/assets/rolldown-runtime-8BhlS34s.js                          0.80 kB │ gzip:   0.47 kB
-../dist/control-ui.build-79262-elwsim/assets/custodian-alert-store-DMTYYmJp.js                     0.81 kB │ gzip:   0.42 kB │ map:     2.78 kB
-../dist/control-ui.build-79262-elwsim/assets/scrollbar-styles-C5UwI7LH.js                          0.82 kB │ gzip:   0.38 kB │ map:     1.11 kB
-../dist/control-ui.build-79262-elwsim/assets/cmake-D52hYidm.js                                     0.89 kB │ gzip:   0.55 kB │ map:     3.19 kB
-../dist/control-ui.build-79262-elwsim/assets/update-failure-report-DAM96Yks.js                     0.90 kB │ gzip:   0.49 kB │ map:     2.52 kB
-../dist/control-ui.build-79262-elwsim/assets/capacity-meter-CAgbW2TD.js                            0.90 kB │ gzip:   0.47 kB │ map:     3.47 kB
-../dist/control-ui.build-79262-elwsim/assets/sandbox-host-Dm6XHU23.js                              0.90 kB │ gzip:   0.50 kB │ map:     2.84 kB
-../dist/control-ui.build-79262-elwsim/assets/plugin-help-value-BGvDtCzt.js                         0.91 kB │ gzip:   0.57 kB │ map:     2.53 kB
-../dist/control-ui.build-79262-elwsim/assets/response-body-DB_FnBJu.js                             0.91 kB │ gzip:   0.56 kB │ map:     2.74 kB
-../dist/control-ui.build-79262-elwsim/assets/asciiarmor-DqwIP8wN.js                                0.91 kB │ gzip:   0.49 kB │ map:     2.68 kB
-../dist/control-ui.build-79262-elwsim/assets/settings-select-row-B7nOCqOv.js                       0.92 kB │ gzip:   0.47 kB │ map:     1.97 kB
-../dist/control-ui.build-79262-elwsim/assets/near-viewport-observer-WgGck829.js                    0.92 kB │ gzip:   0.46 kB │ map:     2.36 kB
-../dist/control-ui.build-79262-elwsim/assets/protobuf-NGTE4n-r.js                                  0.94 kB │ gzip:   0.61 kB │ map:     2.45 kB
-../dist/control-ui.build-79262-elwsim/assets/stream-auto-follow-controller-BZ0UzGsg.js             0.95 kB │ gzip:   0.49 kB │ map:     2.85 kB
-../dist/control-ui.build-79262-elwsim/assets/http-CZiL40Fa.js                                      0.98 kB │ gzip:   0.50 kB │ map:     3.22 kB
-../dist/control-ui.build-79262-elwsim/assets/solr-CtCgyZ-O.js                                      0.99 kB │ gzip:   0.54 kB │ map:     3.23 kB
-../dist/control-ui.build-79262-elwsim/assets/usage-BQd4o5lO.js                                     1.01 kB │ gzip:   0.57 kB │ map:     3.96 kB
-../dist/control-ui.build-79262-elwsim/assets/ref-contract-CpsvYzmz.js                              1.05 kB │ gzip:   0.57 kB │ map:    12.34 kB
-../dist/control-ui.build-79262-elwsim/assets/settings-model-BkY-0MlL.js                            1.07 kB │ gzip:   0.56 kB │ map:     4.67 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-diff-highlight.runtime-SbI_MMcG.js               1.08 kB │ gzip:   0.65 kB │ map:     3.88 kB
-../dist/control-ui.build-79262-elwsim/assets/agent-avatar-8-BeQTbX.js                              1.08 kB │ gzip:   0.56 kB │ map:     2.00 kB
-../dist/control-ui.build-79262-elwsim/assets/troff-BQNyxWC7.js                                     1.09 kB │ gzip:   0.53 kB │ map:     3.20 kB
-../dist/control-ui.build-79262-elwsim/assets/route-loader-DgkWwQx0.js                              1.12 kB │ gzip:   0.62 kB │ map:     3.60 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-styles-DKd6Fluc.js             1.15 kB │ gzip:   0.36 kB │ map:   383.70 kB
-../dist/control-ui.build-79262-elwsim/assets/sessions-hub-header-PXIYX09K.js                       1.16 kB │ gzip:   0.55 kB │ map:     2.09 kB
-../dist/control-ui.build-79262-elwsim/assets/toml-CNMTuoya.js                                      1.18 kB │ gzip:   0.63 kB │ map:     3.77 kB
-../dist/control-ui.build-79262-elwsim/assets/native-session-menu.runtime-Bhg9YfRh.js               1.20 kB │ gzip:   0.60 kB │ map:     4.33 kB
-../dist/control-ui.build-79262-elwsim/assets/spreadsheet-NicZe-2f.js                               1.27 kB │ gzip:   0.63 kB │ map:     3.92 kB
-../dist/control-ui.build-79262-elwsim/assets/pasted-text-excerpt-CzclHQwd.js                       1.29 kB │ gzip:   0.68 kB │ map:     3.52 kB
-../dist/control-ui.build-79262-elwsim/assets/plugin-capabilities.runtime-3ctQ0a0X.js               1.31 kB │ gzip:   0.68 kB │ map:     4.37 kB
-../dist/control-ui.build-79262-elwsim/assets/channel-avatar-D9iDFMTe.js                            1.34 kB │ gzip:   0.63 kB │ map:     2.67 kB
-../dist/control-ui.build-79262-elwsim/assets/decision-model-picker-D2GmkxKI.js                     1.37 kB │ gzip:   0.68 kB │ map:     3.86 kB
-../dist/control-ui.build-79262-elwsim/assets/mbox-DJTpBvrI.js                                      1.53 kB │ gzip:   0.76 kB │ map:     4.92 kB
-../dist/control-ui.build-79262-elwsim/assets/native-notifications-B4mRmJWv.js                      1.58 kB │ gzip:   0.80 kB │ map:     5.74 kB
-../dist/control-ui.build-79262-elwsim/assets/server-prefs-profile-runtime-BQEbZVny.js              1.61 kB │ gzip:   0.84 kB │ map:     5.10 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-native-runtime-recovery-DzpJcA8-.js              1.63 kB │ gzip:   0.74 kB │ map:     3.94 kB
-../dist/control-ui.build-79262-elwsim/assets/sieve-BHLeM6VM.js                                     1.74 kB │ gzip:   0.86 kB │ map:     5.93 kB
-../dist/control-ui.build-79262-elwsim/assets/rpm-6ru8X0RE.js                                       1.75 kB │ gzip:   0.92 kB │ map:     4.50 kB
-../dist/control-ui.build-79262-elwsim/assets/markdown-file-tooltip-CvrzfI3i.js                     1.75 kB │ gzip:   0.95 kB │ map:     5.98 kB
-../dist/control-ui.build-79262-elwsim/assets/state-BdYZr5fb.js                                     1.75 kB │ gzip:   0.85 kB │ map:     8.04 kB
-../dist/control-ui.build-79262-elwsim/assets/update-triage.runtime-SZ1xfcE_.js                     1.76 kB │ gzip:   0.91 kB │ map:     4.46 kB
-../dist/control-ui.build-79262-elwsim/assets/load-CQLBNXGT.js                                      1.78 kB │ gzip:   0.98 kB │ map:     6.81 kB
-../dist/control-ui.build-79262-elwsim/assets/factor-Q1Z7buKY.js                                    1.80 kB │ gzip:   0.70 kB │ map:     4.47 kB
-../dist/control-ui.build-79262-elwsim/assets/browser-document-CKNifeh4.js                          1.81 kB │ gzip:   0.93 kB │ map:     4.10 kB
-../dist/control-ui.build-79262-elwsim/assets/eiffel-BPoKCvky.js                                    1.82 kB │ gzip:   1.00 kB │ map:     4.92 kB
-../dist/control-ui.build-79262-elwsim/assets/browser-bootstrap.runtime--kqjNSBG.js                 1.86 kB │ gzip:   1.05 kB │ map:     5.98 kB
-../dist/control-ui.build-79262-elwsim/assets/z80-BOBAzJas.js                                       1.89 kB │ gzip:   0.88 kB │ map:     4.76 kB
-../dist/control-ui.build-79262-elwsim/assets/en-apps-kpUn1D2a.js                                   1.95 kB │ gzip:   0.98 kB │ map:     3.41 kB
-../dist/control-ui.build-79262-elwsim/assets/mumps-D0jN0dp_.js                                     1.97 kB │ gzip:   1.05 kB │ map:     6.37 kB
-../dist/control-ui.build-79262-elwsim/assets/elm-Cw50aCOi.js                                       2.01 kB │ gzip:   0.92 kB │ map:     7.46 kB
-../dist/control-ui.build-79262-elwsim/assets/skills-shared-BLwsNVOF.js                             2.02 kB │ gzip:   0.87 kB │ map:     5.15 kB
-../dist/control-ui.build-79262-elwsim/assets/mathematica-1hKRFuCQ.js                               2.05 kB │ gzip:   0.92 kB │ map:     6.81 kB
-../dist/control-ui.build-79262-elwsim/assets/dockerfile-05JOL5Sz.js                                2.06 kB │ gzip:   0.76 kB │ map:     6.41 kB
-../dist/control-ui.build-79262-elwsim/assets/turtle-Uiatt2dA.js                                    2.08 kB │ gzip:   0.98 kB │ map:     6.81 kB
-../dist/control-ui.build-79262-elwsim/assets/ebnf-DwPn32cL.js                                      2.11 kB │ gzip:   0.90 kB │ map:     6.64 kB
-../dist/control-ui.build-79262-elwsim/assets/smalltalk-DY21_MKY.js                                 2.15 kB │ gzip:   0.96 kB │ map:     6.59 kB
-../dist/control-ui.build-79262-elwsim/assets/terminal-page-DdOWw_1b.js                             2.15 kB │ gzip:   1.09 kB │ map:     5.85 kB
-../dist/control-ui.build-79262-elwsim/assets/plugins-hub-header-C1LY5nD5.js                        2.16 kB │ gzip:   0.87 kB │ map:    38.91 kB
-../dist/control-ui.build-79262-elwsim/assets/fcl-BKSPRit5.js                                       2.16 kB │ gzip:   1.05 kB │ map:     6.58 kB
-../dist/control-ui.build-79262-elwsim/assets/ntriples-D5FXROHs.js                                  2.20 kB │ gzip:   0.80 kB │ map:     7.66 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-BGBah-M9.js                                      2.20 kB │ gzip:   1.39 kB │ map:     5.19 kB
-../dist/control-ui.build-79262-elwsim/assets/dtd-BziCxTDe.js                                       2.22 kB │ gzip:   0.96 kB │ map:     6.99 kB
-../dist/control-ui.build-79262-elwsim/assets/octave-Y-3Aqrep.js                                    2.25 kB │ gzip:   1.18 kB │ map:     5.78 kB
-../dist/control-ui.build-79262-elwsim/assets/yacas-CJ_G-h-R.js                                     2.28 kB │ gzip:   1.19 kB │ map:     7.21 kB
-../dist/control-ui.build-79262-elwsim/assets/config-form.tiers-D3sZgPnp.js                         2.33 kB │ gzip:   1.08 kB │ map:     7.93 kB
-../dist/control-ui.build-79262-elwsim/assets/pascal-D6MnNqKh.js                                    2.39 kB │ gzip:   1.27 kB │ map:     5.70 kB
-../dist/control-ui.build-79262-elwsim/assets/session-workspace-recovery.runtime-BH1OrM3i.js        2.40 kB │ gzip:   1.17 kB │ map:     7.65 kB
-../dist/control-ui.build-79262-elwsim/assets/plugin-contracts-runtime-BHa4UDS3.js                  2.41 kB │ gzip:   1.11 kB │ map:     9.96 kB
-../dist/control-ui.build-79262-elwsim/assets/simple-mode-B3ouou4l.js                               2.41 kB │ gzip:   1.19 kB │ map:     7.83 kB
-../dist/control-ui.build-79262-elwsim/assets/apl-CZuIt2s3.js                                       2.43 kB │ gzip:   1.34 kB │ map:     6.49 kB
-../dist/control-ui.build-79262-elwsim/assets/native-startup.runtime-DNcc_Xgd.js                    2.45 kB │ gzip:   0.84 kB │ map:     4.41 kB
-../dist/control-ui.build-79262-elwsim/assets/panel-empty-state-B9u7V_jz.js                         2.45 kB │ gzip:   0.97 kB │ map:     3.49 kB
-../dist/control-ui.build-79262-elwsim/assets/commonlisp-JmRDT1qt.js                                2.45 kB │ gzip:   1.19 kB │ map:     6.74 kB
-../dist/control-ui.build-79262-elwsim/assets/tcl-VS4aPR64.js                                       2.48 kB │ gzip:   1.32 kB │ map:     6.55 kB
-../dist/control-ui.build-79262-elwsim/assets/setup-schema-B2MRBriv.js                              2.49 kB │ gzip:   1.28 kB │ map:    10.06 kB
-../dist/control-ui.build-79262-elwsim/assets/appearance-picker-BmcGlM3R.js                         2.53 kB │ gzip:   1.06 kB │ map:     5.22 kB
-../dist/control-ui.build-79262-elwsim/assets/lane-table-BwqhsaNO.js                                2.54 kB │ gzip:   0.95 kB │ map:     8.25 kB
-../dist/control-ui.build-79262-elwsim/assets/shell-B-6dKEO3.js                                     2.56 kB │ gzip:   1.30 kB │ map:     7.99 kB
-../dist/control-ui.build-79262-elwsim/assets/theme-catalog-X5L5Pt7R.js                             2.60 kB │ gzip:   1.18 kB │ map:    10.72 kB
-../dist/control-ui.build-79262-elwsim/assets/gateway-scope-upgrade.runtime-CClFY6T-.js             2.62 kB │ gzip:   1.03 kB │ map:     8.73 kB
-../dist/control-ui.build-79262-elwsim/assets/webidl-y3TQ_6xd.js                                    2.62 kB │ gzip:   1.37 kB │ map:     7.77 kB
-../dist/control-ui.build-79262-elwsim/assets/usage-2X-a5fq_.js                                     2.62 kB │ gzip:   0.96 kB │ map:    49.34 kB
-../dist/control-ui.build-79262-elwsim/assets/en-debug-Br4lW019.js                                  2.63 kB │ gzip:   1.22 kB │ map:     5.07 kB
-../dist/control-ui.build-79262-elwsim/assets/puppet-DvF9Rcyj.js                                    2.65 kB │ gzip:   1.29 kB │ map:     9.04 kB
-../dist/control-ui.build-79262-elwsim/assets/pig-DksdPhxP.js                                       2.65 kB │ gzip:   1.49 kB │ map:     6.65 kB
-../dist/control-ui.build-79262-elwsim/assets/input-dialog-69rd0NrJ.js                              2.66 kB │ gzip:   1.11 kB │ map:     7.50 kB
-../dist/control-ui.build-79262-elwsim/assets/forth-CsObqcja.js                                     2.67 kB │ gzip:   1.42 kB │ map:     6.22 kB
-../dist/control-ui.build-79262-elwsim/assets/pending-session-create-vHQ8EnkI.js                    2.74 kB │ gzip:   1.25 kB │ map:     6.85 kB
-../dist/control-ui.build-79262-elwsim/assets/en-update-actions-D8foG9UF.js                         2.78 kB │ gzip:   1.36 kB │ map:     4.61 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-Cbf4oGMY.js                                      2.78 kB │ gzip:   1.60 kB │ map:     5.10 kB
-../dist/control-ui.build-79262-elwsim/assets/composer-draft-retirement.runtime-BHRi3rOM.js         2.83 kB │ gzip:   1.16 kB │ map:     9.98 kB
-../dist/control-ui.build-79262-elwsim/assets/velocity-DgFe8a_l.js                                  2.84 kB │ gzip:   1.20 kB │ map:     8.47 kB
-../dist/control-ui.build-79262-elwsim/assets/tiddlywiki-ByLaO-PH.js                                2.92 kB │ gzip:   1.18 kB │ map:    11.14 kB
-../dist/control-ui.build-79262-elwsim/assets/modelica-DDfpmrWA.js                                  2.94 kB │ gzip:   1.38 kB │ map:     8.11 kB
-../dist/control-ui.build-79262-elwsim/assets/oz-Dw3yM8mc.js                                        3.03 kB │ gzip:   1.38 kB │ map:     9.52 kB
-../dist/control-ui.build-79262-elwsim/assets/website-BA3-G__s.js                                   3.03 kB │ gzip:   1.41 kB │ map:     8.16 kB
-../dist/control-ui.build-79262-elwsim/assets/r-C3MfMtNT.js                                         3.06 kB │ gzip:   1.45 kB │ map:     9.97 kB
-../dist/control-ui.build-79262-elwsim/assets/stex-B74o6kub.js                                      3.22 kB │ gzip:   1.26 kB │ map:    11.32 kB
-../dist/control-ui.build-79262-elwsim/assets/link-reader-response-BK1uFRcp.js                      3.24 kB │ gzip:   1.42 kB │ map:     6.31 kB
-../dist/control-ui.build-79262-elwsim/assets/lua-Bjba4a35.js                                       3.26 kB │ gzip:   1.50 kB │ map:     7.80 kB
-../dist/control-ui.build-79262-elwsim/assets/config-form.search-DC1F9SMx.js                        3.27 kB │ gzip:   1.47 kB │ map:    13.45 kB
-../dist/control-ui.build-79262-elwsim/assets/session-snapshot-database-kpMXUrjI.js                 3.30 kB │ gzip:   1.22 kB │ map:    10.70 kB
-../dist/control-ui.build-79262-elwsim/assets/macos-titlebar-controls.runtime-Dp3bywgo.js           3.31 kB │ gzip:   1.16 kB │ map:     7.58 kB
-../dist/control-ui.build-79262-elwsim/assets/cypher-QpSxMRXq.js                                    3.33 kB │ gzip:   1.60 kB │ map:     8.57 kB
-../dist/control-ui.build-79262-elwsim/assets/native-link-menu.runtime-Yj_0aXyk.js                  3.34 kB │ gzip:   1.46 kB │ map:     7.55 kB
-../dist/control-ui.build-79262-elwsim/assets/tiki-Cb29ipmL.js                                      3.35 kB │ gzip:   1.35 kB │ map:    12.46 kB
-../dist/control-ui.build-79262-elwsim/assets/en-memory-import-wO6dZqdX.js                          3.39 kB │ gzip:   1.43 kB │ map:     5.24 kB
-../dist/control-ui.build-79262-elwsim/assets/sparql-CUbWMhsH.js                                    3.47 kB │ gzip:   1.70 kB │ map:     9.55 kB
-../dist/control-ui.build-79262-elwsim/assets/vhdl-bNtYFHwV.js                                      3.47 kB │ gzip:   1.61 kB │ map:     9.68 kB
-../dist/control-ui.build-79262-elwsim/assets/theme-palette-DolNpnKz.js                             3.53 kB │ gzip:   1.37 kB │ map:     8.67 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-v8Zi46bm.js                                      3.54 kB │ gzip:   1.83 kB │ map:     6.99 kB
-../dist/control-ui.build-79262-elwsim/assets/svg-icon-rasterizer-Dvol8Ivp.js                       3.54 kB │ gzip:   1.73 kB │ map:    10.89 kB
-../dist/control-ui.build-79262-elwsim/assets/exec-approval-ghq5qgbB.js                             3.56 kB │ gzip:   1.50 kB │ map:     9.99 kB
-../dist/control-ui.build-79262-elwsim/assets/session-progress-C0qzKWYl.js                          3.56 kB │ gzip:   1.40 kB │ map:     9.48 kB
-../dist/control-ui.build-79262-elwsim/assets/nav-drawer-swipe.runtime-DjODBz4P.js                  3.60 kB │ gzip:   1.38 kB │ map:    10.10 kB
-../dist/control-ui.build-79262-elwsim/assets/mscgen-o_TRe-wI.js                                    3.64 kB │ gzip:   1.07 kB │ map:     9.74 kB
-../dist/control-ui.build-79262-elwsim/assets/debug-overlay-CXl5wZ9N.js                             3.73 kB │ gzip:   1.61 kB │ map:     6.64 kB
-../dist/control-ui.build-79262-elwsim/assets/panel-icon-button-BBCqZ6dh.js                         3.82 kB │ gzip:   1.25 kB │ map:     4.60 kB
-../dist/control-ui.build-79262-elwsim/assets/vb-B2Eic2VJ.js                                        3.82 kB │ gzip:   1.95 kB │ map:    11.68 kB
-../dist/control-ui.build-79262-elwsim/assets/q-CCMT7mWg.js                                         3.82 kB │ gzip:   1.78 kB │ map:     9.86 kB
-../dist/control-ui.build-79262-elwsim/assets/d-BVOXk3sl.js                                         3.83 kB │ gzip:   1.79 kB │ map:    10.92 kB
-../dist/control-ui.build-79262-elwsim/assets/swift-DkbHzSG0.js                                     3.92 kB │ gzip:   1.94 kB │ map:    10.87 kB
-../dist/control-ui.build-79262-elwsim/assets/coffeescript-ZFd3ZVx8.js                              4.00 kB │ gzip:   1.79 kB │ map:    13.80 kB
-../dist/control-ui.build-79262-elwsim/assets/fortran-D0Jwcahz.js                                   4.00 kB │ gzip:   2.03 kB │ map:     9.77 kB
-../dist/control-ui.build-79262-elwsim/assets/asn1-CSpwQvlk.js                                      4.10 kB │ gzip:   2.05 kB │ map:    11.05 kB
-../dist/control-ui.build-79262-elwsim/assets/dylan-of2Ivqm3.js                                     4.17 kB │ gzip:   1.73 kB │ map:    14.04 kB
-../dist/control-ui.build-79262-elwsim/assets/gateway-vitals-DXLEADoE.js                            4.19 kB │ gzip:   1.54 kB │ map:     9.49 kB
-../dist/control-ui.build-79262-elwsim/assets/asterisk-CdkrETgV.js                                  4.20 kB │ gzip:   1.84 kB │ map:     9.34 kB
-../dist/control-ui.build-79262-elwsim/assets/livescript-U057igS5.js                                4.22 kB │ gzip:   1.73 kB │ map:    10.04 kB
-../dist/control-ui.build-79262-elwsim/assets/ttcn-cfg-DWX5Nemw.js                                  4.24 kB │ gzip:   1.84 kB │ map:    11.17 kB
-../dist/control-ui.build-79262-elwsim/assets/agents-home-page-CAp_olkA.js                          4.24 kB │ gzip:   1.60 kB │ map:    11.45 kB
-../dist/control-ui.build-79262-elwsim/assets/groovy-CuXwF6x7.js                                    4.26 kB │ gzip:   1.85 kB │ map:    12.84 kB
-../dist/control-ui.build-79262-elwsim/assets/haskell-DHF7m3rz.js                                   4.31 kB │ gzip:   2.02 kB │ map:    12.11 kB
-../dist/control-ui.build-79262-elwsim/assets/report-C_M9HJTF.js                                    4.58 kB │ gzip:   1.96 kB │ map:    15.13 kB
-../dist/control-ui.build-79262-elwsim/assets/mcp-app-confirm-DTiKDS-h.js                           4.63 kB │ gzip:   1.74 kB │ map:     8.01 kB
-../dist/control-ui.build-79262-elwsim/assets/sparkline-tile-CtaakQ0L.js                            4.65 kB │ gzip:   1.79 kB │ map:    16.09 kB
-../dist/control-ui.build-79262-elwsim/assets/gas-CSFUAurG.js                                       4.68 kB │ gzip:   1.36 kB │ map:    13.78 kB
-../dist/control-ui.build-79262-elwsim/assets/first-run-activation-receipt-CRS3jkCq.js              4.80 kB │ gzip:   1.97 kB │ map:    17.34 kB
-../dist/control-ui.build-79262-elwsim/assets/widget-sandbox-host-C9XZQBMX.js                       4.80 kB │ gzip:   1.47 kB │ map:    13.20 kB
-../dist/control-ui.build-79262-elwsim/assets/plugin-help-DH90nwoj.js                               4.89 kB │ gzip:   2.10 kB │ map:    14.36 kB
-../dist/control-ui.build-79262-elwsim/assets/mllike-Bu6D5i0x.js                                    4.96 kB │ gzip:   1.67 kB │ map:    12.82 kB
-../dist/control-ui.build-79262-elwsim/assets/request-usage-snapshot-DhaVI9lY.js                    4.96 kB │ gzip:   2.26 kB │ map:    20.91 kB
-../dist/control-ui.build-79262-elwsim/assets/ttcn-Bf3i5UEf.js                                      5.00 kB │ gzip:   2.27 kB │ map:    13.48 kB
-../dist/control-ui.build-79262-elwsim/assets/logbook-controller-Byn8J1tH.js                        5.04 kB │ gzip:   1.81 kB │ map:    18.99 kB
-../dist/control-ui.build-79262-elwsim/assets/lobsterdex-page-AngVfnlY.js                           5.08 kB │ gzip:   1.93 kB │ map:    17.10 kB
-../dist/control-ui.build-79262-elwsim/assets/permissions-page-DdXUiFyg.js                          5.10 kB │ gzip:   1.55 kB │ map:    11.24 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-DgJBCaeA.js                                      5.16 kB │ gzip:   2.49 kB │ map:    10.83 kB
-../dist/control-ui.build-79262-elwsim/assets/crystal-B2OBIKGd.js                                   5.18 kB │ gzip:   2.23 kB │ map:    17.87 kB
-../dist/control-ui.build-79262-elwsim/assets/debug-overlay-layout.runtime-Dw7BBOjC.js              5.20 kB │ gzip:   1.82 kB │ map:    15.39 kB
-../dist/control-ui.build-79262-elwsim/assets/ruby-DrNj4Hrn.js                                      5.22 kB │ gzip:   2.25 kB │ map:    16.34 kB
-../dist/control-ui.build-79262-elwsim/assets/ecl-BmkYUJLN.js                                       5.25 kB │ gzip:   2.42 kB │ map:    12.07 kB
-../dist/control-ui.build-79262-elwsim/assets/session-discussion-panel-BnJrqcg-.js                  5.26 kB │ gzip:   1.99 kB │ map:    14.10 kB
-../dist/control-ui.build-79262-elwsim/assets/browser-C0eF3lbi.js                                   5.42 kB │ gzip:   1.85 kB │ map:    13.44 kB
-../dist/control-ui.build-79262-elwsim/assets/julia-CfStu5wc.js                                     5.43 kB │ gzip:   2.30 kB │ map:    16.15 kB
-../dist/control-ui.build-79262-elwsim/assets/vbscript-B58SZYoT.js                                  5.57 kB │ gzip:   2.65 kB │ map:    17.63 kB
-../dist/control-ui.build-79262-elwsim/assets/session-placement-move-dialog-C8BuFpRl.js             5.78 kB │ gzip:   1.78 kB │ map:    16.84 kB
-../dist/control-ui.build-79262-elwsim/assets/native-chrome-setup-BZFV28KN.js                       5.80 kB │ gzip:   1.84 kB │ map:    13.41 kB
-../dist/control-ui.build-79262-elwsim/assets/provider-usage-XGGis_Uu.js                            5.93 kB │ gzip:   2.04 kB │ map:    15.32 kB
-../dist/control-ui.build-79262-elwsim/assets/update-run-view-E9dUl7B9.js                           6.00 kB │ gzip:   2.08 kB │ map:    16.21 kB
-../dist/control-ui.build-79262-elwsim/assets/mirc-Cx5z6OrJ.js                                      6.05 kB │ gzip:   2.82 kB │ map:    11.52 kB
-../dist/control-ui.build-79262-elwsim/assets/question-page-registration-Dw08pH70.js                6.28 kB │ gzip:   2.03 kB │ map:    14.98 kB
-../dist/control-ui.build-79262-elwsim/assets/xquery-BZ8GHY3V.js                                    6.29 kB │ gzip:   2.65 kB │ map:    21.09 kB
-../dist/control-ui.build-79262-elwsim/assets/roster-element-km3e5Ggj.js                            6.30 kB │ gzip:   2.57 kB │ map:    19.55 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-pane-placement.runtime-n_OOlEAq.js               6.35 kB │ gzip:   2.32 kB │ map:    15.93 kB
-../dist/control-ui.build-79262-elwsim/assets/cobol-v-vbCXbt.js                                     6.37 kB │ gzip:   3.15 kB │ map:    11.99 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-outbox-receipts-DhrLj1Kx.js                      6.37 kB │ gzip:   2.67 kB │ map:    26.39 kB
-../dist/control-ui.build-79262-elwsim/assets/python-Co-oWxhj.js                                    6.40 kB │ gzip:   2.77 kB │ map:    21.51 kB
-../dist/control-ui.build-79262-elwsim/assets/assistant-panel-content-C9FklB44.js                   6.45 kB │ gzip:   1.95 kB │ map:    15.49 kB
-../dist/control-ui.build-79262-elwsim/assets/scheme-BNktZpsL.js                                    6.51 kB │ gzip:   2.51 kB │ map:    15.97 kB
-../dist/control-ui.build-79262-elwsim/assets/sidebar-people.runtime-BrKMrsMG.js                    6.72 kB │ gzip:   2.48 kB │ map:    18.27 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-dashboard-vOhTaxlf.js                      6.75 kB │ gzip:   2.32 kB │ map:    10.97 kB
-../dist/control-ui.build-79262-elwsim/assets/pug-BJ9q_C7V.js                                       6.77 kB │ gzip:   2.08 kB │ map:    20.06 kB
-../dist/control-ui.build-79262-elwsim/assets/update-confirmation.runtime-DBo00xfy.js               6.79 kB │ gzip:   2.24 kB │ map:    20.19 kB
-../dist/control-ui.build-79262-elwsim/assets/page-operations-B1K32DjR.js                           6.84 kB │ gzip:   2.30 kB │ map:    28.74 kB
-../dist/control-ui.build-79262-elwsim/assets/textile-CigAm-LA.js                                   6.88 kB │ gzip:   2.54 kB │ map:    20.67 kB
-../dist/control-ui.build-79262-elwsim/assets/native-device-settings-cyhqAfk_.js                    6.88 kB │ gzip:   2.66 kB │ map:    24.71 kB
-../dist/control-ui.build-79262-elwsim/assets/board-document-BaKkjTc-.js                            6.90 kB │ gzip:   2.34 kB │ map:    19.17 kB
-../dist/control-ui.build-79262-elwsim/assets/keyboard-shortcuts-dialog-BtarCfHe.js                 6.90 kB │ gzip:   2.46 kB │ map:    15.85 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-session-summary-qAjtM-p-.js                6.97 kB │ gzip:   2.45 kB │ map:    29.62 kB
-../dist/control-ui.build-79262-elwsim/assets/about-page-Gig8ZwTt.js                                7.10 kB │ gzip:   2.51 kB │ map:    23.14 kB
-../dist/control-ui.build-79262-elwsim/assets/en-transcripts-DafldODI.js                            7.18 kB │ gzip:   2.87 kB │ map:    10.34 kB
-../dist/control-ui.build-79262-elwsim/assets/nsis-C0kVBT_2.js                                      7.19 kB │ gzip:   3.17 kB │ map:     9.48 kB
-../dist/control-ui.build-79262-elwsim/assets/youtube-video-card-CkYhHUwq.js                        7.29 kB │ gzip:   2.37 kB │ map:    11.67 kB
-../dist/control-ui.build-79262-elwsim/assets/nginx-NLs6x0Nm.js                                     7.54 kB │ gzip:   2.83 kB │ map:    12.50 kB
-../dist/control-ui.build-79262-elwsim/assets/debug-overlay-content-DzYjGcD8.js                     7.74 kB │ gzip:   2.79 kB │ map:    22.08 kB
-../dist/control-ui.build-79262-elwsim/assets/powershell-BjSJShZW.js                                7.83 kB │ gzip:   3.38 kB │ map:    16.67 kB
-../dist/control-ui.build-79262-elwsim/assets/native-conversation-bridge-BbZm7Zdw.js                7.94 kB │ gzip:   3.39 kB │ map:    30.38 kB
-../dist/control-ui.build-79262-elwsim/assets/haxe-W4XnxWfV.js                                      8.00 kB │ gzip:   3.05 kB │ map:    27.72 kB
-../dist/control-ui.build-79262-elwsim/assets/erlang-IAwUA5rr.js                                    8.00 kB │ gzip:   3.00 kB │ map:    27.14 kB
-../dist/control-ui.build-79262-elwsim/assets/tooltip-C2Lyb-Z7.js                                   8.33 kB │ gzip:   2.90 kB │ map:    21.91 kB
-../dist/control-ui.build-79262-elwsim/assets/verilog-ChfNWxmV.js                                   8.60 kB │ gzip:   3.64 kB │ map:    30.11 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-_FO8vpd1.js                                      8.63 kB │ gzip:   3.73 kB │ map:   102.50 kB
-../dist/control-ui.build-79262-elwsim/assets/onboarding-memory-import-CV69A8n7.js                  9.34 kB │ gzip:   2.83 kB │ map:    25.44 kB
-../dist/control-ui.build-79262-elwsim/assets/sas-SYA7WzvL.js                                       9.46 kB │ gzip:   4.21 kB │ map:    18.08 kB
-../dist/control-ui.build-79262-elwsim/assets/clojure-CQulayJg.js                                   9.56 kB │ gzip:   4.15 kB │ map:    21.00 kB
-../dist/control-ui.build-79262-elwsim/assets/custodian-page-CXSyf2hs.js                            9.66 kB │ gzip:   2.78 kB │ map:    20.35 kB
-../dist/control-ui.build-79262-elwsim/assets/perl-CMrxjaCi.js                                      9.87 kB │ gzip:   3.59 kB │ map:    43.72 kB
-../dist/control-ui.build-79262-elwsim/assets/idl-fIUlL8fB.js                                       9.97 kB │ gzip:   4.52 kB │ map:    15.20 kB
-../dist/control-ui.build-79262-elwsim/assets/catalog-terminal-start-CUe27v42.js                   10.15 kB │ gzip:   3.29 kB │ map:    38.78 kB
-../dist/control-ui.build-79262-elwsim/assets/labs-page-CBFNoKc6.js                                10.22 kB │ gzip:   3.74 kB │ map:    28.10 kB
-../dist/control-ui.build-79262-elwsim/assets/sidebar-agent-roster-CiuV2iSQ.js                     10.26 kB │ gzip:   3.24 kB │ map:    31.58 kB
-../dist/control-ui.build-79262-elwsim/assets/gherkin-DX-eNKsk.js                                  10.29 kB │ gzip:   5.21 kB │ map:    14.24 kB
-../dist/control-ui.build-79262-elwsim/assets/worktrees-page-Cj-Plg9X.js                           10.38 kB │ gzip:   3.26 kB │ map:    26.30 kB
-../dist/control-ui.build-79262-elwsim/assets/wizard-step-controls-6GJWuayB.js                     10.46 kB │ gzip:   3.24 kB │ map:    28.42 kB
-../dist/control-ui.build-79262-elwsim/assets/en-devices-CXaa2HOE.js                               10.53 kB │ gzip:   4.08 kB │ map:    17.17 kB
-../dist/control-ui.build-79262-elwsim/assets/logs-page-hk6WSjKS.js                                10.68 kB │ gzip:   3.76 kB │ map:    32.35 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-session-rail-BWizlW2O.js                        10.98 kB │ gzip:   3.56 kB │ map:    29.15 kB
-../dist/control-ui.build-79262-elwsim/assets/logbook-view-CKUjIhr-.js                             11.08 kB │ gzip:   2.90 kB │ map:    29.65 kB
-../dist/control-ui.build-79262-elwsim/assets/dashboards-page-C_SEuQVz.js                          11.15 kB │ gzip:   3.48 kB │ map:    33.40 kB
-../dist/control-ui.build-79262-elwsim/assets/view-pairing.runtime-BRhsp7-x.js                     11.23 kB │ gzip:   2.63 kB │ map:    19.49 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-processes-panel-Cb2UaQ8h.js                     11.34 kB │ gzip:   3.50 kB │ map:    30.12 kB
-../dist/control-ui.build-79262-elwsim/assets/consent-dialog-M1tnNFrM.js                           11.48 kB │ gzip:   4.05 kB │ map:    26.68 kB
-../dist/control-ui.build-79262-elwsim/assets/sidebar-update-runtime-C5oxFyU6.js                   11.50 kB │ gzip:   3.00 kB │ map:    31.36 kB
-../dist/control-ui.build-79262-elwsim/assets/canvas-widget-view-CL8muMV7.js                       11.57 kB │ gzip:   3.85 kB │ map:    30.54 kB
-../dist/control-ui.build-79262-elwsim/assets/session-group-defaults-dialog-DDXWO0hc.js            11.73 kB │ gzip:   2.80 kB │ map:    23.36 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-Dadut7W4.js                                     11.87 kB │ gzip:   5.37 kB │ map:    31.46 kB
-../dist/control-ui.build-79262-elwsim/assets/browser-IEfMdjAV.js                                  11.90 kB │ gzip:   4.47 kB │ map:    40.22 kB
-../dist/control-ui.build-79262-elwsim/assets/debug-page-D5rSmRIK.js                               12.09 kB │ gzip:   3.54 kB │ map:    28.99 kB
-../dist/control-ui.build-79262-elwsim/assets/settings-targets-BexIBEYz.js                         12.38 kB │ gzip:   3.06 kB │ map:    23.21 kB
-../dist/control-ui.build-79262-elwsim/assets/credential-editor-B1Q7bg9E.js                        12.74 kB │ gzip:   3.27 kB │ map:    29.71 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-Dcqynv36.js                     12.82 kB │ gzip:   4.68 kB │ map:   141.87 kB
-../dist/control-ui.build-79262-elwsim/assets/panel-tab-strip-fs_6WtTG.js                          12.86 kB │ gzip:   4.45 kB │ map:    35.02 kB
-../dist/control-ui.build-79262-elwsim/assets/approvals-page-BEhcjgUT.js                           13.84 kB │ gzip:   3.47 kB │ map:    30.47 kB
-../dist/control-ui.build-79262-elwsim/assets/apps-page-CTm6ddOP.js                                14.03 kB │ gzip:   5.27 kB │ map:    27.00 kB
-../dist/control-ui.build-79262-elwsim/assets/markdown-mermaid-B1_TRe9E.js                         14.18 kB │ gzip:   5.37 kB │ map:    32.77 kB
-../dist/control-ui.build-79262-elwsim/assets/settings-sidebar-BdTtF9kL.js                         14.36 kB │ gzip:   4.96 kB │ map:    42.82 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-BVuFZphE.js                                     14.56 kB │ gzip:   5.95 kB │ map:    34.96 kB
-../dist/control-ui.build-79262-elwsim/assets/wizard-login-controller-Dqd12LqH.js                  15.23 kB │ gzip:   4.43 kB │ map:    59.83 kB
-../dist/control-ui.build-79262-elwsim/assets/search-page-BtLjGGSC.js                              15.72 kB │ gzip:   5.00 kB │ map:    45.03 kB
-../dist/control-ui.build-79262-elwsim/assets/device-page-D88OZbNs.js                              15.80 kB │ gzip:   3.68 kB │ map:    35.68 kB
-../dist/control-ui.build-79262-elwsim/assets/config-form.node.shared-BJJJwSvH.js                  15.83 kB │ gzip:   6.15 kB │ map:    66.57 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-CTO3mArf.js                                     16.43 kB │ gzip:   7.59 kB │ map:    22.09 kB
-../dist/control-ui.build-79262-elwsim/assets/plugin-page-BxvC_vdV.js                              16.56 kB │ gzip:   4.80 kB │ map:    42.28 kB
-../dist/control-ui.build-79262-elwsim/assets/approval-page-registration-BU3Cr9mn.js               16.58 kB │ gzip:   4.49 kB │ map:    38.61 kB
-../dist/control-ui.build-79262-elwsim/assets/session-organizer-operations.runtime-BTwR6Mdr.js     17.02 kB │ gzip:   4.42 kB │ map:    60.09 kB
-../dist/control-ui.build-79262-elwsim/assets/javascript-Cilf6QWD.js                               17.12 kB │ gzip:   5.84 kB │ map:    63.18 kB
-../dist/control-ui.build-79262-elwsim/assets/portals-page-9of_2362.js                             17.50 kB │ gzip:   4.85 kB │ map:    42.97 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-sidebar-region.runtime-BtfA8xW_.js              18.93 kB │ gzip:   5.89 kB │ map:    61.67 kB
-../dist/control-ui.build-79262-elwsim/assets/link-reader-hovercard-DWu80rs1.js                    18.95 kB │ gzip:   6.01 kB │ map:    65.38 kB
-../dist/control-ui.build-79262-elwsim/assets/secrets-page-D1fnVyNG.js                             19.49 kB │ gzip:   5.55 kB │ map:    65.00 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-subagents-panel-Bzjsm4_y.js                     19.68 kB │ gzip:   6.25 kB │ map:    63.48 kB
-../dist/control-ui.build-79262-elwsim/assets/connection-page-B4e3rqZ0.js                          20.22 kB │ gzip:   5.72 kB │ map:    54.65 kB
-../dist/control-ui.build-79262-elwsim/assets/gateway-runtime-D1SOAL3U.js                          20.42 kB │ gzip:   7.65 kB │ map:   110.07 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-question-panel-CMvYfBgB.js                      20.43 kB │ gzip:   5.94 kB │ map:    45.97 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-BLSIDd_T.js                                     20.91 kB │ gzip:   9.50 kB │ map:    35.44 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-ChOYDWbN.js                                     21.19 kB │ gzip:   9.84 kB │ map:    37.51 kB
-../dist/control-ui.build-79262-elwsim/assets/clike-NSnJbUQf.js                                    22.19 kB │ gzip:   7.84 kB │ map:    56.73 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-w43P__y1.js                                     23.31 kB │ gzip:  10.65 kB │ map:    37.66 kB
-../dist/control-ui.build-79262-elwsim/assets/stylus-B7kK8WT_.js                                   23.71 kB │ gzip:   8.77 kB │ map:    55.62 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-loader-D54MHc00.js                        24.16 kB │ gzip:   7.74 kB │ map:    68.41 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-Bte_Wr7u.js                   24.55 kB │ gzip:   9.76 kB │ map:   163.21 kB
-../dist/control-ui.build-79262-elwsim/assets/css-BEjrXOhK.js                                      24.84 kB │ gzip:   8.38 kB │ map:    53.81 kB
-../dist/control-ui.build-79262-elwsim/assets/file-editor-view-B-mGCbun.js                         25.64 kB │ gzip:   8.98 kB │ map:   130.22 kB
-../dist/control-ui.build-79262-elwsim/assets/code-language-BtYXzEBa.js                            25.79 kB │ gzip:   5.46 kB │ map:    55.23 kB
-../dist/control-ui.build-79262-elwsim/assets/memory-import-page-BN5muKyB.js                       26.09 kB │ gzip:   6.49 kB │ map:    71.03 kB
-../dist/control-ui.build-79262-elwsim/assets/lit-runtime-B6ZdNKZE.js                              26.26 kB │ gzip:   9.76 kB │ map:    66.58 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-WmQ811HP.js                                     26.62 kB │ gzip:   8.83 kB │ map:   106.63 kB
-../dist/control-ui.build-79262-elwsim/assets/login-runtime-DEKsPx4d.js                            26.83 kB │ gzip:   8.27 kB │ map:    56.05 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-DlfkFy_M.js                                     27.04 kB │ gzip:  12.85 kB │ map:    45.30 kB
-../dist/control-ui.build-79262-elwsim/assets/meetings-page-DcmWaQWP.js                            28.11 kB │ gzip:   8.09 kB │ map:    76.29 kB
-../dist/control-ui.build-79262-elwsim/assets/github-identity-view-B6eLztDT.js                     28.61 kB │ gzip:   7.61 kB │ map:    75.55 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-CzVK83n7.js                                     28.82 kB │ gzip:  11.84 kB │ map:    72.17 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-DLIW-2tw.js                                     31.04 kB │ gzip:  12.92 kB │ map:    43.84 kB
-../dist/control-ui.build-79262-elwsim/assets/session-progress-hovercard.runtime-G-RoHK_i.js       31.28 kB │ gzip:   9.28 kB │ map:    80.26 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-CeuYZsTS.js                   32.28 kB │ gzip:  12.61 kB │ map:   177.44 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-B3hFjFx0.js                                     32.42 kB │ gzip:  13.16 kB │ map:    69.09 kB
-../dist/control-ui.build-79262-elwsim/assets/sql-DlXpQozQ.js                                      36.96 kB │ gzip:  10.99 kB │ map:    54.86 kB
-../dist/control-ui.build-79262-elwsim/assets/systems-page-WGz93P5l.js                             39.60 kB │ gzip:  11.30 kB │ map:   112.90 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-DcJE8n3q.js                                     40.44 kB │ gzip:  16.89 kB │ map:    45.32 kB
-../dist/control-ui.build-79262-elwsim/assets/link-reader-panel-CYKGmW_8.js                        42.10 kB │ gzip:  11.66 kB │ map:    89.89 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-CejBO95j.js                     42.16 kB │ gzip:  14.11 kB │ map:   171.20 kB
-../dist/control-ui.build-79262-elwsim/assets/custodian-surface-COfymU6L.js                        42.29 kB │ gzip:  12.03 kB │ map:   140.46 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-DREc0aoU.js                                     44.22 kB │ gzip:  15.39 kB │ map:   169.08 kB
-../dist/control-ui.build-79262-elwsim/assets/config-form-B3ZkwMCV.js                              45.03 kB │ gzip:  13.56 kB │ map:   162.79 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-CzBKh40-.js                                     45.04 kB │ gzip:  19.57 kB │ map:    71.31 kB
-../dist/control-ui.build-79262-elwsim/assets/view-status-Di3-2LKE.js                              45.47 kB │ gzip:  13.23 kB │ map:   148.09 kB
-../dist/control-ui.build-79262-elwsim/assets/model-providers-page-DI1ZlmNQ.js                     53.22 kB │ gzip:  14.48 kB │ map:   145.01 kB
-../dist/control-ui.build-79262-elwsim/assets/profile-page-CU4mI6ei.js                             54.46 kB │ gzip:  13.74 kB │ map:   134.66 kB
-../dist/control-ui.build-79262-elwsim/assets/command-palette-B2wPLY9e.js                          55.68 kB │ gzip:  15.59 kB │ map:   167.89 kB
-../dist/control-ui.build-79262-elwsim/assets/terminal-panel-registration-jyuFE3BG.js              55.77 kB │ gzip:  16.23 kB │ map:   156.35 kB
-../dist/control-ui.build-79262-elwsim/assets/file-preview-modal-registration-CFf4td6u.js          56.61 kB │ gzip:  18.18 kB │ map:   360.16 kB
-../dist/control-ui.build-79262-elwsim/assets/board-view-hVwSeG2o.js                               57.11 kB │ gzip:  15.65 kB │ map:   155.98 kB
-../dist/control-ui.build-79262-elwsim/assets/transport.runtime-DIn_Uydf.js                        58.40 kB │ gzip:  15.75 kB │ map:   215.37 kB
-../dist/control-ui.build-79262-elwsim/assets/devices-page-BHOwliHY.js                             61.29 kB │ gzip:  17.15 kB │ map:   184.47 kB
-../dist/control-ui.build-79262-elwsim/assets/model-setup-page-B-514zmq.js                         61.81 kB │ gzip:  15.36 kB │ map:   166.27 kB
-../dist/control-ui.build-79262-elwsim/assets/channels-page-FHr82cX3.js                            63.75 kB │ gzip:  16.43 kB │ map:   176.38 kB
-../dist/control-ui.build-79262-elwsim/assets/skills-page-CS6gyN6H.js                              66.71 kB │ gzip:  16.59 kB │ map:   174.27 kB
-../dist/control-ui.build-79262-elwsim/assets/en-settings-bLjc9vEk.js                              66.79 kB │ gzip:  22.81 kB │ map:   104.48 kB
-../dist/control-ui.build-79262-elwsim/assets/skill-workshop-page-DAxCEJny.js                      68.16 kB │ gzip:  18.65 kB │ map:   227.85 kB
-../dist/control-ui.build-79262-elwsim/assets/sessions-page-B7qG3zQy.js                            68.35 kB │ gzip:  18.63 kB │ map:   188.26 kB
-../dist/control-ui.build-79262-elwsim/assets/desktop-panel-Dkfvu6eI.js                            69.56 kB │ gzip:  18.46 kB │ map:   178.52 kB
-../dist/control-ui.build-79262-elwsim/assets/tool-catalog-D-1jSv85.js                             69.92 kB │ gzip:  18.88 kB │ map:   215.99 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-BNiY8KWm.js                                     71.04 kB │ gzip:  26.26 kB │ map:    78.92 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-detail-panel-Dn9G2smI.js                        73.91 kB │ gzip:  19.24 kB │ map:   185.01 kB
-../dist/control-ui.build-79262-elwsim/assets/browser-panel-De50Xltv.js                            79.49 kB │ gzip:  21.02 kB │ map:   243.10 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-BEf9PFYY.js                                     84.79 kB │ gzip:  33.90 kB │ map:   115.31 kB
-../dist/control-ui.build-79262-elwsim/assets/cloud-workers-page-Ba_ETzN2.js                       86.70 kB │ gzip:  22.44 kB │ map:   234.61 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-B8iIJ_Q6.js                                     98.56 kB │ gzip:  29.07 kB │ map:   112.66 kB
-../dist/control-ui.build-79262-elwsim/assets/activity-page-qmfUTmnV.js                           100.82 kB │ gzip:  28.77 kB │ map:   315.60 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-rQ7dqbv3.js                    103.13 kB │ gzip:  35.54 kB │ map:   338.82 kB
-../dist/control-ui.build-79262-elwsim/assets/plugins-page-B_F-oXAp.js                            103.67 kB │ gzip:  28.55 kB │ map:   310.38 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-thl_gXSL.js                                    104.16 kB │ gzip:  34.94 kB │ map:   113.35 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-Dgium83w.js                    105.03 kB │ gzip:  31.65 kB │ map:   305.83 kB
-../dist/control-ui.build-79262-elwsim/assets/agents-page-LUA76vso.js                             106.69 kB │ gzip:  26.51 kB │ map:   309.65 kB
-../dist/control-ui.build-79262-elwsim/assets/usage-page-iSHCUhRn.js                              115.22 kB │ gzip:  30.96 kB │ map:   323.07 kB
-../dist/control-ui.build-79262-elwsim/assets/phone-runtime-ZUS6orP4.js                           122.62 kB │ gzip:  30.61 kB │ map:   369.23 kB
-../dist/control-ui.build-79262-elwsim/assets/config-runtime-BecGLziM.js                          128.58 kB │ gzip:  37.14 kB │ map:   580.82 kB
-../dist/control-ui.build-79262-elwsim/assets/chat-html-preview-element-DcVPc4og.js               137.92 kB │ gzip:  30.38 kB │ map:   442.06 kB
-../dist/control-ui.build-79262-elwsim/assets/mcp-app-view-registration-BZ-D__js.js               153.86 kB │ gzip:  38.48 kB │ map:   958.29 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-BF9P1iTm.js                  161.10 kB │ gzip:  48.56 kB │ map:   562.35 kB
-../dist/control-ui.build-79262-elwsim/assets/novnc-DviyAnH8.js                                   190.49 kB │ gzip:  57.63 kB │ map:   813.05 kB
-../dist/control-ui.build-79262-elwsim/assets/markdown-runtime-ORQpioyT.js                        204.21 kB │ gzip:  76.64 kB │ map:   767.65 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-BKsufp8f.js                  208.66 kB │ gzip:  68.75 kB │ map: 1,250.02 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-I8nHXBW8.js                  221.53 kB │ gzip:  75.26 kB │ map:   777.24 kB
-../dist/control-ui.build-79262-elwsim/assets/config-page-BeXknAuY.js                             247.74 kB │ gzip:  61.79 kB │ map:   696.82 kB
-../dist/control-ui.build-79262-elwsim/assets/ui-R8q8Pbaf.js                                      263.20 kB │ gzip:  76.25 kB │ map:   864.94 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-_j4STaRv.js                  271.68 kB │ gzip:  80.20 kB │ map: 1,520.61 kB
-../dist/control-ui.build-79262-elwsim/assets/dist-DDaNsWmU.js                                    277.01 kB │ gzip:  91.39 kB │ map: 1,241.08 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-zh-CN-BxdQn_PP.js               295.73 kB │ gzip: 101.20 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-zh-TW-BRRfTg8i.js               301.59 kB │ gzip: 102.31 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-id-Dtv0fdWe.js                  329.18 kB │ gzip:  95.83 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-nl-Cmlk0LPn.js                  349.06 kB │ gzip: 103.59 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-new-DkbfT9Us.js                     354.86 kB │ gzip:  97.23 kB │ map: 1,006.88 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-pt-BR-C-5QKvBz.js               357.51 kB │ gzip: 101.93 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-ko-vkYntJ1B.js                  362.41 kB │ gzip: 103.13 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-tr-DOoJgmtI.js                  362.90 kB │ gzip: 105.20 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-de-BC5Xe0gM.js                  365.24 kB │ gzip: 109.09 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-pl-DjpHc_fJ.js                  366.47 kB │ gzip: 109.87 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-it-d3hNdmVj.js                  367.76 kB │ gzip: 103.78 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-es-BNyipuC9.js                  374.28 kB │ gzip: 104.26 kB
-../dist/control-ui.build-79262-elwsim/assets/zh-CN-Ca_AXRHW.js                                   384.23 kB │ gzip: 137.13 kB │ map:     0.21 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-fr-CqktXZ-G.js                  389.19 kB │ gzip: 107.14 kB
-../dist/control-ui.build-79262-elwsim/assets/zh-TW-DriQcz4o.js                                   394.53 kB │ gzip: 138.52 kB │ map:     0.21 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-vi-CR7KpgFY.js                  408.78 kB │ gzip: 103.41 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-ja-JP-DQg03wUY.js               418.31 kB │ gzip: 110.67 kB
-../dist/control-ui.build-79262-elwsim/assets/id-CXV6H6Ot.js                                      418.97 kB │ gzip: 129.59 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-core-CTqswego.js                         425.66 kB │ gzip: 130.83 kB │ map: 1,439.52 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-BavSTzQd.js                    438.78 kB │ gzip: 127.45 kB │ map: 1,519.72 kB
-../dist/control-ui.build-79262-elwsim/assets/nl-DMcF_CIl.js                                      442.34 kB │ gzip: 140.07 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/pt-BR-Dqo1H_UN.js                                   447.48 kB │ gzip: 139.50 kB │ map:     0.21 kB
-../dist/control-ui.build-79262-elwsim/assets/tr-FmBESuRO.js                                      450.44 kB │ gzip: 140.76 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/it-CkqeT0jA.js                                      457.28 kB │ gzip: 140.55 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/pl-CANEXEOY.js                                      458.07 kB │ gzip: 148.22 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-ar-BQEDIUR3.js                  459.27 kB │ gzip: 113.63 kB
-../dist/control-ui.build-79262-elwsim/assets/es-C5X1EBh7.js                                      460.13 kB │ gzip: 141.66 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-core-Dn6decFZ.js                         468.07 kB │ gzip: 152.17 kB │ map: 1,534.81 kB
-../dist/control-ui.build-79262-elwsim/assets/de-DThwvHwF.js                                      469.57 kB │ gzip: 146.63 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/ko-Dr-1owa-.js                                      473.75 kB │ gzip: 141.72 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/fr-Dh1elpCi.js                                      481.83 kB │ gzip: 145.34 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-fa-CPyKiziP.js                  498.65 kB │ gzip: 114.13 kB
-../dist/control-ui.build-79262-elwsim/assets/vi-Dth3JzjZ.js                                      518.74 kB │ gzip: 142.00 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-chat-3cwmCLoX.js                    533.09 kB │ gzip: 151.29 kB │ map: 1,655.29 kB
-../dist/control-ui.build-79262-elwsim/assets/ja-JP-A83TyWxI.js                                   541.75 kB │ gzip: 149.91 kB │ map:     0.21 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-uk-CWS6bItj.js                  551.50 kB │ gzip: 123.54 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-ru-DMOO1_QJ.js                  556.10 kB │ gzip: 124.83 kB
-../dist/control-ui.build-79262-elwsim/assets/ar-ZuvqwgYP.js                                      570.12 kB │ gzip: 152.59 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/fa-Bj-XPy_W.js                                      620.25 kB │ gzip: 154.07 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/ghostty-web-h90SxDRj.js                             637.12 kB │ gzip: 187.39 kB │ map:   756.75 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-Bxwa1EnM.js                  648.92 kB │ gzip: 185.06 kB │ map: 2,007.99 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-hi-BS31XnDU.js                  655.23 kB │ gzip: 121.53 kB
-../dist/control-ui.build-79262-elwsim/assets/uk-BfWsHZlU.js                                      683.85 kB │ gzip: 169.12 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/ru-BIPKACJo.js                                      688.55 kB │ gzip: 170.72 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/locale-config-hints-th-CzKy9uTW.js                  702.98 kB │ gzip: 121.46 kB
-../dist/control-ui.build-79262-elwsim/assets/control-ui-boot-shared-CnmGqIWI.js                  703.74 kB │ gzip: 204.87 kB │ map: 2,522.29 kB
-../dist/control-ui.build-79262-elwsim/assets/hi-CyZ0YNMB.js                                      827.65 kB │ gzip: 167.05 kB │ map:     0.20 kB
-../dist/control-ui.build-79262-elwsim/assets/th-DO7Ni51a.js                                      857.30 kB │ gzip: 161.34 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-attachment-image.worker-P4E63gj9.js              0.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/custom-light-DyDTxevI.webp                            1.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/crt-light-DbR0bpR3.webp                               1.64 kB
+../dist/control-ui.build-23514-BX99SF/assets/custom-dark-B0roIpAb.webp                             1.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/phosphor-light-B6L1EVnW.webp                          1.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/phosphor-dark-DO_664om.webp                           3.12 kB
+../dist/control-ui.build-23514-BX99SF/assets/crt-dark-Tui5yPvX.webp                                3.26 kB
+../dist/control-ui.build-23514-BX99SF/assets/frame-BoCsE8xn.js                                     4.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/absolutely-light-CraDJas4.webp                        4.93 kB
+../dist/control-ui.build-23514-BX99SF/assets/absolutely-dark-BCt4vgFE.webp                         7.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/manuscript-light-BtjxM-_G.webp                        7.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/diff.worker-DPVjjZX9.js                               8.71 kB
+../dist/control-ui.build-23514-BX99SF/assets/manuscript-dark-CkdelLyK.webp                        12.25 kB
+../dist/control-ui.build-23514-BX99SF/assets/miami-light-CK76ftVr.webp                            12.91 kB
+../dist/control-ui.build-23514-BX99SF/assets/knot-light-bmQq9AbN.webp                             13.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/tide-light-CtKGylEa.webp                             13.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/beacon-light-C8Uuyhzu.webp                           14.84 kB
+../dist/control-ui.build-23514-BX99SF/assets/knot-dark-D6MXlduA.webp                              17.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/rose-light-xf8VQLmW.webp                             20.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/miami-dark-CxsR_EPe.webp                             21.18 kB
+../dist/control-ui.build-23514-BX99SF/assets/tide-dark-B6z-RwsR.webp                              22.01 kB
+../dist/control-ui.build-23514-BX99SF/assets/beacon-dark-BUxx3gLL.webp                            22.76 kB
+../dist/control-ui.build-23514-BX99SF/assets/dash-light-BdkMy7z2.webp                             24.84 kB
+../dist/control-ui.build-23514-BX99SF/index.html                                                  25.72 kB │ gzip:   6.36 kB
+../dist/control-ui.build-23514-BX99SF/assets/rose-dark-D9X1-O20.webp                              26.66 kB
+../dist/control-ui.build-23514-BX99SF/assets/claw-light-crdey3iy.webp                             27.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/dash-dark-BQSVDng9.webp                              29.15 kB
+../dist/control-ui.build-23514-BX99SF/assets/claw-dark-DPmO9vJN.webp                              34.36 kB
+../dist/control-ui.build-23514-BX99SF/social-card.png                                            142.28 kB
+../dist/control-ui.build-23514-BX99SF/assets/mermaid.min-DjFTGxJ3.js                           3,453.23 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-chrome-setup-DEA9Gvpf.css                      0.18 kB │ gzip:   0.13 kB
+../dist/control-ui.build-23514-BX99SF/assets/skills-page-BQ5d-20G.css                              0.23 kB │ gzip:   0.17 kB
+../dist/control-ui.build-23514-BX99SF/assets/terminal-page-DzAc6IHZ.css                            0.25 kB │ gzip:   0.16 kB
+../dist/control-ui.build-23514-BX99SF/assets/device-page-DzxF6N-U.css                              0.37 kB │ gzip:   0.18 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-new-D-SpiTTi.css                      0.56 kB │ gzip:   0.26 kB
+../dist/control-ui.build-23514-BX99SF/assets/browser-QJsz_Ze0.css                                  0.73 kB │ gzip:   0.33 kB
+../dist/control-ui.build-23514-BX99SF/assets/markdown-file-tooltip-jvyPxCJD.css                    0.74 kB │ gzip:   0.38 kB
+../dist/control-ui.build-23514-BX99SF/assets/website-DHaa5x94.css                                  0.82 kB │ gzip:   0.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/capacity-meter-Bpyn5Saf.css                           0.95 kB │ gzip:   0.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/assistant-panel-content-DzJupYdl.css                  1.13 kB │ gzip:   0.40 kB
+../dist/control-ui.build-23514-BX99SF/assets/credential-editor-CxfZfu4o.css                        1.15 kB │ gzip:   0.42 kB
+../dist/control-ui.build-23514-BX99SF/assets/board-document-B0Y4zGJq.css                           1.18 kB │ gzip:   0.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-Dh5vtL-G.css                     1.19 kB │ gzip:   0.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/lane-table-CSTpz4OW.css                               1.21 kB │ gzip:   0.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-dashboard-BZzcciLT.css                     1.52 kB │ gzip:   0.56 kB
+../dist/control-ui.build-23514-BX99SF/assets/agents-home-page-DfcNNRNz.css                         1.80 kB │ gzip:   0.66 kB
+../dist/control-ui.build-23514-BX99SF/assets/wizard-step-controls-CYe5XwZR.css                     1.86 kB │ gzip:   0.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/logs-page-Bu6yianf.css                                1.87 kB │ gzip:   0.73 kB
+../dist/control-ui.build-23514-BX99SF/assets/report-Cegj5HJR.css                                   2.00 kB │ gzip:   0.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/onboarding-memory-import-DuWLEvoz.css                 2.02 kB │ gzip:   0.64 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-embed-CiDYfKFT.css                             2.18 kB │ gzip:   0.71 kB
+../dist/control-ui.build-23514-BX99SF/assets/profile-page-C73ipYq-.css                             2.28 kB │ gzip:   0.73 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-session-rail-BmiGPeTv.css                        2.58 kB │ gzip:   0.88 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-processes-panel-CjcY3LAS.css                     3.14 kB │ gzip:   0.90 kB
+../dist/control-ui.build-23514-BX99SF/assets/update-run-view-CS3ezHvV.css                          3.22 kB │ gzip:   0.90 kB
+../dist/control-ui.build-23514-BX99SF/assets/connection-page-Cwi7GDhW.css                          3.31 kB │ gzip:   0.96 kB
+../dist/control-ui.build-23514-BX99SF/assets/sparkline-tile-CaHeaFDQ.css                           3.48 kB │ gzip:   1.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/portals-page-3o_n6XI9.css                             3.58 kB │ gzip:   1.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-subagents-panel-C5iQ8m24.css                     3.72 kB │ gzip:   1.03 kB
+../dist/control-ui.build-23514-BX99SF/assets/lobsterdex-page-BYmxmm_r.css                          3.80 kB │ gzip:   1.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/apps-page-W4BVT2Dy.css                                4.08 kB │ gzip:   1.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/devices-page-Do3i-SE3.css                             4.44 kB │ gzip:   1.18 kB
+../dist/control-ui.build-23514-BX99SF/assets/memory-import-page-744kZiKS.css                       4.48 kB │ gzip:   1.18 kB
+../dist/control-ui.build-23514-BX99SF/assets/about-page-DCwoVUHC.css                               4.76 kB │ gzip:   1.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/sidebar-update-runtime-Bpn2ByHA.css                   4.86 kB │ gzip:   1.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/logbook-view-CcweRaNm.css                             5.68 kB │ gzip:   1.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/meetings-page-C6CzIO_R.css                            5.76 kB │ gzip:   1.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/dashboards-page-oN0QjD8g.css                          5.78 kB │ gzip:   1.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/secrets-page-DwICXUvq.css                             5.79 kB │ gzip:   1.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/sidebar-agent-roster-BbA0HhFs.css                     6.71 kB │ gzip:   1.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugins-page-D_KVIBAs.css                             6.76 kB │ gzip:   1.71 kB
+../dist/control-ui.build-23514-BX99SF/assets/agents-page-DFluc6jm.css                              7.03 kB │ gzip:   1.84 kB
+../dist/control-ui.build-23514-BX99SF/assets/link-reader-hovercard-CzYUpnNa.css                    8.05 kB │ gzip:   1.88 kB
+../dist/control-ui.build-23514-BX99SF/assets/approval-hO9W1yf6.css                                 8.34 kB │ gzip:   2.02 kB
+../dist/control-ui.build-23514-BX99SF/assets/wizard-login-controller-CisCH8bF.css                  8.63 kB │ gzip:   2.03 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-sidebar-region-BT887V4g.css                      8.75 kB │ gzip:   1.90 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-session-summary-C-mJ1E_e.css               9.50 kB │ gzip:   2.02 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-progress-hovercard-CWlzJYa-.css               9.98 kB │ gzip:   1.90 kB
+../dist/control-ui.build-23514-BX99SF/assets/command-palette-NBC8ATMP.css                         10.65 kB │ gzip:   2.54 kB
+../dist/control-ui.build-23514-BX99SF/assets/custodian-surface-D4ZqgxUa.css                       10.93 kB │ gzip:   2.59 kB
+../dist/control-ui.build-23514-BX99SF/assets/systems-page-CG-xKQDS.css                            11.51 kB │ gzip:   2.62 kB
+../dist/control-ui.build-23514-BX99SF/assets/view-status-CPVPeI0Y.css                             11.51 kB │ gzip:   2.37 kB
+../dist/control-ui.build-23514-BX99SF/assets/board-view-DB-8dG0_.css                              14.74 kB │ gzip:   3.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/sessions-page-C9AWqrKt.css                           15.80 kB │ gzip:   3.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/tool-catalog-DcVygOsX.css                            16.75 kB │ gzip:   3.48 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-DIWJGbGi.css                  19.72 kB │ gzip:   4.27 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-page-fBgfkU40.css                             21.01 kB │ gzip:   4.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/skill-workshop-page-DesVy5lN.css                     21.35 kB │ gzip:   4.37 kB
+../dist/control-ui.build-23514-BX99SF/assets/activity-page-C1NgidG7.css                           26.74 kB │ gzip:   4.94 kB
+../dist/control-ui.build-23514-BX99SF/assets/usage-BRfw-9yY.css                                   33.59 kB │ gzip:   6.27 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugins-hub-header-CY07Sw_v.css                      40.56 kB │ gzip:   7.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-new-styles-D5FdYJoO.css              53.99 kB │ gzip:  10.25 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-transcript-styles-XWYQjeWJ.css                  61.82 kB │ gzip:  10.25 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-styles-CO8uPlqn.css             64.23 kB │ gzip:  10.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-BNkcmzv4.css                    82.09 kB │ gzip:  14.62 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-styles-DBpIQuUO.css          277.52 kB │ gzip:  45.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-core-eUAoOHGB.css                        309.41 kB │ gzip:  51.30 kB
+../dist/control-ui.build-23514-BX99SF/assets/index-CBdlQJLp.js                                     0.04 kB │ gzip:   0.06 kB
+../dist/control-ui.build-23514-BX99SF/assets/approval-t2xr4qDL.js                                  0.14 kB │ gzip:   0.15 kB │ map:    10.56 kB
+../dist/control-ui.build-23514-BX99SF/assets/__vite-browser-external-2447137e-Bt5J11Ku.js          0.16 kB │ gzip:   0.16 kB │ map:     0.38 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-transcript-styles-CQmgNvqu.js                    0.20 kB │ gzip:   0.17 kB │ map:    80.32 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-new-styles-7tZkvAfx.js                0.21 kB │ gzip:   0.18 kB │ map:    75.92 kB
+../dist/control-ui.build-23514-BX99SF/assets/board-layout-BmeSfx17.js                              0.26 kB │ gzip:   0.23 kB │ map:    11.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-styles-CMDQBMK0.js               0.33 kB │ gzip:   0.20 kB │ map:    82.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/system-info-txcD-Mo6.js                               0.34 kB │ gzip:   0.27 kB │ map:     0.56 kB
+../dist/control-ui.build-23514-BX99SF/assets/desktop-focus-window-Drs6u94p.js                      0.34 kB │ gzip:   0.26 kB │ map:     0.63 kB
+../dist/control-ui.build-23514-BX99SF/assets/mcp-app-routing-CPrTT7UX.js                           0.36 kB │ gzip:   0.28 kB │ map:     0.71 kB
+../dist/control-ui.build-23514-BX99SF/assets/provider-usage-request-DjCOoOTs.js                    0.37 kB │ gzip:   0.28 kB │ map:     1.51 kB
+../dist/control-ui.build-23514-BX99SF/assets/reasoned-disabled-control-C25rPrwV.js                 0.38 kB │ gzip:   0.28 kB │ map:     0.69 kB
+../dist/control-ui.build-23514-BX99SF/assets/route-view-CIbRR3lf.js                                0.40 kB │ gzip:   0.28 kB │ map:     0.60 kB
+../dist/control-ui.build-23514-BX99SF/assets/diff-B5t7Hm-P.js                                      0.43 kB │ gzip:   0.33 kB │ map:     1.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/slots-BtBDQ6CI.js                                     0.48 kB │ gzip:   0.33 kB │ map:     5.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/theme-color-DAo4KRoc.js                               0.50 kB │ gzip:   0.38 kB │ map:     1.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/transcript-search-Cop2ab2z.js                         0.50 kB │ gzip:   0.36 kB │ map:     1.86 kB
+../dist/control-ui.build-23514-BX99SF/assets/user-prefs-request-Dje8RWrG.js                        0.54 kB │ gzip:   0.39 kB │ map:     1.72 kB
+../dist/control-ui.build-23514-BX99SF/assets/cloud-worker-stop.runtime-ITexAXO4.js                 0.57 kB │ gzip:   0.39 kB │ map:     1.60 kB
+../dist/control-ui.build-23514-BX99SF/assets/gateway-websocket-url-cYJwVUmD.js                     0.58 kB │ gzip:   0.33 kB │ map:     1.26 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-gateway-health.runtime-GyDqqyGU.js             0.67 kB │ gzip:   0.45 kB │ map:     2.33 kB
+../dist/control-ui.build-23514-BX99SF/assets/brainfuck-rZhEezO0.js                                 0.74 kB │ gzip:   0.41 kB │ map:     2.35 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-disabled-BfUm62xL.js                       0.78 kB │ gzip:   0.47 kB │ map:     1.73 kB
+../dist/control-ui.build-23514-BX99SF/assets/theme-artwork-loader-VDKLqWSh.js                      0.78 kB │ gzip:   0.49 kB │ map:     1.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/dock-destination-controls-_A4xXWyJ.js                 0.80 kB │ gzip:   0.47 kB │ map:     2.08 kB
+../dist/control-ui.build-23514-BX99SF/assets/properties-CmMnR_Ok.js                                0.80 kB │ gzip:   0.44 kB │ map:     2.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/rolldown-runtime-8BhlS34s.js                          0.80 kB │ gzip:   0.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/custodian-alert-store-DMTYYmJp.js                     0.81 kB │ gzip:   0.42 kB │ map:     2.78 kB
+../dist/control-ui.build-23514-BX99SF/assets/scrollbar-styles-CDBYhe8z.js                          0.82 kB │ gzip:   0.38 kB │ map:     1.11 kB
+../dist/control-ui.build-23514-BX99SF/assets/cmake-D52hYidm.js                                     0.89 kB │ gzip:   0.55 kB │ map:     3.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/update-failure-report-B31KwHfr.js                     0.90 kB │ gzip:   0.49 kB │ map:     2.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/capacity-meter-BFxxmqpJ.js                            0.90 kB │ gzip:   0.47 kB │ map:     3.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/sandbox-host-Dm6XHU23.js                              0.90 kB │ gzip:   0.50 kB │ map:     2.84 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugin-help-value-BV48hBv0.js                         0.91 kB │ gzip:   0.57 kB │ map:     2.53 kB
+../dist/control-ui.build-23514-BX99SF/assets/response-body-DXOcm9vY.js                             0.91 kB │ gzip:   0.56 kB │ map:     2.74 kB
+../dist/control-ui.build-23514-BX99SF/assets/asciiarmor-DqwIP8wN.js                                0.91 kB │ gzip:   0.49 kB │ map:     2.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/settings-select-row-WWbqU7dX.js                       0.92 kB │ gzip:   0.47 kB │ map:     1.97 kB
+../dist/control-ui.build-23514-BX99SF/assets/near-viewport-observer-WgGck829.js                    0.92 kB │ gzip:   0.46 kB │ map:     2.36 kB
+../dist/control-ui.build-23514-BX99SF/assets/protobuf-NGTE4n-r.js                                  0.94 kB │ gzip:   0.61 kB │ map:     2.45 kB
+../dist/control-ui.build-23514-BX99SF/assets/stream-auto-follow-controller-BZ0UzGsg.js             0.95 kB │ gzip:   0.49 kB │ map:     2.85 kB
+../dist/control-ui.build-23514-BX99SF/assets/http-CZiL40Fa.js                                      0.98 kB │ gzip:   0.50 kB │ map:     3.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/solr-CtCgyZ-O.js                                      0.99 kB │ gzip:   0.54 kB │ map:     3.23 kB
+../dist/control-ui.build-23514-BX99SF/assets/usage-BQd4o5lO.js                                     1.01 kB │ gzip:   0.57 kB │ map:     3.96 kB
+../dist/control-ui.build-23514-BX99SF/assets/ref-contract-Ck2SHDIr.js                              1.05 kB │ gzip:   0.57 kB │ map:    12.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/settings-model-CCNqdJrl.js                            1.07 kB │ gzip:   0.56 kB │ map:     4.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-diff-highlight.runtime-CpW7nxl8.js               1.08 kB │ gzip:   0.65 kB │ map:     3.88 kB
+../dist/control-ui.build-23514-BX99SF/assets/agent-avatar-BFKa3Xo9.js                              1.08 kB │ gzip:   0.57 kB │ map:     2.00 kB
+../dist/control-ui.build-23514-BX99SF/assets/troff-BQNyxWC7.js                                     1.09 kB │ gzip:   0.53 kB │ map:     3.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/route-loader-SSdNOmEd.js                              1.12 kB │ gzip:   0.62 kB │ map:     3.60 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-styles-DKd6Fluc.js             1.15 kB │ gzip:   0.36 kB │ map:   383.70 kB
+../dist/control-ui.build-23514-BX99SF/assets/sessions-hub-header-BE2fvAye.js                       1.16 kB │ gzip:   0.56 kB │ map:     2.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/toml-CNMTuoya.js                                      1.18 kB │ gzip:   0.63 kB │ map:     3.77 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-session-menu.runtime-Bhg9YfRh.js               1.20 kB │ gzip:   0.60 kB │ map:     4.33 kB
+../dist/control-ui.build-23514-BX99SF/assets/spreadsheet-NicZe-2f.js                               1.27 kB │ gzip:   0.63 kB │ map:     3.92 kB
+../dist/control-ui.build-23514-BX99SF/assets/pasted-text-excerpt-Db6XKRSL.js                       1.29 kB │ gzip:   0.69 kB │ map:     3.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugin-capabilities.runtime-CTSK2StW.js               1.31 kB │ gzip:   0.68 kB │ map:     4.37 kB
+../dist/control-ui.build-23514-BX99SF/assets/channel-avatar-JDs2N1hr.js                            1.34 kB │ gzip:   0.63 kB │ map:     2.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/decision-model-picker-BL8C9E-k.js                     1.37 kB │ gzip:   0.68 kB │ map:     3.86 kB
+../dist/control-ui.build-23514-BX99SF/assets/mbox-DJTpBvrI.js                                      1.53 kB │ gzip:   0.76 kB │ map:     4.92 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-notifications-mcL4qBNb.js                      1.58 kB │ gzip:   0.80 kB │ map:     5.74 kB
+../dist/control-ui.build-23514-BX99SF/assets/server-prefs-profile-runtime-BkOMbpmd.js              1.61 kB │ gzip:   0.84 kB │ map:     5.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-native-runtime-recovery-CjjCfY_T.js              1.63 kB │ gzip:   0.75 kB │ map:     3.94 kB
+../dist/control-ui.build-23514-BX99SF/assets/sieve-BHLeM6VM.js                                     1.74 kB │ gzip:   0.86 kB │ map:     5.93 kB
+../dist/control-ui.build-23514-BX99SF/assets/rpm-6ru8X0RE.js                                       1.75 kB │ gzip:   0.92 kB │ map:     4.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/markdown-file-tooltip-Cm_ufrV4.js                     1.75 kB │ gzip:   0.95 kB │ map:     5.98 kB
+../dist/control-ui.build-23514-BX99SF/assets/state-CmqlWfYD.js                                     1.75 kB │ gzip:   0.85 kB │ map:     8.04 kB
+../dist/control-ui.build-23514-BX99SF/assets/update-triage.runtime-DLPcKdMS.js                     1.76 kB │ gzip:   0.91 kB │ map:     4.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/load-CMIhCl4H.js                                      1.78 kB │ gzip:   0.97 kB │ map:     6.81 kB
+../dist/control-ui.build-23514-BX99SF/assets/factor-Q1Z7buKY.js                                    1.80 kB │ gzip:   0.70 kB │ map:     4.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/browser-document-CN9ewf8A.js                          1.81 kB │ gzip:   0.94 kB │ map:     4.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/eiffel-BPoKCvky.js                                    1.82 kB │ gzip:   1.00 kB │ map:     4.92 kB
+../dist/control-ui.build-23514-BX99SF/assets/browser-bootstrap.runtime-B1qeNU2I.js                 1.86 kB │ gzip:   1.05 kB │ map:     5.98 kB
+../dist/control-ui.build-23514-BX99SF/assets/z80-BOBAzJas.js                                       1.89 kB │ gzip:   0.88 kB │ map:     4.76 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-apps-Bu6K-cdI.js                                   1.95 kB │ gzip:   0.98 kB │ map:     3.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/mumps-D0jN0dp_.js                                     1.97 kB │ gzip:   1.05 kB │ map:     6.37 kB
+../dist/control-ui.build-23514-BX99SF/assets/elm-Cw50aCOi.js                                       2.01 kB │ gzip:   0.92 kB │ map:     7.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/skills-shared-BWKhaIoY.js                             2.02 kB │ gzip:   0.87 kB │ map:     5.15 kB
+../dist/control-ui.build-23514-BX99SF/assets/mathematica-1hKRFuCQ.js                               2.05 kB │ gzip:   0.92 kB │ map:     6.81 kB
+../dist/control-ui.build-23514-BX99SF/assets/dockerfile-05JOL5Sz.js                                2.06 kB │ gzip:   0.76 kB │ map:     6.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/turtle-Uiatt2dA.js                                    2.08 kB │ gzip:   0.98 kB │ map:     6.81 kB
+../dist/control-ui.build-23514-BX99SF/assets/ebnf-DwPn32cL.js                                      2.11 kB │ gzip:   0.90 kB │ map:     6.64 kB
+../dist/control-ui.build-23514-BX99SF/assets/smalltalk-DY21_MKY.js                                 2.15 kB │ gzip:   0.96 kB │ map:     6.59 kB
+../dist/control-ui.build-23514-BX99SF/assets/terminal-page-BARtKtu5.js                             2.15 kB │ gzip:   1.09 kB │ map:     5.85 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugins-hub-header-wnipgbGe.js                        2.16 kB │ gzip:   0.87 kB │ map:    38.91 kB
+../dist/control-ui.build-23514-BX99SF/assets/fcl-BKSPRit5.js                                       2.16 kB │ gzip:   1.05 kB │ map:     6.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/ntriples-D5FXROHs.js                                  2.20 kB │ gzip:   0.80 kB │ map:     7.66 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-BGBah-M9.js                                      2.20 kB │ gzip:   1.39 kB │ map:     5.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/dtd-BziCxTDe.js                                       2.22 kB │ gzip:   0.96 kB │ map:     6.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/octave-Y-3Aqrep.js                                    2.25 kB │ gzip:   1.18 kB │ map:     5.78 kB
+../dist/control-ui.build-23514-BX99SF/assets/yacas-CJ_G-h-R.js                                     2.28 kB │ gzip:   1.19 kB │ map:     7.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-form.tiers-Bi7NFW_E.js                         2.33 kB │ gzip:   1.08 kB │ map:     7.93 kB
+../dist/control-ui.build-23514-BX99SF/assets/pascal-D6MnNqKh.js                                    2.39 kB │ gzip:   1.27 kB │ map:     5.70 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-workspace-recovery.runtime-BaryND-0.js        2.40 kB │ gzip:   1.17 kB │ map:     7.65 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugin-contracts-runtime-BtgSFxeR.js                  2.41 kB │ gzip:   1.11 kB │ map:     9.96 kB
+../dist/control-ui.build-23514-BX99SF/assets/simple-mode-B3ouou4l.js                               2.41 kB │ gzip:   1.19 kB │ map:     7.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/apl-CZuIt2s3.js                                       2.43 kB │ gzip:   1.34 kB │ map:     6.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-startup.runtime-B7m9vy1a.js                    2.45 kB │ gzip:   0.85 kB │ map:     4.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/panel-empty-state-DhTC4nun.js                         2.45 kB │ gzip:   0.97 kB │ map:     3.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/commonlisp-JmRDT1qt.js                                2.45 kB │ gzip:   1.19 kB │ map:     6.74 kB
+../dist/control-ui.build-23514-BX99SF/assets/tcl-VS4aPR64.js                                       2.48 kB │ gzip:   1.32 kB │ map:     6.55 kB
+../dist/control-ui.build-23514-BX99SF/assets/setup-schema-BqMIOXD2.js                              2.49 kB │ gzip:   1.28 kB │ map:    10.06 kB
+../dist/control-ui.build-23514-BX99SF/assets/appearance-picker-DI2an7RZ.js                         2.53 kB │ gzip:   1.06 kB │ map:     5.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/lane-table-CJvQYUzj.js                                2.54 kB │ gzip:   0.96 kB │ map:     8.25 kB
+../dist/control-ui.build-23514-BX99SF/assets/shell-B-6dKEO3.js                                     2.56 kB │ gzip:   1.30 kB │ map:     7.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/theme-catalog-CkEnKHlM.js                             2.60 kB │ gzip:   1.18 kB │ map:    10.72 kB
+../dist/control-ui.build-23514-BX99SF/assets/gateway-scope-upgrade.runtime-xjt6EFGf.js             2.62 kB │ gzip:   1.03 kB │ map:     8.73 kB
+../dist/control-ui.build-23514-BX99SF/assets/webidl-y3TQ_6xd.js                                    2.62 kB │ gzip:   1.37 kB │ map:     7.77 kB
+../dist/control-ui.build-23514-BX99SF/assets/usage-2X-a5fq_.js                                     2.62 kB │ gzip:   0.96 kB │ map:    49.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-debug-BBIT09qc.js                                  2.63 kB │ gzip:   1.22 kB │ map:     5.07 kB
+../dist/control-ui.build-23514-BX99SF/assets/puppet-DvF9Rcyj.js                                    2.65 kB │ gzip:   1.29 kB │ map:     9.04 kB
+../dist/control-ui.build-23514-BX99SF/assets/pig-DksdPhxP.js                                       2.65 kB │ gzip:   1.49 kB │ map:     6.65 kB
+../dist/control-ui.build-23514-BX99SF/assets/input-dialog-CXS25ttU.js                              2.66 kB │ gzip:   1.11 kB │ map:     7.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/forth-CsObqcja.js                                     2.67 kB │ gzip:   1.42 kB │ map:     6.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/pending-session-create-DF6PqFW5.js                    2.74 kB │ gzip:   1.26 kB │ map:     6.85 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-update-actions-HkzJUhQG.js                         2.78 kB │ gzip:   1.37 kB │ map:     4.61 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-Cbf4oGMY.js                                      2.78 kB │ gzip:   1.60 kB │ map:     5.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/composer-draft-retirement.runtime-CfO2S1ze.js         2.83 kB │ gzip:   1.17 kB │ map:     9.98 kB
+../dist/control-ui.build-23514-BX99SF/assets/velocity-DgFe8a_l.js                                  2.84 kB │ gzip:   1.20 kB │ map:     8.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/tiddlywiki-ByLaO-PH.js                                2.92 kB │ gzip:   1.18 kB │ map:    11.14 kB
+../dist/control-ui.build-23514-BX99SF/assets/modelica-DDfpmrWA.js                                  2.94 kB │ gzip:   1.38 kB │ map:     8.11 kB
+../dist/control-ui.build-23514-BX99SF/assets/oz-Dw3yM8mc.js                                        3.03 kB │ gzip:   1.38 kB │ map:     9.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/website-DiKSMNLs.js                                   3.03 kB │ gzip:   1.41 kB │ map:     8.16 kB
+../dist/control-ui.build-23514-BX99SF/assets/r-C3MfMtNT.js                                         3.06 kB │ gzip:   1.45 kB │ map:     9.97 kB
+../dist/control-ui.build-23514-BX99SF/assets/stex-B74o6kub.js                                      3.22 kB │ gzip:   1.26 kB │ map:    11.32 kB
+../dist/control-ui.build-23514-BX99SF/assets/link-reader-response-C2LtZKax.js                      3.24 kB │ gzip:   1.43 kB │ map:     6.31 kB
+../dist/control-ui.build-23514-BX99SF/assets/lua-Bjba4a35.js                                       3.26 kB │ gzip:   1.50 kB │ map:     7.80 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-form.search-lJ4Po4Iz.js                        3.27 kB │ gzip:   1.47 kB │ map:    13.45 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-snapshot-database-CQ9Y17Pv.js                 3.30 kB │ gzip:   1.22 kB │ map:    10.70 kB
+../dist/control-ui.build-23514-BX99SF/assets/macos-titlebar-controls.runtime-Bei20nKR.js           3.31 kB │ gzip:   1.16 kB │ map:     7.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/cypher-QpSxMRXq.js                                    3.33 kB │ gzip:   1.60 kB │ map:     8.57 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-link-menu.runtime-DtxWvzJa.js                  3.34 kB │ gzip:   1.46 kB │ map:     7.55 kB
+../dist/control-ui.build-23514-BX99SF/assets/tiki-Cb29ipmL.js                                      3.35 kB │ gzip:   1.35 kB │ map:    12.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-memory-import-CEAo-li4.js                          3.39 kB │ gzip:   1.43 kB │ map:     5.24 kB
+../dist/control-ui.build-23514-BX99SF/assets/sparql-CUbWMhsH.js                                    3.47 kB │ gzip:   1.70 kB │ map:     9.55 kB
+../dist/control-ui.build-23514-BX99SF/assets/vhdl-bNtYFHwV.js                                      3.47 kB │ gzip:   1.61 kB │ map:     9.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/theme-palette-BeN-FX1G.js                             3.53 kB │ gzip:   1.37 kB │ map:     8.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-v8Zi46bm.js                                      3.54 kB │ gzip:   1.83 kB │ map:     6.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/svg-icon-rasterizer-BRQp4M2Y.js                       3.54 kB │ gzip:   1.73 kB │ map:    10.89 kB
+../dist/control-ui.build-23514-BX99SF/assets/exec-approval-CIraZFEd.js                             3.56 kB │ gzip:   1.50 kB │ map:     9.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-progress-dL3GG6TI.js                          3.56 kB │ gzip:   1.40 kB │ map:     9.48 kB
+../dist/control-ui.build-23514-BX99SF/assets/nav-drawer-swipe.runtime-CQJ9HUG0.js                  3.60 kB │ gzip:   1.38 kB │ map:    10.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/mscgen-o_TRe-wI.js                                    3.64 kB │ gzip:   1.07 kB │ map:     9.74 kB
+../dist/control-ui.build-23514-BX99SF/assets/debug-overlay-BORe-Ok8.js                             3.73 kB │ gzip:   1.61 kB │ map:     6.64 kB
+../dist/control-ui.build-23514-BX99SF/assets/panel-icon-button-CcK34VUY.js                         3.82 kB │ gzip:   1.25 kB │ map:     4.60 kB
+../dist/control-ui.build-23514-BX99SF/assets/vb-B2Eic2VJ.js                                        3.82 kB │ gzip:   1.95 kB │ map:    11.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/q-CCMT7mWg.js                                         3.82 kB │ gzip:   1.78 kB │ map:     9.86 kB
+../dist/control-ui.build-23514-BX99SF/assets/d-BVOXk3sl.js                                         3.83 kB │ gzip:   1.79 kB │ map:    10.92 kB
+../dist/control-ui.build-23514-BX99SF/assets/swift-DkbHzSG0.js                                     3.92 kB │ gzip:   1.94 kB │ map:    10.87 kB
+../dist/control-ui.build-23514-BX99SF/assets/coffeescript-ZFd3ZVx8.js                              4.00 kB │ gzip:   1.79 kB │ map:    13.80 kB
+../dist/control-ui.build-23514-BX99SF/assets/fortran-D0Jwcahz.js                                   4.00 kB │ gzip:   2.03 kB │ map:     9.77 kB
+../dist/control-ui.build-23514-BX99SF/assets/asn1-CSpwQvlk.js                                      4.10 kB │ gzip:   2.05 kB │ map:    11.05 kB
+../dist/control-ui.build-23514-BX99SF/assets/dylan-of2Ivqm3.js                                     4.17 kB │ gzip:   1.73 kB │ map:    14.04 kB
+../dist/control-ui.build-23514-BX99SF/assets/gateway-vitals-BU1tUUN_.js                            4.19 kB │ gzip:   1.54 kB │ map:     9.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/asterisk-CdkrETgV.js                                  4.20 kB │ gzip:   1.84 kB │ map:     9.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/livescript-U057igS5.js                                4.22 kB │ gzip:   1.73 kB │ map:    10.04 kB
+../dist/control-ui.build-23514-BX99SF/assets/ttcn-cfg-DWX5Nemw.js                                  4.24 kB │ gzip:   1.84 kB │ map:    11.17 kB
+../dist/control-ui.build-23514-BX99SF/assets/agents-home-page-C38m_TD3.js                          4.24 kB │ gzip:   1.60 kB │ map:    11.45 kB
+../dist/control-ui.build-23514-BX99SF/assets/groovy-CuXwF6x7.js                                    4.26 kB │ gzip:   1.85 kB │ map:    12.84 kB
+../dist/control-ui.build-23514-BX99SF/assets/haskell-DHF7m3rz.js                                   4.31 kB │ gzip:   2.02 kB │ map:    12.11 kB
+../dist/control-ui.build-23514-BX99SF/assets/report-DoXbI6H-.js                                    4.58 kB │ gzip:   1.96 kB │ map:    15.13 kB
+../dist/control-ui.build-23514-BX99SF/assets/mcp-app-confirm-Co4Xvgyc.js                           4.63 kB │ gzip:   1.74 kB │ map:     8.01 kB
+../dist/control-ui.build-23514-BX99SF/assets/sparkline-tile-DTu6MfsH.js                            4.65 kB │ gzip:   1.79 kB │ map:    16.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/gas-CSFUAurG.js                                       4.68 kB │ gzip:   1.36 kB │ map:    13.78 kB
+../dist/control-ui.build-23514-BX99SF/assets/first-run-activation-receipt-BZiiMDTz.js              4.80 kB │ gzip:   1.97 kB │ map:    17.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/widget-sandbox-host-BIKfnMQq.js                       4.80 kB │ gzip:   1.47 kB │ map:    13.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugin-help-DlCYCdlR.js                               4.89 kB │ gzip:   2.10 kB │ map:    14.36 kB
+../dist/control-ui.build-23514-BX99SF/assets/mllike-Bu6D5i0x.js                                    4.96 kB │ gzip:   1.67 kB │ map:    12.82 kB
+../dist/control-ui.build-23514-BX99SF/assets/request-usage-snapshot-Datyy0mb.js                    4.96 kB │ gzip:   2.26 kB │ map:    20.91 kB
+../dist/control-ui.build-23514-BX99SF/assets/ttcn-Bf3i5UEf.js                                      5.00 kB │ gzip:   2.27 kB │ map:    13.48 kB
+../dist/control-ui.build-23514-BX99SF/assets/logbook-controller-CK9UGrKq.js                        5.04 kB │ gzip:   1.81 kB │ map:    18.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/lobsterdex-page-CUWAcnh-.js                           5.08 kB │ gzip:   1.94 kB │ map:    17.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/permissions-page-BvSR0iPX.js                          5.10 kB │ gzip:   1.56 kB │ map:    11.24 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-DgJBCaeA.js                                      5.16 kB │ gzip:   2.49 kB │ map:    10.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/crystal-B2OBIKGd.js                                   5.18 kB │ gzip:   2.23 kB │ map:    17.87 kB
+../dist/control-ui.build-23514-BX99SF/assets/debug-overlay-layout.runtime-Bu9gjcl2.js              5.20 kB │ gzip:   1.82 kB │ map:    15.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/ruby-DrNj4Hrn.js                                      5.22 kB │ gzip:   2.25 kB │ map:    16.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/ecl-BmkYUJLN.js                                       5.25 kB │ gzip:   2.42 kB │ map:    12.07 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-discussion-panel-C1Tm8ML2.js                  5.26 kB │ gzip:   1.99 kB │ map:    14.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/browser-eJmPMevU.js                                   5.42 kB │ gzip:   1.85 kB │ map:    13.44 kB
+../dist/control-ui.build-23514-BX99SF/assets/julia-CfStu5wc.js                                     5.43 kB │ gzip:   2.30 kB │ map:    16.15 kB
+../dist/control-ui.build-23514-BX99SF/assets/vbscript-B58SZYoT.js                                  5.57 kB │ gzip:   2.65 kB │ map:    17.63 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-placement-move-dialog-4YAbeoDp.js             5.78 kB │ gzip:   1.78 kB │ map:    16.84 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-chrome-setup-Cw-lx3sP.js                       5.80 kB │ gzip:   1.84 kB │ map:    13.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/provider-usage-D1F3TMwt.js                            5.93 kB │ gzip:   2.04 kB │ map:    15.32 kB
+../dist/control-ui.build-23514-BX99SF/assets/update-run-view-xnArwxcS.js                           6.00 kB │ gzip:   2.08 kB │ map:    16.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/mirc-Cx5z6OrJ.js                                      6.05 kB │ gzip:   2.82 kB │ map:    11.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/question-page-registration-D0r_p6py.js                6.28 kB │ gzip:   2.03 kB │ map:    14.98 kB
+../dist/control-ui.build-23514-BX99SF/assets/xquery-BZ8GHY3V.js                                    6.29 kB │ gzip:   2.65 kB │ map:    21.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/roster-element-Bn9ZiW0n.js                            6.30 kB │ gzip:   2.57 kB │ map:    19.55 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-pane-placement.runtime-C89PeiqX.js               6.35 kB │ gzip:   2.32 kB │ map:    15.93 kB
+../dist/control-ui.build-23514-BX99SF/assets/cobol-v-vbCXbt.js                                     6.37 kB │ gzip:   3.15 kB │ map:    11.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-outbox-receipts-DG6BkN4l.js                      6.37 kB │ gzip:   2.67 kB │ map:    26.39 kB
+../dist/control-ui.build-23514-BX99SF/assets/python-Co-oWxhj.js                                    6.40 kB │ gzip:   2.77 kB │ map:    21.51 kB
+../dist/control-ui.build-23514-BX99SF/assets/assistant-panel-content-hPbrPsjx.js                   6.45 kB │ gzip:   1.96 kB │ map:    15.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/scheme-BNktZpsL.js                                    6.51 kB │ gzip:   2.51 kB │ map:    15.97 kB
+../dist/control-ui.build-23514-BX99SF/assets/sidebar-people.runtime-4fhJXXZ2.js                    6.72 kB │ gzip:   2.49 kB │ map:    18.27 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-dashboard-CKkhCcp9.js                      6.75 kB │ gzip:   2.32 kB │ map:    10.97 kB
+../dist/control-ui.build-23514-BX99SF/assets/pug-BJ9q_C7V.js                                       6.77 kB │ gzip:   2.08 kB │ map:    20.06 kB
+../dist/control-ui.build-23514-BX99SF/assets/update-confirmation.runtime-C3U1iR37.js               6.79 kB │ gzip:   2.24 kB │ map:    20.19 kB
+../dist/control-ui.build-23514-BX99SF/assets/page-operations-D4Xne4Rq.js                           6.84 kB │ gzip:   2.30 kB │ map:    28.74 kB
+../dist/control-ui.build-23514-BX99SF/assets/textile-CigAm-LA.js                                   6.88 kB │ gzip:   2.54 kB │ map:    20.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-device-settings-DqxxTegd.js                    6.88 kB │ gzip:   2.66 kB │ map:    24.71 kB
+../dist/control-ui.build-23514-BX99SF/assets/board-document-CKWuVDRL.js                            6.90 kB │ gzip:   2.34 kB │ map:    19.17 kB
+../dist/control-ui.build-23514-BX99SF/assets/keyboard-shortcuts-dialog-B9ShMT1g.js                 6.90 kB │ gzip:   2.46 kB │ map:    15.85 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-session-summary-8RY8ifY5.js                6.97 kB │ gzip:   2.46 kB │ map:    29.62 kB
+../dist/control-ui.build-23514-BX99SF/assets/about-page-64l9UaG2.js                                7.10 kB │ gzip:   2.51 kB │ map:    23.14 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-transcripts-B-uOFRvG.js                            7.18 kB │ gzip:   2.87 kB │ map:    10.34 kB
+../dist/control-ui.build-23514-BX99SF/assets/nsis-C0kVBT_2.js                                      7.19 kB │ gzip:   3.17 kB │ map:     9.48 kB
+../dist/control-ui.build-23514-BX99SF/assets/youtube-video-card-BgBM22de.js                        7.29 kB │ gzip:   2.37 kB │ map:    11.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/nginx-NLs6x0Nm.js                                     7.54 kB │ gzip:   2.83 kB │ map:    12.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/debug-overlay-content-CzrO8hBi.js                     7.74 kB │ gzip:   2.79 kB │ map:    22.08 kB
+../dist/control-ui.build-23514-BX99SF/assets/powershell-BjSJShZW.js                                7.83 kB │ gzip:   3.38 kB │ map:    16.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/native-conversation-bridge-BrAnxOSx.js                7.94 kB │ gzip:   3.39 kB │ map:    30.38 kB
+../dist/control-ui.build-23514-BX99SF/assets/haxe-W4XnxWfV.js                                      8.00 kB │ gzip:   3.05 kB │ map:    27.72 kB
+../dist/control-ui.build-23514-BX99SF/assets/erlang-IAwUA5rr.js                                    8.00 kB │ gzip:   3.00 kB │ map:    27.14 kB
+../dist/control-ui.build-23514-BX99SF/assets/tooltip-qXngaXs1.js                                   8.33 kB │ gzip:   2.90 kB │ map:    21.91 kB
+../dist/control-ui.build-23514-BX99SF/assets/verilog-ChfNWxmV.js                                   8.60 kB │ gzip:   3.64 kB │ map:    30.11 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-_FO8vpd1.js                                      8.63 kB │ gzip:   3.73 kB │ map:   102.50 kB
+../dist/control-ui.build-23514-BX99SF/assets/onboarding-memory-import-DqgyvX8z.js                  9.34 kB │ gzip:   2.83 kB │ map:    25.44 kB
+../dist/control-ui.build-23514-BX99SF/assets/sas-SYA7WzvL.js                                       9.46 kB │ gzip:   4.21 kB │ map:    18.08 kB
+../dist/control-ui.build-23514-BX99SF/assets/clojure-CQulayJg.js                                   9.56 kB │ gzip:   4.15 kB │ map:    21.00 kB
+../dist/control-ui.build-23514-BX99SF/assets/custodian-page-Dd9RIum9.js                            9.66 kB │ gzip:   2.78 kB │ map:    20.35 kB
+../dist/control-ui.build-23514-BX99SF/assets/perl-CMrxjaCi.js                                      9.87 kB │ gzip:   3.59 kB │ map:    43.72 kB
+../dist/control-ui.build-23514-BX99SF/assets/idl-fIUlL8fB.js                                       9.97 kB │ gzip:   4.52 kB │ map:    15.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/catalog-terminal-start-DUngejKj.js                   10.15 kB │ gzip:   3.29 kB │ map:    38.78 kB
+../dist/control-ui.build-23514-BX99SF/assets/labs-page-CZFzvszn.js                                10.22 kB │ gzip:   3.75 kB │ map:    28.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/sidebar-agent-roster-ClkDmGrq.js                     10.26 kB │ gzip:   3.24 kB │ map:    31.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/gherkin-DX-eNKsk.js                                  10.29 kB │ gzip:   5.21 kB │ map:    14.24 kB
+../dist/control-ui.build-23514-BX99SF/assets/worktrees-page-C9OF1pfr.js                           10.38 kB │ gzip:   3.26 kB │ map:    26.30 kB
+../dist/control-ui.build-23514-BX99SF/assets/wizard-step-controls-vCyiLTKz.js                     10.46 kB │ gzip:   3.24 kB │ map:    28.42 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-devices-C27QnZ8X.js                               10.53 kB │ gzip:   4.08 kB │ map:    17.17 kB
+../dist/control-ui.build-23514-BX99SF/assets/logs-page-DF8AH1BY.js                                10.68 kB │ gzip:   3.76 kB │ map:    32.35 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-session-rail-Cxf5SMZh.js                        10.98 kB │ gzip:   3.56 kB │ map:    29.15 kB
+../dist/control-ui.build-23514-BX99SF/assets/logbook-view-pKSId1Y9.js                             11.08 kB │ gzip:   2.90 kB │ map:    29.65 kB
+../dist/control-ui.build-23514-BX99SF/assets/dashboards-page-Wu1t7YNE.js                          11.15 kB │ gzip:   3.49 kB │ map:    33.40 kB
+../dist/control-ui.build-23514-BX99SF/assets/view-pairing.runtime-HSid2c2i.js                     11.23 kB │ gzip:   2.64 kB │ map:    19.49 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-processes-panel-DpJG3aSD.js                     11.34 kB │ gzip:   3.50 kB │ map:    30.12 kB
+../dist/control-ui.build-23514-BX99SF/assets/consent-dialog-DcikGDLd.js                           11.48 kB │ gzip:   4.06 kB │ map:    26.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/sidebar-update-runtime-C4O1einy.js                   11.50 kB │ gzip:   3.00 kB │ map:    31.36 kB
+../dist/control-ui.build-23514-BX99SF/assets/canvas-widget-view-B0mCqFfO.js                       11.57 kB │ gzip:   3.85 kB │ map:    30.54 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-group-defaults-dialog-DEBjOc3J.js            11.73 kB │ gzip:   2.81 kB │ map:    23.36 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-Dadut7W4.js                                     11.87 kB │ gzip:   5.37 kB │ map:    31.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/browser-BM9cu7WV.js                                  11.90 kB │ gzip:   4.47 kB │ map:    40.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/debug-page-z4aJZ6bp.js                               12.09 kB │ gzip:   3.54 kB │ map:    28.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/settings-targets-Cp2O3w5b.js                         12.38 kB │ gzip:   3.06 kB │ map:    23.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/credential-editor-D36HIS-P.js                        12.74 kB │ gzip:   3.27 kB │ map:    29.71 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-Cr19kuNz.js                     12.82 kB │ gzip:   4.68 kB │ map:   141.87 kB
+../dist/control-ui.build-23514-BX99SF/assets/panel-tab-strip-CBTOMyTO.js                          12.86 kB │ gzip:   4.46 kB │ map:    35.02 kB
+../dist/control-ui.build-23514-BX99SF/assets/approvals-page-DvWB2nh2.js                           13.84 kB │ gzip:   3.48 kB │ map:    30.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/apps-page-CPleklgV.js                                14.03 kB │ gzip:   5.27 kB │ map:    27.00 kB
+../dist/control-ui.build-23514-BX99SF/assets/markdown-mermaid-D8y99lhj.js                         14.18 kB │ gzip:   5.38 kB │ map:    32.77 kB
+../dist/control-ui.build-23514-BX99SF/assets/settings-sidebar-Dt6XcbAb.js                         14.36 kB │ gzip:   4.97 kB │ map:    42.82 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-BVuFZphE.js                                     14.56 kB │ gzip:   5.95 kB │ map:    34.96 kB
+../dist/control-ui.build-23514-BX99SF/assets/wizard-login-controller-BXwZNkq3.js                  15.23 kB │ gzip:   4.43 kB │ map:    59.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/search-page-DKMHgptV.js                              15.72 kB │ gzip:   5.00 kB │ map:    45.03 kB
+../dist/control-ui.build-23514-BX99SF/assets/device-page-Dcnd-Z8z.js                              15.80 kB │ gzip:   3.68 kB │ map:    35.68 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-form.node.shared-DmqLvWid.js                  15.83 kB │ gzip:   6.16 kB │ map:    66.57 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-CTO3mArf.js                                     16.43 kB │ gzip:   7.59 kB │ map:    22.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugin-page-BSKc7cpS.js                              16.56 kB │ gzip:   4.81 kB │ map:    42.28 kB
+../dist/control-ui.build-23514-BX99SF/assets/approval-page-registration-BPqKwuCA.js               16.58 kB │ gzip:   4.50 kB │ map:    38.61 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-organizer-operations.runtime-DDsqyGu2.js     17.02 kB │ gzip:   4.42 kB │ map:    60.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/javascript-Cilf6QWD.js                               17.12 kB │ gzip:   5.84 kB │ map:    63.18 kB
+../dist/control-ui.build-23514-BX99SF/assets/portals-page-CtPbsfIU.js                             17.50 kB │ gzip:   4.84 kB │ map:    42.97 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-sidebar-region.runtime-hHu8Z4YW.js              18.93 kB │ gzip:   5.90 kB │ map:    61.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/link-reader-hovercard-BU9bS90h.js                    18.95 kB │ gzip:   6.01 kB │ map:    65.38 kB
+../dist/control-ui.build-23514-BX99SF/assets/secrets-page-DfPlisos.js                             19.49 kB │ gzip:   5.55 kB │ map:    65.00 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-subagents-panel-CXvS6Uda.js                     19.68 kB │ gzip:   6.25 kB │ map:    63.48 kB
+../dist/control-ui.build-23514-BX99SF/assets/connection-page-CLfJP-s4.js                          20.22 kB │ gzip:   5.72 kB │ map:    54.65 kB
+../dist/control-ui.build-23514-BX99SF/assets/gateway-runtime-CA3ntKN4.js                          20.42 kB │ gzip:   7.65 kB │ map:   110.07 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-question-panel-BzHRt-b8.js                      20.43 kB │ gzip:   5.94 kB │ map:    45.97 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-BLSIDd_T.js                                     20.91 kB │ gzip:   9.50 kB │ map:    35.44 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-ChOYDWbN.js                                     21.19 kB │ gzip:   9.84 kB │ map:    37.51 kB
+../dist/control-ui.build-23514-BX99SF/assets/clike-NSnJbUQf.js                                    22.19 kB │ gzip:   7.84 kB │ map:    56.73 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-w43P__y1.js                                     23.31 kB │ gzip:  10.65 kB │ map:    37.66 kB
+../dist/control-ui.build-23514-BX99SF/assets/stylus-B7kK8WT_.js                                   23.71 kB │ gzip:   8.77 kB │ map:    55.62 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-loader-emBXQuz_.js                        24.16 kB │ gzip:   7.75 kB │ map:    68.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-DNZq6BmJ.js                   24.55 kB │ gzip:   9.76 kB │ map:   163.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/css-BEjrXOhK.js                                      24.84 kB │ gzip:   8.38 kB │ map:    53.81 kB
+../dist/control-ui.build-23514-BX99SF/assets/file-editor-view-DABoarQU.js                         25.64 kB │ gzip:   8.98 kB │ map:   130.22 kB
+../dist/control-ui.build-23514-BX99SF/assets/code-language-q0lk6YOz.js                            25.79 kB │ gzip:   5.46 kB │ map:    55.23 kB
+../dist/control-ui.build-23514-BX99SF/assets/memory-import-page-DmG21WyA.js                       26.09 kB │ gzip:   6.49 kB │ map:    71.03 kB
+../dist/control-ui.build-23514-BX99SF/assets/lit-runtime-CRyMBz8k.js                              26.26 kB │ gzip:   9.76 kB │ map:    66.58 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-WmQ811HP.js                                     26.62 kB │ gzip:   8.83 kB │ map:   106.63 kB
+../dist/control-ui.build-23514-BX99SF/assets/login-runtime-DCM4errs.js                            26.83 kB │ gzip:   8.27 kB │ map:    56.05 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-DlfkFy_M.js                                     27.04 kB │ gzip:  12.85 kB │ map:    45.30 kB
+../dist/control-ui.build-23514-BX99SF/assets/meetings-page-DJNitO27.js                            28.11 kB │ gzip:   8.09 kB │ map:    76.29 kB
+../dist/control-ui.build-23514-BX99SF/assets/github-identity-view-po5P6_6g.js                     28.61 kB │ gzip:   7.61 kB │ map:    75.55 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-CzVK83n7.js                                     28.82 kB │ gzip:  11.84 kB │ map:    72.17 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-DLIW-2tw.js                                     31.04 kB │ gzip:  12.92 kB │ map:    43.84 kB
+../dist/control-ui.build-23514-BX99SF/assets/session-progress-hovercard.runtime-Ds75k3IB.js       31.28 kB │ gzip:   9.28 kB │ map:    80.26 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-Mo_C2bVY.js                   32.28 kB │ gzip:  12.62 kB │ map:   177.44 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-B3hFjFx0.js                                     32.42 kB │ gzip:  13.16 kB │ map:    69.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/sql-DlXpQozQ.js                                      36.96 kB │ gzip:  10.99 kB │ map:    54.86 kB
+../dist/control-ui.build-23514-BX99SF/assets/systems-page-D0cEP_2W.js                             39.60 kB │ gzip:  11.30 kB │ map:   112.90 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-DcJE8n3q.js                                     40.44 kB │ gzip:  16.89 kB │ map:    45.32 kB
+../dist/control-ui.build-23514-BX99SF/assets/link-reader-panel-Bh-hxbIF.js                        42.10 kB │ gzip:  11.67 kB │ map:    89.89 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-DRIFoEP8.js                     42.16 kB │ gzip:  14.12 kB │ map:   171.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/custodian-surface-BdcARfHJ.js                        42.29 kB │ gzip:  12.03 kB │ map:   140.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-DREc0aoU.js                                     44.22 kB │ gzip:  15.39 kB │ map:   169.08 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-form-DKhxyCP9.js                              45.03 kB │ gzip:  13.56 kB │ map:   162.79 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-CzBKh40-.js                                     45.04 kB │ gzip:  19.57 kB │ map:    71.31 kB
+../dist/control-ui.build-23514-BX99SF/assets/view-status-CuVLT4wW.js                              45.47 kB │ gzip:  13.24 kB │ map:   148.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/model-providers-page-B9Upl1vk.js                     53.22 kB │ gzip:  14.48 kB │ map:   145.01 kB
+../dist/control-ui.build-23514-BX99SF/assets/profile-page-4RUqDHgq.js                             54.46 kB │ gzip:  13.75 kB │ map:   134.66 kB
+../dist/control-ui.build-23514-BX99SF/assets/command-palette-DgLMgvCB.js                          55.68 kB │ gzip:  15.60 kB │ map:   167.89 kB
+../dist/control-ui.build-23514-BX99SF/assets/terminal-panel-registration-1akqi0I7.js              55.77 kB │ gzip:  16.23 kB │ map:   156.35 kB
+../dist/control-ui.build-23514-BX99SF/assets/file-preview-modal-registration-m8Mg4UDp.js          56.61 kB │ gzip:  18.18 kB │ map:   360.16 kB
+../dist/control-ui.build-23514-BX99SF/assets/board-view-fR2vWuM-.js                               57.11 kB │ gzip:  15.65 kB │ map:   155.98 kB
+../dist/control-ui.build-23514-BX99SF/assets/transport.runtime-BP--v8Qe.js                        58.40 kB │ gzip:  15.75 kB │ map:   215.37 kB
+../dist/control-ui.build-23514-BX99SF/assets/devices-page-Bcab5y8J.js                             61.29 kB │ gzip:  17.16 kB │ map:   184.47 kB
+../dist/control-ui.build-23514-BX99SF/assets/model-setup-page-BEFrSQVD.js                         61.81 kB │ gzip:  15.35 kB │ map:   166.27 kB
+../dist/control-ui.build-23514-BX99SF/assets/channels-page-BoD4nADh.js                            63.75 kB │ gzip:  16.43 kB │ map:   176.38 kB
+../dist/control-ui.build-23514-BX99SF/assets/skills-page-BHhPQ19n.js                              66.71 kB │ gzip:  16.59 kB │ map:   174.27 kB
+../dist/control-ui.build-23514-BX99SF/assets/en-settings-DT9A-dyO.js                              66.79 kB │ gzip:  22.81 kB │ map:   104.48 kB
+../dist/control-ui.build-23514-BX99SF/assets/skill-workshop-page-5-Jl-Hrv.js                      68.16 kB │ gzip:  18.64 kB │ map:   227.85 kB
+../dist/control-ui.build-23514-BX99SF/assets/sessions-page-DcuNhyp8.js                            68.35 kB │ gzip:  18.63 kB │ map:   188.26 kB
+../dist/control-ui.build-23514-BX99SF/assets/desktop-panel-CHgEsTu4.js                            69.56 kB │ gzip:  18.46 kB │ map:   178.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/tool-catalog-m-dp5QWN.js                             69.92 kB │ gzip:  18.88 kB │ map:   215.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-BNiY8KWm.js                                     71.04 kB │ gzip:  26.26 kB │ map:    78.92 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-detail-panel-CMU4waNo.js                        73.91 kB │ gzip:  19.24 kB │ map:   185.01 kB
+../dist/control-ui.build-23514-BX99SF/assets/browser-panel-g0D81l3t.js                            79.49 kB │ gzip:  21.03 kB │ map:   243.10 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-BEf9PFYY.js                                     84.79 kB │ gzip:  33.90 kB │ map:   115.31 kB
+../dist/control-ui.build-23514-BX99SF/assets/cloud-workers-page-DjBcnFRF.js                       86.70 kB │ gzip:  22.44 kB │ map:   234.61 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-B8iIJ_Q6.js                                     98.56 kB │ gzip:  29.07 kB │ map:   112.66 kB
+../dist/control-ui.build-23514-BX99SF/assets/activity-page-BICPkSyF.js                           100.82 kB │ gzip:  28.77 kB │ map:   315.60 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-DjBMCL-8.js                    103.13 kB │ gzip:  35.54 kB │ map:   338.82 kB
+../dist/control-ui.build-23514-BX99SF/assets/plugins-page-CAm3mVpi.js                            103.67 kB │ gzip:  28.55 kB │ map:   310.38 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-thl_gXSL.js                                    104.16 kB │ gzip:  34.94 kB │ map:   113.35 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-DQmzTY3R.js                    105.03 kB │ gzip:  31.65 kB │ map:   305.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/agents-page-CpiUPRGd.js                             106.69 kB │ gzip:  26.51 kB │ map:   309.65 kB
+../dist/control-ui.build-23514-BX99SF/assets/usage-page-WKMmuxR3.js                              115.22 kB │ gzip:  30.96 kB │ map:   323.07 kB
+../dist/control-ui.build-23514-BX99SF/assets/phone-runtime-ZUS6orP4.js                           122.62 kB │ gzip:  30.61 kB │ map:   369.23 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-runtime-BecGLziM.js                          128.58 kB │ gzip:  37.14 kB │ map:   580.82 kB
+../dist/control-ui.build-23514-BX99SF/assets/chat-html-preview-element-oJ8232d6.js               137.92 kB │ gzip:  30.38 kB │ map:   442.06 kB
+../dist/control-ui.build-23514-BX99SF/assets/mcp-app-view-registration-p-CIsA1O.js               153.86 kB │ gzip:  38.49 kB │ map:   958.29 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-FojL2Tr9.js                  161.10 kB │ gzip:  48.55 kB │ map:   562.35 kB
+../dist/control-ui.build-23514-BX99SF/assets/novnc-DviyAnH8.js                                   190.49 kB │ gzip:  57.63 kB │ map:   813.05 kB
+../dist/control-ui.build-23514-BX99SF/assets/markdown-runtime-ORQpioyT.js                        204.21 kB │ gzip:  76.64 kB │ map:   767.65 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-BtYBK2vO.js                  208.66 kB │ gzip:  68.76 kB │ map: 1,250.02 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-D6r-GpCD.js                  221.53 kB │ gzip:  75.27 kB │ map:   777.24 kB
+../dist/control-ui.build-23514-BX99SF/assets/config-page-D05hnfP8.js                             247.74 kB │ gzip:  61.79 kB │ map:   696.82 kB
+../dist/control-ui.build-23514-BX99SF/assets/ui-g28xmnLf.js                                      263.20 kB │ gzip:  76.25 kB │ map:   864.94 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-Bh8LHar9.js                  271.68 kB │ gzip:  80.20 kB │ map: 1,520.61 kB
+../dist/control-ui.build-23514-BX99SF/assets/dist-DDaNsWmU.js                                    277.01 kB │ gzip:  91.39 kB │ map: 1,241.08 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-zh-CN-BxdQn_PP.js               295.73 kB │ gzip: 101.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-zh-TW-BRRfTg8i.js               301.59 kB │ gzip: 102.31 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-id-Dtv0fdWe.js                  329.18 kB │ gzip:  95.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-nl-Cmlk0LPn.js                  349.06 kB │ gzip: 103.59 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-new-BOlnQql2.js                     354.86 kB │ gzip:  97.23 kB │ map: 1,006.88 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-pt-BR-C-5QKvBz.js               357.51 kB │ gzip: 101.93 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-ko-vkYntJ1B.js                  362.41 kB │ gzip: 103.13 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-tr-DOoJgmtI.js                  362.90 kB │ gzip: 105.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-de-BC5Xe0gM.js                  365.24 kB │ gzip: 109.09 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-pl-DjpHc_fJ.js                  366.47 kB │ gzip: 109.87 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-it-d3hNdmVj.js                  367.76 kB │ gzip: 103.78 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-es-BNyipuC9.js                  374.28 kB │ gzip: 104.26 kB
+../dist/control-ui.build-23514-BX99SF/assets/zh-CN-Ca_AXRHW.js                                   384.23 kB │ gzip: 137.13 kB │ map:     0.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-fr-CqktXZ-G.js                  389.19 kB │ gzip: 107.14 kB
+../dist/control-ui.build-23514-BX99SF/assets/zh-TW-DriQcz4o.js                                   394.53 kB │ gzip: 138.52 kB │ map:     0.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-vi-CR7KpgFY.js                  408.78 kB │ gzip: 103.41 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-ja-JP-DQg03wUY.js               418.31 kB │ gzip: 110.67 kB
+../dist/control-ui.build-23514-BX99SF/assets/id-CXV6H6Ot.js                                      418.97 kB │ gzip: 129.59 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-core-s0G-lwJM.js                         425.66 kB │ gzip: 130.83 kB │ map: 1,439.52 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat-9mJ8Xxk-.js                    438.78 kB │ gzip: 127.45 kB │ map: 1,519.72 kB
+../dist/control-ui.build-23514-BX99SF/assets/nl-DMcF_CIl.js                                      442.34 kB │ gzip: 140.07 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/pt-BR-Dqo1H_UN.js                                   447.48 kB │ gzip: 139.50 kB │ map:     0.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/tr-FmBESuRO.js                                      450.44 kB │ gzip: 140.76 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/it-CkqeT0jA.js                                      457.28 kB │ gzip: 140.55 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/pl-CANEXEOY.js                                      458.07 kB │ gzip: 148.22 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-ar-BQEDIUR3.js                  459.27 kB │ gzip: 113.63 kB
+../dist/control-ui.build-23514-BX99SF/assets/es-C5X1EBh7.js                                      460.13 kB │ gzip: 141.66 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-core-DO6R8X9j.js                         468.07 kB │ gzip: 152.14 kB │ map: 1,534.81 kB
+../dist/control-ui.build-23514-BX99SF/assets/de-DThwvHwF.js                                      469.57 kB │ gzip: 146.63 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/ko-Dr-1owa-.js                                      473.75 kB │ gzip: 141.72 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/fr-Dh1elpCi.js                                      481.83 kB │ gzip: 145.34 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-fa-CPyKiziP.js                  498.65 kB │ gzip: 114.13 kB
+../dist/control-ui.build-23514-BX99SF/assets/vi-Dth3JzjZ.js                                      518.74 kB │ gzip: 142.00 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-chat--D2BBekl.js                    533.09 kB │ gzip: 151.29 kB │ map: 1,655.29 kB
+../dist/control-ui.build-23514-BX99SF/assets/ja-JP-A83TyWxI.js                                   541.75 kB │ gzip: 149.91 kB │ map:     0.21 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-uk-CWS6bItj.js                  551.50 kB │ gzip: 123.54 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-ru-DMOO1_QJ.js                  556.10 kB │ gzip: 124.83 kB
+../dist/control-ui.build-23514-BX99SF/assets/ar-ZuvqwgYP.js                                      570.12 kB │ gzip: 152.59 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/fa-Bj-XPy_W.js                                      620.25 kB │ gzip: 154.07 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/ghostty-web-PvTFHwsU.js                             637.12 kB │ gzip: 187.38 kB │ map:   756.75 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-_0lRmJwF.js                  648.92 kB │ gzip: 185.06 kB │ map: 2,007.99 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-hi-BS31XnDU.js                  655.23 kB │ gzip: 121.53 kB
+../dist/control-ui.build-23514-BX99SF/assets/uk-BfWsHZlU.js                                      683.85 kB │ gzip: 169.12 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/ru-BIPKACJo.js                                      688.55 kB │ gzip: 170.72 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/locale-config-hints-th-CzKy9uTW.js                  702.98 kB │ gzip: 121.46 kB
+../dist/control-ui.build-23514-BX99SF/assets/control-ui-boot-shared-Cnf6bEGq.js                  703.74 kB │ gzip: 204.88 kB │ map: 2,522.29 kB
+../dist/control-ui.build-23514-BX99SF/assets/hi-CyZ0YNMB.js                                      827.65 kB │ gzip: 167.05 kB │ map:     0.20 kB
+../dist/control-ui.build-23514-BX99SF/assets/th-DO7Ni51a.js                                      857.30 kB │ gzip: 161.34 kB │ map:     0.20 kB
 
-[INEFFECTIVE_DYNAMIC_IMPORT] src/lib/sessions/session-roster-cache.runtime.ts is dynamically imported by src/lib/sessions/session-roster-cache.ts but also statically imported by src/app/bootstrap-warm-boot.ts, dynamic import will not move module into another chunk.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/lib/sessions/session-roster-cache.runtime.ts is dynamically imported by src/lib/sessions/session-roster-cache.ts but also statically imported by src/app/bootstrap-warm-boot.ts, dynamic import will not move module into another chunk.
 
-[INEFFECTIVE_DYNAMIC_IMPORT] src/pages/chat/session-snapshot-invalidation.ts is dynamically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts but also statically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts, src/pages/chat/session-snapshot-store.ts, dynamic import will not move module into another chunk.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/chat/session-snapshot-invalidation.ts is dynamically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts but also statically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts, src/pages/chat/session-snapshot-store.ts, dynamic import will not move module into another chunk.
 
-[INEFFECTIVE_DYNAMIC_IMPORT] src/pages/chat/chat-send-actions.ts is dynamically imported by src/pages/chat/initial-turn-handoff.ts but also statically imported by src/pages/chat/chat-pane-context.ts, src/pages/chat/chat-pane-retained-presentation.ts, src/pages/chat/chat-pane-session-observation.ts, src/pages/chat/chat-pane-startup-subscriptions.ts, src/pages/chat/chat-state-events.ts, ..., dynamic import will not move module into another chunk.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/chat/chat-send-actions.ts is dynamically imported by src/pages/chat/initial-turn-handoff.ts but also statically imported by src/pages/chat/chat-pane-context.ts, src/pages/chat/chat-pane-retained-presentation.ts, src/pages/chat/chat-pane-session-observation.ts, src/pages/chat/chat-pane-startup-subscriptions.ts, src/pages/chat/chat-state-events.ts, ..., dynamic import will not move module into another chunk.
 
-[INEFFECTIVE_DYNAMIC_IMPORT] src/lib/chat/composer-draft-store.runtime.ts is dynamically imported by src/lib/chat/outbox-store-projection.ts, src/pages/chat/chat-outbox-recovery.ts, src/pages/chat/components/chat-async-question-draft.ts, src/pages/chat/durable-composer-persistence.ts, src/pages/new-session/draft-persistence.ts but also statically imported by src/lib/chat/composer-draft-retirement.runtime.ts, dynamic import will not move module into another chunk.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/lib/chat/composer-draft-store.runtime.ts is dynamically imported by src/lib/chat/outbox-store-projection.ts, src/pages/chat/chat-outbox-recovery.ts, src/pages/chat/components/chat-async-question-draft.ts, src/pages/chat/durable-composer-persistence.ts, src/pages/new-session/draft-persistence.ts but also statically imported by src/lib/chat/composer-draft-retirement.runtime.ts, dynamic import will not move module into another chunk.
 
-[INEFFECTIVE_DYNAMIC_IMPORT] src/components/app-sidebar-session-narration.ts is dynamically imported by src/components/app-sidebar.ts but also statically imported by src/pages/chat/subagents-panel-data.ts, dynamic import will not move module into another chunk.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/components/app-sidebar-session-narration.ts is dynamically imported by src/components/app-sidebar.ts but also statically imported by src/pages/chat/subagents-panel-data.ts, dynamic import will not move module into another chunk.
 
-✓ built in 7.00s
-[PLUGIN_TIMINGS] Plugin hooks ran for 6.1s of this 7.0s build (87%).
+✓ built in 6.96s
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 6.1s of this 7.0s build (88%).
 The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
-  - control-ui-build-output writeBundle (50%, 3.5s, 1 call)
-  - vite:worker load (19%, 1.3s, 1 call)
+  - control-ui-build-output writeBundle (49%, 3.4s, 1 call)
+  - vite:worker load (20%, 1.4s, 1 call)
 Additional hook time came from the hooks below and from hooks under 1s.
 3 hooks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
   - control-ui-locale-modules load (4121 calls)
@@ -675,25 +671,25 @@ See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more det
 verified 926 finalized Control UI sidecars
 Control UI performance:
   measurement: shipped gzip sidecars; Node v24.21.0
-  startup JS: 8 requests, 364.6 KiB gzip (373314 B), 334.6 KiB br, 1207783 B raw (limits: 18 requests, 364.7 KiB gzip / 373454 B)
-  startup JS gzip vs baseline: 373314 B (baseline 372878 B + growth allowance 512 B = growth limit 373390 B; build-variance allowance 64 B; enforcement limit 373454 B; max committed baseline 372878 B)
+  startup JS: 8 requests, 364.5 KiB gzip (373288 B), 334.5 KiB br, 1207783 B raw (limits: 18 requests, 364.7 KiB gzip / 373454 B)
+  startup JS gzip vs baseline: 373288 B (baseline 372878 B + growth allowance 512 B = growth limit 373390 B; build-variance allowance 64 B; enforcement limit 373454 B; max committed baseline 372878 B)
   startup CSS: 1 request, 49.6 KiB gzip (50749 B), 42.2 KiB br, 309417 B raw (limits: 1 request, advisory target 46080 B, hard ceiling 51200 B; headroom 451 B)
-  largest ordinary JS: assets/control-ui-boot-shared-CnmGqIWI.js, 197.4 KiB gzip (limit: 215.0 KiB)
+  largest ordinary JS: assets/control-ui-boot-shared-Cnf6bEGq.js, 197.5 KiB gzip (limit: 215.0 KiB)
   largest CSS: assets/control-ui-core-eUAoOHGB.css, 50749 B gzip (hard ceiling 53400 B; headroom 2651 B)
-  all JS: 396 requests, 9278.3 KiB gzip (9500954 B), 8144.9 KiB br, 34010477 B raw
+  all JS: 396 requests, 9278.6 KiB gzip (9501270 B), 8145.2 KiB br, 34010477 B raw
   all CSS: 67 requests, 233.9 KiB gzip (239495 B), 210.8 KiB br, 1276676 B raw
   retained identity: 487 assets, 35632935 B (34.0 MiB); limit 50331648 B, half the 100663296 B retention budget so the previous build stays retained after an update; headroom 14698713 B
   route boot accounting: initial-entry assets plus measured immediate dynamic imports; existing initial-entry limits unchanged
-  chat boot JS: 32 requests, 1583.9 KiB gzip (1621917 B), 1450.7 KiB br, 5419805 B raw (1248603 B beyond initial-entry JS; limit: 35 requests)
+  chat boot JS: 32 requests, 1583.9 KiB gzip (1621948 B), 1450.6 KiB br, 5419805 B raw (1248660 B beyond initial-entry JS; limit: 35 requests)
   chat boot CSS: 10 requests, 143.8 KiB gzip (147214 B), 128.2 KiB br, 875434 B raw
-  new boot JS: 25 requests, 1231.7 KiB gzip (1261265 B), 1129.9 KiB br, 4184425 B raw (887951 B beyond initial-entry JS; limit: 35 requests)
+  new boot JS: 25 requests, 1231.7 KiB gzip (1261269 B), 1129.8 KiB br, 4184425 B raw (887981 B beyond initial-entry JS; limit: 35 requests)
   new boot CSS: 7 requests, 118.9 KiB gzip (121768 B), 105.0 KiB br, 727910 B raw
   warning: startup CSS gzip is above the 46080 B advisory target; remaining hard-ceiling headroom: 451 B
   isolated Mermaid JS: 1 request, 891.8 KiB gzip (913239 B), 734.0 KiB br, 3453235 B raw (limits: 1 deferred asset, 960.0 KiB gzip; forbidden at startup)
   locale catalog JS: 40 requests, 4989.8 KiB gzip (5109557 B), 4250.3 KiB br, 19119178 B raw (largest pair: ru, 288.3 KiB gzip; limits: 1 base + 1 config-hint asset per locale, 300.0 KiB combined; forbidden at startup)
-[build-all] ui:build done in 7.96s
+[build-all] ui:build done in 7.89s
 [build-all] write-build-info
-[build-all] write-build-info done in 95ms
+[build-all] write-build-info done in 94ms
 [build-all] write-cli-startup-metadata (cache restored)
-[build-all] write-cli-startup-metadata done in 3.43s
-[build-all] phase timings: total 2m 3.3s; slowest write-unified-entry-dts 1m 13.5s; tsdown-unified 15.9s; ui:build 7.96s; check-cli-bootstrap-imports 7.11s; runtime-postbuild 4.55s; write-cli-startup-metadata (reused) 3.43s; external-plugins:local-dist 3.03s; tsdown-packages (reused) 1.50s; tsdown-ai (reused) 1.49s; plugins:assets:build 1.40s; plugins:assets:copy 1.17s; check-plugin-sdk-exports 972ms; build-stamp 931ms; runtime-postbuild-stamp 191ms; write-build-info 95ms; native-protocol 50ms
+[build-all] write-cli-startup-metadata done in 3.55s
+[build-all] phase timings: total 55s; slowest tsdown-unified 15.3s; ui:build 7.89s; check-cli-bootstrap-imports 6.95s; write-unified-entry-dts 6.40s; runtime-postbuild 4.34s; write-cli-startup-metadata (reused) 3.55s; external-plugins:local-dist 2.94s; tsdown-ai (reused) 1.51s; tsdown-packages (reused) 1.48s; plugins:assets:build 1.32s; plugins:assets:copy 1.18s; check-plugin-sdk-exports 950ms; build-stamp 904ms; runtime-postbuild-stamp 179ms; write-build-info 94ms; native-protocol 49ms

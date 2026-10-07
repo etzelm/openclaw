@@ -1,0 +1,62 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=false) 372ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > searches by phrase, tokens and link text and reads by path, basename and id (compiled=true) 278ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads sources/alpha.md beside a malformed sibling page 57ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > reads   sources\nested\alpha.md   beside a malformed sibling page 52ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a large page 138ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > keeps exact, basename and ID reads equivalent for a hardlinked page 56ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > preserves compiled claim precedence over a matching canonical page path 256ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by deleted state 318ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > skips a compiled candidate replaced by directory state 299ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is absent 58ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is invalid 68ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > retains ID fallback when the canonical candidate is directory 62ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during exact reads 123ms
+ ✓  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > rejects a compiled or exact page swapped outside the vault during search reads 382ms
+ ×  extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304) 84ms
+   → expected [] to deeply equal [ 'sources/alpha.md' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query.reads.test.ts > wiki query page reads > never parses whole-vault pages on the calling thread (#166304)
+AssertionError: expected [] to deeply equal [ 'sources/alpha.md' ]
+
+- Expected
++ Received
+
+- [
+-   "sources/alpha.md",
+- ]
++ []
+
+ ❯ extensions/memory-wiki/src/query.reads.test.ts:223:68
+    221|     ).toEqual(["concepts/beta.md", relativePath]);
+    222|     expect(page?.path).toBe(relativePath);
+    223|     expect(scan.mock.calls.map(([params]) => params.relativePath)).toE…
+       |                                                                    ^
+    224|   });
+    225| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  13:17:25
+   Duration  5.32s (tests 51%, transform 26%, import 19%, setup 4%)
+

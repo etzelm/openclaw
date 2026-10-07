@@ -1,0 +1,130 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false) 534ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true) 629ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault 384ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens 455ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups 55ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph 55ms
+   → undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker 75ms
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading 111ms
+   → promise resolved "{ select: 'page', page: { …(33) } }" instead of rejecting
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host 120ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it 72ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind a running scan and lets the scan finish 364ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled 360ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it 331ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph
+TypeError: undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:262:23
+    260|
+    261|     expect(search.results.map((result) => result.path)).toContain("ent…
+    262|     expect(keys.keys).toContainEqual({ relativePath: "entities/keeper.…
+       |                       ^
+    263|     expect(extractLinks).not.toHaveBeenCalled();
+    264|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading
+AssertionError: promise resolved "{ select: 'page', page: { …(33) } }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "page": {
++     "absolutePath": "<tmp>/concepts/non-ascii.md",
++     "aliases": [],
++     "bestUsedFor": [],
++     "bridgeAgentIds": [],
++     "bridgeRelativePath": undefined,
++     "bridgeWorkspaceDir": undefined,
++     "canonicalId": undefined,
++     "claims": [],
++     "confidence": undefined,
++     "contradictions": [],
++     "entityType": undefined,
++     "hasFrontmatter": true,
++     "id": "concept.lanterne",
++     "kind": "concept",
++     "lastRefreshedAt": undefined,
++     "linkTargets": [],
++     "notEnoughFor": [],
++     "pageType": "concept",
++     "parsed": {
++       "body": "
++ # Lanterne du port
++
++ registre de lanterne harbor ledger
++ ",
++       "frontmatter": {
++         "id": "concept.lanterne",
++         "pageType": "concept",
++         "title": "Lanterne du port",
++       },
++       "hasFrontmatter": true,
++     },
++     "personCard": undefined,
++     "privacyTier": undefined,
++     "provenanceMode": undefined,
++     "questions": [],
++     "raw": "---
++ pageType: concept
++ id: concept.lanterne
++ title: Lanterne du port
++ ---
++
++ # Lanterne du port
++
++ registre de lanterne harbor ledger
++ ",
++     "relationships": [],
++     "relativePath": "concepts/non-ascii.md",
++     "sourceIds": [],
++     "sourcePath": undefined,
++     "sourceType": undefined,
++     "title": "Lanterne du port",
++     "unsafeLocalConfiguredPath": undefined,
++     "unsafeLocalRelativePath": undefined,
++     "updatedAt": undefined,
++   },
++   "select": "page",
+  }
+
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:305:6
+    303|     await expect(
+    304|       readWikiPagesTask({ rootDir, relativePaths, visibility: null, se…
+    305|     ).rejects.toMatchObject({
+       |      ^
+    306|       name: "FsSafeError",
+    307|       code: expect.stringMatching(/symlink|path-mismatch/u),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  13:17:14
+   Duration  6.31s (tests 58%, transform 22%, import 16%, setup 4%)
+

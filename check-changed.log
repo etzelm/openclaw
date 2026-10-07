@@ -12,8 +12,10 @@ $ node scripts/check-changed.mjs --base upstream/main
 [check:changed] extensions/memory-wiki/src/query-reader.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query-reader.ts: extension production
 [check:changed] extensions/memory-wiki/src/query-reader.worker.ts: extension production
+[check:changed] extensions/memory-wiki/src/query-scan.test-support.ts: extension test
 [check:changed] extensions/memory-wiki/src/query-scheduling.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query-scoring.ts: extension production
+[check:changed] extensions/memory-wiki/src/query-shared-compute.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query-shared-memory.ts: extension production
 [check:changed] extensions/memory-wiki/src/query.abort.test.ts: extension test
 [check:changed] extensions/memory-wiki/src/query.reads.test.ts: extension test
@@ -25,7 +27,7 @@ $ node scripts/check-no-conflict-markers.mjs
 
 [check:changed] line-cap growth ratchet
 $ node --import ./scripts/tsx.mjs scripts/check-line-cap-ratchet.mts --base upstream/main
-Line-cap ratchet OK: 16 changed source files; no new violations or over-cap growth.
+Line-cap ratchet OK: 18 changed source files; no new violations or over-cap growth.
 
 [check:changed] max-lines suppression ratchet
 $ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base upstream/main
@@ -65,7 +67,7 @@ No plugin-sdk wildcard re-exports found in extension API barrels.
 
 [check:changed] extension test core imports
 $ node --import ./scripts/tsx.mjs scripts/check-no-extension-test-core-imports.ts
-OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4539 extension files, 0 plugin helpers checked).
+OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4541 extension files, 0 plugin helpers checked).
 
 [check:changed] duplicate scan target coverage
 $ node scripts/check-duplicates.mjs --coverage
@@ -76,11 +78,11 @@ $ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
 PASS direct dependency pin guard: checked 716 directly declared dependency specs across 198 tracked package manifests; 0 violations.
 
 [check:changed] format changed files
-$ oxfmt --check --no-error-on-unmatched-pattern -- config/max-lines-baseline.txt docs/plugins/memory-wiki.md extensions/memory-wiki/index.test.ts extensions/memory-wiki/index.ts extensions/memory-wiki/package.json extensions/memory-wiki/README.md extensions/memory-wiki/src/apply.ts extensions/memory-wiki/src/cli.ts extensions/memory-wiki/src/gateway.ts extensions/memory-wiki/src/query-pages.ts extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-reader.worker.ts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-scoring.ts extensions/memory-wiki/src/query-shared-memory.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query.ts extensions/memory-wiki/src/tool.ts
+$ oxfmt --check --no-error-on-unmatched-pattern -- config/max-lines-baseline.txt docs/plugins/memory-wiki.md extensions/memory-wiki/index.test.ts extensions/memory-wiki/index.ts extensions/memory-wiki/package.json extensions/memory-wiki/README.md extensions/memory-wiki/src/apply.ts extensions/memory-wiki/src/cli.ts extensions/memory-wiki/src/gateway.ts extensions/memory-wiki/src/query-pages.ts extensions/memory-wiki/src/query-reader.test.ts extensions/memory-wiki/src/query-reader.ts extensions/memory-wiki/src/query-reader.worker.ts extensions/memory-wiki/src/query-scan.test-support.ts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-scoring.ts extensions/memory-wiki/src/query-shared-compute.test.ts extensions/memory-wiki/src/query-shared-memory.ts extensions/memory-wiki/src/query.abort.test.ts extensions/memory-wiki/src/query.reads.test.ts extensions/memory-wiki/src/query.ts extensions/memory-wiki/src/tool.ts
 Checking formatting...
 
 All matched files use the correct format.
-Finished in 163ms on 18 files using 32 threads.
+Finished in 153ms on 20 files using 32 threads.
 
 [check:changed] npm package-lock guard
 Validating 1 npm package lock with 1 job.
@@ -92,19 +94,19 @@ $ node --import ./scripts/tsx.mjs scripts/test-projects-serial.mts src/plugins/d
 
  RUN  v5.0.1 ~/work/oss-166304
 
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > classifies only static value module edges 30ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps broad agent runtime and heavy doctor barrels off doctor enumeration paths 295ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps the runtime doctor migration helper off state DB and plugin-state graphs 32ms
- ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps kysely statically unreachable from every plugin closure 578ms
- ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > matches every resolvable artifact's coerced doctor surfaces 1012ms
- ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > declares every state migration identity and phase in module order 70ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > classifies only static value module edges 28ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps broad agent runtime and heavy doctor barrels off doctor enumeration paths 298ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps the runtime doctor migration helper off state DB and plugin-state graphs 38ms
+ ✓  plugins  src/plugins/doctor-contract-closure-guard.test.ts > doctor contract import closures > keeps kysely statically unreachable from every plugin closure 583ms
+ ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > matches every resolvable artifact's coerced doctor surfaces 831ms
+ ✓  plugins  src/plugins/doctor-contract-declarations.test.ts > bundled plugin doctor contract declarations > declares every state migration identity and phase in module order 71ms
 
  Test Files  2 passed (2)
       Tests  6 passed (6)
-   Start at  09:09:42
-   Duration  3.39s (tests 69%, setup 18%, transform 9%, import 4%)
+   Start at  13:11:20
+   Duration  3.12s (tests 70%, setup 18%, transform 7%, import 5%)
 
-[test] passed 1 Vitest shard in 4.20s
+[test] passed 1 Vitest shard in 3.87s
 
 [check:changed] bundled channel config metadata
 $ node --import ./scripts/tsx.mjs scripts/generate-bundled-channel-config-metadata.ts --check
@@ -118,7 +120,7 @@ $ node --import ./scripts/tsx.mjs scripts/plugin-boundary-report.ts --summary --
 Plugin Boundary Report
 
 compat deprecated=36 eligibleForRemoval=0 removalPending=15 removalPendingDue=14
-  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8234 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
+  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8235 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
   removal-pending 2026-09-30 plugin-sdk-media-understanding-public-demotion due=true blocker=`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate readerRefs=54 readers=extensions/anthropic/media-understanding-provider.ts,extensions/browser/src/browser-tool.test-support.ts,extensions/browser/src/browser/vision.test.ts,extensions/browser/src/browser/vision.ts,extensions/browser/src/cli/browser-cli-extension.test.ts
   removal-pending 2026-09-30 plugin-sdk-memory-host-core-public-demotion due=true blocker=host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists readerRefs=27 readers=extensions/active-memory/index.test.ts,extensions/active-memory/index.ts,extensions/codex/src/app-server/attempt-context.test.ts,extensions/codex/src/app-server/run-attempt-memory.test-support.ts,extensions/memory-core/index.ts
   removal-pending 2026-10-01 agent-harness-terminal-result-aliases due=true blocker=AgentHarnessAttemptResult.terminal and AgentHarnessDeliveryDefaults.visibleReplies; retain until harness migration verifies that legacy terminal fields and sourceVisibleReplies are unread readerRefs=0 readers=none
@@ -169,7 +171,7 @@ deprecated API usage guard passed
 $ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
 [plugin-sdk boundary dts] fresh; skipping
 Found 0 warnings and 0 errors.
-Finished in 115.7s on 10591 files with 264 rules using 1 threads.
+Finished in 102.2s on 10593 files with 264 rules using 1 threads.
 
 [check:changed] lint scripts
 $ pnpm lint:docker-e2e && pnpm lint:tmp:no-raw-http2-imports && node scripts/run-oxlint.mjs --tsconfig config/tsconfig/oxlint.scripts.json scripts
@@ -178,7 +180,7 @@ Docker E2E package boundary/catalog guard passed.
 $ node --import ./scripts/tsx.mjs scripts/check-no-raw-http2-imports.mts
 OK: raw node:http2 imports stay behind the APNs proxy wrapper.
 Found 0 warnings and 0 errors.
-Finished in 27.7s on 1331 files with 264 rules using 1 threads.
+Finished in 28.5s on 1331 files with 264 rules using 1 threads.
 
 [check:changed] database-first legacy-store guard
 $ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts

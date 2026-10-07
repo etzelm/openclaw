@@ -7,6 +7,7 @@
 //   node --import tsx harness.mts search --vault <dir> --query "<text>" --out <file.json> --label before|after
 //   node --import tsx harness.mts concurrent --vault <dir> --query "<text>" --out <file.json> --label before|after
 //   node --import tsx harness.mts cold --vault <dir> --out <file.json>
+//   node --require ./single-permit.cjs --import tsx harness.mts contention --vault <dir> --query "<text>" --out <file.json> --label <tree>
 //   node --import tsx harness.mts budget --vault <dir> --query "<text>" --lookup <basename> --step cli-search|cli-get|cli-apply|tool --out <file.json> --label <tree>
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -514,6 +515,95 @@ async function budget() {
   process.exit(0);
 }
 
+
+// Contention: on a host with one shared compute permit, start an unsignalled whole-vault
+// search (the supplement and wiki.search RPC call shape), then submit a real memory-core
+// retrieval task every second while it runs and time each one from submission to
+// result. The task is memory-core's presence inspection, which runs in the same
+// retrieval pool (one worker, sharedCompute) as memory_search keyword retrieval.
+async function contention() {
+  const vault = path.resolve(readArg("vault"));
+  const query = readArg("query");
+  const out = path.resolve(readArg("out"));
+  const label = readArg("label");
+  const intervalMs = Number(readArg("interval", "1000"));
+  const repoRoot = process.cwd();
+  const { config, queryModule, close } = await loadPlugin(vault);
+  const capacityModule = await import(pathToFileURL(path.join(repoRoot, "src/infra/worker-task-capacity.ts")).href);
+  const memoryCore = await import(
+    pathToFileURL(path.join(repoRoot, "extensions/memory-core/src/memory/manager-cpu-worker-runtime.ts")).href
+  );
+  const databasePath = path.join(os.tmpdir(), "oss-166304-contention-absent.sqlite");
+  // Warm both pools (worker start, module graphs) so the timings are admission and work.
+  await memoryCore.runMemoryPresenceInspection(databasePath);
+  await queryModule.searchMemoryWiki({ config, query: "zzzz-no-such-token-166304", maxResults: 10 });
+  const warmProbe = performance.now();
+  await memoryCore.runMemoryPresenceInspection(databasePath);
+  const idleRetrievalMs = performance.now() - warmProbe;
+  const capacity = capacityModule.getWorkerComputeCapacity().getSnapshot();
+  const keepAlive = setInterval(() => {}, 2 ** 30);
+  const scanStart = performance.now();
+  let scanWallMs = 0;
+  let done = false;
+  const scan = queryModule.searchMemoryWiki({ config, query, maxResults: 10 }).then((results: unknown[]) => {
+    scanWallMs = performance.now() - scanStart;
+    done = true;
+    return results;
+  });
+  const probes: Array<{ index: number; issuedAtMs: number; ms: number; settledAtMs: number; present: boolean }> = [];
+  const pending: Promise<void>[] = [];
+  for (let index = 0; !done; index += 1) {
+    await new Promise<void>((resolve) => setTimeout(resolve, intervalMs));
+    if (done) {
+      break;
+    }
+    const started = performance.now();
+    pending.push(
+      memoryCore.runMemoryPresenceInspection(databasePath).then((present: boolean) => {
+        const settled = performance.now();
+        probes.push({
+          index,
+          issuedAtMs: Math.round(started - scanStart),
+          ms: Math.round(settled - started),
+          settledAtMs: Math.round(settled - scanStart),
+          present,
+        });
+      }),
+    );
+  }
+  const results = (await scan) as Array<{ path: string; score: number }>;
+  await Promise.all(pending);
+  clearInterval(keepAlive);
+  const sorted = probes.map((probe) => probe.ms).toSorted((left, right) => left - right);
+  const report = {
+    label,
+    machine: `${os.platform()} ${os.arch()} node ${process.version}`,
+    capturedAt: new Date().toISOString(),
+    computeCapacity: capacity,
+    vault: { path: vault, compiled: false },
+    query,
+    retrievalTask: "memory-core runMemoryPresenceInspection (retrieval pool: maxWorkers 1, sharedCompute)",
+    idleRetrievalMs: Math.round(idleRetrievalMs),
+    scanWallMs: Math.round(scanWallMs),
+    probes: {
+      count: probes.length,
+      intervalMs,
+      p50: quantile(sorted, 0.5),
+      p99: quantile(sorted, 0.99),
+      max: quantile(sorted, 1),
+      overMemorySearchDeadline30s: probes.filter((probe) => probe.ms > 30_000).length,
+      settledBeforeScanEnded: probes.filter((probe) => probe.settledAtMs < scanWallMs).length,
+    },
+    perProbe: probes.toSorted((left, right) => left.index - right.index),
+    results,
+  };
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await fs.writeFile(out, JSON.stringify(report, null, 2) + "\n");
+  console.log(JSON.stringify({ ...report, perProbe: undefined, results: undefined }, null, 2));
+  await close();
+  process.exit(0);
+}
+
 const command = process.argv[2];
 if (command === "generate") {
   await generate();
@@ -523,6 +613,8 @@ if (command === "generate") {
   await concurrent();
 } else if (command === "cold") {
   await cold();
+} else if (command === "contention") {
+  await contention();
 } else if (command === "budget") {
   await budget();
 } else {

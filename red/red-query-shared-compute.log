@@ -1,0 +1,52 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+ ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host 434ms
+   → expected [ 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host
+AssertionError: expected [ 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
+
+- Expected
++ Received
+
+  [
+-   "wiki list",
+    "wiki search",
+    "retrieval queued",
+    "retrieval admitted",
+-   "wiki search",
+-   "wiki search",
+  ]
+
+ ❯ extensions/memory-wiki/src/query-shared-compute.test.ts:66:20
+     64|
+     65|     // Without the release between batches the retrieval task waited f…
+     66|     expect(events).toEqual([
+       |                    ^
+     67|       "wiki list",
+     68|       "wiki search",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  13:17:01
+   Duration  1.23s (tests 41%, transform 23%, setup 21%, import 14%)
+

@@ -1,0 +1,81 @@
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts extensions/memory-wiki/src/query-scheduling.test.ts extensions/memory-wiki/src/query-shared-compute.test.ts
+[test] starting test/vitest/vitest.extension-memory.config.ts
+
+ RUN  v5.0.1 ~/work/oss-166304
+
+[vitest-workers] local cache hit after 2469ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared c5355f023bde in 2508ms (14604 inputs, 18662 outputs)
+ ×  extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host 855ms
+   → expected [ 'wiki list', 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > serves an exact-path read without the pool while a whole-vault search scan is held 400ms
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > leaves an unsignalled scan unbounded, as on main, and passes a caller signal through 54ms
+ ×  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results 120ms
+   → expected [ 'list', 'search', 'list', 'keys' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
+ ✓  extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > admits at most two scans at once and queues the rest 396ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-scheduling.test.ts > memory wiki query scheduling > runs a scan as bounded batch tasks, one at a time, with whole-vault results
+AssertionError: expected [ 'list', 'search', 'list', 'keys' ] to deeply equal [ 'list', 'search', 'search', …(5) ]
+
+- Expected
++ Received
+
+  [
+    "list",
+    "search",
+-   "search",
+-   "search",
+    "list",
+-   "keys",
+-   "keys",
+    "keys",
+  ]
+
+ ❯ extensions/memory-wiki/src/query-scheduling.test.ts:122:47
+    120|       "relativePaths" in submitted ? (submitted.relativePaths as strin…
+    121|     );
+    122|     expect(tasks.map(({ select }) => select)).toEqual([
+       |                                               ^
+    123|       "list",
+    124|       ...Array(3).fill("search"),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-shared-compute.test.ts > memory wiki scans under shared compute contention > admits another shared-compute pool between scan batches on a one-permit host
+AssertionError: expected [ 'wiki list', 'wiki search', …(2) ] to deeply equal [ 'wiki list', 'wiki search', …(4) ]
+
+- Expected
++ Received
+
+  [
+    "wiki list",
+    "wiki search",
+    "retrieval queued",
+    "retrieval admitted",
+-   "wiki search",
+-   "wiki search",
+  ]
+
+ ❯ extensions/memory-wiki/src/query-shared-compute.test.ts:66:20
+     64|
+     65|     // Without the release between batches the retrieval task waited f…
+     66|     expect(events).toEqual([
+       |                    ^
+     67|       "wiki list",
+     68|       "wiki search",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 3 passed (5)
+   Start at  13:57:50
+   Duration  7.05s (transform 69%, tests 16%, import 11%, setup 4%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 8.60s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
