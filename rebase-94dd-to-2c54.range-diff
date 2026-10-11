@@ -1,0 +1,71 @@
+1:  5cb15b9e5a3 ! 1:  2e958df86af improve(memory-wiki): run whole-vault page reads and scoring in a plugin-owned worker
+    @@ extensions/memory-wiki/package.json
+          },
+          "build": {
+            "bundledDist": true,
+    --      "openclawVersion": "2026.9.8"
+    -+      "openclawVersion": "2026.9.8",
+    +-      "openclawVersion": "2026.9.9"
+    ++      "openclawVersion": "2026.9.9",
+     +      "workerEntries": [
+     +        "./src/query-reader.worker.ts"
+     +      ]
+    @@ extensions/memory-wiki/src/query.reads.test.ts
+     -import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
+      import { afterEach, describe, expect, it, vi } from "vitest";
+      import { compileMemoryWikiVault } from "./compile.js";
+    --import * as wikiLinks from "./markdown-links.js";
+     +import * as wikiMarkdown from "./markdown.js";
+      import { renderWikiMarkdown } from "./markdown.js";
+      import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
+    @@ extensions/memory-wiki/src/query.reads.test.ts: async function createReadVault(r
+     -    expect(openedPages).not.toContain(unrelatedPath);
+     -  });
+     -
+    -   it.each([false, true])(
+    --    "searches and reads without extracting unused links (compiled=%s)",
+    -+    "searches by phrase, tokens and link text and reads by path, basename and id (compiled=%s)",
+    -     async (compiled) => {
+    -       const { config, targetPath, relativePath } = await createReadVault();
+    -       await fs.appendFile(
+    -@@ extensions/memory-wiki/src/query.reads.test.ts: describe("wiki query page reads", () => {
+    -       if (compiled) {
+    -         await compileMemoryWikiVault(config);
+    -       }
+    --      const extractLinks = vi.spyOn(wikiLinks, "extractWikiLinks");
+    - 
+    -       for (const query of ["Alpha", "cobalt lantern", "concepts/reference"]) {
+    -         const results = await searchMemoryWiki({ config, query });
+    -@@ extensions/memory-wiki/src/query.reads.test.ts: describe("wiki query page reads", () => {
+    -         expect(result?.path).toBe(relativePath);
+    -         expect(result?.content).toContain("[Guide](../concepts/guide.md)");
+    -       }
+    --      expect(extractLinks).not.toHaveBeenCalled();
+    -     },
+    -   );
+    - 
+    -   it.each([
+    -     ["sources/alpha.md", "sources/alpha.md"],
+    -     ["  sources\\nested\\alpha.md  ", "sources/nested/alpha.md"],
+    --  ])("reads %s without enumerating unrelated pages", async (lookup, relativePath) => {
+    -+  ])("reads %s beside a malformed sibling page", async (lookup, relativePath) => {
+    -     const { rootDir, config } = await createReadVault(relativePath);
+    -     await fs.writeFile(path.join(rootDir, "sources", "unrelated.md"), "---\ninvalid: [\n---\n");
+    --    const readdir = vi.spyOn(fs, "readdir");
+    - 
+    -     await expect(
+    -       getMemoryWikiPage({ config, lookup, fromLine: 4, lineCount: 1 }),
+    -     ).resolves.toMatchObject({ path: relativePath, content: "readable line", truncated: true });
+    --    expect(readdir).not.toHaveBeenCalled();
+    -   });
+    - 
+        it.each(["large", "hardlinked"] as const)(
+    +     "keeps exact, basename and ID reads equivalent for a %s page",
+    +     async (kind) => {
+     @@ extensions/memory-wiki/src/query.reads.test.ts: describe("wiki query page reads", () => {
+          },
+        );
+2:  7f2927d702f = 2:  9f72dec7da5 docs(memory-wiki): note that whole-vault reads run in a plugin-owned worker
+3:  058114a30ea = 3:  3b796e521d4 improve(memory-wiki): keep short wiki reads off the scan queue and bound scan occupancy
+4:  19353569c95 = 4:  406c7865e86 improve(memory-wiki): keep scan deadlines with the caller and make scheduling tests deterministic
+5:  94dd0a0e7f0 = 5:  2c54327b1ad improve(memory-wiki): yield wiki scans to waiting shared-compute tasks

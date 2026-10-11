@@ -1,0 +1,132 @@
+$ node --import ./scripts/tsx.mjs scripts/check-deadcode-exports.mts
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+[deadcode] Knip script unused-export scan still running after 60s.
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  src/agents/channel-tools.ts: listAllChannelSupportedActionsSteps
+  src/agents/context.ts: lookupContextTokens
+  src/agents/context.ts: waitForContextWindowCacheLoad
+  src/commands/sessions-display-model.ts: resolveSessionDisplayDefaults
+  src/gateway/server-reload-model-runtime-scope.ts: resolveReloadAgentIds (mrReload)
+  src/gateway/worker-environments/inference.types.ts: WorkerInferenceExecutor
+  ui/src/components/agent-row-chip.tsx: AgentRowChip
+  ui/src/components/agent-row-chip.tsx: AgentRowChipElement
+  ui/src/components/catalog-session-menu-solid.tsx: CatalogSessionMenu
+  ui/src/components/elapsed-time.tsx: ElapsedTime
+  ui/src/components/gateway-url-confirmation.ts: GatewayUrlConfirmation
+  ui/src/components/home-session-solid.tsx: HomeSession
+  ui/src/components/home-session-solid.tsx: OpenClawHomeSession
+  ui/src/components/home-session.runtime.ts: HomeSession
+  ui/src/components/home-session.runtime.ts: OpenClawHomeSession
+  ui/src/components/ip-location.ts: IpLocation
+  ui/src/components/ip-location.tsx: IpLocation
+  ui/src/components/native-chrome-setup.ts: NativeChromeSetup
+  ui/src/components/native-chrome-setup.tsx: NativeChromeSetup
+  ui/src/components/native-link-menu.runtime.ts: NativeLinkMenuAction
+  ui/src/components/native-link-menu.runtime.tsx: NativeLinkMenuAction
+  ui/src/components/openclaw-mascot.ts: OpenClawMascot
+  ui/src/components/openclaw-mascot.ts: OpenClawMascotElement
+  ui/src/components/openclaw-mascot.tsx: OpenClawMascot
+  ui/src/components/openclaw-mascot.tsx: OpenClawMascotElement
+  ui/src/components/option-card.tsx: OptionCard
+  ui/src/components/relative-time.tsx: RelativeTime
+  ui/src/components/settings-save-indicator.tsx: SettingsSaveIndicator
+  ui/src/components/sparkline-tile.tsx: SparklineTile
+  ui/src/components/theme-mode-toggle.ts: ThemeModeToggle
+  ui/src/components/theme-mode-toggle.tsx: ThemeModeToggle
+  ui/src/components/update-run-view.ts: UpdateRunView
+  ui/src/components/update-run-view.tsx: UpdateRunView
+  ui/src/components/working-phrase-solid.tsx: WorkingPhrase
+  ui/src/components/working-phrase.ts: WorkingPhrase
+  ui/src/components/workspace-icon.ts: WorkspaceIcon
+  ui/src/components/workspace-icon.ts: WorkspaceIconElement
+  ui/src/components/workspace-icon.tsx: WorkspaceIcon
+  ui/src/components/workspace-icon.tsx: WorkspaceIconElement
+  ui/src/pages/chat/components/chat-message-attachment-status.ts: renderAssistantAttachmentStatusCard
+  ui/src/pages/chat/components/chat-message-attachment-status.ts: renderOmittedMedia
+  ui/src/pages/chat/components/chat-message-attachments.ts: renderMessageAttachment
+  ui/src/pages/chat/components/chat-message-bubble-view.tsx: renderSolidGroupedMessage
+  ui/src/pages/chat/components/chat-message-confirmation-view.tsx: renderSolidRewindButton
+  ui/src/pages/chat/components/chat-message-confirmation.ts: renderRewindButton
+  ui/src/pages/chat/components/chat-message-context-view.tsx: renderSolidMessageWorkContext
+  ui/src/pages/chat/components/chat-message-group-view.tsx: renderSolidActivityGroup (groups)
+  ui/src/pages/chat/components/chat-message-markdown-view.tsx: renderSolidReplyButton
+  ui/src/pages/chat/components/chat-message-markdown.ts: renderMessageActionButtons
+  ui/src/pages/chat/components/chat-message-markdown.ts: renderReplyButton
+  ui/src/pages/chat/components/chat-message-reaction-chips-view.tsx: renderSolidGroupMessageReactions
+  ui/src/pages/chat/components/chat-message-send-status.ts: renderChatSendStatus
+  ui/src/pages/chat/components/chat-message-stream.ts: emptyGroupFooter
+  ui/src/pages/chat/components/chat-message-stream.ts: renderStreamGroupParts
+  ui/src/pages/chat/components/chat-message-text-view.tsx: MarkdownContentValue
+  ui/src/pages/chat/components/chat-message-text-view.tsx: renderSolidMessageJson
+  ui/src/pages/chat/components/chat-message-text-view.tsx: renderSolidMessageMarkdown
+  ui/src/pages/chat/components/chat-message-text.ts: AssistantMessageDisclosure
+  ui/src/pages/chat/components/chat-message-text.ts: MarkdownContent
+  ui/src/pages/chat/components/chat-message-text.ts: MarkdownText
+  ui/src/pages/chat/components/chat-message-text.ts: MessageMarkdown
+  ui/src/pages/chat/components/chat-message-text.ts: renderSolidMessageJson
+  ui/src/pages/chat/components/chat-message-text.ts: renderSolidMessageMarkdown
+  ui/src/pages/chat/components/chat-message-timestamp.ts: renderMessageMeta
+  ui/src/pages/chat/components/chat-thread.ts: ChatThread
+  ui/src/pages/chat/components/chat-tool-cards.ts: renderPluginToolResult
+  ui/src/pages/chat/components/chat-working-indicator.ts: renderChatBubbleActivity
+  ui/src/pages/chat/components/chat-working-indicator.ts: renderChatBubbleDots
+Delete the exports or model their real production consumers in Knip.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  test/helpers/export-html-template.ts: templateHtml
+  ui/src/components/agent-row-chip.tsx: AgentRowChip
+  ui/src/components/agent-row-chip.tsx: AgentRowChipElement
+  ui/src/components/catalog-session-menu-solid.tsx: CatalogSessionMenu
+  ui/src/components/elapsed-time.tsx: ElapsedTime
+  ui/src/components/gateway-url-confirmation.ts: GatewayUrlConfirmation
+  ui/src/components/home-session-solid.tsx: OpenClawHomeSession
+  ui/src/components/home-session.runtime.ts: HomeSession
+  ui/src/components/home-session.runtime.ts: OpenClawHomeSession
+  ui/src/components/ip-location.ts: IpLocation
+  ui/src/components/ip-location.tsx: IpLocation
+  ui/src/components/native-chrome-setup.ts: NativeChromeSetup
+  ui/src/components/native-chrome-setup.tsx: NativeChromeSetup
+  ui/src/components/openclaw-mascot.ts: OpenClawMascot
+  ui/src/components/openclaw-mascot.tsx: OpenClawMascot
+  ui/src/components/option-card.tsx: OptionCard
+  ui/src/components/relative-time.tsx: RelativeTime
+  ui/src/components/settings-save-indicator.tsx: SettingsSaveIndicator
+  ui/src/components/sparkline-tile.tsx: SparklineTile
+  ui/src/components/theme-mode-toggle.ts: ThemeModeToggle
+  ui/src/components/theme-mode-toggle.tsx: ThemeModeToggle
+  ui/src/components/update-run-view.ts: UpdateRunView
+  ui/src/components/update-run-view.tsx: UpdateRunView
+  ui/src/components/working-phrase-solid.tsx: WorkingPhrase
+  ui/src/components/working-phrase.ts: WorkingPhrase
+  ui/src/components/workspace-icon.ts: WorkspaceIcon
+  ui/src/components/workspace-icon.tsx: WorkspaceIcon
+  ui/src/pages/chat/components/chat-message-attachment-status.ts: renderAssistantAttachmentStatusCard
+  ui/src/pages/chat/components/chat-message-attachment-status.ts: renderOmittedMedia
+  ui/src/pages/chat/components/chat-message-bubble-view.tsx: renderSolidGroupedMessage
+  ui/src/pages/chat/components/chat-message-confirmation-view.tsx: renderSolidRewindButton (chatMessageConfirmation)
+  ui/src/pages/chat/components/chat-message-context-view.tsx: renderSolidMessageWorkContext
+  ui/src/pages/chat/components/chat-message-group-view.tsx: renderSolidActivityGroup (groups)
+  ui/src/pages/chat/components/chat-message-markdown-view.tsx: renderSolidReplyButton
+  ui/src/pages/chat/components/chat-message-markdown.ts: renderReplyButton
+  ui/src/pages/chat/components/chat-message-reaction-chips-view.tsx: renderSolidGroupMessageReactions
+  ui/src/pages/chat/components/chat-message-stream.ts: emptyGroupFooter (chatMessage)
+  ui/src/pages/chat/components/chat-message-text-view.tsx: MarkdownContentValue
+  ui/src/pages/chat/components/chat-message-text-view.tsx: renderSolidMessageJson
+  ui/src/pages/chat/components/chat-message-text-view.tsx: renderSolidMessageMarkdown
+  ui/src/pages/chat/components/chat-message-text.ts: AssistantMessageDisclosure
+  ui/src/pages/chat/components/chat-message-text.ts: MarkdownContent
+  ui/src/pages/chat/components/chat-message-text.ts: MarkdownText
+  ui/src/pages/chat/components/chat-message-text.ts: MessageMarkdown
+  ui/src/pages/chat/components/chat-message-text.ts: renderSolidMessageJson
+  ui/src/pages/chat/components/chat-message-text.ts: renderSolidMessageMarkdown
+  ui/src/pages/chat/components/chat-message-timestamp.ts: renderMessageMeta
+  ui/src/pages/chat/components/chat-thread.ts: ChatThread
+  ui/src/pages/chat/components/chat-tool-cards.ts: renderPluginToolResult
+  ui/src/pages/chat/components/chat-working-indicator.ts: renderChatBubbleActivity
+  ui/src/pages/chat/components/chat-working-indicator.ts: renderChatBubbleDots
+Delete the exports or model their real production consumers in Knip.
+[ELIFECYCLE] Command failed with exit code 1.
+EXIT 1
