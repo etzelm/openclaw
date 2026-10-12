@@ -329,6 +329,27 @@ describe("normalizeAssistantReplayContent", () => {
     },
   );
 
+  it.each([
+    { type: "openai-responses-retained-compaction", stopReason: "stop", retained: true },
+    { type: "openai-responses-retained-compaction", stopReason: "error", retained: false },
+    { type: "openai-responses-compaction-suppression", stopReason: "stop", retained: false },
+    { type: "unrelated-provider-replay", stopReason: "stop", retained: false },
+  ] as const)("keeps only successful empty compaction carriers: $type/$stopReason", (testCase) => {
+    const message = bedrockAssistant([], testCase.stopReason);
+    if (message.role !== "assistant") {
+      throw new Error("Expected an assistant fixture");
+    }
+    message.providerReplay = {
+      type: testCase.type,
+      v: 1,
+      data: "opaque-checkpoint",
+      provider: message.provider,
+      api: message.api,
+      model: message.model,
+    };
+    expect(normalizeAssistantReplayContent([message])).toEqual(testCase.retained ? [message] : []);
+  });
+
   it("preserves empty content with non-error stopReasons (toolUse, length) untouched", () => {
     // Boundary lock: only `stopReason:"error"` should trip the sentinel
     // substitution. `toolUse` and `length` are reachable in practice when a
@@ -628,6 +649,20 @@ describe("normalizeAssistantReplayContent", () => {
       expect.objectContaining({ role: "user" }),
       realReply,
     ]);
+  });
+
+  it("preserves an identical canonical automation result after an assistant reply", () => {
+    const content = [{ type: "text", text: "Report ready" }];
+    const reply = bedrockAssistant(content, "stop", { output: 1, totalTokens: 1 });
+    const result = {
+      ...bedrockAssistant(content, "stop"),
+      api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
+      provider: "openclaw",
+      model: "automation-result",
+    };
+    const messages = [userMessage("report"), reply, result, userMessage("explain")];
+
+    expect(normalizeAssistantReplayContent(messages)).toEqual(messages);
   });
 
   it("preserves adjacent identical assistant turns with nonzero usage", () => {
