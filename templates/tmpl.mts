@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
-const src = fs.readFileSync("src/agents/workspace.ts", "utf8");
+const src = fs.readFileSync("src/agents/workspace-retired-templates.ts", "utf8");
 const retired = [...src.matchAll(/"([a-f0-9]{64})"/g)].map((m) => m[1]);
 const strip = (s: string) => { const m = s.match(/^---\n[\s\S]*?\n---\n/); return m ? s.slice(m[0].length).replace(/^\s+/, "") : s; };
 const h = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
