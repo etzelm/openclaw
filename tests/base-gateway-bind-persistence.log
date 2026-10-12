@@ -1,0 +1,157 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 <repo>
+
+ ✓  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > preserves authored plugin scope during include config repair 2453ms
+ ✓  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > preserves authored plugin scope during invalid config repair 235ms
+stderr | src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > preserves authored plugin scope during doctor config repair
+Config warnings: <tmp>/openclaw-config-iKzUuo/.openclaw/openclaw.json: Config unavailable; using environment and default agent directory settings.
+
+│
+◇  Legacy config keys detected ────────────────────────────────────────────╮
+│                                                                          │
+│  - diagnostics.otel.protocol: diagnostics.otel.protocol = "grpc" is no   │
+│    longer accepted because gRPC export is not implemented. Run           │
+│    "openclaw doctor --fix", then configure an OTLP/HTTP collector        │
+│    before re-enabling telemetry.                                         │
+│  - agents.defaults.models: Legacy agents.defaults.models restricts       │
+│    model overrides; run "openclaw doctor --fix" to migrate valid refs    │
+│    to agents.defaults.modelPolicy.allow.                                 │
+│  - agents.defaults.models: Legacy model restriction retained: some keys  │
+│    need explicit provider/model refs. Set                                │
+│    agents.defaults.modelPolicy.allow to the intended restriction; until  │
+│    then, editing agents.defaults.models still changes the restriction.   │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes ─────────────────────────────╮
+│                                              │
+│  Prepared the agent roster for persistence.  │
+│                                              │
+├──────────────────────────────────────────────╯
+│
+◇  Doctor changes ───────────────────────────────────────────────────────╮
+│                                                                        │
+│  Removed unsupported diagnostics.otel.protocol "grpc"; use             │
+│  "http/protobuf" with an OTLP/HTTP collector.                          │
+│  Disabled diagnostics.otel.enabled because legacy grpc configs with    │
+│  OTLP signals cannot export telemetry; re-enable it after choosing an  │
+│  OTLP/HTTP collector.                                                  │
+│                                                                        │
+├────────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes ────────────────────────────────────────────────╮
+│                                                                 │
+│  Recorded webhook listener decisions; removed pins will not be  │
+│  recreated.                                                     │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────╯
+stderr | unknown test
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/commands/doctor-config-flow.gateway-bind-persistence.test.ts: retiring openclaw.devicePairingPublications
+
+ ✓  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > preserves authored plugin scope during doctor config repair 13391ms
+ ×  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: unchanged 9ms
+   → Legacy config plan is missing include write identities.
+ ×  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: root edit 12ms
+   → expected [Function] to throw error matching /changed since last load/ but got 'Legacy config plan is missing include…'
+ ×  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: include edit 7ms
+   → expected [Function] to throw error matching /changed since last load/ but got 'Legacy config plan is missing include…'
+ ×  commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: different profile 7ms
+   → expected [Function] to throw error matching /config path changed/ but got 'Legacy config plan is missing include…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: unchanged
+Error: Legacy config plan is missing include write identities.
+ ❯ repairLegacyConfigForUpdateChannel src/commands/doctor/legacy-config-repair.ts:102:13
+    100|       )
+    101|     ) {
+    102|       throw new Error("Legacy config plan is missing include write ide…
+       |             ^
+    103|     }
+    104|   }
+ ❯ persist src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:123:13
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:128:34
+ ❯ withEnvAsync src/test-utils/env.ts:147:12
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:109:9
+ ❯ withTempHomeCore src/plugin-sdk/test-helpers/temp-home.ts:74:12
+ ❯ withTempHome src/config/test-helpers.ts:18:12
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:108:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL   commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: root edit
+ FAIL   commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: include edit
+AssertionError: expected [Function] to throw error matching /changed since last load/ but got 'Legacy config plan is missing include…'
+
+- Expected:
+/changed since last load/
+
++ Received:
+"Legacy config plan is missing include write identities."
+
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:145:36
+    143|             const editedPath = scenario === "root edit" ? configPath :…
+    144|             await fs.appendFile(editedPath, "\n");
+    145|             await expect(persist()).rejects.toThrow(/changed since las…
+       |                                    ^
+    146|             expect(await fs.readFile(editedPath, "utf8")).toBe(
+    147|               (scenario === "root edit" ? original : originalInclude) …
+ ❯ withEnvAsync src/test-utils/env.ts:147:12
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:109:9
+ ❯ withTempHomeCore src/plugin-sdk/test-helpers/temp-home.ts:74:12
+ ❯ withTempHome src/config/test-helpers.ts:18:12
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:108:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL   commands  src/commands/doctor-config-flow.gateway-bind-persistence.test.ts > Doctor gateway bind persistence > persists a prepared legacy plan only for its original source: different profile
+AssertionError: expected [Function] to throw error matching /config path changed/ but got 'Legacy config plan is missing include…'
+
+- Expected:
+/config path changed/
+
++ Received:
+"Legacy config plan is missing include write identities."
+
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:137:38
+    135|             await fs.writeFile(otherPath, original);
+    136|             await withEnvAsync({ OPENCLAW_CONFIG_PATH: otherPath }, as…
+    137|               await expect(persist()).rejects.toThrow(/config path cha…
+       |                                      ^
+    138|             });
+    139|             expect(await fs.readFile(otherPath, "utf8")).toBe(original…
+ ❯ withEnvAsync src/test-utils/env.ts:147:18
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:136:19
+ ❯ withEnvAsync src/test-utils/env.ts:147:12
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:109:9
+ ❯ withTempHomeCore src/plugin-sdk/test-helpers/temp-home.ts:74:12
+ ❯ withTempHome src/config/test-helpers.ts:18:12
+ ❯ src/commands/doctor-config-flow.gateway-bind-persistence.test.ts:108:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  21:43:23
+   Duration  19.75s (tests 83%, transform 10%, import 5%, worker 1%, setup 1%)
+

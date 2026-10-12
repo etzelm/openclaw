@@ -1,0 +1,1072 @@
+== oxfmt
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 385ms on 8 files using 32 threads.
+rc=0
+== oxlint
+Found 0 warnings and 0 errors.
+Finished in 2.1s on 6 files with 258 rules using 32 threads.
+rc=0
+== tsgo
+$ pnpm tsgo:core
+$ node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/core.tsbuildinfo
+[dist artifacts] waiting for checkout ownership: <repo>/.artifacts/dist-artifacts.lock
+rc=0
+== diffcheck
+rc=0
+== check-changed
+[check:changed] lanes=all
+[check:changed] extension-impacting surface; extension typecheck included
+[check:changed] .openclaw-lifecycle-pending: unknown surface; fail-safe all lanes
+[check:changed] src/agents/workspace-retired-templates.ts: core production
+[check:changed] src/agents/workspace.ts: core production
+[check:changed] src/commands/doctor-config-flow.ts: core production
+[check:changed] src/commands/doctor-config-flow.workspace-persistence.test.ts: core test
+[check:changed] src/commands/doctor/shared/system-agent-workspace-repair.test.ts: core test
+[check:changed] src/commands/doctor/shared/system-agent-workspace-repair.ts: core production
+
+[check:changed] mobile protocol event coverage
+Protocol event coverage OK: 66 gateway events; ios handles 28, allowlists 38; android handles 26, allowlists 40.
+
+[check:changed] conflict markers
+$ node scripts/check-no-conflict-markers.mjs
+
+[check:changed] line-cap growth ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-line-cap-ratchet.mts --base upstream/main
+Line-cap ratchet OK: 6 changed source files; no new violations or over-cap growth.
+
+[check:changed] max-lines suppression ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base upstream/main
+max-lines ratchet OK: 552 grandfathered suppressions.
+OPENCLAW_* count 456/456
+
+[check:changed] assertion SAFETY comment ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base upstream/main
+assertion SAFETY ratchet OK: 2776 files, 6515 grandfathered assertions.
+
+[check:changed] SQLite worker ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base upstream/main
+SQLite T1 raw calls: 607 -> 607; forwarding-normalized comparison: 605 -> 605.
+SQLite worker ratchet OK: no T1 call-count growth against 16d913005f9751d0d13cf267a10b63bc27c25fba.
+
+[check:changed] SQLite dialect ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-database-dialect-ratchet.mts --base upstream/main
+SQLite dialect scope: 4 differing production files; use --full-tree for totals.
+SQLite dialect mechanical (changed files): 0 -> 0.
+SQLite dialect design (changed files): 0 -> 0.
+SQLite dialect engine-maintenance (changed files): 0 -> 0.
+SQLite string-set owner: 0 mechanical occurrences in changed files (included above).
+SQLite dialect ratchet OK: no construct-group growth against 16d913005f9751d0d13cf267a10b63bc27c25fba.
+
+[check:changed] test timeout race ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base upstream/main
+test timeout race ratchet OK: 127 files, 309 grandfathered sites.
+
+[check:changed] first-party mock export ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base upstream/main
+Mock factory ratchet OK: 9951 grandfathered factories.
+
+[check:changed] changelog attributions
+$ node --import ./scripts/tsx.mjs scripts/check-changelog-attributions.mts
+
+[check:changed] doctor deprecation registry
+$ node --import ./scripts/tsx.mjs scripts/check-doctor-deprecation-registry.ts
+[doctor-deprecation-registry] OK as of 2026-10-12
+
+[check:changed] guarded extension wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-extension-wildcard-reexports.mts
+No guarded extension wildcard re-exports found.
+
+[check:changed] plugin-sdk wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-plugin-sdk-wildcard-reexports.mts
+No plugin-sdk wildcard re-exports found in extension API barrels.
+
+[check:changed] extension test core imports
+$ node --import ./scripts/tsx.mjs scripts/check-no-extension-test-core-imports.ts
+OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4526 extension files, 0 plugin helpers checked).
+
+[check:changed] duplicate scan target coverage
+$ node scripts/check-duplicates.mjs --coverage
+[dup:check] target coverage ok
+
+[check:changed] dependency pin guard
+$ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
+PASS direct dependency pin guard: checked 732 directly declared dependency specs across 199 tracked package manifests; 0 violations.
+
+[check:changed] format changed files
+$ oxfmt --check --no-error-on-unmatched-pattern -- .openclaw-lifecycle-pending docs/concepts/agent-workspace.md docs/docs_map.md docs/gateway/doctor/config-migrations.md src/agents/workspace-retired-templates.ts src/agents/workspace.ts src/commands/doctor-config-flow.ts src/commands/doctor-config-flow.workspace-persistence.test.ts src/commands/doctor/shared/system-agent-workspace-repair.test.ts src/commands/doctor/shared/system-agent-workspace-repair.ts
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 328ms on 9 files using 32 threads.
+
+[check:changed] bundled channel config metadata
+$ node --import ./scripts/tsx.mjs scripts/generate-bundled-channel-config-metadata.ts --check
+
+[check:changed] config docs baseline
+$ node --import ./scripts/tsx.mjs scripts/generate-config-doc-baseline.ts --check
+OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+
+[check:changed] plugin boundaries
+$ node --import ./scripts/tsx.mjs scripts/plugin-boundary-report.ts --summary --fail-on-eligible-compat
+Plugin Boundary Report
+
+compat deprecated=48 eligibleForRemoval=0 removalPending=15 removalPendingDue=14
+  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8305 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
+  removal-pending 2026-09-30 plugin-sdk-media-understanding-public-demotion due=true blocker=`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate readerRefs=54 readers=extensions/anthropic/media-understanding-provider.ts,extensions/browser/src/browser-tool.test-support.ts,extensions/browser/src/browser/vision.test.ts,extensions/browser/src/browser/vision.ts,extensions/browser/src/cli/browser-cli-extension.test.ts
+  removal-pending 2026-09-30 plugin-sdk-memory-host-core-public-demotion due=true blocker=host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists readerRefs=27 readers=extensions/active-memory/index.test.ts,extensions/active-memory/index.ts,extensions/codex/src/app-server/attempt-context.test.ts,extensions/codex/src/app-server/run-attempt-memory.test-support.ts,extensions/memory-core/index.ts
+  removal-pending 2026-10-01 agent-harness-terminal-result-aliases due=true blocker=AgentHarnessAttemptResult.terminal and AgentHarnessDeliveryDefaults.visibleReplies; retain until harness migration verifies that legacy terminal fields and sourceVisibleReplies are unread readerRefs=0 readers=none
+  removal-pending 2026-10-01 message-presentation-legacy-bridges due=true blocker=MessagePresentation values and channel presentation renderers; retain until reply producers and official channel packages no longer emit or read legacy interactive replies readerRefs=161 readers=extensions/a2a/src/inbound.ts,extensions/codex/src/app-server/run-attempt-active-turn.ts,extensions/codex/src/app-server/run-attempt.final-media.test.ts,extensions/codex/src/conversation-binding-hooks.ts,extensions/codex/src/conversation-binding.ts
+  removal-pending 2026-10-01 official-plugin-export-aliases due=true blocker=MessagePresentation renderers and host-owned timeout/runtime behavior; retain until minimum supported official plugin packages no longer import these aliases readerRefs=21 readers=extensions/discord/api.ts,extensions/discord/src/voice/audio-worker-thread.ts,extensions/qa-lab/src/crabline-discord-thread-delivery.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.ts,extensions/qa-lab/src/live-transports/discord/discord-transcripts-authorization.runtime.test.ts
+  removal-pending 2026-10-01 plugin-sdk-channel-setup-input-fields due=true blocker=plugin-local setup input intersections that declare each owning channel field; retain each field until a new published-plugin artifact sweep finds no reader readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-runtime-api-compat-aliases due=true blocker=the namespaced plugin API and focused runtime methods named per surface; retain until all enumerated flat API and runtime aliases have no readers readerRefs=8 readers=extensions/buzz/src/inbound.test.ts,extensions/feishu/src/bot.broadcast.routing.test.ts,extensions/feishu/src/bot.test.ts,extensions/feishu/src/comment-handler.test.ts,extensions/mattermost/src/mattermost/monitor.inbound-system-event.test.ts
+  removal-pending 2026-10-01 plugin-provider-manifest-compat-aliases due=true blocker=manifest-owned plugin kind/setup metadata and model catalog registration; retain until providers no longer publish runtime kind or legacy catalog hooks readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-sdk-provider-owned-helper-shims due=true blocker=provider-local auth, model, replay, OAuth, and stream helper APIs; retain until every helper is migrated in official providers and absent from published plugins readerRefs=476 readers=extensions/agentsapi/agentsapi-harness.lifecycle.test-helpers.ts,extensions/agentsapi/agentsapi-harness.persistence.test.ts,extensions/agentsapi/agentsapi-harness.ts,extensions/agentsapi/native-session-binding.test-api.ts,extensions/amazon-bedrock-mantle/discovery.ts
+  removal-pending 2026-10-01 media-legacy-projection due=true blocker=ordered `MsgContext.media` / `InboundMediaFacts[]`; typed hook `media` and `originalMedia`; `Attachment*` template variables; and `openclaw/plugin-sdk/media-local-roots`; retain until a clean published-plugin artifact sweep verifies that the legacy media surfaces have no readers readerRefs=2 readers=src/plugins/compat/media-legacy-projection.ts,test/scripts/check-deprecated-api-usage.test.ts
+  removal-pending 2026-10-01 memory-host-compatibility-aliases due=true blocker=canonical memory cache/FTS tables; retain until supported memory integrations are verified to use canonical tables without overrides and legacy table data remains preserved readerRefs=2 readers=src/plugins/compat/deprecation-marking.ts,src/plugins/contracts/extension-package-project-boundaries.test.ts
+  removal-pending 2026-10-01 plugin-sdk-broad-runtime-barrels due=true blocker=focused plugin SDK subpaths for each runtime capability; retain until bundled and published plugins no longer import any of the seven broad barrels readerRefs=847 readers=extensions/a2a/src/http.test.ts,extensions/acpx/src/runtime.ts,extensions/acpx/src/session-owner-migration.ts,extensions/active-memory/index.ts,extensions/active-memory/query.ts
+  removal-pending 2026-10-01 plugin-sdk-focused-compat-aliases due=true blocker=the focused replacement named by each TypeScript @deprecated annotation; retain until every enumerated alias has zero bundled and published readers readerRefs=464 readers=extensions/a2a/src/inbound.ts,extensions/acpx/index.test.ts,extensions/acpx/index.ts,extensions/acpx/register.runtime.test.ts,extensions/acpx/register.runtime.ts
+  removal-pending 2026-12-01 plugin-sdk-plugin-config-runtime-public-demotion due=false blocker=`api.pluginConfig`, runtime tool context config, and focused `config-contracts`, `runtime-config-snapshot`, or `config-mutation` subpaths; retain the public subpath through the 2026-12-01 window while official plugin consumers migrate readerRefs=56 readers=extensions/active-memory/index.ts,extensions/active-memory/session-policy.ts,extensions/active-memory/trigger-recall.ts,extensions/amazon-bedrock-mantle/register.sync.runtime.ts,extensions/amazon-bedrock/register.sync.runtime.ts
+plugin-sdk entrypoints=368 supportedBundledFacade=0 publicPluginOwned=1
+memory-host-sdk implementation=private-package-core-integrated private=true exports=10 sourceBridgeFiles=0 coreReferenceFiles=26
+
+[check:changed] wrapper shadowing
+$ node --import ./scripts/tsx.mjs scripts/check-wrapper-shadowing.mts
+wrapper shadowing guard passed.
+
+[check:changed] package patch guard
+$ node --import ./scripts/tsx.mjs scripts/check-package-patches.mts
+PASS package patch guard: no new pnpm patches; 9 approved patches allowlisted.
+
+[check:changed] test temp creation report (warning-only)
+No new test temp-directory migration warnings found.
+
+[check:changed] core tsgo graph boundary
+$ node --import ./scripts/tsx.mjs scripts/check-tsgo-core-boundary.mts
+
+[check:changed] script TypeScript erasability
+$ node --disable-warning=ExperimentalWarning scripts/check-script-erasability.mjs
+[script-erasability] checked 850 TypeScript implementation files
+
+[check:changed] database-first legacy-store guard
+$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
+Database-first legacy-store guard passed.
+
+[check:changed] media download helper guard
+$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+
+[check:changed] runtime sidecar loader guard
+$ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
+runtime-sidecar-loaders: local runtime sidecar loaders look OK.
+
+[check:changed] typecheck all
+$ pnpm tsgo:core:all && pnpm tsgo:extensions:all && pnpm tsgo:scripts && pnpm tsgo:test:root
+$ pnpm tsgo:core && pnpm tsgo:ui && pnpm tsgo:core:test
+$ node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/core.tsbuildinfo
+$ node scripts/run-tsgo.mjs -p tsconfig.ui.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/ui.tsbuildinfo
+$ node scripts/run-tsgo-core-test-shards.mjs
+[tsgo:agents-root] passed in 8.5s
+[tsgo:agents-other] passed in 9.3s
+[tsgo:agents-tools] passed in 9.8s
+[tsgo:gateway-root] passed in 13.4s
+[tsgo:gateway-server] passed in 12.7s
+[tsgo:gateway-other] passed in 10.6s
+[tsgo:infra] passed in 11.1s
+[tsgo:state-logging] passed in 11.1s
+[tsgo:commands] passed in 10.2s
+[tsgo:plugins-platform] passed in 9.7s
+[tsgo:config-cli] passed in 11.0s
+[tsgo:messaging] passed in 12.3s
+[tsgo:services] passed in 12.8s
+[tsgo:other] passed in 12.3s
+[tsgo:ui-pages] passed in 15.0s
+[tsgo:ui-e2e] passed in 17.3s
+[tsgo:ui-other] passed in 13.9s
+[tsgo:packages] passed in 11.0s
+[tsgo:plugin-sdk] passed in 11.5s
+[tsgo:commands-doctor] passed in 10.6s
+[tsgo:cli-update] passed in 11.3s
+[tsgo:gateway-methods] passed in 14.8s
+[tsgo:ui-chat] passed in 14.4s
+[tsgo:agents-sessions] passed in 13.3s
+[tsgo:services-cron] passed in 12.0s
+[tsgo:ui-app] passed in 13.4s
+[tsgo:ui-components] passed in 14.1s
+[tsgo:ui-e2e-chat] passed in 14.2s
+$ node scripts/run-tsgo.mjs -b tsconfig.extensions.projects.json
+$ node scripts/run-tsgo.mjs -p tsconfig.scripts.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/scripts.tsbuildinfo
+$ node scripts/run-tsgo-core-test-shards.mjs root
+[tsgo:test-root-tooling] passed in 13.3s
+[tsgo:test-root-scripts] passed in 14.2s
+[tsgo:test-root-e2e] passed in 12.1s
+[tsgo:test-root-other] passed in 13.5s
+
+[check:changed] coercion helper declaration guard
+$ node --import ./scripts/tsx.mjs scripts/check-coercion-helper-declarations.mts
+Coercion helper declaration guard passed (112 allowlisted declarations).
+
+[check:changed] deprecated API usage
+$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
+deprecated API usage guard passed
+
+[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan passed with 0 entries.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan passed with 0 entries.
+
+[check:changed] lint
+$ node --import ./scripts/tsx.mjs scripts/run-lint.mts --base upstream/main
+Control UI Lit ratchet OK (0 changed files, base 16d913005f9751d0d13cf267a10b63bc27c25fba).
+control-ui-i18n: raw-copy: baseline entries=93
+control-ui-i18n: source: keys=10510 literal_references=8535 template_prefix_references=315
+control-ui-i18n: plugin=workboard keys=372 locales=20 unused_translations=1180
+[plugin-sdk boundary dts] emitted 12748 files
+[oxlint] shard concurrency 3 (cpus=32, memGB=512)
+[oxlint:core] starting
+[oxlint:extensions] starting
+[oxlint:scripts] starting
+[oxlint:core] still running after 30s
+[oxlint:extensions] still running after 30s
+[oxlint:scripts] still running after 30s
+Found 0 warnings and 0 errors.
+Finished in 38.4s on 1363 files with 291 rules using 1 threads.
+[oxlint:scripts] passed
+[oxlint:core] still running after 60s
+[oxlint:extensions] still running after 60s
+[oxlint:core] still running after 90s
+[oxlint:extensions] still running after 90s
+[oxlint:core] still running after 120s
+[oxlint:extensions] still running after 120s
+[oxlint:core] still running after 150s
+[oxlint:extensions] still running after 150s
+
+  ! eslint(max-lines): File has too many lines (1002).
+      ,-[extensions/openai/image-generation-provider.test.ts:1078:4]
+ 1077 |   });
+ 1078 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  ! eslint(max-lines): File has too many lines (717).
+     ,-[extensions/crabbox/src/crabbox-worker-provider.ts:756:2]
+ 755 |   };
+ 756 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+Found 2 warnings and 0 errors.
+Finished in 159.1s on 10668 files with 291 rules using 1 threads.
+[oxlint:extensions] passed
+[oxlint:core] still running after 180s
+[oxlint:core] still running after 210s
+[oxlint:core] still running after 240s
+[oxlint:core] still running after 270s
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/components/lobster-pet-dismiss-menu.tsx:41:20]
+ 40 |             aria-label={t("quickSettings.appearance.lobsterVisits")}
+ 41 |             style={`position: fixed; left: ${position().x}px; top: ${position().y}px; width: 1px; height: 1px; opacity: 0; pointer-events: none;`}
+    :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 42 |           />
+    `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/components/sparkline-tile.tsx:163:20]
+ 162 |           <div
+ 163 |             class={`sparkline-tile__dot sparkline-tile__dot--${hover() ? "hover" : "now"}`}
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 164 |             style={{
+     `----
+
+  ! eslint(max-lines): File has too many lines (755).
+     ,-[src/plugins/registry-runtime-session-ownership.ts:773:2]
+ 772 |   };
+ 773 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:190:14]
+ 189 |     <div
+ 190 |       class={`lobster-pet__motion ${visual().travel ? (visual().travel?.hop ? "lobster-pet__motion--hop" : "lobster-pet__motion--walk") : ""}`}
+     :              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 191 |       style={visual().travelStyle}
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:218:54]
+ 217 |           <Show when={props.look.shiny}>
+ 218 |             <span class="lobster-pet__sparkle" style="--i:0;left:12%;bottom:64%">
+     :                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 219 |               ✦
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:221:54]
+ 220 |             </span>
+ 221 |             <span class="lobster-pet__sparkle" style="--i:1;left:76%;bottom:82%">
+     :                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 222 |               ✦
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:225:46]
+ 224 |           </Show>
+ 225 |           <span class="lobster-pet__z" style="--i:0">
+     :                                              ^^^^^^^
+ 226 |             z
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:228:46]
+ 227 |           </span>
+ 228 |           <span class="lobster-pet__z" style="--i:1">
+     :                                              ^^^^^^^
+ 229 |             z
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:231:46]
+ 230 |           </span>
+ 231 |           <span class="lobster-pet__z" style="--i:2">
+     :                                              ^^^^^^^
+ 232 |             Z
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:234:51]
+ 233 |           </span>
+ 234 |           <span class="lobster-pet__bubble" style="--i:0" />
+     :                                                   ^^^^^^^
+ 235 |           <span class="lobster-pet__bubble" style="--i:1" />
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:235:51]
+ 234 |           <span class="lobster-pet__bubble" style="--i:0" />
+ 235 |           <span class="lobster-pet__bubble" style="--i:1" />
+     :                                                   ^^^^^^^
+ 236 |           <span class="lobster-pet__bubble" style="--i:2" />
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:236:51]
+ 235 |           <span class="lobster-pet__bubble" style="--i:1" />
+ 236 |           <span class="lobster-pet__bubble" style="--i:2" />
+     :                                                   ^^^^^^^
+ 237 |           <span class="lobster-pet__heart">♥</span>
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:350:18]
+ 349 |           class="lobster-pet lobster-pet--shell"
+ 350 |           style={`${view().shellStyle};--lob-x:${view().shellPoint.x}px;--lob-y:${view().shellPoint.y}px`}
+     :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 351 |           aria-hidden="true"
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:361:20]
+ 360 |           <div
+ 361 |             class={`lobster-bottle ${bottle().opened ? "lobster-bottle--open" : ""}`}
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 362 |             style={`--lob-x:${view().bottlePoint.x}px`}
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:362:20]
+ 361 |             class={`lobster-bottle ${bottle().opened ? "lobster-bottle--open" : ""}`}
+ 362 |             style={`--lob-x:${view().bottlePoint.x}px`}
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 363 |             title={bottle().opened ? bottle().fortune : "a message in a bottle"}
+     `----
+
+  ! eslint(max-lines): File has too many lines (701).
+     ,-[ui/src/components/board/board-widget-cell.solid.tsx:710:3]
+ 709 |   },
+ 710 | );
+     :   ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:36:21]
+ 35 |   return (
+ 36 |     <section class={`dreams ${!props.active ? "dreams--idle" : ""}`}>
+    :                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 37 |       <For each={STARS}>
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:41:20]
+ 40 |                 class="dreams__star"
+ 41 | ,->             style={`
+ 42 | |                 top: ${s.top}%;
+ 43 | |                 left: ${s.left}%;
+ 44 | |                 width: ${s.size}px;
+ 45 | |                 height: ${s.size}px;
+ 46 | |                 background: ${s.hue === "accent" ? "var(--accent-muted)" : "var(--text)"};
+ 47 | |                 animation-delay: ${s.delay}s;
+ 48 | `->             `}
+ 49 |               />
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:62:19]
+ 61 |             class="dreams__bubble-dot"
+ 62 |             style="top: calc(50% - 160px); left: calc(50% - 120px); width: 12px; height: 12px; animation-delay: 0.2s;"
+    :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 63 |           />
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:66:19]
+ 65 |             class="dreams__bubble-dot"
+ 66 |             style="top: calc(50% - 120px); left: calc(50% - 90px); width: 8px; height: 8px; animation-delay: 0.4s;"
+    :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 67 |           />
+    `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/agents/memory/view-advanced.tsx:151:18]
+ 150 |         <div
+ 151 |           class={`callout ${props.dreamDiaryActionMessage.kind === "success" ? "success" : "danger"}`}
+     :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 152 |           role="status"
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/agents/memory/view-advanced.tsx:212:30]
+ 211 |                     <button
+ 212 |                       class={`dreams-advanced__sort-btn ${state.advancedWaitingSort === sort ? "dreams-advanced__sort-btn--active" : ""}`}
+     :                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 213 |                       onClick={() => {
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.viewState.wikiPreview' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/agents/memory/view-wiki.tsx:109:3]
+ 108 | function closeWikiPreview(props: DreamingProps): void {
+ 109 |   props.viewState.wikiPreview = null;
+     :   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 110 |   props.onViewStateChange();
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onViewStateChange' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/agents/memory/view-wiki.tsx:110:3]
+ 109 |   props.viewState.wikiPreview = null;
+ 110 |   props.onViewStateChange();
+     :   ^^^^^^^^^^^^^^^^^^^^^^^
+ 111 | }
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/pages/agents/memory/view-wiki.tsx:126:19]
+ 125 |             label={current().page.title || t("dreaming.wiki.previewFallbackTitle")}
+ 126 |             style="--openclaw-modal-width: 1120px"
+     :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 127 |             onModal-cancel={() => closeWikiPreview(props)}
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/agents/memory/view-wiki.tsx:305:22]
+ 304 |         <div class="dreams-diary__insight-title">{item().title}</div>
+ 305 |         <span class={`dreams-diary__insight-badge dreams-diary__insight-badge--${badgeClass()}`}>
+     :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 306 |           {badgeLabel()}
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+    ,-[ui/src/pages/agents/memory/memory-panel-view.tsx:50:22]
+ 49 |             <button
+ 50 |               class={`dreams__phase-toggle ${model().header.dreamingOn ? "dreams__phase-toggle--on" : ""}`}
+    :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 51 |               disabled={
+    `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+    ,-[ui/src/pages/agents/memory/memory-panel-view.tsx:58:15]
+ 57 |             >
+ 58 |               <span class="dreams__phase-toggle-dot"></span>
+    :               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 59 |               <span class="dreams__phase-toggle-label">
+    `----
+
+  ! solid(reactivity): The reactive variable 'environment' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-snapshot-rows.tsx:444:37]
+ 443 |                 <For each={group().builds} keyed={(environment) => environment.id}>
+ 444 |                   {(environment) => props.buildRow(environment)}
+     :                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 445 |                 </For>
+     `----
+
+  ! solid(reactivity): The reactive variable 'image' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-snapshot-rows.tsx:450:31]
+ 449 |                 >
+ 450 |                   {(image) => props.imageRow(image, mixedMetadata)}
+     :                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 451 |                 </For>
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-snapshots.tsx:198:29]
+ 197 |           stopPolling();
+ 198 |           queueMicrotask(() => {
+     :                             ^^
+ 199 |             if (!gateway.isCurrent(scope)) {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-snapshots.tsx:372:63]
+ 371 |       });
+ 372 |       await runSnapshotMutation(scope, "destroying", async () => {
+     :                                                               ^^
+ 373 |         await scope.client.request("environments.destroy", { environmentId: environment.id });
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-snapshots.tsx:428:63]
+ 427 |       });
+ 428 |       await runSnapshotMutation(scope, "recovering", async () => {
+     :                                                               ^^
+ 429 |         await scope.client.request("crabbox.images.recover", {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-snapshots.tsx:481:61]
+ 480 |       });
+ 481 |       await runSnapshotMutation(scope, "mutating", async () => {
+     :                                                             ^^
+ 482 |         if (action !== "pin") {
+     `----
+
+  ! eslint(max-lines): File has too many lines (706).
+     ,-[ui/src/pages/chat/components/chat-detail-panel.tsx:761:2]
+ 760 |   }
+ 761 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/workspace-icon.tsx:26:41]
+ 25 |       revision();
+ 26 |       return loader.withActiveRoutes(() =>
+    :                                         ^^
+ 27 |         props.routeUrl && props.authReady && undecodableRouteUrl() !== props.routeUrl
+    `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-pasted-text.tsx:124:5]
+ 123 |       return (
+ 124 | ,->     <openclaw-chat-pasted-text
+ 125 | |         prop:src={getChatAttachmentDataUrl(att) ?? undefined}
+ 126 | |         prop:sizeBytes={att.sizeBytes}
+ 127 | |         prop:scope={att.id}
+ 128 | |         prop:onOpen={open}
+ 129 | |         prop:composerAction={renderRestoreAction()}
+ 130 | |         prop:composerRemoveAction={renderAttachmentRemove(removeLabel, props.disabled, remove)}
+ 131 | `->     ></openclaw-chat-pasted-text>
+ 132 |       );
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+   ,-[ui/src/pages/chat/components/chat-composer-menu-rows.tsx:7:10]
+ 6 | export function menuDivider(): JSX.Element {
+ 7 |   return <div class="agent-chat__capability-menu-divider" role="separator"></div>;
+   :          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 8 | }
+   `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+    ,-[ui/src/pages/chat/components/chat-composer-menu-rows.tsx:61:9]
+ 60 |           {options.checkbox ? null : (
+ 61 | ,->         <wa-switch
+ 62 | |             slot="details"
+ 63 | |             class="agent-chat__capability-menu-switch"
+ 64 | |             size="s"
+ 65 | |             tabindex="-1"
+ 66 | |             inert
+ 67 | |             aria-hidden="true"
+ 68 | |             prop:checked={options.checked}
+ 69 | |             disabled={options.disabled}
+ 70 | `->         ></wa-switch>
+ 71 |           )}
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.capabilityMenu' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-plus-menu.tsx:684:26]
+ 683 | function resolvePlusMenuProps(props: ChatComposerPlusMenuProps) {
+ 684 |   const capabilityMenu = props.capabilityMenu;
+     :                          ^^^^^^^^^^^^^^^^^^^^
+ 685 |   if (
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.rootToggles?.length' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-plus-menu.tsx:687:6]
+ 686 |     !capabilityMenu &&
+ 687 |     !props.rootToggles?.length &&
+     :      ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 688 |     !uploadsEnabled(props.attachments.uploadConfig)
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.attachments.uploadConfig' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-plus-menu.tsx:688:21]
+ 687 |     !props.rootToggles?.length &&
+ 688 |     !uploadsEnabled(props.attachments.uploadConfig)
+     :                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 689 |   ) {
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-selected-mentions.tsx:147:11]
+ 146 |           </For>
+ 147 |           <span class="composer-context-strip__more" dir="ltr" hidden></span>
+     :           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 148 |         </span>
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:139:18]
+ 138 |             <div
+ 139 | ,->           class={`agent-chat__disabled-banner ${
+ 140 | |               props.disabledBanner.kind === "composer-replacement"
+ 141 | |                 ? "agent-chat__disabled-banner--replacement"
+ 142 | |                 : ""
+ 143 | |             } ${props.disabledBanner.presentation === "compact" ? "agent-chat__disabled-banner--compact" : ""} callout ${
+ 144 | |               props.disabledBanner.tone === "neutral"
+ 145 | |                 ? "agent-chat__disabled-banner--neutral"
+ 146 | |                 : "info"
+ 147 | `->           } callout--action`}
+ 148 |               role="status"
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:178:24]
+ 177 |                 type="button"
+ 178 |                 class={`btn btn--sm ${props.disabledBanner.actionStyle ?? ""}`}
+     :                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 179 |                 disabled={Boolean(props.disabledBanner.disabledReason) || props.disabledBanner.busy}
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:186:21]
+ 185 |                   <>
+ 186 |                     <span class="btn__spinner" aria-hidden="true"></span>
+     :                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 187 |                     {props.disabledBanner.busyLabel ?? props.disabledBanner.actionLabel}
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:246:15]
+ 245 |             <>
+ 246 |               <span class="btn__spinner" aria-hidden="true"></span>
+     :               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 247 |             </>
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:310:22]
+ 309 |             <div
+ 310 |               class={`agent-chat__input agent-chat__input--chat agent-chat__input--mobile-toolbar ${props.offline ? "agent-chat__input--offline" : ""}${context.dictation?.active ? " agent-chat__input--dictating" : ""}${!context.canCompose ? " agent-chat__input--disabled" : ""}`}
+     :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 311 |               aria-busy={props.disabledReasonBusy ? "true" : "false"}
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:357:21]
+ 356 |                       <>
+ 357 | ,->                     <openclaw-mcp-app-catalog
+ 358 | |                         surface="thread"
+ 359 | |                         prop:sessionKey={props.sessionKey}
+ 360 | |                         prop:agentId={props.currentAgentId}
+ 361 | `->                     ></openclaw-mcp-app-catalog>
+ 362 |                         <openclaw-mcp-app-resources
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:362:21]
+ 361 |                         ></openclaw-mcp-app-catalog>
+ 362 | ,->                     <openclaw-mcp-app-resources
+ 363 | |                         prop:sessionKey={props.sessionKey}
+ 364 | |                         prop:agentId={props.currentAgentId}
+ 365 | `->                     ></openclaw-mcp-app-resources>
+ 366 |                       </>
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:409:21]
+ 408 |                       <>
+ 409 | ,->                     <openclaw-mcp-app-context-strip
+ 410 | |                         prop:sessionKey={props.sessionKey}
+ 411 | |                         prop:agentId={props.currentAgentId}
+ 412 | `->                     ></openclaw-mcp-app-context-strip>
+ 413 |                       </>
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:432:23]
+ 431 |                         <div class="agent-chat__video-preview">
+ 432 | ,->                       <video
+ 433 | |                           class={
+ 434 | |                             mirrorCameraPreview() ? "agent-chat__video-preview-mirrored" : undefined
+ 435 | |                           }
+ 436 | |                           autoplay
+ 437 | |                           muted
+ 438 | |                           ref={(video) => {
+ 439 | |                             video.muted = true;
+ 440 | |                           }}
+ 441 | |                           playsinline
+ 442 | |                           aria-label={t("chat.composer.cameraPreview")}
+ 443 | |                           prop:srcObject={props.realtimeTalkVideoStream}
+ 444 | `->                       ></video>
+ 445 |                           {props.realtimeTalkCameraDevices &&
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:601:5]
+ 600 |       return (
+ 601 | ,->     <textarea
+ 602 | |         ref={(node) => {
+ 603 | |           element = node;
+ 604 | |           ownerState.textareaRef?.(node);
+ 605 | |           const next = untrack(value);
+ 606 | |           if (node.value !== next) {
+ 607 | |             node.value = next;
+ 608 | |           }
+ 609 | |         }}
+ 610 | |   
+ 611 | |         dir={detectTextDirection(value())}
+ 612 | |         disabled={!context.canCompose}
+ 613 | |         readonly={context.dictation?.locksComposer === true || context.goalComposer.pending}
+ 614 | |         aria-autocomplete="list"
+ 615 | |         aria-controls={context.menus.menuVisible ? context.menus.menuListboxId : undefined}
+ 616 | |         aria-haspopup={context.menus.menuVisible ? "listbox" : undefined}
+ 617 | |         aria-activedescendant={context.menus.activeMenuOptionId ?? undefined}
+ 618 | |         aria-describedby={`${view.announcementId}${
+ 619 | |           composer.disabledReason ? ` ${view.disabledReasonId}` : ""
+ 620 | |         }`}
+ 621 | |         aria-keyshortcuts={context.sendShortcut === "enter" ? "Enter" : "Control+Enter Meta+Enter"}
+ 622 | |         onKeyDown={(event) => context.handleKeyDown(event)}
+ 623 | |         onBeforeInput={(event) => context.handleBeforeInput(event)}
+ 624 | |         onInput={(event) => context.handleInput(event)}
+ 625 | |         onSelect={(event) => context.handleSelect(event)}
+ 626 | |         onFocus={(event) => context.handleSelect(event)}
+ 627 | |         onPointerUp={(event) => context.handleSelect(event)}
+ 628 | |         onKeyUp={(event: KeyboardEvent) => {
+ 629 | |           clearCompositionEnd(event);
+ 630 | |           context.state.emojiMenu.handleKeyup(event);
+ 631 | |           if (event.key.startsWith("Arrow") || event.key === "Home" || event.key === "End") {
+ 632 | |             context.handleSelect(event);
+ 633 | |           }
+ 634 | |         }}
+ 635 | |         onCompositionStart={(event: CompositionEvent) => {
+ 636 | |           if (event.target !== context.state.composerTextarea || context.draftKey !== view.scopeKey) {
+ 637 | |             return;
+ 638 | |           }
+ 639 | |           const emojiWasOpen = context.state.emojiMenu.open;
+ 640 | |           context.state.mentionMenu.close();
+ 641 | |           context.state.emojiMenu.close();
+ 642 | |           context.state.editRevision += 1;
+ 643 | |           context.state.composerComposing = true;
+ 644 | |           context.state.composingDraft = {
+ 645 | |             key: context.draftKey,
+ 646 | |             // SAFETY: The identity check above requires this scope's composer textarea.
+ 647 | |             value: (event.target as HTMLTextAreaElement).value,
+ 648 | |           };
+ 649 | |           if (emojiWasOpen) {
+ 650 | |             context.requestUpdate();
+ 651 | |           }
+ 652 | |         }}
+ 653 | |         onCompositionEnd={(event) => context.handleCompositionEnd(event)}
+ 654 | |         onBlur={(event) => context.handleBlur(event)}
+ 655 | |         onPaste={(event: ClipboardEvent) => {
+ 656 | |           if (context.canCompose && !composer.suggestionComposer) {
+ 657 | |             handleChatAttachmentPaste(event, composer);
+ 658 | |           }
+ 659 | |         }}
+ 660 | |         aria-label={t("chat.composer.composerInput")}
+ 661 | |         placeholder={context.dictation?.active ? "" : view.placeholder}
+ 662 | |         rows="1"
+ 663 | `->     ></textarea>
+ 664 |       );
+     `----
+
+  ! solid(reactivity): The reactive variable 'name' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-emoji.tsx:257:37]
+ 256 |             },
+ 257 |             icon: emojiForShortcode(name()),
+     :                                     ^^^^^^
+ 258 |             iconHidden: true,
+     `----
+
+  ! solid(reactivity): The reactive variable 'name' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-emoji.tsx:259:23]
+ 258 |             iconHidden: true,
+ 259 |             name: `:${name()}:`,
+     :                       ^^^^^^
+ 260 |             description: undefined,
+     `----
+
+  ! solid(reactivity): The reactive variable 'index' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-emoji.tsx:250:51]
+ 249 |           renderComposerMenuOption({
+ 250 |             id: paneDomId(paneId, `emoji-option-${index()}`),
+     :                                                   ^^^^^^^
+ 251 |             active: index() === this.index,
+     `----
+
+  ! solid(reactivity): The reactive variable 'index' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-emoji.tsx:251:21]
+ 250 |             id: paneDomId(paneId, `emoji-option-${index()}`),
+ 251 |             active: index() === this.index,
+     :                     ^^^^^^^
+ 252 |             select: () => this.select(textarea, requestUpdate, index()),
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:281:20]
+ 280 |             slot="details"
+ 281 |             class={`chat-controls__speed-toggle ${props.holdToDictate !== false ? "chat-controls__speed-toggle--active" : ""}`}
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 282 |             aria-hidden="true"
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:331:18]
+ 330 |   return (
+ 331 |     <span class={`chat-talk-control${holding() ? " chat-talk-control--holding" : ""}`}>
+     :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 332 |       <openclaw-tooltip prop:content={tooltip()}>
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:455:16]
+ 454 |       <div
+ 455 |         class={`agent-chat__dictation-status${dictation.finalizing ? " agent-chat__dictation-status--finalizing" : ""}`}
+     :                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 456 |       >
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:458:18]
+ 457 |         <span
+ 458 |           class={`agent-chat__dictation-phase${!dictation.finalizing ? " agent-chat__dictation-phase--listening" : ""}`}
+     :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 459 |         >
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:544:16]
+ 543 |       <button
+ 544 |         class={`chat-send-btn chat-send-btn--send${props.sending ? " chat-send-btn--sending" : ""}`}
+     :                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 545 |         ref={primaryPointerDownRef(() => props.onPrimaryActionPointerDown)}
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:566:16]
+ 565 |       <button
+ 566 |         class={`chat-send-btn chat-send-btn--${action.camera ? "voice" : "talk-mode"}`}
+     :                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 567 |         type={action.camera ? undefined : "button"}
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+     ,-[ui/src/pages/chat/components/chat-composer-controls.tsx:630:24]
+ 629 |               <button
+ 630 |                 class={`chat-send-btn chat-send-btn--voice-live${voiceErrored() ? " chat-send-btn--voice-error" : ""}`}
+     :                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 631 |                 onClick={() => props.onToggleVoice?.()}
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-mention-menu.tsx:430:23]
+ 429 |                     <span class="slash-menu-icon">
+ 430 |                       <span class="skeleton mention-menu__avatar"></span>
+     :                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 431 |                     </span>
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-composer-mention-menu.tsx:432:21]
+ 431 |                     </span>
+ 432 |                     <span class="skeleton skeleton-line skeleton-line--medium"></span>
+     :                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 433 |                   </div>
+     `----
+
+  ! solid(components-return-once): Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+     ,-[ui/src/pages/chat/components/chat-composer-mention-menu.tsx:393:7]
+ 392 |     if (!this.open) {
+ 393 |       return null;
+     :       ^^^^^^^^^^^^
+ 394 |     }
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+    ,-[ui/src/pages/chat/components/chat-composer-menu.tsx:64:14]
+ 63 |       id={options.id}
+ 64 |       class={`slash-menu ${options.class ?? ""}`}
+    :              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 65 |       role="listbox"
+    `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+    ,-[ui/src/pages/chat/components/chat-composer-menu.tsx:89:14]
+ 88 |       id={options.id}
+ 89 |       class={`slash-menu-item ${options.active ? "slash-menu-item--active" : ""}`}
+    :              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 90 |       role="option"
+    `----
+
+  ! solid(reactivity): For proper analysis, a variable should be used to capture the result of this function call.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:67:7]
+ 66 |           key,
+ 67 | ,->       createMemo(() => Reflect.get(context(), key), {
+ 68 | |           equals: key === "state" || key === "dictation" ? false : undefined,
+ 69 | `->       }),
+ 70 |         ]),
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:87:33]
+ 86 |   const handlers = {
+ 87 |     handleBeforeInput: input(() => context().handleBeforeInput),
+    :                                 ^^
+ 88 |     handleInput: input(() => context().handleInput),
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:88:27]
+ 87 |     handleBeforeInput: input(() => context().handleBeforeInput),
+ 88 |     handleInput: input(() => context().handleInput),
+    :                           ^^
+ 89 |     handleKeyDown: input(() => context().handleKeyDown),
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:89:29]
+ 88 |     handleInput: input(() => context().handleInput),
+ 89 |     handleKeyDown: input(() => context().handleKeyDown),
+    :                             ^^
+ 90 |     handleSelect: input(() => context().handleSelect),
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:90:28]
+ 89 |     handleKeyDown: input(() => context().handleKeyDown),
+ 90 |     handleSelect: input(() => context().handleSelect),
+    :                            ^^
+ 91 |     handleCompositionEnd: input(() => context().handleCompositionEnd),
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:91:36]
+ 90 |     handleSelect: input(() => context().handleSelect),
+ 91 |     handleCompositionEnd: input(() => context().handleCompositionEnd),
+    :                                    ^^
+ 92 |     handleBlur: input(() => context().handleBlur),
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:92:26]
+ 91 |     handleCompositionEnd: input(() => context().handleCompositionEnd),
+ 92 |     handleBlur: input(() => context().handleBlur),
+    :                          ^^
+ 93 |   };
+    `----
+
+  ! eslint(max-lines): File has too many lines (707).
+     ,-[ui/src/pages/chat/components/chat-message-images-solid.tsx:755:2]
+ 754 |   );
+ 755 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (702).
+     ,-[src/cli/update-cli/update-command-post-update.ts:733:2]
+ 732 |   return await reportResult(await runPostUpdate());
+ 733 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (768).
+     ,-[src/auto-reply/reply/dispatch-from-config.choose-route.ts:789:12]
+ 788 |   { status: "ready" }
+ 789 | >["state"];
+     :            ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (704).
+     ,-[src/gateway/server-methods/chat-abort-runtime.ts:735:2]
+ 734 |   };
+ 735 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (715).
+     ,-[src/agents/worktrees/checkout.ts:748:2]
+ 747 |   }
+ 748 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (713).
+     ,-[src/gateway/session-worktree-preparation.ts:743:2]
+ 742 |   return prepared;
+ 743 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (703).
+     ,-[src/agents/tools/sessions-send-tool.ts:715:2]
+ 714 |   return tool;
+ 715 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (749).
+     ,-[src/config/sessions/transcript.ts:789:2]
+ 788 |   return undefined;
+ 789 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (713).
+     ,-[src/plugin-state/plugin-state-store.ts:758:2]
+ 757 |   optionPolicy.clear();
+ 758 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (706).
+     ,-[src/state/openclaw-agent-db-validation-cache.ts:775:2]
+ 774 |   }
+ 775 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+Found 86 warnings and 0 errors.
+Finished in 288.3s on 32001 files with 291 rules using 1 threads.
+[oxlint:core] passed
+
+[check:changed] runtime import cycles
+$ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
+Import cycle check: 0 runtime value cycle(s).
+rc=0
+DONE
