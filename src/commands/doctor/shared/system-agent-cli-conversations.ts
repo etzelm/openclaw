@@ -97,48 +97,36 @@ export function listStoredCliConversations(
   return [...conversations.values()];
 }
 
-/** Only Claude CLI conversations in the SQLite store can be carried to a new directory. */
+/**
+ * Only Claude CLI conversations in the SQLite store whose transcripts sit in the Claude project
+ * folder of `from` can be carried to a new directory.
+ */
 export function canCarryCliConversation(
   conversation: StoredCliConversation,
+  from: string,
   env: NodeJS.ProcessEnv,
 ): boolean {
-  return (
-    !conversation.legacyStore &&
-    normalizeOptionalString(env.HOME) !== undefined &&
-    conversation.providers.every((provider) => provider === CLAUDE_CLI) &&
-    conversation.claudeSessionIds.every(isSafeClaudeSessionId)
+  const homeDir = normalizeOptionalString(env.HOME);
+  if (
+    conversation.legacyStore ||
+    homeDir === undefined ||
+    !conversation.providers.every((provider) => provider === CLAUDE_CLI) ||
+    !conversation.claudeSessionIds.every(isSafeClaudeSessionId)
+  ) {
+    return false;
+  }
+  const fromProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: from, homeDir });
+  return conversation.claudeSessionIds.every((id) =>
+    fs.existsSync(path.join(fromProject, `${id}.jsonl`)),
   );
 }
 
-/**
- * Copies the conversation's Claude CLI transcript into the Claude project folder of the new
- * directory (the original stays in place) and records the new directory in its binding, so the
- * next turn resumes the same native session with its history.
- */
-export async function carryClaudeCliConversation(
+async function setClaudeBindingCwd(
   conversation: StoredCliConversation,
-  from: string,
-  to: string,
-  env: NodeJS.ProcessEnv,
-): Promise<void> {
-  const homeDir = normalizeOptionalString(env.HOME);
-  const fromProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: from, homeDir });
-  const toProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: to, homeDir });
-  for (const sessionId of conversation.claudeSessionIds) {
-    // `<id>.jsonl` is the transcript; a sibling `<id>/` folder holds its tool results.
-    for (const name of [`${sessionId}.jsonl`, sessionId]) {
-      const source = path.join(fromProject, name);
-      if (fs.existsSync(source)) {
-        await fs.promises.mkdir(toProject, { recursive: true });
-        await fs.promises.cp(source, path.join(toProject, name), {
-          recursive: true,
-          force: false,
-          errorOnExist: false,
-        });
-      }
-    }
-  }
-  const fromHash = hashCliSessionText(from);
+  fromHash: string | undefined,
+  toHash: string | undefined,
+): Promise<boolean> {
+  let patched = false;
   await patchSessionEntryCore(
     conversation.scope,
     (entry) => {
@@ -149,13 +137,60 @@ export async function carryClaudeCliConversation(
       if (!key || !binding || binding.cwdHash !== fromHash) {
         return null;
       }
+      patched = true;
       return {
-        cliSessionBindings: {
-          ...entry.cliSessionBindings,
-          [key]: { ...binding, cwdHash: hashCliSessionText(to) },
-        },
+        cliSessionBindings: { ...entry.cliSessionBindings, [key]: { ...binding, cwdHash: toHash } },
       };
     },
     { preserveActivity: true, skipMaintenance: true },
   );
+  return patched;
+}
+
+/**
+ * Copies each conversation's Claude CLI transcript into the Claude project folder of the new
+ * directory (the originals stay in place), then records the new directory in each binding, so the
+ * next turn resumes the same native session with its history. Bindings are patched only after
+ * every transcript is copied, and a failed patch restores the bindings already patched.
+ */
+export async function carryClaudeCliConversations(
+  conversations: StoredCliConversation[],
+  from: string,
+  to: string,
+  env: NodeJS.ProcessEnv,
+): Promise<void> {
+  const homeDir = normalizeOptionalString(env.HOME);
+  const fromProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: from, homeDir });
+  const toProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: to, homeDir });
+  for (const conversation of conversations) {
+    for (const sessionId of conversation.claudeSessionIds) {
+      // `<id>.jsonl` is the transcript; a sibling `<id>/` folder holds its tool results.
+      for (const name of [`${sessionId}.jsonl`, sessionId]) {
+        const source = path.join(fromProject, name);
+        if (fs.existsSync(source)) {
+          await fs.promises.mkdir(toProject, { recursive: true });
+          await fs.promises.cp(source, path.join(toProject, name), {
+            recursive: true,
+            force: false,
+            errorOnExist: false,
+          });
+        }
+      }
+    }
+  }
+  const fromHash = hashCliSessionText(from);
+  const toHash = hashCliSessionText(to);
+  const patched: StoredCliConversation[] = [];
+  try {
+    for (const conversation of conversations) {
+      if (await setClaudeBindingCwd(conversation, fromHash, toHash)) {
+        patched.push(conversation);
+      }
+    }
+  } catch (error) {
+    for (const conversation of patched) {
+      await setClaudeBindingCwd(conversation, toHash, fromHash).catch(() => false);
+    }
+    throw error;
+  }
 }

@@ -19,7 +19,7 @@ import { shortenHomePath } from "../../../utils.js";
 import type { DoctorConfigMutationResult } from "./config-mutation-state.js";
 import {
   canCarryCliConversation,
-  carryClaudeCliConversation,
+  carryClaudeCliConversations,
   listStoredCliConversations,
   type StoredCliConversation,
 } from "./system-agent-cli-conversations.js";
@@ -88,9 +88,10 @@ function describeRestore(params: {
   const from = shortenHomePath(params.launchDir);
   const to = shortenHomePath(params.agentDir);
   const lines: string[] = [];
-  if (params.plan.copies.length > 0) {
+  const copied = [...params.plan.copies, ...params.plan.links];
+  if (copied.length > 0) {
     lines.push(
-      `${params.applied ? "Copied" : "Copy"} ${params.plan.copies.join(", ")} from ${from} into ${to}; the files in ${from} stay in place.`,
+      `${params.applied ? "Copied" : "Copy"} ${copied.join(", ")} from ${from} into ${to}; the files in ${from} stay in place.`,
     );
   }
   if (params.plan.conflicts.length > 0) {
@@ -139,7 +140,7 @@ export async function repairSystemAgentWorkspacePin(
   const launchOwned = listAgentIds(cfg).some(
     (id) => id !== agentId && resolveAgentWorkspaceDir(cfg, id, env) === launchDir,
   );
-  let restore: WorkspaceRestorePlan = { copies: [], conflicts: [] };
+  let restore: WorkspaceRestorePlan = { copies: [], links: [], conflicts: [] };
   try {
     if (!launchOwned && (await workspaceHoldsAgentFiles(launchDir))) {
       restore = await planWorkspaceRestore(launchDir, agentDir);
@@ -163,9 +164,10 @@ export async function repairSystemAgentWorkspacePin(
     workspace.startsWith("~") || containsEnvVarReference(workspace)
       ? workspace
       : shortenHomePath(workspace);
+  const copied = [...restore.copies, ...restore.links];
   const copyHint =
-    restore.copies.length > 0
-      ? ` after copying ${restore.copies.join(", ")} from ${shortenHomePath(launchDir)} into ${shortenHomePath(agentDir)}`
+    copied.length > 0
+      ? ` after copying ${copied.join(", ")} from ${shortenHomePath(launchDir)} into ${shortenHomePath(agentDir)}`
       : "";
   if (options.includeOwnsRoster) {
     return {
@@ -188,7 +190,9 @@ export async function repairSystemAgentWorkspacePin(
       ],
     };
   }
-  const stuck = conversations.filter((conversation) => !canCarryCliConversation(conversation, env));
+  const stuck = conversations.filter(
+    (conversation) => !canCarryCliConversation(conversation, launchDir, env),
+  );
   if (stuck.length > 0) {
     return {
       ...unchanged,
@@ -197,7 +201,7 @@ export async function repairSystemAgentWorkspacePin(
       ],
     };
   }
-  if (options.applyFiles === true && restore.copies.length > 0) {
+  if (options.applyFiles === true && copied.length > 0) {
     try {
       await applyWorkspaceRestore(launchDir, agentDir, restore);
     } catch (error) {
@@ -211,9 +215,7 @@ export async function repairSystemAgentWorkspacePin(
   }
   if (options.applyFiles === true) {
     try {
-      for (const conversation of conversations) {
-        await carryClaudeCliConversation(conversation, launchDir, agentDir, env);
-      }
+      await carryClaudeCliConversations(conversations, launchDir, agentDir, env);
     } catch (error) {
       return {
         ...unchanged,

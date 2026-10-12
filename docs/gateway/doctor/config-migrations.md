@@ -504,7 +504,8 @@ comes from an `$include` file.
 
 When the root holds the agent's files, Doctor first copies them into
 `<root>/<agentId>`: a customized `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or
-`USER.md`, `MEMORY.md`, and the files under `memory/` and `skills/`. A seeded
+`USER.md`, `MEMORY.md`, and the files under `memory/` and `skills/` (a symbolic
+link there is recreated pointing at the same target). A seeded
 template in `<root>/<agentId>` is replaced; a customized file there is kept,
 and Doctor names each file it kept whose root copy differs. Nothing is moved or
 deleted, so the root keeps every original. Doctor skips a root another agent
@@ -515,8 +516,10 @@ tied to the working directory it started in. For a `claude-cli` conversation,
 Doctor copies its transcript into the Claude project folder of
 `<root>/<agentId>` (the original stays in place) and records the new directory
 in the session's binding, so the next turn resumes the same conversation with
-its history. For any other backend, or a conversation kept in a legacy
-`sessions.json` store, Doctor writes nothing and warns with the value to set,
+its history. For any other backend, a `claude-cli` conversation whose
+transcript is not in the root's Claude project folder, or a conversation kept
+in a legacy `sessions.json` store, Doctor writes nothing and warns with the
+value to set,
 because that conversation would start fresh without resuming history.
 
 Doctor follows the existing [include write constraints](/gateway/config-secrets-env).

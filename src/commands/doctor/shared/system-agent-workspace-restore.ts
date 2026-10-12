@@ -11,6 +11,8 @@ import { hasErrnoCode } from "../../../infra/errno.js";
 export type WorkspaceRestorePlan = {
   /** Relative paths copied from the root; seeded template files in the target are replaced. */
   copies: string[];
+  /** Relative paths of symbolic links recreated in the target, pointing where the root's do. */
+  links: string[];
   /** Relative paths customized differently in both directories; the target keeps its own. */
   conflicts: string[];
 };
@@ -29,16 +31,54 @@ async function readIfPresent(file: string): Promise<Buffer | undefined> {
   }
 }
 
+async function lstatIfPresent(file: string) {
+  try {
+    return await fs.lstat(file);
+  } catch (error) {
+    if (hasErrnoCode(error, "ENOENT")) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
 async function planFile(from: string, to: string, rel: string, plan: WorkspaceRestorePlan) {
   const templated = TEMPLATED_FILES.has(rel);
   const source = await readIfPresent(path.join(from, rel));
   if (!source || (templated && !(await fileDiffersFromTemplate(from, rel)))) {
     return;
   }
-  const target = await readIfPresent(path.join(to, rel));
+  const targetPath = path.join(to, rel);
+  // A linked file in the target is kept: copying over it would write to the link's destination.
+  if ((await lstatIfPresent(targetPath))?.isSymbolicLink()) {
+    plan.conflicts.push(rel);
+    return;
+  }
+  const target = await readIfPresent(targetPath);
   if (!target || (templated && !(await fileDiffersFromTemplate(to, rel)))) {
     plan.copies.push(rel);
   } else if (!target.equals(source)) {
+    plan.conflicts.push(rel);
+  }
+}
+
+async function linkTarget(dir: string, rel: string): Promise<string | undefined> {
+  const link = path.join(dir, rel);
+  try {
+    return path.resolve(path.dirname(link), await fs.readlink(link));
+  } catch (error) {
+    if (hasErrnoCode(error, "ENOENT") || hasErrnoCode(error, "EINVAL")) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+async function planLink(from: string, to: string, rel: string, plan: WorkspaceRestorePlan) {
+  const source = await linkTarget(from, rel);
+  if ((await lstatIfPresent(path.join(to, rel))) === undefined) {
+    plan.links.push(rel);
+  } else if (source !== (await linkTarget(to, rel))) {
     plan.conflicts.push(rel);
   }
 }
@@ -59,16 +99,21 @@ async function planTree(from: string, to: string, rel: string, plan: WorkspaceRe
       await planTree(from, to, child, plan);
     } else if (entry.isFile()) {
       await planFile(from, to, child, plan);
+    } else if (entry.isSymbolicLink()) {
+      await planLink(from, to, child, plan);
     }
   }
 }
 
-/** Lists the persona, memory, and skill files `from` holds that `to` lacks or still has as a seed. */
+/**
+ * Lists the persona, memory, and skill files (and links under memory/ and skills/) `from` holds
+ * that `to` lacks or still has as a seed.
+ */
 export async function planWorkspaceRestore(
   from: string,
   to: string,
 ): Promise<WorkspaceRestorePlan> {
-  const plan: WorkspaceRestorePlan = { copies: [], conflicts: [] };
+  const plan: WorkspaceRestorePlan = { copies: [], links: [], conflicts: [] };
   for (const name of [...GENERATED_WORKSPACE_BOOTSTRAP_FILENAMES, DEFAULT_MEMORY_FILENAME]) {
     await planFile(from, to, name, plan);
   }
@@ -93,5 +138,12 @@ export async function applyWorkspaceRestore(
       target,
       TEMPLATED_FILES.has(rel) ? 0 : fs.constants.COPYFILE_EXCL,
     );
+  }
+  for (const rel of plan.links) {
+    const source = path.join(from, rel);
+    const target = path.join(to, rel);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    // An absolute target keeps a relative link pointing where it did from the root.
+    await fs.symlink(path.resolve(path.dirname(source), await fs.readlink(source)), target);
   }
 }

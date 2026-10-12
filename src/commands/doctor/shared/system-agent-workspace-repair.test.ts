@@ -1,7 +1,7 @@
 // System agent workspace repair tests cover which directory Doctor pins for a converged roster.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveAgentWorkspaceDir } from "../../../agents/agent-scope-config.js";
 import { hashCliSessionText } from "../../../agents/cli-session.js";
 import { resolveClaudeCliProjectDirForWorkspace } from "../../../agents/command/claude-cli-project-dir.js";
@@ -20,6 +20,24 @@ import {
 } from "../../../test-utils/openclaw-test-state.js";
 import { repairSystemAgentWorkspacePin } from "./system-agent-workspace-repair.js";
 
+const patchFailure = vi.hoisted(() => ({ sessionKey: "" }));
+
+vi.mock("../../../config/sessions/session-accessor.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../config/sessions/session-accessor.js")>();
+  return {
+    ...actual,
+    patchSessionEntryCore: async (
+      ...args: Parameters<typeof actual.patchSessionEntryCore>
+    ): ReturnType<typeof actual.patchSessionEntryCore> => {
+      if (args[0].sessionKey === patchFailure.sessionKey) {
+        throw new Error("session store is locked");
+      }
+      return await actual.patchSessionEntryCore(...args);
+    },
+  };
+});
+
 let testState: OpenClawTestState;
 let root: string;
 
@@ -33,6 +51,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  patchFailure.sessionKey = "";
   closeOpenClawStateDatabaseForTest();
   await testState.cleanup();
 });
@@ -100,6 +119,57 @@ describe("repairSystemAgentWorkspacePin", () => {
     );
     expect(await fs.readFile(path.join(root, "SOUL.md"), "utf8")).toBe("root persona");
     expect(await fs.readFile(path.join(root, "memory", "2026-10-01.md"), "utf8")).toBe("root note");
+  });
+
+  it("recreates linked skills in the agent directory pointing where the root's links do", async () => {
+    const agentDir = path.join(root, "main");
+    const shared = testState.path("shared-skills");
+    await fs.mkdir(path.join(shared, "deploy"), { recursive: true });
+    await fs.writeFile(path.join(shared, "deploy", "SKILL.md"), "linked skill");
+    await writePersona(root, "root persona");
+    await fs.mkdir(path.join(root, "skills"), { recursive: true });
+    await fs.symlink(path.join(shared, "deploy"), path.join(root, "skills", "absolute"));
+    await fs.symlink(
+      path.join("..", "..", "shared-skills", "deploy"),
+      path.join(root, "skills", "relative"),
+    );
+
+    const result = await repairSystemAgentWorkspacePin(convergedRoster(), testState.env, {
+      applyFiles: true,
+    });
+
+    expect(result.config.agents?.entries?.main?.workspace).toBe(agentDir);
+    expect(result.changes[0]).toBe(
+      `Copied SOUL.md, ${path.join("skills", "absolute")}, ${path.join("skills", "relative")} from ${root} into ${agentDir}; the files in ${root} stay in place.`,
+    );
+    for (const name of ["absolute", "relative"]) {
+      const link = path.join(agentDir, "skills", name);
+      expect((await fs.lstat(link)).isSymbolicLink()).toBe(true);
+      expect(await fs.readFile(path.join(link, "SKILL.md"), "utf8")).toBe("linked skill");
+    }
+    expect(await fs.readlink(path.join(root, "skills", "relative"))).toBe(
+      path.join("..", "..", "shared-skills", "deploy"),
+    );
+  });
+
+  it("keeps a linked file in the agent directory instead of writing through it", async () => {
+    const agentDir = path.join(root, "main");
+    const elsewhere = testState.path("elsewhere-soul.md");
+    await ensureAgentWorkspace({ dir: agentDir, ensureBootstrapFiles: true });
+    const seededSoul = await fs.readFile(path.join(agentDir, "SOUL.md"), "utf8");
+    await fs.writeFile(elsewhere, seededSoul);
+    await fs.rm(path.join(agentDir, "SOUL.md"));
+    await fs.symlink(elsewhere, path.join(agentDir, "SOUL.md"));
+    await writePersona(root, "root persona");
+
+    const result = await repairSystemAgentWorkspacePin(convergedRoster(), testState.env, {
+      applyFiles: true,
+    });
+
+    expect(result.changes).toContain(
+      `Kept SOUL.md in ${agentDir}; the different copies in ${root} stay in place.`,
+    );
+    expect(await fs.readFile(elsewhere, "utf8")).toBe(seededSoul);
   });
 
   it("counts a customized AGENTS.md as files in either directory", async () => {
@@ -210,6 +280,14 @@ describe("repairSystemAgentWorkspacePin", () => {
     });
     await storeSession("main", "agent:main:cron:nightly", { claudeCliSessionId: "legacy-1" });
     await storeSession("main", "agent:main:webchat:direct:2", { model: "gpt-5.4" });
+    // The Claude CLI transcripts exist, so only the Codex CLI conversation blocks the pin.
+    const source = resolveClaudeCliProjectDirForWorkspace({
+      workspaceDir: root,
+      homeDir: testState.env.HOME,
+    });
+    await fs.mkdir(source, { recursive: true });
+    await fs.writeFile(path.join(source, "claude-native-1.jsonl"), "native transcript\n");
+    await fs.writeFile(path.join(source, "legacy-1.jsonl"), "legacy transcript\n");
     const cfg = convergedRoster();
 
     const result = await repairSystemAgentWorkspacePin(cfg, testState.env);
@@ -318,6 +396,84 @@ describe("repairSystemAgentWorkspacePin", () => {
     } finally {
       await fs.chmod(projects, 0o700);
     }
+  });
+
+  it("restores carried bindings when a later binding cannot be patched", async () => {
+    const agentDir = path.join(root, "main");
+    const storePath = resolveSessionStorePathCore(undefined, {
+      agentId: "main",
+      env: testState.env,
+    });
+    const source = resolveClaudeCliProjectDirForWorkspace({
+      workspaceDir: root,
+      homeDir: testState.env.HOME,
+    });
+    await writePersona(agentDir, "subdirectory persona");
+    await fs.mkdir(source, { recursive: true });
+    for (const { sessionKey, sessionId } of [
+      { sessionKey: "agent:main:main", sessionId: "claude-native-1" },
+      { sessionKey: "agent:main:cron:nightly", sessionId: "claude-native-2" },
+    ]) {
+      await storeSession("main", sessionKey, {
+        cliSessionBindings: { "claude-cli": { sessionId, cwdHash: hashCliSessionText(root) } },
+      });
+      await fs.writeFile(path.join(source, `${sessionId}.jsonl`), `${sessionId} transcript\n`);
+    }
+    const readCwdHash = (sessionKey: string) =>
+      loadSessionEntryReadOnly({ agentId: "main", sessionKey, storePath, env: testState.env })
+        ?.cliSessionBindings?.["claude-cli"]?.cwdHash;
+    const conversation = (sessionKey: string, sessionId: string) => ({
+      scope: { agentId: "main", env: testState.env, storePath, sessionKey },
+      providers: ["claude-cli"],
+      claudeSessionIds: [sessionId],
+      legacyStore: false,
+    });
+    patchFailure.sessionKey = "agent:main:cron:nightly";
+    const cfg = convergedRoster();
+
+    const result = await repairSystemAgentWorkspacePin(cfg, testState.env, {
+      applyFiles: true,
+      listCliConversations: () => [
+        conversation("agent:main:main", "claude-native-1"),
+        conversation("agent:main:cron:nightly", "claude-native-2"),
+      ],
+    });
+
+    expect(result.config).toBe(cfg);
+    expect(result.warnings).toEqual([
+      `Could not carry the stored Claude CLI conversations of agent "main" to ${agentDir}: session store is locked. Doctor did not set agents.entries.main.workspace.`,
+    ]);
+    expect(readCwdHash("agent:main:main")).toBe(hashCliSessionText(root));
+    expect(readCwdHash("agent:main:cron:nightly")).toBe(hashCliSessionText(root));
+  });
+
+  it("warns without pinning when a Claude CLI transcript is missing from the launch folder", async () => {
+    const agentDir = path.join(root, "main");
+    await writePersona(agentDir, "subdirectory persona");
+    await storeSession("main", "agent:main:main", {
+      cliSessionBindings: {
+        "claude-cli": { sessionId: "claude-native-1", cwdHash: hashCliSessionText(root) },
+      },
+    });
+    const cfg = convergedRoster();
+
+    const result = await repairSystemAgentWorkspacePin(cfg, testState.env, { applyFiles: true });
+
+    expect(result.config).toBe(cfg);
+    expect(result.changes).toEqual([]);
+    expect(result.warnings).toEqual([
+      expect.stringContaining(
+        "Doctor did not set agents.entries.main.workspace because 1 stored CLI-backend conversation of this agent would start fresh",
+      ),
+    ]);
+    await expect(
+      fs.access(
+        resolveClaudeCliProjectDirForWorkspace({
+          workspaceDir: agentDir,
+          homeDir: testState.env.HOME,
+        }),
+      ),
+    ).rejects.toThrow();
   });
 
   it("pins when only another agent or no session holds a CLI-backend conversation", async () => {
