@@ -1,0 +1,57 @@
+######## after / upgrade
+turn 1 exit=0
+turn 2 exit=0
+doctor exit=0
+turn 3 exit=0
+turn 4 exit=0
+turn 5 exit=0
+[turn1 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=449 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn4 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=79 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn5 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=510 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[prompt canaries per user message]
+user-89829-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0 MANGO-5=0
+user-89903-1.txt: chars=48 PINEAPPLE-7=0 BANANA-3=0 MANGO-5=0
+user-90132-1.txt: chars=449 PINEAPPLE-7=0 BANANA-3=0 MANGO-5=0
+user-90215-1.txt: chars=79 PINEAPPLE-7=0 BANANA-3=0 MANGO-5=1
+user-90299-1.txt: chars=510 PINEAPPLE-7=0 BANANA-3=0 MANGO-5=1
+[stored boundary after each turn]
+after turn 1: cliHistoryBoundary none
+after turn 2: cliHistoryBoundary none
+after turn 3: cliHistoryBoundary none
+after turn 4: cliHistoryBoundary none
+cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 5: cliHistoryBoundary none
+cliHistoryBoundary {"state":"known","maxSeq":4}
+[doctor --fix --non-interactive]
+doctor exit=0
+[transcript rows before the upgrade (written by 2026.10.1)]
+session=harness-session seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+session=harness-session seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session seq=3 role=user text="What is the codeword?"
+session=harness-session seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+[transcript rows and boundaries after turn 5]
+session=harness-session seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+session=harness-session seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session seq=3 role=user text="What is the codeword?"
+session=harness-session seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session seq=5 role=user text="What is the codeword?"
+session=harness-session seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session-2 seq=1 role=user text="Remember: the new codeword is MANGO-5. Reply STORED."
+session=harness-session-2 seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session-2 seq=3 role=user text="What is the codeword?"
+session=harness-session-2 seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session cliHistoryBoundary none
+session=harness-session-2 cliHistoryBoundary {"state":"known","maxSeq":4}
+[agents.defaults.workspace before and after]
+before: $HOME/work/pr-164796-h/harness/runs/after-upgrade/workspace
+after: $HOME/work/pr-164796-h/harness/runs/after-upgrade/workspace

@@ -1,0 +1,33 @@
+######## after / queued-reassign
+turn 1 exit=0
+turn 2 exit=0
+turn 3 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=551 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=present
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=451 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[prompt canaries per user message]
+user-86180-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0 MANGO-5=0
+user-86485-1.txt: chars=551 PINEAPPLE-7=1 BANANA-3=1 MANGO-5=0
+user-86817-1.txt: chars=451 PINEAPPLE-7=0 BANANA-3=0 MANGO-5=0
+[stored boundary after each turn]
+after turn 1: cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 2: cliHistoryBoundary {"state":"known","maxSeq":3}
+after turn 3: cliHistoryBoundary {"state":"unknown"}
+[worker commands around the switch]
+worker-command-queued session.turn.prepare
+worker-command-queued session.turn.commit
+worker-command-queued session.turn.prepare
+worker-command-queued session.turn.prepare
+worker-command-queued session.turn.commit
+login-switched-while-queued session.turn.commit
+[transcript rows after the last turn]
+seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=3 role=user text="Remember: the second codeword is BANANA-3. Reply STORED."
+seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+seq=5 role=user text="What are the codewords?"
+seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"

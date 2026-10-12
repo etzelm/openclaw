@@ -1,0 +1,28 @@
+## RED1 host sends SessionManager writer facts without the owner-check request
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login-metadata.test.ts > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 2 to be 1 // Object.is equality
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:74:38
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:65:7
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:60:3
+      Tests  1 failed (1)
+(checkout clean)
+## RED2 metadata host never answers the owner probe
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login-metadata.test.ts > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 0 to be greater than 0
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:70:25
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:65:7
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:60:3
+      Tests  1 failed (1)
+(checkout clean)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > treats a resumed turn that replays history as carrying saved history
+AssertionError: expected false to be true // Object.is equality
+ ❯ src/agents/cli-runner/execute.native-history-owner.test.ts:98:67
+      Tests  1 failed | 6 passed (7)
+(checkout clean)
+## GREEN
+ Test Files  2 passed (2)
+      Tests  8 passed (8)

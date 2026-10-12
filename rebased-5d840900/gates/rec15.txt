@@ -1,0 +1,25 @@
+######## after / record-credential-mismatch
+turn 1 exit=0
+turn 2 exit=0
+[turn1 openclaw log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=449 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[fake claude child records]
+=== turn1 (account A: record A, credential A)
+{"at":"2026-10-12T04:39:26.761Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T04:39:27.620Z","pid":80204,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh"}
+{"at":"2026-10-12T04:39:27.622Z","pid":80204,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-12T04:39:27.655Z","pid":80204,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"30aeca09d6806ca66631a3555717b193d2a03e75daee77ef22d8a14874b391b4","promptFile":"$RUN/fake-claude.log.user-80204-1.txt"}
+=== turn2 (a credential for account B beside the unchanged account-A record)
+{"at":"2026-10-12T04:39:37.469Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-B","status":200}
+{"at":"2026-10-12T04:39:38.130Z","pid":80784,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-B","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh"}
+{"at":"2026-10-12T04:39:38.132Z","pid":80784,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-B","loginCredentialPresent":true}
+{"at":"2026-10-12T04:39:38.134Z","pid":80784,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-B","loginCredentialPresent":true,"chars":449,"sha256":"f698cfc52bf03cdbc596311d169250ccb1a0fccd9be7115933106b99e454c3e4","promptFile":"$RUN/fake-claude.log.user-80784-1.txt"}
+[prompt canaries per user message]
+user-80204-1.txt: chars=85 PINEAPPLE-7=1 BANANA-3=0 MANGO-5=0
+user-80784-1.txt: chars=449 PINEAPPLE-7=0 BANANA-3=0 MANGO-5=0
+[stored boundary after each turn]
+after turn 1: cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 2: cliHistoryBoundary {"state":"unknown"}

@@ -1,0 +1,10 @@
+=== turn1 (account A)
+{"at":"2026-10-12T04:40:06.400Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T04:40:07.305Z","pid":82170,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh"}
+{"at":"2026-10-12T04:40:07.307Z","pid":82170,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-12T04:40:07.330Z","pid":82170,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"ef4679ba0708233e7b2f216b0291847f2a137602fff1988715d479a113b2bbe5","promptFile":"$RUN/fake-claude.log.user-82170-1.txt"}
+=== turn2 (account A; the profile endpoint holds every request open)
+{"at":"2026-10-12T04:40:16.601Z","event":"profile-request","path":"/api/oauth/profile","mode":"timeout","tokenAccount":"account-A","status":"held"}
+{"at":"2026-10-12T04:40:20.211Z","pid":82560,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh"}
+{"at":"2026-10-12T04:40:20.214Z","pid":82560,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-12T04:40:20.215Z","pid":82560,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":449,"sha256":"503a58d4b26e7ec015c3a91a4d0c6c563ff127cdd30b4c12600023223ea694c0","promptFile":"$RUN/fake-claude.log.user-82560-1.txt"}
