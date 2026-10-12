@@ -93,6 +93,24 @@ function activeTurn(session: ClaudeCliSession): ClaudeCliTurn | undefined {
   }
 }
 
+function boundaryHolds(turn: ClaudeCliTurn): boolean {
+  try {
+    turn.context.assertCurrent?.();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function carriesTurnContext(request: Record<string, unknown>, response: unknown): boolean {
+  return (
+    request.callback_id === "UserPromptSubmit" &&
+    isRecord(response) &&
+    isRecord(response.hookSpecificOutput) &&
+    response.hookSpecificOutput.additionalContext !== undefined
+  );
+}
+
 async function authorizeTool(
   session: ClaudeCliSession,
   request: Record<string, unknown>,
@@ -447,7 +465,10 @@ export async function* executeClaudeCli(
           // The transport invokes this synchronously at its final write, after all awaits.
           return () => {
             if (admittedTurn && activeTurn(session) === admittedTurn && !signal.aborted) {
-              return response;
+              // Saved turn context leaves here, so it takes the full account-bound check.
+              return carriesTurnContext(request, response) && !boundaryHolds(admittedTurn)
+                ? {}
+                : response;
             }
             const message = "The OpenClaw run is no longer active.";
             if (request.subtype === "can_use_tool") {

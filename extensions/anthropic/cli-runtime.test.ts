@@ -717,6 +717,26 @@ describe("Claude native stdio boundary", () => {
     await expect(access(path.join(context.cwd, "user.received"))).rejects.toThrow();
   });
 
+  it("withholds private turn context when the boundary fails after the prompt was sent", async () => {
+    let promptSent = false;
+    const context = await createContext("normal", {
+      prompt: "Remember orange.",
+      promptContext: { prependContext: "saved private context" },
+      assertCurrent: () => {
+        if (promptSent) {
+          throw new Error("Synthetic account reassigned after send.");
+        }
+      },
+      // The first stream check runs once the prompt was sent: the login changes from there on.
+      assertStreamCurrent: () => {
+        promptSent = true;
+      },
+    });
+    const detail = resultDetail(await collect(context));
+    expect(detail).toMatchObject({ turn: 1, user: "Remember orange." });
+    expect(detail.privateContext).toBeUndefined();
+  });
+
   it("keeps an awaited hook decision on the stream check once the prompt was delivered", async () => {
     let boundaryActive = true;
     const approvalStarted = createDeferred<void>();
