@@ -1,0 +1,55 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 /Users/openclaw/work/pr-166433
+
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > registers prompt supplement, gateway methods, tools, and wiki cli surface
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > registers default-vault tools inside the configured state directory
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > resolves every tool factory from keyed agent entries
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > forwards protected recall authorization to wiki search and get
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > activates an initialized legacy vault before an external compile
+ ×  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > terminates the query reader worker when the plugin service stops 1421ms
+   → expected +0 to be 1 // Object.is equality
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > fences cache publication when the plugin service stops
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes queued wiki.importInsights source sync before it can activate a vault
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > closes queued wiki.compile source sync before it can activate a vault
+ ↓  extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > clears active owners before a fallible lifecycle identity refresh
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/index.test.ts > memory-wiki plugin > terminates the query reader worker when the plugin service stops
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ extensions/memory-wiki/index.test.ts:300:29
+    298|       await service?.stop?.();
+    299|
+    300|       expect(workersExited).toBe(workersCreated);
+       |                             ^
+    301|     } finally {
+    302|       process.off("worker", onWorker);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 skipped (10)
+   Start at  15:11:48
+   Duration  22.60s (transform 72%, import 18%, tests 7%, setup 4%)
+

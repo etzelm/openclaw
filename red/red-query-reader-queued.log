@@ -1,0 +1,69 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 /Users/openclaw/work/pr-166433
+
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=false)
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns the same results through the worker as an in-thread whole-vault read (compiled=true)
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > backfills underfilled digest candidates from the rest of the vault
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads only compiled metadata candidates for distributed query tokens
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > reads query pages without extracting the link graph
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > applies the serialized sandbox scope inside the worker
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a page swapped outside the vault between listing and reading
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rebuilds a worker boundary refusal as the same error on the host
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read whose signal is already aborted without dispatching it
+ ×  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind two running scans and lets the scans finish 119ms
+   → expected 3 to be less than or equal to 2
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recovers on a fresh worker after a running read is cancelled
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > returns no page when a lookup's match changes before it is read again
+ ↓  extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > recreates the reader after the plugin closes it
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   extension-memory  extensions/memory-wiki/src/query-reader.test.ts > memory wiki query reader > rejects a read queued behind two running scans and lets the scans finish
+AssertionError: expected 3 to be less than or equal to 2
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:391:34
+    389|     expect(run).toHaveBeenCalledTimes(3);
+    390|     expect(admitted.pendingTasks).toBe(3);
+    391|     expect(admitted.activeTasks).toBeLessThanOrEqual(2);
+       |                                  ^
+    392|     await expect(queued).rejects.toBe(reason);
+    393|     for (const finished of await Promise.all(scans)) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: caller cancelled the queued wiki read
+ ❯ extensions/memory-wiki/src/query-reader.test.ts:378:20
+ ❯ node_modules/.pnpm/vitest@5.0.1_patch_hash=90ba2969491e095cc2e92a4d38256dfcf64f85078ec29e1762b9429a00b3590_97a01857a58f4497e41a6517ab9b01b5/node_modules/vitest/dist/chunks/run.C5UmxDPh.js:2783:20
+
+This error originated in "extensions/memory-wiki/src/query-reader.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "rejects a read queued behind two running scans and lets the scans finish". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 skipped (14)
+     Errors  1 error
+   Start at  16:03:32
+   Duration  12.44s (transform 69%, import 23%, setup 7%, tests 1%)
+
