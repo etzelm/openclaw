@@ -36,7 +36,13 @@ afterEach(() => {
 const fixture = (withHeader?: boolean) => createHistoryBoundaryFixture(sessionDirs, withHeader);
 
 describe("native CLI login owner", () => {
-  const native = { provider: "claude-cli" };
+  // The operator's opt-in to sending the native token to Anthropic's profile endpoint.
+  const attestNativeLogin: OpenClawConfig = {
+    plugins: {
+      entries: { anthropic: { config: { historyRecovery: { attestNativeLogin: true } } } },
+    },
+  };
+  const native = { provider: "claude-cli", config: attestNativeLogin };
   // Stub Anthropic profile endpoint: a synthetic token names its own account.
   const profile = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
     const bearer = new Headers(init?.headers).get("authorization") ?? "";
@@ -166,6 +172,26 @@ describe("native CLI login owner", () => {
     expect(next.seeded).toBeUndefined();
   });
 
+  it("never reads or sends the native token without the operator's opt-in", async () => {
+    const f = await fixture();
+    const { backend } = logins();
+    loginIn(backend, "uuid:account-a");
+    const lookup = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
+    let allowed: boolean | undefined;
+    await f.run(
+      undefined,
+      async (ok) => {
+        allowed = ok;
+      },
+      { provider: "claude-cli" },
+      undefined,
+      backendUsing(backend),
+    );
+    expect(allowed).toBe(false);
+    expect(lookup).not.toHaveBeenCalled();
+    expect(profile).not.toHaveBeenCalled();
+  });
+
   it("keeps history unknown when the native login cannot be proven", async () => {
     const f = await fixture();
     const { backend } = logins();
@@ -202,6 +228,7 @@ describe("native CLI login owner", () => {
     const source = getRuntimeConfigSourceSnapshot();
     const config = {
       ...runtime,
+      ...attestNativeLogin,
       skills: { entries: { "login-skill": { env: { CLAUDE_CONFIG_DIR: skill } } } },
     } as OpenClawConfig;
     setRuntimeConfigSnapshot(config, config);

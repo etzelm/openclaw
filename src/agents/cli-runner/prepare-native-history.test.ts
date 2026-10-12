@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runWithCliHistoryWriter } from "../../config/sessions/cli-history-boundary.js";
 import { patchSessionEntryCore } from "../../config/sessions/session-accessor.js";
+import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import { prepareSystemAgentRunAdmission } from "../admitted-run-context.js";
 import { testing as cliBackendsTesting } from "../cli-backends.test-support.js";
 import {
@@ -31,6 +32,11 @@ vi.mock("../../config/config.js", async () => ({
 vi.mock("../sandbox.js", () => ({ ensureSandboxWorkspaceForSession: vi.fn(async () => null) }));
 // mock-isolation: no global hook runner may observe or alter the prepared run.
 vi.mock("../../plugins/hook-runner-global.js", () => ({ getGlobalHookRunner: vi.fn(() => null) }));
+
+// The operator's opt-in to sending the native token to Anthropic's profile endpoint.
+const attestNativeLogin: OpenClawConfig = {
+  plugins: { entries: { anthropic: { config: { historyRecovery: { attestNativeLogin: true } } } } },
+};
 
 describe("native Claude login history on preparation", () => {
   let fixture: ReturnType<typeof createCliRunnerPrepareFixture>;
@@ -127,6 +133,7 @@ describe("native Claude login history on preparation", () => {
     owner: string | undefined,
     next: string | undefined,
     nextOptions: Parameters<typeof login>[1] = {},
+    nextConfig: OpenClawConfig = attestNativeLogin,
   ) {
     const { dir, sessionTarget } = fixture.session;
     const runId = "native-history-run";
@@ -138,6 +145,7 @@ describe("native Claude login history on preparation", () => {
         {
           admittedRunContext: await admission.admit("embedded"),
           runId,
+          config: attestNativeLogin,
           agentDir: path.join(dir, "agents", "main", "agent"),
           provider: "claude-cli",
           model: "sonnet",
@@ -162,7 +170,9 @@ describe("native Claude login history on preparation", () => {
         }),
       );
       login(next, nextOptions);
+      profile.mockClear();
       return await fixture.prepare({
+        config: nextConfig,
         provider: "claude-cli",
         model: "sonnet",
         runId,
@@ -178,6 +188,19 @@ describe("native Claude login history on preparation", () => {
     const context = await prepareAfterTurnBy("uuid:account-a", "uuid:account-a");
     expect(context.cliHistoryWriter).toBeDefined();
     expect(context.openClawHistoryPrompt).toContain("native canary");
+  });
+
+  it("never sends the native token to Anthropic unless the operator opted in", async () => {
+    // A token this process never attested, so only the missing opt-in keeps it off the network.
+    const context = await prepareAfterTurnBy(
+      "uuid:account-a",
+      "uuid:account-a",
+      { expiresAt: Date.parse("2031-01-01T00:00:00Z") },
+      {},
+    );
+    expect(context.cliHistoryWriter).toBeUndefined();
+    expect(context.openClawHistoryPrompt).toBeUndefined();
+    expect(profile).not.toHaveBeenCalled();
   });
 
   it("refuses saved history once the native login changed", async () => {

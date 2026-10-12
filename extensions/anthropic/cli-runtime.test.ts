@@ -22,7 +22,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import type { ClaudeCliSecretInput } from "./cli-process.js";
 import { CLAUDE_PROTOCOL_FIXTURE } from "./cli-runtime.test-support.js";
-import { executeClaudeCli } from "./cli.runtime.js";
+import { executeClaudeCli, type ClaudeCliExecuteContext } from "./cli.runtime.js";
 
 const roots: string[] = [];
 const handles = new Set<CliBackendLiveSessionHandle>();
@@ -46,8 +46,8 @@ afterEach(async () => {
 
 async function createContext(
   scenario = "normal",
-  overrides: Partial<CliBackendExecuteContext> = {},
-): Promise<CliBackendExecuteContext> {
+  overrides: Partial<ClaudeCliExecuteContext> = {},
+): Promise<ClaudeCliExecuteContext> {
   const root = await realpath(await mkdtemp(path.join(os.tmpdir(), "openclaw-claude-protocol-")));
   roots.push(root);
   const fixture = path.join(root, "claude.mjs");

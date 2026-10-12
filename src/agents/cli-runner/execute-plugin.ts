@@ -594,6 +594,8 @@ export async function executePluginOwnedProcess(params: {
         useResume: params.useResume,
         abortSignal: signal,
         assertCurrent: assertBoundaryCurrent,
+        // Host-internal, not in the plugin SDK type: the bundled Claude runtime checks control
+        // requests with it after the prompt was delivered, as it receives auth credentials.
         ...(assertBoundary ? { assertStreamCurrent: assertCurrent } : {}),
         timeoutMs: run.timeoutMs,
         ...(run.executionMode ? { executionMode: run.executionMode } : {}),

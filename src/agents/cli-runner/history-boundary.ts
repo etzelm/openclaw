@@ -38,7 +38,11 @@ import {
   resolveAdmittedRunActiveAssertion,
 } from "../admitted-run-context.js";
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
-import { readAttestedNativeCliLoginOwner, resolveNativeCliLoginOwner } from "../cli-credentials.js";
+import {
+  isNativeCliLoginAttestationEnabled,
+  readAttestedNativeCliLoginOwner,
+  resolveNativeCliLoginOwner,
+} from "../cli-credentials.js";
 import { buildSessionContext, SessionManager } from "../sessions/session-manager.js";
 import { resolveCliChildEnv } from "./execution-env.js";
 import { createCliRunCurrentAssertion, resolveCliExecutionTarget } from "./execution-target.js";
@@ -131,11 +135,12 @@ async function prepareCliHistoryBoundaryOnce(
   // A forwarded credential decides which account runs. Without one, the CLI runs under the
   // native login its own environment selects, unless it is node-placed and runs under the
   // node's login instead. The Gateway process environment is never the identity source.
-  // The owner is the account the provider attests for that login's credential. It is
-  // attested before planning so no read source is held across the network request.
+  // The owner is the account the provider attests for that login's credential, and only when
+  // the operator opted in to sending it there. It is attested before planning so no read source is held across the network request.
   const nativeLogin =
     credential ||
     !childEnv ||
+    !isNativeCliLoginAttestationEnabled(provider, params.config) ||
     resolveCliExecutionTarget({ params, backendId: provider }).kind === "node"
       ? undefined
       : await resolveNativeCliLoginOwner(provider, childEnv);

@@ -7,13 +7,18 @@ import {
   loadSessionEntryReadOnly,
   patchSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
+import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import { useSessionStoreTempDirs } from "../../test-utils/session-state-cleanup.js";
 import { SessionManager } from "../sessions/session-manager.js";
 import { prepareCliHistoryBoundary } from "./history-boundary.js";
 import { createHistoryBoundaryFixture } from "./history-boundary.test-support.js";
 
 const sessionDirs = useSessionStoreTempDirs(afterAll, "cli-history-boundary-metadata-");
-const native = { provider: "claude-cli" };
+// The operator's opt-in to sending the native token to Anthropic's profile endpoint.
+const attestNativeLogin: OpenClawConfig = {
+  plugins: { entries: { anthropic: { config: { historyRecovery: { attestNativeLogin: true } } } } },
+};
+const native = { provider: "claude-cli", config: attestNativeLogin };
 
 beforeEach(() => {
   // Stub Anthropic profile endpoint: a synthetic token names its own account.

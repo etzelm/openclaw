@@ -7,6 +7,7 @@ import {
   resolveExpiresAtMsFromDurationMs,
 } from "@openclaw/normalization-core/number-coercion";
 import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import type { OpenClawConfig } from "../config/types.openclaw.js";
 import { resolveOsHomeRelativePath } from "../infra/home-dir.js";
 import { loadJsonFileThroughSymlink } from "../infra/json-file.js";
 import {
@@ -474,6 +475,23 @@ export type NativeCliLoginAttestation = {
   /** From this time the CLI rotates the credential before it accepts a prompt. */
   refreshDueAt?: number;
 };
+
+/**
+ * Attestation sends the CLI's own access token to its provider, so it runs only when the
+ * owning plugin opts in. For Claude that is
+ * `plugins.entries.anthropic.config.historyRecovery.attestNativeLogin: true`. Off by default:
+ * the native login then has no owner and history stays refused, as before.
+ */
+export function isNativeCliLoginAttestationEnabled(
+  backendId: string,
+  config: OpenClawConfig | undefined,
+): boolean {
+  const pluginConfig = asOptionalRecord(config?.plugins?.entries?.anthropic?.config);
+  return (
+    backendId === "claude-cli" &&
+    asOptionalRecord(pluginConfig?.historyRecovery)?.attestNativeLogin === true
+  );
+}
 
 /**
  * Owner of the native login a local run of this CLI backend would use under

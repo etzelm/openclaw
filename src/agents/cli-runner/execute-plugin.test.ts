@@ -92,6 +92,9 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+// The host passes its stream check outside the plugin SDK type, as it does auth credentials.
+type HostExecuteContext = CliBackendExecuteContext & { assertStreamCurrent?: () => void };
+
 describe("plugin-owned CLI execution host boundary", () => {
   it("streams plugin events through the canonical host output boundary", async () => {
     // Exercise stream translation independently of cold policy-worker startup time.
@@ -143,8 +146,9 @@ describe("plugin-owned CLI execution host boundary", () => {
     const caller = vi.fn();
     const boundary = vi.fn();
     context.params.assertCurrent = caller;
-    let observed: CliBackendExecuteContext | undefined;
-    const execute: CliBackendExecute = async function* (execution) {
+    let observed: HostExecuteContext | undefined;
+    const execute: CliBackendExecute = async function* (hostContext) {
+      const execution: HostExecuteContext = hostContext;
       observed = execution;
       caller.mockClear();
       boundary.mockClear();
@@ -163,7 +167,7 @@ describe("plugin-owned CLI execution host boundary", () => {
 
   it("offers no stream check unless the host binds the run to an account", async () => {
     const { context } = await createExecution({ runId: "plugin-no-stream-check" });
-    let observed: CliBackendExecuteContext | undefined;
+    let observed: HostExecuteContext | undefined;
     const execute: CliBackendExecute = async function* (execution) {
       observed = execution;
       yield SUCCESS_RESULT;

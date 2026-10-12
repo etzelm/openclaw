@@ -50,8 +50,16 @@ function readReplayedTaskId(
   return /^<task-notification>\s*<task-id>([^<]+)<\/task-id>/u.exec(text)?.[1];
 }
 
+/**
+ * Host-internal, like the forwarded auth credential and not part of the plugin SDK: a host
+ * that binds the run to an account also passes a cheaper check for control requests after
+ * the prompt was delivered. Spawn, send and private-context delivery keep assertCurrent.
+ */
+export type ClaudeCliExecuteContext = CliBackendExecuteContext & {
+  assertStreamCurrent?: () => void;
+};
 type ClaudeCliTurn = {
-  context: CliBackendExecuteContext;
+  context: ClaudeCliExecuteContext;
   controller: AbortController;
   userInput: ReturnType<typeof createClaudeCliUserInputAuthorizer>;
   events: PassThrough;
@@ -395,7 +403,7 @@ function createSession(capability?: CliBackendLiveSessionCapability): ClaudeCliS
 }
 
 export async function* executeClaudeCli(
-  context: CliBackendExecuteContext,
+  context: ClaudeCliExecuteContext,
   secretInput?: ClaudeCliSecretInput,
 ): AsyncIterable<Record<string, unknown>> {
   context.assertCurrent?.();

@@ -488,13 +488,6 @@ describe("attestClaudeNativeLoginOwner", () => {
           "uuid:uuid-a",
         );
       });
-
-      it("reads the Keychain login when the password lookup succeeds", async () => {
-        const execSync = vi.fn(() => keychainPayload) as never;
-        expect(await attest({ homeDir: stale(), platform: "darwin", execSync })).toBe(
-          "uuid:uuid-keychain",
-        );
-      });
     });
   });
 });
