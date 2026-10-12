@@ -365,7 +365,7 @@ describe("Doctor workspace persistence", () => {
     });
   });
 
-  it("does not pin a converged system agent whose files are only in the shared workspace", async () => {
+  it("copies shared-workspace files into a converged system agent's directory and pins it", async () => {
     await withDoctorConfigPreflightHome(async (home) => {
       await withEnvAsync({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
         const workspace = path.join(home, "shared-workspace");
@@ -386,8 +386,15 @@ describe("Doctor workspace persistence", () => {
         await runInitialConfigWriteHealth(await prepareDoctorContext(configPath));
 
         const after = (await readConfigFileSnapshot()).config;
-        expect(after.agents?.entries?.main?.workspace).toBeUndefined();
+        expect(after.agents?.entries?.main?.workspace).toBe(path.join(workspace, "main"));
         expect(resolveAgentWorkspaceDir(after, "main")).toBe(path.join(workspace, "main"));
+        expect(
+          listConfiguredOwnerInputs(after, workspace).find((input) => input.agentId === "main")
+            ?.workspaceDir,
+        ).toBe(path.join(workspace, "main"));
+        expect(await fs.readFile(path.join(workspace, "main", "SOUL.md"), "utf8")).toBe(
+          "root persona",
+        );
         expect(await fs.readFile(path.join(workspace, "SOUL.md"), "utf8")).toBe("root persona");
       });
     });
@@ -430,7 +437,7 @@ describe("Doctor workspace persistence", () => {
     });
   });
 
-  it("leaves a converged system agent unpinned while it has a stored CLI-backend conversation", async () => {
+  it("leaves a converged system agent unpinned while a stored CLI conversation would lose history", async () => {
     await withDoctorConfigPreflightHome(async (home) => {
       await withEnvAsync({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
         const workspace = path.join(home, "shared-workspace");
@@ -454,7 +461,7 @@ describe("Doctor workspace persistence", () => {
           {
             sessionId: "main-local",
             updatedAt: Date.now(),
-            cliSessionBindings: { "claude-cli": { sessionId: "claude-native-1" } },
+            cliSessionBindings: { "codex-cli": { sessionId: "codex-native-1" } },
           },
         );
         closeOpenClawStateDatabaseForTest();
@@ -472,8 +479,8 @@ describe("Doctor workspace persistence", () => {
             agentId: "main",
             sessionKey: "agent:main:main",
             storePath: resolveSessionStorePathCore(undefined, { agentId: "main" }),
-          })?.cliSessionBindings?.["claude-cli"]?.sessionId,
-        ).toBe("claude-native-1");
+          })?.cliSessionBindings?.["codex-cli"]?.sessionId,
+        ).toBe("codex-native-1");
       });
     });
   });

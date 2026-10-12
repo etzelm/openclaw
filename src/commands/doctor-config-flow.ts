@@ -494,6 +494,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     (isRecord(parsedDefaults) ? parsedDefaults.workspace : undefined);
   const systemAgentWorkspace = await repairSystemAgentWorkspacePin(state.candidate, process.env, {
     includeOwnsRoster,
+    applyFiles: shouldRepair,
     authoredDefaultWorkspace:
       typeof authoredDefaultWorkspace === "string" ? authoredDefaultWorkspace : undefined,
   });

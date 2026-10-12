@@ -496,22 +496,28 @@ An already converged explicit roster can leave the system agent
 (`agents.defaults.systemAgent.agentId`) without `workspace`: its Gateway turns
 then run in the shared workspace root while its persona, bootstrap, and memory
 files resolve to `<root>/<agentId>`. `openclaw doctor --fix` records
-`agents.entries.<agentId>.workspace` as `<root>/<agentId>` only when the root
-holds no customized files, so nothing changes where the files live. The pin
-keeps the root as you wrote it (`${WORKSPACE_ROOT}/<agentId>`, `~/x/<agentId>`),
-so changing that variable moves defaults and pin together, including when
-`agents.defaults` comes from an `$include` file. A customized
-`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or `USER.md`, `memory/`, `MEMORY.md`, or
-workspace skills count as files; seeded templates do not. When the root holds
-such files, Doctor never assigns the shared root to the agent: it writes
-nothing and warns with the root, `<root>/<agentId>`, and the
-`agents.entries.<agentId>.workspace` key to set. The same applies when both
-directories hold files. Doctor also never picks a root another agent already
-resolves to, and only warns when the roster lives in an included file. If a
-stored session of the agent holds a CLI-backend conversation (for example
-`claude-cli`), Doctor writes nothing and warns with the value to set: that
-conversation is tied to the current working directory and would start fresh,
-without resuming history, after the pin. No files are moved or deleted.
+`agents.entries.<agentId>.workspace` as `<root>/<agentId>`, never as the shared
+root, which also holds the other agents' workspaces. The pin keeps the root as
+you wrote it (`${WORKSPACE_ROOT}/<agentId>`, `~/x/<agentId>`), so changing that
+variable moves defaults and pin together, including when `agents.defaults`
+comes from an `$include` file.
+
+When the root holds the agent's files, Doctor first copies them into
+`<root>/<agentId>`: a customized `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or
+`USER.md`, `MEMORY.md`, and the files under `memory/` and `skills/`. A seeded
+template in `<root>/<agentId>` is replaced; a customized file there is kept,
+and Doctor names each file it kept whose root copy differs. Nothing is moved or
+deleted, so the root keeps every original. Doctor skips a root another agent
+already resolves to, and only warns when the roster lives in an included file.
+
+A stored session of the agent can hold a CLI-backend conversation, which is
+tied to the working directory it started in. For a `claude-cli` conversation,
+Doctor copies its transcript into the Claude project folder of
+`<root>/<agentId>` (the original stays in place) and records the new directory
+in the session's binding, so the next turn resumes the same conversation with
+its history. For any other backend, or a conversation kept in a legacy
+`sessions.json` store, Doctor writes nothing and warns with the value to set,
+because that conversation would start fresh without resuming history.
 
 Doctor follows the existing [include write constraints](/gateway/config-secrets-env).
 A root-level `$include`, or a repair spanning an included roster and root-owned

@@ -165,7 +165,7 @@ export function isExpectedAbsentBootstrapFile(name: string): boolean {
   return OPTIONAL_BOOTSTRAP_FILENAMES.has(name) || name === DEFAULT_MEMORY_FILENAME;
 }
 
-async function fileContentDiffersFromTemplate(dir: string, fileName: string): Promise<boolean> {
+export async function fileDiffersFromTemplate(dir: string, fileName: string): Promise<boolean> {
   try {
     return await retryAsync(
       async () =>
@@ -264,7 +264,7 @@ export async function workspaceProfileLooksConfigured(params: {
 }): Promise<boolean> {
   const profileFileDiffs = await Promise.all(
     WORKSPACE_ONBOARDING_PROFILE_FILENAMES.map(async (fileName) =>
-      fileContentDiffersFromTemplate(params.dir, fileName),
+      fileDiffersFromTemplate(params.dir, fileName),
     ),
   );
   return (
@@ -292,7 +292,7 @@ export async function workspaceRequiredBootstrapLooksCustomized(
       return false;
     }
   }
-  return fileContentDiffersFromTemplate(dir, DEFAULT_AGENTS_FILENAME);
+  return fileDiffersFromTemplate(dir, DEFAULT_AGENTS_FILENAME);
 }
 
 async function workspaceAttestedGeneratedFilesIntact(
