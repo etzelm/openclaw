@@ -9,5 +9,4 @@ All captures in this folder ran on one Mac Studio at tree `76e11c8b4a9` (the pus
 
 Paths are redacted: `$RUN` is the scenario run dir, `$HOME` the home dir.
 
-Identity: the captures ran in a local commit `4cccfd5a9bb` (tree `e31df11f419`); the pushed commit is the same tree, signed. `gates/identity.txt` records the tree before and after the run.
-Base controls (`gates/base-control-*.log`) compare a failing test on `5d840900899` and on an earlier local commit of this branch whose diff to the pushed tree is a docs sentence and two lint fixes; neither file is touched by the PR.
+Second sitting, same tree: `runs/` and `outcomes-after.txt` were re-captured after the synthetic child learned to answer OpenClaw's `UserPromptSubmit` hook the way Claude CLI does (`fake-claude.log.context-*.txt` is the context each prompt received). That sitting adds `harness/gateway-probe.sh` (rows 28 to 31: a Gateway turn left unfinished, then `--local` turns), `harness/plugins/probe-note` (row 32: a plugin-SDK note), `runs/after-note-worker-commands.log` (every SQLite worker command of row 32), and `runs/base-*` with `outcomes-base.txt` (the same harness against a build of `5d840900899`). Scenario outcomes 1 to 27 match the first sitting.

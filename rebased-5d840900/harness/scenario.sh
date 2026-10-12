@@ -25,7 +25,7 @@ STUB=$!
 trap 'kill $STUB 2>/dev/null' EXIT
 for _ in $(seq 50); do [ -s "$RUN/profile-port" ] && break; sleep 0.1; done
 export FAKE_PROFILE_PORT=$(cat "$RUN/profile-port")
-export NODE_OPTIONS="--import $H/shim/profile-fetch-shim.mjs"
+export NODE_OPTIONS="--import $H/shim/profile-fetch-shim.mjs ${EXTRA_NODE_OPTIONS:-}"
 mkdir -p "$RUN/workspace/skills/harness-skill"
 printf -- '---\nname: harness-skill\ndescription: Harness skill whose config injects an environment variable.\n---\nNo instructions.\n' > "$RUN/workspace/skills/harness-skill/SKILL.md"
 SKILL_LOGIN=$RUN/skill-claude-config
@@ -37,6 +37,10 @@ write_config() { # optional skill CLAUDE_CONFIG_DIR value
   fi
 }
 write_config
+# The probe-note plugin (plugins/probe-note) appends one saved note at agent_end of a chosen turn.
+write_probe_config() {
+  printf '{"agents":{"defaults":{"workspace":"%s"}},"plugins":{"load":{"paths":["%s"]},"entries":{"probe-note":{"enabled":true,"hooks":{"allowConversationAccess":true}}}}}' "$RUN/workspace" "$H/plugins/probe-note" > "$OPENCLAW_CONFIG_PATH"
+}
 write_account() { # dir uuid
   mkdir -p "$1"
   printf '{"oauthAccount":{"accountUuid":"%s","emailAddress":"%s@example.invalid"}}' "$2" "$2" > "$1/.claude.json"
@@ -203,6 +207,37 @@ case "$SCEN" in
     cp "$OPENCLAW_CONFIG_PATH" "$RUN/config-after-upgrade.json"
     mark "turn4 (candidate, new conversation, account A)"; SESSION_ID=harness-session-2 turn 4 "Remember: the new codeword is MANGO-5. Reply STORED."
     mark "turn5 (candidate, new conversation, fresh claude session)"; SESSION_ID=harness-session-2 turn 5 "What is the codeword?" ;;
+  note-resumed-allowed)
+    # Turn 1 leaves a saved note (KIWI-9) through the plugin SDK; turns 2 and 3 resume the Claude session.
+    export FAKE_WRITE_TRANSCRIPT=1; write_probe_config
+    mark "turn1 (account A, fresh claude session; the probe plugin appends saved note KIWI-9 at agent_end)"
+    PROBE_NOTE=KIWI-9 turn 1 "Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+    mark "turn2 (account A, resumed claude session)"; turn 2 "What is the harness note?" ;;
+  note-resumed-reassign-before-send)
+    export FAKE_WRITE_TRANSCRIPT=1; write_probe_config
+    mark "turn1 (account A, fresh claude session; the probe plugin appends saved note KIWI-9 at agent_end)"
+    PROBE_NOTE=KIWI-9 turn 1 "Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+    mark "turn2 (account A at launch, resumed claude session; login reassigned to B while claude initializes, before the prompt is sent)"
+    FAKE_ON_INIT="$SWITCH_TO_B" turn 2 "What is the harness note?"
+    eval "$SWITCH_TO_A"
+    mark "turn3 (back on account A, resumed claude session)"; turn 3 "What is the harness note?" ;;
+  note-resumed-revoke-before-send)
+    export FAKE_WRITE_TRANSCRIPT=1; write_probe_config
+    mark "turn1 (account A, fresh claude session; the probe plugin appends saved note KIWI-9 at agent_end)"
+    PROBE_NOTE=KIWI-9 turn 1 "Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+    mark "turn2 (account A at launch, resumed claude session; credential removed while claude initializes, before the prompt is sent)"
+    FAKE_ON_INIT="$REVOKE" turn 2 "What is the harness note?"
+    eval "$SWITCH_TO_A"
+    mark "turn3 (credential back for account A, resumed claude session)"; turn 3 "What is the harness note?" ;;
+  note-append-after-switch)
+    # Turn 2's note is appended after the login moved to B (PROBE_NOTE_BEFORE runs the switch).
+    export FAKE_WRITE_TRANSCRIPT=1; write_probe_config
+    mark "turn1 (account A, fresh claude session; the probe plugin appends saved note KIWI-9 at agent_end)"
+    PROBE_NOTE=KIWI-9 turn 1 "Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+    mark "turn2 (account A, resumed claude session; login reassigned to B at agent_end, then the plugin appends saved note FIG-4)"
+    PROBE_NOTE=FIG-4 PROBE_NOTE_BEFORE="$SWITCH_TO_B" turn 2 "Remember: the second codeword is BANANA-3. Reply STORED."
+    eval "$SWITCH_TO_A"
+    mark "turn3 (back on account A, resumed claude session)"; turn 3 "What is the harness note?" ;;
   resumed-allowed)
     # The synthetic child writes a native transcript, so turns 2 and 3 resume the Claude session.
     export FAKE_WRITE_TRANSCRIPT=1

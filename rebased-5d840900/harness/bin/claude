@@ -86,12 +86,62 @@ const writeTranscript = (content) => {
   ];
   fs.appendFileSync(path.join(dir, `${sessionId}.jsonl`), lines.map((l) => JSON.stringify(l)).join("\n") + "\n");
 };
-record("spawn", { argc: process.argv.length - 2, sessionMode: resumed ? "resume" : "fresh" });
+// The system prompt arrives in argv (or a file named there). Keep it, so a run can show which
+// saved context reached this child before any user message.
+let argvFile;
+if (log && process.argv.length > 4) {
+  const parts = process.argv.slice(2).map((arg) => {
+    try {
+      return arg.length < 4096 && fs.statSync(arg).isFile() ? `${arg}\n${fs.readFileSync(arg, "utf8")}` : arg;
+    } catch {
+      return arg;
+    }
+  });
+  argvFile = `${log}.argv-${process.pid}.txt`;
+  fs.writeFileSync(argvFile, parts.join("\n"));
+}
+record("spawn", { argc: process.argv.length - 2, sessionMode: resumed ? "resume" : "fresh", ...(argvFile ? { argvFile } : {}) });
 let userMessages = 0;
+let promptHook = false;
+const pendingHooks = new Map();
+// After the prompt (and its UserPromptSubmit hook, when registered) the child replies.
+const finishUserTurn = (content) => {
+  hook("FAKE_ON_USER");
+  writeTranscript(content);
+  send({
+    type: "result",
+    subtype: "success",
+    is_error: false,
+    result: process.env.FAKE_REPLY ?? "STORED",
+    session_id: sessionId,
+  });
+};
 for await (const line of readline.createInterface({ input: process.stdin })) {
   const message = JSON.parse(line);
+  if (message.type === "control_response" && pendingHooks.has(message.response?.request_id)) {
+    // Claude CLI asks the SDK host for UserPromptSubmit additional context before it handles the
+    // prompt; OpenClaw's private turn context (saved notes, interrupted inputs) arrives here.
+    const { content, n } = pendingHooks.get(message.response.request_id);
+    pendingHooks.delete(message.response.request_id);
+    const extra = message.response?.response?.hookSpecificOutput?.additionalContext ?? "";
+    const file = `${process.env.FAKE_CLAUDE_LOG}.context-${process.pid}-${n}.txt`;
+    fs.writeFileSync(file, String(extra));
+    record("prompt-context-received", {
+      chars: String(extra).length,
+      sha256: crypto.createHash("sha256").update(String(extra)).digest("hex"),
+      contextFile: file,
+    });
+    finishUserTurn(content);
+    continue;
+  }
   if (message.type === "control_request" && message.request.subtype === "initialize") {
-    record("initialize");
+    promptHook = Boolean(message.request.hooks?.UserPromptSubmit);
+    // The system prompt and appended context arrive in this request; keep it for canary counts.
+    const initFile = log ? `${log}.init-${process.pid}.json` : undefined;
+    if (initFile) {
+      fs.writeFileSync(initFile, JSON.stringify(message.request, null, 1));
+    }
+    record("initialize", initFile ? { initFile } : {});
     hook("FAKE_ON_INIT");
     send({
       type: "control_response",
@@ -111,14 +161,20 @@ for await (const line of readline.createInterface({ input: process.stdin })) {
       sha256: crypto.createHash("sha256").update(content).digest("hex"),
       promptFile: file,
     });
-    hook("FAKE_ON_USER");
-    writeTranscript(content);
-    send({
-      type: "result",
-      subtype: "success",
-      is_error: false,
-      result: process.env.FAKE_REPLY ?? "STORED",
-      session_id: sessionId,
-    });
+    if (promptHook) {
+      const requestId = `hook-${process.pid}-${userMessages}`;
+      pendingHooks.set(requestId, { content, n: userMessages });
+      send({
+        type: "control_request",
+        request_id: requestId,
+        request: {
+          subtype: "hook_callback",
+          callback_id: "UserPromptSubmit",
+          input: { hook_event_name: "UserPromptSubmit", prompt: content, session_id: sessionId },
+        },
+      });
+    } else {
+      finishUserTurn(content);
+    }
   }
 }

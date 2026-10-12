@@ -1,0 +1,4 @@
+# scenario | turn exit codes | per turn promptChars/historyPrompt/useResume (REFUSED = 'CLI history authority changed before execution') | per delivered user message chars:PINEAPPLE-7,BANANA-3,MANGO-5 counts, then +ctx with the same counts for the UserPromptSubmit context the child received | stored boundary per session after the last turn | profile requests that reached the STUB
+interrupted-allowed | exit=0 exit=0 exit=0 | 85/none/false -/-/- 61/none/true | 85:1,0,0+ctx852:0,0,0 87:0,0,1+ctx852:0,0,0 61:0,0,0+ctx852:0,0,0 | t1:none t2:none t3:none | stubProfileRequests=0
+interrupted-fresh | exit=0 exit=0 exit=0 | 85/none/false -/-/- 462/none/false | 85:1,0,0+ctx852:0,0,0 87:0,0,1+ctx852:0,0,0 462:0,0,0+ctx852:0,0,0 | t1:none t2:none t3:none | stubProfileRequests=0
+resumed-allowed | exit=0 exit=0 exit=0 | 85/none/false 83/none/true 50/none/true | 85:1,0,0+ctx852:0,0,0 83:0,1,0+ctx852:0,0,0 50:0,0,0+ctx852:0,0,0 | t1:none t2:none t3:none | stubProfileRequests=0
