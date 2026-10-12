@@ -1,0 +1,725 @@
+$ node --import ./scripts/tsx.mjs scripts/build-all.mts
+[build-all] native-protocol
+[build-all] native-protocol done in 124ms
+[build-all] plugins:assets:build
+[canvas] build: node scripts/bundle-a2ui.mjs
+<DIR>/a2ui.bundle.js  chunk │ size: 607.42 kB
+<DIR>/a2ui-v0.9.bundle.js  chunk │ size: 835.72 kB
+
+✔ rolldown v1.2.12 Finished in 156.97 ms
+[clawrouter] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/clawrouter
+[workboard] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/workboard
+[x] build: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/x
+[build-all] plugins:assets:build done in 3.54s
+[build-all] tsdown-ai
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[PLUGIN_TIMINGS] JavaScript callbacks ran for 8.9s of this 9.0s build (99%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin openclaw-native-declarations buildStart (95%, 8.5s, 1 call)
+Additional callback time came from the callbacks below and from callbacks under 1s.
+3 callbacks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - plugin tsdown:deps resolveId (883 calls)
+  - plugin rolldown-plugin-dts:resolver resolveId (956 calls)
+  - plugin rolldown-plugin-dts:fake-js transform (140 calls)
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+[tsdown-build] invocation 1/1 finished in 9.3s
+[build-all] tsdown-ai done in 11s
+[build-all] tsdown-packages
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=10984; no output for 59s
+[tsdown-build] invocation 1/1 finished in 78.7s
+[build-all] tsdown-packages done in 1m 20.7s
+[build-all] tsdown
+[tsdown-build] invocation 1/2 finished in 0.3s
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 ]
+      │
+ 2400 │           ASM_CONSTS[start] = eval(func);
+      │                               ──┬─  
+      │                                 ╰─── Use of direct `eval` here.
+      │ 
+      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+──────╯
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 ]
+      │
+ 2423 │           moduleExports[name] = eval(func);
+      │                                 ──┬─  
+      │                                   ╰─── Use of direct `eval` here.
+      │ 
+      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+──────╯
+
+node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66352:28) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+       ╭─[ node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66352:29 ]
+       │
+ 66352 │               const value = eval(`(${expr})`);
+       │                             ──┬─  
+       │                               ╰─── Use of direct `eval` here.
+       │ 
+       │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+───────╯
+
+node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js (66359:28) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+       ╭─[ node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/coreBundle.js:66359:29 ]
+       │
+ 66359 │               const value = eval(`(${expr})`);
+       │                             ──┬─  
+       │                               ╰─── Use of direct `eval` here.
+       │ 
+       │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+───────╯
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2400:30) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2400:31 ]
+      │
+ 2400 │           ASM_CONSTS[start] = eval(func);
+      │                               ──┬─  
+      │                                 ╰─── Use of direct `eval` here.
+      │ 
+      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+──────╯
+
+node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js (2423:32) [EVAL] Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      ╭─[ node_modules/.pnpm/web-tree-sitter@0.27.0/node_modules/web-tree-sitter/web-tree-sitter.js:2423:33 ]
+      │
+ 2423 │           moduleExports[name] = eval(func);
+      │                                 ──┬─  
+      │                                   ╰─── Use of direct `eval` here.
+      │ 
+      │ Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+──────╯
+
+[tsdown-build] invocation 2/2 finished in 30.8s
+[build-all] tsdown done in 33.8s
+[build-all] external-plugins:local-dist
+[plugin-npm-runtime-build] build assets diffs: node --import tsx ../../scripts/build-diffs-viewer-runtime.mts curated
+[plugin-npm-runtime-build] build assets diffs-language-pack: node --import tsx ../../scripts/build-diffs-viewer-runtime.mts full
+[plugin-npm-runtime-build] build assets discord: node --import ../../scripts/tsx.mjs ../../scripts/build-discord-activity-sdk.mts
+[external-plugin-local-dist] built 96 plugins in 4398ms
+[build-all] external-plugins:local-dist done in 4.73s
+[build-all] write-unified-entry-dts
+[tsdown-unified] openclaw-dts: cache miss (record-unavailable)
+
+ WARN  TypeScript 7.0 does not yet have a stable API and is experimental. Some options will be unavailable.
+
+[tsdown-build] still running pid=17566; no output for 60s
+[tsdown-build] still running pid=17566; no output for 30s
+[tsdown-build] still running pid=17566; no output for 30s
+[tsdown-build] invocation 1/1 finished in 124.9s
+[build-all] write-unified-entry-dts done in 2m 16.2s
+[build-all] check-cli-bootstrap-imports
+CLI bootstrap import guard passed.
+[build-all] check-cli-bootstrap-imports done in 9.14s
+[build-all] plugins:assets:copy
+[browser] copy: node scripts/copy-chrome-extension.mjs
+[canvas] copy: node scripts/copy-a2ui.mjs
+[clawrouter] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/clawrouter --copy
+[workboard] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/workboard --copy
+[x] copy: cd ../.. && node --import ./scripts/tsx.mjs scripts/build-plugin-control-ui.mts extensions/x --copy
+[build-all] plugins:assets:copy done in 2.62s
+[build-all] runtime-postbuild
+[plugin-control-plane-loads] verified 54 built modules with native require and checked doctor closures
+runtime-postbuild: 14 phases completed in 9726ms (slowest: built plugin control-plane loads 2801ms)
+[build-all] runtime-postbuild done in 10.3s
+[build-all] build-stamp
+[build-all] build-stamp done in 326ms
+[build-all] runtime-postbuild-stamp
+[build-all] runtime-postbuild-stamp done in 146ms
+[build-all] check-plugin-sdk-exports
+Public plugin SDK declaration graph: 4967719/5315536 bytes (5250000-byte ratchet + 65536-byte output variance).
+OK: All 154 public plugin-sdk subpaths verified.
+[build-all] check-plugin-sdk-exports done in 1.77s
+[build-all] ui:build
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+vite v8.3.2 building client environment for production...
+`output.codeSplitting.groups[0].name` is a function. Set `output.codeSplitting.groups[0].debugName` so the bundler timing report can identify this group.
+transforming...
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "$HOME/work/pr-164796/packages/media-core/src/mime.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "$HOME/work/pr-164796/packages/media-core/src/file-name.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 4528 modules transformed.
+rendering chunks...
+Control UI precompression: starting
+Control UI precompression complete: 496 assets (992 sidecars)
+computing gzip size...
+../dist/control-ui.build-28038-kvl19e/assets/chat-attachment-image.worker-P4E63gj9.js              0.99 kB
+../dist/control-ui.build-28038-kvl19e/assets/custom-light-DyDTxevI.webp                            1.52 kB
+../dist/control-ui.build-28038-kvl19e/assets/crt-light-DbR0bpR3.webp                               1.64 kB
+../dist/control-ui.build-28038-kvl19e/assets/custom-dark-B0roIpAb.webp                             1.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/phosphor-light-B6L1EVnW.webp                          1.83 kB
+../dist/control-ui.build-28038-kvl19e/assets/phosphor-dark-DO_664om.webp                           3.12 kB
+../dist/control-ui.build-28038-kvl19e/assets/crt-dark-Tui5yPvX.webp                                3.26 kB
+../dist/control-ui.build-28038-kvl19e/assets/frame-BoCsE8xn.js                                     4.41 kB
+../dist/control-ui.build-28038-kvl19e/assets/absolutely-light-CraDJas4.webp                        4.93 kB
+../dist/control-ui.build-28038-kvl19e/assets/absolutely-dark-BCt4vgFE.webp                         7.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/manuscript-light-BtjxM-_G.webp                        7.58 kB
+../dist/control-ui.build-28038-kvl19e/assets/manuscript-dark-CkdelLyK.webp                        12.25 kB
+../dist/control-ui.build-28038-kvl19e/assets/miami-light-CK76ftVr.webp                            12.91 kB
+../dist/control-ui.build-28038-kvl19e/assets/knot-light-bmQq9AbN.webp                             13.39 kB
+../dist/control-ui.build-28038-kvl19e/assets/tide-light-CtKGylEa.webp                             13.49 kB
+../dist/control-ui.build-28038-kvl19e/assets/beacon-light-C8Uuyhzu.webp                           14.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/knot-dark-D6MXlduA.webp                              17.41 kB
+../dist/control-ui.build-28038-kvl19e/assets/rose-light-xf8VQLmW.webp                             20.09 kB
+../dist/control-ui.build-28038-kvl19e/assets/miami-dark-CxsR_EPe.webp                             21.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/tide-dark-B6z-RwsR.webp                              22.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/beacon-dark-BUxx3gLL.webp                            22.76 kB
+../dist/control-ui.build-28038-kvl19e/assets/dash-light-BdkMy7z2.webp                             24.84 kB
+../dist/control-ui.build-28038-kvl19e/index.html                                                  26.54 kB │ gzip:   6.54 kB
+../dist/control-ui.build-28038-kvl19e/assets/rose-dark-D9X1-O20.webp                              26.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/claw-light-crdey3iy.webp                             27.58 kB
+../dist/control-ui.build-28038-kvl19e/assets/dash-dark-BQSVDng9.webp                              29.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/claw-dark-DPmO9vJN.webp                              34.36 kB
+../dist/control-ui.build-28038-kvl19e/social-card.png                                            142.28 kB
+../dist/control-ui.build-28038-kvl19e/assets/mermaid.min-RZ6v1efX.js                           3,420.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-Bdwf2Lnv.css                   0.18 kB │ gzip:   0.12 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-chrome-setup-DEA9Gvpf.css                      0.18 kB │ gzip:   0.13 kB
+../dist/control-ui.build-28038-kvl19e/assets/skills-page-BQ5d-20G.css                              0.23 kB │ gzip:   0.17 kB
+../dist/control-ui.build-28038-kvl19e/assets/terminal-page-DzAc6IHZ.css                            0.25 kB │ gzip:   0.16 kB
+../dist/control-ui.build-28038-kvl19e/assets/device-page-D5hqr-vM.css                              0.33 kB │ gzip:   0.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-new-D-SpiTTi.css                      0.56 kB │ gzip:   0.26 kB
+../dist/control-ui.build-28038-kvl19e/assets/browser-CJbChXBx.css                                  0.71 kB │ gzip:   0.33 kB
+../dist/control-ui.build-28038-kvl19e/assets/markdown-file-tooltip-jvyPxCJD.css                    0.74 kB │ gzip:   0.38 kB
+../dist/control-ui.build-28038-kvl19e/assets/website-FFS1HcOL.css                                  0.78 kB │ gzip:   0.39 kB
+../dist/control-ui.build-28038-kvl19e/assets/unsupported-browser-DnDuIuKE.css                      0.88 kB │ gzip:   0.45 kB
+../dist/control-ui.build-28038-kvl19e/assets/capacity-meter-Bpyn5Saf.css                           0.95 kB │ gzip:   0.39 kB
+../dist/control-ui.build-28038-kvl19e/assets/mcp-app-view-registration-DWqwxYFj.css                0.96 kB │ gzip:   0.41 kB
+../dist/control-ui.build-28038-kvl19e/assets/mcp-app-confirm-hGp0oC5t.css                          0.97 kB │ gzip:   0.44 kB
+../dist/control-ui.build-28038-kvl19e/assets/assistant-panel-content-DzJupYdl.css                  1.13 kB │ gzip:   0.40 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-document-nXmtMAlH.css                           1.14 kB │ gzip:   0.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/credential-editor-CxfZfu4o.css                        1.15 kB │ gzip:   0.42 kB
+../dist/control-ui.build-28038-kvl19e/assets/lane-table-CSTpz4OW.css                               1.21 kB │ gzip:   0.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-dashboard-BZzcciLT.css                     1.52 kB │ gzip:   0.56 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-processes-panel-wfftEucI.css                     1.59 kB │ gzip:   0.53 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-core-CAGzVH_L.css                          1.71 kB │ gzip:   0.50 kB
+../dist/control-ui.build-28038-kvl19e/assets/report-u5Iupsx8.css                                   1.75 kB │ gzip:   0.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/agents-home-page-DfcNNRNz.css                         1.80 kB │ gzip:   0.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/wizard-step-controls-CYe5XwZR.css                     1.86 kB │ gzip:   0.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/logs-page-Bu6yianf.css                                1.87 kB │ gzip:   0.73 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-session-panels-BDbvNV8H.css                      1.99 kB │ gzip:   0.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/youtube-video-card-fbkG3y6X.css                       1.99 kB │ gzip:   0.80 kB
+../dist/control-ui.build-28038-kvl19e/assets/onboarding-memory-import-DuWLEvoz.css                 2.02 kB │ gzip:   0.64 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-embed-CYYiIVhL.css                             2.10 kB │ gzip:   0.71 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-subagents-panel-T1NfAUyA.css                     2.13 kB │ gzip:   0.69 kB
+../dist/control-ui.build-28038-kvl19e/assets/keyboard-shortcuts-dialog-Ch0L5Kpq.css                2.26 kB │ gzip:   0.70 kB
+../dist/control-ui.build-28038-kvl19e/assets/profile-page-C73ipYq-.css                             2.28 kB │ gzip:   0.73 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-session-rail-oFVOaZvm.css                        2.56 kB │ gzip:   0.88 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-background-4Ec0haXh.css                       2.91 kB │ gzip:   0.80 kB
+../dist/control-ui.build-28038-kvl19e/assets/update-run-view-CS3ezHvV.css                          3.22 kB │ gzip:   0.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/connection-page-Cwi7GDhW.css                          3.31 kB │ gzip:   0.96 kB
+../dist/control-ui.build-28038-kvl19e/assets/sparkline-tile-CaHeaFDQ.css                           3.48 kB │ gzip:   1.22 kB
+../dist/control-ui.build-28038-kvl19e/assets/portals-page-DZUgz7YJ.css                             3.55 kB │ gzip:   1.09 kB
+../dist/control-ui.build-28038-kvl19e/assets/lobsterdex-page-BYmxmm_r.css                          3.80 kB │ gzip:   1.19 kB
+../dist/control-ui.build-28038-kvl19e/assets/apps-page-W4BVT2Dy.css                                4.08 kB │ gzip:   1.22 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-BDUq9Q-W.css                                    4.25 kB │ gzip:   1.33 kB
+../dist/control-ui.build-28038-kvl19e/assets/devices-page-Do3i-SE3.css                             4.44 kB │ gzip:   1.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/memory-import-page-744kZiKS.css                       4.48 kB │ gzip:   1.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/about-page-DCwoVUHC.css                               4.76 kB │ gzip:   1.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/sidebar-update-runtime-Bpn2ByHA.css                   4.86 kB │ gzip:   1.22 kB
+../dist/control-ui.build-28038-kvl19e/assets/logbook-view-CcweRaNm.css                             5.68 kB │ gzip:   1.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/meetings-page-sOPnahJO.css                            5.73 kB │ gzip:   1.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/dashboards-page-oN0QjD8g.css                          5.78 kB │ gzip:   1.50 kB
+../dist/control-ui.build-28038-kvl19e/assets/secrets-page-DwICXUvq.css                             5.79 kB │ gzip:   1.39 kB
+../dist/control-ui.build-28038-kvl19e/assets/sidebar-agent-roster-D2zOS8ef.css                     6.53 kB │ gzip:   1.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugins-page-Br1CAd8n.css                             6.85 kB │ gzip:   1.73 kB
+../dist/control-ui.build-28038-kvl19e/assets/agents-page-DFluc6jm.css                              7.03 kB │ gzip:   1.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/link-reader-hovercard-CzYUpnNa.css                    8.05 kB │ gzip:   1.88 kB
+../dist/control-ui.build-28038-kvl19e/assets/approval-DeisL8qe.css                                 8.29 kB │ gzip:   2.02 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-sidebar-region-CCOvYwiO.css                      8.37 kB │ gzip:   1.89 kB
+../dist/control-ui.build-28038-kvl19e/assets/wizard-login-controller-DGCZ5v__.css                  8.58 kB │ gzip:   2.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/skill-workshop-page-DBGEFD5q.css                      8.82 kB │ gzip:   2.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/terminal-panel-registration-BFwHO1XC.css              8.90 kB │ gzip:   2.40 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-session-summary-CPjGnt6E.css               9.46 kB │ gzip:   2.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-progress-hovercard-CWlzJYa-.css               9.98 kB │ gzip:   1.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/command-palette-NBC8ATMP.css                         10.65 kB │ gzip:   2.54 kB
+../dist/control-ui.build-28038-kvl19e/assets/custodian-surface-DQTGxtgY.css                       10.94 kB │ gzip:   2.59 kB
+../dist/control-ui.build-28038-kvl19e/assets/view-status-DgXyX4nT.css                             11.27 kB │ gzip:   2.40 kB
+../dist/control-ui.build-28038-kvl19e/assets/systems-page-CG-xKQDS.css                            11.51 kB │ gzip:   2.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-view-e8aVblan.css                              13.09 kB │ gzip:   3.07 kB
+../dist/control-ui.build-28038-kvl19e/assets/sessions-page-Dkc69EX8.css                           16.53 kB │ gzip:   3.31 kB
+../dist/control-ui.build-28038-kvl19e/assets/tool-catalog-jFw-1RwO.css                            16.58 kB │ gzip:   3.52 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-page-CSdLFQ6y.css                             20.99 kB │ gzip:   4.52 kB
+../dist/control-ui.build-28038-kvl19e/assets/activity-page-DJlgqWhW.css                           26.91 kB │ gzip:   5.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/usage-BUJiEu_u.css                                   33.25 kB │ gzip:   6.25 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugins-C5tnI7Bt.css                                 40.27 kB │ gzip:   7.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-styles-DDnzoKoO.css             42.02 kB │ gzip:   7.19 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-Cn94p9q5.css                  46.14 kB │ gzip:   8.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-new-styles-66-h4eG3.css              52.85 kB │ gzip:  10.13 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-transcript-styles-Hh7loqEL.css                  63.60 kB │ gzip:  10.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-dvywfgAy.css                   127.65 kB │ gzip:  22.02 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-styles-C9e7PJkY.css          257.50 kB │ gzip:  43.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-core-DX5uUxRy.css                        298.29 kB │ gzip:  50.33 kB
+../dist/control-ui.build-28038-kvl19e/assets/index-DRjZN_jH.js                                     0.04 kB │ gzip:   0.06 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-D6d4Y3p7.js                                     0.14 kB │ gzip:   0.15 kB │ map:     5.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/approval-DGJeJQC2.js                                  0.14 kB │ gzip:   0.15 kB │ map:    10.59 kB
+../dist/control-ui.build-28038-kvl19e/assets/capacity-meter-CtP0MElm.js                            0.15 kB │ gzip:   0.15 kB │ map:     1.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/__vite-browser-external-2447137e-Bt5J11Ku.js          0.16 kB │ gzip:   0.16 kB │ map:     0.42 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-transcript-styles-DVSyd-C6.js                    0.20 kB │ gzip:   0.17 kB │ map:    85.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-new-styles-BOiOTlp9.js                0.21 kB │ gzip:   0.18 kB │ map:    75.07 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-view-Dq9oichS.js                                0.21 kB │ gzip:   0.19 kB │ map:     0.28 kB
+../dist/control-ui.build-28038-kvl19e/assets/agent-avatar-xqmA2ZDf.js                              0.22 kB │ gzip:   0.19 kB │ map:     0.27 kB
+../dist/control-ui.build-28038-kvl19e/assets/lobster-pet.runtime-BrcpDbRB.js                       0.23 kB │ gzip:   0.20 kB │ map:     0.28 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-layout-BmeSfx17.js                              0.26 kB │ gzip:   0.23 kB │ map:    11.30 kB
+../dist/control-ui.build-28038-kvl19e/assets/application-native-Cy6QjTBi.js                        0.26 kB │ gzip:   0.22 kB │ map:     0.65 kB
+../dist/control-ui.build-28038-kvl19e/assets/system-info-B9-2DfR_.js                               0.34 kB │ gzip:   0.27 kB │ map:     0.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/desktop-focus-window-C7aHAW5h.js                      0.34 kB │ gzip:   0.26 kB │ map:     0.78 kB
+../dist/control-ui.build-28038-kvl19e/assets/mcp-app-routing-9sBc0qZ3.js                           0.36 kB │ gzip:   0.28 kB │ map:     0.89 kB
+../dist/control-ui.build-28038-kvl19e/assets/format-aUshxlwr.js                                    0.37 kB │ gzip:   0.24 kB │ map:     1.29 kB
+../dist/control-ui.build-28038-kvl19e/assets/provider-usage-request-THsmtxh_.js                    0.37 kB │ gzip:   0.28 kB │ map:     1.63 kB
+../dist/control-ui.build-28038-kvl19e/assets/lobster-pet-look-chNtGwuB.js                          0.41 kB │ gzip:   0.28 kB │ map:     1.06 kB
+../dist/control-ui.build-28038-kvl19e/assets/solid-dom--6Whddl1.js                                 0.41 kB │ gzip:   0.27 kB │ map:     1.69 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-widget-cell-render-TikysiVh.js                  0.42 kB │ gzip:   0.29 kB │ map:     0.93 kB
+../dist/control-ui.build-28038-kvl19e/assets/theme-D7FBH81y.js                                     0.43 kB │ gzip:   0.29 kB │ map:     1.29 kB
+../dist/control-ui.build-28038-kvl19e/assets/diff-B5t7Hm-P.js                                      0.43 kB │ gzip:   0.33 kB │ map:     1.27 kB
+../dist/control-ui.build-28038-kvl19e/assets/page-layout-Bpc4sXWT.js                               0.46 kB │ gzip:   0.32 kB │ map:     1.63 kB
+../dist/control-ui.build-28038-kvl19e/assets/markdown-html-DIO8TPh8.js                             0.46 kB │ gzip:   0.31 kB │ map:     1.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/slots-B5wuKtQ_.js                                     0.48 kB │ gzip:   0.34 kB │ map:     5.82 kB
+../dist/control-ui.build-28038-kvl19e/assets/theme-color-DAo4KRoc.js                               0.50 kB │ gzip:   0.38 kB │ map:     1.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/transcript-search-DlHJ0-bX.js                         0.50 kB │ gzip:   0.36 kB │ map:     2.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/gateway-websocket-url-BW0hi5Wr.js                     0.53 kB │ gzip:   0.33 kB │ map:     1.36 kB
+../dist/control-ui.build-28038-kvl19e/assets/user-prefs-request-C1I4AG9j.js                        0.54 kB │ gzip:   0.39 kB │ map:     1.99 kB
+../dist/control-ui.build-28038-kvl19e/assets/worktree-preservation-BY7Mzsua.js                     0.55 kB │ gzip:   0.35 kB │ map:     1.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/cloud-worker-stop.runtime-BboyGG9P.js                 0.57 kB │ gzip:   0.39 kB │ map:     1.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/domain-capabilities-Bobw5qOq.js                       0.66 kB │ gzip:   0.37 kB │ map:     2.95 kB
+../dist/control-ui.build-28038-kvl19e/assets/domain-board-DPeo-cVT.js                              0.66 kB │ gzip:   0.38 kB │ map:     1.93 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-gateway-health.runtime-GyDqqyGU.js             0.67 kB │ gzip:   0.45 kB │ map:     2.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/panel-icon-button-BMETKlw2.js                         0.71 kB │ gzip:   0.46 kB │ map:     2.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/brainfuck-rZhEezO0.js                                 0.74 kB │ gzip:   0.41 kB │ map:     2.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/properties-CmMnR_Ok.js                                0.80 kB │ gzip:   0.44 kB │ map:     2.58 kB
+../dist/control-ui.build-28038-kvl19e/assets/rolldown-runtime-8BhlS34s.js                          0.80 kB │ gzip:   0.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/custodian-alert-store-DMTYYmJp.js                     0.81 kB │ gzip:   0.42 kB │ map:     2.96 kB
+../dist/control-ui.build-28038-kvl19e/assets/theme-artwork-loader-3nDGJuzm.js                      0.84 kB │ gzip:   0.52 kB │ map:     2.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/cmake-D52hYidm.js                                     0.89 kB │ gzip:   0.55 kB │ map:     3.36 kB
+../dist/control-ui.build-28038-kvl19e/assets/update-failure-report-CtQKSwf7.js                     0.90 kB │ gzip:   0.49 kB │ map:     2.77 kB
+../dist/control-ui.build-28038-kvl19e/assets/sandbox-host-Dm6XHU23.js                              0.90 kB │ gzip:   0.50 kB │ map:     3.10 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugin-help-value-5ddHM72g.js                         0.91 kB │ gzip:   0.58 kB │ map:     2.94 kB
+../dist/control-ui.build-28038-kvl19e/assets/response-body-B8xf1SsR.js                             0.91 kB │ gzip:   0.56 kB │ map:     3.00 kB
+../dist/control-ui.build-28038-kvl19e/assets/asciiarmor-DqwIP8wN.js                                0.91 kB │ gzip:   0.49 kB │ map:     2.81 kB
+../dist/control-ui.build-28038-kvl19e/assets/near-viewport-observer-WgGck829.js                    0.92 kB │ gzip:   0.46 kB │ map:     2.52 kB
+../dist/control-ui.build-28038-kvl19e/assets/protobuf-NGTE4n-r.js                                  0.94 kB │ gzip:   0.61 kB │ map:     2.58 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-agents-home-T3vsEjLL.js                            0.94 kB │ gzip:   0.56 kB │ map:     1.71 kB
+../dist/control-ui.build-28038-kvl19e/assets/settings-navigation-BFjQyOtS.js                       0.96 kB │ gzip:   0.60 kB │ map:     3.91 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugin-capabilities.runtime-tRFsrChQ.js               0.97 kB │ gzip:   0.54 kB │ map:     3.50 kB
+../dist/control-ui.build-28038-kvl19e/assets/http-CZiL40Fa.js                                      0.98 kB │ gzip:   0.50 kB │ map:     3.45 kB
+../dist/control-ui.build-28038-kvl19e/assets/gateway-page-DHCBT3aT.js                              0.98 kB │ gzip:   0.51 kB │ map:     3.23 kB
+../dist/control-ui.build-28038-kvl19e/assets/solr-CtCgyZ-O.js                                      0.99 kB │ gzip:   0.54 kB │ map:     3.49 kB
+../dist/control-ui.build-28038-kvl19e/assets/settings-model-C8NA-Wgy.js                            1.03 kB │ gzip:   0.56 kB │ map:     5.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/ref-contract-BgJ2MSo6.js                              1.04 kB │ gzip:   0.57 kB │ map:    10.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-disabled.solid-CyCA9PPH.js                 1.05 kB │ gzip:   0.60 kB │ map:     4.00 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-diff-highlight.runtime-D8p-lZ5n.js               1.06 kB │ gzip:   0.62 kB │ map:     4.73 kB
+../dist/control-ui.build-28038-kvl19e/assets/troff-BQNyxWC7.js                                     1.09 kB │ gzip:   0.53 kB │ map:     3.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/panel-refresh-status-DiepMUo7.js                      1.09 kB │ gzip:   0.59 kB │ map:     3.50 kB
+../dist/control-ui.build-28038-kvl19e/assets/route-loader-DvyqmHwE.js                              1.11 kB │ gzip:   0.62 kB │ map:     4.04 kB
+../dist/control-ui.build-28038-kvl19e/assets/toml-CNMTuoya.js                                      1.18 kB │ gzip:   0.63 kB │ map:     3.86 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-session-menu.runtime-Bhg9YfRh.js               1.20 kB │ gzip:   0.60 kB │ map:     4.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/spreadsheet-NicZe-2f.js                               1.27 kB │ gzip:   0.63 kB │ map:     4.02 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-widget-error-CY-0Wfl2.js                        1.28 kB │ gzip:   0.67 kB │ map:     3.88 kB
+../dist/control-ui.build-28038-kvl19e/assets/pasted-text-excerpt-BKCIrxdc.js                       1.29 kB │ gzip:   0.68 kB │ map:     3.87 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-core-B7jyS0Im.js                           1.30 kB │ gzip:   0.72 kB │ map:     4.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/server-prefs-write-batch-BQp-bGIC.js                  1.45 kB │ gzip:   0.73 kB │ map:     6.75 kB
+../dist/control-ui.build-28038-kvl19e/assets/agent-avatar-BPTDIs_r.js                              1.46 kB │ gzip:   0.79 kB │ map:     5.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/usage-CUnrUbcN.js                                     1.48 kB │ gzip:   0.72 kB │ map:     5.98 kB
+../dist/control-ui.build-28038-kvl19e/assets/mbox-DJTpBvrI.js                                      1.53 kB │ gzip:   0.76 kB │ map:     5.22 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-notifications-Bp9ZzZsN.js                      1.58 kB │ gzip:   0.81 kB │ map:     6.21 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-native-runtime-recovery-Cmnjzjlf.js              1.63 kB │ gzip:   0.74 kB │ map:     4.35 kB
+../dist/control-ui.build-28038-kvl19e/assets/markdown-file-tooltip-80eRKj1X.js                     1.70 kB │ gzip:   0.93 kB │ map:     6.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugin-card-CWyBi6ib.js                               1.72 kB │ gzip:   0.90 kB │ map:     5.23 kB
+../dist/control-ui.build-28038-kvl19e/assets/sieve-BHLeM6VM.js                                     1.74 kB │ gzip:   0.86 kB │ map:     6.25 kB
+../dist/control-ui.build-28038-kvl19e/assets/rpm-6ru8X0RE.js                                       1.75 kB │ gzip:   0.92 kB │ map:     4.72 kB
+../dist/control-ui.build-28038-kvl19e/assets/update-triage.runtime-2lkVnd-D.js                     1.76 kB │ gzip:   0.91 kB │ map:     5.05 kB
+../dist/control-ui.build-28038-kvl19e/assets/setup-schema-Dp8NtfDb.js                              1.80 kB │ gzip:   0.94 kB │ map:     8.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/factor-Q1Z7buKY.js                                    1.80 kB │ gzip:   0.70 kB │ map:     4.51 kB
+../dist/control-ui.build-28038-kvl19e/assets/load-COkAxl3c.js                                      1.81 kB │ gzip:   0.98 kB │ map:     7.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/eiffel-BPoKCvky.js                                    1.82 kB │ gzip:   1.00 kB │ map:     5.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/browser-bootstrap.runtime-DAlgB34y.js                 1.86 kB │ gzip:   1.05 kB │ map:     6.56 kB
+../dist/control-ui.build-28038-kvl19e/assets/z80-BOBAzJas.js                                       1.89 kB │ gzip:   0.88 kB │ map:     4.94 kB
+../dist/control-ui.build-28038-kvl19e/assets/request-usage-snapshot-CRzguBS1.js                    1.90 kB │ gzip:   1.08 kB │ map:     7.78 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-overlay-loading-DAGXgmg7.js                     1.93 kB │ gzip:   0.69 kB │ map:     3.71 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-apps-ySeFAqDJ.js                                   1.95 kB │ gzip:   0.98 kB │ map:     3.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/mumps-D0jN0dp_.js                                     1.97 kB │ gzip:   1.05 kB │ map:     6.64 kB
+../dist/control-ui.build-28038-kvl19e/assets/unsupported-browser-O20tUQvz.js                       1.98 kB │ gzip:   0.90 kB │ map:     4.64 kB
+../dist/control-ui.build-28038-kvl19e/assets/elm-Cw50aCOi.js                                       2.01 kB │ gzip:   0.92 kB │ map:     7.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-workspace-recovery.runtime-Bny5FT6y.js        2.02 kB │ gzip:   1.03 kB │ map:     7.26 kB
+../dist/control-ui.build-28038-kvl19e/assets/mathematica-1hKRFuCQ.js                               2.05 kB │ gzip:   0.92 kB │ map:     7.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/dockerfile-05JOL5Sz.js                                2.06 kB │ gzip:   0.76 kB │ map:     6.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-overlay-loading-view-CbFrvyFM.js                2.07 kB │ gzip:   0.86 kB │ map:    11.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/turtle-Uiatt2dA.js                                    2.08 kB │ gzip:   0.98 kB │ map:     7.17 kB
+../dist/control-ui.build-28038-kvl19e/assets/ebnf-DwPn32cL.js                                      2.11 kB │ gzip:   0.90 kB │ map:     6.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/state-BklX49c7.js                                     2.13 kB │ gzip:   1.01 kB │ map:    10.06 kB
+../dist/control-ui.build-28038-kvl19e/assets/smalltalk-DY21_MKY.js                                 2.15 kB │ gzip:   0.96 kB │ map:     6.99 kB
+../dist/control-ui.build-28038-kvl19e/assets/skills-grouping-pUUIVhCa.js                           2.16 kB │ gzip:   0.92 kB │ map:     6.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/fcl-BKSPRit5.js                                       2.16 kB │ gzip:   1.05 kB │ map:     7.41 kB
+../dist/control-ui.build-28038-kvl19e/assets/lobster-favicon-Ci19pLJt.js                           2.19 kB │ gzip:   1.20 kB │ map:     6.81 kB
+../dist/control-ui.build-28038-kvl19e/assets/ntriples-D5FXROHs.js                                  2.20 kB │ gzip:   0.80 kB │ map:     8.00 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BPIZePoc.js                                      2.20 kB │ gzip:   1.39 kB │ map:     5.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/usage-Cl8qHv24.js                                     2.20 kB │ gzip:   0.86 kB │ map:    48.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/dtd-BziCxTDe.js                                       2.22 kB │ gzip:   0.96 kB │ map:     7.32 kB
+../dist/control-ui.build-28038-kvl19e/assets/terminal-page-DVVet76i.js                             2.23 kB │ gzip:   1.16 kB │ map:    10.76 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-startup.runtime-D9DY0VDa.js                    2.24 kB │ gzip:   0.80 kB │ map:     4.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/octave-Y-3Aqrep.js                                    2.25 kB │ gzip:   1.18 kB │ map:     6.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/browser-document-BRC_iGwd.js                          2.26 kB │ gzip:   1.10 kB │ map:    10.28 kB
+../dist/control-ui.build-28038-kvl19e/assets/yacas-CJ_G-h-R.js                                     2.28 kB │ gzip:   1.19 kB │ map:     7.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-form.tiers-KzMTEFCv.js                         2.33 kB │ gzip:   1.09 kB │ map:     8.55 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugins-ByIei1PE.js                                   2.38 kB │ gzip:   1.08 kB │ map:    45.80 kB
+../dist/control-ui.build-28038-kvl19e/assets/pascal-D6MnNqKh.js                                    2.39 kB │ gzip:   1.27 kB │ map:     6.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/simple-mode-B3ouou4l.js                               2.41 kB │ gzip:   1.19 kB │ map:     8.36 kB
+../dist/control-ui.build-28038-kvl19e/assets/apl-CZuIt2s3.js                                       2.43 kB │ gzip:   1.34 kB │ map:     6.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/commonlisp-JmRDT1qt.js                                2.45 kB │ gzip:   1.19 kB │ map:     7.04 kB
+../dist/control-ui.build-28038-kvl19e/assets/tcl-VS4aPR64.js                                       2.48 kB │ gzip:   1.32 kB │ map:     6.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/theme-catalog-CNrf0gdV.js                             2.54 kB │ gzip:   1.13 kB │ map:    11.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/mcp-app-confirm-DniGStQ8.js                           2.54 kB │ gzip:   1.17 kB │ map:    11.86 kB
+../dist/control-ui.build-28038-kvl19e/assets/shell-B-6dKEO3.js                                     2.56 kB │ gzip:   1.30 kB │ map:     8.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/appearance-picker-Bc0VAxlY.js                         2.57 kB │ gzip:   1.07 kB │ map:     5.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugin-contracts-runtime-bd6Qmj1C.js                  2.58 kB │ gzip:   1.19 kB │ map:    11.65 kB
+../dist/control-ui.build-28038-kvl19e/assets/panel-empty-state-CHRVA6s_.js                         2.61 kB │ gzip:   1.21 kB │ map:     7.50 kB
+../dist/control-ui.build-28038-kvl19e/assets/gateway-scope-upgrade.runtime-CEXxhGiA.js             2.62 kB │ gzip:   1.03 kB │ map:     9.19 kB
+../dist/control-ui.build-28038-kvl19e/assets/webidl-y3TQ_6xd.js                                    2.62 kB │ gzip:   1.37 kB │ map:     8.24 kB
+../dist/control-ui.build-28038-kvl19e/assets/puppet-DvF9Rcyj.js                                    2.65 kB │ gzip:   1.29 kB │ map:     9.35 kB
+../dist/control-ui.build-28038-kvl19e/assets/pig-DksdPhxP.js                                       2.65 kB │ gzip:   1.49 kB │ map:     6.99 kB
+../dist/control-ui.build-28038-kvl19e/assets/input-dialog-R1UwiyYJ.js                              2.66 kB │ gzip:   1.11 kB │ map:     8.10 kB
+../dist/control-ui.build-28038-kvl19e/assets/forth-CsObqcja.js                                     2.67 kB │ gzip:   1.42 kB │ map:     6.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-update-actions-DWTOeMuV.js                         2.78 kB │ gzip:   1.36 kB │ map:     4.75 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-DrVNkJri.js                                      2.78 kB │ gzip:   1.60 kB │ map:     5.37 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-session-panels-BurDr6sd.js                       2.79 kB │ gzip:   1.12 kB │ map:    10.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/composer-draft-retirement.runtime-CojhIyGO.js         2.83 kB │ gzip:   1.16 kB │ map:    11.07 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-debug-Ecc6FuAm.js                                  2.84 kB │ gzip:   1.31 kB │ map:     5.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/velocity-DgFe8a_l.js                                  2.84 kB │ gzip:   1.20 kB │ map:     8.87 kB
+../dist/control-ui.build-28038-kvl19e/assets/panel-tab-strip-C5o_aggj.js                           2.84 kB │ gzip:   1.24 kB │ map:    11.21 kB
+../dist/control-ui.build-28038-kvl19e/assets/tiddlywiki-ByLaO-PH.js                                2.92 kB │ gzip:   1.18 kB │ map:    12.09 kB
+../dist/control-ui.build-28038-kvl19e/assets/modelica-DDfpmrWA.js                                  2.94 kB │ gzip:   1.38 kB │ map:     8.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/oz-Dw3yM8mc.js                                        3.03 kB │ gzip:   1.38 kB │ map:    10.06 kB
+../dist/control-ui.build-28038-kvl19e/assets/r-C3MfMtNT.js                                         3.06 kB │ gzip:   1.45 kB │ map:    10.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/website-ju15hPox.js                                   3.09 kB │ gzip:   1.43 kB │ map:     8.94 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-link-menu.runtime-DwHoS3cL.js                  3.17 kB │ gzip:   1.54 kB │ map:    12.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/stex-B74o6kub.js                                      3.22 kB │ gzip:   1.26 kB │ map:    12.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/link-reader-response-B9Xdn4Es.js                      3.24 kB │ gzip:   1.43 kB │ map:     6.78 kB
+../dist/control-ui.build-28038-kvl19e/assets/lua-Bjba4a35.js                                       3.26 kB │ gzip:   1.50 kB │ map:     8.16 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-form.search-DuWU425Q.js                        3.27 kB │ gzip:   1.47 kB │ map:    14.91 kB
+../dist/control-ui.build-28038-kvl19e/assets/macos-titlebar-controls.runtime-jnsVSZRj.js           3.31 kB │ gzip:   1.17 kB │ map:     8.16 kB
+../dist/control-ui.build-28038-kvl19e/assets/exec-approval-C6kn8U2t.js                             3.32 kB │ gzip:   1.68 kB │ map:    17.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/cypher-QpSxMRXq.js                                    3.33 kB │ gzip:   1.60 kB │ map:     8.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/nav-drawer-swipe.runtime-_9pNflcb.js                  3.33 kB │ gzip:   1.30 kB │ map:     9.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/lane-table-A95nG10R.js                                3.34 kB │ gzip:   1.33 kB │ map:    18.89 kB
+../dist/control-ui.build-28038-kvl19e/assets/tiki-Cb29ipmL.js                                      3.35 kB │ gzip:   1.35 kB │ map:    13.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-snapshot-database-mzS0curA.js                 3.37 kB │ gzip:   1.38 kB │ map:    12.26 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-memory-import-Bu22xYZO.js                          3.39 kB │ gzip:   1.44 kB │ map:     5.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/svg-icon-rasterizer-DhvcRFjD.js                       3.40 kB │ gzip:   1.70 kB │ map:    11.95 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-overlay-frame-C3WSaA3a.js                       3.43 kB │ gzip:   1.32 kB │ map:     7.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/sparql-CUbWMhsH.js                                    3.47 kB │ gzip:   1.70 kB │ map:    10.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/vhdl-bNtYFHwV.js                                      3.47 kB │ gzip:   1.61 kB │ map:    10.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/theme-palette-CLuDnXDZ.js                             3.53 kB │ gzip:   1.37 kB │ map:     9.56 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BlRVEb_N.js                                      3.54 kB │ gzip:   1.83 kB │ map:     7.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/youtube-video-card-D3KwAnnM.js                        3.60 kB │ gzip:   1.64 kB │ map:    24.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/mscgen-o_TRe-wI.js                                    3.64 kB │ gzip:   1.07 kB │ map:    10.16 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-progress-Cw4xKU2e.js                          3.66 kB │ gzip:   1.43 kB │ map:    10.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-styles-CRQ0r5_M.js               3.71 kB │ gzip:   1.39 kB │ map:    59.36 kB
+../dist/control-ui.build-28038-kvl19e/assets/vb-B2Eic2VJ.js                                        3.82 kB │ gzip:   1.95 kB │ map:    12.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/q-CCMT7mWg.js                                         3.82 kB │ gzip:   1.78 kB │ map:    10.31 kB
+../dist/control-ui.build-28038-kvl19e/assets/d-BVOXk3sl.js                                         3.83 kB │ gzip:   1.79 kB │ map:    11.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-discussion-panel-DLZrewH_.js                  3.89 kB │ gzip:   1.76 kB │ map:    15.05 kB
+../dist/control-ui.build-28038-kvl19e/assets/swift-DkbHzSG0.js                                     3.92 kB │ gzip:   1.94 kB │ map:    11.58 kB
+../dist/control-ui.build-28038-kvl19e/assets/coffeescript-ZFd3ZVx8.js                              4.00 kB │ gzip:   1.79 kB │ map:    14.64 kB
+../dist/control-ui.build-28038-kvl19e/assets/fortran-D0Jwcahz.js                                   4.00 kB │ gzip:   2.03 kB │ map:    10.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/sparkline-tile-Dsoqpl2I.js                            4.03 kB │ gzip:   1.86 kB │ map:    23.53 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugin-help-CthuKczX.js                               4.08 kB │ gzip:   1.81 kB │ map:    15.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/asn1-CSpwQvlk.js                                      4.10 kB │ gzip:   2.05 kB │ map:    11.70 kB
+../dist/control-ui.build-28038-kvl19e/assets/dylan-of2Ivqm3.js                                     4.17 kB │ gzip:   1.73 kB │ map:    14.99 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-chrome-setup-Fqz9a_Ic.js                       4.19 kB │ gzip:   1.83 kB │ map:    16.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/asterisk-CdkrETgV.js                                  4.20 kB │ gzip:   1.84 kB │ map:     9.50 kB
+../dist/control-ui.build-28038-kvl19e/assets/livescript-U057igS5.js                                4.22 kB │ gzip:   1.73 kB │ map:    10.31 kB
+../dist/control-ui.build-28038-kvl19e/assets/server-prefs-profile-runtime-BR0u-r9t.js              4.23 kB │ gzip:   1.71 kB │ map:    15.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/ttcn-cfg-DWX5Nemw.js                                  4.24 kB │ gzip:   1.84 kB │ map:    11.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/groovy-CuXwF6x7.js                                    4.26 kB │ gzip:   1.85 kB │ map:    13.63 kB
+../dist/control-ui.build-28038-kvl19e/assets/haskell-DHF7m3rz.js                                   4.31 kB │ gzip:   2.02 kB │ map:    12.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/logbook-controller-PncuXMrR.js                        4.45 kB │ gzip:   1.65 kB │ map:    17.04 kB
+../dist/control-ui.build-28038-kvl19e/assets/first-run-activation-receipt-CrtrCi9a.js              4.49 kB │ gzip:   1.84 kB │ map:    17.25 kB
+../dist/control-ui.build-28038-kvl19e/assets/keyboard-shortcuts-dialog-Cuw9nlkX.js                 4.49 kB │ gzip:   1.99 kB │ map:    23.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/report-DKYVrQaA.js                                    4.58 kB │ gzip:   1.96 kB │ map:    16.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/gas-CSFUAurG.js                                       4.68 kB │ gzip:   1.36 kB │ map:    14.09 kB
+../dist/control-ui.build-28038-kvl19e/assets/widget-sandbox-host-DaPbnVdd.js                       4.74 kB │ gzip:   1.49 kB │ map:    13.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/mllike-Bu6D5i0x.js                                    4.96 kB │ gzip:   1.67 kB │ map:    15.12 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-dashboard-n8tG4qIy.js                      4.96 kB │ gzip:   2.18 kB │ map:    17.94 kB
+../dist/control-ui.build-28038-kvl19e/assets/ttcn-Bf3i5UEf.js                                      5.00 kB │ gzip:   2.27 kB │ map:    14.32 kB
+../dist/control-ui.build-28038-kvl19e/assets/pending-session-create-CGQ3-QmA.js                    5.01 kB │ gzip:   2.03 kB │ map:    14.22 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-view.solid-Bgb6vTGJ.js                     5.11 kB │ gzip:   2.26 kB │ map:    23.30 kB
+../dist/control-ui.build-28038-kvl19e/assets/gateway-vitals-DUAudZJ9.js                            5.14 kB │ gzip:   1.98 kB │ map:    20.45 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-Bbgk3juY.js                                      5.16 kB │ gzip:   2.49 kB │ map:    11.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/assistant-panel-content-D2YvGqCg.js                   5.17 kB │ gzip:   2.04 kB │ map:    24.39 kB
+../dist/control-ui.build-28038-kvl19e/assets/crystal-B2OBIKGd.js                                   5.18 kB │ gzip:   2.23 kB │ map:    18.95 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-overlay-layout.runtime-Bq4TGnbk.js              5.18 kB │ gzip:   1.81 kB │ map:    15.72 kB
+../dist/control-ui.build-28038-kvl19e/assets/ruby-DrNj4Hrn.js                                      5.22 kB │ gzip:   2.25 kB │ map:    17.19 kB
+../dist/control-ui.build-28038-kvl19e/assets/ecl-BmkYUJLN.js                                       5.25 kB │ gzip:   2.42 kB │ map:    12.78 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-placement-move-dialog-Crubjbqa.js             5.41 kB │ gzip:   2.26 kB │ map:    50.83 kB
+../dist/control-ui.build-28038-kvl19e/assets/julia-CfStu5wc.js                                     5.43 kB │ gzip:   2.30 kB │ map:    17.05 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-readiness-lit-DkyVW789.js                  5.47 kB │ gzip:   1.82 kB │ map:    18.22 kB
+../dist/control-ui.build-28038-kvl19e/assets/browser-D6SFXRH2.js                                   5.53 kB │ gzip:   1.90 kB │ map:    14.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/vbscript-B58SZYoT.js                                  5.57 kB │ gzip:   2.65 kB │ map:    18.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/agents-home-page-GE5TQzPC.js                          5.66 kB │ gzip:   2.22 kB │ map:    32.06 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-pane-placement.runtime-6dmsGu9y.js               5.78 kB │ gzip:   2.09 kB │ map:    17.07 kB
+../dist/control-ui.build-28038-kvl19e/assets/permissions-page-cIRTNlo3.js                          5.96 kB │ gzip:   1.70 kB │ map:    56.35 kB
+../dist/control-ui.build-28038-kvl19e/assets/mirc-Cx5z6OrJ.js                                      6.05 kB │ gzip:   2.82 kB │ map:    11.83 kB
+../dist/control-ui.build-28038-kvl19e/assets/provider-usage-HGp0acK8.js                            6.09 kB │ gzip:   2.32 kB │ map:    27.13 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-overlay-C3BFtI2A.js                             6.11 kB │ gzip:   2.53 kB │ map:    24.24 kB
+../dist/control-ui.build-28038-kvl19e/assets/lobsterdex-page-CTs9rWq7.js                           6.11 kB │ gzip:   2.51 kB │ map:    38.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-styles-CruN_IcF.js             6.15 kB │ gzip:   1.89 kB │ map:   364.75 kB
+../dist/control-ui.build-28038-kvl19e/assets/xquery-BZ8GHY3V.js                                    6.29 kB │ gzip:   2.65 kB │ map:    22.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/cobol-v-vbCXbt.js                                     6.37 kB │ gzip:   3.15 kB │ map:    12.35 kB
+../dist/control-ui.build-28038-kvl19e/assets/python-Co-oWxhj.js                                    6.40 kB │ gzip:   2.77 kB │ map:    22.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/page-operations-BfVF8gGU.js                           6.49 kB │ gzip:   2.31 kB │ map:    29.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/sidebar-people.runtime-DBK9MbIn.js                    6.51 kB │ gzip:   2.43 kB │ map:    19.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/scheme-BNktZpsL.js                                    6.51 kB │ gzip:   2.51 kB │ map:    16.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/server-prefs-reconcile-BshY1Q9t.js                    6.66 kB │ gzip:   2.76 kB │ map:    33.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/pug-BJ9q_C7V.js                                       6.77 kB │ gzip:   2.08 kB │ map:    21.19 kB
+../dist/control-ui.build-28038-kvl19e/assets/textile-CigAm-LA.js                                   6.88 kB │ gzip:   2.54 kB │ map:    21.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-device-settings-BSfeAV_v.js                    6.88 kB │ gzip:   2.66 kB │ map:    25.98 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-outbox-receipts-Br8S_d4f.js                      7.16 kB │ gzip:   2.88 kB │ map:    32.80 kB
+../dist/control-ui.build-28038-kvl19e/assets/update-run-view-7hbQvA-h.js                           7.18 kB │ gzip:   2.64 kB │ map:    42.37 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-transcripts-DD5xBZD4.js                            7.18 kB │ gzip:   2.87 kB │ map:    10.44 kB
+../dist/control-ui.build-28038-kvl19e/assets/nsis-C0kVBT_2.js                                      7.19 kB │ gzip:   3.17 kB │ map:     9.51 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-session-summary-bmY4T1Xt.js                7.23 kB │ gzip:   2.87 kB │ map:    51.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-document-qkAF1uOJ.js                            7.29 kB │ gzip:   2.67 kB │ map:    29.14 kB
+../dist/control-ui.build-28038-kvl19e/assets/dock-panel-solid-CP-fVX2S.js                          7.33 kB │ gzip:   2.72 kB │ map:    20.82 kB
+../dist/control-ui.build-28038-kvl19e/assets/nginx-NLs6x0Nm.js                                     7.54 kB │ gzip:   2.83 kB │ map:    12.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/update-confirmation.runtime-D_5hlXjL.js               7.60 kB │ gzip:   2.51 kB │ map:    25.40 kB
+../dist/control-ui.build-28038-kvl19e/assets/server-prefs-drain-D8YFAUC0.js                        7.75 kB │ gzip:   2.62 kB │ map:    30.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/powershell-BjSJShZW.js                                7.83 kB │ gzip:   3.38 kB │ map:    17.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/native-conversation-bridge-CfFOq7hu.js                7.92 kB │ gzip:   3.39 kB │ map:    32.75 kB
+../dist/control-ui.build-28038-kvl19e/assets/question-page-registration-RYUiOULa.js                7.97 kB │ gzip:   2.65 kB │ map:    32.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/haxe-W4XnxWfV.js                                      8.00 kB │ gzip:   3.05 kB │ map:    30.34 kB
+../dist/control-ui.build-28038-kvl19e/assets/erlang-IAwUA5rr.js                                    8.00 kB │ gzip:   3.00 kB │ map:    28.63 kB
+../dist/control-ui.build-28038-kvl19e/assets/onboarding-memory-import-DMGsNCLz.js                  8.07 kB │ gzip:   3.19 kB │ map:    39.62 kB
+../dist/control-ui.build-28038-kvl19e/assets/tooltip-C7QsjEfw.js                                   8.33 kB │ gzip:   2.91 kB │ map:    23.07 kB
+../dist/control-ui.build-28038-kvl19e/assets/about-page-DG450Oa1.js                                8.38 kB │ gzip:   3.11 kB │ map:    46.44 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-overlay-content-yVKuXNid.js                     8.54 kB │ gzip:   3.15 kB │ map:    44.59 kB
+../dist/control-ui.build-28038-kvl19e/assets/verilog-ChfNWxmV.js                                   8.60 kB │ gzip:   3.64 kB │ map:    31.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-izXw1-Fb.js                                      8.63 kB │ gzip:   3.73 kB │ map:   104.42 kB
+../dist/control-ui.build-28038-kvl19e/assets/custodian-page-BcmYuZ2o.js                            8.90 kB │ gzip:   3.09 kB │ map:    44.55 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-background-BCo4fS_R.js                        9.01 kB │ gzip:   3.84 kB │ map:    40.54 kB
+../dist/control-ui.build-28038-kvl19e/assets/sas-SYA7WzvL.js                                       9.46 kB │ gzip:   4.21 kB │ map:    18.45 kB
+../dist/control-ui.build-28038-kvl19e/assets/logs-page-vAb0okEm.js                                 9.51 kB │ gzip:   4.01 kB │ map:    49.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/clojure-CQulayJg.js                                   9.56 kB │ gzip:   4.15 kB │ map:    21.56 kB
+../dist/control-ui.build-28038-kvl19e/assets/perl-CMrxjaCi.js                                      9.87 kB │ gzip:   3.59 kB │ map:    46.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/idl-fIUlL8fB.js                                       9.97 kB │ gzip:   4.52 kB │ map:    15.40 kB
+../dist/control-ui.build-28038-kvl19e/assets/catalog-terminal-start-CN77J1tX.js                   10.15 kB │ gzip:   3.29 kB │ map:    40.41 kB
+../dist/control-ui.build-28038-kvl19e/assets/labs-page-CNFhh1oP.js                                10.16 kB │ gzip:   4.06 kB │ map:    44.01 kB
+../dist/control-ui.build-28038-kvl19e/assets/view-pairing.runtime-CsUDTf6C.js                     10.28 kB │ gzip:   2.73 kB │ map:    19.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/gherkin-DX-eNKsk.js                                  10.29 kB │ gzip:   5.21 kB │ map:    14.32 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-processes-panel-gMTyrec2.js                     10.42 kB │ gzip:   3.55 kB │ map:    50.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/wizard-step-controls-D6dn9cV4.js                     10.51 kB │ gzip:   3.26 kB │ map:    30.16 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-devices-Bklpi3F4.js                               10.53 kB │ gzip:   4.08 kB │ map:    17.28 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-session-rail-Dag2i83m.js                        10.55 kB │ gzip:   3.86 kB │ map:    64.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/debug-page-Dy8n2xLH.js                               10.72 kB │ gzip:   3.65 kB │ map:    63.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-organizer-operations.runtime-A2iDIxC_.js     10.77 kB │ gzip:   3.25 kB │ map:    41.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/credential-editor-5zNp_PE1.js                        10.80 kB │ gzip:   3.70 kB │ map:    56.32 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-group-defaults-dialog-BeRs3R-1.js            10.85 kB │ gzip:   3.51 kB │ map:    54.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-organizer-archive.runtime-mXu1P57u.js        11.00 kB │ gzip:   3.36 kB │ map:    40.53 kB
+../dist/control-ui.build-28038-kvl19e/assets/sidebar-agent-roster-guN3x2vU.js                     11.63 kB │ gzip:   3.69 kB │ map:    37.91 kB
+../dist/control-ui.build-28038-kvl19e/assets/approvals-page-HXpzseXC.js                           11.67 kB │ gzip:   3.80 kB │ map:    73.02 kB
+../dist/control-ui.build-28038-kvl19e/assets/browser-BlhRHUJ0.js                                  11.76 kB │ gzip:   4.40 kB │ map:    42.77 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-B03OKhuP.js                                     11.87 kB │ gzip:   5.38 kB │ map:    33.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/panel-tab-strip-solid-BKBQgxuH.js                    12.22 kB │ gzip:   4.57 kB │ map:    58.77 kB
+../dist/control-ui.build-28038-kvl19e/assets/logbook-view-CHvo9TGZ.js                             12.59 kB │ gzip:   3.84 kB │ map:    75.60 kB
+../dist/control-ui.build-28038-kvl19e/assets/canvas-widget-view-DTaN-bKQ.js                       12.60 kB │ gzip:   4.34 kB │ map:    50.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/dashboards-page-B2DSyPaS.js                          12.66 kB │ gzip:   4.38 kB │ map:    57.74 kB
+../dist/control-ui.build-28038-kvl19e/assets/settings-targets-Bb1_8sJk.js                         12.84 kB │ gzip:   3.21 kB │ map:    24.59 kB
+../dist/control-ui.build-28038-kvl19e/assets/worktrees-page-CKcleqUc.js                           13.13 kB │ gzip:   4.09 kB │ map:    80.23 kB
+../dist/control-ui.build-28038-kvl19e/assets/markdown-mermaid-B_0LGebW.js                         13.48 kB │ gzip:   5.53 kB │ map:    40.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/sidebar-update-runtime-QomxKtRJ.js                   13.67 kB │ gzip:   3.40 kB │ map:    38.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/apps-page-CbOWOQ_Q.js                                13.82 kB │ gzip:   5.55 kB │ map:    48.63 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-CswaSsgT.js                                     14.56 kB │ gzip:   5.95 kB │ map:    37.17 kB
+../dist/control-ui.build-28038-kvl19e/assets/wizard-login-controller-BNemES70.js                  14.64 kB │ gzip:   4.50 kB │ map:    61.06 kB
+../dist/control-ui.build-28038-kvl19e/assets/settings-sidebar-BNitCahB.js                         15.60 kB │ gzip:   5.44 kB │ map:    65.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/device-page-BR0KUaIL.js                              15.98 kB │ gzip:   3.92 kB │ map:   118.51 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-form.node.shared-CuKvL5bU.js                  16.10 kB │ gzip:   6.23 kB │ map:    72.94 kB
+../dist/control-ui.build-28038-kvl19e/assets/search-page-up1kyqsJ.js                              16.40 kB │ gzip:   5.70 kB │ map:   140.27 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BMe_HS9U.js                                     16.43 kB │ gzip:   7.59 kB │ map:    22.73 kB
+../dist/control-ui.build-28038-kvl19e/assets/approval-page-registration-D4h6KbjP.js               16.57 kB │ gzip:   5.11 kB │ map:    56.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugin-page-CbRNwpSj.js                              16.88 kB │ gzip:   5.15 kB │ map:    60.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/javascript-Cilf6QWD.js                               17.12 kB │ gzip:   5.84 kB │ map:    68.49 kB
+../dist/control-ui.build-28038-kvl19e/assets/portals-page-_Xdhl662.js                             17.58 kB │ gzip:   5.30 kB │ map:    84.18 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-subagents-panel-TzzycUes.js                     17.96 kB │ gzip:   6.34 kB │ map:    93.95 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-sidebar-region.runtime-CQb9EkS1.js              18.38 kB │ gzip:   6.51 kB │ map:   100.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-loader-CnhKG_mi.js                        18.88 kB │ gzip:   6.76 kB │ map:    76.13 kB
+../dist/control-ui.build-28038-kvl19e/assets/secrets-page-ewQq5tcN.js                             20.10 kB │ gzip:   6.54 kB │ map:   130.02 kB
+../dist/control-ui.build-28038-kvl19e/assets/gateway-runtime-B5F9Ztrk.js                          20.42 kB │ gzip:   7.65 kB │ map:   114.53 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-QefyHhcr.js                                     20.91 kB │ gzip:   9.50 kB │ map:    37.05 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-CWgBxuJK.js                                     21.95 kB │ gzip:  10.27 kB │ map:    39.83 kB
+../dist/control-ui.build-28038-kvl19e/assets/clike-NSnJbUQf.js                                    22.19 kB │ gzip:   7.84 kB │ map:    59.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/connection-page-tD6qY-dH.js                          22.77 kB │ gzip:   6.53 kB │ map:   121.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/link-reader-hovercard-DBSY3vMB.js                    23.25 kB │ gzip:   7.20 kB │ map:    96.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-Cu3LFAqa.js                                     23.31 kB │ gzip:  10.65 kB │ map:    39.56 kB
+../dist/control-ui.build-28038-kvl19e/assets/stylus-B7kK8WT_.js                                   23.71 kB │ gzip:   8.77 kB │ map:    58.00 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-question-panel-CZxdKK31.js                      24.71 kB │ gzip:   8.07 kB │ map:   144.83 kB
+../dist/control-ui.build-28038-kvl19e/assets/css-BEjrXOhK.js                                      24.84 kB │ gzip:   8.38 kB │ map:    55.35 kB
+../dist/control-ui.build-28038-kvl19e/assets/lit-runtime-DlW4gA0d.js                              25.10 kB │ gzip:   9.46 kB │ map:    67.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/memory-import-page-ZXDx8LO7.js                       25.25 kB │ gzip:   7.26 kB │ map:   172.12 kB
+../dist/control-ui.build-28038-kvl19e/assets/file-editor-view-Buy8tLne.js                         25.62 kB │ gzip:   8.96 kB │ map:   138.32 kB
+../dist/control-ui.build-28038-kvl19e/assets/code-language-Bfh4lmbM.js                            25.79 kB │ gzip:   5.46 kB │ map:    56.78 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BCNx77XN.js                                     26.62 kB │ gzip:   8.83 kB │ map:   111.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/github-identity-view-BcJXJbzi.js                     26.91 kB │ gzip:   6.88 kB │ map:   121.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-B6pjGMqd.js                                     27.05 kB │ gzip:  12.91 kB │ map:    47.35 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-LGo2Koa1.js                                     28.82 kB │ gzip:  11.83 kB │ map:    76.21 kB
+../dist/control-ui.build-28038-kvl19e/assets/meetings-page-DYKWRjAq.js                            29.07 kB │ gzip:   9.32 kB │ map:   153.07 kB
+../dist/control-ui.build-28038-kvl19e/assets/login-runtime-BHNa15RX.js                            30.05 kB │ gzip:   9.75 kB │ map:    92.46 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-DlRhaevf.js                                     31.04 kB │ gzip:  12.92 kB │ map:    45.27 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BxX-eM-I.js                                     32.42 kB │ gzip:  13.16 kB │ map:    72.27 kB
+../dist/control-ui.build-28038-kvl19e/assets/skill-workshop-page-Ch2cWglE.js                      35.31 kB │ gzip:  10.96 kB │ map:   182.86 kB
+../dist/control-ui.build-28038-kvl19e/assets/sql-DlXpQozQ.js                                      36.96 kB │ gzip:  10.99 kB │ map:    55.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/session-progress-hovercard.runtime-CCSycik3.js       38.00 kB │ gzip:  10.77 kB │ map:   190.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-C7LeHIRG.js                                     40.44 kB │ gzip:  16.89 kB │ map:    45.77 kB
+../dist/control-ui.build-28038-kvl19e/assets/custodian-surface-C21J5r7D.js                        40.82 kB │ gzip:  12.60 kB │ map:   213.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-form-DhomkQ98.js                              42.68 kB │ gzip:  13.24 kB │ map:   169.14 kB
+../dist/control-ui.build-28038-kvl19e/assets/systems-page-Ds4NPWL9.js                             44.11 kB │ gzip:  13.04 kB │ map:   193.81 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-D5V0LL15.js                                     44.22 kB │ gzip:  15.39 kB │ map:   179.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-CzMKFsvw.js                                     45.04 kB │ gzip:  19.57 kB │ map:    74.48 kB
+../dist/control-ui.build-28038-kvl19e/assets/profile-page-x3yMhShj.js                             53.45 kB │ gzip:  14.87 kB │ map:   322.70 kB
+../dist/control-ui.build-28038-kvl19e/assets/link-reader-panel-Dv4xJqIz.js                        54.87 kB │ gzip:  16.08 kB │ map:   195.53 kB
+../dist/control-ui.build-28038-kvl19e/assets/transport.runtime-FUgTpaiZ.js                        56.90 kB │ gzip:  15.55 kB │ map:   216.69 kB
+../dist/control-ui.build-28038-kvl19e/assets/terminal-panel-registration-CAK4NGIf.js              57.66 kB │ gzip:  17.00 kB │ map:   211.55 kB
+../dist/control-ui.build-28038-kvl19e/assets/model-providers-page-JbPeIOnh.js                     58.08 kB │ gzip:  16.08 kB │ map:   245.61 kB
+../dist/control-ui.build-28038-kvl19e/assets/command-palette-DRsV-MHV.js                          60.69 kB │ gzip:  17.78 kB │ map:   229.76 kB
+../dist/control-ui.build-28038-kvl19e/assets/board-view-zw74RI1U.js                               60.99 kB │ gzip:  17.85 kB │ map:   246.24 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-BoYYyKr_.js                   61.55 kB │ gzip:  23.37 kB │ map:   388.26 kB
+../dist/control-ui.build-28038-kvl19e/assets/view-status-C-EGqgob.js                              62.92 kB │ gzip:  19.00 kB │ map:   330.11 kB
+../dist/control-ui.build-28038-kvl19e/assets/model-setup-page-B8kTJYZp.js                         66.06 kB │ gzip:  17.16 kB │ map:   277.77 kB
+../dist/control-ui.build-28038-kvl19e/assets/tool-catalog-BP9wiq__.js                             67.65 kB │ gzip:  20.46 kB │ map:   319.38 kB
+../dist/control-ui.build-28038-kvl19e/assets/channels-page-DZtUACUU.js                            68.90 kB │ gzip:  18.73 kB │ map:   320.29 kB
+../dist/control-ui.build-28038-kvl19e/assets/en-settings-DSynFRJn.js                              69.17 kB │ gzip:  23.64 kB │ map:   108.36 kB
+../dist/control-ui.build-28038-kvl19e/assets/skills-page-D3klkq2m.js                              69.18 kB │ gzip:  18.57 kB │ map:   369.43 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-detail-panel-CUBHLy7b.js                        70.71 kB │ gzip:  22.08 kB │ map:   376.21 kB
+../dist/control-ui.build-28038-kvl19e/assets/devices-page-DOz5ixvk.js                             70.84 kB │ gzip:  20.73 kB │ map:   319.64 kB
+../dist/control-ui.build-28038-kvl19e/assets/desktop-panel-BDBhr-k_.js                            71.53 kB │ gzip:  19.39 kB │ map:   247.44 kB
+../dist/control-ui.build-28038-kvl19e/assets/sessions-page-BrTBMCma.js                            76.00 kB │ gzip:  22.07 kB │ map:   307.00 kB
+../dist/control-ui.build-28038-kvl19e/assets/browser-panel-DIm-SKcD.js                            83.16 kB │ gzip:  22.01 kB │ map:   305.39 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BSX3a_8q.js                                     83.94 kB │ gzip:  30.82 kB │ map:    93.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-CWpUz6hd.js                                     84.83 kB │ gzip:  33.91 kB │ map:   117.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/cloud-workers-page-DuATobrv.js                       86.46 kB │ gzip:  24.83 kB │ map:   408.09 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-DMCf0dk_.js                                     98.56 kB │ gzip:  29.07 kB │ map:   114.47 kB
+../dist/control-ui.build-28038-kvl19e/assets/agents-page-WqskIXIR.js                             100.85 kB │ gzip:  28.96 kB │ map:   609.56 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BXkajx9a.js                                    104.16 kB │ gzip:  34.94 kB │ map:   114.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-BLKTwsqy.js                    108.68 kB │ gzip:  37.30 kB │ map:   350.94 kB
+../dist/control-ui.build-28038-kvl19e/assets/activity-page-Cv5EA3fo.js                           109.26 kB │ gzip:  32.28 kB │ map:   527.91 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-DNEY_1mj.js                    112.23 kB │ gzip:  36.96 kB │ map:   446.69 kB
+../dist/control-ui.build-28038-kvl19e/assets/usage-page-2xhqSLY0.js                              120.07 kB │ gzip:  34.50 kB │ map:   635.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/phone-runtime-DRt4IZ3-.js                           122.57 kB │ gzip:  30.60 kB │ map:   382.32 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-runtime-BecGLziM.js                          128.58 kB │ gzip:  37.14 kB │ map:   607.25 kB
+../dist/control-ui.build-28038-kvl19e/assets/chat-html-preview-element-CVVcWmPS.js               136.56 kB │ gzip:  30.31 kB │ map:   471.03 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-CT5X1Rq-.js                  146.28 kB │ gzip:  45.55 kB │ map:   552.68 kB
+../dist/control-ui.build-28038-kvl19e/assets/mcp-app-view-registration-DbMbz2Kl.js               155.45 kB │ gzip:  39.05 kB │ map: 1,004.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-ClrVPaVP.js                  171.86 kB │ gzip:  50.87 kB │ map:   756.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/plugins-page-0j7Oyiq0.js                            181.05 kB │ gzip:  54.08 kB │ map: 1,029.71 kB
+../dist/control-ui.build-28038-kvl19e/assets/novnc-DviyAnH8.js                                   190.49 kB │ gzip:  57.63 kB │ map:   844.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-sJ36SEzf.js                  193.81 kB │ gzip:  65.15 kB │ map: 1,247.75 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-Cz_z0YZ1.js                  201.46 kB │ gzip:  66.97 kB │ map:   931.90 kB
+../dist/control-ui.build-28038-kvl19e/assets/markdown-runtime-Cannf53W.js                        204.21 kB │ gzip:  76.92 kB │ map:   804.69 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-BOSrfzpw.js                  248.54 kB │ gzip:  84.79 kB │ map:   916.04 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-BluEgib9.js                  271.81 kB │ gzip:  80.68 kB │ map: 1,659.09 kB
+../dist/control-ui.build-28038-kvl19e/assets/config-page-DfmahXlJ.js                             271.86 kB │ gzip:  69.77 kB │ map:   854.14 kB
+../dist/control-ui.build-28038-kvl19e/assets/dist-BVfGhkDR.js                                    277.04 kB │ gzip:  91.40 kB │ map: 1,298.63 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-zh-CN-Dl-uF-Te.js               299.61 kB │ gzip: 102.59 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-zh-TW-DivU292K.js               305.64 kB │ gzip: 103.80 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-id-Cik46QFE.js                  333.60 kB │ gzip:  97.16 kB
+../dist/control-ui.build-28038-kvl19e/assets/ui-D8Vqmxa2.js                                      353.13 kB │ gzip: 108.62 kB │ map: 1,661.60 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-nl-DNIcsq9D.js                  353.68 kB │ gzip: 104.95 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-new-Ctp4lWaS.js                     359.77 kB │ gzip: 100.22 kB │ map: 1,123.72 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-pt-BR-DgHQhQn9.js               362.01 kB │ gzip: 103.33 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-ko-CnxkGPqm.js                  367.23 kB │ gzip: 104.53 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-tr-JKH7DBG1.js                  367.42 kB │ gzip: 106.65 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-de-CJGOpega.js                  369.95 kB │ gzip: 110.51 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-pl-DjIJIZ7W.js                  371.12 kB │ gzip: 111.36 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-it-B8BOO898.js                  372.46 kB │ gzip: 105.24 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-es-D4QRlr_c.js                  379.04 kB │ gzip: 105.67 kB
+../dist/control-ui.build-28038-kvl19e/assets/zh-CN-CkbjUXk1.js                                   391.22 kB │ gzip: 139.61 kB │ map:   121.87 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-fr-mbyNok0D.js                  394.16 kB │ gzip: 108.66 kB
+../dist/control-ui.build-28038-kvl19e/assets/zh-TW-2_ZFKco8.js                                   401.97 kB │ gzip: 141.17 kB │ map:   121.87 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-vi-lmMx9kOI.js                  414.30 kB │ gzip: 104.83 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-ja-JP-DoB_lagC.js               423.83 kB │ gzip: 112.15 kB
+../dist/control-ui.build-28038-kvl19e/assets/id-DQhtyEy6.js                                      426.73 kB │ gzip: 131.89 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-BJvjXB5V.js                    435.42 kB │ gzip: 128.09 kB │ map: 1,616.44 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-core-DzonBzZR.js                         438.25 kB │ gzip: 136.06 kB │ map: 1,617.60 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-Cu2Ta9_d.js                  449.41 kB │ gzip: 132.71 kB │ map: 2,045.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/nl-D_Sd_hcY.js                                      450.36 kB │ gzip: 142.57 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/pt-BR-CHOAQ1p5.js                                   455.68 kB │ gzip: 141.99 kB │ map:   121.87 kB
+../dist/control-ui.build-28038-kvl19e/assets/tr-D1aDIhAz.js                                      458.80 kB │ gzip: 143.30 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-ar-C8eODkRe.js                  465.11 kB │ gzip: 115.17 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-core-B0DXcDZU.js                         465.42 kB │ gzip: 152.45 kB │ map: 1,623.57 kB
+../dist/control-ui.build-28038-kvl19e/assets/it-7oSoTdzz.js                                      465.75 kB │ gzip: 143.18 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/pl-BEbvd0yR.js                                      466.26 kB │ gzip: 150.96 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/es-BmgeJS3O.js                                      468.56 kB │ gzip: 144.31 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/de-C-gDTn7F.js                                      478.37 kB │ gzip: 149.26 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/ko-CCShoBeP.js                                      483.02 kB │ gzip: 144.27 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/fr-CabPiDqt.js                                      490.80 kB │ gzip: 148.05 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-fa-nA8GdbOX.js                  505.32 kB │ gzip: 115.79 kB
+../dist/control-ui.build-28038-kvl19e/assets/vi-B4o2DJ_1.js                                      528.22 kB │ gzip: 144.57 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-chat-CnC39Mgd.js                    529.98 kB │ gzip: 155.24 kB │ map: 2,452.98 kB
+../dist/control-ui.build-28038-kvl19e/assets/ja-JP-Ec3JnXU6.js                                   552.33 kB │ gzip: 152.73 kB │ map:   121.87 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-uk-DOGa14Bg.js                  558.68 kB │ gzip: 125.25 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-ru-B83YanJD.js                  563.55 kB │ gzip: 126.60 kB
+../dist/control-ui.build-28038-kvl19e/assets/ar-BAo07JkR.js                                      580.98 kB │ gzip: 155.53 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/fa-BsSOfGW6.js                                      632.13 kB │ gzip: 157.00 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/ghostty-web-BL5E9nl9.js                             637.18 kB │ gzip: 187.42 kB │ map:   759.89 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-hi-BWbTjgVy.js                  663.93 kB │ gzip: 123.20 kB
+../dist/control-ui.build-28038-kvl19e/assets/uk-CEhR5M8L.js                                      696.78 kB │ gzip: 172.29 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/ru-CFmEwDsl.js                                      701.53 kB │ gzip: 173.92 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/locale-config-hints-th-Bo-37DAa.js                  712.17 kB │ gzip: 123.08 kB
+../dist/control-ui.build-28038-kvl19e/assets/control-ui-boot-shared-CWjFmnpt.js                  717.16 kB │ gzip: 211.05 kB │ map: 2,667.92 kB
+../dist/control-ui.build-28038-kvl19e/assets/hi-CuDv68UM.js                                      843.33 kB │ gzip: 170.17 kB │ map:   121.84 kB
+../dist/control-ui.build-28038-kvl19e/assets/th-w2c2maWd.js                                      873.56 kB │ gzip: 164.34 kB │ map:   121.84 kB
+
+[INEFFECTIVE_DYNAMIC_IMPORT] src/pages/chat/session-snapshot-invalidation.ts is dynamically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts but also statically imported by src/pages/chat/session-snapshot-invalidation.runtime.ts, src/pages/chat/session-snapshot-store.ts, dynamic import will not move module into another chunk.
+
+[INEFFECTIVE_DYNAMIC_IMPORT] src/lib/chat/composer-draft-store.runtime.ts is dynamically imported by src/lib/chat/outbox-store-projection.ts, src/pages/chat/chat-outbox-recovery.ts, src/pages/chat/components/chat-async-question-draft.ts, src/pages/chat/durable-composer-persistence.ts, src/pages/new-session/draft-persistence.ts but also statically imported by src/lib/chat/composer-draft-retirement.runtime.ts, dynamic import will not move module into another chunk.
+
+[INEFFECTIVE_DYNAMIC_IMPORT] src/components/app-sidebar-session-narration.ts is dynamically imported by src/components/app-sidebar.ts but also statically imported by src/pages/chat/subagents-panel-data.ts, dynamic import will not move module into another chunk.
+
+[INEFFECTIVE_DYNAMIC_IMPORT] src/components/channel-avatar.ts is dynamically imported by src/components/session-leading-indicator.ts but also statically imported by src/pages/chat/chat-avatar.ts, src/pages/chat/components/chat-author-avatar.ts, dynamic import will not move module into another chunk.
+
+✓ built in 9.88s
+[PLUGIN_TIMINGS] JavaScript callbacks ran for 8.8s of this 9.9s build (89%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin control-ui-build-output writeBundle (47%, 4.6s, 1 call)
+  - plugin vite:worker load (18%, 1.8s, 1 call)
+Additional callback time came from the callbacks below and from callbacks under 1s.
+3 callbacks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - plugin control-ui-locale-modules load (4525 calls)
+  - plugin vite:css transform (158 calls)
+  - plugin solid transform (4528 calls)
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+verified 992 finalized Control UI sidecars
+Control UI performance:
+  measurement: shipped gzip sidecars; Node v24.21.0
+  startup JS: 8 requests, 400.4 KiB gzip (409961 B), 368.8 KiB br, 1306572 B raw (limits: 18 requests, 440.0 KiB gzip / 450576 B)
+  startup JS gzip vs baseline: 409961 B (baseline 450000 B + growth allowance 512 B = growth limit 450512 B; build-variance allowance 64 B; enforcement limit 450576 B; max committed baseline 450000 B)
+  startup CSS: 2 requests, 49.0 KiB gzip (50160 B), 42.0 KiB br, 300011 B raw (limits: 2 requests, advisory target 46080 B, hard ceiling 51200 B; headroom 1040 B)
+  largest ordinary JS: assets/control-ui-boot-shared-CWjFmnpt.js, 203.8 KiB gzip (limit: 215.0 KiB)
+  largest CSS: assets/control-ui-core-DX5uUxRy.css, 49656 B gzip (hard ceiling 53400 B; headroom 3744 B)
+  all JS: 419 requests, 9575.7 KiB gzip (9805504 B), 8401.8 KiB br, 34701037 B raw
+  all CSS: 77 requests, 244.9 KiB gzip (250824 B), 220.9 KiB br, 1303164 B raw
+  route boot accounting: initial-entry assets plus measured immediate dynamic imports; existing initial-entry limits unchanged
+  chat boot JS: 30 requests, 1597.1 KiB gzip (1635477 B), 1463.1 KiB br, 5316255 B raw (1225516 B beyond initial-entry JS; limit: 35 requests)
+  chat boot CSS: 9 requests, 139.7 KiB gzip (143015 B), 124.5 KiB br, 841998 B raw
+  new boot JS: 28 requests, 1347.4 KiB gzip (1379757 B), 1238.3 KiB br, 4486437 B raw (969796 B beyond initial-entry JS; limit: 35 requests)
+  new boot CSS: 9 requests, 121.4 KiB gzip (124283 B), 108.0 KiB br, 725738 B raw
+  warning: startup CSS gzip is above the 46080 B advisory target; remaining hard-ceiling headroom: 1040 B
+  isolated Mermaid JS: 1 request, 876.3 KiB gzip (897333 B), 724.7 KiB br, 3420792 B raw (limits: 1 deferred asset, 960.0 KiB gzip; forbidden at startup)
+  locale catalog JS: 40 requests, 5088.7 KiB gzip (5210798 B), 4317.9 KiB br, 19429389 B raw (largest pair: ru, 294.3 KiB gzip; limits: 1 base + 1 config-hint asset per locale, 300.0 KiB combined; forbidden at startup)
+  hint: startup JS gzip is more than 4096 B below the 450000 B baseline; lower it with node --import ./scripts/tsx.mjs scripts/check-control-ui-performance.mts --update-baseline --reason "<reason>"
+[build-all] ui:build done in 12.7s
+[build-all] write-build-info
+[build-all] write-build-info done in 130ms
+[build-all] write-cli-startup-metadata
+[build-all] write-cli-startup-metadata done in 12.3s
+[build-all] phase timings: total 5m 19.6s; slowest write-unified-entry-dts 2m 16.2s; tsdown-packages 1m 20.7s; tsdown 33.8s; ui:build 12.7s; write-cli-startup-metadata 12.3s; tsdown-ai 11s; runtime-postbuild 10.3s; check-cli-bootstrap-imports 9.14s; external-plugins:local-dist 4.73s; plugins:assets:build 3.54s; plugins:assets:copy 2.62s; check-plugin-sdk-exports 1.77s; build-stamp 326ms; runtime-postbuild-stamp 146ms; write-build-info 130ms; native-protocol 124ms
+
+real	5m24.143s
+user	5m13.873s
+sys	2m55.209s
+EXIT 0

@@ -1,0 +1,285 @@
+$ node --import ./scripts/tsx.mjs scripts/test-projects.mts src/config/sessions/
+[test] preparing runtime runtime before Vitest workers
+[vitest-workers] local cache hit after 21880ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared e1c6142fd053 in 21972ms (15274 inputs, 19580 outputs)
+[test] starting test/vitest/vitest.infra.config.ts
+
+ RUN  v5.0.1 $HOME/work/pr-164796
+
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite transcript append > canonicalizes assistant media at the generic transcript append owner 694ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > preserves the generation when initially recording identical model prompt text 500ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > invalidates admissions when steering metadata accompanies content changes 400ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > invalidates admissions when steering metadata accompanies provenance changes 392ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > invalidates admissions when steering metadata accompanies sender authority changes 395ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > invalidates admissions when steering metadata accompanies model projection changes 330ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > invalidates admissions when steering metadata accompanies branch parent changes 337ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > applies exact bindings across both storage arms 376ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > publishes the native patch's exact transcript predicate and rereads a sibling generation next time 3173ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > keeps oversized metadata current but hides changed text until the real worker reconciles 2718ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > rolls back payload-arm changes and mutation state on later conflict 350ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > recovers a claimed projection on metadata rewrite and fences stale publication 331ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > rebuilds changed role facts without duplicate FTS invalidation 347ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > rebuilds changed message presence facts without duplicate FTS invalidation 362ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript rewrite > avoids duplicate FTS invalidation for maintenance text repair and preserves recency 373ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > preserves an intervening append before replacing prefix 0 314ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > publishes the worker patch's exact transcript predicate and rereads a sibling generation next time 2728ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > preserves an intervening append before replacing prefix 1 314ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > coalesces concurrent viewers and skips restoration for unchanged summaries 5805ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reconciles a suffix anchored on an inactive branch 1618ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > enforces context count and byte budgets and releases rejected reads for later appends 5735ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > yields to the event loop while another connection holds the entry write lock 2156ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reconciles a later suffix redirect above the retai… 2954ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > rejects an oversized header before acquiring its payload 3271ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > restores the connection's commit wait after admitting a rollback-journal write 4530ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reconciles an inactive suffix below an active pare… 3786ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > omits an oversized latest compaction boundary before acquiring its payload 3633ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > rejects cached summaries when the lifecycle changes during cache validation 9516ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reconciles an active root-level suffix exposing ol… 2488ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > rejects a changed authority after yielding for the entry write lock 4512ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > selects imported headers and retention anchors before later indexed duplicates 3586ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reconciles an inactive root-level side branch 2115ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > rejects a changed row after yielding for the entry write lock 2201ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reconciles a same-length replacement after an unch… 342ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reparents a retained compressed opaque suffix while preserving payload and rollback 396ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > promotes a prefix duplicate when the re… 424ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > removes a retained event's key 377ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > reserves the retained owner ahead of a … 347ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > promotes a retained duplicate when its … 345ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > preserves the established idempotency owner across retained suffix rows 313ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > retains the latest boundary and counts earlier resets before a truncated tail 3534ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > rejects a changed connection after yielding for the entry write lock 2678ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > removes the keyed suffix with a malformed prefix 370ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > removes the keyed suffix with a duplicate beyond the rebuild bound 560ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > removes the keyed suffix with a unique key beyond the rebuild bound 532ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > compact session currency facts > discards facts first observed after a write in a rolled-back native transaction 2518ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > keeps reset history closed across compaction with a warm history cache 2757ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-transcript-store.test.ts > SQLite exact transcript suffix replacement > preserves retained row timestamps when an already-dirty projection needs reconciliation 2884ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > compact session currency facts > refreshes a cached owner after a sibling change and preserves rollback 2685ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > carries summaries into fresh readers and invalidates changed transcripts 10505ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > counts paired reset tool results without counting discarded orphan results 3163ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > compact session currency facts > refreshes a cached owner after a same-connection change and preserves rollback 1846ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > counts retained raw bytes without hydrating private native payloads 1804ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > compact session currency facts > preserves parser values and last duplicate owner fields through native admission 3735ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > compact session currency facts > refuses a captured source replaced by identical database bytes 6086ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > keeps fresh actor absence separate from the unbound native owner 119ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > commits an unchanged persisted row after evicting the host handle during preparation 3972ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > rereads non-mutating worker incognito delivery receipts without replay 6052ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > rereads non-mutating native incognito delivery receipts without replay 56ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > composes sharing, delivery, steering and presence from current actor facts without host SQL 52ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > composes suggestion FIFO, claims, release and resolution without caller SQL 99ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > honors explicit members custody and refuses canceled ambient reads 22ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > honors explicit suggestions custody and refuses canceled ambient reads 22ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > refuses members disclosure after its borrowed actor releases inside an accepted composition 20ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > refuses suggestions disclosure after its borrowed actor releases inside an accepted composition 17ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > retains a committed suggestion claim token through release after borrower release 22ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > retains a committed suggestion claim token through finalize after borrower release 18ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > publishes actor membership, owner, participant and category changes through their owners 31ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > publishes a committed category change after revoked-authority without replay 11ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > publishes a committed category change after lost-reply without replay 12ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > retains the actionable incognito refusal at suggestion transaction admission 14ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > retains the actionable incognito refusal at suggestion commit admission 13ms
+ ✓  infra  src/config/sessions/session-sharing-store.incognito.test.ts > refuses a captured actor belonging to another physical store 10ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > revalidates unrelated lineage for ordinary patches (replacement: false) 6246ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > refuses cached worker summaries in cold storage and reuses them after restoration 22155ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > revalidates unrelated lineage for lifecycle patches (replacement: true) 3392ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > keeps later unindexed feedback payloads outside an admitted context read 23350ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > keeps the exact-replacement reader exception after unrelated lineage invalidation 2221ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > revokes an in-flight branch read and joins worker exit before closing its database 7095ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > rejects a no-op lifecycle patch after host eviction with invalidated unrelated lineage 3152ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > keeps usage and bootstrap facts in the rebuilt bounded tail despite display activity 6423ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > rejects an intervening owner assignment even when entry JSON is unchanged 2404ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > refuses a completed branch snapshot when its session lifecycle changes before delivery 6243ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > keeps repeated visits on one snapshot and expires their reader on return 3589ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > preserves separately committed participants through patch and reopen with unchanged row projection 3547ms
+ ×  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > preserves the cold database lifetime for maintenance without a runtime handoff 7271ms
+   → expected [ …(2) ] to deeply equal []
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > preserves json failure precedence and releases the read cursor 5203ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > rejects a lifecycle target selected under a different stored key 5744ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-entry-revalidation.test.ts > SQLite session entry patch commit revalidation > preserves canonical creation policy when the writer receives an unrelated previous entry 4238ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > preserves sql failure precedence and releases the read cursor 6772ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > preserves the preexisting database lifetime for maintenance without a runtime handoff 9581ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > does not create a missing configured agent database during startup maintenance 24ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > reuses unchanged summaries across fifty active sessions without repeating worker reads 13994ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > preserves consumer failure precedence and releases the read cursor 6981ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > recomputes summaries after physical database replacement with identical watermarks 10571ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > does not count display-only activity toward unbounded context pressure 7541ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > reuses listing revisions without payload scans and invalidates sibling edits and reopened readers 1762ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > reconciles surviving stores while retained deleted stores stay fenced (cleanup completed: false) 14974ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > resolves runtime targets through an admitted reader without freshness probes 960ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-bounded-context.test.ts > does not count display-only activity toward reset context pressure 5920ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > reads session projections in the worker and observes the next sibling commit 6047ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > returns unreadable-store data only after its connection closes (close failure: false) 92ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > returns unreadable-store data only after its connection closes (close failure: true) 43ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > classifies selected-row failures only after reader cleanup: schema-retained 398ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > recomputes branch summaries after an append advances the watermark 11006ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > classifies selected-row failures only after reader cleanup: schema-disposable 407ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > classifies selected-row failures only after reader cleanup: row 1056ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > classifies selected-row failures only after reader cleanup: rollback 960ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > keeps source refusal outside the ordinary row-error result 715ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > propagates raw worker failure without calling the optional-data consumer 21ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > retains the scoped registry witness even when the first read rejects before returning a snapshot 12ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > returns unavailable registry facts as locator data without catching candidate escape 20ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > reconciles surviving stores while retained deleted stores stay fenced (cleanup completed: true) 10379ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > retains logical main through its alias consumer (retargeted: true) 3116ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > retains logical ops through its alias consumer (retargeted: false) 1092ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > fences the selected SQLite alias after a logical store read releases its initial owner 1921ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > fences the selected SQLite alias after a omitted store read releases its initial owner 1356ms
+ ✓  infra  src/config/sessions/session-entry-readonly.worker.test.ts > fences the selected SQLite alias after a empty store read releases its initial owner 1433ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > rewind invalidates the source cache and lists the resulting branch 13109ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > joins a forced followup after maintenance failure (mutation fails: false) 1619ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > observes committed deletion before startup handoff after canonical database drainage 11170ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > joins a forced followup after maintenance failure (mutation fails: true) 2612ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > publishes native writes into a warm cache without new generation probes 605ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > switch invalidates the source cache and lists the resulting branch 17416ms
+stdout | src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > refreshes admitted session readers after worker commits without schema or freshness probes
+{"writer":{"cache":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.5472090000002936},"exact":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":1.373290999999881},"owner":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.09699999999793363}},"readOnly":{"cache":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.5428750000028231},"exact":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":1.188125000000582},"owner":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.060667000001558335}},"snapshot":{"cache":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":8.788499999998749},"exact":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":2.804041999999754},"owner":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.14183399999819812}},"borrowed":{"cache":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.9441249999981665},"exact":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":1.6014590000013413},"owner":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.08150000000023283}},"worker":{"cache":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.8438749999986612},"exact":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":1.669000000001688},"owner":{"admitted":true,"schemaVersion":0,"userVersion":0,"dataVersion":0,"elapsedMs":0.07924999999886495}}}
+
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > joins real SDK mutation maintenance before native fixture drainage 20905ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > joins a measurement admitted after drainage starts before retiring its worker 2508ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > coalesces file teardown with another teardown while a runtime scan awaits retirement 1584ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > refreshes admitted session readers after worker commits without schema or freshness probes 14004ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > loads only selected cold snapshots outside the retention transaction: { cronRetention: true } 436ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > fork invalidates the source cache and lists the resulting branch 11925ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > loads only selected cold snapshots outside the retention transaction: { expiredCronRuns: [Object] } 825ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > loads only selected cold snapshots outside the retention transaction: { expiredCronRuns: [Object] } 1060ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with missing deletion history 29098ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > retains unsplit snapshots on selected cron rows 678ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > selected readonly listing > returns the ordered selected metadata for undefined 355ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > selected readonly listing > returns the ordered selected metadata for [ 'c', 'missing', 'a', 'c', …(2) ] 391ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > coalesces runtime lifecycle cleanup with another teardown while a runtime scan awaits retirement 4582ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > selected readonly listing > returns the ordered selected metadata for [] 975ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > selected core listing > returns the ordered selected metadata for undefined 919ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > selected core listing > returns the ordered selected metadata for [ 'c', 'missing', 'a', 'c', …(2) ] 849ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > selected core listing > returns the ordered selected metadata for [] 350ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > retains unrelated canonical-key errors for an empty selection 398ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-schema-probes.test.ts > validates unrelated warm delivery aliases before selecting listing keys 392ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > reports scan overload and retires queued scans before reusing workers 4160ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > measures and prunes the canonical session artifacts through the SQLite selector 1258ms
+ ✓  infra  src/config/sessions/disk-budget.physical-usage.test.ts > physical session disk usage > does not add synchronous realpath work as session artifacts grow 577ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with receipt-held deletion history 19093ms
+ ✓  infra  src/config/sessions/session-entry-cohort.worker.test.ts > reads complete cold entry facts with lifecycle=false 1518ms
+ ✓  infra  src/config/sessions/session-entry-cohort.worker.test.ts > reads complete cold entry facts with lifecycle=true 481ms
+ ✓  infra  src/config/sessions/session-entry-cohort.worker.test.ts > prepares bounded facts on one admitted source and refreshes after sibling and local writes without probes 432ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > keeps opaque payloads in the worker and refreshes phased Unicode headlines after a rewrite 12292ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > shares cold database admission with an immediate heartbeat 5877ms
+ ✓  infra  src/config/sessions/session-entry-cohort.worker.test.ts > prepares the admitted run target with its entry and refuses source loss after target preparation 5513ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > preserves heartbeat entries and SQLite creation without materializing the JSON locator 2595ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > joins concurrent first read requests through the queued database owner 988ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > joins concurrent first admission requests through the queued database owner 243ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with malformed-receipt deletion history 15895ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > preserves logical and physical owners without parent SQLite calls 7642ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > retains a read across an unrelated registry change before-consume 1408ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > retains a read across an unrelated registry change after-consume 236ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > retains the captured relative locator and environment across worker preparation 2421ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > keeps writable schema-repair admission for a logical read 3674ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > refuses file replacement while-queued (changed registration) 218ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > refuses file replacement while-queued (unchanged registration) 195ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > refuses caller replacement while-queued (changed registration) 364ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > preserves a populated incognito owner for an explicit locator (undefined, topic) 130ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > preserves a populated incognito owner for an explicit locator (main, global) 156ms
+ ✓  infra  src/config/sessions/session-logical-entry-read.worker.test.ts > leaves absent storage absent when a read-only phase has no admitted cohort 430ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > returns missing-session for history navigation in an absent store 9583ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with malformed-journal deletion history 19270ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > returns a committed rewind after identity publication retires its old authority 9351ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > keeps timestamp-mismatched keys without strengthening Doctor validation 499ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > lists process-only incognito branches without opening a worker 47759ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > reloads metadata after a commit during required validation (pending rewrite: false) 672ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > reloads metadata after a commit during required validation (pending rewrite: true) 929ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > does not publish a partial snapshot after a later malformed row 1066ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > preserves a literal main key after the main alias changes with a warm reader 292ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > refuses a valid physical store replacement before rewind preparation resumes 5409ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > revalidates a changed policy before writing a literal main transcript root 290ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > decodes cold list metadata once and preserves projected values (retained handle: true) 1096ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > re-registers durable lineage children before configured-only runtime reads 10285ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > omits saved prompts before decoding keys but retains them for Doctor 4915ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > keeps copied state directories self-contained for combined gateway reads 3545ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > drains fixture resources before retiring native handles and removing the root 7961ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-branches.test.ts > SQLite session branches > summarizes a large shared branch graph without repeated path walks 11256ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > keeps the event loop responsive while repairing a cold registry startup contract 2184ms
+ ✓  infra  src/config/sessions/session-canonical-key.test.ts > cold canonical session validation > still rejects divergent lineage on the first read 3157ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > keeps the event loop responsive while repairing a cold main-key startup contract 3845ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > reuses policy with canonical admission true and observes writes 51ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > reuses policy with canonical admission false and observes writes 15ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > keeps current policy inside read transactions and refreshes after savepoint rollback 15ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > observes prepared run writes and indirect trigger changes 12ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > observes prepared get writes and indirect trigger changes 13ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > observes prepared all writes and indirect trigger changes 13ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > observes prepared iterate writes and indirect trigger changes 11ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > does not reuse policy facts during native callbacks or after failed batches and rollback 12ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > shares the physical policy across handles and unrelated writes without rereading it 24ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > observes the schema owner's seed after reading a missing policy row 29ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > discards uncommitted policy after tracked implicit rollback 12ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > discards uncommitted policy after native implicit rollback 11ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > discards uncommitted policy after native-before-begin implicit rollback 13ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > retires stale policy when autocommit committed fact installation fails 24ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > retires stale policy when managed committed fact installation fails 41ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > does not carry a policy value across transaction controls inside a native batch 11ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > observes schema replacement when native callbacks re-admit intermediate facts 12ms
+ ✓  infra  src/config/sessions/session-canonical-key-policy.test.ts > canonical main-key policy facts > does not bypass an authorizer with a retained policy value 12ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > rejects rewind when the source lifecycle changes in the writer queue 8019ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > captures and revalidates existing admission without host SQL 532ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > refuses publication when release changes before publication 395ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > rejects fork when the source lifecycle changes in the writer queue 7453ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > refuses publication when readiness changes before publication 737ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > refuses publication when post-commit release changes before publication 939ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > does not export a proof whose readiness changed at its admission commit 996ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > retains only committed admission after rollback (previous admission: false) 435ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > returns the exact committed rewrite generation without selecting it again 526ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > retains only committed admission after manual commit (previous admission: false) 411ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > retains only committed admission after invalidate before commit (previous admission: false) 547ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > retains only committed admission after rollback (previous admission: true) 801ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > rejects physical replacement before host publication while the original handles remain open 1415ms
+ ✓  infra  src/config/sessions/session-canonical-reader-continuation.test.ts > rejects physical replacement before worker return while the original handles remain open 362ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > rewrites the anchor for logical main without caller-thread SQL or changing later rows 3502ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > rewinds by repointing the active leaf and returns the editor text 6909ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-history-query-plan.test.ts > keeps history marker reads selective (analyzed=false) 14448ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > rewrites the terminal for logical main without caller-thread SQL or changing later rows 4813ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > rewrites the anchor for logical secondary without caller-thread SQL or changing later rows 3702ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > defers an oversized rewind projection until the reconcile worker finishes 8681ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > rewrites the terminal for logical secondary without caller-thread SQL or changing later rows 4083ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > refuses a stale payload after preparation with the original error class 2031ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-message-cut.test.ts > SQLite session message cuts > forks an exact active-path prefix without changing the source 8192ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > refuses a stale lifecycle after preparation with the original error class 2469ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > preserves an inherited lifecycle fence when enriching a completion 413ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-history-query-plan.test.ts > keeps history marker reads selective (analyzed=true) 14000ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > pins completion writes and publication across alias retargeting with stale writer false 1917ms
+ ✓  infra  src/config/sessions/session-message-rewrite.test.ts > pins completion writes and publication across alias retargeting with stale writer true 2202ms
+ ✓  infra  src/config/sessions/session-accessor.sqlite-history-query-plan.test.ts > looks up nested activity anchors without scanning unrelated transcript identities 6639ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   infra  src/config/sessions/startup-migration.registry-recovery.test.ts > preserves the cold database lifetime for maintenance without a runtime handoff
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "select \"main_key\" from \"session_key_contract\" where \"id\" = ?",
++   "select \"main_key\" from \"session_key_contract\" where \"id\" = ?",
++ ]
+
+ ❯ src/config/sessions/startup-migration.registry-recovery.test.ts:91:7
+     89|         /select "main_key" from "session_key_contract"/iu.test(sql),
+     90|       ),
+     91|     ).toEqual([]);
+       |       ^
+     92|
+     93|     expect(withOpenClawAgentDatabaseReadOnly(readCanonicalSessionMainK…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 234 passed (235)
+   Start at  10:39:35
+   Duration  291.47s (tests 75%, transform 13%, import 8%, setup 3%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 370.49s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
+EXIT 1

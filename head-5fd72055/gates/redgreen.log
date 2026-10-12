@@ -1,0 +1,43 @@
+## RED1 host sends SessionManager writer facts without the owner-check request
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login-metadata.test.ts > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 2 to be 1 // Object.is equality
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:79:38
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:70:7
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:65:3
+      Tests  1 failed (1)
+(checkout clean)
+## RED2 metadata host never answers the owner probe
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login-metadata.test.ts > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 0 to be greater than 0
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:75:25
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:70:7
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:65:3
+      Tests  1 failed (1)
+(checkout clean)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > treats a resumed turn that replays history as carrying saved history
+AssertionError: expected false to be true // Object.is equality
+ ❯ src/agents/cli-runner/execute.native-history-owner.test.ts:98:67
+      Tests  1 failed | 6 passed (7)
+(checkout clean)
+## RED4 the UserPromptSubmit response goes out on the stream check alone
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > withholds private turn context when the boundary fails after the prompt was sent
+AssertionError: expected 'saved private context' to be undefined
+      Tests  1 failed | 38 passed (39)
+(checkout clean)
+## RED5 the native login is attested without the operator's opt-in
+ 1 file changed, 1 deletion(-)
+ FAIL   agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in
+AssertionError: expected { …(12) } to be undefined
+ ❯ src/agents/cli-runner/prepare-native-history.test.ts:201:38
+      Tests  1 failed | 5 passed (6)
+(checkout clean)
+## GREEN
+ Test Files  3 passed (3)
+      Tests  14 passed (14)
+ Test Files  1 passed (1)
+      Tests  39 passed (39)

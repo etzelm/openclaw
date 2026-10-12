@@ -1,0 +1,32 @@
+=== turn1 (Keychain item readable)
+{"at":"2026-10-12T17:01:33.250Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:33.345Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-12T17:01:35.670Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.696Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.713Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.714Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.716Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.718Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.719Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.768Z","pid":12221,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/fake-claude.log.argv-12221.txt"}
+{"at":"2026-10-12T17:01:35.772Z","pid":12221,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/fake-claude.log.init-12221.json"}
+{"at":"2026-10-12T17:01:35.775Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.776Z","pid":12221,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"79141942afb7e950ad7918a85f8219d630a2e0ec744de3ca8864f9201f1f1691","promptFile":"$RUN/fake-claude.log.user-12221-1.txt"}
+{"at":"2026-10-12T17:01:35.778Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:01:35.778Z","pid":12221,"event":"prompt-context-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1011,"sha256":"fa006d4b2dc88bd96e26beacc85bb418c2a10c7b0c6a0c50c68597562e464f2b","contextFile":"$RUN/fake-claude.log.context-12221-1.txt"}
+{"at":"2026-10-12T17:01:36.056Z","pid":10683,"event":"security-lookup","kind":"password","mode":"present"}
+=== turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent)
+{"at":"2026-10-12T17:02:02.303Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:02.313Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-12T17:02:03.006Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.024Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.040Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.041Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.042Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.044Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.045Z","pid":12299,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-12T17:02:03.108Z","pid":13536,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/fake-claude.log.argv-13536.txt"}
+{"at":"2026-10-12T17:02:03.113Z","pid":13536,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/fake-claude.log.init-13536.json"}
+{"at":"2026-10-12T17:02:03.124Z","pid":13536,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+{"at":"2026-10-12T17:02:03.127Z","pid":12299,"event":"security-lookup","kind":"password","mode":"fail"}
+{"at":"2026-10-12T17:02:03.128Z","pid":12299,"event":"security-lookup","kind":"metadata","mode":"fail"}

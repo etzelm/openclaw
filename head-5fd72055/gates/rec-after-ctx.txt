@@ -1,0 +1,40 @@
+######## after / interrupted-reassign-before-context
+turn 1 exit=0
+gateway started pid=43581 port=22164 listening=1
+turn 2 attestation held by the STUB: 1
+gateway killed while turn 2 was held; turn 2 prompts that reached the child: 0
+turn 2 client exit=143
+turn 3 exit=0
+turn 4 exit=0
+[turn1 log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 log]
+Gateway agent call connection closed; the Gateway may still be running this turn (accepted run 35aed8aa-fc81-4517-bfe6-cc46bb8b2d08). Check `openclaw gateway status` and the session transcript before retrying or rerunning with --local, so the turn does not execute twice.
+[turn3 log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=61 trigger=user useResume=true session=present resumeSession=85cf91e099bc reuse=reusable historyPrompt=present
+[turn4 log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=61 trigger=user useResume=true session=present resumeSession=85cf91e099bc reuse=reusable historyPrompt=none
+[fake claude child records, turn 3 onward; configDir and file-path fields omitted]
+{"at":"2026-10-12T17:28:46.686Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T17:28:48.635Z","pid":49375,"event":"spawn","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"resume"}
+{"at":"2026-10-12T17:28:48.639Z","pid":49375,"event":"initialize","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-12T17:28:48.671Z","pid":49375,"event":"user-message-received","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":61,"sha256":"6f27c35324586ee3efd27d2a629eeaabdad042ae1edd51627af082d0a8e765d2"}
+{"at":"2026-10-12T17:28:48.698Z","pid":49375,"event":"hook-ran","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"hook":"FAKE_BEFORE_CONTEXT"}
+{"at":"2026-10-12T17:28:48.738Z","pid":49375,"event":"prompt-context-received","loginAccount":"account-B","credentialAccount":"account-B","loginCredentialPresent":true,"chars":0,"sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+{"at":"2026-10-12T17:29:14.994Z","pid":51666,"event":"spawn","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":3,"sessionMode":"fresh"}
+{"at":"2026-10-12T17:29:24.878Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T17:29:26.308Z","pid":52401,"event":"spawn","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"resume"}
+{"at":"2026-10-12T17:29:26.318Z","pid":52401,"event":"initialize","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-12T17:29:26.320Z","pid":52401,"event":"user-message-received","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":61,"sha256":"b8694902b1b40c913752b7a9b2c23515cf972438bae91fbde2e944a7546fe0b1"}
+{"at":"2026-10-12T17:29:26.326Z","pid":52401,"event":"prompt-context-received","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":846,"sha256":"f76af26349c0ac6d24587e803082461bd70dc61661bccab80b3351e5732c6e60"}
+[canaries per delivered user message and its UserPromptSubmit context, bytes]
+user-43492-1.txt: bytes=85 PINEAPPLE-7=1 MANGO-5=0 | context bytes=1017 MANGO-5=0 interrupted-section=1
+user-49375-1.txt: bytes=61 PINEAPPLE-7=0 MANGO-5=0 | context bytes=0 MANGO-5=0 interrupted-section=0
+user-52401-1.txt: bytes=61 PINEAPPLE-7=0 MANGO-5=0 | context bytes=852 MANGO-5=0 interrupted-section=0
+[session_pending_inputs after the last turn]
+seq=1 state=interrupted consumed=null text="Remember: the interrupted codeword is MANGO-5. Reply STORED."
+[stored boundary after each turn]
+after turn 1: cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 2: cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 3: cliHistoryBoundary {"state":"known","maxSeq":3}
+after turn 4: cliHistoryBoundary {"state":"unknown"}

@@ -1,0 +1,11 @@
+=== turn1 (account A)
+{"at":"2026-10-12T16:56:01.979Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T16:56:02.672Z","pid":86903,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/fake-claude.log.argv-86903.txt"}
+{"at":"2026-10-12T16:56:02.675Z","pid":86903,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/fake-claude.log.init-86903.json"}
+{"at":"2026-10-12T16:56:02.703Z","pid":86903,"event":"user-message-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"70a2b9c7202c8529111f9baab8fae8895b9988b40f949afc0d8f47f20312ec4a","promptFile":"$RUN/fake-claude.log.user-86903-1.txt"}
+{"at":"2026-10-12T16:56:02.729Z","pid":86903,"event":"prompt-context-received","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1011,"sha256":"fa006d4b2dc88bd96e26beacc85bb418c2a10c7b0c6a0c50c68597562e464f2b","contextFile":"$RUN/fake-claude.log.context-86903-1.txt"}
+=== turn2 (account A at launch; credential revoked while claude initializes, before the prompt is sent)
+{"at":"2026-10-12T16:56:20.350Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T16:56:21.467Z","pid":88201,"event":"spawn","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/fake-claude.log.argv-88201.txt"}
+{"at":"2026-10-12T16:56:21.471Z","pid":88201,"event":"initialize","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/fake-claude.log.init-88201.json"}
+{"at":"2026-10-12T16:56:21.484Z","pid":88201,"event":"hook-ran","configDir":"$RUN/claude-config","loginAccount":"account-A","credentialAccount":null,"loginCredentialPresent":false,"hook":"FAKE_ON_INIT"}

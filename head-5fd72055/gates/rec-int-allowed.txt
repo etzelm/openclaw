@@ -1,0 +1,28 @@
+######## after / interrupted-allowed
+turn 1 exit=0
+gateway started pid=16906 port=20608 listening=1
+turn 2 attestation held by the STUB: 1
+gateway killed while turn 2 was held; turn 2 prompts that reached the child: 0
+turn 2 client exit=1
+turn 3 exit=0
+[turn1 log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 log]
+Gateway agent call connection closed; the Gateway may still be running this turn (accepted run 1a648564-8bb1-4c74-9a88-2ad7e5d498b3). Check `openclaw gateway status` and the session transcript before retrying or rerunning with --local, so the turn does not execute twice.
+[turn3 log]
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=61 trigger=user useResume=true session=present resumeSession=dd06863d94a5 reuse=reusable historyPrompt=present
+[fake claude child records, turn 3 onward; configDir and file-path fields omitted]
+{"at":"2026-10-12T17:19:16.850Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"account-A","status":200}
+{"at":"2026-10-12T17:19:18.488Z","pid":20539,"event":"spawn","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"resume"}
+{"at":"2026-10-12T17:19:18.494Z","pid":20539,"event":"initialize","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true}
+{"at":"2026-10-12T17:19:18.568Z","pid":20539,"event":"user-message-received","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":61,"sha256":"84f2727fdc6e343b76ca3f9c955320360bdb7a73472a85f5de316dd2c45d579a"}
+{"at":"2026-10-12T17:19:18.603Z","pid":20539,"event":"prompt-context-received","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1413,"sha256":"cb0574039a7de1eb8562ea93350ac129baebfc879a534228f776df7163afd522"}
+[canaries per delivered user message and its UserPromptSubmit context, bytes]
+user-16874-1.txt: bytes=85 PINEAPPLE-7=1 MANGO-5=0 | context bytes=1017 MANGO-5=0 interrupted-section=1
+user-20539-1.txt: bytes=61 PINEAPPLE-7=0 MANGO-5=0 | context bytes=1419 MANGO-5=1 interrupted-section=1
+[session_pending_inputs after the last turn]
+seq=1 state=interrupted consumed=null text="Remember: the interrupted codeword is MANGO-5. Reply STORED."
+[stored boundary after each turn]
+after turn 1: cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 2: cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 3: cliHistoryBoundary {"state":"known","maxSeq":4}
