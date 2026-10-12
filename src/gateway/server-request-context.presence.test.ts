@@ -5,12 +5,9 @@ import {
 } from "../../packages/gateway-protocol/src/client-info.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
 import { listSystemPresence } from "../infra/system-presence.js";
+import { readUserProfileIdentity } from "../state/user-profile-list.js";
 import { linkEmail } from "../state/user-profile-writes.worker.js";
-import {
-  ensureProfileForEmail,
-  getUserProfileDisplay,
-  resolveUserProfileId,
-} from "../state/user-profiles.js";
+import { ensureProfileForEmail, getUserProfileDisplay } from "../state/user-profiles.js";
 import {
   createGatewaySchedulerClock,
   createTestGatewayScheduler,
@@ -74,6 +71,11 @@ describe("createGatewayRequestContext presence", () => {
   it.each(["email", "owner", "tailscale"] as const)(
     "refreshes every live profile connection with %s identity",
     async (identity) => {
+      let now = Date.now();
+      const clock = vi.spyOn(Date, "now").mockImplementation(() => now++);
+      onTestFinished(() => {
+        clock.mockRestore();
+      });
       const profileId = `profile-${identity}`;
       const emails =
         identity === "email"
@@ -149,8 +151,12 @@ describe("createGatewayRequestContext presence", () => {
       expect(unrelated.authenticatedUserProfile.displayName).toBe("Grace");
       const rows = listSystemPresence().filter((entry) => entry.user?.id === profileId);
       expect(rows).toHaveLength(clients.length);
+      const newestFirstEmails = emails.toReversed();
       for (const [index, row] of rows.entries()) {
-        expect(row.user).toEqual(expectedUser(emails[index], revisions.at(-1)!));
+        expect(row.user).toEqual(expectedUser(newestFirstEmails[index], revisions.at(-1)!));
+      }
+      if (identity === "email") {
+        expect(rows[0]!.ts).toBeGreaterThan(rows[1]!.ts);
       }
       if (identity === "owner") {
         expect(params.runtime.broadcast).toHaveBeenCalledExactlyOnceWith(
@@ -202,7 +208,7 @@ describe("createGatewayRequestContext presence", () => {
       const context = createGatewayRequestContext(params);
 
       const linked = linkEmail("merge-source@example.test", target.id);
-      expect(resolveUserProfileId(source.id)).toBe(target.id);
+      expect(readUserProfileIdentity(source.id)?.profileId).toBe(target.id);
       const display = getUserProfileDisplay(linked.id);
       context.refreshConnectedUserProfile?.({
         ...display,

@@ -34,6 +34,15 @@ The implementation owners are `subagent-registry-requester-yield.ts`,
 `subagent-announce.requester-settle-wake.ts`, and
 `agent-task-tracking.ts`. `adoptPausedSubagentRunForFollowUp` uses the existing
 registry replacement operation; it does not create a second delegated task.
+Adoption clears a child-only pause notice instead of carrying it into completion.
+Actual requester completion batches keep their frozen membership and generation.
+
+Before admitting another turn in a yielded requester, the recovery owner transfers
+its ended execution's fence to the current durable child batch. The batch is
+revalidated before the write commits; absent or adopted batches, unrelated run
+fences, and outstanding recovery or delivery work remain fenced. The successor
+then receives its own execution fence, so completing it leaves later user input
+admissible without discarding pending child results.
 
 An explicit `waitFor: "message"` counts as continuation evidence after the
 registry accepts the wait. The attempt carries that fact into terminal reply
@@ -43,8 +52,11 @@ warning. Refused or unregistered waits do not provide that evidence.
 `resolveYieldedRunContinuation` owns whether a paused run can still be continued. A
 collector without a recorded result never can, because an explicit wait reads a
 collector and no continuation resumes it. The registry sweeper settles that run
-through the existing completion owner as an `error` that keeps the end time the
-yield recorded, and marks the collector completion with
+through the existing completion owner and keeps the end time the yield recorded.
+An outcome the yield already recorded stays: a collector an earlier version left at
+`ok` settles as done with the reply its yielded turn ended on, the same result a
+collector that yields now gets. Only a run with no recorded outcome settles as an
+`error` that says why, and its collector completion is marked with
 `reason: "yielded_without_result"` so `agents_wait` callers can tell it from an
 ordinary failure. No other terminal records a `reason`. Every other paused run
 stays continuable however long it has been paused: a declared message wait, a leaf
@@ -124,7 +136,10 @@ owner, so callbacks from the closed Gateway cannot settle the recovered wake.
   direct user turn, cancellation, session reset or archive, and Gateway restart.
   After the successor binds its run scope, that scope owns the entitlement until
   it closes. Retiring the delivered child batch cannot revoke a still-running
-  requester.
+  requester. A new direct user turn retires the automation entitlement, not the
+  child batch’s separately retained completion source. Valid results can still
+  return under their original caller’s restrictions; they never borrow the new
+  turn’s identity or permissions.
 - **Completion-source custody.** Registration retains the live operator source
   separately from execution. Individual delivery and requester settlement use
   that captured permission ceiling, not the async caller that later schedules
@@ -166,7 +181,8 @@ owner, so callbacks from the closed Gateway cannot settle the recovered wake.
   in flight, settlement observes the same request without spending failure
   attempts or discarding the child results. Gateway admission and execution
   retain their own timeouts; explicit cancellation still stops the turn.
-  Individual private announcements keep their existing delivery deadline.
+  Individual private announcements keep their delivery deadline until requester
+  execution starts; the Gateway's requester runtime budget then applies.
   Findings are capped at 4,096 characters, individual
   results at 512, and route notices at 1,024. Ambiguous replay reuses its attempt
   key; it does not assert global exactly-once delivery across Gateway restarts.
@@ -189,10 +205,18 @@ continuations do not send activity to an external channel. This
 activity signal does not change the configured message queue mode or restore
 individual tool-progress messages.
 
-The former Tasks-backed detached presenter and its notification policies are no
-longer available. A yielded turn does not start a separate task or flow projection
-to keep editing a channel progress message. Ordinary channel streaming still
-follows the channel's settings while its turn is active.
+On Telegram and Discord, a confirmed `progress` draft can stay with the yielding
+turn's announcing children instead of the waiting acknowledgment. The channel keeps
+rendering, throttling and deleting it; the native registry only forwards child
+status and prepared operation names (never child prose, commands, arguments or
+results). Public task state remains visible with the detailed tool log disabled;
+`streaming.progress.toolProgress` controls the rolling diagnostic rows. A resumed parent that
+yields again keeps the same draft for its new children. The draft is deleted when
+the settle wake completes the last tracked cohort (final, `NO_REPLY` or terminal
+failure) or when stop or reset cancels the children. It is process-local: a
+Gateway restart does not revive it. Other channels keep the waiting
+acknowledgment. A yielded turn still does not start a separate task or flow
+projection.
 
 [Progress cards](/tools/progress-card) remain durable session state. The parent
 updates its own card as work advances and when child results return. Inspect

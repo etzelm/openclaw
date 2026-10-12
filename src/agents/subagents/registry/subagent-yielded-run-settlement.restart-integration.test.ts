@@ -7,10 +7,11 @@ import { codeModeSwarmHandlers } from "../../code-mode-swarm.runtime.js";
 import type { ToolSearchToolContext } from "../../tool-search-types.js";
 import { createAgentsWaitTool } from "../../tools/agents-wait-tool.js";
 import { createSubagentsTool } from "../../tools/subagents-tool.js";
+import { captureSubagentCompletionReply } from "../announce/subagent-announce.js";
 import { observeSubagentExecution } from "./subagent-execution-observation.js";
 import { subagentRuns } from "./subagent-registry-memory.js";
+import { loadSubagentRegistryFromSqlite } from "./subagent-registry-state.fixture.test-support.js";
 import { writeSubagentSessionEntry } from "./subagent-registry.persistence.test-support.js";
-import { loadSubagentRegistryFromSqlite } from "./subagent-registry.store.sqlite.js";
 import {
   addSubagentRunForTests,
   finalizeInterruptedSubagentRun,
@@ -26,6 +27,7 @@ type RunView = { runId: string; status: string };
 const T0 = Date.parse("2026-10-03T08:00:00Z");
 const MINUTE_MS = 60_000;
 const COLLECTOR_KEY = "agent:main:subagent:legacy-collector";
+const YIELDED_REPLY = "Collector reply written before the yield";
 
 describe("yielded run settlement", () => {
   const fixture = useSubagentRestartRecoveryFixture();
@@ -55,10 +57,27 @@ describe("yielded run settlement", () => {
     };
   };
   // The pre-fix shapes seen in the field: the yield marker with no collector completion, and the
-  // execution outcome either absent (#141474 comment of 9/13) or `ok` (the issue body).
+  // execution outcome either absent (#141474 comment of 9/13) or `ok` (the issue body). A recorded
+  // `ok` is kept and read as the result, as a collector that yields now settles; only the absent
+  // shape takes the diagnostic error.
+  const DIAGNOSTIC = expect.stringContaining("no recorded collectorCompletion");
   const LEGACY_SHAPES = [
-    { shape: "execution.outcome absent", outcome: undefined },
-    { shape: "execution.outcome ok with endedAt", outcome: { status: "ok" as const } },
+    {
+      shape: "execution.outcome absent",
+      outcome: undefined,
+      settledOutcome: { status: "error", error: DIAGNOSTIC },
+      endedReason: "subagent-error",
+      waited: { status: "failed", error: DIAGNOSTIC, result: "" },
+      reason: "yielded_without_result",
+    },
+    {
+      shape: "execution.outcome ok with endedAt",
+      outcome: { status: "ok" as const },
+      settledOutcome: { status: "ok" },
+      endedReason: "subagent-complete",
+      waited: { status: "done", result: YIELDED_REPLY },
+      reason: undefined,
+    },
   ];
   const legacyYieldedCollector = (
     outcome?: { status: "ok" },
@@ -81,7 +100,7 @@ describe("yielded run settlement", () => {
 
   it.each(LEGACY_SHAPES)(
     "settles a collector persisted yielded without a result when the registry restarts ($shape)",
-    async ({ outcome }) => {
+    async ({ outcome, settledOutcome, endedReason, waited: expectedWait, reason }) => {
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(T0);
       await writeSubagentSessionEntry({
@@ -91,6 +110,10 @@ describe("yielded run settlement", () => {
         sessionId: "sess-legacy-collector",
         defaultSessionId: "sess-legacy-collector",
       });
+      // The fixture stubs reply capture; the collector's last reply is what a capture would read.
+      vi.mocked(captureSubagentCompletionReply).mockImplementation(async (sessionKey) =>
+        sessionKey === COLLECTOR_KEY ? YIELDED_REPLY : undefined,
+      );
       // Controls: yielded rows that a continuation can still reach stay untouched.
       const orchestrator = makeRunRecord({
         runId: "yielded-orchestrator",
@@ -109,12 +132,34 @@ describe("yielded run settlement", () => {
         startedAt: T0 - 5 * MINUTE_MS,
         endedAt: T0 - 4 * MINUTE_MS,
       });
-      for (const run of [legacyYieldedCollector(outcome), orchestrator, legacyLeaf]) {
+      // Controls: collectors the sweep must never settle, one with a recorded result and one
+      // whose stop is already claimed.
+      const frozenCollector = makeRunRecord({
+        ...legacyYieldedCollector(),
+        runId: "yielded-frozen-collector",
+        childSessionKey: "agent:main:subagent:frozen-collector",
+        outcome: { status: "ok" },
+        collectorCompletion: { status: "done" },
+      });
+      const killClaimedCollector = makeRunRecord({
+        ...legacyYieldedCollector(),
+        runId: "yielded-kill-claimed-collector",
+        childSessionKey: "agent:main:subagent:kill-claimed-collector",
+        killIntent: { requestedAt: T0 - 3 * MINUTE_MS, reason: "operator" },
+      });
+      for (const run of [
+        legacyYieldedCollector(outcome),
+        orchestrator,
+        legacyLeaf,
+        frozenCollector,
+        killClaimedCollector,
+      ]) {
         await addSubagentRunForTests(run);
       }
       expect(persisted("legacy-yielded-collector")?.execution.outcome?.status).toBe(
         outcome?.status,
       );
+      const frozenBefore = persisted("yielded-frozen-collector");
       await restartRegistry();
       expect(
         await waitSurface("legacy-yielded-collector"),
@@ -126,45 +171,36 @@ describe("yielded run settlement", () => {
 
       const settled = persisted("legacy-yielded-collector");
       expect(settled?.pauseReason).toBeUndefined();
-      // The yield time stays the end time for either stored shape; only the outcome is replaced
-      // (an `ok` that never had a collector result is the failure being repaired).
+      // The yield time stays the end time for either stored shape, and a recorded outcome stays.
       expect(settled?.execution).toMatchObject({
         status: "terminal",
         startedAt: T0 - 5 * MINUTE_MS,
         endedAt: T0 - 4 * MINUTE_MS,
-        outcome: {
-          status: "error",
-          error: expect.stringContaining("no recorded collectorCompletion"),
-        },
+        outcome: settledOutcome,
       });
-      expect(settled?.endedReason).toBe("subagent-error");
-      expect(settled?.collectorCompletion).toMatchObject({
-        status: "failed",
-        reason: "yielded_without_result",
-      });
+      expect(settled?.endedReason).toBe(endedReason);
+      expect(settled?.collectorCompletion?.status).toBe(expectedWait.status);
+      // Only the settlement that records the diagnostic failure marks the completion.
+      expect(settled?.collectorCompletion?.reason).toBe(reason);
       const waited = await waitSurface("legacy-yielded-collector");
       expect(waited.pending).toEqual([]);
-      expect(waited.completed).toMatchObject([
-        {
-          status: "failed",
-          error: expect.stringContaining("no recorded collectorCompletion"),
-          reason: "yielded_without_result",
-        },
-      ]);
+      expect(waited.completed).toMatchObject([expectedWait]);
+      expect(waited.completed[0]?.reason).toBe(reason);
+      expect("reason" in (waited.completed[0] ?? {})).toBe(reason !== undefined);
+      if (outcome) {
+        expect(waited.completed[0]?.error).toBeUndefined();
+      }
       // The agents.run wait bridge returns the same completion.
-      await expect(
-        codeModeSwarmHandlers.agentWait({
-          request: {
-            id: "bridge:agentWait:1",
-            method: "agentWait",
-            args: ["legacy-yielded-collector"],
-          },
-          ctx: { sessionKey: "agent:main:main", agentId: "main" } as ToolSearchToolContext,
-        }),
-      ).resolves.toMatchObject({
-        status: "failed",
-        reason: "yielded_without_result",
+      const bridged = await codeModeSwarmHandlers.agentWait({
+        request: {
+          id: "bridge:agentWait:1",
+          method: "agentWait",
+          args: ["legacy-yielded-collector"],
+        },
+        ctx: { sessionKey: "agent:main:main", agentId: "main" } as ToolSearchToolContext,
       });
+      expect(bridged).toMatchObject({ status: expectedWait.status });
+      expect((bridged as { reason?: string }).reason).toBe(reason);
       for (const control of [orchestrator, legacyLeaf]) {
         expect(persisted(control.runId), control.runId).toMatchObject({
           pauseReason: "sessions_yield",
@@ -172,6 +208,16 @@ describe("yielded run settlement", () => {
         });
         expect(persisted(control.runId)?.execution.outcome).toBeUndefined();
       }
+      const frozen = persisted("yielded-frozen-collector");
+      expect(frozen?.execution).toEqual(frozenBefore?.execution);
+      expect(frozen?.collectorCompletion).toEqual({ status: "done" });
+      expect(frozen?.endedReason).toBe(frozenBefore?.endedReason);
+      // The claimed stop owns the row: it completes as a cancellation, not as the sweep's failure.
+      expect(persisted("yielded-kill-claimed-collector")).toMatchObject({
+        endedReason: "subagent-killed",
+        collectorCompletion: { status: "killed" },
+        execution: { outcome: { status: "error", error: "operator" } },
+      });
     },
   );
 

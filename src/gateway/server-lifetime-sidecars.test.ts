@@ -47,6 +47,11 @@ vi.mock("./github-oauth-lifecycle.js", () => ({
   installActiveGitHubOAuthLifecycle: oauth.install,
 }));
 
+// mock-isolation: Prevent unrelated backfill; real lifetime/worker proof covers publication.
+vi.mock("./session-cost-usage-lifetime.js", () => ({
+  startSessionCostUsageProjectionLifetime: () => ({ stop: async () => {} }),
+}));
+
 const roots: string[] = [];
 
 function createStateDir(): string {
@@ -410,8 +415,8 @@ describe("gateway lifetime sidecars", () => {
     expect(oauth.stop).toHaveBeenCalledOnce();
     expect(context.githubOAuthService).toBeUndefined();
     expect(context.modelAccountConnectService).toBeUndefined();
-    expect(() =>
-      modelAccounts?.status({ owner: "profile-1", assertCurrent: () => {} }, "stale-flow"),
-    ).toThrow("current authorized connection");
+    await expect(
+      modelAccounts?.statusAsync({ owner: "profile-1", assertCurrent: () => {} }, "stale-flow"),
+    ).rejects.toThrow("current authorized connection");
   });
 });

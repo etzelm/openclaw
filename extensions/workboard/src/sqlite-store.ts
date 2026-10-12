@@ -1,50 +1,46 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
-import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
 import {
-  openSqliteWorkerStore,
-  runSqliteWorkerStoreOperation,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+  resolveDatabaseEngineInput,
+  openEngineWorkerStore,
+  runEngineStoreOperation,
+} from "openclaw/plugin-sdk/database-engine-runtime";
+import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
+import { readSqliteDatabaseWriteTokenForPath } from "openclaw/plugin-sdk/sqlite-runtime";
 import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import type {
-  PersistedWorkboardAttachment,
-  PersistedWorkboardBoard,
-  WorkboardCardStore,
-  WorkboardKeyedStore,
-  WorkboardSessionsBoardStore,
-  WorkboardSubscriptionStore,
-  WorkboardWriteAuthority,
-} from "./persistence-types.js";
+import type { WorkboardPersistence, WorkboardWriteAuthority } from "./persistence-types.js";
 import type {
   WorkboardSqliteOperations,
   WorkboardSqliteWorkerOperations,
 } from "./sqlite-store-contract.js";
 import { unwrapWorkboardSqliteResult } from "./sqlite-store-errors.js";
 
-type WorkboardSqliteStores = {
-  cards: WorkboardCardStore;
-  boards: WorkboardKeyedStore<PersistedWorkboardBoard>;
-  sessionsBoard: WorkboardSessionsBoardStore;
-  subscriptions: WorkboardSubscriptionStore;
-  attachments: WorkboardKeyedStore<PersistedWorkboardAttachment>;
-  ready: Promise<number>;
-  dataVersion(this: void): Promise<number>;
+type WorkboardSqliteStores = WorkboardPersistence & {
+  ready: Promise<void>;
+  readWriteToken(this: void): string | undefined;
   close(this: void): Promise<void>;
   runWithWriteAuthority: WorkboardWriteAuthority;
 };
 
 export function createWorkboardSqliteStores(options: {
+  config?: Parameters<typeof resolveDatabaseEngineInput>[0];
   dbPath?: string;
   workerModuleUrl: URL;
 }): WorkboardSqliteStores {
   const databasePath = path.resolve(
     options.dbPath ?? path.join(resolveStateDir(), "plugins", "workboard", "workboard.sqlite"),
   );
-  const worker = openSqliteWorkerStore<WorkboardSqliteWorkerOperations>({
-    moduleUrl: options.workerModuleUrl,
-    databasePath,
-    input: undefined,
-  });
+  const selectedDatabase = resolveDatabaseEngineInput(options.config ?? {});
+  const worker = selectedDatabase.then((input) =>
+    openEngineWorkerStore<WorkboardSqliteWorkerOperations>(
+      {
+        moduleUrl: options.workerModuleUrl,
+        databasePath,
+        input,
+      },
+      input,
+    ),
+  );
   let ownedConnection: number | undefined;
   let brokerClosed = false;
   let brokerCleanup = false;
@@ -106,7 +102,7 @@ export function createWorkboardSqliteStores(options: {
       }
       throw error;
     });
-  const ready = opened.then((value) => value.dataVersion);
+  const ready = opened.then(() => undefined);
   void ready.catch(() => {});
   async function execute<K extends keyof WorkboardSqliteOperations>(
     type: K,
@@ -115,24 +111,25 @@ export function createWorkboardSqliteStores(options: {
   ): Promise<WorkboardSqliteOperations[K]["output"]> {
     const authority = writes ? writeAuthority.getStore() : undefined;
     const store = await worker;
-    if (!authority) {
-      return unwrapWorkboardSqliteResult(await store.execute({ type, input }));
-    }
     const result = unwrapWorkboardSqliteResult(
-      await runSqliteWorkerStoreOperation(
+      await runEngineStoreOperation(
         store,
+        await selectedDatabase,
+        writes,
         (scope) => scope.execute({ type, input }),
-        undefined,
-        () => {
-          if (!authority.active) {
-            throw new Error("Workboard mutation authority has settled.");
-          }
-          authority.assertCurrent?.();
-        },
+        authority
+          ? () => {
+              if (!authority.active) {
+                throw new Error("Workboard mutation authority has settled.");
+              }
+              authority.assertCurrent?.();
+            }
+          : undefined,
+        databasePath,
       ),
     );
     // A rejected comparison has accepted no mutation; a retry still needs authority.
-    if (result !== false && result !== "conflict" && result !== "owner_busy") {
+    if (authority && result !== false && result !== "conflict" && result !== "owner_busy") {
       authority.assertCurrent = undefined;
     }
     return result;
@@ -175,7 +172,7 @@ export function createWorkboardSqliteStores(options: {
       }
     },
     ready,
-    dataVersion: () => run(undefined, (connection) => execute("dataVersion", { connection })),
+    readWriteToken: () => readSqliteDatabaseWriteTokenForPath(databasePath),
     cards: {
       register: bindOperation((input) => execute("cards.register", input, true)),
       registerIfAbsent: bindOperation((input) => execute("cards.registerIfAbsent", input, true)),

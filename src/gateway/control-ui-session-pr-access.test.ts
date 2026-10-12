@@ -1,10 +1,15 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { copyFileSync, renameSync } from "node:fs";
 import { DatabaseSync, StatementSync } from "node:sqlite";
 import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { withinTest } from "../../test/helpers/promise.js";
 import { observeSqliteReadSql } from "../../test/helpers/sqlite-statement-execution-counter.js";
 import { deleteSessionEntryLifecycle } from "../config/sessions.js";
 import type { SessionEntry } from "../config/sessions/types.js";
+import { runExec } from "../process/exec.js";
+import { runWithSpawnBroker } from "../process/spawn-broker/context.js";
+import { createSpawnBrokerHost, type SpawnBrokerHost } from "../process/spawn-broker/host.js";
 import { sessionChanges } from "../sessions/session-row-changes.js";
 import { AsyncWorkScope } from "../shared/async-work-scope.js";
 import { createDeferredCore } from "../shared/deferred.js";
@@ -30,6 +35,7 @@ import {
   snapshot,
   type Load,
 } from "./control-ui-session-pr-access.test-support.js";
+import { prepareControlUiSessionPrServiceTarget } from "./control-ui-session-pr-read.js";
 import { createControlUiSessionPullRequestSubscriptions } from "./control-ui-session-pr-subscriptions.js";
 import { githubJson, pullListItem, requestUrl } from "./control-ui-session-prs.test-support.js";
 import type { OperatorScope } from "./operator-scopes.js";
@@ -99,6 +105,66 @@ function expectedFrame(key: string, value: ControlUiSessionPullRequests = snapsh
     payload: { sessions: { [key]: { ...value, status: "ready" } } },
   });
 }
+
+describe.skipIf(process.platform === "win32" || Boolean(process.versions.bun))(
+  "prepared session PR transport",
+  () => {
+    let ownerBroker: SpawnBrokerHost;
+    let callerBroker: SpawnBrokerHost;
+    beforeAll(async () => {
+      ownerBroker = createSpawnBrokerHost();
+      callerBroker = createSpawnBrokerHost();
+      await Promise.all([ownerBroker.ready(), callerBroker.ready()]);
+    });
+    afterAll(async () => {
+      await Promise.all([ownerBroker?.close(), callerBroker?.close()]);
+    });
+
+    it("keeps the owner's spawn broker while detaching the requesting caller", async ({
+      signal,
+    }) => {
+      const callerContext = new AsyncLocalStorage<string>();
+      // Shared stores outlive this suite's brokers; only the PR owner captures one.
+      sharedState ??= await createOpenClawTestState({ scenario: "minimal" });
+      await runWithSpawnBroker(ownerBroker, () =>
+        withFixture("operator.read", async (f) => {
+          const target = await prepareControlUiSessionPrServiceTarget(
+            () => getSessionRowProjection(f.context),
+            { sessionKey, agentId: "main" },
+          );
+          if (!target || target.source === null) {
+            throw new Error("Fixture has no workspace PR target");
+          }
+          const launched = createDeferredCore<{
+            parentPid: number;
+            caller: string | undefined;
+          }>();
+          f.load.mockImplementationOnce(async () => {
+            try {
+              const caller = callerContext.getStore();
+              const result = await runExec(process.execPath, ["-p", "process.ppid"], {
+                logOutput: false,
+                signal,
+              });
+              launched.resolve({ parentPid: Number(result.stdout.trim()), caller });
+              return snapshot;
+            } catch (error) {
+              launched.reject(error);
+              throw error;
+            }
+          });
+          callerContext.run("request-authority", () =>
+            runWithSpawnBroker(callerBroker, () => f.subscriptions.readPrepared(target)),
+          );
+          expect(await withinTest(launched.promise, signal)).toEqual({
+            parentPid: ownerBroker.pid,
+            caller: undefined,
+          });
+        }),
+      );
+    });
+  },
+);
 
 describe("registered session PR subscriptions", () => {
   it.each(["incarnation", "namespace", "repository"] as const)(
@@ -563,7 +629,7 @@ describe("registered session PR check details", () => {
           },
           client: f.client,
           context: f.context,
-          extraHandlers: createControlUiHandlers(undefined, undefined, load),
+          extraHandlers: createControlUiHandlers(undefined, load),
           isWebchatConnect: () => false,
           respond,
         });
@@ -636,25 +702,28 @@ it.each(["local", "repository"] as const)(
         await f.seed(sessionKey, f.profile.id, { repositoryWorkspaceId: repository.workspaceId });
       }
       await f.subscribe();
-      for (let index = 1; index < 20; index++) {
-        await f.subscribe([sessionKey], f.addReader(`warm-reader-${index}`).client);
-      }
-      await f.subscriptions.pollNow();
       const statements = observeSqliteReadSql(StatementSync.prototype);
-      f.load.mockClear();
       try {
+        for (let index = 1; index < 20; index++) {
+          await f.subscribe([sessionKey], f.addReader(`warm-reader-${index}`).client);
+        }
+        await f.subscriptions.pollNow();
+        expect(statements.queries.filter((sql) => /\buser_profiles\b/i.test(sql))).toEqual([]);
+        statements.queries.length = 0;
+        f.load.mockClear();
         for (let index = 0; index < 3; index++) {
           await f.subscriptions.pollNow();
         }
         const queries = statements.queries.map((sql) => sql.toLowerCase());
         expect({
           sessionReads: queries.filter((sql) => sql.includes("session_nodes")).length,
+          profileReads: queries.filter((sql) => sql.includes("user_profiles")).length,
           repositoryReads: queries.filter((sql) => sql.includes("session_repository_workspaces"))
             .length,
           freshnessReads: queries.filter(
             (sql) => sql.includes("pragma") || sql.includes("cache_generation"),
           ).length,
-        }).toEqual({ sessionReads: 0, repositoryReads: 0, freshnessReads: 0 });
+        }).toEqual({ sessionReads: 0, profileReads: 0, repositoryReads: 0, freshnessReads: 0 });
         expect(f.load).toHaveBeenCalledTimes(3);
         expect(frames(f.socket)).toEqual([expectedFrame(sessionKey)]);
       } finally {

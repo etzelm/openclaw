@@ -3,12 +3,10 @@ import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import {
   ErrorCodes,
   errorShape,
-  formatValidationErrors,
   validateConfigApplyParams,
   validateConfigGetParams,
   validateConfigPatchParams,
   validateConfigSchemaLookupParams,
-  validateConfigSchemaLookupResult,
   validateConfigSchemaParams,
   validateConfigSetParams,
 } from "../../../packages/gateway-protocol/src/index.js";
@@ -49,10 +47,12 @@ import {
   prepareSecretsRuntimeSnapshot,
   type PreparedSecretsRuntimeSnapshot,
 } from "../../secrets/runtime.js";
-import { diffConfigPaths, diffGatewayReloadPaths } from "../config-diff.js";
+import { diffGatewayReloadPaths } from "../config-diff.js";
 import { invalidateConfigGetResponseCache, readConfigGetResponse } from "../config-get-response.js";
 import {
   listConfigReloadRefinementPrefixes,
+  buildGatewayReloadPlan,
+  isNoopGatewayReloadPlan,
   resolveConfigReloadMetadata,
 } from "../config-reload-plan.js";
 import type { GatewayConfigRevisionProjector } from "../config-revision-token.js";
@@ -62,6 +62,11 @@ import {
   summarizeChangedPaths,
 } from "../control-plane-audit.js";
 import { resolveBaseHashParam } from "./base-hash.js";
+import {
+  diffConfigLeafPaths,
+  hasHashlessPatchLwwStructure,
+  isHashlessPatchLwwPath,
+} from "./config-patch-intent.js";
 import {
   summarizeConfigValidationIssues,
   validateSubmittedConfigOrRespond,
@@ -83,11 +88,6 @@ import {
 } from "./open-path.js";
 import type { GatewayRequestContext, GatewayRequestHandlers, RespondFn } from "./types.js";
 import { assertValidParams } from "./validation.js";
-
-// ui.prefs is the cross-device Control UI preference surface documented in docs/web/control-ui.md.
-// Leaf preferences are LWW so independent tabs/devices do not CAS-conflict on the whole config;
-// every other path keeps strict document CAS.
-const HASHLESS_PATCH_LWW_PATH_PREFIXES = ["ui.prefs"] as const;
 
 let configSchemaResponseCache: {
   pluginRegistryVersion: number;
@@ -112,25 +112,14 @@ function requireConfigBaseHash(
     return true;
   }
   const snapshotHash = resolveConfigSnapshotHash(snapshot);
-  if (!snapshotHash) {
-    respond(
-      false,
-      undefined,
-      errorShape(
-        ErrorCodes.INVALID_REQUEST,
-        "config base hash unavailable; re-run config.get and retry",
-      ),
-    );
-    return false;
-  }
   const baseHash = resolveBaseHashParam(params);
-  if (!baseHash) {
+  if (!snapshotHash || !baseHash) {
     respond(
       false,
       undefined,
       errorShape(
         ErrorCodes.INVALID_REQUEST,
-        "config base hash required; re-run config.get and retry",
+        `config base hash ${snapshotHash ? "required" : "unavailable"}; re-run config.get and retry`,
       ),
     );
     return false;
@@ -588,6 +577,7 @@ async function commitConfigRestartWrite(params: {
   respond: RespondFn;
   uiHints: ConfigRedactionHints;
   preparedSecretsSnapshot: PreparedSecretsRuntimeSnapshot;
+  summary?: boolean;
 }): Promise<void> {
   const { snapshot, writeOptions } = params.writeSnapshot;
   const changedPaths = diffGatewayReloadPaths(
@@ -626,7 +616,7 @@ async function commitConfigRestartWrite(params: {
     ...(writeResult.hash
       ? { hash: params.context.configRevisionProjector.projectRawHash(writeResult.hash) }
       : {}),
-    config: redactConfigObject(writeResult.config, params.uiHints),
+    ...(!params.summary ? { config: redactConfigObject(writeResult.config, params.uiHints) } : {}),
   };
   if (writeResult.application) {
     const outcome = await writeResult.application;
@@ -648,7 +638,20 @@ async function commitConfigRestartWrite(params: {
       return;
     }
   }
-  configSchemaResponseCache = null;
+  const noopReload = isNoopGatewayReloadPlan(
+    buildGatewayReloadPlan(changedPaths, {
+      previousConfig: snapshot.config,
+      candidateConfig: params.nextConfig,
+    }),
+  );
+  if (!noopReload) {
+    configSchemaResponseCache = null;
+  }
+  if (params.summary && noopReload) {
+    params.respond(true, { ok: true, path: writeResult.path, ...persistedConfig, changedPaths });
+    writeResult.queueFollowUp();
+    return;
+  }
   const { payload, sentinelPersisted, restart } = await resolveGatewayConfigRestartWriteResult({
     requestParams: params.requestParams,
     kind: params.mode === "config.patch" ? "config-patch" : "config-apply",
@@ -754,48 +757,6 @@ async function commitGatewayConfigWriteOrRespond(
   }
 }
 
-function isHashlessPatchLwwPath(path: string): boolean {
-  return HASHLESS_PATCH_LWW_PATH_PREFIXES.some(
-    (prefix) => path === prefix || path.startsWith(`${prefix}.`),
-  );
-}
-
-// Hash-free LWW is a per-leaf protocol. Container replacement or deletion requires document CAS
-// so a stale client cannot wipe preference keys added by a concurrent writer.
-function hasHashlessPatchLwwStructure(patch: unknown): boolean {
-  return HASHLESS_PATCH_LWW_PATH_PREFIXES.every((prefix) => {
-    let node = patch;
-    for (const segment of prefix.split(".")) {
-      if (!isPlainObject(node)) {
-        return false;
-      }
-      if (!Object.hasOwn(node, segment)) {
-        return true;
-      }
-      node = node[segment];
-      if (!isPlainObject(node)) {
-        return false;
-      }
-    }
-    return true;
-  });
-}
-
-function diffConfigLeafPaths(prev: unknown, next: unknown, prefix = ""): string[] {
-  if (isPlainObject(prev) || isPlainObject(next)) {
-    const prevRecord = isPlainObject(prev) ? prev : {};
-    const nextRecord = isPlainObject(next) ? next : {};
-    const keys = [...new Set([...Object.keys(prevRecord), ...Object.keys(nextRecord)])];
-    if (keys.length === 0) {
-      return isDeepStrictEqual(prev, next) ? [] : [prefix || "<root>"];
-    }
-    return keys.flatMap((key) =>
-      diffConfigLeafPaths(prevRecord[key], nextRecord[key], prefix ? `${prefix}.${key}` : key),
-    );
-  }
-  return diffConfigPaths(prev, next, prefix);
-}
-
 export const configHandlers: GatewayRequestHandlers = {
   "config.get": async ({ params, respond, context }) => {
     if (!assertValidParams(params, validateConfigGetParams, "config.get", respond)) {
@@ -826,7 +787,7 @@ export const configHandlers: GatewayRequestHandlers = {
     }
     respond(true, loadSchemaWithPlugins(), undefined);
   },
-  "config.schema.lookup": ({ params, respond, context }) => {
+  "config.schema.lookup": ({ params, respond }) => {
     if (
       !assertValidParams(params, validateConfigSchemaLookupParams, "config.schema.lookup", respond)
     ) {
@@ -840,20 +801,6 @@ export const configHandlers: GatewayRequestHandlers = {
         false,
         undefined,
         errorShape(ErrorCodes.INVALID_REQUEST, "config schema path not found"),
-      );
-      return;
-    }
-    if (!validateConfigSchemaLookupResult(result)) {
-      const errors = validateConfigSchemaLookupResult.errors ?? [];
-      context.logGateway.warn(
-        `config.schema.lookup produced invalid payload for ${sanitizePathForLog(path)}: ${formatValidationErrors(errors)}`,
-      );
-      respond(
-        false,
-        undefined,
-        errorShape(ErrorCodes.UNAVAILABLE, "config.schema.lookup returned invalid payload", {
-          details: { errors },
-        }),
       );
       return;
     }
@@ -1047,7 +994,9 @@ export const configHandlers: GatewayRequestHandlers = {
           noop: true,
           changedPaths: [],
           path: resolveGatewayConfigPath(snapshot),
-          config: redactConfigObject(snapshot.config, schemaPatch.uiHints),
+          ...(params.response !== "summary"
+            ? { config: redactConfigObject(snapshot.config, schemaPatch.uiHints) }
+            : {}),
         },
         undefined,
       );
@@ -1081,6 +1030,7 @@ export const configHandlers: GatewayRequestHandlers = {
       respond,
       uiHints: schemaPatch.uiHints,
       preparedSecretsSnapshot,
+      summary: params.response === "summary",
     });
   },
   "config.apply": async ({ params, respond, client, context }) => {

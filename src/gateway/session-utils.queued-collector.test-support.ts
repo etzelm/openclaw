@@ -100,26 +100,27 @@ export function useQueuedCollectorFixture() {
         const { storePath, entry } = loadGatewaySessionEntryReadOnly(sessionKey);
         await upsertSessionEntryCore(
           { storePath, sessionKey },
-          buildAgentSessionPatch({
-            freshEntry: entry,
-            initialEntry: entry,
-            cfg: getRuntimeConfig(),
-            sessionAgentId: "main",
-            canonicalSessionKey: sessionKey,
-            storePath,
-            requestLabel: typeof params.label === "string" ? params.label : undefined,
-            normalizedSpawned: {},
-            requestDeliveryHint: undefined,
-            expectedExistingSessionId: entry?.sessionId,
-            hasRestoredCronContinuation: false,
-            resetPolicy: resolveSessionResetPolicy({ resetType: "direct" }),
-            now: Date.now(),
-            isSystemGatewayRun: true,
-            visibleRequest: false,
-            fallbackSessionId: expectDefined(entry?.sessionId, "created child identity"),
-            touchInteraction: false,
-            failedSessionTranscriptMissing: () => false,
-          }).patch,
+          (
+            await buildAgentSessionPatch({
+              freshEntry: entry,
+              initialEntry: entry,
+              cfg: getRuntimeConfig(),
+              sessionAgentId: "main",
+              canonicalSessionKey: sessionKey,
+              storePath,
+              requestLabel: typeof params.label === "string" ? params.label : undefined,
+              normalizedSpawned: {},
+              requestDeliveryHint: undefined,
+              expectedExistingSessionId: entry?.sessionId,
+              hasRestoredCronContinuation: false,
+              resetPolicy: resolveSessionResetPolicy({ resetType: "direct" }),
+              now: Date.now(),
+              isSystemGatewayRun: true,
+              visibleRequest: false,
+              fallbackSessionId: expectDefined(entry?.sessionId, "created child identity"),
+              touchInteraction: false,
+            })
+          ).patch,
         );
         launchedRunIds.push(runId);
         registerAgentRunContext(runId, { sessionKey, projectSessionActive: true });
@@ -254,25 +255,29 @@ export function useQueuedCollectorFixture() {
     const runId = `${name}-collector`;
     const groupId = `swarm:${parentKey}:parent-turn`;
     reserveSwarmRun({ runId, groupId, maxConcurrent: 1, activeRunIds: [] });
-    expect(
-      await createInitialSubagentSession({
-        cfg: getRuntimeConfig(),
-        requesterAgentId: "main",
-        targetAgentId: "main",
-        childSessionKey,
-        label: "Reserved collector",
-        incognito: false,
-        requesterInternalKey: parentKey,
-        completionOwnerSessionKey: parentKey,
-        creationPolicy,
-        modelPatch: {},
-        swarmGroupId: groupId,
-        collect: true,
-      }),
-    ).toMatchObject({ status: "ok" });
+    const created = await createInitialSubagentSession({
+      cfg: getRuntimeConfig(),
+      requesterAgentId: "main",
+      targetAgentId: "main",
+      childSessionKey,
+      label: "Reserved collector",
+      incognito: false,
+      requesterInternalKey: parentKey,
+      completionOwnerSessionKey: parentKey,
+      creationPolicy,
+      modelPatch: {},
+      swarmGroupId: groupId,
+      collect: true,
+    });
+    expect(created.status).toBe("ok");
+    if (created.status !== "ok") {
+      throw new Error(created.error);
+    }
     const registration = {
       runId,
       childSessionKey,
+      childAgentId: "main",
+      sessionEntry: expectDefined(created.entry, "created reservation identity"),
       requesterSessionKey: parentKey,
       requesterTurnRunId: "parent-turn",
       requesterDisplayKey: parentKey,
