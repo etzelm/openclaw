@@ -52,8 +52,11 @@ warning. Refused or unregistered waits do not provide that evidence.
 `resolveYieldedRunContinuation` owns whether a paused run can still be continued.
 A collector without a recorded result never can, because an explicit wait reads a
 collector and no continuation resumes it. The registry sweeper settles that run
-through the existing completion owner as an `error` that keeps the end time the
-yield recorded. Every other paused run stays continuable however long it has been
+through the existing completion owner and keeps the end time the yield recorded.
+An outcome the yield already recorded stays: a collector an earlier version left at
+`ok` settles as done with the reply its yielded turn ended on, the same result a
+collector that yields now gets. Only a run with no recorded outcome settles as an
+`error` that says why. Every other paused run stays continuable however long it has been
 paused: a declared message wait, a leaf that an earlier version left paused, and an
 orchestrator waiting on descendants are not bounded by this settlement. A kill
 claim on a paused run is never settled over; cancellation stays with the kill path.

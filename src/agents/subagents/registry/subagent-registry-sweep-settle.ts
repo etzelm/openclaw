@@ -1,5 +1,8 @@
 import { getAgentRunContext } from "../../../infra/agent-run-registry.js";
-import { SUBAGENT_ENDED_REASON_ERROR } from "./subagent-lifecycle-events.js";
+import {
+  SUBAGENT_ENDED_REASON_COMPLETE,
+  SUBAGENT_ENDED_REASON_ERROR,
+} from "./subagent-lifecycle-events.js";
 import type { createSubagentRegistryCompletionRuntime } from "./subagent-registry-completion-runtime.js";
 import { resolveYieldedRunContinuation } from "./subagent-registry-run-pause.js";
 import type { createSubagentSweepReadScope } from "./subagent-registry-sweep-cleanup.js";
@@ -103,6 +106,12 @@ export async function settleUnreachableYieldedSubagentRun(params: {
   if (continuation?.state !== "unreachable") {
     return false;
   }
+  // An outcome the yield already recorded is kept, as a collector that yields now ends with its
+  // yielded turn as its result; only a run with no recorded outcome takes the diagnostic error.
+  const outcome = entry.execution.outcome ?? {
+    status: "error" as const,
+    error: continuation.error,
+  };
   await complete(
     {
       runId,
@@ -110,8 +119,9 @@ export async function settleUnreachableYieldedSubagentRun(params: {
       recoveryCurrent: readScope.completionCurrent,
       // The run ended when it yielded; settling now must not rewrite that time.
       endedAt: entry.execution.endedAt,
-      outcome: { status: "error", error: continuation.error },
-      reason: SUBAGENT_ENDED_REASON_ERROR,
+      outcome,
+      reason:
+        outcome.status === "error" ? SUBAGENT_ENDED_REASON_ERROR : SUBAGENT_ENDED_REASON_COMPLETE,
       settleYielded: true,
       sendFarewell: true,
       accountId: entry.requesterOrigin?.accountId,
