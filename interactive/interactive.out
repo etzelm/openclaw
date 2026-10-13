@@ -1,0 +1,117 @@
+# interactive doctor (head 511f9a0a760)
+npm install -g <candidate.tgz> exit=0
+installed: OpenClaw 2026.10.2 (511f9a0)
+profile ready: case=root
+## workspace before (sha256 prefix, main/.git omitted)
+ac7c735bbf21f072  ./AGENTS.md
+d1b9cea71ba4214f  ./IDENTITY.md
+1365ee567b46c64a  ./MEMORY.md
+ad41d5489edec715  ./SOUL.md
+46e0d8c937df7b10  ./USER.md
+c8815c26ac19a76b  ./dev/SOUL.md
+ac7c735bbf21f072  ./main/AGENTS.md
+0bcb8c9187e32c87  ./main/BOOTSTRAP.md
+d1b9cea71ba4214f  ./main/IDENTITY.md
+f1ca0312afae15de  ./main/SOUL.md
+46e0d8c937df7b10  ./main/USER.md
+2253daed8b60a164  ./memory/2026-10-01.md
+
+## openclaw doctor (interactive, no --fix), answer: decline
+exit=0
+Yes / ○ No
+Yes
+Copy SOUL.md, MEMORY.md, memory/2026-10-01.md from $OPENCLAW_HOME/workspace into
+Set agents.entries.main.workspace to
+Apply recommended config repairs now?
+Yes / ○ No
+Yes / ● No◇  Apply recommended config repairs now?
+No
+No command owner is configured.
+Yes / ○ No
+OTHER PROMPT, answered No: Tighten permissions on $OPENCLAW_HOME/openclaw.json to 600?
+Yes / ● No│  ● Yes / ○ No
+No
+No successful backup is recorded.
+action. No jobs were removed.
+Yes / ○ No
+OTHER PROMPT, answered No: Enable zsh shell completion for openclaw?
+No
+agents.entries = {"main":{},"dev":{}}
+-- workspace vs before:
+identical
+
+## openclaw doctor (interactive, no --fix), answer: accept
+exit=0
+Yes / ○ No
+Yes
+Copy SOUL.md, MEMORY.md, memory/2026-10-01.md from $OPENCLAW_HOME/workspace into
+Set agents.entries.main.workspace to
+Apply recommended config repairs now?
+Yes / ○ No
+Apply recommended config repairs now?
+Yes
+Copied SOUL.md, MEMORY.md, memory/2026-10-01.md from $OPENCLAW_HOME/workspace into
+Set agents.entries.main.workspace to
+Updated config: $OPENCLAW_HOME/openclaw.json
+No command owner is configured.
+No successful backup is recorded.
+action. No jobs were removed.
+Yes / ○ No
+OTHER PROMPT, answered No: Enable zsh shell completion for openclaw?
+Yes / ● No
+No
+agents.entries = {"main":{"workspace":"<profile>/workspace/main"},"dev":{}}
+-- workspace vs before:
+10c10,11
+< f1ca0312afae15de  ./main/SOUL.md
+---
+> 1365ee567b46c64a  ./main/MEMORY.md
+> ad41d5489edec715  ./main/SOUL.md
+11a13
+> 2253daed8b60a164  ./main/memory/2026-10-01.md
+
+## gateway after: version 2026.10.2
+{
+  "name": "operator turn (chat.send, session agent:main:main)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-ROOT-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md",
+    "<profile>/workspace/main/MEMORY.md"
+  ],
+  "earlierTurnsReplayedToProvider": [
+    "operator turn before: say PROOF-REPLY"
+  ]
+}
+{
+  "name": "agent RPC turn (session agent:main:wake-proof)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-ROOT-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md",
+    "<profile>/workspace/main/MEMORY.md"
+  ]
+}
+{
+  "name": "scheduled turn (cron.add isolated agentTurn for main, cron.run force)",
+  "workingDirectory": "<profile>/workspace/main",
+  "soulMarkersInjected": [
+    "PROOF-MARKER-ROOT-SOUL"
+  ],
+  "bootstrapFiles": [
+    "<profile>/workspace/main/AGENTS.md",
+    "<profile>/workspace/main/SOUL.md",
+    "<profile>/workspace/main/IDENTITY.md",
+    "<profile>/workspace/main/USER.md"
+  ]
+}

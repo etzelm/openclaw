@@ -1,0 +1,224 @@
+spawn openclaw doctor
+[?25l│
+[?25h◇  
+[2K
+ð¦ OpenClaw 2026.10.2 (511f9a0) — It's not "failing," it's "discovering new ways to configure the same thing wrong."
+
+┌  OpenClaw doctor
+│
+◇  Update ──────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                           │
+│  This install is not a git checkout.                                                      │
+│  Run `openclaw update` to update via your package manager (npm/pnpm), then rerun doctor.  │
+│                                                                                           │
+├───────────────────────────────────────────────────────────────────────────────────────────╯
+[?25l│
+◆  Pause the managed Gateway while you review repairs? Doctor restores its prior service state when finished.
+│  ● Yes / ○ No
+└
+[999D[4A[1B[J◇  Pause the managed Gateway while you review repairs? Doctor restores its prior service state when finished.
+│  Yes
+[?25h
+Pre-repair state retained for manual recovery at /Users/openclaw/work/pr-165112-ev/interactive/profile/state.update-captures/doctor-27c70dc8-eeba-434c-9cce-826483957b47/manifest.json.
+crabbox migration declares no data resources; its private state is not in the recovery set
+memory-core migration declares no data resources; its private state is not in the recovery set
+workboard migration declares no data resources; its private state is not in the recovery set
+[?25l│
+
+[1D[0K◒  cron repair…[1G[J◐  legacy state migrations…[1G[J◓  legacy state migrations…[1G[J◑  legacy state migrations…[1G[J◒  legacy state migrations…[1G[J◐  legacy state migrations…[1G[J◓  legacy state migrations…[1G[J◑  legacy state migrations…[1G[J◒  legacy state migrations….[1G[J◐  legacy state migrations….[1G[J◓  legacy state migrations….[1G[J[?25h◇  
+[2K│
+◇  Doctor changes preview ───────────────────────────────────────╮
+│                                                                │
+│  openai/gpt-5.6-luna model configured, enabled automatically.  │
+│                                                                │
+├────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes preview ──────────────────────────────────────────────────────────────╮
+│                                                                                       │
+│  Copy SOUL.md, MEMORY.md, memory/2026-10-01.md from $OPENCLAW_HOME/workspace into     │
+│  $OPENCLAW_HOME/workspace/main; the files in $OPENCLAW_HOME/workspace stay in place.  │
+│  Set agents.entries.main.workspace to                                                 │
+│  /Users/openclaw/work/pr-165112-ev/interactive/profile/workspace/main so its working  │
+│  directory, persona, and memory use one workspace.                                    │
+│                                                                                       │
+├───────────────────────────────────────────────────────────────────────────────────────╯
+[?25l│
+◆  Apply recommended config repairs now?
+│  ● Yes / ○ No
+└
+[999D[4A[2B[2K[G│  ○ Yes / ● No[2B[999D[4A[1B[J◇  Apply recommended config repairs now?
+│  No
+[?25h│
+◇  Doctor ───────────────────────────────────────────────────────────╮
+│                                                                    │
+│  Run "openclaw doctor --fix" to apply these changes.               │
+│  Run "openclaw doctor --fix" to pin the system agent's workspace.  │
+│                                                                    │
+├────────────────────────────────────────────────────────────────────╯
+│
+◇  Database engines ───────────────────╮
+│                                      │
+│  Shared state: sqlite                │
+│  Agent data: sqlite                  │
+│  Workboard: sqlite                   │
+│  Logbook: sqlite                     │
+│  Database quarantine: sqlite         │
+│  Managed update handoffs: sqlite     │
+│  Package activation journal: sqlite  │
+│                                      │
+├──────────────────────────────────────╯
+│
+◇  Command owner ───────────────────────────────────────────────────────────────────────────╮
+│                                                                                           │
+│  No command owner is configured.                                                          │
+│  A command owner is your trusted human operator account, allowed to update OpenClaw with  │
+│  /update, restart the Gateway, change configuration, and approve commands. Chat           │
+│  allowlists do not grant this authority.                                                  │
+│  Run openclaw channels add and complete a channel's setup to choose your operator         │
+│  account, including servers and groups without DM pairing.                                │
+│  CLI pairing approval records the first command owner. Control UI pairing approval has a  │
+│  separate owner checkbox.                                                                 │
+│  Fix: set commands.ownerAllowFrom to your channel user id, for example openclaw config    │
+│  set commands.ownerAllowFrom '["telegram:123456789"]'                                     │
+│  Restart the gateway after changing this if it is already running.                        │
+│                                                                                           │
+├───────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Session titles ──────────────────────────────────────────────────────────────────╮
+│                                                                                   │
+│  - Found 1 missing session title(s). Run "openclaw doctor --fix" to repair them.  │
+│                                                                                   │
+├───────────────────────────────────────────────────────────────────────────────────╯
+[?25l│
+◆  Tighten permissions on $OPENCLAW_HOME/openclaw.json to 600?
+│  ● Yes / ○ No
+└
+
+OTHER PROMPT, answered No: Tighten permissions on $OPENCLAW_HOME/openclaw.json to 600?
+[999D[4A[2B[2K[G│  ○ Yes / ● No[2B[999D[4A[2B[2K[G│  ● Yes / ○ No[2B[1A
+[?25h[999D[4A[1B[J◇  Tighten permissions on $OPENCLAW_HOME/openclaw.json to 600?
+│  No
+│
+◇  State integrity ────────────────────────────────────────────────────────────────────────╮
+│                                                                                          │
+│  - Config file is group/world readable ($OPENCLAW_HOME/openclaw.json). Recommend chmod   │
+│    600.                                                                                  │
+│  - OAuth dir not present ($OPENCLAW_HOME/state/credentials). Skipping create because no  │
+│    WhatsApp/pairing channel config is active.                                            │
+│                                                                                          │
+├──────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Backups ────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  No successful backup is recorded.                                           │
+│  Create one now with openclaw backup create.                                 │
+│  Schedule versioned backups with openclaw backup enable --repository <dir>.  │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Foreign launchd jobs (macOS) ──────────────────────────────────────────────────────────╮
+│                                                                                         │
+│  Could not inspect foreign launchd jobs: Cannot inspect launchd job                     │
+│  ai.openclaw.nas-mount: Could not print domain: 125: Domain does not support specified  │
+│  action. No jobs were removed.                                                          │
+│                                                                                         │
+├─────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Host desktop ────────────────────────────────────────────────────╮
+│                                                                   │
+│  disabled; enable the Desktop lab with desktop.host.enabled=true  │
+│                                                                   │
+├───────────────────────────────────────────────────────────────────╯
+│
+◇  GitHub projects ────────────────────────────────────────────────────────────────╮
+│                                                                                  │
+│  Set gateway.controlUi.github.token with gateway.controlUi.github.host matching  │
+│  gateway.github.host for private project access. Public github.com can also use  │
+│  GH_TOKEN/GITHUB_TOKEN; otherwise search is public-only.                         │
+│                                                                                  │
+├──────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Browser ────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                          │
+│  - System browser profile cookie import is enabled (browser.allowSystemProfileImport).   │
+│  - System browser profile discovery skipped by Doctor; importable cookie database count  │
+│    is unavailable.                                                                       │
+│  - Doctor does not access the macOS Keychain; importing asks for consent separately.     │
+│                                                                                          │
+├──────────────────────────────────────────────────────────────────────────────────────────╯
+(node:21078) [DEP_PLUGIN_SDK] DeprecationWarning: Plugin SDK: AuthStorage.reload is deprecated; use AuthStorage.reloadAsync instead. The legacy contract remains supported in the current Plugin SDK major. It will be removed in the next Plugin SDK major.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:21078) [DEP_PLUGIN_SDK] DeprecationWarning: Plugin SDK: ensureAuthProfileStoreWithoutExternalProfiles is deprecated; use ensureAuthProfileStoreWithoutExternalProfilesAsync instead. The legacy contract remains supported in the current Plugin SDK major. It will be removed in the next Plugin SDK major.
+[?25l│
+◆  Enable zsh shell completion for openclaw?
+│  ● Yes / ○ No
+└
+
+OTHER PROMPT, answered No: Enable zsh shell completion for openclaw?
+[1A
+[?25h[999D[4A[1B[J◇  Enable zsh shell completion for openclaw?
+│  No
+│
+◇  Gateway ─────────────────────────────────────────────╮
+│                                                       │
+│  Gateway health will be checked after Doctor repair.  │
+│                                                       │
+├───────────────────────────────────────────────────────╯
+│
+◇  Memory search ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                            │
+│  Agent "main": Remember across conversations is effectively enabled for agent "main", but  │
+│  the current memory provider does not support protected private transcript recall. Set     │
+│  memory.search.rememberAcrossConversations to false or use that provider's own recall      │
+│  path; advanced Active Memory can still use its recall tools.                              │
+│                                                                                            │
+├────────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                            │
+│  Agent "main": Remember across conversations is effectively enabled for agent "main", but  │
+│  memory search is disabled. Enable memory search or set                                    │
+│  memory.search.rememberAcrossConversations to false.                                       │
+│                                                                                            │
+├────────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────────────────────╮
+│                                                                                          │
+│  Agent "dev": Remember across conversations is effectively enabled for agent "dev", but  │
+│  the current memory provider does not support protected private transcript recall. Set   │
+│  memory.search.rememberAcrossConversations to false or use that provider's own recall    │
+│  path; advanced Active Memory can still use its recall tools.                            │
+│                                                                                          │
+├──────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────────────────────╮
+│                                                                                          │
+│  Agent "dev": Remember across conversations is effectively enabled for agent "dev", but  │
+│  memory search is disabled. Enable memory search or set                                  │
+│  memory.search.rememberAcrossConversations to false.                                     │
+│                                                                                          │
+├──────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Workspace ───────────────────────────────────────────────────────────────────────────────╮
+│                                                                                           │
+│  Agent "dev": - Tip: back up the agent workspace in a private git repo; keep ~/.openclaw  │
+│  out of git (credentials, sessions). Details:                                             │
+│  /concepts/agent-workspace#git-backup-recommended-private                                 │
+│                                                                                           │
+├───────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Workspace ────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│  Agent "dev": Memory system not found in workspace.                                    │
+│  Paste this into your agent:                                                           │
+│                                                                                        │
+│  Install the memory system by applying:                                                │
+│  https://github.com/openclaw/openclaw/commit/9ffea23f31ca1df5183b25668f8f814bee0fb34e  │
+│  https://github.com/openclaw/openclaw/commit/7d1fee70e76f2f634f1b41fca927ee663914183a  │
+│                                                                                        │
+├────────────────────────────────────────────────────────────────────────────────────────╯
+21:44:10 [state/agent-db] agent database clean-close receipt: verification-missing
+│
+└  Doctor complete.
+
+[0m[?25h[?1000l[?1002l[?1003l[?1006l[?2004l[<u[>4;0m

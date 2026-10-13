@@ -1,0 +1,28 @@
+#!/usr/bin/expect -f
+# usage: doctor-interactive.exp <accept|decline> ; runs the installed `openclaw doctor` (interactive, no --fix)
+# answers "Apply recommended config repairs now?" as given, accepts pausing the Gateway (none is installed under the profile HOME); any other prompt is answered No.
+set timeout 180
+set mode [lindex $argv 0]
+log_user 1
+set stty_init "rows 60 cols 200"
+spawn openclaw doctor
+expect {
+  -re "Apply recommended config repairs now\\?" {
+    sleep 1
+    if {$mode eq "accept"} { send "\r" } else { send "\033\[C"; sleep 1; send "\r" }
+    exp_continue
+  }
+  -re "Pause the managed Gateway while you review repairs\\?" {
+    sleep 1; send "\r"
+    exp_continue
+  }
+  -re "◆ +(\[^\r\n\]*\\?)" {
+    puts "\nOTHER PROMPT, answered No: $expect_out(1,string)"
+    sleep 1; send "n"
+    exp_continue
+  }
+  timeout { puts "\nTIMEOUT"; exit 4 }
+  eof
+}
+catch wait result
+exit [lindex $result 3]
