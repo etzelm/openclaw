@@ -1,0 +1,4 @@
+#!/bin/bash
+# usage: projects-real.sh <profile> : per Claude project folder, each Claude Code transcript with its user prompts (Claude Code's own records)
+P=$1; cd "$P/.claude/projects" 2>/dev/null || { echo "no Claude project folders"; exit 0; }
+for d in ./*; do n=${d##*-profile-}; n=${n##*-profile}; [ -z "$n" ] && n="workspace(root)"; for f in "$d"/*.jsonl; do [ -f "$f" ] || continue; echo "$n/$(basename $f): $(wc -l < $f | tr -d ' ') lines; prompts: $(node -e 'const l=require("fs").readFileSync(process.argv[1],"utf8").trim().split("\n").map(s=>{try{return JSON.parse(s)}catch{return {}}}).filter(j=>j.type==="user"&&!j.isMeta).map(j=>{const c=j.message?.content;return typeof c==="string"?c:Array.isArray(c)?c.filter(p=>p.type==="text").map(p=>p.text).join(""):""}).filter(Boolean).map(t=>JSON.stringify(t.slice(0,48)));console.log(l.join(", "))' "$f")"; done; done

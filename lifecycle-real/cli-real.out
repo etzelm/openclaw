@@ -1,0 +1,65 @@
+# claude-cli lifecycle with real Claude Code (head c1f4957778f)
+claude --version: 2.1.296 (Claude Code)
+profile ready: case=subdir
+credential: a Claude Code setup token copied to <profile>/.claude/.credentials.json (not shown)
+
+## 1. Gateway, two turns (unpinned: the conversation starts in the shared root)
+turn-first-1 sent: Remember this codeword for later: PLUM-7731. Reply with only the word: noted
+turn-first-1 reply: noted
+turn-first-2 sent: Also remember the color teal. Reply with only the word: noted
+turn-first-2 reply: noted
+binding agent:main:main claude-cli: sessionId=09bf4625-153f-4608-98de-a0696615eb5f cwdHash=<profile>/workspace fields=authEpochVersion,cwdHash,extraSystemPromptHash,mcpConfigHash,mcpResumeHash,messageToolPolicyHash,promptToolNamesHash,resumeCheckpointId,sessionId
+agents.entries = {"main":{},"dev":{}}
+-- Claude project folders:
+workspace/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 25 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th"
+
+## 2. openclaw doctor --fix --non-interactive with OPENCLAW_CONFIG_READONLY=1 (the pin cannot be published)
+exit=0
+Config repairs pending in externally managed <profile>/openclaw.json; no config files were changed.
+Apply this merge patch in the external deployment source (null removes a key; arrays replace the whole array). For $include-owned keys, edit the included source. Redacted values must be supplied externally, not copied from this report.
+Config repairs pending in externally managed <profile>/openclaw.json; no config files were changed.
+Apply this merge patch in the external deployment source (null removes a key; arrays replace the whole array). For $include-owned keys, edit the included source. Redacted values must be supplied externally, not copied from this report.
+agents.entries = {"main":{},"dev":{}}
+binding agent:main:main claude-cli: sessionId=09bf4625-153f-4608-98de-a0696615eb5f cwdHash=absent fields=authEpochVersion,extraSystemPromptHash,mcpConfigHash,mcpResumeHash,messageToolPolicyHash,promptToolNamesHash,resumeCheckpointId,sessionId
+-- Claude project folders:
+workspace/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 25 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th"
+workspace-main/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 25 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th"
+
+## 3. Gateway start without turns (the agent database finishes the inspection Doctor left pending), then a Gateway with two more turns (still unpinned, in the shared root)
+turn-refused-1 sent: What codeword and color did I ask you to remember earlier in this conversation? Reply with only the codeword and the color.
+turn-refused-1 reply: PLUM-7731, teal
+turn-refused-2 sent: Also remember the number 42. Reply with only the word: noted
+turn-refused-2 reply: noted
+binding agent:main:main claude-cli: sessionId=09bf4625-153f-4608-98de-a0696615eb5f cwdHash=<profile>/workspace fields=authEpochVersion,cwdHash,extraSystemPromptHash,mcpConfigHash,mcpResumeHash,messageToolPolicyHash,promptToolNamesHash,resumeCheckpointId,sessionId
+-- Claude project folders:
+workspace/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 40 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th", "What codeword and color did I ask you to remembe", "Also remember the number 42. Reply with only the"
+workspace-main/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 25 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th"
+
+## 4. openclaw doctor --fix --non-interactive
+exit=0
+Set agents.entries.main.workspace to
+Carried 1 stored Claude CLI conversation of agent "main" to
+agents.entries = {"main":{"workspace":"<profile>/workspace/main"},"dev":{}}
+binding agent:main:main claude-cli: sessionId=09bf4625-153f-4608-98de-a0696615eb5f cwdHash=absent fields=authEpochVersion,extraSystemPromptHash,mcpConfigHash,mcpResumeHash,messageToolPolicyHash,promptToolNamesHash,resumeCheckpointId,sessionId
+-- Claude project folders:
+workspace/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 40 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th", "What codeword and color did I ask you to remembe", "Also remember the number 42. Reply with only the"
+workspace-main/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 40 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th", "What codeword and color did I ask you to remembe", "Also remember the number 42. Reply with only the"
+
+## 5. Gateway, one turn (pinned)
+turn-pinned-1 sent: List the codeword, the color and the number I asked you to remember in this conversation. Reply with only those three values.
+turn-pinned-1 reply: PLUM-7731, teal, 42
+binding agent:main:main claude-cli: sessionId=09bf4625-153f-4608-98de-a0696615eb5f cwdHash=<profile>/workspace/main fields=authEpochVersion,cwdHash,extraSystemPromptHash,mcpConfigHash,mcpResumeHash,messageToolPolicyHash,promptToolNamesHash,resumeCheckpointId,sessionId
+-- Claude project folders:
+workspace/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 40 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th", "What codeword and color did I ask you to remembe", "Also remember the number 42. Reply with only the"
+workspace-main/09bf4625-153f-4608-98de-a0696615eb5f.jsonl: 49 lines; prompts: "Remember this codeword for later: PLUM-7731. Rep", "Also remember the color teal. Reply with only th", "What codeword and color did I ask you to remembe", "Also remember the number 42. Reply with only the", "List the codeword, the color and the number I as"
+
+## Gateway logs: CLI session reuse lines
+-- first
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=76 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=61 trigger=user useResume=true session=present resumeSession=4001d1cb276f reuse=reusable historyPrompt=none
+-- settle
+-- refused
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=123 trigger=user useResume=true session=present resumeSession=4001d1cb276f reuse=reusable historyPrompt=none
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=60 trigger=user useResume=true session=present resumeSession=4001d1cb276f reuse=reusable historyPrompt=none
+-- pinned
+[agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=125 trigger=user useResume=true session=present resumeSession=4001d1cb276f reuse=reusable historyPrompt=none

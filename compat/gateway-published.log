@@ -1,0 +1,64 @@
+[gateway] startup phase: entry.run-main-import starting total=115.4ms
+[gateway] startup phase: entry.run-main-import 4.8ms total=120.2ms start=115.4ms
+[gateway] startup phase: cli.main.gateway-run-select-environment starting total=163.0ms
+[gateway] startup phase: cli.main.gateway-run-select-environment 253.4ms total=416.4ms start=163.0ms
+[gateway] startup phase: cli.main.gateway-run-imports starting total=424.8ms
+[gateway] startup phase: cli.main.gateway-run-imports 2.3ms total=427.1ms start=424.8ms
+[gateway] startup phase: cli.main.gateway-run-pre-bootstrap starting total=430.7ms
+[gateway] startup phase: cli.main.gateway-run-pre-bootstrap 5.5ms total=436.2ms start=430.7ms
+[gateway] startup phase: cli.main.gateway-run-bootstrap starting total=436.3ms
+[gateway] startup phase: cli.bootstrap.admission.database-readiness starting total=465.5ms
+[gateway] startup phase: cli.bootstrap.admission.database-readiness 1.2ms total=466.7ms start=465.5ms agentCount=2 schemaProcessCount=0 schemaInspectionCount=0 schemaSnapshotCount=0
+[gateway] startup phase: cli.bootstrap.admission.database-readiness starting total=839.2ms
+[gateway] startup phase: cli.bootstrap.admission.database-readiness 199.9ms total=1039.2ms start=839.2ms agentCount=2 schemaProcessCount=0 schemaInspectionCount=0 schemaSnapshotCount=0
+[gateway] startup phase: cli.main.gateway-run-bootstrap 2295.6ms total=2731.9ms start=436.3ms
+2026-10-13T01:09:18.213-07:00 [gateway] loading configuration…
+2026-10-13T01:09:18.226-07:00 [gateway] resolving authentication…
+2026-10-13T01:09:18.232-07:00 [gateway] auth mode=none explicitly configured; all gateway connections are unauthenticated.
+2026-10-13T01:09:18.233-07:00 [gateway] starting...
+2026-10-13T01:09:18.410-07:00 [gateway] shutdown budget at startup: drain=315000ms shutdown=325000ms reserve=10000ms exitMargin=5000ms; source=Gateway stop policy=330000ms
+[gateway] startup phase: gateway.server-start-import starting total=3073.2ms
+[gateway] startup phase: gateway.server-start-import 268.7ms total=3341.9ms start=3073.2ms
+2026-10-13T01:09:18.722-07:00 [gateway] startup phase: process.bootstrap 3381.2ms total=3381.2ms
+2026-10-13T01:09:18.930-07:00 [gateway] startup phase: state.schema-preflight starting total=3589.3ms
+2026-10-13T01:09:19.131-07:00 [gateway] startup phase: state.schema-preflight 200.8ms total=3790.1ms
+2026-10-13T01:09:19.144-07:00 [gateway] auto-enabled plugins for this runtime without writing config:
+- claude-cli/claude-sonnet-5 model configured, enabled automatically.
+- openai/gpt-5.6-luna model configured, enabled automatically.
+2026-10-13T01:09:19.146-07:00 [gateway] startup phase: config.auth starting total=3805.0ms
+2026-10-13T01:09:19.196-07:00 [secrets] [SECRETS_OWNER_UNAVAILABLE] Secret owner provider:openai is configured-unavailable; paths: models.providers.openai.apiKey; reason: secret reference was not found.
+2026-10-13T01:09:19.197-07:00 [secrets] [SECRETS_DEGRADED] cold provider:openai: secret reference was not found. Retry: openclaw secrets reload. event=secrets.degraded ownerKind=provider ownerId=openai reason="secret reference was not found" state=cold retryHint="openclaw secrets reload"
+2026-10-13T01:09:19.197-07:00 [gateway] startup phase: config.auth 51.5ms total=3856.5ms
+2026-10-13T01:09:19.615-07:00 [gateway] startup phase: startup.maintenance starting total=4274.5ms
+2026-10-13T01:09:19.622-07:00 [gateway] startup phase: startup.maintenance 6.4ms total=4281.0ms
+2026-10-13T01:09:19.850-07:00 [gateway] starting HTTP server...
+2026-10-13T01:09:19.931-07:00 [health-monitor] started (interval: 300s, startup-grace: 60s, channel-connect-grace: 120s)
+2026-10-13T01:09:20.191-07:00 [gateway] startup phase: http.bound 0.0ms total=4850.0ms
+2026-10-13T01:09:20.426-07:00 [gateway] agent model: claude-cli/claude-sonnet-5 (thinking=high, fast=off)
+2026-10-13T01:09:20.427-07:00 [gateway] http server listening (12 plugins: anthropic, bonjour, canvas, cua-computer, device-pair, file-transfer, geolocation, github, linux-node, ollama, talk-voice, xai; 2.0s)
+2026-10-13T01:09:20.427-07:00 [gateway] log file: /tmp/openclaw/openclaw-2026-10-13.log
+2026-10-13T01:09:20.427-07:00 [gateway] Older local CLI/SDK versions can bypass Gateway state mutation routing. Use matching CLI/SDK and Gateway versions; legacy direct writers remain supported.
+2026-10-13T01:09:20.428-07:00 [gateway] native runtime: {"pid":26970,"platform":"darwin","arch":"arm64","node":"24.21.0","v8":"13.6.233.17-node.53","uv":"1.53.0","openssl":"3.6.4","sqlite":"3.53.4","sqliteClose":{"explicitSqliteCloseReleasesNativeResources":true,"decided":true,"reason":"Node runtime"}}
+2026-10-13T01:09:20.428-07:00 [gateway] worker startup state: {"workerCount":5,"workerLifecycle":[{"script":"gateway-state-owner-heartbeat.worker.js","started":2,"retired":[{"reason":"exit","count":1}]},{"script":"sqlite-store.worker.js","started":1,"retired":[]},{"script":"openclaw-state-lease-heartbeat.worker.js","started":1,"retired":[]},{"script":"worker-native-lifecycle.worker.js","started":1,"retired":[]},{"script":"openclaw-state-read.worker.js","started":1,"retired":[]},{"script":"other","started":1,"retired":[{"reason":"exit","count":1}]}],"compute":{"limit":31,"active":0,"waitingPools":0,"pendingTasks":0,"pendingBytes":0}}
+2026-10-13T01:09:20.458-07:00 [gateway] starting channels and sidecars...
+2026-10-13T01:09:21.073-07:00 [gateway] startup outcomes: internal-hooks=skipped (not-configured); internal-startup-hook=skipped (no-handlers-loaded); gateway-start-hooks=skipped (no-handlers-loaded); gmail-watcher=skipped (hooks-disabled); gmail-model=skipped (not-configured)
+2026-10-13T01:09:21.074-07:00 [gateway] ready
+2026-10-13T01:09:21.077-07:00 [gateway] startup phase: ready 1.9ms total=5736.8ms
+2026-10-13T01:09:21.090-07:00 [heartbeat] disabled
+2026-10-13T01:09:21.551-07:00 [ws] ⇄ res ✓ chat.send 90ms runId=9348b07f-5198-4138-bc40-24bb2f56a085 bytes=146 conn=a8f89c7f…8bf2 id=d068f67a…4d31
+2026-10-13T01:09:22.171-07:00 [gateway] remote model catalog applied
+2026-10-13T01:09:23.417-07:00 [agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+2026-10-13T01:09:23.434-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=26 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+2026-10-13T01:09:23.444-07:00 [agent/cli-backend] cli live session start: provider=claude-cli model=claude-sonnet-5 activeSessions=1
+2026-10-13T01:09:23.484-07:00 [agent/cli-backend] cli turn: provider=claude-cli model=claude-sonnet-5 durationMs=50 outBytes=118 outHash=9b0dd82d5bf0
+2026-10-13T01:09:25.194-07:00 [agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+2026-10-13T01:09:25.198-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=26 trigger=user useResume=true session=present resumeSession=7557e36124a4 reuse=reusable historyPrompt=none
+2026-10-13T01:09:25.202-07:00 [agent/cli-backend] cli turn: provider=claude-cli model=claude-sonnet-5 durationMs=4 outBytes=118 outHash=9b0dd82d5bf0
+2026-10-13T01:09:27.091-07:00 [admission] closed: stop (SIGTERM)
+2026-10-13T01:09:27.091-07:00 [gateway] received SIGTERM; shutting down
+2026-10-13T01:09:27.092-07:00 [gateway] shutdown budget at shutdown: drain=315000ms shutdown=325000ms reserve=10000ms exitMargin=5000ms; source=Gateway stop policy=330000ms
+2026-10-13T01:09:27.098-07:00 [gateway] active-work drain settled; beginning server close
+2026-10-13T01:09:27.115-07:00 [gmail-watcher] gmail watcher stopped
+[state/agent-db] agent database clean-close receipt: active-leases
+2026-10-13T01:09:27.157-07:00 [state/agent-db] agent database clean-close receipt: written
+2026-10-13T01:09:27.180-07:00 [shutdown] completed cleanly in 75ms
