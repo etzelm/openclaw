@@ -93,6 +93,12 @@ async function planTree(from: string, to: string, rel: string, plan: WorkspaceRe
     }
     throw error;
   }
+  // A linked or non-directory target is kept whole: descending would write through it.
+  const target = await lstatIfPresent(path.join(to, rel));
+  if (target && !target.isDirectory()) {
+    plan.conflicts.push(rel);
+    return;
+  }
   for (const entry of entries.toSorted((a, b) => a.name.localeCompare(b.name))) {
     const child = path.join(rel, entry.name);
     if (entry.isDirectory()) {

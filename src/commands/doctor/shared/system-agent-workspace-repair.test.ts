@@ -198,6 +198,39 @@ describe("repairSystemAgentWorkspacePin", () => {
     expect(await fs.readFile(elsewhere, "utf8")).toBe(seededSoul);
   });
 
+  it("keeps linked directories in the agent directory instead of copying into them", async () => {
+    const agentDir = path.join(root, "main");
+    const devMemory = path.join(root, "dev", "memory");
+    const elsewhere = testState.path("elsewhere-skill");
+    await ensureAgentWorkspace({ dir: agentDir, ensureBootstrapFiles: true });
+    await fs.mkdir(devMemory, { recursive: true });
+    await fs.mkdir(elsewhere, { recursive: true });
+    await fs.symlink(devMemory, path.join(agentDir, "memory"));
+    await fs.mkdir(path.join(agentDir, "skills"), { recursive: true });
+    await fs.symlink(elsewhere, path.join(agentDir, "skills", "deploy"));
+    await writePersona(root, "root persona");
+    await fs.mkdir(path.join(root, "memory"), { recursive: true });
+    await fs.writeFile(path.join(root, "memory", "private.md"), "main's private memory");
+    await fs.mkdir(path.join(root, "skills", "deploy"), { recursive: true });
+    await fs.writeFile(path.join(root, "skills", "deploy", "SKILL.md"), "root skill");
+
+    const result = await repairSystemAgentWorkspacePin(convergedRoster(), testState.env, {
+      applyFiles: true,
+    });
+
+    expect(result.config.agents?.entries?.main?.workspace).toBe(agentDir);
+    expect(result.changes).toContain(
+      `Kept memory, ${path.join("skills", "deploy")} in ${agentDir}; the different copies in ${root} stay in place.`,
+    );
+    expect(await fs.readdir(devMemory)).toEqual([]);
+    expect(await fs.readdir(elsewhere)).toEqual([]);
+    expect((await fs.lstat(path.join(agentDir, "memory"))).isSymbolicLink()).toBe(true);
+    expect(await fs.readFile(path.join(agentDir, "SOUL.md"), "utf8")).toBe("root persona");
+    expect(await fs.readFile(path.join(root, "memory", "private.md"), "utf8")).toBe(
+      "main's private memory",
+    );
+  });
+
   it("counts a customized AGENTS.md as files in either directory", async () => {
     await fs.writeFile(path.join(root, "SOUL.md"), "root persona");
     await fs.mkdir(path.join(root, "main"), { recursive: true });
