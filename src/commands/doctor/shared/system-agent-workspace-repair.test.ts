@@ -446,6 +446,93 @@ describe("repairSystemAgentWorkspacePin", () => {
     );
   });
 
+  it("warns instead of failing on an unreadable transcript, and never writes through a linked copy", async () => {
+    const agentDir = path.join(root, "main");
+    const project = (dir: string) =>
+      resolveClaudeCliProjectDirForWorkspace({ workspaceDir: dir, homeDir: testState.env.HOME });
+    await writePersona(agentDir, "subdirectory persona");
+    await storeSession("main", "agent:main:main", {
+      cliSessionBindings: {
+        "claude-cli": { sessionId: "claude-native-1", cwdHash: hashCliSessionText(root) },
+      },
+    });
+    await fs.mkdir(project(root), { recursive: true });
+    await fs.mkdir(project(agentDir), { recursive: true });
+    await fs.writeFile(path.join(project(root), "claude-native-1.jsonl"), "turn 1\nturn 2\n");
+    const cfg = convergedRoster();
+    const stuckWarning = expect.stringContaining(
+      "because 1 stored CLI-backend conversation of this agent would start fresh",
+    );
+
+    await fs.chmod(project(root), 0o000);
+    try {
+      const unreadable = await repairSystemAgentWorkspacePin(cfg, testState.env, {
+        applyFiles: true,
+      });
+
+      expect(unreadable.config).toBe(cfg);
+      expect(unreadable.warnings).toEqual([stuckWarning]);
+    } finally {
+      await fs.chmod(project(root), 0o700);
+    }
+
+    const elsewhere = path.join(root, "elsewhere.jsonl");
+    await fs.writeFile(elsewhere, "turn 1\n");
+    await fs.symlink(elsewhere, path.join(project(agentDir), "claude-native-1.jsonl"));
+
+    const linked = await repairSystemAgentWorkspacePin(cfg, testState.env, { applyFiles: true });
+
+    expect(linked.config).toBe(cfg);
+    expect(linked.warnings).toEqual([stuckWarning]);
+    expect(await fs.readFile(elsewhere, "utf8")).toBe("turn 1\n");
+
+    const outside = path.join(root, "outside-results");
+    await fs.rm(path.join(project(agentDir), "claude-native-1.jsonl"));
+    await fs.mkdir(path.join(project(root), "claude-native-1"), { recursive: true });
+    await fs.writeFile(path.join(project(root), "claude-native-1", "tool.txt"), "result");
+    await fs.mkdir(outside);
+    await fs.symlink(outside, path.join(project(agentDir), "claude-native-1"));
+
+    const linkedResults = await repairSystemAgentWorkspacePin(cfg, testState.env, {
+      applyFiles: true,
+    });
+
+    expect(linkedResults.config).toBe(cfg);
+    expect(linkedResults.warnings).toEqual([
+      expect.stringContaining("would be written through a link"),
+    ]);
+    expect(await fs.readdir(outside)).toEqual([]);
+  });
+
+  it("pins without carrying a conversation the root would not resume", async () => {
+    const agentDir = path.join(root, "main");
+    const binding = {
+      sessionId: "claude-native-1",
+      cwdHash: hashCliSessionText(path.join(root, "elsewhere")),
+    };
+    await writePersona(agentDir, "subdirectory persona");
+    await storeSession("main", "agent:main:main", {
+      cliSessionBindings: { "claude-cli": binding },
+    });
+
+    const result = await repairSystemAgentWorkspacePin(convergedRoster(), testState.env, {
+      applyFiles: true,
+    });
+
+    expect(result.config.agents?.entries?.main?.workspace).toBe(agentDir);
+    expect(result.changes).not.toEqual(
+      expect.arrayContaining([expect.stringContaining("Claude CLI conversation")]),
+    );
+    expect(
+      loadSessionEntryReadOnly({
+        agentId: "main",
+        sessionKey: "agent:main:main",
+        storePath: resolveSessionStorePathCore(undefined, { agentId: "main", env: testState.env }),
+        env: testState.env,
+      })?.cliSessionBindings?.["claude-cli"],
+    ).toEqual(binding);
+  });
+
   it("warns without pinning when a Claude CLI conversation cannot be carried", async () => {
     const agentDir = path.join(root, "main");
     const projects = path.join(testState.env.HOME ?? "", ".claude", "projects");

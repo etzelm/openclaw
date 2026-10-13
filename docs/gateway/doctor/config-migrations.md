@@ -519,11 +519,14 @@ conversation has since grown past is refreshed) and removes the recorded
 working directory from the session's binding. Both folders then hold the
 transcript, so the next turn resumes the same conversation with its history in
 whichever directory it runs, even if the config write is refused, and records
-that directory again. For any other backend, a `claude-cli` conversation whose
-transcript is not in the root's Claude project folder or whose copy in
-`<root>/<agentId>` holds turns the root's lacks, or a conversation kept in a
-legacy `sessions.json` store, Doctor writes nothing and warns with the value to
-set, because that conversation would start fresh without resuming history.
+that directory again. A `claude-cli` conversation recorded in another
+directory already starts fresh in the root, so Doctor leaves it unchanged. For
+any other backend, a `claude-cli` conversation whose transcript Doctor cannot
+read in the root's Claude project folder or whose copy in `<root>/<agentId>`
+holds turns the root's lacks or is not a regular file, or a conversation kept
+in a legacy `sessions.json` store, Doctor writes nothing and warns with the
+value to set, because that conversation would start fresh without resuming
+history.
 
 `openclaw doctor` without `--fix` only describes the copies. If you accept its
 "Apply recommended config repairs now?" prompt, Doctor makes them before the

@@ -624,7 +624,6 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
         })
       : undefined;
   if (confirmedWorkspace) {
-    changesPanelSink.emit(confirmedWorkspace.changes);
     explicitSetPaths.push(...(confirmedWorkspace.explicitSetPaths ?? []));
     if (confirmedWorkspace.warnings?.length) {
       emitDoctorNotes({ note, warningNotes: confirmedWorkspace.warnings });
@@ -675,7 +674,11 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   // Queued repair panels describe candidate mutations; the write runner prints
   // them as "Doctor changes" only after the atomic write commits. A blocked
   // write drops them — its blocking note already states nothing was changed.
-  const pendingChangePanels = changesPanelSink.drain();
+  // The accepted preview already printed; its applied lines print once the write commits.
+  const pendingChangePanels = [
+    ...changesPanelSink.drain(),
+    ...(confirmedWorkspace?.changes.length ? [confirmedWorkspace.changes.join("\n")] : []),
+  ];
   const providerRenames = legacyStep.blocksWrite ? [] : plannedProviderRenames;
   // Later Doctor contributions and service finalization consume these callbacks.
   const resources = preparingResources.move();

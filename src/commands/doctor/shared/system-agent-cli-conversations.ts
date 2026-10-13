@@ -27,6 +27,8 @@ export type StoredCliConversation = {
   providers: string[];
   /** Native Claude CLI session ids, from the binding, the id map, or the legacy field. */
   claudeSessionIds: string[];
+  /** Working directory hash the Claude CLI binding recorded, when it recorded one. */
+  claudeCwdHash?: string;
   /** Read from a legacy sessions.json store, which this repair does not rewrite. */
   legacyStore: boolean;
 };
@@ -44,10 +46,13 @@ function describeConversation(entry: SessionEntry) {
   if (legacyClaudeId !== undefined) {
     providers.push(CLAUDE_CLI);
   }
-  const claudeSessionIds = [getCliSessionBinding(entry, CLAUDE_CLI)?.sessionId, legacyClaudeId];
+  const claudeBinding = getCliSessionBinding(entry, CLAUDE_CLI);
+  const claudeSessionIds = [claudeBinding?.sessionId, legacyClaudeId];
+  const claudeCwdHash = normalizeOptionalString(claudeBinding?.cwdHash);
   return {
     providers: [...new Set(providers.map(normalizeProviderId))],
     claudeSessionIds: [...new Set(claudeSessionIds.filter((id) => id !== undefined))],
+    ...(claudeCwdHash !== undefined ? { claudeCwdHash } : {}),
   };
 }
 
@@ -72,12 +77,12 @@ export function listStoredCliConversations(
     if (normalizeAgentId(owner) !== agentId) {
       return;
     }
-    const { providers, claudeSessionIds } = describeConversation(entry);
+    const { providers, ...claude } = describeConversation(entry);
     if (providers.length > 0 && !conversations.get(sessionKey)?.legacyStore) {
       conversations.set(sessionKey, {
         scope: { agentId: target.agentId, env, storePath: target.storePath, sessionKey },
         providers,
-        claudeSessionIds,
+        ...claude,
         legacyStore,
       });
     }
@@ -100,9 +105,10 @@ export function listStoredCliConversations(
 
 type TranscriptCopy = "absent" | "copy" | "current" | "diverged";
 
-function sizeIfExists(file: string): number | undefined {
+/** Undefined when missing; `link` reports a symbolic link itself instead of its target. */
+function statIfExists(file: string, link = false): fs.Stats | undefined {
   try {
-    return fs.statSync(file).size;
+    return link ? fs.lstatSync(file) : fs.statSync(file);
   } catch (error) {
     if (hasErrnoCode(error, "ENOENT")) {
       return undefined;
@@ -111,37 +117,59 @@ function sizeIfExists(file: string): number | undefined {
   }
 }
 
-function readHead(file: string, length: number): Buffer {
-  const fd = fs.openSync(file, "r");
+/** True when the first `length` bytes of both files match, read a chunk at a time. */
+function sameHead(a: string, b: string, length: number): boolean {
+  const fdA = fs.openSync(a, "r");
   try {
-    const head = Buffer.alloc(length);
-    const read = fs.readSync(fd, head, 0, length, 0);
-    return head.subarray(0, read);
+    const fdB = fs.openSync(b, "r");
+    try {
+      const chunkA = Buffer.alloc(64 * 1024);
+      const chunkB = Buffer.alloc(chunkA.length);
+      for (let offset = 0; offset < length; offset += chunkA.length) {
+        const size = Math.min(chunkA.length, length - offset);
+        const readA = fs.readSync(fdA, chunkA, 0, size, offset);
+        const readB = fs.readSync(fdB, chunkB, 0, size, offset);
+        if (
+          readA !== size ||
+          readB !== size ||
+          !chunkA.subarray(0, size).equals(chunkB.subarray(0, size))
+        ) {
+          return false;
+        }
+      }
+      return true;
+    } finally {
+      fs.closeSync(fdB);
+    }
   } finally {
-    fs.closeSync(fd);
+    fs.closeSync(fdA);
   }
 }
 
 /**
  * Compares `<id>.jsonl` in both Claude project folders. A target that is a prefix of the source
  * (an earlier copy the conversation has since grown past) is refreshed; a target with turns the
- * source lacks has diverged and is never overwritten.
+ * source lacks, or that is not a regular file, has diverged and is never overwritten.
  */
 function planTranscriptCopy(fromProject: string, toProject: string, id: string): TranscriptCopy {
   const source = path.join(fromProject, `${id}.jsonl`);
   const target = path.join(toProject, `${id}.jsonl`);
-  const sourceSize = sizeIfExists(source);
-  if (sourceSize === undefined) {
+  const sourceStat = statIfExists(source);
+  if (!sourceStat?.isFile()) {
     return "absent";
   }
-  const targetSize = sizeIfExists(target);
-  if (targetSize === undefined) {
+  const targetStat = statIfExists(target, true);
+  if (targetStat === undefined) {
     return "copy";
   }
-  if (targetSize > sourceSize || !readHead(source, targetSize).equals(fs.readFileSync(target))) {
+  if (
+    !targetStat.isFile() ||
+    targetStat.size > sourceStat.size ||
+    !sameHead(source, target, targetStat.size)
+  ) {
     return "diverged";
   }
-  return targetSize === sourceSize ? "current" : "copy";
+  return targetStat.size === sourceStat.size ? "current" : "copy";
 }
 
 function claudeProjects(from: string, to: string, env: NodeJS.ProcessEnv) {
@@ -153,8 +181,24 @@ function claudeProjects(from: string, to: string, env: NodeJS.ProcessEnv) {
 }
 
 /**
+ * A Claude CLI binding recorded in another directory already starts fresh in `dir`, so moving
+ * away from `dir` changes nothing for it.
+ */
+export function cliConversationResumesIn(
+  conversation: StoredCliConversation,
+  dir: string,
+): boolean {
+  return (
+    conversation.claudeCwdHash === undefined ||
+    !conversation.providers.every((provider) => provider === CLAUDE_CLI) ||
+    conversation.claudeCwdHash === hashCliSessionText(dir)
+  );
+}
+
+/**
  * Only Claude CLI conversations in the SQLite store can be carried, and only when each transcript
  * is in the Claude project folder of `from` and any copy already in `to` holds nothing it lacks.
+ * A transcript Doctor cannot read is not carried.
  */
 export function canCarryCliConversation(
   conversation: StoredCliConversation,
@@ -171,10 +215,14 @@ export function canCarryCliConversation(
     return false;
   }
   const { fromProject, toProject } = claudeProjects(from, to, env);
-  return conversation.claudeSessionIds.every((id) => {
-    const copy = planTranscriptCopy(fromProject, toProject, id);
-    return copy !== "absent" && copy !== "diverged";
-  });
+  try {
+    return conversation.claudeSessionIds.every((id) => {
+      const copy = planTranscriptCopy(fromProject, toProject, id);
+      return copy !== "absent" && copy !== "diverged";
+    });
+  } catch {
+    return false;
+  }
 }
 
 async function clearClaudeBindingCwd(
@@ -226,6 +274,11 @@ export async function carryClaudeCliConversations(
       }
       // A sibling `<id>/` folder holds the transcript's tool results; existing files are kept.
       const results = path.join(fromProject, sessionId);
+      if (statIfExists(path.join(toProject, sessionId), true)?.isSymbolicLink()) {
+        throw new Error(
+          `the tool results of Claude CLI session ${sessionId} would be written through a link`,
+        );
+      }
       if (fs.existsSync(results)) {
         await fs.promises.cp(results, path.join(toProject, sessionId), {
           recursive: true,

@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readAgentRosterProperty } from "../agents/agent-roster.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope-config.js";
-import { hashCliSessionText } from "../agents/cli-session.js";
+import { hashCliSessionText, resolveCliSessionReuse } from "../agents/cli-session.js";
 import { resolveClaudeCliProjectDirForWorkspace } from "../agents/command/claude-cli-project-dir.js";
 import { listConfiguredOwnerInputs } from "../agents/prepared-model-runtime.configured.js";
 import { promoteConfigSnapshotToLastKnownGood, readConfigFileSnapshot } from "../config/config.js";
@@ -434,6 +434,67 @@ describe("Doctor workspace persistence", () => {
           );
           expect(launch?.workspaceDir).toBe(path.join(workspace, "main"));
           expect(resolveAgentWorkspaceDir(after, "dev")).toBe(path.join(workspace, "dev"));
+        },
+      );
+    });
+  });
+
+  it("keeps a carried Claude CLI conversation resumable in the root when the config is read-only", async () => {
+    await withDoctorConfigPreflightHome(async (home) => {
+      await withEnvAsync(
+        { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_CONFIG_READONLY: "1" },
+        async () => {
+          const workspace = path.join(home, "shared-workspace");
+          const project = resolveClaudeCliProjectDirForWorkspace({
+            workspaceDir: workspace,
+            homeDir: process.env.HOME,
+          });
+          await fs.mkdir(workspace, { recursive: true });
+          await fs.mkdir(project, { recursive: true });
+          await fs.writeFile(path.join(workspace, "SOUL.md"), "root persona");
+          await fs.writeFile(path.join(project, "claude-native-1.jsonl"), "turn 1\n");
+          const configPath = await writeOpenClawConfig(home, {
+            agents: {
+              ownership: "explicit",
+              defaults: { workspace, systemAgent: { agentId: "main" } },
+              entries: { main: {}, dev: {} },
+            },
+            gateway: { mode: "local" },
+            plugins: { enabled: false },
+          });
+          const before = await fs.readFile(configPath, "utf8");
+          const storePath = resolveSessionStorePathCore(undefined, { agentId: "main" });
+          await upsertSessionEntryCore(
+            { agentId: "main", sessionKey: "agent:main:main", storePath },
+            {
+              sessionId: "main-local",
+              updatedAt: Date.now(),
+              cliSessionBindings: {
+                "claude-cli": {
+                  sessionId: "claude-native-1",
+                  cwdHash: hashCliSessionText(workspace),
+                },
+              },
+            },
+          );
+          closeOpenClawStateDatabaseForTest();
+
+          await using ctx = await prepareDoctorContext(configPath);
+          await runInitialConfigWriteHealth(ctx);
+
+          expect(await fs.readFile(configPath, "utf8")).toBe(before);
+          const binding = loadSessionEntryReadOnly({
+            agentId: "main",
+            sessionKey: "agent:main:main",
+            storePath,
+          })?.cliSessionBindings?.["claude-cli"];
+          expect(
+            resolveCliSessionReuse({
+              binding,
+              authEpochVersion: 1,
+              cwdHash: hashCliSessionText(workspace),
+            }),
+          ).toEqual({ mode: "reuse", sessionId: "claude-native-1" });
         },
       );
     });

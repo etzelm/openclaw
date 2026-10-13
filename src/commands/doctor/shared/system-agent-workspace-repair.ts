@@ -16,6 +16,7 @@ import type { DoctorConfigMutationResult } from "./config-mutation-state.js";
 import {
   canCarryCliConversation,
   carryClaudeCliConversations,
+  cliConversationResumesIn,
   listStoredCliConversations,
   type StoredCliConversation,
 } from "./system-agent-cli-conversations.js";
@@ -176,7 +177,7 @@ export async function repairSystemAgentWorkspacePin(
   try {
     conversations = (
       options.listCliConversations ?? ((id: string) => listStoredCliConversations(cfg, id, env))
-    )(agentId);
+    )(agentId).filter((conversation) => cliConversationResumesIn(conversation, launchDir));
   } catch (error) {
     return {
       ...unchanged,
