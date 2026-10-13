@@ -492,11 +492,14 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   const authoredDefaultWorkspace =
     snapshot.authoredConfig?.agents?.defaults?.workspace ??
     (isRecord(parsedDefaults) ? parsedDefaults.workspace : undefined);
-  const systemAgentWorkspace = await repairSystemAgentWorkspacePin(state.candidate, process.env, {
+  const systemAgentWorkspaceOptions = {
     includeOwnsRoster,
-    applyFiles: shouldRepair,
     authoredDefaultWorkspace:
       typeof authoredDefaultWorkspace === "string" ? authoredDefaultWorkspace : undefined,
+  };
+  const systemAgentWorkspace = await repairSystemAgentWorkspacePin(state.candidate, process.env, {
+    ...systemAgentWorkspaceOptions,
+    applyFiles: shouldRepair,
   });
   explicitSetPaths.push(...(systemAgentWorkspace.explicitSetPaths ?? []));
   applyConfigMutation(
@@ -611,8 +614,24 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     confirm: params.confirm,
     note,
   });
-  const cfg = finalized.cfg;
   const shouldWriteConfig = finalized.shouldWriteConfig && legacyStep.blocksWrite !== true;
+  // An accepted preview copies the system agent's files before its workspace pin joins the write.
+  const confirmedWorkspace =
+    !shouldRepair && shouldWriteConfig && systemAgentWorkspace.restorePending
+      ? await repairSystemAgentWorkspacePin(finalized.cfg, process.env, {
+          ...systemAgentWorkspaceOptions,
+          applyFiles: true,
+        })
+      : undefined;
+  if (confirmedWorkspace) {
+    changesPanelSink.emit(confirmedWorkspace.changes);
+    explicitSetPaths.push(...(confirmedWorkspace.explicitSetPaths ?? []));
+    if (confirmedWorkspace.warnings?.length) {
+      emitDoctorNotes({ note, warningNotes: confirmedWorkspace.warnings });
+      configRepairWarnings.push(...confirmedWorkspace.warnings);
+    }
+  }
+  const cfg = confirmedWorkspace?.config ?? finalized.cfg;
   const includeBoundaryWrite =
     shouldWriteConfig &&
     canWriteDoctorInclude(
@@ -664,6 +683,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   return {
     [Symbol.asyncDispose]: () => resources.disposeAsync(),
     ...finalized,
+    cfg,
     ...(shouldWriteConfig && sessionStoreOwnerRecovery.changes.length > 0
       ? {
           confirmedConfigSource: {

@@ -14,6 +14,7 @@ import {
 import { resolveAllAgentSessionStoreTargetsSync } from "../../../config/sessions/targets.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
 import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { hasErrnoCode } from "../../../infra/errno.js";
 import { loadLegacySessionStore } from "../../../infra/state-migrations.legacy-session-store.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
 import { parseAgentSessionKey } from "../../../sessions/session-key-utils.js";
@@ -97,36 +98,89 @@ export function listStoredCliConversations(
   return [...conversations.values()];
 }
 
+type TranscriptCopy = "absent" | "copy" | "current" | "diverged";
+
+function sizeIfExists(file: string): number | undefined {
+  try {
+    return fs.statSync(file).size;
+  } catch (error) {
+    if (hasErrnoCode(error, "ENOENT")) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+function readHead(file: string, length: number): Buffer {
+  const fd = fs.openSync(file, "r");
+  try {
+    const head = Buffer.alloc(length);
+    const read = fs.readSync(fd, head, 0, length, 0);
+    return head.subarray(0, read);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 /**
- * Only Claude CLI conversations in the SQLite store whose transcripts sit in the Claude project
- * folder of `from` can be carried to a new directory.
+ * Compares `<id>.jsonl` in both Claude project folders. A target that is a prefix of the source
+ * (an earlier copy the conversation has since grown past) is refreshed; a target with turns the
+ * source lacks has diverged and is never overwritten.
+ */
+function planTranscriptCopy(fromProject: string, toProject: string, id: string): TranscriptCopy {
+  const source = path.join(fromProject, `${id}.jsonl`);
+  const target = path.join(toProject, `${id}.jsonl`);
+  const sourceSize = sizeIfExists(source);
+  if (sourceSize === undefined) {
+    return "absent";
+  }
+  const targetSize = sizeIfExists(target);
+  if (targetSize === undefined) {
+    return "copy";
+  }
+  if (targetSize > sourceSize || !readHead(source, targetSize).equals(fs.readFileSync(target))) {
+    return "diverged";
+  }
+  return targetSize === sourceSize ? "current" : "copy";
+}
+
+function claudeProjects(from: string, to: string, env: NodeJS.ProcessEnv) {
+  const homeDir = normalizeOptionalString(env.HOME);
+  return {
+    fromProject: resolveClaudeCliProjectDirForWorkspace({ workspaceDir: from, homeDir }),
+    toProject: resolveClaudeCliProjectDirForWorkspace({ workspaceDir: to, homeDir }),
+  };
+}
+
+/**
+ * Only Claude CLI conversations in the SQLite store can be carried, and only when each transcript
+ * is in the Claude project folder of `from` and any copy already in `to` holds nothing it lacks.
  */
 export function canCarryCliConversation(
   conversation: StoredCliConversation,
   from: string,
+  to: string,
   env: NodeJS.ProcessEnv,
 ): boolean {
-  const homeDir = normalizeOptionalString(env.HOME);
   if (
     conversation.legacyStore ||
-    homeDir === undefined ||
+    normalizeOptionalString(env.HOME) === undefined ||
     !conversation.providers.every((provider) => provider === CLAUDE_CLI) ||
     !conversation.claudeSessionIds.every(isSafeClaudeSessionId)
   ) {
     return false;
   }
-  const fromProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: from, homeDir });
-  return conversation.claudeSessionIds.every((id) =>
-    fs.existsSync(path.join(fromProject, `${id}.jsonl`)),
-  );
+  const { fromProject, toProject } = claudeProjects(from, to, env);
+  return conversation.claudeSessionIds.every((id) => {
+    const copy = planTranscriptCopy(fromProject, toProject, id);
+    return copy !== "absent" && copy !== "diverged";
+  });
 }
 
-async function setClaudeBindingCwd(
+async function clearClaudeBindingCwd(
   conversation: StoredCliConversation,
   fromHash: string | undefined,
-  toHash: string | undefined,
-): Promise<boolean> {
-  let patched = false;
+): Promise<void> {
   await patchSessionEntryCore(
     conversation.scope,
     (entry) => {
@@ -137,21 +191,18 @@ async function setClaudeBindingCwd(
       if (!key || !binding || binding.cwdHash !== fromHash) {
         return null;
       }
-      patched = true;
-      return {
-        cliSessionBindings: { ...entry.cliSessionBindings, [key]: { ...binding, cwdHash: toHash } },
-      };
+      const { cwdHash: _cwdHash, ...rest } = binding;
+      return { cliSessionBindings: { ...entry.cliSessionBindings, [key]: rest } };
     },
     { preserveActivity: true, skipMaintenance: true },
   );
-  return patched;
 }
 
 /**
- * Copies each conversation's Claude CLI transcript into the Claude project folder of the new
- * directory (the originals stay in place), then records the new directory in each binding, so the
- * next turn resumes the same native session with its history. Bindings are patched only after
- * every transcript is copied, and a failed patch restores the bindings already patched.
+ * Copies each conversation's Claude CLI transcript into the Claude project folder of `to` (the
+ * originals stay in place), then drops the binding's recorded working directory. Both folders
+ * then hold the transcript, so the next turn resumes the same native session in whichever
+ * directory it runs, whether or not the workspace pin is published, and records that directory.
  */
 export async function carryClaudeCliConversations(
   conversations: StoredCliConversation[],
@@ -159,38 +210,33 @@ export async function carryClaudeCliConversations(
   to: string,
   env: NodeJS.ProcessEnv,
 ): Promise<void> {
-  const homeDir = normalizeOptionalString(env.HOME);
-  const fromProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: from, homeDir });
-  const toProject = resolveClaudeCliProjectDirForWorkspace({ workspaceDir: to, homeDir });
+  const { fromProject, toProject } = claudeProjects(from, to, env);
   for (const conversation of conversations) {
     for (const sessionId of conversation.claudeSessionIds) {
-      // `<id>.jsonl` is the transcript; a sibling `<id>/` folder holds its tool results.
-      for (const name of [`${sessionId}.jsonl`, sessionId]) {
-        const source = path.join(fromProject, name);
-        if (fs.existsSync(source)) {
-          await fs.promises.mkdir(toProject, { recursive: true });
-          await fs.promises.cp(source, path.join(toProject, name), {
-            recursive: true,
-            force: false,
-            errorOnExist: false,
-          });
-        }
+      const copy = planTranscriptCopy(fromProject, toProject, sessionId);
+      if (copy === "absent" || copy === "diverged") {
+        throw new Error(`the transcript of Claude CLI session ${sessionId} changed during repair`);
+      }
+      await fs.promises.mkdir(toProject, { recursive: true });
+      if (copy === "copy") {
+        await fs.promises.copyFile(
+          path.join(fromProject, `${sessionId}.jsonl`),
+          path.join(toProject, `${sessionId}.jsonl`),
+        );
+      }
+      // A sibling `<id>/` folder holds the transcript's tool results; existing files are kept.
+      const results = path.join(fromProject, sessionId);
+      if (fs.existsSync(results)) {
+        await fs.promises.cp(results, path.join(toProject, sessionId), {
+          recursive: true,
+          force: false,
+          errorOnExist: false,
+        });
       }
     }
   }
   const fromHash = hashCliSessionText(from);
-  const toHash = hashCliSessionText(to);
-  const patched: StoredCliConversation[] = [];
-  try {
-    for (const conversation of conversations) {
-      if (await setClaudeBindingCwd(conversation, fromHash, toHash)) {
-        patched.push(conversation);
-      }
-    }
-  } catch (error) {
-    for (const conversation of patched) {
-      await setClaudeBindingCwd(conversation, toHash, fromHash).catch(() => false);
-    }
-    throw error;
+  for (const conversation of conversations) {
+    await clearClaudeBindingCwd(conversation, fromHash);
   }
 }

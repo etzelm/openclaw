@@ -514,13 +514,20 @@ already resolves to, and only warns when the roster lives in an included file.
 A stored session of the agent can hold a CLI-backend conversation, which is
 tied to the working directory it started in. For a `claude-cli` conversation,
 Doctor copies its transcript into the Claude project folder of
-`<root>/<agentId>` (the original stays in place) and records the new directory
-in the session's binding, so the next turn resumes the same conversation with
-its history. For any other backend, a `claude-cli` conversation whose
-transcript is not in the root's Claude project folder, or a conversation kept
-in a legacy `sessions.json` store, Doctor writes nothing and warns with the
-value to set,
-because that conversation would start fresh without resuming history.
+`<root>/<agentId>` (the original stays in place; an earlier copy that the
+conversation has since grown past is refreshed) and removes the recorded
+working directory from the session's binding. Both folders then hold the
+transcript, so the next turn resumes the same conversation with its history in
+whichever directory it runs, even if the config write is refused, and records
+that directory again. For any other backend, a `claude-cli` conversation whose
+transcript is not in the root's Claude project folder or whose copy in
+`<root>/<agentId>` holds turns the root's lacks, or a conversation kept in a
+legacy `sessions.json` store, Doctor writes nothing and warns with the value to
+set, because that conversation would start fresh without resuming history.
+
+`openclaw doctor` without `--fix` only describes the copies. If you accept its
+"Apply recommended config repairs now?" prompt, Doctor makes them before the
+pin is written; if you decline, nothing is copied and no pin is written.
 
 Doctor follows the existing [include write constraints](/gateway/config-secrets-env).
 A root-level `$include`, or a repair spanning an included roster and root-owned

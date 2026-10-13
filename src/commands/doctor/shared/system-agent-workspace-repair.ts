@@ -7,10 +7,6 @@ import {
   tryResolveLegacyCompatibilityAgentId,
 } from "../../../agents/agent-scope-config.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../../agents/workspace-default-path.js";
-import {
-  workspaceProfileLooksConfigured,
-  workspaceRequiredBootstrapLooksCustomized,
-} from "../../../agents/workspace.js";
 import { containsEnvVarReference, resolveConfigEnvVars } from "../../../config/env-substitution.js";
 import type { OpenClawConfig } from "../../../config/types.openclaw.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
@@ -28,15 +24,6 @@ import {
   planWorkspaceRestore,
   type WorkspaceRestorePlan,
 } from "./system-agent-workspace-restore.js";
-
-/** Customized profile, memory, skills, or AGENTS.md all count as files the agent owns. */
-async function workspaceHoldsAgentFiles(dir: string): Promise<boolean> {
-  const [profile, agents] = await Promise.all([
-    workspaceProfileLooksConfigured({ dir }),
-    workspaceRequiredBootstrapLooksCustomized(dir),
-  ]);
-  return profile || agents;
-}
 
 /**
  * Pin `<root>/<agentId>` with the root spelled as authored (`${VAR}`, `~/x`) so a later change
@@ -108,7 +95,8 @@ function describeRestore(params: {
  * Pin the agent directory, after copying the agent's files there from the shared root. The root is
  * never assigned (it holds sibling workspaces), no file is moved or deleted, a customized file in
  * the agent directory is never replaced, and no pin lands while it would end a stored CLI-backend
- * conversation that Doctor cannot carry to the new directory.
+ * conversation that Doctor cannot carry to the new directory. Without `applyFiles` the pin is left
+ * out whenever files or conversations still have to be carried.
  */
 export async function repairSystemAgentWorkspacePin(
   cfg: OpenClawConfig,
@@ -116,11 +104,18 @@ export async function repairSystemAgentWorkspacePin(
   options: {
     includeOwnsRoster?: boolean;
     authoredDefaultWorkspace?: string;
-    /** Copy files now (Doctor repair); otherwise only describe the copy. */
+    /** Copy files now (Doctor repair); otherwise describe the copy and leave the pin out. */
     applyFiles?: boolean;
     listCliConversations?: (agentId: string) => StoredCliConversation[];
   } = {},
-): Promise<DoctorConfigMutationResult & { warnings?: string[]; explicitSetPaths?: string[][] }> {
+): Promise<
+  DoctorConfigMutationResult & {
+    warnings?: string[];
+    explicitSetPaths?: string[][];
+    /** Rerun with `applyFiles` once the operator confirms; this preview left the pin out. */
+    restorePending?: true;
+  }
+> {
   const unchanged = { config: cfg, changes: [] };
   const agentId = tryResolveLegacyCompatibilityAgentId(cfg);
   const entries = cfg.agents?.entries ?? {};
@@ -142,7 +137,7 @@ export async function repairSystemAgentWorkspacePin(
   );
   let restore: WorkspaceRestorePlan = { copies: [], links: [], conflicts: [] };
   try {
-    if (!launchOwned && (await workspaceHoldsAgentFiles(launchDir))) {
+    if (!launchOwned) {
       restore = await planWorkspaceRestore(launchDir, agentDir);
     }
   } catch (error) {
@@ -191,7 +186,7 @@ export async function repairSystemAgentWorkspacePin(
     };
   }
   const stuck = conversations.filter(
-    (conversation) => !canCarryCliConversation(conversation, launchDir, env),
+    (conversation) => !canCarryCliConversation(conversation, launchDir, agentDir, env),
   );
   if (stuck.length > 0) {
     return {
@@ -201,7 +196,27 @@ export async function repairSystemAgentWorkspacePin(
       ],
     };
   }
-  if (options.applyFiles === true && copied.length > 0) {
+  const carryLines = (applied: boolean) =>
+    conversations.length > 0
+      ? [
+          `${applied ? "Carried" : "Carry"} ${countLabel(conversations.length, "stored Claude CLI conversation")} of agent "${agentId}" to ${shortenHomePath(agentDir)}: ${conversations.length === 1 ? "its transcript is" : "their transcripts are"} copied into that directory's Claude project folder, the originals stay in place, and the next turn resumes with ${conversations.length === 1 ? "its" : "their"} history.`,
+        ]
+      : [];
+  if (options.applyFiles !== true) {
+    if (copied.length > 0 || conversations.length > 0) {
+      // The config stays unpinned until the copy runs: --fix, or this repair rerun with
+      // applyFiles once the operator accepts the preview.
+      return {
+        ...unchanged,
+        restorePending: true,
+        changes: [
+          ...describeRestore({ plan: restore, applied: false, launchDir, agentDir }),
+          `Set ${configPath} to ${workspace} so its working directory, persona, and memory use one workspace.`,
+          ...carryLines(false),
+        ],
+      };
+    }
+  } else {
     try {
       await applyWorkspaceRestore(launchDir, agentDir, restore);
     } catch (error) {
@@ -212,8 +227,6 @@ export async function repairSystemAgentWorkspacePin(
         ],
       };
     }
-  }
-  if (options.applyFiles === true) {
     try {
       await carryClaudeCliConversations(conversations, launchDir, agentDir, env);
     } catch (error) {
@@ -234,18 +247,9 @@ export async function repairSystemAgentWorkspacePin(
       },
     },
     changes: [
-      ...describeRestore({
-        plan: restore,
-        applied: options.applyFiles === true,
-        launchDir,
-        agentDir,
-      }),
+      ...describeRestore({ plan: restore, applied: true, launchDir, agentDir }),
       `Set ${configPath} to ${workspace} so its working directory, persona, and memory use one workspace.`,
-      ...(conversations.length > 0
-        ? [
-            `${options.applyFiles === true ? "Carried" : "Carry"} ${countLabel(conversations.length, "stored Claude CLI conversation")} of agent "${agentId}" to ${shortenHomePath(agentDir)}: ${conversations.length === 1 ? "its transcript is" : "their transcripts are"} copied into that directory's Claude project folder, the originals stay in place, and the next turn resumes with ${conversations.length === 1 ? "its" : "their"} history.`,
-          ]
-        : []),
+      ...carryLines(true),
     ],
     explicitSetPaths: [["agents", "entries", entryKey, "workspace"]],
   };
