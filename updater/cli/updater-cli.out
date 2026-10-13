@@ -1,0 +1,197 @@
+# updater shape: cli (candidate from 587b44ed771, base f307d643788)
+npm install -g openclaw@2026.10.1 exit=0
+profile ready: case=subdir
+
+## installed (published)
+OpenClaw 2026.10.1 (e178c39)
+
+## candidate artifact
+-rw-r--r--  1 openclaw  openclaw  108472320 Oct 12 18:11 <work>/pack/openclaw-candidate.tgz
+openclaw 2026.10.2 updateAdmissionProtocol= 1
+
+## config before
+agents.defaults.workspace = <profile>/workspace | model = {"primary":"claude-cli/claude-sonnet-5"} | entries = {"main":{},"dev":{}}
+
+## Gateway run on published 2026.10.1 (creates the stored sessions the candidate must read)
+turn-published-1: stub received the turn
+turn-published-2: stub received the turn
+
+## stub log after the published run
+{"pid":63702,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":63722,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":63746,"ev":"spawn","cwd":"<profile>/workspace","mode":"new-session","sessionId":"a5569ee4-c214-43a0-a3bf-efa2da9bd188","argvHead":["--model","--session-id"]}
+{"pid":63746,"ev":"control","subtype":"initialize"}
+{"pid":63746,"ev":"turn","cwd":"<profile>/workspace","sessionId":"a5569ee4-c214-43a0-a3bf-efa2da9bd188","prompt":"turn-published-1","turnsInProcess":1,"historyTags":[],"persona":[]}
+{"pid":63750,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":63746,"ev":"turn","cwd":"<profile>/workspace","sessionId":"a5569ee4-c214-43a0-a3bf-efa2da9bd188","prompt":"turn-published-2","turnsInProcess":2,"historyTags":[],"persona":[]}
+
+## workspace before update
+c8815c26ac19a76b  ./dev/SOUL.md
+490fc2b32865dd31  ./main/AGENTS.md
+59b223766c8dd978  ./main/IDENTITY.md
+06de15d2f196c540  ./main/SOUL.md
+46e0d8c937df7b10  ./main/USER.md
+5ce5a3a1295bb699  ./main/memory/2026-10-01.md
+
+## published 2026.10.1: openclaw update --dry-run --tag <candidate.tgz> --yes --no-restart
+  Install kind: package
+  Mode: npm
+  Channel: stable
+  Tag/spec: <work>/pack/openclaw-candidate.tgz
+  Current version: 2026.10.1
+  Target version: unresolved (The package artifact is not staged during a dry-run.)
+
+Planned actions:
+  - Run global package manager update with spec <work>/pack/openclaw-candidate.tgz
+  - Run plugin update sync after core update
+  - Refresh shell completion cache (if needed)
+  - Skip restart (because --no-restart is set)
+
+Notes:
+  - Configured plugin availability will be checked against the staged package before update checks or activation; this preview does not stage the target.
+  - Non-registry package specs skip npm version lookup and downgrade previews.
+Phase: staging
+Phase: validating
+Phase: finished
+
+ℹ️ OpenClaw update skipped: dry-run.
+Report: <profile>/state/update-reports/92390141-6d30-4c54-88c5-196374ce9da8.md
+Update mode: npm
+Admission: installed.
+Phases: requested (712ms) → staging (18ms) → validating (18ms)
+
+## published 2026.10.1: openclaw update --tag <candidate.tgz> --yes --no-restart
+exit=0
+│  provider's own recall path; advanced Active Memory can still use its   │
+│  recall tools.                                                          │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ─────────────────────────────────────────────────────────╮
+│                                                                         │
+│  Agent "dev": Remember across conversations is effectively enabled for  │
+│  agent "dev", but memory search is disabled. Enable memory search or    │
+│  set memory.search.rememberAcrossConversations to false.                │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+[state/agent-db] agent database clean-close receipt: written
+│
+◇  Updater runtimes ──────────────────────────────────────────────────────────────────╮
+│                                                                                     │
+│  Runtime retained at                                                                │
+│  <work>/gprefix-cli/lib/openclaw-update-runtime-pt1jbp:  │
+│  Could not inspect OpenClaw processes: ProcSafeError: incomplete:                   │
+│  unterminated Darwin environment                                                    │
+│                                                                                     │
+├─────────────────────────────────────────────────────────────────────────────────────╯
+│
+└  Doctor complete.
+
+✅ OpenClaw updated to 2026.10.2 (from 2026.10.1).
+Report: <profile>/state/update-reports/e2bce0bd-5a3f-478e-a30d-51be6154d466.md
+Warning: Deferred model retirement repair completed after plugin convergence.
+Warning: Doctor lint warning [core/doctor/browser]: System browser profile cookie import is enabled (browser.allowSystemProfileImport).: - System browser profile discovery skipped by Doctor; importable cookie database count is unavailable.; - Doctor does not access the macOS Keychain; importing asks for consent separately.
+Warning: Doctor lint warning [core/doctor/claude-cli]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/claude-cli` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/command-owner]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/command-owner` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/update-snapshots]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/update-snapshots` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/security]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/security` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/oauth-tls]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/oauth-tls` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/hooks-model]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/hooks-model` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/model-references]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/model-references` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/acp-agent-model]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/acp-agent-model` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/provider-catalog-projection]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/provider-catalog-projection` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/local-audio-acceleration]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/local-audio-acceleration` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/runtime-tool-schemas]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/runtime-tool-schemas` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/skill-workshop-tool-policy]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/skill-workshop-tool-policy` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/bootstrap-size]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/bootstrap-size` after activation to complete this inspection.
+Warning: Skipped agent database path repair during update Doctor. Run openclaw doctor --fix after the update finishes.
+Warning: service management skipped: non-default state dir or config path. Rerun with HOME set to the OS account home, OPENCLAW_HOME either unset or pointing at that same home, and OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH either unset or pointing at the canonical paths for that account home and profile to manage the gateway service during update.
+Update mode: npm
+Update safety checks ran in the candidate updater (2026.10.2).
+Admission checks: config: ok, database-schema: ok, node-runtime: ok, plugin-availability: ok.
+Snapshot location: ~/openclaw-update-canary-1ztGUt (explicit-tmpdir). Snapshot requires 80 MiB for 4 MiB SQLite and 0 B plugin files and scratch space. Checked ~: 170 GiB available; ~/state.update-captures: 170 GiB available; /tmp: 170 GiB available.
+Databases snapshotted at <work>/gprefix-cli/lib/node_modules/.openclaw.package-backup-63809-1791854794064.databases. Verified successful activation removes these snapshots; otherwise retain them with the update's recovery artifacts.
+Doctor interval openclaw doctor; backup <work>/gprefix-cli/lib/node_modules/.openclaw.package-backup-63809-1791854794064.databases; from SHA-256 9b6255b6d9bf2ee3bfe65c46e024c8e91a5d4d755a70157d34c314572a1b1798 to SHA-256 6fa4aceaca797d13240f75c9859fb6b89e081b09216e8f59741a16007f5b1052.
+~/state/agents/main/agent/openclaw-agent.sqlite -> <work>/gprefix-cli/lib/node_modules/.openclaw.package-backup-63809-1791854794064.databases/payload/posix<profile>/state/agents/main/agent/openclaw-agent.sqlite; schema 24; 692224 bytes; SHA-256 b84ac4d62b8a656f9b265af9232e897d650a7078ee10608324e73720351abbe6
+~/state/state/openclaw.sqlite -> <work>/gprefix-cli/lib/node_modules/.openclaw.package-backup-63809-1791854794064.databases/payload/posix<profile>/state/state/openclaw.sqlite; schema 20; 2895872 bytes; SHA-256 b065296ec8fabbd6676add7491184d385deb03ec772686aa139cbe2f3c82c2f7
+Warning: Doctor migration: anthropic/claude-sonnet-5 model configured, enabled automatically.
+Warning: Doctor migration: openai/gpt-5.6-luna model configured, enabled automatically.
+Warning: Doctor migration: Set agents.entries.main.workspace to ~/workspace/main so its working directory, persona, and memory use one workspace.
+Warning: Doctor migration: Carried 1 stored Claude CLI conversation of agent "main" to $OPENCLAW_HOME/workspace/main: its transcript is copied into that directory's Claude project folder, the originals stay in place, and the next turn resumes with its history.
+Phases: requested (14.49s) → staging (22ms) → validating (67.94s) → activating (59.14s)
+After confirming the update and your conversations are healthy, preview retained migration originals eligible for permanent cleanup with `openclaw update cleanup --dry-run` for state `<profile>/state`. Use the same profile, state, and config settings.
+Finishing update: checking package backup retention and cleanup.
+[infra:temp-artifacts] Runtime retained at <work>/gprefix-cli/lib/openclaw-update-runtime-pt1jbp: worker generation settled; cleanup deferred to the next eligible update or openclaw doctor --fix
+
+## after: installed version
+OpenClaw 2026.10.2 (3a16f52)
+
+## config after
+agents.defaults.workspace = <profile>/workspace | model = {"primary":"anthropic/claude-sonnet-5"} | entries = {"main":{"workspace":"<profile>/workspace/main"},"dev":{}}
+
+## pre-update config backup
+openclaw.json
+openclaw.json.bak
+openclaw.json.last-good
+openclaw.json.pre-update
+openclaw.json.pre-update is byte-identical to the config before the update
+
+## workspace after update
+WORKSPACE IDENTICAL (sha256 of every file)
+
+## openclaw update status
+OpenClaw update status
+
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Item             │ Value                                                                                             │
+├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Install          │ npm                                                                                               │
+│ Channel          │ stable (default)                                                                                  │
+│ Package recovery │ complete (92de1a26-7c6e-49d4-91c5-fef65e0e9624)                                                   │
+│ Update           │ npm · up to date · npm latest 2026.10.2                                                           │
+└──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Last recorded update (2026-10-13T01:25:20.164Z):
+✅ OpenClaw updated to 2026.10.2 (from 2026.10.1).
+Warning: Deferred model retirement repair completed after plugin convergence.
+Warning: Doctor lint warning [core/doctor/browser]: System browser profile cookie import is enabled (browser.allowSystemProfileImport).: - System browser profile discovery skipped by Doctor; importable cookie database count is unavailable.; - Doctor does not access the macOS Keychain; importing asks for consent separately.
+Warning: Doctor lint warning [core/doctor/claude-cli]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/claude-cli` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/command-owner]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/command-owner` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/update-snapshots]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/update-snapshots` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/security]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/security` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/oauth-tls]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/oauth-tls` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/hooks-model]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/hooks-model` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/model-references]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/model-references` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/acp-agent-model]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/acp-agent-model` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/provider-catalog-projection]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/provider-catalog-projection` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/local-audio-acceleration]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/local-audio-acceleration` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/runtime-tool-schemas]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/runtime-tool-schemas` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/skill-workshop-tool-policy]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/skill-workshop-tool-policy` after activation to complete this inspection.
+Warning: Doctor lint warning [core/doctor/bootstrap-size]: update-validation-scope: Advisory inspection deferred until after update activation; required migration, config, plugin, and Gateway readiness checks remain enabled.: Run `openclaw doctor --lint --only core/doctor/bootstrap-size` after activation to complete this inspection.
+Warning: Skipped agent database path repair during update Doctor. Run openclaw doctor --fix after the update finishes.
+Warning: service management skipped: non-default state dir or config path. Rerun with HOME set to the OS account home, OPENCLAW_HOME either unset or pointing at that same home, and OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH either unset or pointing at the canonical paths for that account home and profile to manage the gateway service during update.
+
+## Gateway run on the candidate, same state directory
+turn-candidate-1: stub received the turn
+turn-candidate-2: stub received the turn
+
+## stub log, new lines from the candidate run
+{"pid":65255,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":65259,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":65289,"ev":"spawn","cwd":"/private/tmp/openclaw/openclaw-isolated-completion-3021ee1e-9ea5-4393-8213-a79fbf690e38-vWCO6f","mode":"new-session","sessionId":"stub-session","argvHead":["--model"]}
+{"pid":65301,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":65305,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":65310,"ev":"spawn","cwd":"<work>/gprefix-cli/lib/node_modules/openclaw","mode":"new-session","sessionId":"stub-session","argvHead":[]}
+{"pid":65311,"ev":"spawn","cwd":"<profile>/workspace/main","mode":"resume","sessionId":"a5569ee4-c214-43a0-a3bf-efa2da9bd188","argvHead":["--model","--resume"]}
+{"pid":65311,"ev":"control","subtype":"initialize"}
+{"pid":65311,"ev":"turn","cwd":"<profile>/workspace/main","sessionId":"a5569ee4-c214-43a0-a3bf-efa2da9bd188","prompt":"turn-candidate-1","turnsInProcess":1,"historyTags":[],"persona":[]}
+{"pid":65311,"ev":"turn","cwd":"<profile>/workspace/main","sessionId":"a5569ee4-c214-43a0-a3bf-efa2da9bd188","prompt":"turn-candidate-2","turnsInProcess":2,"historyTags":[],"persona":[]}
+
+## candidate gateway log: CLI session reuse lines
+2026-10-12T18:28:27.539-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-haiku-5-5 promptChars=427 trigger=session-activity-summary useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+2026-10-12T18:28:28.053-07:00 [agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+2026-10-12T18:28:28.079-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=153 trigger=user useResume=true session=present resumeSession=e7d26a49b089 reuse=reusable-drift:prompt-tools historyPrompt=none
+2026-10-12T18:28:30.198-07:00 [agent/cli-backend] cli session history refused across auth boundary: reason=auth-unknown
+2026-10-12T18:28:30.206-07:00 [agent/cli-backend] cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=26 trigger=user useResume=true session=present resumeSession=e7d26a49b089 reuse=reusable historyPrompt=none
+
+SEEDED AND PRE-UPDATE FILES INTACT after the candidate run (6 files)

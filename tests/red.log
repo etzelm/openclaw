@@ -1,0 +1,292 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - JSON import "./control-ui-i18n-config.json" without import attributes (../../scripts/lib/control-ui-i18n-sync-plan.ts:2:41). Add `with { type: 'json' }`
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+Plugin "vitest:mocks:interceptor" defines Vite-specific hooks (configureServer) in a plugin returned from applyToEnvironment. These hooks will be ignored.
+
+ RUN  v5.0.1 /Users/openclaw/work/pr-165112
+
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > copies the shared root's files over the agent's seeded files, then pins it 2264ms
+   → expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > recreates linked skills in the agent directory pointing where the root's links do 6ms
+   → expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps a linked file in the agent directory instead of writing through it 1587ms
+   → expected [] to include 'Kept SOUL.md in /private/var/folders/…'
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > counts a customized AGENTS.md as files in either directory 4ms
+   → expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins the agent directory when only its AGENTS.md is customized 7ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps the authored env reference in the pin and resolves to the same directory 5ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps a tilde root as authored 5ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > falls back to the resolved path when the authored root does not match 4ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins the agent directory when only it holds the agent's files 5ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins the directory its persona already resolves to when neither holds files 1579ms
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns instead of pinning when a stored CLI-backend conversation would lose its history 2294ms
+   → expected [ Array(1) ] to deeply equal [ Array(1) ]
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > carries stored Claude CLI conversations to the pinned directory 1977ms
+   → expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns without pinning when a Claude CLI conversation cannot be carried 1997ms
+   → expected [ Array(1) ] to deeply equal [ StringContaining{…} ]
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > restores carried bindings when a later binding cannot be patched 1932ms
+   → expected [ Array(1) ] to deeply equal [ Array(1) ]
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns without pinning when a Claude CLI transcript is missing from the launch folder 2008ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > pins when only another agent or no session holds a CLI-backend conversation 3722ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > counts a CLI-backend conversation kept in a legacy session store 8ms
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > names the pin it skipped when stored sessions cannot be read 4ms
+   → expected [ Array(1) ] to deeply equal []
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > counts one stored CLI-backend conversation in the singular 3ms
+   → expected [ Array(1) ] to deeply equal []
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps the agent's own customized files when both directories hold files 5ms
+   → expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+ ×  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns without pinning when the agent's files cannot be copied 4ms
+   → expected [ Array(1) ] to deeply equal [ StringContaining{…} ]
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps the system agent off a shared root another agent already owns 4ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns instead of writing when the roster lives in an include 3ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns instead of failing Doctor when a workspace cannot be read 11ms
+ ✓  commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > leaves an authored workspace and a sole agent alone 3ms
+stderr | unknown test
+[sqlite-test-lifecycle] src/commands/doctor/shared/system-agent-workspace-repair.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/commands/doctor/shared/system-agent-workspace-repair.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/commands/doctor/shared/system-agent-workspace-repair.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/commands/doctor/shared/system-agent-workspace-repair.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/commands/doctor/shared/system-agent-workspace-repair.test.ts: retiring openclaw.agentDatabaseLifecycle
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > copies the shared root's files over the agent's seeded files, then pins it
+AssertionError: expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+
+- Expected:
+"/private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-WJ77zn/shared/main"
+
++ Received:
+undefined
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:98:61
+     96|     const planned = await repairSystemAgentWorkspacePin(cfg, testState…
+     97|
+     98|     expect(planned.config.agents?.entries?.main?.workspace).toBe(agent…
+       |                                                             ^
+     99|     expect(planned.changes[0]).toBe(
+    100|       `Copy SOUL.md, ${path.join("memory", "2026-10-01.md")}, ${path.j…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > recreates linked skills in the agent directory pointing where the root's links do
+AssertionError: expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+
+- Expected:
+"/private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-T5kitf/shared/main"
+
++ Received:
+undefined
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:141:60
+    139|     });
+    140|
+    141|     expect(result.config.agents?.entries?.main?.workspace).toBe(agentD…
+       |                                                            ^
+    142|     expect(result.changes[0]).toBe(
+    143|       `Copied SOUL.md, ${path.join("skills", "absolute")}, ${path.join…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps a linked file in the agent directory instead of writing through it
+AssertionError: expected [] to include 'Kept SOUL.md in /private/var/folders/…'
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:169:28
+    167|     });
+    168|
+    169|     expect(result.changes).toContain(
+       |                            ^
+    170|       `Kept SOUL.md in ${agentDir}; the different copies in ${root} st…
+    171|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > counts a customized AGENTS.md as files in either directory
+AssertionError: expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+
+- Expected:
+"/private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-EriZZy/shared/main"
+
++ Received:
+undefined
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:183:58
+    181|     const both = await repairSystemAgentWorkspacePin(cfg, testState.en…
+    182|
+    183|     expect(both.config.agents?.entries?.main?.workspace).toBe(path.joi…
+       |                                                          ^
+    184|     expect(both.changes[0]).toMatch(/^Copied SOUL\.md from /);
+    185|     expect(await fs.readFile(path.join(root, "main", "SOUL.md"), "utf8…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns instead of pinning when a stored CLI-backend conversation would lose its history
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+-   "Agent \"main\" works in /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-739Q3I/shared but resolves its persona and memory to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-739Q3I/shared/main. Doctor did not set agents.entries.main.workspace because 1 stored CLI-backend conversation of this agent would start fresh, without resuming history, once its working directory changes. Set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-739Q3I/shared/main when that is acceptable.",
++   "Agent \"main\" works in /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-739Q3I/shared but resolves its persona and memory to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-739Q3I/shared/main. Doctor did not set agents.entries.main.workspace because 3 stored CLI-backend conversations of this agent would start fresh, without resuming history, once its working directory changes. Set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-739Q3I/shared/main when that is acceptable.",
+  ]
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:298:29
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > carries stored Claude CLI conversations to the pinned directory
+AssertionError: expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+
+- Expected:
+"/private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-1MS6jM/shared/main"
+
++ Received:
+undefined
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:332:61
+    330|     const planned = await repairSystemAgentWorkspacePin(convergedRoste…
+    331|
+    332|     expect(planned.config.agents?.entries?.main?.workspace).toBe(agent…
+       |                                                             ^
+    333|     expect(planned.changes[1]).toMatch(/^Carry 2 stored Claude CLI con…
+    334|     await expect(fs.access(project(agentDir))).rejects.toThrow();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns without pinning when a Claude CLI conversation cannot be carried
+AssertionError: expected [ Array(1) ] to deeply equal [ StringContaining{…} ]
+
+- Expected
++ Received
+
+  [
+-   StringContaining "Could not carry the stored Claude CLI conversations of agent \"main\" to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-wuJzVf/shared/main",
++   "Agent \"main\" works in /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-wuJzVf/shared but resolves its persona and memory to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-wuJzVf/shared/main. Doctor did not set agents.entries.main.workspace because 1 stored CLI-backend conversation of this agent would start fresh, without resuming history, once its working directory changes. Set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-wuJzVf/shared/main when that is acceptable.",
+  ]
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:391:31
+    389|       expect(result.config).toBe(cfg);
+    390|       expect(result.changes).toEqual([]);
+    391|       expect(result.warnings).toEqual([
+       |                               ^
+    392|         expect.stringContaining(
+    393|           `Could not carry the stored Claude CLI conversations of agen…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > restores carried bindings when a later binding cannot be patched
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+-   "Could not carry the stored Claude CLI conversations of agent \"main\" to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-T77efE/shared/main: session store is locked. Doctor did not set agents.entries.main.workspace.",
++   "Agent \"main\" works in /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-T77efE/shared but resolves its persona and memory to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-T77efE/shared/main. Doctor did not set agents.entries.main.workspace because 2 stored CLI-backend conversations of this agent would start fresh, without resuming history, once its working directory changes. Set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-T77efE/shared/main when that is acceptable.",
+  ]
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:443:29
+    441|
+    442|     expect(result.config).toBe(cfg);
+    443|     expect(result.warnings).toEqual([
+       |                             ^
+    444|       `Could not carry the stored Claude CLI conversations of agent "m…
+    445|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > names the pin it skipped when stored sessions cannot be read
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "Set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-Jd1gqQ/shared/main so its working directory, persona, and memory use one workspace.",
++ ]
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:525:28
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > counts one stored CLI-backend conversation in the singular
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "Set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-kAezdp/shared/main so its working directory, persona, and memory use one workspace.",
++ ]
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:551:28
+    549|     });
+    550|
+    551|     expect(result.changes).toEqual([]);
+       |                            ^
+    552|     expect(result.warnings?.[0]).toContain(
+    553|       "because 1 stored CLI-backend conversation of this agent",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > keeps the agent's own customized files when both directories hold files
+AssertionError: expected undefined to be '/private/var/folders/fx/dlr4cvc97t5fx…' // Object.is equality
+
+- Expected:
+"/private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-MoRoHe/shared/main"
+
++ Received:
+undefined
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:571:60
+    569|     });
+    570|
+    571|     expect(result.config.agents?.entries?.main?.workspace).toBe(agentD…
+       |                                                            ^
+    572|     expect(result.changes).toEqual([
+    573|       `Copied IDENTITY.md from ${root} into ${agentDir}; the files in …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL   commands  src/commands/doctor/shared/system-agent-workspace-repair.test.ts > repairSystemAgentWorkspacePin > warns without pinning when the agent's files cannot be copied
+AssertionError: expected [ Array(1) ] to deeply equal [ StringContaining{…} ]
+
+- Expected
++ Received
+
+  [
+-   StringContaining "Could not copy the files of agent \"main\" from /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-UxQyv9/shared into /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-UxQyv9/shared/main",
++   "Agent \"main\" has workspace files in /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-UxQyv9/shared (its working directory) but resolves its persona and memory to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-UxQyv9/shared/main. Doctor did not pick a workspace for it; set agents.entries.main.workspace to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-UxQyv9/shared to keep the files in place, or to /private/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-system-agent-workspace-UxQyv9/shared/main after moving them there.",
+  ]
+
+ ❯ src/commands/doctor/shared/system-agent-workspace-repair.test.ts:595:31
+    593|       expect(result.config).toBe(cfg);
+    594|       expect(result.changes).toEqual([]);
+    595|       expect(result.warnings).toEqual([
+       |                               ^
+    596|         expect.stringContaining(
+    597|           `Could not copy the files of agent "main" from ${root} into …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  12 failed | 13 passed (25)
+   Start at  18:43:50
+   Duration  24.48s (tests 80%, transform 11%, import 6%, worker 2%, setup 1%)
+
