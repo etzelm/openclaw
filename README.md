@@ -11,6 +11,7 @@ Source tree `a28e59b1ec0d38fe9237548b88c30acbf495e627` (head `a3ad193228e5`), ba
 | `updater/<shape>/updater-<shape>.out` | published `openclaw@2026.10.1` from npm runs the profile, then its own `openclaw update --tag <candidate.tgz>`; the candidate Gateway runs on the same state; shapes `root` (files only in the shared root), `subdir` (files only in `<root>/main`), `cli` (claude-cli backend with a conversation stored by 2026.10.1) |
 | `updater/<shape>/update.log` | full updater output |
 | `updater/cli/stub.log` | every spawn and turn the synthetic `claude` received, with cwd, session id and resume mode |
+| `updater/cli/claude-projects.txt` | the synthetic `claude` transcript in each Claude project folder after the candidate run |
 | `updater/<shape>/gateway-candidate.log` | candidate Gateway log |
 | `tests/green.log`, `tests/red.log` | targeted tests at the tree; the repair test file against the repair module of the previous head `0b5464403a02` |
 | `tests/check-changed.log` | `node scripts/check-changed.mjs --base <base>` |
