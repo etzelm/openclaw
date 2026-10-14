@@ -303,7 +303,7 @@ includes compact `Claim:` and `Evidence:` lines when available.
 or cancellation returns a tool error rather than an empty result, and stops
 the ongoing page scan. For a known page, use `wiki_get` with its id or path.
 The page scan itself (reading, parsing and scoring every page when the compiled
-digest cannot narrow the search, resolving `wiki_get` basename and id lookups,
+digest cannot narrow the search, resolving `wiki_get` id lookups and misses,
 and `wiki_apply` metadata updates) runs in a plugin-owned pool of two worker
 threads, so the gateway event loop stays responsive while a large vault is
 scanned. Every 64 pages a scan checks whether another task is waiting for its

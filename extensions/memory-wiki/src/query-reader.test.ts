@@ -224,19 +224,28 @@ describe("memory wiki query reader", () => {
     ]);
   });
 
-  it("reads exact paths on the calling thread and dispatches basename reads as whole-vault lookups", async () => {
-    const { config } = await createScoringVault();
+  it("reads exact paths and basename hits on the calling thread and scans the vault for id lookups", async () => {
+    const { rootDir, config } = await createScoringVault();
     const dispatch = vi.spyOn(queryReader, "readMemoryWikiPages");
+    const dispatched = () => dispatch.mock.calls.map(([task]) => [task.select, task.relativePaths]);
 
     const exactPage = await getMemoryWikiPage({ config, lookup: "sources/page-1.md" });
-    const exact = dispatch.mock.calls.map(([task]) => [task.select, task.relativePaths]);
+    const exact = dispatched();
     dispatch.mockClear();
-    await getMemoryWikiPage({ config, lookup: "page-1" });
-    const basename = dispatch.mock.calls.map(([task]) => [task.select, task.relativePaths]);
+    const basenamePage = await getMemoryWikiPage({ config, lookup: "page-1" });
+    const basename = dispatched();
+    dispatch.mockClear();
+    const idPage = await getMemoryWikiPage({ config, lookup: "source.page-1" });
+    const byId = dispatched();
 
     expect(exactPage?.path).toBe("sources/page-1.md");
+    expect(basenamePage?.path).toBe("sources/page-1.md");
+    expect(idPage?.path).toBe("sources/page-1.md");
     expect(exact).toEqual([]);
-    expect(basename).toEqual([["lookup", undefined]]);
+    // A path tier reads its candidate from the listing on this thread; only an id lookup
+    // (or a miss) is a whole-vault scan.
+    expect(basename).toEqual([]);
+    expect(byId).toEqual([["lookup", await listVault(rootDir)]]);
   });
 
   it("reads query pages without extracting the link graph", async () => {

@@ -1,6 +1,6 @@
 import { sleepWithAbort } from "@openclaw/retry";
 import type { BackgroundPreference } from "../../../packages/gateway-protocol/src/schema/background-preferences.ts";
-import type { ConfigPatchAck } from "../lib/config/config-gateway-operations.ts";
+import type { ConfigPatchAck } from "../lib/config/config-draft-model.ts";
 import { showToast } from "../lib/toast.ts";
 import { readConfirmedPrefs, publishConfirmedPrefs } from "./server-prefs-confirmation.ts";
 import { foldSidebarEntriesBase, hasSidebarOrderIntent } from "./server-prefs-intent.ts";
@@ -182,6 +182,7 @@ export async function drainPendingPrefs(
           invalidateUserPreferences(writer.state.client);
         }
         let lastSeenAtDispatch: ServerUiPrefs = {};
+        const profileAtDispatch = resolveProfileAppearancePrefs(gatewayScope, profileId);
         const result = useProfile
           ? await import("./server-prefs-profile-runtime.ts").then(
               ({ writeProfileAppearancePrefs }) =>
@@ -222,7 +223,9 @@ export async function drainPendingPrefs(
                 }),
               {
                 waitForWritesResumed: true,
-                configWriteAck: (ack) => ack,
+                // The shared Settings draft adopts the receipt before its trailing save.
+                configWriteAck: (value) => value,
+                shouldRefresh: () => false,
                 canDispatch: () => {
                   if (
                     !isCurrent() ||
@@ -275,51 +278,23 @@ export async function drainPendingPrefs(
           if (
             navigationReceipt &&
             capturedClient &&
-            writer.state.client === capturedClient &&
-            writer.state.connected &&
-            sync.pushCanWrite &&
             profileId &&
-            Object.hasOwn(committedBatch, "sidebarEntries") &&
             sync.pendingPrefs &&
             Object.hasOwn(sync.pendingPrefs, "sidebarEntries") &&
-            lastSeen.navigationConfirmation?.sidebarEntries !==
-              lastSeenAtDispatch.navigationConfirmation?.sidebarEntries &&
+            resolveProfileAppearancePrefs(gatewayScope, profileId) !== profileAtDispatch &&
             !prefValuesEqual(lastSeen.sidebarEntries, committedBatch.sidebarEntries)
           ) {
-            // users.prefs has no server revision: an identical read before this commit
-            // and an ABA read after it have indistinguishable receipts. Only this raced,
-            // still-owned ACK needs a fresh read; ordinary/settled ACKs never reread.
-            const beforeRead = lastSeen.navigationConfirmation;
-            const configObject = writer.state.configSnapshot?.config;
+            // Reconnect hydration can publish the pre-write pins while replay is in flight.
             invalidateUserPreferences(capturedClient);
-            try {
-              await refreshProfileAppearancePrefs({
-                client: capturedClient,
-                profileId,
-                scope: capturedClient.gatewayUrl,
-                configObject,
-                onApplied: () => undefined,
-                isCurrent: () => {
-                  if (
-                    !isCurrent() ||
-                    writer.state.client !== capturedClient ||
-                    !writer.state.connected ||
-                    !sync.pushCanWrite ||
-                    writer.state.configSnapshot?.config !== configObject
-                  ) {
-                    return false;
-                  }
-                  const confirmation = readConfirmedPrefs(
-                    sync,
-                    sync.pendingScope,
-                  )?.navigationConfirmation;
-                  return confirmation?.sidebarEntries === beforeRead?.sidebarEntries;
-                },
-              });
-            } catch {
-              // A failed observation cannot replace the most recent confirmed snapshot.
-            }
-            if (!isCurrent() || writer.state.client !== capturedClient) {
+            await refreshProfileAppearancePrefs({
+              client: capturedClient,
+              profileId,
+              scope: gatewayScope,
+              configObject: writer.state.configSnapshot?.config,
+              onApplied: () => undefined,
+              isCurrent: profileIsCurrent,
+            }).catch(() => false);
+            if (!isCurrent() || !profileIsCurrent()) {
               return;
             }
             sync.reconcilePersistedPendingPrefs();
@@ -344,9 +319,7 @@ export async function drainPendingPrefs(
             }
             const held = sync.pendingPrefs && Object.hasOwn(sync.pendingPrefs, "sidebarEntries");
             const newer =
-              (lastSeen.navigationConfirmation?.sidebarEntries !==
-                lastSeenAtDispatch.navigationConfirmation?.sidebarEntries ||
-                !prefValuesEqual(lastSeen.sidebarEntries, lastSeenAtDispatch.sidebarEntries)) &&
+              !prefValuesEqual(lastSeen.sidebarEntries, lastSeenAtDispatch.sidebarEntries) &&
               !prefValuesEqual(lastSeen.sidebarEntries, committedBatch.sidebarEntries);
             if (Object.hasOwn(publication, "sidebarEntries") && (!held || newer)) {
               // Clearing an outbox may mean a sibling settled or the user cancelled,
@@ -400,16 +373,10 @@ export async function drainPendingPrefs(
             sync.applyServerPrefsPatch(latestNavigation);
           }
           if (Object.keys(publication).length) {
-            publishConfirmedPrefs(
-              sync,
-              sync.pendingScope,
-              nextLastSeen,
-              SYNCED_PREF_KEYS.filter((key) => Object.hasOwn(publication, key)),
-            );
+            publishConfirmedPrefs(sync, sync.pendingScope, nextLastSeen);
           }
           sync.mergePendingIntoStorage(acknowledgedBatch);
           sync.publishPreferenceWrites();
-          sync.clearConflictRedrain();
           if (!isCurrent()) {
             return;
           }
@@ -477,7 +444,9 @@ export async function drainPendingPrefs(
           continue;
         }
         if (result.reason === "conflict") {
-          sync.scheduleConflictRedrain(writer, epoch);
+          // Repeated contention waits for the next edit, explicit retry, or reconnect.
+          sync.recordPreferenceWriteFailures(sync.pendingScope, dispatchedBatch, result.error);
+          sync.publishPreferenceWrites();
           return;
         }
         if (result.reason === "error" || result.reason === "rejected") {

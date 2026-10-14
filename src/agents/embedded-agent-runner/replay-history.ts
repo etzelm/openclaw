@@ -4,7 +4,10 @@ import {
   isReasoningOnlyLengthAssistantTurn,
   isStreamErrorFallbackContent,
 } from "@openclaw/ai/internal/shared";
-import { replaceCompactionReplayOwnerContent } from "@openclaw/ai/transports";
+import {
+  isCompactionReplayCheckpoint,
+  replaceCompactionReplayOwnerContent,
+} from "@openclaw/ai/transports";
 import { asFiniteNumber as toFiniteCostNumber } from "@openclaw/normalization-core/number-coercion";
 import {
   asOptionalObjectRecord,
@@ -23,11 +26,13 @@ import {
   normalizeInputProvenance,
 } from "../../sessions/input-provenance.js";
 import { hasPersistedMedia } from "../../sessions/user-turn-media.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../shared/transcript-only-openclaw-assistant.js";
+import {
+  isTranscriptOnlyOpenClawAssistantMessage,
+  OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
+} from "../../shared/transcript-only-openclaw-assistant.js";
 import { rethrowIncognitoSessionError } from "../../state/incognito-session-error.js";
 import { stripStaleAssistantUsageBeforeLatestCompaction } from "../compaction-usage.js";
 import {
-  downgradeOpenAIFunctionCallReasoningPairs,
   dropStaleOpenAIReasoning,
   normalizeOpenAIResponsesToolCallIds,
   sanitizeGoogleTurnOrdering,
@@ -38,7 +43,7 @@ import {
 import {
   providerRequiresSignedThinking,
   shouldAllowProviderOwnedThinkingReplay,
-  shouldMergeConsecutiveUserTurns,
+  shouldMergeConsecutiveTurns,
 } from "../embedded-agent-helpers/turns.js";
 import { resolveImageSanitizationLimits } from "../image-sanitization.js";
 import type { AgentMessage } from "../runtime/index.js";
@@ -232,6 +237,21 @@ function normalizeAssistantReplayBlockContent(
     }
     removedSilentText ||= isSilentText;
   }
+  const spoken = message.openclawDelivery?.tts?.text;
+  if (
+    spoken?.trim() &&
+    !sanitizedContent.some((block) => {
+      const record = asOptionalRecord(block);
+      return (
+        record?.type === "toolCall" ||
+        (record?.type === "text" && typeof record.text === "string" && record.text.trim())
+      );
+    })
+  ) {
+    // Restore speech only in model history; the stored and displayed turn stays unchanged.
+    sanitizedContent.push({ type: "text", text: spoken });
+    touched = true;
+  }
   if (!touched) {
     return message;
   }
@@ -248,6 +268,14 @@ function normalizeAssistantReplayBlockContent(
 }
 
 function isBareDeliveryMirrorDuplicate(out: AgentMessage[], next: AssistantReplayMessage): boolean {
+  // Canonical automation results are visible conversation turns, not mirrors,
+  // even when they repeat the preceding reply without using model tokens.
+  if (
+    next.provider === OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER &&
+    next.model === "automation-result"
+  ) {
+    return false;
+  }
   const previous = out.at(-1);
   if (!previous || previous.role !== "assistant") {
     return false;
@@ -282,12 +310,14 @@ function normalizeAssistantReplayMessage(
     // entry so user-facing transcript surfaces are unchanged.
     return null;
   }
-  // Failed attempts have no model content; discard the legacy placeholder too.
+  // Empty failed or aborted attempts have no model content; discard the legacy placeholder too.
   // Keep billed silent replies and incomplete tool/length states unchanged.
   if (
     isStreamErrorFallbackContent(message.content) &&
     (message.stopReason === "error" ||
-      isZeroUsageEmptyStopAssistantTurn({ ...message, content: [] }))
+      message.stopReason === "aborted" ||
+      (isZeroUsageEmptyStopAssistantTurn({ ...message, content: [] }) &&
+        !isCompactionReplayCheckpoint(message.providerReplay)))
   ) {
     return null;
   }
@@ -352,6 +382,8 @@ export function normalizeAssistantReplayContent(messages: AgentMessage[]): Agent
           ...replaceCompactionReplayOwnerContent(normalized, completed),
           stopReason: "toolUse",
         };
+      } else {
+        normalized = null;
       }
     }
     if (normalized) {
@@ -610,20 +642,15 @@ export async function sanitizeSessionHistory(
     allowedToolNames: params.allowedToolNames,
     allowProviderOwnedThinkingReplay,
   });
-  // OpenAI Responses rejects orphan/missing function_call_output items. Upstream
-  // Codex repairs those gaps with "aborted"; keep that before the fc_* downgrade
-  // so both call and result ids are rewritten together. Covered by unit replay
-  // tests plus live OpenAI/Codex and generic replay-repair model tests.
+  // Repair missing tool results before normalizing paired call/result ids.
   if (policy.repairToolUseResultPairing) {
     messages = sanitizeToolUseResultPairingForModel(messages, isOpenAIResponsesApi);
   }
   if (isOpenAIResponsesApi) {
-    messages = downgradeOpenAIFunctionCallReasoningPairs(
-      normalizeOpenAIResponsesToolCallIds(
-        // Keep the pre-switch prompt prefix byte-stable: once rs_*/msg_* ids are
-        // invalidated by a switch, every later replay must keep dropping them.
-        dropStaleOpenAIReasoning(messages, latestModelSwitchTimestamp ?? undefined),
-      ),
+    messages = normalizeOpenAIResponsesToolCallIds(
+      // Keep the pre-switch prompt prefix byte-stable: once rs_*/msg_* ids are
+      // invalidated by a switch, every later replay must keep dropping them.
+      dropStaleOpenAIReasoning(messages, latestModelSwitchTimestamp ?? undefined),
     );
   } else if (policy.sanitizeToolCallIds && policy.toolCallIdMode) {
     messages = sanitizeToolCallIdsForCloudCodeAssist(messages, policy.toolCallIdMode, {
@@ -723,7 +750,7 @@ export async function validateReplayTurns(
     : params.messages;
   return policy.validateAnthropicTurns
     ? validateAnthropicTurns(validatedGemini, {
-        mergeConsecutiveUserTurns: shouldMergeConsecutiveUserTurns(policy, params.modelApi),
+        mergeConsecutiveTurns: shouldMergeConsecutiveTurns(policy, params.modelApi),
       })
     : validatedGemini;
 }

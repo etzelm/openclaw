@@ -49,7 +49,6 @@ import {
 
 export type AnthropicStreamBlock = AssistantMessage["content"][number] & {
   index?: number;
-  partialJson?: string;
 };
 
 /** One Messages protocol reducer; entry points retain their established preview/replay contracts. */
@@ -473,6 +472,9 @@ export async function consumeAnthropicStream(params: {
           }
         }
         applyAnthropicMessageDeltaUsage(output.usage, usage, messageStartPromptUsage);
+        if (sawStopReason && messageStartPromptUsage && typeof usage?.output_tokens === "number") {
+          output.usage.usageReport = { state: "available" };
+        }
         calculateCost(costModel, output.usage);
       }
     }

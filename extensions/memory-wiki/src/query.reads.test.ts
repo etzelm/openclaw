@@ -165,13 +165,14 @@ describe("wiki query page reads", () => {
         body: "# Beta\n\nanother readable line\n",
       }),
     );
-    // Without a compiled digest every search reads the whole vault, and a basename
-    // lookup resolves against every page; both parse each page with this function.
-    // Only the lookup's one matched page is parsed here, like any single-page read.
+    // Without a compiled digest every search reads the whole vault, and an id lookup
+    // (no path tier matches it) resolves against every page; both parse each page with
+    // this function. Only the lookup's one matched page is parsed here, like any
+    // single-page read.
     const scan = vi.spyOn(wikiMarkdown, "scanWikiPageSummary");
 
     const results = await searchMemoryWiki({ config, query: "readable line" });
-    const page = await getMemoryWikiPage({ config, lookup: "alpha" });
+    const page = await getMemoryWikiPage({ config, lookup: "source.alpha" });
 
     expect(
       results

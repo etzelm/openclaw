@@ -8,10 +8,10 @@ import {
   type WorkerTaskResponse,
 } from "openclaw/plugin-sdk/process-runtime";
 import { FsSafeError } from "openclaw/plugin-sdk/security-runtime";
+import { resolveQueryableWikiPageByLookup } from "./query-page-lookup.js";
 import {
   excludeWikiPagePaths,
   readWikiPagesTask,
-  resolveQueryableWikiPageByLookup,
   WIKI_SCAN_YIELD,
   type WikiPageKey,
   type WikiPageReadResult,

@@ -12,8 +12,9 @@ import {
   resolveActiveMemoryAgentId,
   usesNativeMemoryProvider,
 } from "./query-memory-provider.js";
+import { resolveQueryableWikiPageForLookup } from "./query-page-lookup.js";
 import {
-  normalizeLookupKey,
+  isWikiPageVisible,
   readWikiPagesTask,
   type WikiPageReadScope,
   type WikiPageVisibility,
@@ -30,6 +31,7 @@ import {
   type WikiSearchResult,
 } from "./query-scoring.js";
 import {
+  normalizeLookupKey,
   readSharedMemoryPage,
   searchSharedMemory,
   shouldEnforceSessionVisibility,
@@ -243,14 +245,30 @@ async function readExactWikiPage(
   return readWikiPage(rootDir, relativePath, visibility, signal);
 }
 
+/** The vault listing is a directory walk, so it stays on the calling thread like one-page reads. */
+async function listWikiPages(rootDir: string, signal?: AbortSignal): Promise<string[]> {
+  return (await readWikiPagesTask({ select: "list", rootDir }, signal)).relativePaths;
+}
+
 /** Resolve one page by path, basename or id over the page keys the reader pool reads. */
 export async function readMemoryWikiPageByLookup(
   rootDir: string,
   lookup: string,
-  options: { visibility?: WikiPageVisibility | null; signal?: AbortSignal } = {},
+  options: {
+    visibility?: WikiPageVisibility | null;
+    /** The pages to resolve over; the whole vault when absent. */
+    relativePaths?: string[];
+    signal?: AbortSignal;
+  } = {},
 ): Promise<QueryableWikiPage | null> {
   const { page } = await readMemoryWikiPages(
-    { rootDir, visibility: options.visibility ?? null, select: "lookup", lookup },
+    {
+      rootDir,
+      visibility: options.visibility ?? null,
+      ...(options.relativePaths ? { relativePaths: options.relativePaths } : {}),
+      select: "lookup",
+      lookup,
+    },
     options.signal ? { signal: options.signal } : {},
   );
   return page;
@@ -347,14 +365,35 @@ export async function getMemoryWikiPage(
       ? await readWikiPage(rootDir, digestClaimPagePath, visibility, params.signal)
       : null;
     // Claim IDs may themselves be paths; preserve their established lookup priority.
-    const directLookupPage =
-      digestLookupPage ??
-      (await readExactWikiPage(rootDir, params.lookup, visibility, params.signal));
     const page =
-      directLookupPage ??
-      (await readMemoryWikiPageByLookup(rootDir, params.lookup, {
-        visibility,
-        ...(params.signal ? { signal: params.signal } : {}),
+      digestLookupPage ??
+      (await resolveQueryableWikiPageForLookup({
+        lookup: params.lookup,
+        readExactPage: () => readExactWikiPage(rootDir, params.lookup, visibility, params.signal),
+        listFiles: () => listWikiPages(rootDir, params.signal),
+        // The owner reads a path-tier candidate one page at a time and the full read as
+        // one call over the listing. A one-page read runs on the calling thread like an
+        // exact path; the full read is a worker scan over those pages that returns the
+        // page the lookup resolves to, or none. That is enough for the owner because its
+        // final resolve runs the same lookup over whatever this returns, so the result is
+        // the page a read of every listed page would pick.
+        readPages: async (relativePaths) => {
+          const [onlyPath] = relativePaths;
+          if (onlyPath === undefined) {
+            return [];
+          }
+          const candidate =
+            relativePaths.length === 1
+              ? await readWikiPage(rootDir, onlyPath, visibility, params.signal)
+              : await readMemoryWikiPageByLookup(rootDir, params.lookup, {
+                  visibility,
+                  relativePaths,
+                  ...(params.signal ? { signal: params.signal } : {}),
+                });
+          return candidate ? [candidate] : [];
+        },
+        // The reader already applies the session scope; this keeps the owner's contract whole.
+        canReadPage: (candidate) => isWikiPageVisible(candidate, visibility),
       }));
     if (page) {
       const lines = page.parsed.body.split(/\r?\n/);

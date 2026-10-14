@@ -548,7 +548,7 @@ export function registerWikiCli(program: Command, registration: MemoryWikiCliReg
     .option("--json", "Print JSON")
     .action(async (opts: WikiJsonOptions) => {
       const { appConfig, config } = requireCommandContext();
-      await syncMemoryWikiImportedSources({ config, appConfig });
+      await syncMemoryWikiImportedSources({ config, appConfig, deferIndexRefresh: true });
       printWikiResult(
         await compileMemoryWikiVault(config),
         opts.json,
@@ -561,7 +561,7 @@ export function registerWikiCli(program: Command, registration: MemoryWikiCliReg
     .option("--json", "Print JSON")
     .action(async (opts: WikiJsonOptions) => {
       const { appConfig, config } = requireCommandContext();
-      await syncMemoryWikiImportedSources({ config, appConfig });
+      await syncMemoryWikiImportedSources({ config, appConfig, deferIndexRefresh: true });
       printWikiResult(
         await lintMemoryWikiVault(config),
         opts.json,

@@ -65,11 +65,6 @@ type WikiPageReadCancellation = Pick<AbortSignal, "throwIfAborted">;
 /** Called between scan segments; resolves true when the scan should stop and return. */
 type WikiPageReadYield = () => Promise<boolean>;
 
-export function normalizeLookupKey(value: string): string {
-  const normalized = value.trim().replace(/\\/g, "/");
-  return normalized.endsWith(".md") ? normalized : normalized.replace(/\/+$/, "");
-}
-
 async function listWikiMarkdownFiles(rootDir: string): Promise<string[]> {
   const files = await Promise.all(
     WIKI_PAGE_GROUPS.map(({ dir }) => listMemoryWikiPagePaths(rootDir, dir)),
@@ -135,7 +130,7 @@ function isBridgeCompiledPage(page: QueryableWikiPage): boolean {
   );
 }
 
-function isWikiPageVisible(page: QueryableWikiPage, visibility: WikiPageVisibility | null) {
+export function isWikiPageVisible(page: QueryableWikiPage, visibility: WikiPageVisibility | null) {
   if (!visibility) {
     return true;
   }
@@ -145,22 +140,6 @@ function isWikiPageVisible(page: QueryableWikiPage, visibility: WikiPageVisibili
       page.bridgeAgentIds.some(
         (agentId) => normalizeLowercaseStringOrEmpty(agentId) === visibility.scopedAgentId,
       ))
-  );
-}
-
-export function resolveQueryableWikiPageByLookup<Page extends WikiPageKey>(
-  pages: Page[],
-  lookup: string,
-): Page | null {
-  const key = normalizeLookupKey(lookup);
-  const withExtension = key.endsWith(".md") ? key : `${key}.md`;
-  return (
-    pages.find((page) => page.relativePath === key) ??
-    pages.find((page) => page.relativePath === withExtension) ??
-    pages.find((page) => page.relativePath.replace(/\.md$/i, "") === key) ??
-    pages.find((page) => path.basename(page.relativePath, ".md") === key) ??
-    pages.find((page) => page.id === key) ??
-    null
   );
 }
 
