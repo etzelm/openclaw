@@ -1,0 +1,3583 @@
+diff --git a/config/max-lines-baseline.txt b/config/max-lines-baseline.txt
+index ec06f4abe7e..263a2cdb4a9 100644
+--- a/config/max-lines-baseline.txt
++++ b/config/max-lines-baseline.txt
+@@ -101,7 +101,6 @@ extensions/memory-wiki/src/chatgpt-import.ts
+ extensions/memory-wiki/src/cli.ts
+ extensions/memory-wiki/src/compile.ts
+ extensions/memory-wiki/src/query.test.ts
+-extensions/memory-wiki/src/query.ts
+ extensions/microsoft-foundry/index.test.ts
+ extensions/migrate-hermes/secrets.test.ts
+ extensions/msteams/src/channel.ts
+diff --git a/docs/plugins/memory-wiki.md b/docs/plugins/memory-wiki.md
+index f5ce19c4bbb..e433471694e 100644
+--- a/docs/plugins/memory-wiki.md
++++ b/docs/plugins/memory-wiki.md
+@@ -302,6 +302,18 @@ includes compact `Claim:` and `Evidence:` lines when available.
+ `wiki_search` has a 30-second deadline and honors turn cancellation. A timeout
+ or cancellation returns a tool error rather than an empty result, and stops
+ the ongoing page scan. For a known page, use `wiki_get` with its id or path.
++The page scan itself (reading, parsing and scoring every page when the compiled
++digest cannot narrow the search, resolving `wiki_get` id lookups and misses,
++and `wiki_apply` metadata updates) runs in a plugin-owned pool of two worker
++threads, so the gateway event loop stays responsive while a large vault is
++scanned. Every 64 pages a scan checks whether another task is waiting for its
++shared compute slot or its worker, such as `memory_search` retrieval on a small
++host or a third concurrent scan, and if so hands it over and resumes afterwards
++instead of making it wait for the whole scan. The pool adds no deadline of its
++own: `wiki_search` keeps its 30-second deadline and turn
++cancellation, and CLI, RPC and lookup scans run to completion as before.
++Single-page reads (`wiki_get` by exact path or claim id) stay on the calling
++thread and never wait behind a scan.
+ 
+ The plugin also registers a non-exclusive memory corpus supplement, so shared
+ `memory_search` and `memory_get` can reach the wiki when the active memory
+diff --git a/extensions/memory-wiki/README.md b/extensions/memory-wiki/README.md
+index bc885a7ef90..c697938ab77 100644
+--- a/extensions/memory-wiki/README.md
++++ b/extensions/memory-wiki/README.md
+@@ -241,3 +241,4 @@ unknown ids fail in multi-agent setups.
+ - Rollback quarantine clears immediately for an in-process compile. After a separate compiler process publishes, refresh the plugin lifecycle so the daemon can validate that durable publication.
+ - Pre-publication-epoch cache rows are rebuildable misses, not migrated state; the next compile replaces them.
+ - Obsidian CLI support requires the official `obsidian` CLI to be installed and available on `PATH`.
++- Whole-vault scans for `wiki_search`, `wiki_get` id lookups and misses, and `wiki_apply` metadata updates run in a plugin-owned pool of two worker threads, handing their shared compute slot or worker to a waiting task at the next 64-page checkpoint (deadlines stay with the caller: `wiki_search` keeps its 30-second deadline, other scans run to completion as before); single-page reads (`wiki_get` by exact path, by basename or by claim id) stay on the calling thread, and the gateway main thread only merges returned results and reads a lookup's one matched page, so the gateway event loop stays responsive and short reads never wait behind a scan.
+diff --git a/extensions/memory-wiki/index.test.ts b/extensions/memory-wiki/index.test.ts
+index 7a56b5a0b2b..023aec0638a 100644
+--- a/extensions/memory-wiki/index.test.ts
++++ b/extensions/memory-wiki/index.test.ts
+@@ -2,6 +2,7 @@
+ import { randomUUID } from "node:crypto";
+ import fs from "node:fs/promises";
+ import path from "node:path";
++import type { Worker } from "node:worker_threads";
+ import { withEnv } from "openclaw/plugin-sdk/test-env";
+ import { describe, expect, it, vi } from "vitest";
+ import type { OpenClawConfig } from "./api.js";
+@@ -20,7 +21,9 @@ import {
+   loadMemoryWikiVaultIdentity,
+   resolveMemoryWikiVaultSourceGeneration,
+ } from "./src/log.js";
++import { renderWikiMarkdown } from "./src/markdown.js";
+ import { withMemoryWikiVaultMutation } from "./src/mutation-coordinator.js";
++import * as queryReader from "./src/query-reader.js";
+ import { waitForMemoryWikiImportedSourceSyncs } from "./src/source-sync.js";
+ import { createMemoryWikiTestHarness } from "./src/test-helpers.js";
+ 
+@@ -173,6 +176,53 @@ describe("memory-wiki plugin", () => {
+     }
+   });
+ 
++  it("terminates the query reader worker when the plugin service stops", async () => {
++    const rootDir = await createTempDir("memory-wiki-index-stop-reader-");
++    const { api, registerService } = createPluginApi();
++    api.pluginConfig = { vault: { path: rootDir } };
++    plugin.register(api);
++    const service = registerService.mock.calls[0]?.[0];
++    await service?.start?.();
++    await fs.mkdir(path.join(rootDir, "sources"), { recursive: true });
++    await fs.writeFile(
++      path.join(rootDir, "sources", "alpha.md"),
++      renderWikiMarkdown({
++        frontmatter: { pageType: "source", id: "source.alpha", title: "Alpha" },
++        body: "# Alpha\n",
++      }),
++    );
++    // Start from a closed reader so the lookup below creates the pool's workers.
++    await queryReader.closeMemoryWikiQueryReader();
++    let workersCreated = 0;
++    let workersExited = 0;
++    const onWorker = (worker: Worker) => {
++      workersCreated += 1;
++      worker.once("exit", () => {
++        workersExited += 1;
++      });
++    };
++    process.on("worker", onWorker);
++    try {
++      // A whole-vault lookup runs on the reader's worker.
++      const read = await queryReader.readMemoryWikiPages({
++        rootDir,
++        visibility: null,
++        select: "lookup",
++        lookup: "alpha",
++      });
++      expect(read.page?.relativePath).toBe("sources/alpha.md");
++      expect(workersCreated).toBeGreaterThan(0);
++      // The idle worker stays alive until it is retired or the pool closes.
++      expect(workersExited).toBe(0);
++
++      await service?.stop?.();
++
++      expect(workersExited).toBe(workersCreated);
++    } finally {
++      process.off("worker", onWorker);
++    }
++  });
++
+   it("fences cache publication when the plugin service stops", async () => {
+     const rootDir = await createTempDir("memory-wiki-index-stop-fence-");
+     await fs.mkdir(path.join(rootDir, ".openclaw-wiki"), { recursive: true });
+diff --git a/extensions/memory-wiki/index.ts b/extensions/memory-wiki/index.ts
+index 69b3bfe79af..ec0cc94aafc 100644
+--- a/extensions/memory-wiki/index.ts
++++ b/extensions/memory-wiki/index.ts
+@@ -30,6 +30,7 @@ import {
+   createWikiPromptSectionBuilder,
+   createWikiPromptSectionPreparer,
+ } from "./src/prompt-section.js";
++import { closeMemoryWikiQueryReader } from "./src/query-reader.js";
+ import {
+   configureMemoryWikiSourceSyncStateStore,
+   createMemoryWikiSourceSyncStateStore,
+@@ -171,6 +172,7 @@ export default definePluginEntry({
+         deactivateMemoryWikiCompiledCacheOwnersExcept(new Set());
+         await waitForMemoryWikiImportedSourceSyncs();
+         deactivateMemoryWikiCompiledCacheOwnersExcept(new Set());
++        await closeMemoryWikiQueryReader();
+       },
+     });
+ 
+diff --git a/extensions/memory-wiki/package.json b/extensions/memory-wiki/package.json
+index 41eff04001d..aacb9a1416a 100644
+--- a/extensions/memory-wiki/package.json
++++ b/extensions/memory-wiki/package.json
+@@ -37,7 +37,10 @@
+     },
+     "build": {
+       "bundledDist": true,
+-      "openclawVersion": "2026.10.3"
++      "openclawVersion": "2026.10.3",
++      "workerEntries": [
++        "./src/query-reader.worker.ts"
++      ]
+     },
+     "release": {
+       "publishToClawHub": true,
+diff --git a/extensions/memory-wiki/src/apply.ts b/extensions/memory-wiki/src/apply.ts
+index cdb126e9752..6b73fcea9ab 100644
+--- a/extensions/memory-wiki/src/apply.ts
++++ b/extensions/memory-wiki/src/apply.ts
+@@ -22,8 +22,7 @@ import {
+   type WikiClaim,
+ } from "./markdown.js";
+ import { withMemoryWikiVaultMutation } from "./mutation-coordinator.js";
+-import { resolveQueryableWikiPageByLookup } from "./query-page-lookup.js";
+-import { readQueryableWikiPages } from "./query-pages.js";
++import { readMemoryWikiPageByLookup } from "./query.js";
+ import { readExistingWikiPage } from "./vault-page-write.js";
+ import { initializeMemoryWikiVault } from "./vault.js";
+ 
+@@ -286,10 +285,12 @@ function buildUpdatedFrontmatter(params: {
+ async function applyUpdateMetadataMutation(params: {
+   config: ResolvedMemoryWikiConfig;
+   mutation: UpdateMetadataMemoryWikiMutation;
++  signal?: AbortSignal;
+ }): Promise<{ changed: boolean; pagePath: string; pageId?: string }> {
+-  const page = resolveQueryableWikiPageByLookup(
+-    await readQueryableWikiPages(params.config.vault.path),
++  const page = await readMemoryWikiPageByLookup(
++    params.config.vault.path,
+     params.mutation.lookup,
++    params.signal ? { signal: params.signal } : {},
+   );
+   if (!page) {
+     throw new Error(`Wiki page not found: ${params.mutation.lookup}`);
+@@ -331,6 +332,7 @@ export async function applyMemoryWikiMutation(params: {
+         : await applyUpdateMetadataMutation({
+             config: params.config,
+             mutation: params.mutation,
++            ...(params.signal ? { signal: params.signal } : {}),
+           });
+     params.signal?.throwIfAborted();
+     const compile = await compileMemoryWikiVault(
+diff --git a/extensions/memory-wiki/src/cli.ts b/extensions/memory-wiki/src/cli.ts
+index e2f5f17ec09..6b1e6b48d65 100644
+--- a/extensions/memory-wiki/src/cli.ts
++++ b/extensions/memory-wiki/src/cli.ts
+@@ -35,12 +35,8 @@ import {
+ } from "./obsidian.js";
+ import { formatOkfImportSummary, importMemoryWikiOkfBundle } from "./okf.js";
+ import { renderWikiMutationSummary, renderWikiSearchResults } from "./presentation.js";
+-import {
+-  getMemoryWikiPage,
+-  searchMemoryWiki,
+-  WIKI_SEARCH_MODES,
+-  type WikiSearchMode,
+-} from "./query.js";
++import { WIKI_SEARCH_MODES, type WikiSearchMode } from "./query-scoring.js";
++import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
+ import { syncMemoryWikiImportedSources } from "./source-sync.js";
+ import type { MemoryWikiImportedSourceSyncResult } from "./source-sync.js";
+ import {
+diff --git a/extensions/memory-wiki/src/gateway.ts b/extensions/memory-wiki/src/gateway.ts
+index 3160da57db0..8810385125b 100644
+--- a/extensions/memory-wiki/src/gateway.ts
++++ b/extensions/memory-wiki/src/gateway.ts
+@@ -26,7 +26,8 @@ import {
+   assertOfficialObsidianCliSupported,
+   runObsidianAction,
+ } from "./obsidian.js";
+-import { getMemoryWikiPage, searchMemoryWiki, WIKI_SEARCH_MODES } from "./query.js";
++import { WIKI_SEARCH_MODES } from "./query-scoring.js";
++import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
+ import { syncMemoryWikiImportedSources } from "./source-sync.js";
+ import { buildMemoryWikiDoctorReport, resolveMemoryWikiStatus } from "./status.js";
+ import { initializeMemoryWikiVault } from "./vault.js";
+diff --git a/extensions/memory-wiki/src/query-pages.ts b/extensions/memory-wiki/src/query-pages.ts
+index 1cb2d391654..e90437c040a 100644
+--- a/extensions/memory-wiki/src/query-pages.ts
++++ b/extensions/memory-wiki/src/query-pages.ts
+@@ -1,42 +1,92 @@
++// Page reads for wiki queries. This module runs inside the query reader worker,
++// so it carries no host-only state (pools, stores, config).
+ import path from "node:path";
+ import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
+ import { FsSafeError, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
++import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+ import { listMemoryWikiPagePaths } from "./bounded-walk.js";
++import { scanWikiPageSummary, WIKI_PAGE_GROUPS } from "./markdown.js";
+ import {
+-  type ParsedWikiMarkdown,
+-  scanWikiPageSummary,
+-  type WikiPageSummary,
+-  WIKI_PAGE_GROUPS,
+-} from "./markdown.js";
++  type QueryableWikiPage,
++  sortWikiSearchResults,
++  toWikiSearchResult,
++  type WikiSearchMode,
++  type WikiSearchResult,
++} from "./query-scoring.js";
+ 
+-export const QUERY_PAGE_READ_CONCURRENCY = 16;
++const QUERY_PAGE_READ_CONCURRENCY = 16;
+ 
+-export type QueryableWikiPage = WikiPageSummary & {
+-  raw: string;
+-  parsed: ParsedWikiMarkdown;
++/**
++ * Pages a scan reads between two checkpoints. At each checkpoint the worker asks the host
++ * whether to go on; it stops when another task is waiting for its shared compute permit
++ * or its worker, so that task waits for one segment rather than the whole scan.
++ */
++const WIKI_SCAN_CHECKPOINT_PAGES = 64;
++
++/** The host's checkpoint reply that ends a scan task early; the host resubmits the rest. */
++export const WIKI_SCAN_YIELD = "yield";
++
++/** Serializable sandbox scope for bridge pages; `null` admits every page. */
++export type WikiPageVisibility = { scopedAgentId: string };
++
++/** A scan's scope as callers pass it to the reader pool. */
++export type WikiPageReadScope = {
++  rootDir: string;
++  /** Explicit page paths; the whole vault when absent. */
++  relativePaths?: string[];
++  /** Whole-vault reads skip pages an earlier candidate read already covered. */
++  excludePaths?: string[];
++  visibility: WikiPageVisibility | null;
+ };
+ 
+-export async function listWikiMarkdownFiles(rootDir: string): Promise<string[]> {
++/** What a lookup resolves on: the page's path and id. */
++export type WikiPageKey = Pick<QueryableWikiPage, "relativePath" | "id">;
++
++/** One read: list the vault, or read, parse and project an explicit list of pages. */
++export type WikiPageReadTask =
++  | { select: "list"; rootDir: string; excludePaths?: string[] }
++  | ({ rootDir: string; relativePaths: string[]; visibility: WikiPageVisibility | null } & (
++      | { select: "search"; query: string; mode: WikiSearchMode; maxResults: number }
++      | { select: "keys" }
++      | { select: "page" }
++    ));
++
++/** `readPages` counts the leading pages read before a checkpoint stopped the task. */
++export type WikiPageReadResult =
++  | { select: "list"; relativePaths: string[] }
++  | { select: "search"; results: WikiSearchResult[]; readPages: number }
++  | { select: "keys"; keys: WikiPageKey[]; readPages: number }
++  | { select: "page"; page: QueryableWikiPage | null }
++  | { select: "refused"; code: FsSafeError["code"]; message: string };
++
++/** Cancellation checkpoint: an `AbortSignal`, or the pool task control in the worker. */
++type WikiPageReadCancellation = Pick<AbortSignal, "throwIfAborted">;
++
++/** Called between scan segments; resolves true when the scan should stop and return. */
++type WikiPageReadYield = () => Promise<boolean>;
++
++async function listWikiMarkdownFiles(rootDir: string): Promise<string[]> {
+   const files = await Promise.all(
+     WIKI_PAGE_GROUPS.map(({ dir }) => listMemoryWikiPagePaths(rootDir, dir)),
+   );
+   return files.flat().toSorted((left, right) => left.localeCompare(right));
+ }
+ 
+-export async function readQueryableWikiPages(
+-  rootDir: string,
+-  signal?: AbortSignal,
+-): Promise<QueryableWikiPage[]> {
+-  signal?.throwIfAborted();
+-  const files = await listWikiMarkdownFiles(rootDir);
+-  return readQueryableWikiPagesByPaths(rootDir, files, signal);
++export function excludeWikiPagePaths(relativePaths: string[], excludePaths?: string[]): string[] {
++  if (!excludePaths?.length) {
++    return relativePaths;
++  }
++  const excluded = new Set(excludePaths);
++  return relativePaths.filter((relativePath) => !excluded.has(relativePath));
+ }
+ 
+-export async function readQueryableWikiPagesByPaths(
++/** Read and parse pages in listing order, keeping only each page's projection. */
++async function readQueryableWikiPagesByPaths<T>(
+   rootDir: string,
+   files: string[],
+-  signal?: AbortSignal,
+-): Promise<QueryableWikiPage[]> {
++  project: (page: QueryableWikiPage) => T | null,
++  signal?: WikiPageReadCancellation,
++): Promise<T[]> {
+   signal?.throwIfAborted();
+   if (files.length === 0) {
+     return [];
+@@ -52,7 +102,7 @@ export async function readQueryableWikiPagesByPaths(
+         const raw = await vault.readText(relativePath);
+         signal?.throwIfAborted();
+         const scan = scanWikiPageSummary({ absolutePath, relativePath, raw, includeLinks: false });
+-        return scan.status === "valid" ? { ...scan.page, raw, parsed: scan.parsed } : null;
++        return scan.status === "valid" ? project({ ...scan.page, raw, parsed: scan.parsed }) : null;
+       } catch (error) {
+         // Compiled candidates and directory listings can outlive a page. Only absence
+         // may fall through to discovery; boundary refusals must remain terminal.
+@@ -69,5 +119,110 @@ export async function readQueryableWikiPagesByPaths(
+     errorMode: "stop",
+     throwOnError: true,
+   });
+-  return results.filter((page): page is QueryableWikiPage => page !== null);
++  return results.filter((result): result is T => result !== null);
++}
++
++function isBridgeCompiledPage(page: QueryableWikiPage): boolean {
++  return (
++    page.sourceType === "memory-bridge" ||
++    page.sourceType === "memory-bridge-events" ||
++    page.bridgeAgentIds.length > 0
++  );
++}
++
++export function isWikiPageVisible(page: QueryableWikiPage, visibility: WikiPageVisibility | null) {
++  if (!visibility) {
++    return true;
++  }
++  return (
++    !isBridgeCompiledPage(page) ||
++    (visibility.scopedAgentId.length > 0 &&
++      page.bridgeAgentIds.some(
++        (agentId) => normalizeLowercaseStringOrEmpty(agentId) === visibility.scopedAgentId,
++      ))
++  );
++}
++
++type WikiPageReadSelection<Task extends WikiPageReadTask> = Extract<
++  WikiPageReadResult,
++  { select: Task["select"] }
++>;
++
++/**
++ * List the vault, or read, parse and score pages for one query task. Each page is
++ * projected as it is read (a scoring result, a lookup key, or the one requested page),
++ * so a read retains no page text or parse; boundary refusals propagate as
++ * `FsSafeError`, and the cancellation checkpoint stops the read between pages. A search
++ * or key read asks `shouldYield` between segments and returns early when it says so.
++ */
++export function readWikiPagesTask<Task extends WikiPageReadTask>(
++  task: Task,
++  signal?: WikiPageReadCancellation,
++  shouldYield?: WikiPageReadYield,
++): Promise<WikiPageReadSelection<Task>> {
++  // SAFETY: Every branch below returns the variant named by the task's `select`.
++  return runWikiPageReadTask(task, signal, shouldYield) as Promise<WikiPageReadSelection<Task>>;
++}
++
++async function runWikiPageReadTask(
++  task: WikiPageReadTask,
++  signal?: WikiPageReadCancellation,
++  shouldYield?: WikiPageReadYield,
++): Promise<Exclude<WikiPageReadResult, { select: "refused" }>> {
++  signal?.throwIfAborted();
++  if (task.select === "list") {
++    const files = await listWikiMarkdownFiles(task.rootDir);
++    return { select: "list", relativePaths: excludeWikiPagePaths(files, task.excludePaths) };
++  }
++  const { relativePaths } = task;
++  const visible = (page: QueryableWikiPage) =>
++    isWikiPageVisible(page, task.visibility) ? page : null;
++  if (task.select === "search" || task.select === "keys") {
++    let results: WikiSearchResult[] = [];
++    const keys: WikiPageKey[] = [];
++    let readPages = 0;
++    while (readPages < relativePaths.length) {
++      if (readPages > 0 && shouldYield && (await shouldYield())) {
++        break;
++      }
++      const segment = relativePaths.slice(readPages, readPages + WIKI_SCAN_CHECKPOINT_PAGES);
++      if (task.select === "search") {
++        const found = await readQueryableWikiPagesByPaths(
++          task.rootDir,
++          segment,
++          (page) => {
++            if (!visible(page)) {
++              return null;
++            }
++            const result = toWikiSearchResult(page, task.query, task.mode);
++            return result.score > 0 ? result : null;
++          },
++          signal,
++        );
++        // A stable sort of the running top followed by the segment keeps ties in listing
++        // order, as one whole-list sort does, and a page cut here already trails
++        // maxResults better pages.
++        results = sortWikiSearchResults([...results, ...found]).slice(0, task.maxResults);
++      } else {
++        const found = await readQueryableWikiPagesByPaths(
++          task.rootDir,
++          segment,
++          (page) => (visible(page) ? { relativePath: page.relativePath, id: page.id } : null),
++          signal,
++        );
++        keys.push(...found);
++      }
++      readPages += segment.length;
++    }
++    return task.select === "search"
++      ? { select: "search", results, readPages }
++      : { select: "keys", keys, readPages };
++  }
++  const pages = await readQueryableWikiPagesByPaths(
++    task.rootDir,
++    relativePaths.slice(0, 1),
++    visible,
++    signal,
++  );
++  return { select: "page", page: pages[0] ?? null };
+ }
+diff --git a/extensions/memory-wiki/src/query-reader.test.ts b/extensions/memory-wiki/src/query-reader.test.ts
+new file mode 100644
+index 00000000000..cf802e76dba
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-reader.test.ts
+@@ -0,0 +1,498 @@
++import fs from "node:fs/promises";
++import path from "node:path";
++import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
++import { WorkerTaskPool } from "openclaw/plugin-sdk/process-runtime";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { compileMemoryWikiVault } from "./compile.js";
++import * as wikiLinks from "./markdown-links.js";
++import { renderWikiMarkdown } from "./markdown.js";
++import * as queryPages from "./query-pages.js";
++import { readWikiPagesTask } from "./query-pages.js";
++import * as queryReader from "./query-reader.js";
++import { closeMemoryWikiQueryReader, readMemoryWikiPages } from "./query-reader.js";
++import { sortWikiSearchResults, type WikiSearchMode } from "./query-scoring.js";
++import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
++import { createMemoryWikiTestHarness } from "./test-helpers.js";
++
++const { createVault } = createMemoryWikiTestHarness();
++
++// The in-thread reference reads the whole vault: list it, then read every listed page.
++async function listVault(rootDir: string) {
++  return (await readWikiPagesTask({ select: "list", rootDir })).relativePaths;
++}
++
++afterEach(() => {
++  __setFsSafeTestHooksForTest(undefined);
++  vi.restoreAllMocks();
++});
++
++async function createScoringVault() {
++  const vault = await createVault({
++    initialize: true,
++    config: { search: { backend: "local", corpus: "wiki" } },
++  });
++  const write = (relativePath: string, markdown: Parameters<typeof renderWikiMarkdown>[0]) =>
++    fs.writeFile(path.join(vault.rootDir, relativePath), renderWikiMarkdown(markdown));
++  await fs.mkdir(path.join(vault.rootDir, "sources", "nested"), { recursive: true });
++  for (let index = 0; index < 12; index += 1) {
++    await write(`sources/page-${index}.md`, {
++      frontmatter: {
++        pageType: "source",
++        id: `source.page-${index}`,
++        title: `Harbor ledger ${index}`,
++        sourceIds: [`source.page-${(index + 1) % 12}`],
++        aliases: index === 7 ? ["keeps watch"] : index % 3 === 0 ? ["lantern keeper"] : [],
++        updatedAt: `2026-0${(index % 9) + 1}-01T00:00:00.000Z`,
++        claims: [
++          {
++            id: `claim.page-${index}.a`,
++            text: `Lantern ledger entry ${index} records the harbor tally.`,
++            status: index % 4 === 0 ? "contested" : "supported",
++            confidence: (index % 10) / 10,
++            evidence: [{ kind: "source", sourceId: `source.page-${index}`, note: "tally" }],
++          },
++          { id: `claim.page-${index}.b`, text: `Cobalt note ${index}.`, status: "supported" },
++        ],
++      },
++      body: `# Harbor ledger ${index}\n\nLantern ledger body ${index} ${"cobalt ".repeat(index)}\n<!-- openclaw:wiki:related:start -->\nrelated lantern\n<!-- openclaw:wiki:related:end -->\n`,
++    });
++  }
++  await write("entities/keeper.md", {
++    frontmatter: {
++      pageType: "entity",
++      entityType: "person",
++      id: "entity.keeper",
++      title: "Lantern Keeper",
++      canonicalId: "keeper",
++      aliases: ["the keeper"],
++      personCard: { canonicalId: "keeper", lane: "harbor operations", askFor: ["ledger audits"] },
++      relationships: [{ kind: "works-with", targetId: "entity.mate", targetTitle: "First Mate" }],
++    },
++    body: "# Lantern Keeper\n\nKeeps the harbor ledger.\n[[sources/page-1]]\n",
++  });
++  await write("sources/nested/bridge-note.md", {
++    frontmatter: {
++      pageType: "source",
++      id: "source.bridge-note",
++      title: "Bridge Lantern Note",
++      sourceType: "memory-bridge",
++      sourcePath: "/tmp/workspace/bridge-note.md",
++      bridgeRelativePath: "bridge-note.md",
++      bridgeWorkspaceDir: "/tmp/workspace",
++      bridgeAgentIds: ["Main"],
++    },
++    body: "# Bridge Lantern Note\n\nlantern ledger from the bridge\n",
++  });
++  await write("concepts/non-ascii.md", {
++    frontmatter: { pageType: "concept", id: "concept.lanterne", title: "Lanterne du port" },
++    body: "# Lanterne du port\n\nregistre de lanterne harbor ledger\n",
++  });
++  await fs.writeFile(path.join(vault.rootDir, "sources", "broken.md"), "---\ninvalid: [\n---\n");
++  return vault;
++}
++
++const SEARCHES: Array<{ query: string; mode: WikiSearchMode; maxResults: number }> = [
++  { query: "lantern ledger", mode: "auto", maxResults: 5 },
++  { query: "harbor", mode: "raw-claim", maxResults: 3 },
++  { query: "who knows about ledger audits", mode: "route-question", maxResults: 4 },
++  { query: "keeper", mode: "find-person", maxResults: 2 },
++  { query: "source.page-3", mode: "source-evidence", maxResults: 3 },
++  { query: "lanterne", mode: "auto", maxResults: 10 },
++];
++
++describe("memory wiki query reader", () => {
++  it.each([false, true])(
++    "returns the same results through the worker as an in-thread whole-vault read (compiled=%s)",
++    async (compiled) => {
++      const { rootDir, config } = await createScoringVault();
++      if (compiled) {
++        await compileMemoryWikiVault(config);
++      }
++      for (const search of SEARCHES) {
++        const reference = sortWikiSearchResults(
++          (
++            await readWikiPagesTask({
++              rootDir,
++              relativePaths: await listVault(rootDir),
++              visibility: null,
++              select: "search",
++              query: search.query,
++              mode: search.mode,
++              maxResults: Number.MAX_SAFE_INTEGER,
++            })
++          ).results,
++        ).slice(0, search.maxResults);
++        expect(reference.length).toBeGreaterThan(0);
++
++        const results = await searchMemoryWiki({ config, ...search });
++
++        expect(JSON.stringify(results)).toBe(JSON.stringify(reference));
++      }
++      const lookups = {
++        "sources/page-4.md": "sources/page-4.md",
++        "page-4": "sources/page-4.md",
++        "source.page-4": "sources/page-4.md",
++        "entity.keeper": "entities/keeper.md",
++      };
++      for (const [lookup, relativePath] of Object.entries(lookups)) {
++        const reference = (
++          await readWikiPagesTask({
++            rootDir,
++            visibility: null,
++            select: "page",
++            relativePaths: [relativePath],
++          })
++        ).page;
++        const result = await getMemoryWikiPage({ config, lookup, lineCount: 5 });
++        expect(result?.path).toBe(relativePath);
++        expect(result?.content).toBe(reference?.parsed.body.split(/\r?\n/).slice(0, 5).join("\n"));
++        // A pooled lookup returns the same page object as a one-page read of its match.
++        const pooled = await readMemoryWikiPages({
++          rootDir,
++          visibility: null,
++          select: "lookup",
++          lookup,
++        });
++        expect(JSON.stringify(pooled.page)).toBe(JSON.stringify(reference));
++      }
++      // The pool and the calling thread run the same reader: result lists are
++      // byte-identical across the thread boundary.
++      for (const search of SEARCHES) {
++        const task = { rootDir, visibility: null, select: "search" as const, ...search };
++        const inThread = await readWikiPagesTask({
++          ...task,
++          relativePaths: await listVault(rootDir),
++        });
++        const pooled = await readMemoryWikiPages(task);
++        expect(JSON.stringify(pooled.results)).toBe(JSON.stringify(inThread.results));
++      }
++    },
++  );
++
++  it("backfills underfilled digest candidates from the rest of the vault", async () => {
++    const { config } = await createScoringVault();
++    await compileMemoryWikiVault(config);
++    const dispatch = vi.spyOn(queryReader, "readMemoryWikiPages");
++
++    // "keeps watch" is a digest alias of page 7, so it is the only candidate; the keeper
++    // page says "Keeps the harbor ledger." only in its body, outside the digest.
++    const results = await searchMemoryWiki({ config, query: "keeps", maxResults: 10 });
++
++    const tasks = dispatch.mock.calls.map(([task]) => task);
++    expect(tasks.map((task) => [task.select, task.relativePaths, task.excludePaths])).toEqual([
++      ["search", ["sources/page-7.md"], undefined],
++      ["search", undefined, ["sources/page-7.md"]],
++    ]);
++    expect(
++      results
++        .map((result) => result.path ?? "")
++        .toSorted((left, right) => left.localeCompare(right)),
++    ).toEqual(["entities/keeper.md", "sources/page-7.md"]);
++    expect(results.map((result) => result.score)).toEqual(
++      results.map((result) => result.score).toSorted((left, right) => right - left),
++    );
++  });
++
++  it("reads only compiled metadata candidates for distributed query tokens", async () => {
++    const { rootDir, config } = await createScoringVault();
++    const relativePath = "sources/quartz.md";
++    await fs.writeFile(
++      path.join(rootDir, relativePath),
++      renderWikiMarkdown({
++        frontmatter: {
++          pageType: "source",
++          id: "source.quartz",
++          title: "Cobalt",
++          aliases: ["amber"],
++          questions: ["lantern"],
++        },
++        body: "# Cobalt\n\nSelected evidence.\n",
++      }),
++    );
++    const query = "cobalt quartz amber lantern";
++    const liveResults = await searchMemoryWiki({ config, query, maxResults: 1 });
++    expect(liveResults[0]?.path).toBe(relativePath);
++    await compileMemoryWikiVault(config);
++    const dispatch = vi.spyOn(queryReader, "readMemoryWikiPages");
++
++    await expect(searchMemoryWiki({ config, query, maxResults: 1 })).resolves.toEqual(liveResults);
++
++    // The digest admits the page on distributed tokens, so the only read is the
++    // candidate read for that page; no whole-vault task follows.
++    expect(dispatch.mock.calls.map(([task]) => [task.select, task.relativePaths])).toEqual([
++      ["search", [relativePath]],
++    ]);
++  });
++
++  it("reads exact paths and basename hits on the calling thread and scans the vault for id lookups", async () => {
++    const { rootDir, config } = await createScoringVault();
++    const dispatch = vi.spyOn(queryReader, "readMemoryWikiPages");
++    const dispatched = () => dispatch.mock.calls.map(([task]) => [task.select, task.relativePaths]);
++
++    const exactPage = await getMemoryWikiPage({ config, lookup: "sources/page-1.md" });
++    const exact = dispatched();
++    dispatch.mockClear();
++    const basenamePage = await getMemoryWikiPage({ config, lookup: "page-1" });
++    const basename = dispatched();
++    dispatch.mockClear();
++    const idPage = await getMemoryWikiPage({ config, lookup: "source.page-1" });
++    const byId = dispatched();
++
++    expect(exactPage?.path).toBe("sources/page-1.md");
++    expect(basenamePage?.path).toBe("sources/page-1.md");
++    expect(idPage?.path).toBe("sources/page-1.md");
++    expect(exact).toEqual([]);
++    // A path tier reads its candidate from the listing on this thread; only an id lookup
++    // (or a miss) is a whole-vault scan.
++    expect(basename).toEqual([]);
++    expect(byId).toEqual([["lookup", await listVault(rootDir)]]);
++  });
++
++  it("reads query pages without extracting the link graph", async () => {
++    const { rootDir } = await createScoringVault();
++    const extractLinks = vi.spyOn(wikiLinks, "extractWikiLinks");
++
++    const relativePaths = await listVault(rootDir);
++    const search = await readWikiPagesTask({
++      rootDir,
++      relativePaths,
++      visibility: null,
++      select: "search",
++      query: "keeps the harbor ledger",
++      mode: "auto",
++      maxResults: 5,
++    });
++    const keys = await readWikiPagesTask({
++      rootDir,
++      relativePaths,
++      visibility: null,
++      select: "keys",
++    });
++
++    expect(search.results.map((result) => result.path)).toContain("entities/keeper.md");
++    expect(keys.keys).toContainEqual({ relativePath: "entities/keeper.md", id: "entity.keeper" });
++    expect(extractLinks).not.toHaveBeenCalled();
++  });
++
++  it("applies the serialized sandbox scope inside the worker", async () => {
++    const { config } = await createScoringVault();
++    const scoped = await searchMemoryWiki({
++      config,
++      agentId: "secondary",
++      sandboxed: true,
++      query: "lantern ledger from the bridge",
++    });
++    const owner = await searchMemoryWiki({
++      config,
++      agentId: "main",
++      sandboxed: true,
++      query: "lantern ledger from the bridge",
++    });
++
++    expect(scoped.map((result) => result.path)).not.toContain("sources/nested/bridge-note.md");
++    expect(owner.map((result) => result.path)).toContain("sources/nested/bridge-note.md");
++  });
++
++  it("rejects a page swapped outside the vault between listing and reading", async () => {
++    const { rootDir } = await createScoringVault();
++    const relativePaths = await listVault(rootDir);
++    const targetPath = path.join(rootDir, "sources", "page-1.md");
++    const outside = await createScoringVault();
++    const canonicalTarget = await fs.realpath(targetPath);
++    let swapped = false;
++    __setFsSafeTestHooksForTest({
++      beforeOpen: async (filePath) => {
++        if (swapped || path.resolve(filePath) !== canonicalTarget) {
++          return;
++        }
++        swapped = true;
++        await fs.unlink(targetPath);
++        await fs.symlink(path.join(outside.rootDir, "sources", "page-1.md"), targetPath);
++      },
++    });
++
++    await expect(
++      readWikiPagesTask({ rootDir, relativePaths, visibility: null, select: "keys" }),
++    ).rejects.toMatchObject({
++      name: "FsSafeError",
++      code: expect.stringMatching(/symlink|path-mismatch/u),
++    });
++    expect(swapped).toBe(true);
++  });
++
++  it("rebuilds a worker boundary refusal as the same error on the host", async () => {
++    const { rootDir } = await createScoringVault();
++    const targetPath = path.join(rootDir, "sources", "page-2.md");
++    const outside = await createScoringVault();
++    await fs.unlink(targetPath);
++    await fs.symlink(path.join(outside.rootDir, "sources", "page-2.md"), targetPath);
++
++    // A lookup scoped to the swapped page reads it inside the worker.
++    await expect(
++      readMemoryWikiPages({
++        rootDir,
++        relativePaths: ["sources/page-2.md"],
++        visibility: null,
++        select: "lookup",
++        lookup: "page-2",
++      }),
++    ).rejects.toMatchObject({
++      name: "FsSafeError",
++      code: expect.stringMatching(/symlink|path-mismatch/u),
++    });
++  });
++
++  it("rejects a read whose signal is already aborted without dispatching it", async () => {
++    const { rootDir } = await createScoringVault();
++    // Start from no pool: a dispatched task would have to create the worker first.
++    await closeMemoryWikiQueryReader();
++    let workersCreated = 0;
++    const onWorker = () => {
++      workersCreated += 1;
++    };
++    process.on("worker", onWorker);
++    try {
++      const controller = new AbortController();
++      const reason = new Error("caller cancelled the wiki read");
++      controller.abort(reason);
++
++      await expect(
++        readMemoryWikiPages(
++          { rootDir, visibility: null, select: "lookup", lookup: "page-1" },
++          { signal: controller.signal },
++        ),
++      ).rejects.toBe(reason);
++      expect(workersCreated).toBe(0);
++    } finally {
++      process.off("worker", onWorker);
++    }
++  });
++
++  // With one worker, a task handed to an idle, ready worker is sent to it before
++  // run() returns (WorkerTaskPoolCore.run dispatches synchronously), and any task
++  // submitted while that one is in flight waits in the pool's queue.
++  it("rejects a read queued behind two running scans and lets the scans finish", async () => {
++    const { rootDir } = await createScoringVault();
++    const run = vi.spyOn(WorkerTaskPool.prototype, "run");
++    const scanTask = {
++      rootDir,
++      visibility: null,
++      select: "search",
++      query: "lantern ledger",
++      mode: "auto",
++      maxResults: 5,
++    } as const;
++    const scans = [readMemoryWikiPages(scanTask), readMemoryWikiPages(scanTask)];
++    const controller = new AbortController();
++    const reason = new Error("caller cancelled the queued wiki read");
++    const queued = readMemoryWikiPages(
++      { rootDir, visibility: null, select: "lookup", lookup: "page-3" },
++      { signal: controller.signal },
++    );
++    // Admission is synchronous inside run() and the pool runs at most two tasks, so
++    // the read, submitted third, is still waiting when this snapshot is taken.
++    const pool = run.mock.contexts[0] as WorkerTaskPool<unknown, unknown>;
++    const admitted = pool.getSnapshot();
++    controller.abort(reason);
++
++    expect(run).toHaveBeenCalledTimes(3);
++    expect(admitted.pendingTasks).toBe(3);
++    expect(admitted.activeTasks).toBeLessThanOrEqual(2);
++    await expect(queued).rejects.toBe(reason);
++    for (const finished of await Promise.all(scans)) {
++      expect(finished.results).toHaveLength(5);
++      expect(finished.results.every((result) => result.score > 0)).toBe(true);
++    }
++  });
++
++  it("recovers on a fresh worker after a running read is cancelled", async () => {
++    const { rootDir } = await createScoringVault();
++    // Start from a closed reader so the warm read below leaves exactly one idle worker.
++    await closeMemoryWikiQueryReader();
++    // Node announces every Worker the process creates; a retired worker is replaced.
++    let workersCreated = 0;
++    const onWorker = () => {
++      workersCreated += 1;
++    };
++    process.on("worker", onWorker);
++    try {
++      const warm = await readMemoryWikiPages({
++        rootDir,
++        visibility: null,
++        select: "lookup",
++        lookup: "page-3",
++      });
++      expect(warm.page?.relativePath).toBe("sources/page-3.md");
++      const controller = new AbortController();
++      const reason = new Error("caller cancelled the running wiki read");
++      // The worker is idle and ready, so this task is in flight when abort() runs.
++      const running = readMemoryWikiPages(
++        { rootDir, visibility: null, select: "lookup", lookup: "page-3" },
++        { signal: controller.signal },
++      );
++      controller.abort(reason);
++
++      await expect(running).rejects.toBe(reason);
++      const workersBeforeRecovery = workersCreated;
++      const recovered = await readMemoryWikiPages({
++        rootDir,
++        visibility: null,
++        select: "lookup",
++        lookup: "page-3",
++      });
++      expect(recovered.page?.relativePath).toBe("sources/page-3.md");
++      expect(workersCreated).toBe(workersBeforeRecovery + 1);
++    } finally {
++      process.off("worker", onWorker);
++    }
++  });
++
++  it("returns no page when a lookup's match changes before it is read again", async () => {
++    const { rootDir } = await createScoringVault();
++    const reread = queryPages.readWikiPagesTask;
++    // The match is chosen from worker keys and read again on this thread; the second read
++    // sees the page after its id changed.
++    vi.spyOn(queryPages, "readWikiPagesTask").mockImplementation(async (task, ...rest) => {
++      const read = await reread(task, ...rest);
++      return read.select === "page" && read.page
++        ? { ...read, page: { ...read.page, id: "source.renamed" } }
++        : read;
++    });
++
++    const byId = await readMemoryWikiPages({
++      rootDir,
++      visibility: null,
++      select: "lookup",
++      lookup: "source.page-4",
++    });
++    const byPath = await readMemoryWikiPages({
++      rootDir,
++      visibility: null,
++      select: "lookup",
++      lookup: "page-4",
++    });
++
++    expect(byId.page).toBeNull();
++    expect(byPath.page?.relativePath).toBe("sources/page-4.md");
++  });
++
++  it("recreates the reader after the plugin closes it", async () => {
++    const { rootDir } = await createScoringVault();
++    const before = await readMemoryWikiPages({
++      rootDir,
++      visibility: null,
++      select: "lookup",
++      lookup: "page-5",
++    });
++    await closeMemoryWikiQueryReader();
++    const after = await readMemoryWikiPages({
++      rootDir,
++      visibility: null,
++      select: "lookup",
++      lookup: "page-5",
++    });
++
++    expect(before.page?.relativePath).toBe("sources/page-5.md");
++    expect(after.page?.relativePath).toBe("sources/page-5.md");
++  });
++});
+diff --git a/extensions/memory-wiki/src/query-reader.ts b/extensions/memory-wiki/src/query-reader.ts
+new file mode 100644
+index 00000000000..6a45931df41
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-reader.ts
+@@ -0,0 +1,215 @@
++import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
++// Host side of the query reader pool: two lazily created workers that own the
++// whole-vault scans (search and lookup) for wiki queries. Single-page reads stay
++// on the calling thread (query.ts) so they never wait behind a scan.
++import {
++  resolveRuntimeWorkerUrl,
++  WorkerTaskPool,
++  type WorkerTaskResponse,
++} from "openclaw/plugin-sdk/process-runtime";
++import { FsSafeError } from "openclaw/plugin-sdk/security-runtime";
++import { resolveQueryableWikiPageByLookup } from "./query-page-lookup.js";
++import {
++  excludeWikiPagePaths,
++  readWikiPagesTask,
++  WIKI_SCAN_YIELD,
++  type WikiPageKey,
++  type WikiPageReadResult,
++  type WikiPageReadScope,
++  type WikiPageReadTask,
++} from "./query-pages.js";
++import {
++  sortWikiSearchResults,
++  type QueryableWikiPage,
++  type WikiSearchMode,
++  type WikiSearchResult,
++} from "./query-scoring.js";
++
++/**
++ * The watchdog on a checkpoint reply, which the pool requires: the timer maximum, so a scan
++ * keeps no deadline of its own. Caller deadlines and cancellation arrive through `signal`.
++ */
++const WIKI_SCAN_CHECKPOINT_WATCHDOG_MS = MAX_TIMER_TIMEOUT_MS;
++
++/**
++ * Answer a scan's checkpoint. The pool aborts `yieldSignal` when another task waits for this
++ * task's shared compute permit or worker (it checks as each checkpoint opens); the scan then
++ * returns what it has read, its permit goes to the waiting task, and the host resubmits the
++ * rest. An uncontended scan stays one task, so it never pays a task boundary per segment.
++ */
++async function answerScanCheckpoint(
++  _value: unknown,
++  { yieldSignal }: { yieldSignal: AbortSignal },
++): Promise<WorkerTaskResponse> {
++  return {
++    input: yieldSignal.aborted ? WIKI_SCAN_YIELD : null,
++    timeoutMs: WIKI_SCAN_CHECKPOINT_WATCHDOG_MS,
++  };
++}
++
++/** A whole-vault scan as callers submit it; the reader runs it as yielding pool tasks. */
++export type WikiPageScanTask = WikiPageReadScope &
++  (
++    | { select: "search"; query: string; mode: WikiSearchMode; maxResults: number }
++    | { select: "lookup"; lookup: string }
++  );
++
++export type WikiPageScanResult =
++  | { select: "search"; results: WikiSearchResult[] }
++  | { select: "lookup"; page: QueryableWikiPage | null };
++
++/** What the pool runs: the listing and the scan reads; one-page reads stay in-thread. */
++type WikiPagePoolTask = Exclude<WikiPageReadTask, { select: "page" }>;
++
++const memoryWikiQueryReaderEntrypoint = {
++  currentModuleUrl: import.meta.url,
++  sourceWorkerName: "query-reader.worker",
++  distWorkerPath: "extensions/memory-wiki/src/query-reader.worker.js",
++  package: { name: "@openclaw/memory-wiki", distWorkerPath: "src/query-reader.worker.js" },
++} as const;
++
++let pool: WorkerTaskPool<WikiPagePoolTask, WikiPageReadResult> | undefined;
++
++function resolvePool(): WorkerTaskPool<WikiPagePoolTask, WikiPageReadResult> {
++  // A pool that is closing stays referenced until close settles, so a read issued
++  // during stop() fails with the pool's own closed error instead of opening an orphan.
++  pool ??= new WorkerTaskPool<WikiPagePoolTask, WikiPageReadResult>({
++    workerUrl: resolveRuntimeWorkerUrl(memoryWikiQueryReaderEntrypoint),
++    // Two workers: a lookup can overtake a long search and two scans overlap; a third
++    // queues. Each worker is a V8 isolate (about 100 MB heap peak while scanning a 140 MB,
++    // 10,000-page vault), which is why the pool does not grow with the core count.
++    maxWorkers: 2,
++    sharedCompute: true,
++  });
++  return pool;
++}
++
++/** Pool admission accounting: UTF-16 code units of the strings the task carries. */
++function estimateWikiPageReadBytes(task: WikiPagePoolTask): number {
++  let chars = task.rootDir.length;
++  const paths = task.select === "list" ? (task.excludePaths ?? []) : task.relativePaths;
++  for (const relativePath of paths) {
++    chars += relativePath.length;
++  }
++  if (task.select === "search") {
++    chars += task.query.length;
++  }
++  return chars * 2;
++}
++
++async function runPoolTask<Task extends WikiPagePoolTask>(
++  task: Task,
++  signal: AbortSignal | undefined,
++): Promise<Extract<WikiPageReadResult, { select: Task["select"] }>> {
++  const result = await resolvePool().run(task, {
++    inputBytes: estimateWikiPageReadBytes(task),
++    ...(signal ? { signal } : {}),
++    ...(task.select === "list" ? {} : { onRequest: answerScanCheckpoint }),
++  });
++  if (result.select === "refused") {
++    throw new FsSafeError(result.code, result.message);
++  }
++  // A scan task reads at least one segment before it can yield, so each one makes progress.
++  const stalled =
++    "readPages" in result &&
++    task.select !== "list" &&
++    task.relativePaths.length > 0 &&
++    result.readPages <= 0;
++  if (result.select !== task.select || stalled) {
++    throw new Error("Invalid memory wiki page read worker result");
++  }
++  // SAFETY: The discriminant check above pairs the reply with the submitted task.
++  return result as Extract<WikiPageReadResult, { select: Task["select"] }>;
++}
++
++/**
++ * Run one whole-vault scan in the reader pool and return its typed selection. The vault
++ * is listed once, then read by one task that yields at a checkpoint when another task
++ * waits; the host resubmits the unread rest until every page is read. Deadlines stay
++ * with the caller, as on main: the wiki_search tool's 30 s deadline and turn
++ * cancellation arrive through `signal`; a caller that passes none waits for the scan.
++ */
++export async function readMemoryWikiPages<Task extends WikiPageScanTask>(
++  task: Task,
++  options: { signal?: AbortSignal } = {},
++): Promise<Extract<WikiPageScanResult, { select: Task["select"] }>> {
++  const { rootDir, visibility } = task;
++  const { signal } = options;
++  const relativePaths = task.relativePaths
++    ? excludeWikiPagePaths(task.relativePaths, task.excludePaths)
++    : (
++        await runPoolTask(
++          {
++            select: "list",
++            rootDir,
++            ...(task.excludePaths ? { excludePaths: task.excludePaths } : {}),
++          },
++          signal,
++        )
++      ).relativePaths;
++  type Selection = Extract<WikiPageScanResult, { select: Task["select"] }>;
++  const rest = (offset: number) => (offset === 0 ? relativePaths : relativePaths.slice(offset));
++  if (task.select === "search") {
++    const { query, mode, maxResults } = task;
++    let results: WikiSearchResult[] = [];
++    let offset = 0;
++    do {
++      const read = await runPoolTask(
++        {
++          select: "search",
++          rootDir,
++          visibility,
++          relativePaths: rest(offset),
++          query,
++          mode,
++          maxResults,
++        },
++        signal,
++      );
++      // Each task returns its top maxResults in order; merging it after the earlier tasks'
++      // with a stable sort keeps listing order among ties, as the worker's own merge does.
++      results = sortWikiSearchResults([...results, ...read.results]).slice(0, maxResults);
++      offset += read.readPages;
++    } while (offset < relativePaths.length);
++    // SAFETY: This branch handles the search task, so the reply is its variant.
++    return { select: "search", results } as Selection;
++  }
++  const keys: WikiPageKey[] = [];
++  let offset = 0;
++  do {
++    const read = await runPoolTask(
++      { select: "keys", rootDir, visibility, relativePaths: rest(offset) },
++      signal,
++    );
++    keys.push(...read.keys);
++    offset += read.readPages;
++  } while (offset < relativePaths.length);
++  // Resolve over the whole listing, then read the matched page on the calling thread
++  // like any other single-page read. The page is read twice, so it must still match: a
++  // page whose id changed in between resolves to nothing, like one that disappeared.
++  const match = resolveQueryableWikiPageByLookup(keys, task.lookup);
++  const { page } = match
++    ? await readWikiPagesTask(
++        { select: "page", rootDir, visibility, relativePaths: [match.relativePath] },
++        signal,
++      )
++    : { page: null };
++  const current = page && resolveQueryableWikiPageByLookup([page], task.lookup);
++  // SAFETY: The only other scan task is a lookup, so the reply is its variant.
++  return { select: "lookup", page: current ?? null } as Selection;
++}
++
++/** Plugin stop releases the workers; a read after the close settles recreates the pool. */
++export async function closeMemoryWikiQueryReader(): Promise<void> {
++  const current = pool;
++  if (!current) {
++    return;
++  }
++  try {
++    await current.close();
++  } finally {
++    if (pool === current) {
++      pool = undefined;
++    }
++  }
++}
+diff --git a/extensions/memory-wiki/src/query-reader.worker.ts b/extensions/memory-wiki/src/query-reader.worker.ts
+new file mode 100644
+index 00000000000..51110160aa4
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-reader.worker.ts
+@@ -0,0 +1,36 @@
++import { FsSafeError } from "openclaw/plugin-sdk/security-runtime";
++import { serveWorkerTasks } from "openclaw/plugin-sdk/worker-task-server";
++import {
++  readWikiPagesTask,
++  WIKI_SCAN_YIELD,
++  type WikiPageReadResult,
++  type WikiPageReadTask,
++} from "./query-pages.js";
++
++serveWorkerTasks(async (input, channel, control): Promise<WikiPageReadResult> => {
++  // SAFETY: The paired host reader constructs the private task union.
++  const task = input as WikiPageReadTask;
++  // Scan tasks carry a channel: between segments the host says whether to go on.
++  const shouldYield = channel
++    ? async () => {
++        const reply = await channel.request(null);
++        reply.consumed();
++        return reply.input === WIKI_SCAN_YIELD;
++      }
++    : undefined;
++  try {
++    // Pool cancellation is polled between pages so a cancelled scan stops early.
++    return await readWikiPagesTask(
++      task,
++      { throwIfAborted: () => control.throwIfCancelled() },
++      shouldYield,
++    );
++  } catch (error) {
++    // Only an error message crosses the pool boundary; the host rebuilds the
++    // boundary refusal from its code so callers keep the same error contract.
++    if (error instanceof FsSafeError) {
++      return { select: "refused", code: error.code, message: error.message };
++    }
++    throw error;
++  }
++});
+diff --git a/extensions/memory-wiki/src/query-scan.test-support.ts b/extensions/memory-wiki/src/query-scan.test-support.ts
+new file mode 100644
+index 00000000000..d508572a39d
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-scan.test-support.ts
+@@ -0,0 +1,63 @@
++import fs from "node:fs/promises";
++import path from "node:path";
++import { renderWikiMarkdown } from "./markdown.js";
++import { readWikiPagesTask } from "./query-pages.js";
++import { sortWikiSearchResults, type WikiSearchMode } from "./query-scoring.js";
++import type { createMemoryWikiTestHarness } from "./test-helpers.js";
++
++/** More pages than two scan segments (`WIKI_SCAN_CHECKPOINT_PAGES` in query-pages.ts). */
++export const TIED_VAULT_PAGES = 131;
++
++type CreateVault = ReturnType<typeof createMemoryWikiTestHarness>["createVault"];
++
++/** Pages that tie on score and title, so their order is listing order across segments. */
++export async function createBatchedVault(createVault: CreateVault, pages: number) {
++  const vault = await createVault({
++    initialize: true,
++    config: { search: { backend: "local", corpus: "wiki" } },
++  });
++  for (let index = 0; index < pages; index += 1) {
++    await fs.writeFile(
++      path.join(vault.rootDir, "sources", `page-${String(index).padStart(4, "0")}.md`),
++      renderWikiMarkdown({
++        frontmatter: { pageType: "source", id: `source.page-${index}`, title: "Lantern" },
++        body: `# Lantern\n\ncobalt lantern ledger${index % 3 === 0 ? " cobalt" : ""}.\n`,
++      }),
++    );
++  }
++  return vault;
++}
++
++/** A whole-vault search task, as `searchWikiCorpus` submits it without digest candidates. */
++export const scanTask = (rootDir: string) => ({
++  rootDir,
++  visibility: null,
++  select: "search" as const,
++  query: "cobalt lantern ledger",
++  mode: "auto" as const,
++  maxResults: 5,
++});
++
++/**
++ * The whole-vault top `maxResults`, scored one page per read and sorted once, so it shares
++ * no segment or task merge with the reader under test.
++ */
++export async function wholeVaultReference(
++  rootDir: string,
++  task: { query: string; mode: WikiSearchMode; maxResults: number },
++) {
++  const { relativePaths } = await readWikiPagesTask({ select: "list", rootDir });
++  const scored = [];
++  for (const relativePath of relativePaths) {
++    const read = await readWikiPagesTask({
++      ...task,
++      rootDir,
++      visibility: null,
++      select: "search",
++      relativePaths: [relativePath],
++      maxResults: 1,
++    });
++    scored.push(...read.results);
++  }
++  return sortWikiSearchResults(scored).slice(0, task.maxResults);
++}
+diff --git a/extensions/memory-wiki/src/query-scheduling.test.ts b/extensions/memory-wiki/src/query-scheduling.test.ts
+new file mode 100644
+index 00000000000..2b8bd9b1d0e
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-scheduling.test.ts
+@@ -0,0 +1,181 @@
++import fs from "node:fs/promises";
++import path from "node:path";
++import { WorkerTaskPool } from "openclaw/plugin-sdk/process-runtime";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { renderWikiMarkdown } from "./markdown.js";
++import * as queryReader from "./query-reader.js";
++import { closeMemoryWikiQueryReader, readMemoryWikiPages } from "./query-reader.js";
++import {
++  createBatchedVault,
++  scanTask,
++  TIED_VAULT_PAGES,
++  wholeVaultReference,
++} from "./query-scan.test-support.js";
++import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
++import { createMemoryWikiTestHarness } from "./test-helpers.js";
++
++const { createVault } = createMemoryWikiTestHarness();
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++// A small vault without a digest, so every search is a whole-vault scan task.
++async function createScanVault() {
++  const vault = await createVault({
++    initialize: true,
++    config: { search: { backend: "local", corpus: "wiki" } },
++  });
++  for (let index = 0; index < 8; index += 1) {
++    await fs.writeFile(
++      path.join(vault.rootDir, "sources", `page-${index}.md`),
++      renderWikiMarkdown({
++        frontmatter: { pageType: "source", id: `source.page-${index}`, title: `Lantern ${index}` },
++        body: `# Lantern ${index}\n\ncobalt lantern ledger note ${index}.\n`,
++      }),
++    );
++  }
++  return vault;
++}
++
++describe("memory wiki query scheduling", () => {
++  it("serves an exact-path read without the pool while a whole-vault search scan is held", async () => {
++    const { config } = await createScanVault();
++    const dispatchScan = queryReader.readMemoryWikiPages;
++    const { promise: held, resolve: hold } = Promise.withResolvers<void>();
++    const { promise: released, resolve: release } = Promise.withResolvers<void>();
++    // Hold every search scan before it reaches the pool; other tasks pass through, so a
++    // read that still went through the pool would show up in the dispatch log.
++    const dispatch = vi
++      .spyOn(queryReader, "readMemoryWikiPages")
++      .mockImplementation(async (task, options) => {
++        if (task.select === "search") {
++          hold();
++          await released;
++        }
++        return dispatchScan(task, options);
++      });
++    let scanSettled = false;
++    const scan = searchMemoryWiki({
++      config,
++      query: "cobalt lantern ledger",
++      maxResults: 5,
++    }).finally(() => {
++      scanSettled = true;
++    });
++    await held;
++
++    const page = await getMemoryWikiPage({ config, lookup: "sources/page-4.md", lineCount: 1 });
++
++    expect(page?.path).toBe("sources/page-4.md");
++    expect(scanSettled).toBe(false);
++    expect(dispatch.mock.calls.map(([task]) => task.select)).toEqual(["search"]);
++    release();
++    expect((await scan).length).toBeGreaterThan(0);
++  });
++
++  it("leaves an unsignalled scan unbounded, as on main, and passes a caller signal through", async () => {
++    const { rootDir } = await createScanVault();
++    const run = vi.spyOn(WorkerTaskPool.prototype, "run");
++    const controller = new AbortController();
++
++    await readMemoryWikiPages(scanTask(rootDir));
++    await readMemoryWikiPages(scanTask(rootDir), { signal: controller.signal });
++
++    // Each scan is a listing task and one scan task.
++    expect(run.mock.calls.map(([, options]) => options.timeoutMs)).toEqual(
++      Array(4).fill(undefined),
++    );
++    expect(run.mock.calls.map(([, options]) => options.signal)).toEqual([
++      undefined,
++      undefined,
++      controller.signal,
++      controller.signal,
++    ]);
++  });
++
++  it("reads an uncontended scan as one task that checkpoints between segments", async () => {
++    const { rootDir } = await createBatchedVault(createVault, TIED_VAULT_PAGES);
++    // oxlint-disable-next-line typescript/unbound-method -- Reflect.apply preserves the intercepted pool receiver.
++    const dispatchRun = WorkerTaskPool.prototype.run;
++    const run = vi.spyOn(WorkerTaskPool.prototype, "run");
++    const replies: unknown[] = [];
++    const watchdogs: number[] = [];
++    run.mockImplementation(function (this: WorkerTaskPool<unknown, unknown>, input, options) {
++      const answer = options.onRequest;
++      const observed = answer
++        ? {
++            ...options,
++            onRequest: async (...request: Parameters<typeof answer>) => {
++              const reply = await answer(...request);
++              replies.push(reply.input);
++              watchdogs.push(reply.timeoutMs);
++              return reply;
++            },
++          }
++        : options;
++      return Reflect.apply(dispatchRun, this, [input, observed]);
++    });
++    // More results than one segment holds, then fewer, so segments both keep and cut results.
++    const task = { ...scanTask(rootDir), maxResults: 114 };
++    const cut = { ...task, maxResults: 10 };
++
++    const pooled = await readMemoryWikiPages(task);
++    const cutPooled = await readMemoryWikiPages(cut);
++    const lookup = await readMemoryWikiPages({
++      rootDir,
++      visibility: null,
++      select: "lookup",
++      lookup: "source.page-130",
++    });
++
++    expect(run.mock.calls.map(([submitted]) => (submitted as { select: string }).select)).toEqual([
++      "list",
++      "search",
++      "list",
++      "search",
++      "list",
++      "keys",
++    ]);
++    // Nothing else waits for compute or a worker, so every checkpoint lets the scan go on.
++    expect(replies.length).toBeGreaterThanOrEqual(3);
++    expect(new Set(replies)).toEqual(new Set([null]));
++    // The pool requires a watchdog on each reply; the timer maximum adds no scan deadline.
++    expect(new Set(watchdogs)).toEqual(new Set([2_147_000_000]));
++    expect(pooled.results).toHaveLength(114);
++    expect(JSON.stringify(pooled.results)).toBe(
++      JSON.stringify(await wholeVaultReference(rootDir, task)),
++    );
++    expect(JSON.stringify(cutPooled.results)).toBe(
++      JSON.stringify(await wholeVaultReference(rootDir, cut)),
++    );
++    expect(lookup.page?.relativePath).toBe("sources/page-0130.md");
++  });
++
++  it("admits at most two scans at once and queues the rest", async () => {
++    const { rootDir } = await createScanVault();
++    await closeMemoryWikiQueryReader();
++    const run = vi.spyOn(WorkerTaskPool.prototype, "run");
++
++    // Admission and dispatch happen synchronously inside run(), so the snapshot taken
++    // right after the third submission is the pool's state before any scan can settle.
++    const scans = [0, 1, 2].map(() => readMemoryWikiPages(scanTask(rootDir)));
++    const pool = run.mock.contexts[0] as WorkerTaskPool<unknown, unknown>;
++    const admitted = pool.getSnapshot();
++    const results = await Promise.all(scans);
++    const settled = pool.getSnapshot();
++
++    expect(new Set(run.mock.contexts).size).toBe(1);
++    expect(admitted.maxWorkers).toBe(2);
++    expect(admitted.pendingTasks).toBe(3);
++    // Shared compute can admit fewer than two on a small host; never more.
++    expect(admitted.activeTasks).toBeGreaterThanOrEqual(1);
++    expect(admitted.activeTasks).toBeLessThanOrEqual(2);
++    expect(settled.workersCreated).toBeLessThanOrEqual(2);
++    expect(settled).toMatchObject({ activeTasks: 0, pendingTasks: 0 });
++    for (const result of results) {
++      expect(JSON.stringify(result.results)).toBe(JSON.stringify(results[0]?.results));
++    }
++    expect(results[0]?.results.length).toBeGreaterThan(0);
++  });
++});
+diff --git a/extensions/memory-wiki/src/query-scoring.ts b/extensions/memory-wiki/src/query-scoring.ts
+new file mode 100644
+index 00000000000..91965d46f2c
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-scoring.ts
+@@ -0,0 +1,667 @@
++// Query scoring for live wiki pages and compiled digest entries: pure functions
++// over page and digest data, shared by the host prefilter and the reader worker.
++import type { MemoryReference, MemoryCitation } from "openclaw/plugin-sdk/memory-host-search";
++import {
++  normalizeLowercaseStringOrEmpty,
++  uniqueStrings,
++} from "openclaw/plugin-sdk/string-coerce-runtime";
++import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
++import { assessClaimFreshness, isClaimContestedStatus } from "./claim-health.js";
++import type {
++  MemoryWikiCompiledCacheSnapshot,
++  MemoryWikiCompiledClaim,
++  MemoryWikiCompiledDigestPage,
++} from "./compiled-cache.js";
++import type { ParsedWikiMarkdown, WikiClaim, WikiPageSummary } from "./markdown.js";
++import { isPersonLikePage } from "./person-page.js";
++
++/** A wiki page as read for queries: its summary plus raw text and parsed markdown. */
++export type QueryableWikiPage = WikiPageSummary & {
++  raw: string;
++  parsed: ParsedWikiMarkdown;
++};
++
++export const WIKI_SEARCH_MODES = [
++  "auto",
++  "find-person",
++  "route-question",
++  "source-evidence",
++  "raw-claim",
++] as const;
++
++export type WikiSearchMode = (typeof WIKI_SEARCH_MODES)[number];
++
++const WIKI_SNIPPET_MAX_CHARS = 700;
++const RELATED_BLOCK_PATTERN =
++  /<!-- openclaw:wiki:related:start -->[\s\S]*?<!-- openclaw:wiki:related:end -->/g;
++const MARKDOWN_FRONTMATTER_PATTERN = /^\s*---\r?\n[\s\S]*?\r?\n---\r?\n?/;
++const STRUCTURAL_MARKER_LINE_PATTERN = /^\s*<!--\s*openclaw:(?:wiki|human):[^>]*-->\s*$/;
++const ROUTE_QUESTION_STOP_WORDS = new Set([
++  "a",
++  "about",
++  "am",
++  "an",
++  "are",
++  "ask",
++  "asking",
++  "be",
++  "been",
++  "being",
++  "can",
++  "could",
++  "did",
++  "do",
++  "does",
++  "for",
++  "help",
++  "how",
++  "i",
++  "in",
++  "is",
++  "know",
++  "knows",
++  "me",
++  "my",
++  "need",
++  "needs",
++  "of",
++  "on",
++  "or",
++  "our",
++  "question",
++  "questions",
++  "should",
++  "the",
++  "to",
++  "us",
++  "we",
++  "what",
++  "when",
++  "where",
++  "who",
++  "whom",
++  "whose",
++  "why",
++  "with",
++  "would",
++]);
++
++export type WikiResultMetadata = {
++  reference?: MemoryReference;
++  lookup?: string;
++  citations?: MemoryCitation[];
++  title: string;
++  kind: WikiPageSummary["kind"] | "memory";
++  id?: string;
++  sourceType?: string;
++  provenanceMode?: string;
++  sourcePath?: string;
++  provenanceLabel?: string;
++  updatedAt?: string;
++};
++
++export type WikiSearchResult = WikiResultMetadata & {
++  score: number;
++  snippet: string;
++  startLine?: number;
++  endLine?: number;
++  citation?: string;
++  memorySource?: string;
++  searchMode?: WikiSearchMode;
++  entityType?: string;
++  canonicalId?: string;
++  aliases?: string[];
++  privacyTier?: string;
++  matchedClaimId?: string;
++  matchedClaimStatus?: string;
++  matchedClaimConfidence?: number;
++  evidenceKinds?: string[];
++  evidenceSourceIds?: string[];
++} & WikiResultSource;
++
++// Wiki pages and legacy memory read by path; native provider records use opaque lookups.
++export type WikiResultSource =
++  | { corpus: "wiki"; path: string }
++  | { corpus: "memory"; path: string; reference?: never; lookup?: never }
++  | { corpus: "memory"; path?: never; reference: MemoryReference; lookup: string };
++
++export function sortWikiSearchResults(results: WikiSearchResult[]): WikiSearchResult[] {
++  return results.toSorted((left, right) => {
++    if (left.score !== right.score) {
++      return right.score - left.score;
++    }
++    return left.title.localeCompare(right.title);
++  });
++}
++
++function buildSnippet(raw: string, query: string): string {
++  const queryLower = normalizeLowercaseStringOrEmpty(query);
++  const queryTokens = buildQueryTokens(queryLower);
++  const searchable = buildSearchableBody(raw);
++  const lines = searchable.split(/\r?\n/).filter((line) => line.trim().length > 0);
++  let matchingLine = lines.find((line) =>
++    lineMatchesQuery(normalizeLowercaseStringOrEmpty(line), queryLower, queryTokens),
++  );
++  if (matchingLine === undefined && queryTokens.length > 0) {
++    let bestHits = 0;
++    for (const line of lines) {
++      const lineLower = normalizeLowercaseStringOrEmpty(line);
++      const hits = queryTokens.filter((token) => lineLower.includes(token)).length;
++      if (hits > bestHits) {
++        bestHits = hits;
++        matchingLine = line;
++      }
++    }
++  }
++  return matchingLine?.trim() || lines.find((line) => line.trim() !== "---")?.trim() || "";
++}
++
++function buildPageSearchFields(
++  page: QueryableWikiPage | MemoryWikiCompiledDigestPage,
++  relationships: WikiPageSummary["relationships"] | undefined,
++): string[] {
++  return [
++    page.pageType ?? "",
++    page.entityType ?? "",
++    page.canonicalId ?? "",
++    page.aliases?.join(" ") ?? "",
++    page.sourceIds.join(" "),
++    page.questions.join(" "),
++    page.contradictions.join(" "),
++    page.privacyTier ?? "",
++    page.bestUsedFor?.join(" ") ?? "",
++    page.notEnoughFor?.join(" ") ?? "",
++    page.personCard?.canonicalId ?? "",
++    page.personCard?.handles.join(" ") ?? "",
++    page.personCard?.socials.join(" ") ?? "",
++    page.personCard?.emails.join(" ") ?? "",
++    page.personCard?.timezone ?? "",
++    page.personCard?.lane ?? "",
++    page.personCard?.askFor.join(" ") ?? "",
++    page.personCard?.avoidAskingFor.join(" ") ?? "",
++    page.personCard?.bestUsedFor.join(" ") ?? "",
++    page.personCard?.notEnoughFor.join(" ") ?? "",
++    relationships
++      ?.flatMap((relationship) => [
++        relationship.targetId ?? "",
++        relationship.targetPath ?? "",
++        relationship.targetTitle ?? "",
++        relationship.kind ?? "",
++        relationship.evidenceKind ?? "",
++        relationship.note ?? "",
++      ])
++      .join(" ") ?? "",
++  ];
++}
++
++function buildPageSearchText(page: QueryableWikiPage): string {
++  return [
++    page.title,
++    page.relativePath,
++    page.id ?? "",
++    JSON.stringify(page.parsed.frontmatter),
++    ...buildPageSearchFields(page, page.relationships),
++    page.claims.map((claim) => claim.text).join(" "),
++    page.claims.map((claim) => claim.id ?? "").join(" "),
++    page.claims
++      .flatMap((claim) =>
++        claim.evidence.flatMap((evidence) => [
++          evidence.kind ?? "",
++          evidence.sourceId ?? "",
++          evidence.path ?? "",
++          evidence.lines ?? "",
++          evidence.note ?? "",
++          evidence.privacyTier ?? "",
++        ]),
++      )
++      .join(" "),
++  ]
++    .filter(Boolean)
++    .join("\n");
++}
++
++function buildSearchableBody(raw: string): string {
++  return raw
++    .replace(RELATED_BLOCK_PATTERN, "")
++    .replace(MARKDOWN_FRONTMATTER_PATTERN, "")
++    .split(/\r?\n/)
++    .filter((line) => !STRUCTURAL_MARKER_LINE_PATTERN.test(line))
++    .join("\n");
++}
++
++function buildQueryTokens(queryLower: string): string[] {
++  return [
++    ...new Set(
++      queryLower
++        .split(/[^\p{L}\p{N}\p{M}@._-]+/u)
++        .map((token) => token.trim())
++        .filter((token) => token.length >= 2),
++    ),
++  ];
++}
++
++function buildRouteQuestionTokens(queryLower: string): string[] {
++  const tokens = buildQueryTokens(queryLower);
++  const routedTokens = tokens.filter((token) => !ROUTE_QUESTION_STOP_WORDS.has(token));
++  return routedTokens.length > 0 ? routedTokens : tokens;
++}
++
++function lineMatchesQuery(
++  lineLower: string,
++  queryLower: string,
++  queryTokens: readonly string[],
++): boolean {
++  if (queryLower.length > 0 && lineLower.includes(queryLower)) {
++    return true;
++  }
++  return queryTokens.length > 0 && queryTokens.every((token) => lineLower.includes(token));
++}
++
++function buildDigestPageSearchText(
++  page: MemoryWikiCompiledDigestPage,
++  claims: MemoryWikiCompiledClaim[],
++): string {
++  return [
++    page.title,
++    page.path,
++    page.id ?? "",
++    ...buildPageSearchFields(page, page.topRelationships),
++    claims.map((claim) => claim.text).join(" "),
++    claims.map((claim) => claim.id ?? "").join(" "),
++    claims.map((claim) => claim.evidenceKinds?.join(" ") ?? "").join(" "),
++    claims.map((claim) => claim.privacyTiers?.join(" ") ?? "").join(" "),
++  ]
++    .filter(Boolean)
++    .join("\n");
++}
++
++function isClaimTextOrIdMatch(
++  claim: Pick<WikiClaim, "id" | "text">,
++  queryLower: string,
++  queryTokens: readonly string[] = buildQueryTokens(queryLower),
++): boolean {
++  const textLower = normalizeLowercaseStringOrEmpty(claim.text);
++  if (lineMatchesQuery(textLower, queryLower, queryTokens)) {
++    return true;
++  }
++  return lineMatchesQuery(normalizeLowercaseStringOrEmpty(claim.id), queryLower, queryTokens);
++}
++
++function scoreClaimMatch(params: {
++  text: string;
++  id?: string;
++  confidence?: number;
++  status?: string;
++  freshnessLevel?: string;
++  queryLower: string;
++  queryTokens?: readonly string[];
++}): number {
++  let score = 0;
++  if (normalizeLowercaseStringOrEmpty(params.text).includes(params.queryLower)) {
++    score += 25;
++  } else if (
++    params.queryTokens?.length &&
++    params.queryTokens.every((token) =>
++      normalizeLowercaseStringOrEmpty(params.text).includes(token),
++    )
++  ) {
++    score += 18;
++  }
++  if (normalizeLowercaseStringOrEmpty(params.id).includes(params.queryLower)) {
++    score += 10;
++  }
++  if (typeof params.confidence === "number") {
++    score += Math.round(params.confidence * 10);
++  }
++  switch (params.freshnessLevel) {
++    case "fresh":
++      score += 8;
++      break;
++    case "aging":
++      score += 4;
++      break;
++    case "stale":
++      score -= 2;
++      break;
++    case "unknown":
++      score -= 4;
++      break;
++    case undefined:
++      break;
++  }
++  score += isClaimContestedStatus(params.status) ? -6 : 4;
++  return score;
++}
++
++function hasAnyQueryMatch(
++  values: readonly (string | undefined)[],
++  queryLower: string,
++  queryTokens: readonly string[],
++) {
++  return values.some((value) =>
++    lineMatchesQuery(normalizeLowercaseStringOrEmpty(value), queryLower, queryTokens),
++  );
++}
++
++function buildRouteQuestionFields(
++  page: QueryableWikiPage | MemoryWikiCompiledDigestPage,
++): string[] {
++  const relationships = "relationships" in page ? page.relationships : page.topRelationships;
++  return [
++    page.personCard?.lane,
++    ...(page.personCard?.askFor ?? []),
++    ...(page.personCard?.avoidAskingFor ?? []),
++    ...(page.bestUsedFor ?? []),
++    ...(page.notEnoughFor ?? []),
++    ...(page.personCard?.bestUsedFor ?? []),
++    ...(page.personCard?.notEnoughFor ?? []),
++    ...(relationships?.flatMap((relationship) => [
++      relationship.kind,
++      relationship.targetTitle,
++      relationship.note,
++    ]) ?? []),
++  ].filter((value): value is string => Boolean(value));
++}
++
++function hasRouteQuestionMatch(values: readonly string[], queryLower: string): boolean {
++  return hasAnyQueryMatch(values, queryLower, buildRouteQuestionTokens(queryLower));
++}
++
++function scoreWikiSearchModeBoost(params: {
++  page: QueryableWikiPage | MemoryWikiCompiledDigestPage;
++  claims: readonly (WikiClaim | MemoryWikiCompiledClaim)[];
++  matchingClaimCount: number;
++  queryLower: string;
++  queryTokens: readonly string[];
++  mode: WikiSearchMode;
++}): number {
++  const { page, queryLower, queryTokens } = params;
++  switch (params.mode) {
++    case "auto":
++      return 0;
++    case "find-person": {
++      let score = isPersonLikePage(page) ? 24 : -4;
++      if (
++        hasAnyQueryMatch(
++          [
++            page.canonicalId,
++            ...(page.aliases ?? []),
++            page.personCard?.canonicalId,
++            ...(page.personCard?.handles ?? []),
++            ...(page.personCard?.emails ?? []),
++            ...(page.personCard?.socials ?? []),
++          ],
++          queryLower,
++          queryTokens,
++        )
++      ) {
++        score += 24;
++      }
++      return score;
++    }
++    case "route-question": {
++      let score = isPersonLikePage(page) ? 14 : 0;
++      if (hasRouteQuestionMatch(buildRouteQuestionFields(page), queryLower)) {
++        score += 32;
++      }
++      // Digests retain only top relationships; ranking still uses the full count.
++      const relationshipCount =
++        "relationships" in page ? page.relationships.length : (page.relationshipCount ?? 0);
++      return score + Math.min(8, relationshipCount * 2);
++    }
++    case "source-evidence": {
++      let score = page.kind === "source" ? 22 : 0;
++      const evidenceFields = params.claims.flatMap((claim) =>
++        "evidence" in claim
++          ? claim.evidence.flatMap((evidence) => [
++              evidence.kind,
++              evidence.sourceId,
++              evidence.path,
++              evidence.lines,
++              evidence.note,
++            ])
++          : [
++              ...(claim.sourceIds ?? []),
++              ...(claim.evidenceKinds ?? []),
++              ...(claim.privacyTiers ?? []),
++            ],
++      );
++      if (
++        hasAnyQueryMatch(
++          [
++            "sourcePath" in page ? page.sourcePath : undefined,
++            ...page.sourceIds,
++            ...evidenceFields,
++          ],
++          queryLower,
++          queryTokens,
++        )
++      ) {
++        score += 30;
++      }
++      return score;
++    }
++    case "raw-claim":
++      return params.matchingClaimCount > 0 ? 42 : 0;
++  }
++  return 0;
++}
++
++export function buildDigestCandidatePaths(params: {
++  snapshot: MemoryWikiCompiledCacheSnapshot;
++  query: string;
++  maxResults: number;
++  mode: WikiSearchMode;
++}): string[] {
++  const queryLower = normalizeLowercaseStringOrEmpty(params.query);
++  const queryTokens = buildQueryTokens(queryLower);
++  const claimsByPage = new Map<string, MemoryWikiCompiledClaim[]>();
++  for (const claim of params.snapshot.claims) {
++    const current = claimsByPage.get(claim.pagePath) ?? [];
++    current.push(claim);
++    claimsByPage.set(claim.pagePath, current);
++  }
++
++  return params.snapshot.digest.pages
++    .map((page) => {
++      const claims = claimsByPage.get(page.path) ?? [];
++      const metadataLower = normalizeLowercaseStringOrEmpty(
++        buildDigestPageSearchText(page, claims),
++      );
++      if (
++        !lineMatchesQuery(metadataLower, queryLower, queryTokens) &&
++        !(
++          params.mode === "route-question" &&
++          hasRouteQuestionMatch(buildRouteQuestionFields(page), queryLower)
++        )
++      ) {
++        return { path: page.path, score: 0 };
++      }
++      const matchingClaims = getMatchingClaims(claims, queryLower, queryTokens, (claim) =>
++        scoreClaimMatch({ ...claim, queryLower, queryTokens }),
++      );
++      const score = scorePage({
++        page,
++        claims,
++        matchingClaims,
++        queryLower,
++        queryTokens,
++        mode: params.mode,
++      });
++      return { path: page.path, score };
++    })
++    .filter((candidate) => candidate.score > 0)
++    .toSorted((left, right) => {
++      if (left.score !== right.score) {
++        return right.score - left.score;
++      }
++      return left.path.localeCompare(right.path);
++    })
++    .slice(0, Math.max(params.maxResults * 4, 20))
++    .map((candidate) => candidate.path);
++}
++
++function getMatchingClaims<Claim extends Pick<WikiClaim, "id" | "text">>(
++  claims: readonly Claim[],
++  queryLower: string,
++  queryTokens: readonly string[],
++  score: (claim: Claim) => number,
++): Array<{ claim: Claim; score: number }> {
++  return claims
++    .filter((claim) => isClaimTextOrIdMatch(claim, queryLower, queryTokens))
++    .map((claim) => ({ claim, score: score(claim) }))
++    .toSorted((left, right) => right.score - left.score);
++}
++
++function scorePage(params: {
++  page: QueryableWikiPage | MemoryWikiCompiledDigestPage;
++  claims: readonly (WikiClaim | MemoryWikiCompiledClaim)[];
++  matchingClaims: readonly { score: number }[];
++  queryLower: string;
++  queryTokens: readonly string[];
++  mode: WikiSearchMode;
++}): number {
++  const { page, claims, matchingClaims, queryLower, queryTokens, mode } = params;
++  const titleLower = normalizeLowercaseStringOrEmpty(page.title);
++  const pathLower = normalizeLowercaseStringOrEmpty(
++    "relativePath" in page ? page.relativePath : page.path,
++  );
++  const idLower = normalizeLowercaseStringOrEmpty(page.id);
++  let score = 1;
++  if (titleLower === queryLower) {
++    score += 50;
++  } else if (titleLower.includes(queryLower)) {
++    score += 20;
++  }
++  if (pathLower.includes(queryLower)) {
++    score += 10;
++  }
++  if (idLower.includes(queryLower)) {
++    score += 20;
++  }
++  if (page.sourceIds.some((id) => normalizeLowercaseStringOrEmpty(id).includes(queryLower))) {
++    score += 12;
++  }
++  const [bestMatchingClaim] = matchingClaims;
++  if (bestMatchingClaim) {
++    score += bestMatchingClaim.score;
++    score += Math.min(10, (matchingClaims.length - 1) * 2);
++  }
++  score += scoreWikiSearchModeBoost({
++    page,
++    claims,
++    matchingClaimCount: matchingClaims.length,
++    queryLower,
++    queryTokens,
++    mode,
++  });
++  // Digest candidates admit phrase and distributed token matches in metadata.
++  // Live pages also match and score their body text.
++  if (!("raw" in page)) {
++    return score;
++  }
++  const metadataLower = normalizeLowercaseStringOrEmpty(buildPageSearchText(page));
++  const rawLower = normalizeLowercaseStringOrEmpty(buildSearchableBody(page.raw));
++  const fields = [titleLower, pathLower, idLower, metadataLower, rawLower];
++  const combinedLower = fields.join("\n");
++  if (
++    !fields.some((field) => field.includes(queryLower)) &&
++    !(queryTokens.length > 0 && queryTokens.every((token) => combinedLower.includes(token))) &&
++    !(
++      mode === "route-question" && hasRouteQuestionMatch(buildRouteQuestionFields(page), queryLower)
++    )
++  ) {
++    return 0;
++  }
++  score += Math.min(10, rawLower.split(queryLower).length - 1);
++  for (const token of queryTokens) {
++    if (titleLower.includes(token)) {
++      score += 8;
++    }
++    if (pathLower.includes(token) || idLower.includes(token)) {
++      score += 6;
++    }
++    if (metadataLower.includes(token)) {
++      score += 4;
++    }
++    if (rawLower.includes(token)) {
++      score += 1;
++    }
++  }
++  return score;
++}
++
++function buildWikiProvenanceLabel(page: WikiPageSummary): string | undefined {
++  if (page.sourceType === "memory-bridge-events") {
++    return `bridge events: ${page.bridgeRelativePath ?? page.relativePath}`;
++  }
++  if (page.sourceType === "memory-bridge") {
++    return `bridge: ${page.bridgeRelativePath ?? page.relativePath}`;
++  }
++  if (page.provenanceMode === "unsafe-local" || page.sourceType === "memory-unsafe-local") {
++    return `unsafe-local: ${page.unsafeLocalRelativePath ?? page.relativePath}`;
++  }
++  return undefined;
++}
++
++export function buildWikiResultMetadata(page: WikiPageSummary) {
++  const provenanceLabel = buildWikiProvenanceLabel(page);
++  return {
++    ...(page.id ? { id: page.id } : {}),
++    ...(page.sourceType ? { sourceType: page.sourceType } : {}),
++    ...(page.provenanceMode ? { provenanceMode: page.provenanceMode } : {}),
++    ...(page.sourcePath ? { sourcePath: page.sourcePath } : {}),
++    ...(provenanceLabel ? { provenanceLabel } : {}),
++    ...(page.updatedAt ? { updatedAt: page.updatedAt } : {}),
++    ...(page.entityType ? { entityType: page.entityType } : {}),
++    ...(page.canonicalId ? { canonicalId: page.canonicalId } : {}),
++    ...(page.aliases.length > 0 ? { aliases: [...page.aliases] } : {}),
++    ...(page.privacyTier ? { privacyTier: page.privacyTier } : {}),
++  };
++}
++
++export function toWikiSearchResult(
++  page: QueryableWikiPage,
++  query: string,
++  mode: WikiSearchMode,
++): WikiSearchResult {
++  const queryLower = normalizeLowercaseStringOrEmpty(query);
++  const queryTokens = buildQueryTokens(queryLower);
++  const matchingClaims = getMatchingClaims(page.claims, queryLower, queryTokens, (claim) =>
++    scoreClaimMatch({
++      ...claim,
++      freshnessLevel: assessClaimFreshness({ page, claim }).level,
++      queryLower,
++      queryTokens,
++    }),
++  );
++  const matchingClaim = matchingClaims[0]?.claim;
++  return {
++    corpus: "wiki",
++    path: page.relativePath,
++    title: page.title,
++    kind: page.kind,
++    score: scorePage({ page, claims: page.claims, matchingClaims, queryLower, queryTokens, mode }),
++    snippet: truncateUtf16Safe(
++      matchingClaim?.text ?? buildSnippet(page.raw, query),
++      WIKI_SNIPPET_MAX_CHARS,
++    ),
++    searchMode: mode,
++    ...buildWikiResultMetadata(page),
++    ...(matchingClaim
++      ? {
++          ...(matchingClaim.id ? { matchedClaimId: matchingClaim.id } : {}),
++          ...(matchingClaim.status ? { matchedClaimStatus: matchingClaim.status } : {}),
++          ...(typeof matchingClaim.confidence === "number"
++            ? { matchedClaimConfidence: matchingClaim.confidence }
++            : {}),
++          evidenceKinds: uniqueStrings(
++            matchingClaim.evidence.flatMap((evidence) => evidence.kind ?? []),
++          ),
++          evidenceSourceIds: uniqueStrings(
++            matchingClaim.evidence.flatMap((evidence) => evidence.sourceId ?? []),
++          ),
++        }
++      : {}),
++  };
++}
+diff --git a/extensions/memory-wiki/src/query-shared-compute.test.ts b/extensions/memory-wiki/src/query-shared-compute.test.ts
+new file mode 100644
+index 00000000000..ef75516202c
+--- /dev/null
++++ b/extensions/memory-wiki/src/query-shared-compute.test.ts
+@@ -0,0 +1,97 @@
++import { WorkerTaskPool } from "openclaw/plugin-sdk/process-runtime";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { WIKI_SCAN_YIELD } from "./query-pages.js";
++import { readMemoryWikiPages } from "./query-reader.js";
++import {
++  createBatchedVault,
++  scanTask,
++  TIED_VAULT_PAGES,
++  wholeVaultReference,
++} from "./query-scan.test-support.js";
++import { createMemoryWikiTestHarness } from "./test-helpers.js";
++
++// One shared compute permit, as on a one- or two-core host: max(1, cores - 1). The
++// capacity is a process-wide singleton created on first use, so this file owns the pin.
++vi.mock("node:os", async (importOriginal) => ({
++  ...(await importOriginal<typeof import("node:os")>()),
++  availableParallelism: () => 2,
++}));
++
++const { createVault } = createMemoryWikiTestHarness();
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++describe("memory wiki scans under shared compute contention", () => {
++  it("yields a scan at its next checkpoint to a pool waiting for the only permit", async () => {
++    const { rootDir } = await createBatchedVault(createVault, TIED_VAULT_PAGES);
++    // Shaped like memory-core retrieval: one worker that takes shared compute. Its task
++    // records admission while preparing its input and stops there, so no worker starts.
++    const retrieval = new WorkerTaskPool<unknown, unknown>({
++      workerUrl: new URL("data:text/javascript,"),
++      maxWorkers: 1,
++      sharedCompute: true,
++    });
++    const events: string[] = [];
++    // oxlint-disable-next-line typescript/unbound-method -- Reflect.apply preserves the intercepted pool receiver.
++    const dispatchRun = WorkerTaskPool.prototype.run;
++    const run = vi.spyOn(WorkerTaskPool.prototype, "run");
++    let retrievalRun: Promise<unknown> | undefined;
++    run.mockImplementation(function (this: WorkerTaskPool<unknown, unknown>, input, options) {
++      if (this === retrieval) {
++        return Reflect.apply(dispatchRun, this, [input, options]);
++      }
++      const { select } = input as { select: string };
++      events.push(`wiki ${select}`);
++      const answer = options.onRequest;
++      const observed = answer
++        ? {
++            ...options,
++            onRequest: async (...request: Parameters<typeof answer>) => {
++              const reply = await answer(...request);
++              events.push(`checkpoint ${reply.input === WIKI_SCAN_YIELD ? "yield" : "continue"}`);
++              return reply;
++            },
++          }
++        : options;
++      // Admission and dispatch are synchronous, so the scan task holds the only permit
++      // when the retrieval task arrives.
++      const running = Reflect.apply(dispatchRun, this, [input, observed]);
++      if (select === "search" && !retrievalRun) {
++        retrievalRun = retrieval.run(
++          () => {
++            events.push("retrieval admitted");
++            throw new Error("retrieval admitted");
++          },
++          { inputBytes: 0 },
++        );
++        events.push("retrieval queued");
++      }
++      return running;
++    });
++
++    let scan: Awaited<ReturnType<typeof readMemoryWikiPages<ReturnType<typeof scanTask>>>>;
++    try {
++      scan = await readMemoryWikiPages(scanTask(rootDir));
++      await expect(retrievalRun).rejects.toThrow("retrieval admitted");
++    } finally {
++      await retrieval.close();
++    }
++
++    // The first checkpoint yields; the retrieval task takes the permit before the host
++    // resubmits the unread pages, and the resumed scan has nothing left to yield to.
++    expect(events.slice(0, 6)).toEqual([
++      "wiki list",
++      "wiki search",
++      "retrieval queued",
++      "checkpoint yield",
++      "retrieval admitted",
++      "wiki search",
++    ]);
++    expect(new Set(events.slice(6))).toEqual(new Set(["checkpoint continue"]));
++    expect(JSON.stringify(scan.results)).toBe(
++      JSON.stringify(await wholeVaultReference(rootDir, scanTask(rootDir))),
++    );
++  });
++});
+diff --git a/extensions/memory-wiki/src/query.abort.test.ts b/extensions/memory-wiki/src/query.abort.test.ts
+index 962a17749be..3b29f5684f5 100644
+--- a/extensions/memory-wiki/src/query.abort.test.ts
++++ b/extensions/memory-wiki/src/query.abort.test.ts
+@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
+ import path from "node:path";
+ import { afterEach, expect, it, vi } from "vitest";
+ import * as markdown from "./markdown.js";
++import { readWikiPagesTask } from "./query-pages.js";
++import * as queryReader from "./query-reader.js";
+ import { searchMemoryWiki } from "./query.js";
+ import { createMemoryWikiTestHarness } from "./test-helpers.js";
+ 
+@@ -9,16 +11,23 @@ vi.mock("./markdown.js", { spy: true });
+ const harness = createMemoryWikiTestHarness();
+ afterEach(() => vi.restoreAllMocks());
+ 
+-it("stops parsing vault pages after cancellation during a scan", async () => {
+-  const { rootDir, config } = await harness.createVault({ initialize: true });
++async function createArchiveVault() {
++  const vault = await harness.createVault({ initialize: true });
+   await Promise.all(
+     Array.from({ length: 32 }, (_, index) =>
+       fs.writeFile(
+-        path.join(rootDir, "entities", `page-${index}.md`),
++        path.join(vault.rootDir, "entities", `page-${index}.md`),
+         `---\npageType: entity\nid: page.${index}\ntitle: Archive ${index}\n---\nArchival text.\n`,
+       ),
+     ),
+   );
++  return vault;
++}
++
++// The reader runs in the worker, so the parse spy and the mid-scan abort are
++// exercised on the reader itself; the pool-level abort is covered below.
++it("stops parsing vault pages after cancellation during a scan", async () => {
++  const { rootDir } = await createArchiveVault();
+   const controller = new AbortController();
+   const { scanWikiPageSummary: original } = await vi.importActual<typeof markdown>("./markdown.js");
+   const scan = vi.spyOn(markdown, "scanWikiPageSummary").mockImplementation((params) => {
+@@ -26,8 +35,45 @@ it("stops parsing vault pages after cancellation during a scan", async () => {
+     controller.abort(new Error("Turn cancelled"));
+     return page;
+   });
++  const { relativePaths } = await readWikiPagesTask({ select: "list", rootDir });
+   await expect(
+-    searchMemoryWiki({ config, query: "absent multi term", signal: controller.signal }),
++    readWikiPagesTask(
++      {
++        rootDir,
++        relativePaths,
++        visibility: null,
++        select: "search",
++        query: "absent multi term",
++        mode: "auto",
++        maxResults: 10,
++      },
++      controller.signal,
++    ),
+   ).rejects.toThrow("Turn cancelled");
+   expect(scan).toHaveBeenCalledTimes(1);
+ });
++
++it("rejects a whole-vault search through the pool's cancellation of its dispatched task", async () => {
++  const { config } = await createArchiveVault();
++  const controller = new AbortController();
++  const reason = new Error("Turn cancelled");
++  const dispatched = queryReader.readMemoryWikiPages;
++  let pending: ReturnType<typeof dispatched> | undefined;
++  // Abort only once the search has handed its first task (the vault listing) to the pool. The pool
++  // has not served a task yet in this file, so the task is queued while its worker
++  // starts; the rejection must come from that queued task, not from a host check.
++  const read = vi.spyOn(queryReader, "readMemoryWikiPages").mockImplementation((task, options) => {
++    pending = dispatched(task, options);
++    controller.abort(reason);
++    return pending;
++  });
++
++  await expect(
++    searchMemoryWiki({ config, query: "absent multi term", signal: controller.signal }),
++  ).rejects.toBe(reason);
++  expect(read).toHaveBeenCalledOnce();
++  expect(read.mock.calls[0]?.[0].select).toBe("search");
++  expect(read.mock.calls[0]?.[0].relativePaths).toBeUndefined();
++  expect(read.mock.calls[0]?.[1]?.signal).toBe(controller.signal);
++  await expect(pending).rejects.toBe(reason);
++});
+diff --git a/extensions/memory-wiki/src/query.path-lookup.test.ts b/extensions/memory-wiki/src/query.path-lookup.test.ts
+index f15711e4d60..de98aac948d 100644
+--- a/extensions/memory-wiki/src/query.path-lookup.test.ts
++++ b/extensions/memory-wiki/src/query.path-lookup.test.ts
+@@ -2,10 +2,11 @@
+ import fs from "node:fs/promises";
+ import path from "node:path";
+ import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
+-import { afterEach, describe, expect, it } from "vitest";
++import { afterEach, describe, expect, it, vi } from "vitest";
+ import { compileMemoryWikiVault } from "./compile.js";
+ import { renderWikiMarkdown } from "./markdown.js";
+-import { readQueryableWikiPages } from "./query-pages.js";
++import { readWikiPagesTask } from "./query-pages.js";
++import * as queryReader from "./query-reader.js";
+ import { getMemoryWikiPage } from "./query.js";
+ import { createMemoryWikiTestHarness } from "./test-helpers.js";
+ 
+@@ -14,6 +15,7 @@ const PAGE_COUNT = 20;
+ 
+ afterEach(() => {
+   __setFsSafeTestHooksForTest(undefined);
++  vi.restoreAllMocks();
+ });
+ 
+ async function writePage(
+@@ -76,17 +78,23 @@ describe("wiki_get lookups", () => {
+ 
+   it("resolves id lookups and misses with exactly one full read", async () => {
+     const { rootDir, config } = await createCompiledVault();
++    const listed = (await readWikiPagesTask({ select: "list", rootDir })).relativePaths;
+     const opened = countPageOpens();
+-    await readQueryableWikiPages(rootDir);
+-    const fullRead = opened.splice(0).length;
++    const scans = vi.spyOn(queryReader, "readMemoryWikiPages");
++    const scanned = () => scans.mock.calls.map(([task]) => [task.select, task.relativePaths]);
+ 
+     await expect(getMemoryWikiPage({ config, lookup: "concept.p7" })).resolves.toMatchObject({
+       path: "concepts/p7.md",
+     });
+-    expect(opened).toHaveLength(fullRead);
++    // The full read is one worker scan over the listing, where this thread's open hook
++    // does not fire; the calling thread opens only the page the scan resolved.
++    expect(scanned()).toEqual([["lookup", listed]]);
++    expect(opened).toEqual(["p7.md"]);
++    scans.mockClear();
+     opened.splice(0);
+     await expect(getMemoryWikiPage({ config, lookup: "absent" })).resolves.toBeNull();
+-    expect(opened).toHaveLength(fullRead);
++    expect(scanned()).toEqual([["lookup", listed]]);
++    expect(opened).toEqual([]);
+   });
+ 
+   it("reads one page when several share a basename and settles on the first in path order", async () => {
+@@ -166,21 +174,26 @@ describe("wiki_get lookups", () => {
+     const outsidePath = path.join(outside.rootDir, "outside.md");
+     await fs.writeFile(outsidePath, "outside the vault\n");
+     await writePage(rootDir, "concepts/unrelated.md", { pageType: "concept" });
+-    const unrelated = await fs.realpath(path.join(rootDir, "concepts/unrelated.md"));
+-    __setFsSafeTestHooksForTest({
+-      beforeOpen: async (filePath) => {
+-        if (path.resolve(filePath) === unrelated) {
+-          await fs.unlink(unrelated);
+-          await fs.symlink(outsidePath, unrelated);
+-        }
+-      },
+-    });
++    const unrelated = path.join(rootDir, "concepts/unrelated.md");
++    // The full read runs in the worker, where this thread's open hook does not fire, and
++    // the directory walk skips symlinks, so the page is swapped once it has been listed
++    // and before the worker reads it.
++    const scan = queryReader.readMemoryWikiPages;
++    const scans = vi
++      .spyOn(queryReader, "readMemoryWikiPages")
++      .mockImplementation(async (task, ...rest) => {
++        await fs.unlink(unrelated);
++        await fs.symlink(outsidePath, unrelated);
++        return scan(task, ...rest);
++      });
+ 
+     await expect(getMemoryWikiPage({ config, lookup: "p7" })).resolves.toMatchObject({
+       path: "concepts/p7.md",
+     });
++    expect(scans).not.toHaveBeenCalled();
+     await expect(getMemoryWikiPage({ config, lookup: "absent" })).rejects.toMatchObject({
+       name: "FsSafeError",
+     });
++    expect(scans).toHaveBeenCalledOnce();
+   });
+ });
+diff --git a/extensions/memory-wiki/src/query.reads.test.ts b/extensions/memory-wiki/src/query.reads.test.ts
+index 3fef7f10fc5..e33dd0ebfe8 100644
+--- a/extensions/memory-wiki/src/query.reads.test.ts
++++ b/extensions/memory-wiki/src/query.reads.test.ts
+@@ -1,8 +1,8 @@
+ import fs from "node:fs/promises";
+ import path from "node:path";
+-import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
+ import { afterEach, describe, expect, it, vi } from "vitest";
+ import { compileMemoryWikiVault } from "./compile.js";
++import * as wikiMarkdown from "./markdown.js";
+ import { renderWikiMarkdown } from "./markdown.js";
+ import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
+ import { createMemoryWikiTestHarness } from "./test-helpers.js";
+@@ -10,7 +10,6 @@ import { createMemoryWikiTestHarness } from "./test-helpers.js";
+ const { createVault } = createMemoryWikiTestHarness();
+ 
+ afterEach(() => {
+-  __setFsSafeTestHooksForTest(undefined);
+   vi.restoreAllMocks();
+ });
+ 
+@@ -32,47 +31,6 @@ async function createReadVault(relativePath = "sources/alpha.md") {
+ }
+ 
+ describe("wiki query page reads", () => {
+-  it("reads only compiled metadata candidates for distributed query tokens", async () => {
+-    const { rootDir, config, targetPath, relativePath } = await createReadVault();
+-    await fs.writeFile(
+-      targetPath,
+-      renderWikiMarkdown({
+-        frontmatter: {
+-          pageType: "source",
+-          id: "source.quartz",
+-          title: "Cobalt",
+-          aliases: ["amber"],
+-          questions: ["lantern"],
+-        },
+-        body: "# Cobalt\n\nSelected evidence.\n",
+-      }),
+-    );
+-    const unrelatedPath = path.join(rootDir, "sources", "unrelated.md");
+-    await fs.writeFile(
+-      unrelatedPath,
+-      renderWikiMarkdown({
+-        frontmatter: { pageType: "source", title: "Unrelated" },
+-        body: "# Unrelated\n",
+-      }),
+-    );
+-    const query = "cobalt quartz amber lantern";
+-    const liveResults = await searchMemoryWiki({ config, query, maxResults: 1 });
+-    expect(liveResults[0]?.path).toBe(relativePath);
+-    await compileMemoryWikiVault(config);
+-    const openedPages: string[] = [];
+-    __setFsSafeTestHooksForTest({
+-      beforeOpen: (filePath) => {
+-        if (filePath.endsWith(".md")) {
+-          openedPages.push(filePath);
+-        }
+-      },
+-    });
+-
+-    await expect(searchMemoryWiki({ config, query, maxResults: 1 })).resolves.toEqual(liveResults);
+-    expect(openedPages).toContain(targetPath);
+-    expect(openedPages).not.toContain(unrelatedPath);
+-  });
+-
+   it.each(["large", "hardlinked"] as const)(
+     "keeps exact, basename and ID reads equivalent for a %s page",
+     async (kind) => {
+@@ -166,12 +124,14 @@ describe("wiki query page reads", () => {
+     },
+   );
+ 
+-  it.each(["exact", "basename", "search"] as const)(
+-    "rejects a page swapped outside the vault during %s reads",
++  // Exact reads open the lookup path directly and compiled candidates are read by
++  // path, so a page replaced by a symlink is reached and must be refused. Directory
++  // walks skip symlinks, which is why the whole-vault routes cannot reach one here.
++  it.each(["exact", "search"] as const)(
++    "rejects a compiled or exact page swapped outside the vault during %s reads",
+     async (route) => {
+       const { config, targetPath, relativePath } = await createReadVault();
+       const outside = await createReadVault();
+-      const canonicalTarget = await fs.realpath(targetPath);
+       await fs.writeFile(
+         outside.targetPath,
+         (await fs.readFile(outside.targetPath, "utf8")).replace(
+@@ -179,36 +139,47 @@ describe("wiki query page reads", () => {
+           "outside-vault marker",
+         ),
+       );
+-      let swapped = false;
+-      const swap = async () => {
+-        if (swapped) {
+-          return;
+-        }
+-        swapped = true;
+-        await fs.unlink(targetPath);
+-        await fs.symlink(outside.targetPath, targetPath);
+-      };
+-      __setFsSafeTestHooksForTest({
+-        beforeOpen: async (filePath) => {
+-          if (path.resolve(filePath) === canonicalTarget) {
+-            await swap();
+-          }
+-        },
+-      });
+-      const readdir = vi.spyOn(fs, "readdir");
++      if (route === "search") {
++        await compileMemoryWikiVault(config);
++      }
++      await fs.unlink(targetPath);
++      await fs.symlink(outside.targetPath, targetPath);
+       const read =
+         route === "search"
+           ? searchMemoryWiki({ config, query: "Alpha" })
+-          : getMemoryWikiPage({ config, lookup: route === "exact" ? relativePath : "alpha" });
++          : getMemoryWikiPage({ config, lookup: relativePath });
+ 
+       await expect(read).rejects.toMatchObject({
+         name: "FsSafeError",
+         code: expect.stringMatching(/symlink|path-mismatch/u),
+       });
+-      expect(swapped).toBe(true);
+-      if (route === "exact") {
+-        expect(readdir).not.toHaveBeenCalled();
+-      }
+     },
+   );
++
++  it("never parses whole-vault pages on the calling thread (#166304)", async () => {
++    const { rootDir, config, relativePath } = await createReadVault();
++    await fs.writeFile(
++      path.join(rootDir, "concepts", "beta.md"),
++      renderWikiMarkdown({
++        frontmatter: { pageType: "concept", id: "concept.beta", title: "Beta" },
++        body: "# Beta\n\nanother readable line\n",
++      }),
++    );
++    // Without a compiled digest every search reads the whole vault, and an id lookup
++    // (no path tier matches it) resolves against every page; both parse each page with
++    // this function. Only the lookup's one matched page is parsed here, like any
++    // single-page read.
++    const scan = vi.spyOn(wikiMarkdown, "scanWikiPageSummary");
++
++    const results = await searchMemoryWiki({ config, query: "readable line" });
++    const page = await getMemoryWikiPage({ config, lookup: "source.alpha" });
++
++    expect(
++      results
++        .map((result) => result.path ?? "")
++        .toSorted((left, right) => left.localeCompare(right)),
++    ).toEqual(["concepts/beta.md", relativePath]);
++    expect(page?.path).toBe(relativePath);
++    expect(scan.mock.calls.map(([params]) => params.relativePath)).toEqual([relativePath]);
++  });
+ });
+diff --git a/extensions/memory-wiki/src/query.ts b/extensions/memory-wiki/src/query.ts
+index 9a3ac01a872..a0bbab4d950 100644
+--- a/extensions/memory-wiki/src/query.ts
++++ b/extensions/memory-wiki/src/query.ts
+@@ -1,24 +1,11 @@
+ import path from "node:path";
+-import { setImmediate } from "node:timers/promises";
+ import { resolveSessionAgentIdStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+-import type { MemoryReference, MemoryCitation } from "openclaw/plugin-sdk/memory-host-search";
+ import { resolveIntegerOption } from "openclaw/plugin-sdk/number-runtime";
+-import {
+-  normalizeLowercaseStringOrEmpty,
+-  uniqueStrings,
+-} from "openclaw/plugin-sdk/string-coerce-runtime";
+-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
++import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+ import type { OpenClawConfig } from "../api.js";
+-import { assessClaimFreshness, isClaimContestedStatus } from "./claim-health.js";
+-import {
+-  loadMemoryWikiCompiledCache,
+-  type MemoryWikiCompiledCacheSnapshot,
+-  type MemoryWikiCompiledClaim,
+-  type MemoryWikiCompiledDigestPage,
+-} from "./compiled-cache.js";
++import { loadMemoryWikiCompiledCache } from "./compiled-cache.js";
+ import type { ResolvedMemoryWikiConfig, WikiSearchBackend, WikiSearchCorpus } from "./config.js";
+-import { type WikiClaim, type WikiPageSummary, WIKI_PAGE_GROUPS } from "./markdown.js";
+-import { isPersonLikePage } from "./person-page.js";
++import { WIKI_PAGE_GROUPS } from "./markdown.js";
+ import {
+   isMemoryReferenceLookup,
+   parseMemoryReferenceLookup,
+@@ -27,12 +14,22 @@ import {
+ } from "./query-memory-provider.js";
+ import { resolveQueryableWikiPageForLookup } from "./query-page-lookup.js";
+ import {
+-  listWikiMarkdownFiles,
+-  QUERY_PAGE_READ_CONCURRENCY,
+-  readQueryableWikiPages,
+-  readQueryableWikiPagesByPaths,
+-  type QueryableWikiPage,
++  isWikiPageVisible,
++  readWikiPagesTask,
++  type WikiPageReadScope,
++  type WikiPageVisibility,
+ } from "./query-pages.js";
++import { readMemoryWikiPages } from "./query-reader.js";
++import {
++  buildDigestCandidatePaths,
++  buildWikiResultMetadata,
++  type QueryableWikiPage,
++  sortWikiSearchResults,
++  type WikiResultMetadata,
++  type WikiResultSource,
++  type WikiSearchMode,
++  type WikiSearchResult,
++} from "./query-scoring.js";
+ import {
+   normalizeLookupKey,
+   readSharedMemoryPage,
+@@ -42,110 +39,6 @@ import {
+ } from "./query-shared-memory.js";
+ import { initializeMemoryWikiVault } from "./vault.js";
+ 
+-const WIKI_SNIPPET_MAX_CHARS = 700;
+-const RELATED_BLOCK_PATTERN =
+-  /<!-- openclaw:wiki:related:start -->[\s\S]*?<!-- openclaw:wiki:related:end -->/g;
+-const MARKDOWN_FRONTMATTER_PATTERN = /^\s*---\r?\n[\s\S]*?\r?\n---\r?\n?/;
+-const STRUCTURAL_MARKER_LINE_PATTERN = /^\s*<!--\s*openclaw:(?:wiki|human):[^>]*-->\s*$/;
+-const ROUTE_QUESTION_STOP_WORDS = new Set([
+-  "a",
+-  "about",
+-  "am",
+-  "an",
+-  "are",
+-  "ask",
+-  "asking",
+-  "be",
+-  "been",
+-  "being",
+-  "can",
+-  "could",
+-  "did",
+-  "do",
+-  "does",
+-  "for",
+-  "help",
+-  "how",
+-  "i",
+-  "in",
+-  "is",
+-  "know",
+-  "knows",
+-  "me",
+-  "my",
+-  "need",
+-  "needs",
+-  "of",
+-  "on",
+-  "or",
+-  "our",
+-  "question",
+-  "questions",
+-  "should",
+-  "the",
+-  "to",
+-  "us",
+-  "we",
+-  "what",
+-  "when",
+-  "where",
+-  "who",
+-  "whom",
+-  "whose",
+-  "why",
+-  "with",
+-  "would",
+-]);
+-
+-export const WIKI_SEARCH_MODES = [
+-  "auto",
+-  "find-person",
+-  "route-question",
+-  "source-evidence",
+-  "raw-claim",
+-] as const;
+-
+-export type WikiSearchMode = (typeof WIKI_SEARCH_MODES)[number];
+-
+-type WikiResultMetadata = {
+-  reference?: MemoryReference;
+-  lookup?: string;
+-  citations?: MemoryCitation[];
+-  title: string;
+-  kind: WikiPageSummary["kind"] | "memory";
+-  id?: string;
+-  sourceType?: string;
+-  provenanceMode?: string;
+-  sourcePath?: string;
+-  provenanceLabel?: string;
+-  updatedAt?: string;
+-};
+-
+-type WikiSearchResult = WikiResultMetadata & {
+-  score: number;
+-  snippet: string;
+-  startLine?: number;
+-  endLine?: number;
+-  citation?: string;
+-  memorySource?: string;
+-  searchMode?: WikiSearchMode;
+-  entityType?: string;
+-  canonicalId?: string;
+-  aliases?: string[];
+-  privacyTier?: string;
+-  matchedClaimId?: string;
+-  matchedClaimStatus?: string;
+-  matchedClaimConfidence?: number;
+-  evidenceKinds?: string[];
+-  evidenceSourceIds?: string[];
+-} & WikiResultSource;
+-
+-// Wiki pages and legacy memory read by path; native provider records use opaque lookups.
+-type WikiResultSource =
+-  | { corpus: "wiki"; path: string }
+-  | { corpus: "memory"; path: string; reference?: never; lookup?: never }
+-  | { corpus: "memory"; path?: never; reference: MemoryReference; lookup: string };
+-
+ type WikiGetResult = WikiResultMetadata & {
+   content: string;
+   fromLine: number;
+@@ -164,15 +57,6 @@ type WikiQueryParams = Omit<SharedMemorySearchParams, "query"> &
+     config: ResolvedMemoryWikiConfig;
+   };
+ 
+-function sortWikiSearchResults(results: WikiSearchResult[]): WikiSearchResult[] {
+-  return results.toSorted((left, right) => {
+-    if (left.score !== right.score) {
+-      return right.score - left.score;
+-    }
+-    return left.title.localeCompare(right.title);
+-  });
+-}
+-
+ function mergeWikiSearchCorpusResults(params: {
+   wikiResults: WikiSearchResult[];
+   memoryResults: WikiSearchResult[];
+@@ -201,463 +85,6 @@ function mergeWikiSearchCorpusResults(params: {
+   return sortWikiSearchResults(selected).slice(0, params.maxResults);
+ }
+ 
+-function buildSnippet(raw: string, query: string): string {
+-  const queryLower = normalizeLowercaseStringOrEmpty(query);
+-  const queryTokens = buildQueryTokens(queryLower);
+-  const searchable = buildSearchableBody(raw);
+-  const lines = searchable.split(/\r?\n/).filter((line) => line.trim().length > 0);
+-  let matchingLine = lines.find((line) =>
+-    lineMatchesQuery(normalizeLowercaseStringOrEmpty(line), queryLower, queryTokens),
+-  );
+-  if (matchingLine === undefined && queryTokens.length > 0) {
+-    let bestHits = 0;
+-    for (const line of lines) {
+-      const lineLower = normalizeLowercaseStringOrEmpty(line);
+-      const hits = queryTokens.filter((token) => lineLower.includes(token)).length;
+-      if (hits > bestHits) {
+-        bestHits = hits;
+-        matchingLine = line;
+-      }
+-    }
+-  }
+-  return matchingLine?.trim() || lines.find((line) => line.trim() !== "---")?.trim() || "";
+-}
+-
+-function buildPageSearchFields(
+-  page: QueryableWikiPage | MemoryWikiCompiledDigestPage,
+-  relationships: WikiPageSummary["relationships"] | undefined,
+-): string[] {
+-  return [
+-    page.pageType ?? "",
+-    page.entityType ?? "",
+-    page.canonicalId ?? "",
+-    page.aliases?.join(" ") ?? "",
+-    page.sourceIds.join(" "),
+-    page.questions.join(" "),
+-    page.contradictions.join(" "),
+-    page.privacyTier ?? "",
+-    page.bestUsedFor?.join(" ") ?? "",
+-    page.notEnoughFor?.join(" ") ?? "",
+-    page.personCard?.canonicalId ?? "",
+-    page.personCard?.handles.join(" ") ?? "",
+-    page.personCard?.socials.join(" ") ?? "",
+-    page.personCard?.emails.join(" ") ?? "",
+-    page.personCard?.timezone ?? "",
+-    page.personCard?.lane ?? "",
+-    page.personCard?.askFor.join(" ") ?? "",
+-    page.personCard?.avoidAskingFor.join(" ") ?? "",
+-    page.personCard?.bestUsedFor.join(" ") ?? "",
+-    page.personCard?.notEnoughFor.join(" ") ?? "",
+-    relationships
+-      ?.flatMap((relationship) => [
+-        relationship.targetId ?? "",
+-        relationship.targetPath ?? "",
+-        relationship.targetTitle ?? "",
+-        relationship.kind ?? "",
+-        relationship.evidenceKind ?? "",
+-        relationship.note ?? "",
+-      ])
+-      .join(" ") ?? "",
+-  ];
+-}
+-
+-function buildPageSearchText(page: QueryableWikiPage): string {
+-  return [
+-    page.title,
+-    page.relativePath,
+-    page.id ?? "",
+-    JSON.stringify(page.parsed.frontmatter),
+-    ...buildPageSearchFields(page, page.relationships),
+-    page.claims.map((claim) => claim.text).join(" "),
+-    page.claims.map((claim) => claim.id ?? "").join(" "),
+-    page.claims
+-      .flatMap((claim) =>
+-        claim.evidence.flatMap((evidence) => [
+-          evidence.kind ?? "",
+-          evidence.sourceId ?? "",
+-          evidence.path ?? "",
+-          evidence.lines ?? "",
+-          evidence.note ?? "",
+-          evidence.privacyTier ?? "",
+-        ]),
+-      )
+-      .join(" "),
+-  ]
+-    .filter(Boolean)
+-    .join("\n");
+-}
+-
+-function buildSearchableBody(raw: string): string {
+-  return raw
+-    .replace(RELATED_BLOCK_PATTERN, "")
+-    .replace(MARKDOWN_FRONTMATTER_PATTERN, "")
+-    .split(/\r?\n/)
+-    .filter((line) => !STRUCTURAL_MARKER_LINE_PATTERN.test(line))
+-    .join("\n");
+-}
+-
+-function buildQueryTokens(queryLower: string): string[] {
+-  return [
+-    ...new Set(
+-      queryLower
+-        .split(/[^\p{L}\p{N}\p{M}@._-]+/u)
+-        .map((token) => token.trim())
+-        .filter((token) => token.length >= 2),
+-    ),
+-  ];
+-}
+-
+-function buildRouteQuestionTokens(queryLower: string): string[] {
+-  const tokens = buildQueryTokens(queryLower);
+-  const routedTokens = tokens.filter((token) => !ROUTE_QUESTION_STOP_WORDS.has(token));
+-  return routedTokens.length > 0 ? routedTokens : tokens;
+-}
+-
+-function lineMatchesQuery(
+-  lineLower: string,
+-  queryLower: string,
+-  queryTokens: readonly string[],
+-): boolean {
+-  if (queryLower.length > 0 && lineLower.includes(queryLower)) {
+-    return true;
+-  }
+-  return queryTokens.length > 0 && queryTokens.every((token) => lineLower.includes(token));
+-}
+-
+-function buildDigestPageSearchText(
+-  page: MemoryWikiCompiledDigestPage,
+-  claims: MemoryWikiCompiledClaim[],
+-): string {
+-  return [
+-    page.title,
+-    page.path,
+-    page.id ?? "",
+-    ...buildPageSearchFields(page, page.topRelationships),
+-    claims.map((claim) => claim.text).join(" "),
+-    claims.map((claim) => claim.id ?? "").join(" "),
+-    claims.map((claim) => claim.evidenceKinds?.join(" ") ?? "").join(" "),
+-    claims.map((claim) => claim.privacyTiers?.join(" ") ?? "").join(" "),
+-  ]
+-    .filter(Boolean)
+-    .join("\n");
+-}
+-
+-function isClaimTextOrIdMatch(
+-  claim: Pick<WikiClaim, "id" | "text">,
+-  queryLower: string,
+-  queryTokens: readonly string[] = buildQueryTokens(queryLower),
+-): boolean {
+-  const textLower = normalizeLowercaseStringOrEmpty(claim.text);
+-  if (lineMatchesQuery(textLower, queryLower, queryTokens)) {
+-    return true;
+-  }
+-  return lineMatchesQuery(normalizeLowercaseStringOrEmpty(claim.id), queryLower, queryTokens);
+-}
+-
+-function scoreClaimMatch(params: {
+-  text: string;
+-  id?: string;
+-  confidence?: number;
+-  status?: string;
+-  freshnessLevel?: string;
+-  queryLower: string;
+-  queryTokens?: readonly string[];
+-}): number {
+-  let score = 0;
+-  if (normalizeLowercaseStringOrEmpty(params.text).includes(params.queryLower)) {
+-    score += 25;
+-  } else if (
+-    params.queryTokens?.length &&
+-    params.queryTokens.every((token) =>
+-      normalizeLowercaseStringOrEmpty(params.text).includes(token),
+-    )
+-  ) {
+-    score += 18;
+-  }
+-  if (normalizeLowercaseStringOrEmpty(params.id).includes(params.queryLower)) {
+-    score += 10;
+-  }
+-  if (typeof params.confidence === "number") {
+-    score += Math.round(params.confidence * 10);
+-  }
+-  switch (params.freshnessLevel) {
+-    case "fresh":
+-      score += 8;
+-      break;
+-    case "aging":
+-      score += 4;
+-      break;
+-    case "stale":
+-      score -= 2;
+-      break;
+-    case "unknown":
+-      score -= 4;
+-      break;
+-    case undefined:
+-      break;
+-  }
+-  score += isClaimContestedStatus(params.status) ? -6 : 4;
+-  return score;
+-}
+-
+-function hasAnyQueryMatch(
+-  values: readonly (string | undefined)[],
+-  queryLower: string,
+-  queryTokens: readonly string[],
+-) {
+-  return values.some((value) =>
+-    lineMatchesQuery(normalizeLowercaseStringOrEmpty(value), queryLower, queryTokens),
+-  );
+-}
+-
+-function buildRouteQuestionFields(
+-  page: QueryableWikiPage | MemoryWikiCompiledDigestPage,
+-): string[] {
+-  const relationships = "relationships" in page ? page.relationships : page.topRelationships;
+-  return [
+-    page.personCard?.lane,
+-    ...(page.personCard?.askFor ?? []),
+-    ...(page.personCard?.avoidAskingFor ?? []),
+-    ...(page.bestUsedFor ?? []),
+-    ...(page.notEnoughFor ?? []),
+-    ...(page.personCard?.bestUsedFor ?? []),
+-    ...(page.personCard?.notEnoughFor ?? []),
+-    ...(relationships?.flatMap((relationship) => [
+-      relationship.kind,
+-      relationship.targetTitle,
+-      relationship.note,
+-    ]) ?? []),
+-  ].filter((value): value is string => Boolean(value));
+-}
+-
+-function hasRouteQuestionMatch(values: readonly string[], queryLower: string): boolean {
+-  return hasAnyQueryMatch(values, queryLower, buildRouteQuestionTokens(queryLower));
+-}
+-
+-function scoreWikiSearchModeBoost(params: {
+-  page: QueryableWikiPage | MemoryWikiCompiledDigestPage;
+-  claims: readonly (WikiClaim | MemoryWikiCompiledClaim)[];
+-  matchingClaimCount: number;
+-  queryLower: string;
+-  queryTokens: readonly string[];
+-  mode: WikiSearchMode;
+-}): number {
+-  const { page, queryLower, queryTokens } = params;
+-  switch (params.mode) {
+-    case "auto":
+-      return 0;
+-    case "find-person": {
+-      let score = isPersonLikePage(page) ? 24 : -4;
+-      if (
+-        hasAnyQueryMatch(
+-          [
+-            page.canonicalId,
+-            ...(page.aliases ?? []),
+-            page.personCard?.canonicalId,
+-            ...(page.personCard?.handles ?? []),
+-            ...(page.personCard?.emails ?? []),
+-            ...(page.personCard?.socials ?? []),
+-          ],
+-          queryLower,
+-          queryTokens,
+-        )
+-      ) {
+-        score += 24;
+-      }
+-      return score;
+-    }
+-    case "route-question": {
+-      let score = isPersonLikePage(page) ? 14 : 0;
+-      if (hasRouteQuestionMatch(buildRouteQuestionFields(page), queryLower)) {
+-        score += 32;
+-      }
+-      // Digests retain only top relationships; ranking still uses the full count.
+-      const relationshipCount =
+-        "relationships" in page ? page.relationships.length : (page.relationshipCount ?? 0);
+-      return score + Math.min(8, relationshipCount * 2);
+-    }
+-    case "source-evidence": {
+-      let score = page.kind === "source" ? 22 : 0;
+-      const evidenceFields = params.claims.flatMap((claim) =>
+-        "evidence" in claim
+-          ? claim.evidence.flatMap((evidence) => [
+-              evidence.kind,
+-              evidence.sourceId,
+-              evidence.path,
+-              evidence.lines,
+-              evidence.note,
+-            ])
+-          : [
+-              ...(claim.sourceIds ?? []),
+-              ...(claim.evidenceKinds ?? []),
+-              ...(claim.privacyTiers ?? []),
+-            ],
+-      );
+-      if (
+-        hasAnyQueryMatch(
+-          [
+-            "sourcePath" in page ? page.sourcePath : undefined,
+-            ...page.sourceIds,
+-            ...evidenceFields,
+-          ],
+-          queryLower,
+-          queryTokens,
+-        )
+-      ) {
+-        score += 30;
+-      }
+-      return score;
+-    }
+-    case "raw-claim":
+-      return params.matchingClaimCount > 0 ? 42 : 0;
+-  }
+-  return 0;
+-}
+-
+-function buildDigestCandidatePaths(params: {
+-  snapshot: MemoryWikiCompiledCacheSnapshot;
+-  query: string;
+-  maxResults: number;
+-  mode: WikiSearchMode;
+-}): string[] {
+-  const queryLower = normalizeLowercaseStringOrEmpty(params.query);
+-  const queryTokens = buildQueryTokens(queryLower);
+-  const claimsByPage = new Map<string, MemoryWikiCompiledClaim[]>();
+-  for (const claim of params.snapshot.claims) {
+-    const current = claimsByPage.get(claim.pagePath) ?? [];
+-    current.push(claim);
+-    claimsByPage.set(claim.pagePath, current);
+-  }
+-
+-  return params.snapshot.digest.pages
+-    .map((page) => {
+-      const claims = claimsByPage.get(page.path) ?? [];
+-      const metadataLower = normalizeLowercaseStringOrEmpty(
+-        buildDigestPageSearchText(page, claims),
+-      );
+-      if (
+-        !lineMatchesQuery(metadataLower, queryLower, queryTokens) &&
+-        !(
+-          params.mode === "route-question" &&
+-          hasRouteQuestionMatch(buildRouteQuestionFields(page), queryLower)
+-        )
+-      ) {
+-        return { path: page.path, score: 0 };
+-      }
+-      const matchingClaims = getMatchingClaims(claims, queryLower, queryTokens, (claim) =>
+-        scoreClaimMatch({ ...claim, queryLower, queryTokens }),
+-      );
+-      const score = scorePage({
+-        page,
+-        claims,
+-        matchingClaims,
+-        queryLower,
+-        queryTokens,
+-        mode: params.mode,
+-      });
+-      return { path: page.path, score };
+-    })
+-    .filter((candidate) => candidate.score > 0)
+-    .toSorted((left, right) => {
+-      if (left.score !== right.score) {
+-        return right.score - left.score;
+-      }
+-      return left.path.localeCompare(right.path);
+-    })
+-    .slice(0, Math.max(params.maxResults * 4, 20))
+-    .map((candidate) => candidate.path);
+-}
+-
+-function getMatchingClaims<Claim extends Pick<WikiClaim, "id" | "text">>(
+-  claims: readonly Claim[],
+-  queryLower: string,
+-  queryTokens: readonly string[],
+-  score: (claim: Claim) => number,
+-): Array<{ claim: Claim; score: number }> {
+-  return claims
+-    .filter((claim) => isClaimTextOrIdMatch(claim, queryLower, queryTokens))
+-    .map((claim) => ({ claim, score: score(claim) }))
+-    .toSorted((left, right) => right.score - left.score);
+-}
+-
+-function scorePage(params: {
+-  page: QueryableWikiPage | MemoryWikiCompiledDigestPage;
+-  claims: readonly (WikiClaim | MemoryWikiCompiledClaim)[];
+-  matchingClaims: readonly { score: number }[];
+-  queryLower: string;
+-  queryTokens: readonly string[];
+-  mode: WikiSearchMode;
+-}): number {
+-  const { page, claims, matchingClaims, queryLower, queryTokens, mode } = params;
+-  const titleLower = normalizeLowercaseStringOrEmpty(page.title);
+-  const pathLower = normalizeLowercaseStringOrEmpty(
+-    "relativePath" in page ? page.relativePath : page.path,
+-  );
+-  const idLower = normalizeLowercaseStringOrEmpty(page.id);
+-  let score = 1;
+-  if (titleLower === queryLower) {
+-    score += 50;
+-  } else if (titleLower.includes(queryLower)) {
+-    score += 20;
+-  }
+-  if (pathLower.includes(queryLower)) {
+-    score += 10;
+-  }
+-  if (idLower.includes(queryLower)) {
+-    score += 20;
+-  }
+-  if (page.sourceIds.some((id) => normalizeLowercaseStringOrEmpty(id).includes(queryLower))) {
+-    score += 12;
+-  }
+-  const [bestMatchingClaim] = matchingClaims;
+-  if (bestMatchingClaim) {
+-    score += bestMatchingClaim.score;
+-    score += Math.min(10, (matchingClaims.length - 1) * 2);
+-  }
+-  score += scoreWikiSearchModeBoost({
+-    page,
+-    claims,
+-    matchingClaimCount: matchingClaims.length,
+-    queryLower,
+-    queryTokens,
+-    mode,
+-  });
+-  // Digest candidates admit phrase and distributed token matches in metadata.
+-  // Live pages also match and score their body text.
+-  if (!("raw" in page)) {
+-    return score;
+-  }
+-  const metadataLower = normalizeLowercaseStringOrEmpty(buildPageSearchText(page));
+-  const rawLower = normalizeLowercaseStringOrEmpty(buildSearchableBody(page.raw));
+-  const fields = [titleLower, pathLower, idLower, metadataLower, rawLower];
+-  const combinedLower = fields.join("\n");
+-  if (
+-    !fields.some((field) => field.includes(queryLower)) &&
+-    !(queryTokens.length > 0 && queryTokens.every((token) => combinedLower.includes(token))) &&
+-    !(
+-      mode === "route-question" && hasRouteQuestionMatch(buildRouteQuestionFields(page), queryLower)
+-    )
+-  ) {
+-    return 0;
+-  }
+-  score += Math.min(10, rawLower.split(queryLower).length - 1);
+-  for (const token of queryTokens) {
+-    if (titleLower.includes(token)) {
+-      score += 8;
+-    }
+-    if (pathLower.includes(token) || idLower.includes(token)) {
+-      score += 6;
+-    }
+-    if (metadataLower.includes(token)) {
+-      score += 4;
+-    }
+-    if (rawLower.includes(token)) {
+-      score += 1;
+-    }
+-  }
+-  return score;
+-}
+-
+ function resolveExactWikiPagePath(lookup: string): string | null {
+   const normalized = normalizeLookupKey(lookup);
+   const segments = normalized.split("/");
+@@ -674,22 +101,14 @@ function resolveExactWikiPagePath(lookup: string): string | null {
+   return normalized;
+ }
+ 
+-function isBridgeCompiledPage(page: QueryableWikiPage): boolean {
+-  return (
+-    page.sourceType === "memory-bridge" ||
+-    page.sourceType === "memory-bridge-events" ||
+-    page.bridgeAgentIds.length > 0
+-  );
+-}
+-
+-function createWikiPageVisibilityFilter(params: {
++function resolveWikiPageVisibility(params: {
+   appConfig?: OpenClawConfig;
+   agentId?: string;
+   agentSessionKey?: string;
+   sandboxed?: boolean;
+-}): (page: QueryableWikiPage) => boolean {
++}): WikiPageVisibility | null {
+   if (params.sandboxed !== true) {
+-    return () => true;
++    return null;
+   }
+   const sessionKey = params.agentSessionKey?.trim();
+   const scopedAgentId = normalizeLowercaseStringOrEmpty(
+@@ -698,12 +117,7 @@ function createWikiPageVisibilityFilter(params: {
+         ? resolveSessionAgentIdStrict({ sessionKey, config: params.appConfig })
+         : undefined),
+   );
+-  return (page) =>
+-    !isBridgeCompiledPage(page) ||
+-    (scopedAgentId.length > 0 &&
+-      page.bridgeAgentIds.some(
+-        (agentId) => normalizeLowercaseStringOrEmpty(agentId) === scopedAgentId,
+-      ));
++  return { scopedAgentId };
+ }
+ 
+ function shouldUseSharedMemory(config: ResolvedMemoryWikiConfig): boolean {
+@@ -759,87 +173,12 @@ function applySearchOverrides(
+   };
+ }
+ 
+-function buildWikiProvenanceLabel(page: WikiPageSummary): string | undefined {
+-  if (page.sourceType === "memory-bridge-events") {
+-    return `bridge events: ${page.bridgeRelativePath ?? page.relativePath}`;
+-  }
+-  if (page.sourceType === "memory-bridge") {
+-    return `bridge: ${page.bridgeRelativePath ?? page.relativePath}`;
+-  }
+-  if (page.provenanceMode === "unsafe-local" || page.sourceType === "memory-unsafe-local") {
+-    return `unsafe-local: ${page.unsafeLocalRelativePath ?? page.relativePath}`;
+-  }
+-  return undefined;
+-}
+-
+-function buildWikiResultMetadata(page: WikiPageSummary) {
+-  const provenanceLabel = buildWikiProvenanceLabel(page);
+-  return {
+-    ...(page.id ? { id: page.id } : {}),
+-    ...(page.sourceType ? { sourceType: page.sourceType } : {}),
+-    ...(page.provenanceMode ? { provenanceMode: page.provenanceMode } : {}),
+-    ...(page.sourcePath ? { sourcePath: page.sourcePath } : {}),
+-    ...(provenanceLabel ? { provenanceLabel } : {}),
+-    ...(page.updatedAt ? { updatedAt: page.updatedAt } : {}),
+-    ...(page.entityType ? { entityType: page.entityType } : {}),
+-    ...(page.canonicalId ? { canonicalId: page.canonicalId } : {}),
+-    ...(page.aliases.length > 0 ? { aliases: [...page.aliases] } : {}),
+-    ...(page.privacyTier ? { privacyTier: page.privacyTier } : {}),
+-  };
+-}
+-
+-function toWikiSearchResult(
+-  page: QueryableWikiPage,
+-  query: string,
+-  mode: WikiSearchMode,
+-): WikiSearchResult {
+-  const queryLower = normalizeLowercaseStringOrEmpty(query);
+-  const queryTokens = buildQueryTokens(queryLower);
+-  const matchingClaims = getMatchingClaims(page.claims, queryLower, queryTokens, (claim) =>
+-    scoreClaimMatch({
+-      ...claim,
+-      freshnessLevel: assessClaimFreshness({ page, claim }).level,
+-      queryLower,
+-      queryTokens,
+-    }),
+-  );
+-  const matchingClaim = matchingClaims[0]?.claim;
+-  return {
+-    corpus: "wiki",
+-    path: page.relativePath,
+-    title: page.title,
+-    kind: page.kind,
+-    score: scorePage({ page, claims: page.claims, matchingClaims, queryLower, queryTokens, mode }),
+-    snippet: truncateUtf16Safe(
+-      matchingClaim?.text ?? buildSnippet(page.raw, query),
+-      WIKI_SNIPPET_MAX_CHARS,
+-    ),
+-    searchMode: mode,
+-    ...buildWikiResultMetadata(page),
+-    ...(matchingClaim
+-      ? {
+-          ...(matchingClaim.id ? { matchedClaimId: matchingClaim.id } : {}),
+-          ...(matchingClaim.status ? { matchedClaimStatus: matchingClaim.status } : {}),
+-          ...(typeof matchingClaim.confidence === "number"
+-            ? { matchedClaimConfidence: matchingClaim.confidence }
+-            : {}),
+-          evidenceKinds: uniqueStrings(
+-            matchingClaim.evidence.flatMap((evidence) => evidence.kind ?? []),
+-          ),
+-          evidenceSourceIds: uniqueStrings(
+-            matchingClaim.evidence.flatMap((evidence) => evidence.sourceId ?? []),
+-          ),
+-        }
+-      : {}),
+-  };
+-}
+-
+ async function searchWikiCorpus(params: {
+   config: ResolvedMemoryWikiConfig;
+   query: string;
+   maxResults: number;
+   mode: WikiSearchMode;
+-  canReadPage: (page: QueryableWikiPage) => boolean;
++  visibility: WikiPageVisibility | null;
+   signal?: AbortSignal;
+ }): Promise<WikiSearchResult[]> {
+   params.signal?.throwIfAborted();
+@@ -853,54 +192,86 @@ async function searchWikiCorpus(params: {
+         mode: params.mode,
+       })
+     : [];
+-  const candidatePages =
+-    candidatePaths.length > 0
+-      ? await readQueryableWikiPagesByPaths(rootDir, candidatePaths, params.signal)
+-      : await readQueryableWikiPages(rootDir, params.signal);
+-  const results: WikiSearchResult[] = [];
+-  const scorePages = async (pages: QueryableWikiPage[]) => {
+-    let index = 0;
+-    for (const page of pages) {
+-      // Let deadlines and turn cancellation run during CPU-bound scoring too.
+-      if (params.signal && index++ % QUERY_PAGE_READ_CONCURRENCY === 0) {
+-        await setImmediate();
+-      }
+-      params.signal?.throwIfAborted();
+-      if (params.canReadPage(page)) {
+-        const result = toWikiSearchResult(page, params.query, params.mode);
+-        if (result.score > 0) {
+-          results.push(result);
+-        }
+-      }
+-    }
+-  };
+-  await scorePages(candidatePages);
++  const search = (scope: Partial<Pick<WikiPageReadScope, "relativePaths" | "excludePaths">>) =>
++    readMemoryWikiPages(
++      {
++        rootDir,
++        visibility: params.visibility,
++        select: "search",
++        query: params.query,
++        mode: params.mode,
++        maxResults: params.maxResults,
++        ...scope,
++      },
++      params.signal ? { signal: params.signal } : {},
++    );
++  // Each read returns its top maxResults; the merge below only ever consumes that many.
++  const { results } = await search(
++    candidatePaths.length > 0 ? { relativePaths: candidatePaths } : {},
++  );
+   if (candidatePaths.length === 0 || results.length >= params.maxResults) {
+     return results;
+   }
+ 
+-  const seenPaths = new Set(candidatePages.map((page) => page.relativePath));
+-  const remainingPaths = (await listWikiMarkdownFiles(rootDir)).filter(
+-    (relativePath) => !seenPaths.has(relativePath),
+-  );
+-  const remainingPages = await readQueryableWikiPagesByPaths(
+-    rootDir,
+-    remainingPaths,
+-    params.signal,
++  const remaining = await search({ excludePaths: candidatePaths });
++  return [...results, ...remaining.results];
++}
++
++async function readWikiPage(
++  rootDir: string,
++  relativePath: string,
++  visibility: WikiPageVisibility | null,
++  signal?: AbortSignal,
++): Promise<QueryableWikiPage | null> {
++  // One page is read on the calling thread with the reader the worker runs, so an
++  // exact-path wiki_get or a digest claim read never waits behind a whole-vault scan.
++  const { page } = await readWikiPagesTask(
++    { rootDir, relativePaths: [relativePath], visibility, select: "page" },
++    signal,
+   );
+-  await scorePages(remainingPages);
+-  return results;
++  return page;
+ }
+ 
+ async function readExactWikiPage(
+   rootDir: string,
+   lookup: string,
++  visibility: WikiPageVisibility | null,
++  signal?: AbortSignal,
+ ): Promise<QueryableWikiPage | null> {
+   const relativePath = resolveExactWikiPagePath(lookup);
+   if (!relativePath) {
+     return null;
+   }
+-  return (await readQueryableWikiPagesByPaths(rootDir, [relativePath]))[0] ?? null;
++  return readWikiPage(rootDir, relativePath, visibility, signal);
++}
++
++/** The vault listing is a directory walk, so it stays on the calling thread like one-page reads. */
++async function listWikiPages(rootDir: string, signal?: AbortSignal): Promise<string[]> {
++  return (await readWikiPagesTask({ select: "list", rootDir }, signal)).relativePaths;
++}
++
++/** Resolve one page by path, basename or id over the page keys the reader pool reads. */
++export async function readMemoryWikiPageByLookup(
++  rootDir: string,
++  lookup: string,
++  options: {
++    visibility?: WikiPageVisibility | null;
++    /** The pages to resolve over; the whole vault when absent. */
++    relativePaths?: string[];
++    signal?: AbortSignal;
++  } = {},
++): Promise<QueryableWikiPage | null> {
++  const { page } = await readMemoryWikiPages(
++    {
++      rootDir,
++      visibility: options.visibility ?? null,
++      ...(options.relativePaths ? { relativePaths: options.relativePaths } : {}),
++      select: "lookup",
++      lookup,
++    },
++    options.signal ? { signal: options.signal } : {},
++  );
++  return page;
+ }
+ 
+ export async function searchMemoryWiki(
+@@ -939,8 +310,8 @@ export async function searchMemoryWiki(
+         query: params.query,
+         maxResults,
+         mode,
+-        canReadPage: createWikiPageVisibilityFilter(params),
+-        signal: params.signal,
++        visibility: resolveWikiPageVisibility(params),
++        ...(params.signal ? { signal: params.signal } : {}),
+       })
+     : [];
+   params.signal?.throwIfAborted();
+@@ -985,25 +356,44 @@ export async function getMemoryWikiPage(
+       : null;
+ 
+   if (!reference && shouldSearchWiki(effectiveConfig)) {
+-    const canReadPage = createWikiPageVisibilityFilter(params);
++    const rootDir = effectiveConfig.vault.path;
++    const visibility = resolveWikiPageVisibility(params);
+     const digest = await loadMemoryWikiCompiledCache(effectiveConfig);
+     const claimId = params.lookup.trim().replace(/^claim:/i, "");
+     const digestClaimPagePath = digest?.claims.find((claim) => claim.id === claimId)?.pagePath;
+     const digestLookupPage = digestClaimPagePath
+-      ? ((
+-          await readQueryableWikiPagesByPaths(effectiveConfig.vault.path, [digestClaimPagePath])
+-        ).find(canReadPage) ?? null)
++      ? await readWikiPage(rootDir, digestClaimPagePath, visibility, params.signal)
+       : null;
+     // Claim IDs may themselves be paths; preserve their established lookup priority.
+     const page =
+       digestLookupPage ??
+       (await resolveQueryableWikiPageForLookup({
+         lookup: params.lookup,
+-        readExactPage: () => readExactWikiPage(effectiveConfig.vault.path, params.lookup),
+-        listFiles: () => listWikiMarkdownFiles(effectiveConfig.vault.path),
+-        readPages: (relativePaths) =>
+-          readQueryableWikiPagesByPaths(effectiveConfig.vault.path, relativePaths),
+-        canReadPage,
++        readExactPage: () => readExactWikiPage(rootDir, params.lookup, visibility, params.signal),
++        listFiles: () => listWikiPages(rootDir, params.signal),
++        // The owner reads a path-tier candidate one page at a time and the full read as
++        // one call over the listing. A one-page read runs on the calling thread like an
++        // exact path; the full read is a worker scan over those pages that returns the
++        // page the lookup resolves to, or none. That is enough for the owner because its
++        // final resolve runs the same lookup over whatever this returns, so the result is
++        // the page a read of every listed page would pick.
++        readPages: async (relativePaths) => {
++          const [onlyPath] = relativePaths;
++          if (onlyPath === undefined) {
++            return [];
++          }
++          const candidate =
++            relativePaths.length === 1
++              ? await readWikiPage(rootDir, onlyPath, visibility, params.signal)
++              : await readMemoryWikiPageByLookup(rootDir, params.lookup, {
++                  visibility,
++                  relativePaths,
++                  ...(params.signal ? { signal: params.signal } : {}),
++                });
++          return candidate ? [candidate] : [];
++        },
++        // The reader already applies the session scope; this keeps the owner's contract whole.
++        canReadPage: (candidate) => isWikiPageVisible(candidate, visibility),
+       }));
+     if (page) {
+       const lines = page.parsed.body.split(/\r?\n/);
+@@ -1031,5 +421,3 @@ export async function getMemoryWikiPage(
+   }
+   return await readSharedMemoryPage({ ...params, fromLine, lineCount }, reference);
+ }
+-
+-/* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */
+diff --git a/extensions/memory-wiki/src/tool.ts b/extensions/memory-wiki/src/tool.ts
+index 8f6c89620fd..308ee5203e3 100644
+--- a/extensions/memory-wiki/src/tool.ts
++++ b/extensions/memory-wiki/src/tool.ts
+@@ -15,7 +15,8 @@ import {
+ } from "./config.js";
+ import { lintMemoryWikiVault } from "./lint.js";
+ import { renderWikiMutationSummary, renderWikiSearchResults } from "./presentation.js";
+-import { getMemoryWikiPage, searchMemoryWiki, WIKI_SEARCH_MODES } from "./query.js";
++import { WIKI_SEARCH_MODES } from "./query-scoring.js";
++import { getMemoryWikiPage, searchMemoryWiki } from "./query.js";
+ import { syncMemoryWikiImportedSources } from "./source-sync.js";
+ import { renderMemoryWikiStatus, resolveMemoryWikiStatus } from "./status.js";
+ 

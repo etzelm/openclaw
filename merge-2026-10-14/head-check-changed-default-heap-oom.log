@@ -1,0 +1,63 @@
+$ node scripts/check-changed.mjs --base origin/main
+
+<--- Last few GCs --->
+
+[97646:0x776680c000]   377061 ms: Scavenge (interleaved) 4070.7 (4086.8) -> 4066.4 (4104.8) MB, pooled: 0 MB, 6.08 / 0.00 ms  (average mu = 0.120, current mu = 0.067) allocation failure; 
+[97646:0x776680c000]   377611 ms: Mark-Compact (reduce) 4066.5 (4104.8) -> 4066.1 (4075.5) MB, pooled: 0 MB, 525.38 / 0.00 ms  (+ 2.1 ms in 1 steps since start of marking, biggest step 2.1 ms, walltime since start of marking 531 ms) (average mu = 0.125, c
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x105fdedb4 node::(anonymous namespace)::DefaultAbortHandler(char const*, char const*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 2: 0x105fdef84 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 3: 0x10512a5d0 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 4: 0x10512a588 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 5: 0x1052e9edc v8::internal::Heap::ShouldOptimizeForLoadTime() const [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 6: 0x1052ec574 v8::internal::Heap::OldGenerationConsumedBytes() const [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 7: 0x1052ec414 v8::internal::Heap::RecomputeLimits(v8::internal::GarbageCollector, v8::base::TimeTicks) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 8: 0x1052f9658 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags)::$_1::operator()() const [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+ 9: 0x1052f92fc void heap::base::Stack::SetMarkerAndCallbackImpl<v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags)::$_1>(heap::base::Stack*, void*, void const*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+10: 0x1059518b8 PushAllRegistersAndIterateStack [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+11: 0x1052e8594 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+12: 0x105276b00 v8::internal::StackGuard::HandleInterrupts(v8::internal::StackGuard::InterruptLevel) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+13: 0x1055f7a50 v8::internal::Runtime_HandleNoHeapWritesInterrupts(int, unsigned long*, v8::internal::Isolate*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+14: 0x105a0e234 Builtins_CEntry_Return1_ArgvOnStack_NoBuiltinExit [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+15: 0x12a897864 
+16: 0x10596d978 Builtins_JSConstructStubGeneric [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+17: 0x12a892950 
+18: 0x12a790298 
+19: 0x12a893390 
+20: 0x12a790298 
+21: 0x12a893128 
+22: 0x12a790298 
+23: 0x12a893390 
+24: 0x12a790298 
+25: 0x12a893128 
+26: 0x12a790298 
+27: 0x12a86bbe8 
+28: 0x12a72323c 
+29: 0x12a87a4c0 
+30: 0x105a278a0 Builtins_FlattenIntoArrayWithMapFn [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+31: 0x105a28798 Builtins_ArrayPrototypeFlatMap [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+32: 0x105970bec Builtins_InterpreterEntryTrampoline [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+33: 0x1059716e0 Builtins_InterpreterEnterAtBytecode [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+34: 0x105970bec Builtins_InterpreterEntryTrampoline [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+35: 0x1059af7e8 Builtins_AsyncFunctionAwaitResolveClosure [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+36: 0x105a84e58 Builtins_PromiseFulfillReactionJob [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+37: 0x10599ebd0 Builtins_RunMicrotasks [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+38: 0x10596e7b0 Builtins_JSRunMicrotasksEntry [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+39: 0x105253a8c v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+40: 0x105254134 v8::internal::(anonymous namespace)::InvokeWithTryCatch(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+41: 0x105254224 v8::internal::Execution::TryRunMicrotasks(v8::internal::Isolate*, v8::internal::MicrotaskQueue*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+42: 0x1052750a8 v8::internal::MicrotaskQueue::RunMicrotasks(v8::internal::Isolate*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+43: 0x105274ec4 v8::internal::MicrotaskQueue::PerformCheckpointInternal(v8::Isolate*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+44: 0x104ecbff4 node::InternalCallbackScope::Close() [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+45: 0x104ecbe8c node::InternalCallbackScope::~InternalCallbackScope() [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+46: 0x104f501c4 node::StartExecution(node::Environment*, std::__1::function<v8::MaybeLocal<v8::Value> (node::StartExecutionCallbackInfoWithModule const&)>) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+47: 0x104ed1584 node::LoadEnvironment(node::Environment*, std::__1::function<v8::MaybeLocal<v8::Value> (node::StartExecutionCallbackInfoWithModule const&)>, std::__1::function<void (node::Environment*, v8::Local<v8::Value>, v8::Local<v8::Value>)>) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+48: 0x104fb8754 node::NodeMainInstance::Run(node::ExitCode*, node::Environment*) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+49: 0x104fb8544 node::NodeMainInstance::Run() [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+50: 0x104f52d94 node::Start(int, char**) [~/homebrew/Cellar/node@24/24.21.0/lib/libnode.137.dylib]
+51: 0x19d94fe80 start [/usr/lib/dyld]
+sh: line 1: 97645 Abort trap: 6           node scripts/check-changed.mjs --base origin/main
+[ELIFECYCLE] Command failed with exit code 134.
+check exit=134

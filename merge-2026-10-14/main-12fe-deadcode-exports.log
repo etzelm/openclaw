@@ -1,0 +1,35 @@
+$ node --import ./scripts/tsx.mjs scripts/check-deadcode-exports.mts
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  src/config/sessions/session-accessor.sqlite-entry-cache.types.ts: assertSessionEntryCreationCurrent
+  src/config/sessions/session-entry-patch.worker.ts: createSessionWorkerOperationContext
+  src/gateway/worker-environments/preparation-identity.schema.ts: WorkerPreparationArtifactsSchema
+  src/infra/database-engine/contract.ts: PostgresSchemaDefinition
+  src/infra/database-engine/postgres-schema.ts: postgresSchemaFingerprint
+  src/infra/device-pairing-store.ts: readPairedDevicePairingRecordsFromDatabase
+  src/infra/git-root.ts: readGitMetadataFile
+  ui/src/pages/chat/components/session-diff-render.tsx: SessionSplitDiff
+Delete the exports or model their real production consumers in Knip.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  src/config/sessions/session-accessor.sqlite-entry-cache.types.ts: assertSessionEntryCreationCurrent
+  src/gateway/worker-environments/preparation-identity.schema.ts: WorkerPreparationArtifactsSchema
+  src/infra/database-engine/contract.ts: PostgresSchemaDefinition
+  src/infra/database-engine/postgres-schema.ts: postgresSchemaFingerprint
+  src/infra/git-root.ts: readGitMetadataFile
+  ui/src/components/provider-icon.ts: renderProviderFallbackIcon
+  ui/src/components/settings-ui.ts: renderSettingsEmpty
+  ui/src/components/settings-ui.ts: renderSettingsNavRow
+  ui/src/components/settings-ui.ts: renderSettingsPage
+  ui/src/components/settings-ui.ts: renderSettingsPageHeader
+  ui/src/components/settings-ui.ts: renderSettingsSection
+  ui/src/components/settings-ui.ts: renderSettingsToggle
+  ui/src/components/settings-ui.ts: renderSettingsToggleRow
+  ui/src/components/settings-ui.ts: renderSettingsValue
+  ui/src/pages/chat/components/chat-diff-highlight.runtime.ts: highlightDiffLines (diffSyntax)
+  ui/src/pages/chat/components/chat-diff-highlight.runtime.ts: highlightDiffTokens
+  ui/src/pages/chat/components/session-diff-render.tsx: SessionSplitDiff
+Delete the exports or model their real production consumers in Knip.
+[ELIFECYCLE] Command failed with exit code 1.
+exit=1
