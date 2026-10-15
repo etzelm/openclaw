@@ -1,4 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  clearRuntimeConfigSnapshot,
+  setRuntimeConfigSnapshot,
+} from "../../../config/runtime-snapshot.js";
 import { resetGatewayWorkAdmission } from "../../../process/gateway-work-admission.js";
 import {
   SUBAGENT_ENDED_REASON_ERROR,
@@ -21,7 +25,13 @@ vi.mock("../../agent-bundle-mcp-tools.js", async (importOriginal) => ({
 
 beforeEach(() => {
   resetGatewayWorkAdmission();
+  // Completion captures session-store watcher paths from the prepared runtime config.
+  setRuntimeConfigSnapshot({});
   vi.mocked(persistSubagentSessionTiming).mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+  clearRuntimeConfigSnapshot();
 });
 
 const createController = (entry: SubagentRunRecord) =>
