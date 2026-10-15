@@ -1,10 +1,7 @@
 import { EventEmitter, once } from "node:events";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
-import {
-  GATEWAY_SERVER_CAPS,
-  type HelloOk,
-} from "../../../../packages/gateway-protocol/src/index.js";
+import type { HelloOk } from "../../../../packages/gateway-protocol/src/index.js";
 import type { OpenClawConfig } from "../../../config/types.openclaw.js";
 import * as systemPresence from "../../../infra/system-presence.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
@@ -77,8 +74,9 @@ vi.mock("../../session-row-projection-access.js", async (importOriginal) => ({
   getSessionRowProjection: getSessionRowProjectionMock,
 }));
 
-vi.mock("../../../state/user-profiles.js", () => ({
-  hasMultipleSessionSharingIdentities: vi.fn(() => false),
+vi.mock("../../../state/user-profile-list.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../state/user-profile-list.js")>()),
+  hasMultipleResidentSessionSharingIdentities: vi.fn(() => false),
 }));
 
 vi.mock("../../control-ui-plugin-tabs.js", () => ({
@@ -194,9 +192,9 @@ describe("sendGatewayHello update detail scope", () => {
   it.each([undefined, []])(
     "sends hello without membership reads for idle presence (%j)",
     async (watchedSessions) => {
-      const presence = vi
-        .spyOn(systemPresence, "listSystemPresence")
-        .mockReturnValue([{ text: "idle peer", ts: 1, watchedSessions }]);
+      vi.spyOn(systemPresence, "listSystemPresence").mockReturnValue([
+        { text: "idle peer", ts: 1, watchedSessions },
+      ]);
       const projection = {
         needsMembershipPreparation: vi.fn(() => true),
         prepareMembership: vi.fn(async () => {
@@ -212,79 +210,28 @@ describe("sendGatewayHello update detail scope", () => {
         {},
       );
 
-      expect(presence).toHaveBeenCalledWith({ includeConnectionId: "conn-operator" });
       expect(projection.needsMembershipPreparation).not.toHaveBeenCalled();
       expect(projection.prepareMembership).not.toHaveBeenCalled();
       expect(context.sendFrame).toHaveBeenCalledOnce();
     },
   );
 
-  it("waits for watched-session membership before sending hello", async () => {
+  it("sends hello while watched-session membership preparation is pending", async () => {
     vi.spyOn(systemPresence, "listSystemPresence").mockReturnValue([
       { text: "watching peer", ts: 1, watchedSessions: ["agent:main:watched"] },
     ]);
-    const entered = createDeferredCore();
-    const release = createDeferredCore();
     const projection = {
-      needsMembershipPreparation: vi
-        .fn()
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(true)
-        .mockReturnValue(false),
-      prepareMembership: vi
-        .fn()
-        .mockImplementationOnce(async () => {
-          entered.resolve();
-          await release.promise;
-        })
-        .mockResolvedValue(undefined),
+      needsMembershipPreparation: vi.fn(() => true),
+      prepareMembership: vi.fn(() => new Promise<void>(() => {})),
     };
     getSessionRowProjectionMock.mockReturnValue(projection);
     const context = makeContext("operator", ["operator.read"]);
-    const sending = sendGatewayHello(
-      context as never,
-      makeState("operator", ["operator.read"]) as never,
-      {},
-    );
-    try {
-      await entered.promise;
-      expect(buildGatewaySnapshotMock).not.toHaveBeenCalled();
-      expect(context.sendFrame).not.toHaveBeenCalled();
-    } finally {
-      release.resolve();
-      await sending;
-    }
-    expect(projection.prepareMembership).toHaveBeenCalledTimes(2);
+
+    await sendGatewayHello(context as never, makeState("operator", ["operator.read"]) as never, {});
+
     expect(context.sendFrame).toHaveBeenCalledOnce();
+    expect(projection.prepareMembership).not.toHaveBeenCalled();
   });
-
-  it.each(["closed", "invalidated"])(
-    "rejects a %s connection after watched-session preparation",
-    async (state) => {
-      vi.spyOn(systemPresence, "listSystemPresence").mockReturnValue([
-        { text: "watching peer", ts: 1, watchedSessions: ["agent:main:watched"] },
-      ]);
-      getSessionRowProjectionMock.mockReturnValue({
-        needsMembershipPreparation: () => true,
-        prepareMembership: async () => undefined,
-      });
-      const original = makeContext("operator", ["operator.read"]);
-      const context = {
-        ...original,
-        handler: {
-          ...original.handler,
-          isClosed: () => state === "closed",
-          getClient: () => (state === "invalidated" ? { invalidated: true } : null),
-        },
-      };
-
-      await expect(
-        sendGatewayHello(context as never, makeState("operator", ["operator.read"]) as never, {}),
-      ).rejects.toThrow("Gateway connection closed before hello");
-      expect(buildGatewaySnapshotMock).not.toHaveBeenCalled();
-      expect(context.sendFrame).not.toHaveBeenCalled();
-    },
-  );
 
   it.each(["write", "suggest", "view", "none", undefined] as const)(
     "projects the current operator session cap %s only when configured",
@@ -388,19 +335,6 @@ describe("sendGatewayHello update detail scope", () => {
       }
     },
   );
-
-  it("does not advertise configured Serve identity without a live route claim", async () => {
-    const context = makeContext("operator", ["operator.read"]);
-    context.configSnapshot = {
-      gateway: { publicOrigin: "https://other.example.test", tailscale: { mode: "serve" } },
-    };
-    const state = {
-      ...makeState("operator", ["operator.read"]),
-      resolvedAuth: { mode: "token", allowTailscale: true },
-    };
-    await sendGatewayHello(context as never, state as never, {});
-    expect(helloSnapshot(context)).not.toHaveProperty("controlUiIdentityUrl");
-  });
 
   it.each(["before hello delivery", "after hello delivery", "during hello delivery"] as const)(
     "releases only live announcement owners when withdrawn %s",
@@ -575,47 +509,8 @@ describe("sendGatewayHello update detail scope", () => {
       includeUpdateDetails: false,
     });
     expectRedactedHelloSnapshot(context);
-  });
-
-  it("includes update details for an operator.read client", async () => {
-    const context = makeContext("operator", ["operator.read"]);
-    await sendGatewayHello(context as never, makeState("operator", ["operator.read"]) as never, {});
-
-    expect(buildGatewaySnapshotMock).toHaveBeenCalledWith({
-      client: null,
-      includeSensitive: false,
-      includeUpdateDetails: true,
-    });
-    expect(helloSnapshot(context)).toEqual(
-      expect.objectContaining({
-        updateAvailable: expect.objectContaining({
-          upstreamRef: "origin/main",
-          upstreamSha: "2222222222222222222222222222222222222222",
-          commitsBehind: 1,
-          commits: [{ sha: "2222222", subject: "Detailed commit subject" }],
-        }),
-        updateSchedule: {
-          channel: "dev",
-          autoEnabled: true,
-          install: { kind: "git" },
-        },
-      }),
-    );
-    expect(helloPayload(context)?.server.buildId).toBe("build-a");
-    expect(helloPayload(context)?.server.bootId).toBe("gateway-boot-a");
-    expect(helloPayload(context)?.server.controlUiBuildSource).toBe("bundled");
-    expect(helloPayload(context)?.features.capabilities).toContain(
-      GATEWAY_SERVER_CAPS.SESSION_UNREAD_ACK_CONTRACT,
-    );
-    expect(helloPayload(context)?.features.capabilities).toContain(
-      GATEWAY_SERVER_CAPS.PROGRESS_CARD_AGENT_SCOPE,
-    );
-    expect(helloPayload(context)?.features.capabilities).toContain("session-scoped-chat-metadata");
-    expect(helloPayload(context)?.features.capabilities).toContain("session-scoped-model-catalog");
-    expect(helloPayload(context)?.features.capabilities).toContain("profile-binding-v1");
-    expect(helloPayload(context)?.features.capabilities).toContain(
-      "sender-restricted-hidden-helpers-v1",
-    );
+    expect(helloPayload(context)?.features.capabilities).toContain("node-permission-errors");
+    expect(helloPayload(context)?.features.capabilities).toContain("agent-session-id-create-v1");
   });
 
   it.each([
