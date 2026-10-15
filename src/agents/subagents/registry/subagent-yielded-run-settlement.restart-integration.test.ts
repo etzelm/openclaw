@@ -59,7 +59,8 @@ describe("yielded run settlement", () => {
   // The pre-fix shapes seen in the field: the yield marker with no collector completion, and the
   // execution outcome either absent (#141474 comment of 9/13) or `ok` (the issue body). A recorded
   // `ok` is kept and read as the result, as a collector that yields now settles; only the absent
-  // shape takes the diagnostic error.
+  // shape takes the diagnostic error. A recorded `error` is kept as the failure and is not marked
+  // either: the marker means the sweeper substituted the diagnostic.
   const DIAGNOSTIC = expect.stringContaining("no recorded collectorCompletion");
   const LEGACY_SHAPES = [
     {
@@ -78,9 +79,17 @@ describe("yielded run settlement", () => {
       waited: { status: "done", result: YIELDED_REPLY },
       reason: undefined,
     },
+    {
+      shape: "execution.outcome error with endedAt",
+      outcome: { status: "error" as const, error: "recorded failure" },
+      settledOutcome: { status: "error", error: "recorded failure" },
+      endedReason: "subagent-error",
+      waited: { status: "failed", error: "recorded failure", result: "" },
+      reason: undefined,
+    },
   ];
   const legacyYieldedCollector = (
-    outcome?: { status: "ok" },
+    outcome?: { status: "ok" } | { status: "error"; error: string },
     overrides: Partial<SubagentRunRecord> = {},
   ) =>
     makeRunRecord({
@@ -187,7 +196,7 @@ describe("yielded run settlement", () => {
       expect(waited.completed).toMatchObject([expectedWait]);
       expect(waited.completed[0]?.reason).toBe(reason);
       expect("reason" in (waited.completed[0] ?? {})).toBe(reason !== undefined);
-      if (outcome) {
+      if (outcome?.status === "ok") {
         expect(waited.completed[0]?.error).toBeUndefined();
       }
       // The agents.run wait bridge returns the same completion.
