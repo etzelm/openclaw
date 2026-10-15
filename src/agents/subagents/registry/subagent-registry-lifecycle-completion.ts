@@ -15,10 +15,7 @@ import {
   clearPublishedSwarmCollectorOutput,
   updateSwarmCollectorCompletion,
 } from "../swarm/swarm-collector.js";
-import {
-  resolveSubagentChildAuthority,
-  warnLegacySubagentAuthority,
-} from "./subagent-child-owner-match.js";
+import { resolveSubagentChildAuthority } from "./subagent-child-owner-match.js";
 import { resolveSubagentChildSessionOwner } from "./subagent-child-session-owner.js";
 import {
   prepareSubagentKillSession,
@@ -155,7 +152,6 @@ export async function completeSubagentRunAttempt(
     throw new SubagentRegistryMutationRejectedError("Subagent terminal execution changed");
   }
   try {
-    warnLegacySubagentAuthority(selected, (message, meta) => params.warn(message, meta));
     const assertCurrent = () => {
       assertSubagentRegistryWriteSourceCurrent(stateContext);
       if (
@@ -184,6 +180,7 @@ export async function completeSubagentRunAttempt(
     assertCurrent();
     assertSessionBinding();
     if (
+      !suppressSessionEffects &&
       selected.collect &&
       !selected.collectorCompletion &&
       resolveSubagentChildAuthority(selected).status === "verified"
@@ -226,7 +223,6 @@ export async function completeSubagentRunAttempt(
     };
     assertCurrent();
     let settled: ReturnType<typeof planTerminalCompletion>;
-    let terminalGeneration = 0;
     let publishesTerminalSignal = false;
     try {
       const commit = () =>
@@ -309,11 +305,7 @@ export async function completeSubagentRunAttempt(
         );
       settled = collectorSession ? await collectorSession.withPublication(commit) : await commit();
       if (settled) {
-        const bindingChanged =
-          completeParams.sessionEffects !== undefined &&
-          context.getSessionEffects(settled.entry) !== completeParams.sessionEffects;
         context.bindTerminalSessionEffects(settled.entry, completeParams.sessionEffects);
-        terminalGeneration = context.bumpTerminalGeneration(settled.entry, bindingChanged);
         if (settled.replacedProvisionalKill) {
           context.bumpCleanupGeneration(settled.entry);
         }
@@ -332,7 +324,6 @@ export async function completeSubagentRunAttempt(
     await completeTerminalEffects(context, {
       completeParams,
       ...settled,
-      terminalGeneration,
       stateContext,
       assertCurrent,
       loadCleanupBrowserSessionsForLifecycleEnd:
@@ -437,16 +428,16 @@ function planTerminalCompletion(
     if (!entry.collect && !suppressSessionEffects) {
       // Unfinished work needs its history even when successful completion would delete it.
       entry.cleanup = "keep";
-      if (
-        entry.expectsCompletionMessage === false &&
-        entry.completionRequesterSessionId &&
-        entry.completionRequesterLifecycleRevision
-      ) {
-        // Quiet completion does not waive continuation after a restart. Keep the
-        // handoff private and bound to the requester captured before launch.
-        entry.completionTarget = "parent";
-        entry.requesterTurnRunId = undefined;
-      }
+    }
+    if (
+      !entry.collect &&
+      entry.expectsCompletionMessage === false &&
+      entry.completionRequesterSessionId &&
+      entry.completionRequesterLifecycleRevision
+    ) {
+      // The original requester owns this notice even when the child was replaced.
+      entry.completionTarget = "parent";
+      entry.requesterTurnRunId = undefined;
     }
   }
   const sessionSuperseded = context.newerGenerationOwnsSession(currentEntry);
