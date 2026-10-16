@@ -1,0 +1,17 @@
+## git rev-parse HEAD: 012bb1ccaf0b63696b2608599b1cf4ea869a4245
+## pnpm deadcode:exports
+$ node --import ./scripts/tsx.mjs scripts/check-deadcode-exports.mts
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+production unused-export scan:
+Unused exports are not allowed:
+  extensions/file-transfer/src/node-host/path-errors.ts: classifyFsSafeReadError
+Delete the exports or model their real production consumers in Knip.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  extensions/file-transfer/src/node-host/path-errors.ts: classifyFsSafeReadError
+  ui/src/pages/chat/components/chat-transcript.test-support.ts: TranscriptTestHost
+Delete the exports or model their real production consumers in Knip.
+[ELIFECYCLE] Command failed with exit code 1.
+EXIT 1
