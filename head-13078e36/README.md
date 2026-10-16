@@ -1,0 +1,10 @@
+# 164796 evidence at head 13078e36 (base 95a27d0779d)
+
+Signed head `13078e36c7e9b858216cbd285f5cfbdc94f097c1` (tree `b7660b55ee7373aae0ea57e56b5a9667cc6885cb`): the merge of main `95a27d0779d1c8e0c44b35e6cab9d7662e3bb6e7` into the previous head `5f246effb0c`. All captures ran on one Mac Studio at commit `8abf27dee0d`, the unsigned Studio merge with the identical tree (`gates/identity.txt`). `runs/base-*` ran a build of `95a27d0779d` itself.
+
+- `gates/`: typecheck (`f-tsgo-*.log`), owning-directory lanes (`f-lane-*.log`), `check:changed` against `95a27d0779d` (`f-check-changed.log`), builds of both trees (`build-final.log`, `build-base.log`), the released `openclaw@2026.10.4` install for the upgrade scenario (`release-install.log`), the upgrade record (`rec-upgrade.txt`), and the scripts that ran them (`gates.sh`, `builds.sh`, `harness-run.sh`, `upgrade-run.sh`).
+- `mutations/`: `redgreen.sh` and `redgreen.log` (RED1 to RED5, each mutated then restored).
+- `harness/`: harness log, `outcomes-after.txt` and `outcomes-base.txt` (written by `outcomes2.sh`), and `compare.txt` (`compare.py` against the previous head's `../head-5f246eff/outcomes-after.txt`). The harness scripts are unchanged from `../head-5fd72055/harness/` plus the queued-switch shim from `../head-5f246eff/harness/`. `outcomes2.sh` replaces `outcomes.sh`: main's logging cleanup (`447128e3a84`) removed the `cli exec:` log line whose `promptChars`, `historyPrompt` and `useResume` fields the old script read, so the per-turn column now comes from the synthetic child's own records (delivered user message chars and spawn `sessionMode`); refusals are still read from the OpenClaw log.
+- `runs/after-<scenario>/`, `runs/base-<scenario>/`: per-scenario records in the same format as `../head-5f246eff/`, including `after-upgrade` (released `openclaw@2026.10.4` for turns 1 and 2, this tree from turn 3).
+
+Paths are redacted to `$RUN`, `$TREE`, `$BASE`, `$RELEASE`, `$LOGS`, `$HARNESS` and `$HOME`. The throwaway harness gateway token is redacted. Tokens in the harness are synthetic (`synthetic-<account>`). Synthetic login files, SQLite files and the synthetic home are not included.

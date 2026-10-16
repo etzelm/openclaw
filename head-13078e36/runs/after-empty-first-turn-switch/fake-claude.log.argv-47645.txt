@@ -1,0 +1,44 @@
+--strict-mcp-config
+--mcp-config
+/var/folders/fx/dlr4cvc97t5fxh09rptph1yc0000gq/T/openclaw-cli-mcp-4pW3V0/mcp.json
+{
+  "mcpServers": {
+    "openclaw": {
+      "type": "http",
+      "url": "http://127.0.0.1:52657/mcp",
+      "alwaysLoad": true,
+      "headers": {
+        "Authorization": "Bearer 35636d7013cedd19fe89a13f7b2f4607c527b03a69d4d218dcaf7dfa40bed6f3",
+        "x-openclaw-cli-capture-key": "e682d2cb-d356-400b-baa0-0cd75ce0f143"
+      },
+      "timeout": 3610000
+    }
+  }
+}
+
+--plugin-dir
+/tmp/openclaw/openclaw-claude-skills-cg9EBT/openclaw-skills
+--disallowedTools
+ScheduleWakeup,CronCreate,Bash(run_in_background:true),Monitor,Bash
+--effort
+high
+--print
+--input-format
+stream-json
+--output-format
+stream-json
+--verbose
+--include-partial-messages
+--replay-user-messages
+--permission-prompt-tool
+stdio
+--permission-mode
+default
+--setting-sources
+user
+--model
+claude-sonnet-5
+--allowedTools
+mcp__openclaw__*
+--session-id
+1382b5ed-6946-4e06-9e87-6766ad44d1c0

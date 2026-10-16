@@ -1,0 +1,322 @@
+┌  OpenClaw doctor
+Pre-repair state retained for manual recovery at $RUN/state.update-captures/doctor-10c24cf3-a557-4ecc-bfc5-f7bdfb98de63/manifest.json.
+codex migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+discord migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+line migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+matrix migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+memory-lancedb migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+voice-call migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+zalouser migration recovery coverage is unknown: no backup inventory was declared. Update the plugin to a version with migration backup support. Until then, keep a separate backup of its configured data before relying on rollback; ask its maintainer to add backup support. See https://docs.openclaw.ai/cli/doctor/state-migrations#plugin-migration-recovery-coverage
+Saved pre-migration SQLite backup: $RUN/state/agents/main/agent/openclaw-agent.sqlite.pre-startup-migration-ddb61029-5c06-8514-8eb3-97c19e4915f4.bak
+Saved pre-migration SQLite backup: $RUN/state/state/openclaw.sqlite.pre-startup-migration-ddb61029-5c06-8514-8eb3-97c19e4915f4.bak
+│
+◇  Doctor changes ────────────────────────────────────────────────────────╮
+│                                                                         │
+│  - Derived meeting transcript selectors and bounded delivery retention  │
+│    columns (v21)                                                        │
+│  - Promoted portable ACP resume keys and cursor identities (v22)        │
+│  - Persisted normalized meeting transcript start times                  │
+│  - Replaced retained task indexes with ordered cron history indexes     │
+│    (v24)                                                                │
+│  - Required original operator authority for subagent recovery (v25)     │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Session SQLite ──────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                               │
+│  - Session entry inspection awaits its database schema repair: OpenClaw                                       │
+│    agent database                                                                                             │
+│    $RUN/state/agents/main/agent/openclaw-agent.sqlite  │
+│    uses schema version 24; stop active agents and run openclaw doctor                                         │
+│    --fix to migrate session identities before using it.                                                       │
+│                                                                                                               │
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+[state/agent-db] agent database schema migration pending; verifying integrity first
+[state/agent-db] agent outbox enqueue sequence rebuilt
+[state/agent-db] agent database clean-close receipt: written
+[state/agent-db] agent database clean-close receipt: written
+[state-migrations] Auto-migrated legacy state:
+- Upgraded agent database schema in $RUN/state/agents/main/agent/openclaw-agent.sqlite: v24 -> v27.
+- Retired the Skill Workshop proposal tables.
+│
+◇  Doctor changes ───────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                │
+│  - Upgraded agent database schema in                                                                           │
+│    $RUN/state/agents/main/agent/openclaw-agent.sqlite:  │
+│    v24 -> v27.                                                                                                 │
+│  - Retired the Skill Workshop proposal tables.                                                                 │
+│                                                                                                                │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes ─────────────────────────────╮
+│                                              │
+│  Prepared the agent roster for persistence.  │
+│                                              │
+├──────────────────────────────────────────────╯
+│
+◇  Doctor changes ────────────────────────────────────────────────╮
+│                                                                 │
+│  Recorded webhook listener decisions; removed pins will not be  │
+│  recreated.                                                     │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────╯
+Updated config: $RUN/openclaw.json
+  Backup: $RUN/openclaw.json.bak
+[info] core/doctor/native-status - fs-safe: loaded
+[info] core/doctor/native-status - proc-safe: loaded
+│
+◇  Gateway ──────────────────────────────────────────────────────────╮
+│                                                                    │
+│  gateway.mode is unset; gateway start will be blocked.             │
+│  Fix: run openclaw configure and set Gateway mode (local/remote).  │
+│  Or set directly: openclaw config set gateway.mode local           │
+│                                                                    │
+├────────────────────────────────────────────────────────────────────╯
+│
+◇  Database engines ──────────────────────────────────────────────────╮
+│                                                                     │
+│  Shared state: default=sqlite, override=inherit, effective=sqlite   │
+│  (configured)                                                       │
+│  Agent data: default=sqlite, override=inherit, effective=sqlite     │
+│  (configured)                                                       │
+│  Workboard: default=sqlite, override=inherit, effective=sqlite      │
+│  (configured)                                                       │
+│  Logbook: default=sqlite, override=inherit, effective=sqlite        │
+│  (configured)                                                       │
+│  Team Reports: default=sqlite, override=inherit, effective=sqlite   │
+│  (configured)                                                       │
+│  Database quarantine: default=sqlite, override=fixed local,         │
+│  effective=sqlite (configured)                                      │
+│  Managed update handoffs: default=sqlite, override=fixed local,     │
+│  effective=sqlite (configured)                                      │
+│  Package activation journal: default=sqlite, override=fixed local,  │
+│  effective=sqlite (configured)                                      │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────╯
+│
+◇  Gateway auth ───────────────────────────────────────────────────────╮
+│                                                                      │
+│  Gateway auth is off or missing a token.                             │
+│  Run `openclaw doctor --fix --generate-gateway-token` to generate a  │
+│  token, then restart the Gateway.                                    │
+│                                                                      │
+├──────────────────────────────────────────────────────────────────────╯
+│
+◇  Command owner ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  No command owner is configured.                                         │
+│  A command owner is your trusted human operator account, allowed to      │
+│  update OpenClaw with /update, restart the Gateway, change               │
+│  configuration, and approve commands. Chat allowlists do not grant this  │
+│  authority.                                                              │
+│  Run openclaw channels add and complete a channel's setup to choose      │
+│  your operator account, including servers and groups without DM          │
+│  pairing.                                                                │
+│  CLI pairing approval records the first command owner. Control UI        │
+│  pairing approval has a separate owner checkbox.                         │
+│  Fix: set commands.ownerAllowFrom to your channel user id, for example   │
+│  openclaw config set commands.ownerAllowFrom '["telegram:123456789"]'    │
+│  Restart the gateway after changing this if it is already running.       │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+[state/agent-db] agent database clean-close receipt: checkpoint-incomplete
+│
+◇  Session titles ────────────────────────────────────────────────────────╮
+│                                                                         │
+│  - Repaired 1 of 1 missing session title(s) without changing activity.  │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Plugin registry ──────────────────────────────────────────╮
+│                                                            │
+│  Plugin registry rebuilt: 89/171 enabled plugins indexed.  │
+│                                                            │
+├────────────────────────────────────────────────────────────╯
+│
+◇  State integrity ────────────────────────────────────────────────────────────────────╮
+│                                                                                      │
+│  - State directory permissions are too open                                          │
+│    ($RUN/state).              │
+│    Recommend chmod 700.                                                              │
+│  - OAuth dir not present                                                             │
+│    ($RUN/state/credentials).  │
+│    Skipping create because no WhatsApp/pairing channel config is                     │
+│    active.                                                                           │
+│  - Found stale Anthropic session routing state in 1 session.                         │
+│    An unavailable runtime or legacy routing state can keep later runs                │
+│    on an obsolete route.                                                             │
+│    Examples: agent:main:explicit:harness-session (runtime model state,               │
+│    CLI session binding)                                                              │
+│                                                                                      │
+├──────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes ─────────────────────────────────────────────────────────╮
+│                                                                          │
+│  - Tightened permissions on                                              │
+│    $RUN/state to  │
+│    700                                                                   │
+│  - Cleared stale Anthropic session routing state for 1 session.          │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Backups ─────────────────────────────────────────────────────────────╮
+│                                                                       │
+│  No successful backup is recorded.                                    │
+│  Create one now with openclaw backup create.                          │
+│  Schedule versioned backups with openclaw backup enable --repository  │
+│  <dir>.                                                               │
+│                                                                       │
+├───────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor warnings ──────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                │
+│  - Agent main database                                                                                         │
+│    $RUN/state/agents/main/agent/openclaw-agent.sqlite:  │
+│    This agent database scope still requires its existing native owner                                          │
+│                                                                                                                │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+│
+◇  Foreign launchd jobs (macOS) ────────────────────────────────────────╮
+│                                                                       │
+│  Could not inspect foreign launchd jobs: Cannot inspect launchd job   │
+│  ai.openclaw.nas-mount: Could not print domain: 125: Domain does not  │
+│  support specified action. No jobs were removed.                      │
+│                                                                       │
+├───────────────────────────────────────────────────────────────────────╯
+│
+◇  Host desktop ────────────────────────────────────────────────────╮
+│                                                                   │
+│  disabled; enable the Desktop lab with desktop.host.enabled=true  │
+│                                                                   │
+├───────────────────────────────────────────────────────────────────╯
+│
+◇  GitHub projects ───────────────────────────────────────────────────────╮
+│                                                                         │
+│  Set gateway.controlUi.github.token with gateway.controlUi.github.host  │
+│  matching gateway.github.host for private project access. Public        │
+│  github.com can also use GH_TOKEN/GITHUB_TOKEN; otherwise search is     │
+│  public-only.                                                           │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Browser relay authentication ──────────────────────────────────────────╮
+│                                                                         │
+│  - Legacy Browser Relay Authentication is enabled                       │
+│    (browser.extensionRelay.allowLegacyAuth=true).                       │
+│  - Update paired Chrome extensions and external CDP clients to Browser  │
+│    Relay Authentication v2, then set                                    │
+│    browser.extensionRelay.allowLegacyAuth=false.                        │
+│  - V2 clients never downgrade to legacy authentication.                 │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────╯
+│
+◇  Browser ──────────────────────────────────────────────────────────╮
+│                                                                    │
+│  - System browser profile cookie import is enabled                 │
+│    (browser.allowSystemProfileImport).                             │
+│  - System browser profile discovery skipped by Doctor; importable  │
+│    cookie database count is unavailable.                           │
+│  - Doctor does not access the macOS Keychain; importing asks for   │
+│    consent separately.                                             │
+│                                                                    │
+├────────────────────────────────────────────────────────────────────╯
+│
+◇  Skills ─────────────────────────────────────────────────────────────────╮
+│                                                                          │
+│  30 allowed skills are not usable in this environment (missing           │
+│  binaries, env vars, or config).                                         │
+│  - 1password, bear-notes, blogwatcher, blucli, camsnap, coding-agent,    │
+│    eightctl, gemini, gifgrep, gog, goplaces, himalaya, mcporter,         │
+│    model-usage, nano-pdf, obsidian, openai-whisper, openai-whisper-api,  │
+│    openhue, oracle, ordercli, sag, sherpa-onnx-tts, songsee, sonoscli,   │
+│    spotify-player, summarize, tmux, trello, xurl                         │
+│  Inspect details: openclaw skills check --agent <id> or openclaw skills  │
+│  info <name> --agent <id>                                                │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Doctor changes ────────────────╮
+│                                 │
+│  - Disabled 1password           │
+│  - Disabled bear-notes          │
+│  - Disabled blogwatcher         │
+│  - Disabled blucli              │
+│  - Disabled camsnap             │
+│  - Disabled coding-agent        │
+│  - Disabled eightctl            │
+│  - Disabled gemini              │
+│  - Disabled gifgrep             │
+│  - Disabled gog                 │
+│  - Disabled goplaces            │
+│  - Disabled himalaya            │
+│  - Disabled mcporter            │
+│  - Disabled model-usage         │
+│  - Disabled nano-pdf            │
+│  - Disabled obsidian            │
+│  - Disabled openai-whisper      │
+│  - Disabled openai-whisper-api  │
+│  - Disabled openhue             │
+│  - Disabled oracle              │
+│  - Disabled ordercli            │
+│  - Disabled sag                 │
+│  - Disabled sherpa-onnx-tts     │
+│  - Disabled songsee             │
+│  - Disabled sonoscli            │
+│  - Disabled spotify-player      │
+│  - Disabled summarize           │
+│  - Disabled tmux                │
+│  - Disabled trello              │
+│  - Disabled xurl                │
+│                                 │
+├─────────────────────────────────╯
+│
+◇  Doctor changes ────────────────────────────────────╮
+│                                                     │
+│  Create heartbeat monitor for agent "main" at 30m.  │
+│                                                     │
+├─────────────────────────────────────────────────────╯
+│
+◇  Gateway ─────────────────────────────────────────────╮
+│                                                       │
+│  Gateway health will be checked after Doctor repair.  │
+│                                                       │
+├───────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────────────────────────────────────╮
+│                                                                          │
+│  Memory search provider is set to "openai" but no API key was found.     │
+│  Without working primary or fallback embeddings, memory sync stops for   │
+│  explicitly configured providers or existing vector indexes; new and     │
+│  changed memory files are not indexed.                                   │
+│                                                                          │
+│                                                                          │
+│  Fix (pick one):                                                         │
+│  - Set OPENAI_API_KEY in your environment                                │
+│  - Configure credentials: openclaw configure --section model             │
+│  - For keyword-only recall without a key, set memory.search.provider to  │
+│    "none" for this agent (including any agent override), then run        │
+│    openclaw memory index --force --agent main                            │
+│                                                                          │
+│  Then rerun: openclaw doctor                                             │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────╯
+│
+◇  Memory search ──────────────────────────╮
+│                                          │
+│  Dreaming: enabled (cadence 0 3 * * *).  │
+│                                          │
+├──────────────────────────────────────────╯
+Updated config: $RUN/openclaw.json
+  Backup: $RUN/openclaw.json.bak
+│
+◇  Workspace ──────────────────────────────────────────────────────╮
+│                                                                  │
+│  - Tip: back up the agent workspace in a private git repo; keep  │
+│    ~/.openclaw out of git (credentials, sessions). Details:      │
+│    /concepts/agent-workspace#git-backup-recommended-private      │
+│                                                                  │
+├──────────────────────────────────────────────────────────────────╯
+[state/agent-db] agent database clean-close receipt: checkpoint-incomplete
+│
+└  Doctor complete.
+

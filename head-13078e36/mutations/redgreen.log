@@ -1,0 +1,65 @@
+## RED1 host sends SessionManager writer facts without the owner-check request
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login-metadata.test.ts > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 2 to be 1 // Object.is equality
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:79:38
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:70:7
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:65:3
+      Tests  1 failed (1)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+(checkout clean)
+## RED2 metadata host never answers the owner probe
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login-metadata.test.ts > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 0 to be greater than 0
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:75:25
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:70:7
+ ❯ src/agents/cli-runner/history-boundary.native-login-metadata.test.ts:65:3
+      Tests  1 failed (1)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+(checkout clean)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login
+AssertionError: promise resolved "{ text: 'done', …(5) }" instead of rejecting
+ ❯ src/agents/cli-runner/execute.native-history-owner.test.ts:93:69
+      Tests  1 failed | 3 passed (4)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+(checkout clean)
+## RED4 the UserPromptSubmit response goes out on the stream check alone
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+-- mutated:
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.private-input.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent
+AssertionError: expected 'saved private context' to be undefined
+ ❯ extensions/anthropic/cli-runtime.private-input.test.ts:58:35
+      Tests  1 failed | 2 passed (3)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+(checkout clean)
+## RED5 the native login is attested without the operator's opt-in
+ 1 file changed, 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in
+AssertionError: expected { …(12) } to be undefined
+ ❯ src/agents/cli-runner/prepare-native-history.test.ts:200:38
+      Tests  1 failed | 5 passed (6)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+(checkout clean)
+## GREEN (all five owning files, unmutated)
+ Test Files  3 passed (3)
+      Tests  11 passed (11)
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+       0
