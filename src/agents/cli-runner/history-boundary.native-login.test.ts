@@ -382,26 +382,31 @@ describe("native CLI login owner", () => {
     await seedNative(f, backendUsing(backend));
     const lookup = vi.spyOn(cliCredentials, "readAttestedNativeCliLoginOwner");
     const attest = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
-    await withNativeWriter(f, "boundary-native-every-call", backendUsing(backend), async (writer) => {
-      lookup.mockClear();
-      attest.mockClear();
-      profile.mockClear();
-      for (let check = 0; check < 20; check += 1) {
-        writer.assertCurrent();
-      }
-      expect(lookup).not.toHaveBeenCalled();
-      await writer.assertReadable();
-      writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, true);
-      writer.checkNativeLoginBoundary(true);
-      writer.checkNativeLoginBoundary(false);
-      expect(lookup).toHaveBeenCalledTimes(4);
-      lookup.mockClear();
-      f.manager().appendMessage({ role: "user", content: "covered turn", timestamp: 2 });
-      expect(lookup).toHaveBeenCalledTimes(1);
-      // Boundary and commit checks are local: no attestation, no network.
-      expect(attest).not.toHaveBeenCalled();
-      expect(profile).not.toHaveBeenCalled();
-    });
+    await withNativeWriter(
+      f,
+      "boundary-native-every-call",
+      backendUsing(backend),
+      async (writer) => {
+        lookup.mockClear();
+        attest.mockClear();
+        profile.mockClear();
+        for (let check = 0; check < 20; check += 1) {
+          writer.assertCurrent();
+        }
+        expect(lookup).not.toHaveBeenCalled();
+        await writer.assertReadable();
+        writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, true);
+        writer.checkNativeLoginBoundary(true);
+        writer.checkNativeLoginBoundary(false);
+        expect(lookup).toHaveBeenCalledTimes(4);
+        lookup.mockClear();
+        f.manager().appendMessage({ role: "user", content: "covered turn", timestamp: 2 });
+        expect(lookup).toHaveBeenCalledTimes(1);
+        // Boundary and commit checks are local: no attestation, no network.
+        expect(attest).not.toHaveBeenCalled();
+        expect(profile).not.toHaveBeenCalled();
+      },
+    );
   });
 
   it("binds execution to the login the spawned environment selects", async () => {
@@ -470,7 +475,9 @@ describe("native CLI login owner", () => {
     await f.withRun(
       runId,
       async (params) => {
-        const writer = await prepareCliHistoryBoundary(params, { preparedBackend: backendUsing(backend) });
+        const writer = await prepareCliHistoryBoundary(params, {
+          preparedBackend: backendUsing(backend),
+        });
         if (!writer) {
           throw new Error("Missing admitted history writer");
         }

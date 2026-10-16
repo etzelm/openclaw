@@ -212,8 +212,7 @@ describe("plugin-owned CLI execution host boundary", () => {
     };
     const execute: CliBackendExecute = async function* (execution) {
       // The bundled Claude runtime checks this host-internal field before its prompt send.
-      const host: CliBackendExecuteContext & { assertPrivateInputCurrent?: () => void } =
-        execution;
+      const host: CliBackendExecuteContext & { assertPrivateInputCurrent?: () => void } = execution;
       loginHolds = false;
       host.assertPrivateInputCurrent?.();
       yield SUCCESS_RESULT;

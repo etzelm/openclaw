@@ -1468,16 +1468,13 @@ async function prepareCliRunContextWithinReadFence(
     const allowRawTranscriptReseed =
       backendResolved.config.reseedFromRawTranscriptWhenUncompacted === true;
     const historyParams = (params = await admitCliRunParams(params, workspaceResolution.agentId));
+    const historyIdentity = { credential: authCredential, preparedBackend: preparedBackendFinal };
     const cliHistoryWriter = !isSideQuestion
-      ? await prepareCliHistoryBoundary(historyParams, {
-          credential: authCredential,
-          preparedBackend: preparedBackendFinal,
-        })
+      ? await prepareCliHistoryBoundary(historyParams, historyIdentity)
       : undefined;
-    // Explicit caller-owned memory remains input; it cannot authorize borrowed durable history.
-    const historyAllowed = params.sessionManager !== undefined || cliHistoryWriter?.replaysHistory;
-    // Native compatibility and transcript account ownership are independent gates.
-    const rawTranscriptReseedReason = !historyAllowed
+    // Native compatibility and transcript account ownership are independent gates. Explicit
+    // caller-owned memory remains input; it cannot authorize borrowed durable history.
+    const rawTranscriptReseedReason = !(params.sessionManager || replayableTarget(cliHistoryWriter))
       ? "auth-unknown"
       : reusableCliSessionId
         ? "session-expired"
@@ -1550,8 +1547,7 @@ async function prepareCliRunContextWithinReadFence(
           !reusableCliSessionId?.trim() || reusableCliSession.mode === "reuse-with-drift",
         thinkLevel: params.thinkLevel,
         runtimeContextFragments: params.runtimeContextFragments,
-        // Caller-owned memory cannot grant access to persisted interrupted inputs, and a
-        // turn that runs without saved history does not receive them either.
+        // Caller-owned memory cannot grant access to persisted interrupted inputs.
         sessionTarget: params.isolatedCompletion ? undefined : replayableTarget(cliHistoryWriter),
         context: [promptBuildHookResult?.appendContext, authorizedPromptBuildResult?.appendContext],
       }));

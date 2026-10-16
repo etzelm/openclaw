@@ -131,7 +131,8 @@ async function prepareCliHistoryBoundaryOnce(
   // native login its own environment selects, unless it is node-placed and runs under the
   // node's login instead. The Gateway process environment is never the identity source.
   // The owner is the account the provider attests for that login's credential, and only when
-  // the operator opted in to sending it there. It is attested before planning so no read source is held across the network request.
+  // the operator opted in to sending it there. It is attested before planning so no read
+  // source is held across the network request.
   const nativeLogin =
     credential ||
     !childEnv ||
