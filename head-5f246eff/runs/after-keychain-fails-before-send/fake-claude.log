@@ -1,0 +1,24 @@
+=== turn1 (Keychain item readable)
+{"at":"2026-10-16T01:56:22.279Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:22.284Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-16T01:56:22.723Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:22.748Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:22.754Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:23.040Z","pid":4360,"event":"spawn","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/runs/after-keychain-fails-before-send/fake-claude.log.argv-4360.txt"}
+{"at":"2026-10-16T01:56:23.043Z","pid":4360,"event":"initialize","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/runs/after-keychain-fails-before-send/fake-claude.log.init-4360.json"}
+{"at":"2026-10-16T01:56:23.043Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:23.044Z","pid":4360,"event":"user-message-received","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3b34cbd3e44b11e2c169ce87327af1d489fd658cd03693b7d6a2f7a8fc47ceb9","promptFile":"$RUN/runs/after-keychain-fails-before-send/fake-claude.log.user-4360-1.txt"}
+{"at":"2026-10-16T01:56:23.044Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:23.045Z","pid":4360,"event":"prompt-context-received","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1310,"sha256":"99385d7156d4b33d6b78cbb84946ee0b422023bf51d6d0f926087dbbc13bffb7","contextFile":"$RUN/runs/after-keychain-fails-before-send/fake-claude.log.context-4360-1.txt"}
+{"at":"2026-10-16T01:56:23.318Z","pid":4311,"event":"security-lookup","kind":"password","mode":"present"}
+=== turn2 (Keychain readable at preparation; both lookups start timing out while claude initializes, before the prompt is sent)
+{"at":"2026-10-16T01:56:29.851Z","pid":4368,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:29.859Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-16T01:56:30.296Z","pid":4368,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:30.307Z","pid":4368,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:30.312Z","pid":4368,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:30.585Z","pid":4417,"event":"spawn","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/runs/after-keychain-fails-before-send/fake-claude.log.argv-4417.txt"}
+{"at":"2026-10-16T01:56:30.587Z","pid":4417,"event":"initialize","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/runs/after-keychain-fails-before-send/fake-claude.log.init-4417.json"}
+{"at":"2026-10-16T01:56:30.592Z","pid":4417,"event":"hook-ran","configDir":"$RUN/runs/after-keychain-fails-before-send/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_INIT"}
+{"at":"2026-10-16T01:56:30.593Z","pid":4368,"event":"security-lookup","kind":"password","mode":"fail"}
+{"at":"2026-10-16T01:56:30.593Z","pid":4368,"event":"security-lookup","kind":"metadata","mode":"fail"}

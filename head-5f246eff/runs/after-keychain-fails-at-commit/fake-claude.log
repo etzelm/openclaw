@@ -1,0 +1,35 @@
+=== turn1 (Keychain item readable)
+{"at":"2026-10-16T01:56:36.915Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:36.920Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-16T01:56:37.348Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:37.371Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:37.375Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:37.659Z","pid":4497,"event":"spawn","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.argv-4497.txt"}
+{"at":"2026-10-16T01:56:37.661Z","pid":4497,"event":"initialize","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.init-4497.json"}
+{"at":"2026-10-16T01:56:37.662Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:37.662Z","pid":4497,"event":"user-message-received","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":85,"sha256":"3b34cbd3e44b11e2c169ce87327af1d489fd658cd03693b7d6a2f7a8fc47ceb9","promptFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.user-4497-1.txt"}
+{"at":"2026-10-16T01:56:37.663Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:37.663Z","pid":4497,"event":"prompt-context-received","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1310,"sha256":"99385d7156d4b33d6b78cbb84946ee0b422023bf51d6d0f926087dbbc13bffb7","contextFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.context-4497-1.txt"}
+{"at":"2026-10-16T01:56:37.949Z","pid":4441,"event":"security-lookup","kind":"password","mode":"present"}
+=== turn2 (Keychain readable at preparation and at send; both lookups start timing out after the prompt was delivered, before the turn is committed)
+{"at":"2026-10-16T01:56:44.474Z","pid":4505,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:44.484Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-16T01:56:44.933Z","pid":4505,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:44.943Z","pid":4505,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:44.948Z","pid":4505,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:45.221Z","pid":4556,"event":"spawn","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.argv-4556.txt"}
+{"at":"2026-10-16T01:56:45.223Z","pid":4556,"event":"initialize","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.init-4556.json"}
+{"at":"2026-10-16T01:56:45.223Z","pid":4505,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:45.224Z","pid":4556,"event":"user-message-received","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":551,"sha256":"52008005a143c7e3c2e74929853f0f6c2e2ad3425c13cbc484f1cabf65065a79","promptFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.user-4556-1.txt"}
+{"at":"2026-10-16T01:56:45.224Z","pid":4505,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:45.225Z","pid":4556,"event":"prompt-context-received","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1310,"sha256":"99385d7156d4b33d6b78cbb84946ee0b422023bf51d6d0f926087dbbc13bffb7","contextFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.context-4556-1.txt"}
+{"at":"2026-10-16T01:56:45.230Z","pid":4556,"event":"hook-ran","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"hook":"FAKE_ON_USER"}
+{"at":"2026-10-16T01:56:45.515Z","pid":4505,"event":"security-lookup","kind":"password","mode":"fail"}
+{"at":"2026-10-16T01:56:45.516Z","pid":4505,"event":"security-lookup","kind":"metadata","mode":"fail"}
+=== turn3 (Keychain readable again)
+{"at":"2026-10-16T01:56:52.079Z","pid":4565,"event":"security-lookup","kind":"password","mode":"present"}
+{"at":"2026-10-16T01:56:52.087Z","event":"profile-request","path":"/api/oauth/profile","mode":"ok","tokenAccount":"keychain","status":200}
+{"at":"2026-10-16T01:56:52.834Z","pid":4617,"event":"spawn","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"argc":29,"sessionMode":"fresh","argvFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.argv-4617.txt"}
+{"at":"2026-10-16T01:56:52.836Z","pid":4617,"event":"initialize","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"initFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.init-4617.json"}
+{"at":"2026-10-16T01:56:52.837Z","pid":4617,"event":"user-message-received","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":451,"sha256":"ccedd56557de2c4b753e9d8a779a2e200f610724f1c77d302570d52d8a39e235","promptFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.user-4617-1.txt"}
+{"at":"2026-10-16T01:56:52.837Z","pid":4617,"event":"prompt-context-received","configDir":"$RUN/runs/after-keychain-fails-at-commit/claude-config","loginAccount":"account-A","credentialAccount":"account-A","loginCredentialPresent":true,"chars":1145,"sha256":"1bd5abe0890261c004819ed2bc3de3e53b67419842ed1b60a9cab524cd6d6981","contextFile":"$RUN/runs/after-keychain-fails-at-commit/fake-claude.log.context-4617-1.txt"}
