@@ -1,23 +1,44 @@
 import type WaDropdownItem from "@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js";
 import type WaDropdown from "@awesome.me/webawesome/dist/components/dropdown/dropdown.js";
+import type WaOption from "@awesome.me/webawesome/dist/components/option/option.js";
 import type WaPopover from "@awesome.me/webawesome/dist/components/popover/popover.js";
 import type WaPopup from "@awesome.me/webawesome/dist/components/popup/popup.js";
+import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
 import type WaSwitch from "@awesome.me/webawesome/dist/components/switch/switch.js";
 import type WaTabGroup from "@awesome.me/webawesome/dist/components/tab-group/tab-group.js";
 import type WaTabPanel from "@awesome.me/webawesome/dist/components/tab-panel/tab-panel.js";
 import type WaTab from "@awesome.me/webawesome/dist/components/tab/tab.js";
 import type { JSX } from "@solidjs/web";
+import type { NodePermissionRequest } from "../../../packages/gateway-protocol/src/node-permissions.js";
+import type { ControlUiSessionPullRequest } from "../../../src/gateway/control-ui-contract.js";
 import type { ControlUiSurfaceProps } from "../../../src/plugin-sdk/control-ui.js";
 import type { ClawHubRecommendation } from "../../../src/shared/clawhub-recommendations.js";
+import type { ApplicationGateway } from "../app/gateway.ts";
+import type { LobsterPetProps } from "../components/lobster-pet-contract.ts";
 import type { MascotMood } from "../components/mascot-pose.ts";
 import type { MessageActionDetails } from "../pages/chat/components/chat-message-markdown.types.ts";
 export type { JSX } from "@solidjs/web";
 
 // Keep ambient tag contracts independent of renderer modules: SDK declarations include this file.
 type LegacyAttributes<T extends HTMLElement> = JSX.HTMLAttributes<T> & JSX.Properties<T>;
+type DockElementAttributes = JSX.HTMLAttributes<HTMLElement> & {
+  [key: `prop:${string}`]: unknown;
+};
 type Tooltip = HTMLElementTagNameMap["openclaw-tooltip"];
 
-type ElementProperties<T> = { [Key in keyof T as `prop:${string & Key}`]?: T[Key] };
+export type ElementProperties<T> = { [Key in keyof T as `prop:${string & Key}`]?: T[Key] };
+type ChatCiProperties = {
+  gateway?: ApplicationGateway;
+  pullRequest?: ControlUiSessionPullRequest;
+  sessionKey: string;
+  presented: boolean;
+};
+type PluginViewProperties = {
+  [Surface in keyof ControlUiSurfaceProps]: {
+    "prop:surface": Surface;
+    "prop:props": ControlUiSurfaceProps[Surface];
+  };
+}[keyof ControlUiSurfaceProps];
 
 declare module "@solidjs/web" {
   namespace JSX {
@@ -30,12 +51,66 @@ declare module "@solidjs/web" {
       messageActions: MessageActionDetails | null | undefined;
     }
     interface IntrinsicElements {
-      "openclaw-plugin-view": HTMLAttributes<HTMLElement> & {
-        "prop:surface": "tool-result";
-        "prop:props": ControlUiSurfaceProps["tool-result"];
-        "prop:defaultView": unknown;
-        "prop:presented": boolean;
+      "openclaw-chat-ci-details": HTMLAttributes<HTMLElement> & ElementProperties<ChatCiProperties>;
+      "openclaw-chat-ci-automation": HTMLAttributes<HTMLElement> &
+        ElementProperties<ChatCiProperties & { sessionId: string }>;
+      "openclaw-terminal-panel": DockElementAttributes & { fullscreen?: boolean };
+      "openclaw-browser-panel": DockElementAttributes;
+      "openclaw-link-reader-panel": DockElementAttributes;
+      "openclaw-appearance-background": HTMLAttributes<HTMLElement>;
+      "openclaw-config-page": HTMLAttributes<HTMLElement>;
+      "openclaw-meeting-capture-settings": HTMLAttributes<HTMLElement>;
+      "openclaw-session-storage-settings": HTMLAttributes<HTMLElement>;
+      "openclaw-talk-settings": HTMLAttributes<HTMLElement>;
+      "openclaw-memory-settings": HTMLAttributes<HTMLElement>;
+      "openclaw-memory-memories": HTMLAttributes<HTMLElement>;
+      "openclaw-modal-actions": HTMLAttributes<HTMLElement>;
+      "openclaw-claws-explore": HTMLAttributes<HTMLElement> & {
+        "prop:onSelect"?: (
+          entry: import("../pages/agents-home/claws-catalog-client.ts").ClawCatalogEntry,
+        ) => void;
       };
+      "openclaw-claws-catalog-dialog": HTMLAttributes<HTMLElement> & {
+        "prop:initialPackageName"?: string;
+        "prop:pageMode"?: boolean;
+        "prop:onClose"?: () => void;
+        "prop:onAdded"?: () => void;
+        "prop:onSelectEntry"?: (
+          entry: import("../pages/agents-home/claws-catalog-client.ts").ClawCatalogEntry,
+        ) => void;
+      };
+      "openclaw-github-identity": HTMLAttributes<HTMLElement>;
+      "openclaw-chat-permission-card": HTMLAttributes<HTMLElement> & {
+        "prop:request"?: NodePermissionRequest | null;
+        "prop:onRetry"?: (message: string) => void;
+      };
+      "openclaw-chat-run-failure-notice": LegacyAttributes<
+        HTMLElementTagNameMap["openclaw-chat-run-failure-notice"]
+      > &
+        ElementProperties<
+          Pick<HTMLElementTagNameMap["openclaw-chat-run-failure-notice"], "onRetry">
+        >;
+      "openclaw-mcp-servers-card": HTMLAttributes<HTMLElement>;
+      "openclaw-update-run-view": HTMLAttributes<HTMLElement>;
+      "openclaw-plugins-page": HTMLAttributes<HTMLElement>;
+      "openclaw-dashboards-page": HTMLAttributes<HTMLElement>;
+      "openclaw-lobster-pet": HTMLAttributes<HTMLElement> & ElementProperties<LobsterPetProps>;
+      "wa-select": HTMLAttributes<WaSelect> & { "prop:value": WaSelect["value"] };
+      "wa-option": HTMLAttributes<WaOption> & {
+        value: WaOption["value"];
+        "prop:label": WaOption["label"];
+        "prop:selected": WaOption["selected"];
+      };
+      // Each caller validates the picker option/callback pairing before the DOM boundary.
+      "openclaw-select-picker": HTMLAttributes<HTMLElementTagNameMap["openclaw-select-picker"]> & {
+        "prop:params": unknown;
+      };
+      "openclaw-plugin-view": HTMLAttributes<HTMLElement> &
+        PluginViewProperties & {
+          "prop:defaultView": unknown;
+          "prop:replacementCompanion"?: unknown;
+          "prop:presented": boolean;
+        };
       "openclaw-message-reaction-picker": HTMLAttributes<HTMLElement> & {
         compact?: boolean;
         placement?: "bottom-start" | "bottom-end";
@@ -54,6 +129,8 @@ declare module "@solidjs/web" {
       };
       "wa-tab": HTMLAttributes<WaTab> & {
         panel: string;
+        active?: boolean;
+        disabled?: boolean;
         "prop:active"?: boolean;
         "prop:tabIndex"?: number;
       };
@@ -62,20 +139,22 @@ declare module "@solidjs/web" {
         "prop:active": boolean;
       };
       "resizable-divider": Omit<HTMLAttributes<HTMLElement>, "onResize"> & {
-        "prop:orientation": "horizontal" | "vertical";
+        "prop:orientation"?: "horizontal" | "vertical";
         "prop:label": string;
         "prop:splitRatio": number;
         "prop:minRatio": number;
         "prop:maxRatio": number;
-        "prop:measureRatio": () => number;
-        "prop:measureSize": () => number;
+        "prop:measureRatio"?: () => number;
+        "prop:measureSize"?: () => number;
         onResize: (event: CustomEvent<{ splitRatio: number }>) => void;
         "onResize-end"?: () => void;
       };
       "wa-popup": LegacyAttributes<WaPopup> & {
         active?: boolean;
+        anchor?: WaPopup["anchor"];
         placement?: WaPopup["placement"];
         strategy?: WaPopup["strategy"];
+        sync?: WaPopup["sync"];
         "onWa-reposition"?: EventHandlerUnion<WaPopup, CustomEvent>;
       };
       "wa-switch": LegacyAttributes<WaSwitch> & {
@@ -87,10 +166,15 @@ declare module "@solidjs/web" {
         "prop:content"?: Tooltip["content"];
         "prop:contentTemplate"?: Tooltip["contentTemplate"];
         "prop:describe"?: Tooltip["describe"];
+        "prop:pointerThrough"?: Tooltip["pointerThrough"];
         "prop:openOnClick"?: Tooltip["openOnClick"];
         "prop:disabled"?: Tooltip["disabled"];
         "prop:anchor"?: Tooltip["anchor"];
         "prop:placement"?: Tooltip["placement"];
+        "prop:closeDelay"?: Tooltip["closeDelay"];
+        "prop:hoverDismissDelay"?: Tooltip["hoverDismissDelay"];
+        "prop:delay"?: Tooltip["delay"];
+        "prop:autoSize"?: Tooltip["autoSize"];
         content?: string;
         disabled?: boolean;
         placement?: Tooltip["placement"];
@@ -103,7 +187,16 @@ declare module "@solidjs/web" {
         ElementProperties<
           Pick<
             HTMLElementTagNameMap["openclaw-viewer-facepile"],
-            "staticParticipants" | "totalCount" | "maxVisible" | "personActivity"
+            | "staticParticipants"
+            | "staticUsers"
+            | "presencePayload"
+            | "selfUser"
+            | "selfInstanceId"
+            | "sessionKey"
+            | "excludeIdentities"
+            | "totalCount"
+            | "maxVisible"
+            | "personActivity"
           >
         > & { variant?: "session" };
       "openclaw-viewer-avatar": HTMLAttributes<HTMLElementTagNameMap["openclaw-viewer-avatar"]> &
@@ -121,7 +214,12 @@ declare module "@solidjs/web" {
         ElementProperties<
           Pick<
             HTMLElementTagNameMap["openclaw-link-reader-hovercard-provider"],
-            "client" | "readers" | "agentId" | "previewSeeds"
+            | "client"
+            | "readers"
+            | "agentId"
+            | "previewSeeds"
+            | "pagePreviewContext"
+            | "claimedReaders"
           >
         >;
       "openclaw-session-owner-chip": HTMLAttributes<
@@ -142,6 +240,11 @@ declare module "@solidjs/web" {
       "openclaw-agent-row-chip": HTMLAttributes<HTMLElement> & {
         "prop:agentId"?: string;
       };
+      "openclaw-systems-page": HTMLAttributes<HTMLElement>;
+      "openclaw-systems-sidebar": HTMLAttributes<
+        HTMLElementTagNameMap["openclaw-systems-sidebar"]
+      > &
+        ElementProperties<Pick<HTMLElementTagNameMap["openclaw-systems-sidebar"], "controller">>;
       "openclaw-mascot": LegacyAttributes<HTMLElement> & {
         mood?: MascotMood;
         "prop:size"?: number;

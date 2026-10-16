@@ -8,6 +8,7 @@ import type {
   CliBackendLiveSessionHandle,
   CliBackendToolPermissionResult,
 } from "../../plugins/cli-backend.types.js";
+import * as execDefaults from "../exec-defaults.js";
 import { callGatewayTool } from "../tools/gateway.js";
 import {
   closeCliLiveSession,
@@ -92,9 +93,6 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-// The host passes its stream check outside the plugin SDK type, as it does auth credentials.
-type HostExecuteContext = CliBackendExecuteContext & { assertStreamCurrent?: () => void };
-
 describe("plugin-owned CLI execution host boundary", () => {
   it("streams plugin events through the canonical host output boundary", async () => {
     // Exercise stream translation independently of cold policy-worker startup time.
@@ -141,39 +139,86 @@ describe("plugin-owned CLI execution host boundary", () => {
     );
   });
 
-  it("adds the host boundary check to the plugin's spawn and send check, not its stream check", async () => {
-    const { context } = await createExecution({ runId: "plugin-stream-check" });
-    const caller = vi.fn();
-    const boundary = vi.fn();
-    context.params.assertCurrent = caller;
-    let observed: HostExecuteContext | undefined;
-    const execute: CliBackendExecute = async function* (hostContext) {
-      const execution: HostExecuteContext = hostContext;
-      observed = execution;
-      caller.mockClear();
-      boundary.mockClear();
-      execution.assertStreamCurrent?.();
-      execution.assertStreamCurrent?.();
-      expect(caller).toHaveBeenCalledTimes(2);
-      expect(boundary).not.toHaveBeenCalled();
-      execution.assertCurrent?.();
-      expect(caller).toHaveBeenCalledTimes(3);
-      expect(boundary).toHaveBeenCalledTimes(1);
-      yield SUCCESS_RESULT;
+  it("does not disclose private context when history access changes during permission preparation", async () => {
+    const { context } = await createExecution();
+    context.promptContext = { prependContext: "private conversation history" };
+    let historyReadable = true;
+    context.cliHistoryWriter = {
+      target: {
+        agentId: "main",
+        sessionId: "sdk-session",
+        sessionKey: "agent:main:main",
+        storePath: "/synthetic/sessions.sqlite",
+      },
+      runId: "history-owner",
+      authFingerprint: "a".repeat(64),
+      bindsNativeLogin: false,
+      replaysHistory: true,
+      assertCurrent() {},
+      async assertReadable() {
+        if (!historyReadable) {
+          throw new Error("Private history account changed");
+        }
+      },
+      checkNativeLoginBoundary() {},
+      bindExecutionEnv() {},
+      async settleNativeLogin() {},
     };
-    await runPlugin(context, execute, { assertBoundary: boundary });
-    expect(observed?.assertStreamCurrent).toBeTypeOf("function");
+    const preparingPermission = createDeferred();
+    const releasePermission = createDeferred();
+    const resolvePermission = execDefaults.resolveExecDefaultsAsync;
+    vi.spyOn(execDefaults, "resolveExecDefaultsAsync").mockImplementationOnce(async (...args) => {
+      preparingPermission.resolve();
+      await releasePermission.promise;
+      return resolvePermission(...args);
+    });
+    const execute = vi.fn(async function* () {
+      yield SUCCESS_RESULT;
+    });
+    const result = runPlugin(context, execute).catch((error: unknown) => error);
+    try {
+      await preparingPermission.promise;
+      historyReadable = false;
+    } finally {
+      releasePermission.resolve();
+    }
+    expect(await result).toEqual(new Error("Private history account changed"));
+    expect(execute).not.toHaveBeenCalled();
   });
 
-  it("offers no stream check unless the host binds the run to an account", async () => {
-    const { context } = await createExecution({ runId: "plugin-no-stream-check" });
-    let observed: HostExecuteContext | undefined;
+  it("does not disclose private input when a native login changes after the plugin started", async () => {
+    const { context } = await createExecution();
+    let loginHolds = true;
+    context.cliHistoryWriter = {
+      target: {
+        agentId: "main",
+        sessionId: "sdk-session",
+        sessionKey: "agent:main:main",
+        storePath: "/synthetic/sessions.sqlite",
+      },
+      runId: "history-owner",
+      authFingerprint: "a".repeat(64),
+      bindsNativeLogin: true,
+      replaysHistory: true,
+      assertCurrent() {},
+      async assertReadable() {},
+      checkNativeLoginBoundary(carriesSavedHistory) {
+        if (carriesSavedHistory && !loginHolds) {
+          throw new Error("Private history account changed");
+        }
+      },
+      bindExecutionEnv() {},
+      async settleNativeLogin() {},
+    };
     const execute: CliBackendExecute = async function* (execution) {
-      observed = execution;
+      // The bundled Claude runtime checks this host-internal field before its prompt send.
+      const host: CliBackendExecuteContext & { assertPrivateInputCurrent?: () => void } =
+        execution;
+      loginHolds = false;
+      host.assertPrivateInputCurrent?.();
       yield SUCCESS_RESULT;
     };
-    await runPlugin(context, execute);
-    expect(observed?.assertStreamCurrent).toBeUndefined();
+    await expect(runPlugin(context, execute)).rejects.toThrow("Private history account changed");
   });
 
   it.each([false, true])(

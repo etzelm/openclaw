@@ -9,7 +9,7 @@ export type CliHistoryWriter = {
   authFingerprint: string;
   lifecycleRevision?: string;
   assertCurrent: () => void;
-  assertReadable: () => void;
+  assertReadable: () => void | Promise<void>;
   /**
    * Fresh owner check, asked once per coverage commit. False keeps the commit's rows but
    * does not advance coverage. Absent means the owner cannot change during the run.
@@ -22,7 +22,7 @@ export type CliExecutionHistoryWriter = CliHistoryWriter & {
   /** True when ownership comes from a native login resolved from the child environment. */
   bindsNativeLogin: boolean;
   /**
-   * Fresh native login check for a spawn or prompt send. A changed or unresolvable login
+   * Fresh native login check, also run last by assertReadable. A changed or unresolvable login
    * refuses a turn whose prompt carries saved history and stops coverage for any other turn.
    */
   checkNativeLoginBoundary: (carriesSavedHistory: boolean) => void;

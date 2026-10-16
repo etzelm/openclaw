@@ -65,7 +65,7 @@ it("covers a SessionManager append only while the native login owner holds", asy
   await f.withRun(
     runId,
     async (params) => {
-      const writer = await prepareCliHistoryBoundary(params, undefined, prepared);
+      const writer = await prepareCliHistoryBoundary(params, { preparedBackend: prepared });
       expect(writer?.bindsNativeLogin).toBe(true);
       await runWithCliHistoryWriter(writer, async () => {
         const manager = await SessionManager.openAsync(f.target);

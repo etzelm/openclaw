@@ -1,6 +1,7 @@
 // Shared session fixture for the CLI transcript account boundary tests.
 import path from "node:path";
 import { expect } from "vitest";
+import { setRuntimeConfigSnapshot } from "../../config/runtime-snapshot.js";
 import { runWithCliHistoryWriter } from "../../config/sessions/cli-history-boundary.js";
 import {
   patchSessionEntryCore,
@@ -21,6 +22,7 @@ export async function createHistoryBoundaryFixture(
   sessionDirs: SessionStoreTempDirs,
   withHeader = true,
 ) {
+  setRuntimeConfigSnapshot({});
   const dir = sessionDirs.make();
   const target = {
     agentId: "main",
@@ -72,18 +74,19 @@ export async function createHistoryBoundaryFixture(
     action: (allowed: boolean, params: PreparedCliRunContext["params"]) => Promise<T>,
     overrides: Partial<PreparedCliRunContext["params"]> = {},
     credential?: AuthProfileCredential,
-    preparedBackend?: Parameters<typeof prepareCliHistoryBoundary>[2],
+    preparedBackend?: Parameters<typeof prepareCliHistoryBoundary>[1]["preparedBackend"],
   ) => {
     const runId = "boundary-run-" + ++runNumber;
     await patchSessionEntryCore(target, (entry) => ({ ...entry, activeWriterRunId: runId }));
     return await withRun(
       runId,
       async (params) => {
-        const writer = await prepareCliHistoryBoundary(
-          params,
-          credential ?? (epoch ? { type: "token", provider: "test-cli", token: epoch } : undefined),
+        const writer = await prepareCliHistoryBoundary(params, {
+          credential:
+            credential ??
+            (epoch ? { type: "token", provider: "test-cli", token: epoch } : undefined),
           preparedBackend,
-        );
+        });
         return await runWithCliHistoryWriter(writer, () => action(Boolean(writer), params));
       },
       overrides,

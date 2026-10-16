@@ -7,17 +7,12 @@ import {
   type CliHistoryBoundary,
 } from "../../config/sessions/cli-history-boundary.js";
 import {
-  loadSessionEntryReadOnly,
   patchSessionEntryCore,
-  readSessionTranscriptWatermark,
   resolveSessionTranscriptDatabasePath,
   waitForSessionTranscriptProjection,
 } from "../../config/sessions/session-accessor.js";
 import type { SessionTranscriptRuntimeTarget } from "../../config/sessions/session-accessor.types.js";
-import {
-  captureIncognitoSessionHistoryBinding,
-  withIncognitoSessionActor,
-} from "../../config/sessions/session-incognito-binding.js";
+import { captureSessionActorStorageOwner } from "../../config/sessions/session-actor-storage-binding.js";
 import {
   sessionEntryCommitGuardOptions,
   composeSessionSourceAssertion,
@@ -84,16 +79,18 @@ export function replayableTarget(writer: CliExecutionHistoryWriter | undefined) 
  */
 export async function prepareCliHistoryBoundary(
   params: PreparedCliRunContext["params"],
-  credential: AuthProfileCredential | undefined,
-  /**
-   * The prepared backend the CLI child will run from. A native login owner is resolved only
-   * from the environment it yields (resolveCliChildEnv, the same function execution spawns
-   * with); without it no owner can be established and history is refused.
-   */
-  preparedBackend?: Parameters<typeof resolveCliChildEnv>[0],
+  identity: {
+    credential?: AuthProfileCredential;
+    /**
+     * The prepared backend the CLI child will run from. A native login owner is resolved only
+     * from the environment it yields (resolveCliChildEnv, the same function execution spawns
+     * with); without it no owner can be established and history is refused.
+     */
+    preparedBackend?: Parameters<typeof resolveCliChildEnv>[0];
+  },
 ): Promise<CliExecutionHistoryWriter | undefined> {
   try {
-    return await prepareCliHistoryBoundaryOnce(params, credential, preparedBackend);
+    return await prepareCliHistoryBoundaryOnce(params, identity);
   } catch (error) {
     if (
       params.abortSignal?.aborted ||
@@ -104,13 +101,12 @@ export async function prepareCliHistoryBoundary(
     }
   }
   // Settlement can move the tip after planning. Nothing committed; reread once.
-  return prepareCliHistoryBoundaryOnce(params, credential, preparedBackend);
+  return prepareCliHistoryBoundaryOnce(params, identity);
 }
 
 async function prepareCliHistoryBoundaryOnce(
   params: PreparedCliRunContext["params"],
-  credential: AuthProfileCredential | undefined,
-  preparedBackend: Parameters<typeof resolveCliChildEnv>[0] | undefined,
+  identity: Parameters<typeof prepareCliHistoryBoundary>[1],
 ): Promise<CliExecutionHistoryWriter | undefined> {
   const source = params.sessionTarget;
   if (
@@ -127,8 +123,7 @@ async function prepareCliHistoryBoundaryOnce(
   const capturedAdmission = admission && structuredClone(admission);
   const assertRunCurrent = createCliRunCurrentAssertion(params);
   const assertOwned = captureOwnedTranscriptWriteAssertion(requested);
-  const incognito = captureIncognitoSessionHistoryBinding(requested);
-  let assertPhysicalSource = () => {};
+  const { credential, preparedBackend } = identity;
   const childEnv =
     !credential && preparedBackend ? resolvePreparedChildEnv(params, preparedBackend) : undefined;
   const provider = normalizeProviderId(params.provider);
@@ -148,29 +143,25 @@ async function prepareCliHistoryBoundaryOnce(
     assertRunCurrent();
   }
   const nativeLoginOwner = nativeLogin?.owner;
-  const identity = { credential, nativeLoginOwner };
-  const plan = incognito
-    ? await withIncognitoSessionActor(
-        incognito.actor,
-        () => {
-          assertPhysicalSource = incognito.authority.assertCurrent;
-          return planCliHistoryBoundary(
-            params,
-            identity,
-            { ...requested, storePath: incognito.actor.path },
-            capturedAdmission,
-            () => {
-              assertRunCurrent();
-              incognito.authority.assertCurrent();
-            },
-          );
-        },
-        params.abortSignal,
+  const owner = { credential, nativeLoginOwner };
+  const memory = captureSessionActorStorageOwner(requested, {
+    assertCurrent: assertRunCurrent,
+    authorize() {},
+  });
+  let assertPhysicalSource = () => {
+    memory?.owner?.assertCurrent();
+    memory?.binding?.actor.assertReadable();
+  };
+  const plan = memory
+    ? await planCliHistoryBoundary(
+        params,
+        owner,
+        { ...requested, storePath: memory.path },
+        capturedAdmission,
+        assertRunCurrent,
       )
     : await withSessionTranscriptReadSource(
         requested,
-        () =>
-          planCliHistoryBoundary(params, identity, requested, capturedAdmission, assertRunCurrent),
         ({ scope, expectedIdentity, assertCurrent: assertReaderCurrent }) => {
           const target = { ...requested, storePath: scope.storePath };
           assertPhysicalSource = () => {
@@ -182,7 +173,7 @@ async function prepareCliHistoryBoundaryOnce(
               );
             }
           };
-          return planCliHistoryBoundary(params, identity, target, capturedAdmission, () => {
+          return planCliHistoryBoundary(params, owner, target, capturedAdmission, () => {
             assertReaderCurrent();
             assertRunCurrent();
           });
@@ -195,6 +186,7 @@ async function prepareCliHistoryBoundaryOnce(
   const { target, snapshot, watermark, boundary, allowed, writerRunId } = plan;
   const assertCurrent = composeSessionSourceAssertion([assertRunCurrent], (assertSource) => {
     assertSource();
+    memory?.authority.assertCurrent();
     assertPhysicalSource();
   });
   assertCurrent();
@@ -261,8 +253,9 @@ async function prepareCliHistoryBoundaryOnce(
     }
     assertActive();
   };
-  // The fingerprint proves only the owner attested at preparation. Each spawn, prompt send
-  // and coverage commit rereads the credential from the environment the child runs under
+  // The fingerprint proves only the owner attested at preparation. Each private-input
+  // boundary (assertReadable), Claude's prompt hook answer and coverage commit rereads the
+  // credential from the environment the child runs under
   // (execution rebinds this to the exact environment it spawns with) and accepts it only
   // if this process attested that exact credential to the same owner. These checks are
   // synchronous and never wait on the network. Run and write liveness checks do not
@@ -321,18 +314,27 @@ async function prepareCliHistoryBoundaryOnce(
     // check could prove it, so such a turn runs without saved history.
     replaysHistory: !refreshDue(),
     assertCurrent: assertWriterCurrent,
-    assertReadable: () => {
+    assertReadable: async () => {
       assertWriterCurrent();
       assertPhysicalSource();
-      // The actor publishes exact boundary/tip facts at settlement. Unbound native
-      // callers retain their existing synchronous final-authority guard until P12.
-      const stored: InternalSessionEntry | undefined = incognito
+      const authority = memory
         ? undefined
-        : loadSessionEntryReadOnly(target);
-      const current = incognito ? incognito.actor.sessions.readSteering(target.sessionKey) : stored;
-      const history = incognito?.actor.sessions.readCliHistory(target.sessionKey);
-      const proof = incognito ? history?.boundary : stored?.cliHistoryBoundary;
-      const tip = incognito ? history?.watermark : readSessionTranscriptWatermark(target);
+        : (
+            await readSessionTranscriptAnchorsAsync(
+              target,
+              { entryIds: [], contextAuthority: true },
+              params.abortSignal,
+            )
+          ).contextAuthority;
+      assertWriterCurrent();
+      assertPhysicalSource();
+      const facts =
+        memory?.binding?.actor.target.sessionKey === target.sessionKey
+          ? memory.binding.actor.snapshot(memory.authority)
+          : memory?.owner?.readSession(target.sessionKey, memory.authority);
+      const current = memory ? facts?.entry : authority?.entry;
+      const proof = current?.cliHistoryBoundary;
+      const tip = memory ? facts?.transcript.watermark : authority?.watermark;
       if (
         !current ||
         current.sessionId !== target.sessionId ||
@@ -348,6 +350,8 @@ async function prepareCliHistoryBoundaryOnce(
       ) {
         throw new Error("CLI history authority changed before execution");
       }
+      // Transports call this at their private-input boundary, so the login is rechecked last.
+      checkNativeLoginBoundary(writer.replaysHistory);
     },
     // Asked once per coverage commit. A changed or unresolvable login keeps the commit's
     // rows but leaves coverage where it is, so a produced reply is never discarded. Other
@@ -376,7 +380,10 @@ async function prepareCliHistoryBoundaryOnce(
     throw new Error("CLI history writer is no longer active");
   }
   bindAgentRunTerminalWriteContext(authority, {
-    run: (write) => runWithCliHistoryWriter(writer, write),
+    // Terminal bookkeeping keeps the admitted account/row facts after execution
+    // is cancelled. The transcript writer still checks those facts at commit.
+    run: (write) =>
+      runWithCliHistoryWriter({ ...writer, assertCurrent: assertPhysicalSource }, write),
   });
   return writer;
 }

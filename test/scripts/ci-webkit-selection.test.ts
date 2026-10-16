@@ -7,6 +7,9 @@ describe("Control UI WebKit selection", () => {
   it.each([
     ["ui/vitest.config.ts", true],
     ["ui/src/components/modal-dialog.ts", true],
+    ["ui/src/components/session-hovercard-automations.tsx", true],
+    ["ui/src/components/solid/session-hovercard-automations.browser.test.tsx", true],
+    ["ui/src/components/session-hovercard.css", true],
     ["ui/src/pages/chat/components/chat-composer.tsx", true],
     ["ui/src/pages/chat/chat-pane-header.ts", true],
     ["ui/src/pages/chat/components/chat-pane-header.ts", true],
@@ -68,6 +71,12 @@ describe("Control UI WebKit selection", () => {
             repository: "openclaw/openclaw",
             runAttempt: 1,
             matrix: { shard },
+            failed: true,
+            steps: {
+              node_setup: { outputs: {}, outcome: "success" },
+              ui_webkit: { outputs: {}, outcome: "success" },
+              ui_bun: { outputs: {}, outcome: "skipped" },
+            },
             preflightOutputs: { run_ui_webkit: selected },
           }),
         ).toBe(expected);

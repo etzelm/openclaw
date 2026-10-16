@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { stopSubagentsForRequester } from "../../../auto-reply/reply/abort-operation.js";
 import { cleanupBrowserSessionsForLifecycleEnd } from "../../../browser-lifecycle-cleanup.js";
+import { captureRuntimeConfigAsyncReader } from "../../../config/config.js";
 import {
   loadSessionEntry,
   replaceSessionEntrySync,
@@ -51,7 +52,7 @@ import {
 } from "./subagent-registry.test-helpers.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
-const fixture = useSubagentControlFixture();
+const fixture = useSubagentControlFixture({ reuseStateDir: true });
 const { cfgWithSessionStore, writeSessionStoreFixture: writeSessionStore } =
   useSubagentControlSessionStores();
 
@@ -130,7 +131,8 @@ function resetRegistryLeafMocks() {
   vi.mocked(resolveContextEngine).mockReset();
 }
 
-beforeEach(() => {
+beforeEach(async () => {
+  await captureRuntimeConfigAsyncReader()();
   setSubagentControlDepsForTest();
   resetRegistryLeafMocks();
   vi.mocked(cleanupBrowserSessionsForLifecycleEnd).mockResolvedValue(undefined);

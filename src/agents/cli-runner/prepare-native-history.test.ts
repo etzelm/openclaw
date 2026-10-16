@@ -157,8 +157,7 @@ describe("native Claude login history on preparation", () => {
           sessionFile: sessionTarget.sessionKey,
           sessionTarget,
         },
-        undefined,
-        { backend: { command: "claude" } },
+        { preparedBackend: { backend: { command: "claude" } } },
       );
       expect(writer).toBeDefined();
       await runWithCliHistoryWriter(writer, async () =>

@@ -3,6 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { observeHostDataSql } from "../../../test/helpers/sqlite-statement-execution-counter.js";
+import { clearRuntimeConfigSnapshot } from "../../config/runtime-snapshot.js";
 import {
   getCliHistoryWriter,
   runWithCliHistoryWriter,
@@ -27,7 +28,14 @@ import { prepareCliHistoryBoundary } from "./history-boundary.js";
 import { createHistoryBoundaryFixture, history } from "./history-boundary.test-support.js";
 import type { PreparedCliRunContext } from "./types.js";
 
-const sessionDirs = useSessionStoreTempDirs(afterAll, "cli-history-boundary-");
+const sessionDirs = useSessionStoreTempDirs(
+  (cleanup) =>
+    afterAll(async () => {
+      await cleanup();
+      clearRuntimeConfigSnapshot();
+    }),
+  "cli-history-boundary-",
+);
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -70,9 +78,7 @@ describe("CLI transcript account boundary", () => {
       const sql = observeHostDataSql();
       try {
         const writer = await prepareCliHistoryBoundary(params, {
-          type: "token",
-          provider: "test-cli",
-          token: "epoch-a",
+          credential: { type: "token", provider: "test-cli", token: "epoch-a" },
         });
         expect(writer).toBeDefined();
         expect(sql.queries, `MAIN SQL observations: ${sql.queries.length}`).toEqual([]);
@@ -119,9 +125,7 @@ describe("CLI transcript account boundary", () => {
         async (params) => {
           await expect(
             prepareCliHistoryBoundary(params, {
-              type: "token",
-              provider: "test-cli",
-              token: "epoch-a",
+              credential: { type: "token", provider: "test-cli", token: "epoch-a" },
             }),
           ).rejects.toThrow();
           if (change === "append" || change === "rewrite") {
@@ -163,9 +167,7 @@ describe("CLI transcript account boundary", () => {
         );
       await f.withRun("replanned-preparation", async (params) => {
         const writer = await prepareCliHistoryBoundary(params, {
-          type: "token",
-          provider: "test-cli",
-          token: "epoch-a",
+          credential: { type: "token", provider: "test-cli", token: "epoch-a" },
         });
         expect(spy).toHaveBeenCalledTimes(2);
         expect(loadSessionEntryReadOnly(f.target)?.activeWriterRunId).toBe(params.runId);
@@ -261,7 +263,7 @@ describe("CLI transcript account boundary", () => {
       throw new Error("Missing admitted history writer");
     }
     const before = f.manager().getEntries();
-    expect(() => writer.assertReadable()).toThrow();
+    await expect(writer.assertReadable()).rejects.toThrow();
     expect(() =>
       runWithCliHistoryWriter(writer, () =>
         f.manager().appendMessage({
@@ -367,7 +369,9 @@ describe("CLI transcript account boundary", () => {
   it("admits a finished writer's successor while refusing the live writer", async () => {
     const f = await fixture();
     await f.seed();
-    const identity = { type: "token" as const, provider: "test-cli", token: "epoch-a" };
+    const identity = {
+      credential: { type: "token" as const, provider: "test-cli", token: "epoch-a" },
+    };
     await f.withRun("orchestrator-prior", async (params) => {
       await claimAgentSessionWriter(params);
       await f.withRun("direct-cli-blocked", async (direct) => {
@@ -453,9 +457,7 @@ describe("CLI transcript account boundary", () => {
       await f.withRun("direct-cli-recovery", async (params) => {
         await expect(
           prepareCliHistoryBoundary(params, {
-            type: "token",
-            provider: "test-cli",
-            token: "epoch-a",
+            credential: { type: "token", provider: "test-cli", token: "epoch-a" },
           }),
         ).rejects.toThrow("CLI history owner changed before preparation");
       });
@@ -476,20 +478,18 @@ describe("CLI transcript account boundary", () => {
       await f.withRun("direct-cli-recovery", async (params) => {
         params.sessionEntry = loadSessionEntryReadOnly(f.target);
         const writer = await prepareCliHistoryBoundary(params, {
-          type: "token",
-          provider: "test-cli",
-          token: "epoch-a",
+          credential: { type: "token", provider: "test-cli", token: "epoch-a" },
         });
         expect(writer).toBeDefined();
         if (!writer) {
           throw new Error("Missing admitted history writer");
         }
-        writer.assertReadable();
+        await writer.assertReadable();
         await f.withRun(replacementRunId, async (replacement) => {
           await claimAgentSessionWriter(replacement);
-          expect
-            .soft(() => writer?.assertReadable())
-            .toThrow(
+          await expect
+            .soft(writer.assertReadable())
+            .rejects.toThrow(
               replacementRunId === params.runId
                 ? "admitted run authority is no longer active"
                 : "CLI history authority changed",

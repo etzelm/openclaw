@@ -141,7 +141,7 @@ describe("native CLI login owner", () => {
     await f.withRun(
       runId,
       async (params) => {
-        const writer = await prepareCliHistoryBoundary(params, undefined, prepared);
+        const writer = await prepareCliHistoryBoundary(params, { preparedBackend: prepared });
         if (!writer) {
           throw new Error("Missing admitted history writer");
         }
@@ -363,26 +363,38 @@ describe("native CLI login owner", () => {
     });
   });
 
-  it("looks the login up at each boundary and coverage commit, never at a liveness check", async () => {
+  it("refuses private input at the readable boundary once the login is reassigned", async () => {
+    const f = await fixture();
+    const { backend } = logins();
+    loginIn(backend, "uuid:account-a");
+    await seedNative(f, backendUsing(backend));
+    await withNativeWriter(f, "boundary-native-readable", backendUsing(backend), async (writer) => {
+      await writer.assertReadable();
+      loginIn(backend, "uuid:account-b");
+      await expect(writer.assertReadable()).rejects.toThrow("CLI history authority changed");
+    });
+  });
+
+  it("looks the login up at each private-input boundary and coverage commit, never at a liveness check", async () => {
     const f = await fixture();
     const { backend } = logins();
     loginIn(backend, "uuid:account-a");
     await seedNative(f, backendUsing(backend));
     const lookup = vi.spyOn(cliCredentials, "readAttestedNativeCliLoginOwner");
     const attest = vi.spyOn(cliCredentials, "resolveNativeCliLoginOwner");
-    await withNativeWriter(f, "boundary-native-every-call", backendUsing(backend), (writer) => {
+    await withNativeWriter(f, "boundary-native-every-call", backendUsing(backend), async (writer) => {
       lookup.mockClear();
       attest.mockClear();
       profile.mockClear();
       for (let check = 0; check < 20; check += 1) {
         writer.assertCurrent();
-        writer.assertReadable();
       }
       expect(lookup).not.toHaveBeenCalled();
+      await writer.assertReadable();
       writer.bindExecutionEnv({ CLAUDE_CONFIG_DIR: backend }, true);
       writer.checkNativeLoginBoundary(true);
       writer.checkNativeLoginBoundary(false);
-      expect(lookup).toHaveBeenCalledTimes(3);
+      expect(lookup).toHaveBeenCalledTimes(4);
       lookup.mockClear();
       f.manager().appendMessage({ role: "user", content: "covered turn", timestamp: 2 });
       expect(lookup).toHaveBeenCalledTimes(1);
@@ -458,7 +470,7 @@ describe("native CLI login owner", () => {
     await f.withRun(
       runId,
       async (params) => {
-        const writer = await prepareCliHistoryBoundary(params, undefined, backendUsing(backend));
+        const writer = await prepareCliHistoryBoundary(params, { preparedBackend: backendUsing(backend) });
         if (!writer) {
           throw new Error("Missing admitted history writer");
         }
@@ -680,18 +692,20 @@ describe("native CLI login owner", () => {
       this: Worker,
       ...args: Parameters<Worker["postMessage"]>
     ) {
-      post.apply(this, args);
       const request = args[0] as { type?: string; input?: unknown } | undefined;
-      if (!state.flipped && request?.type === "execute" && request.input instanceof Uint8Array) {
-        const command = deserialize(request.input) as {
-          type?: string;
-          input?: { command?: { type?: string } };
-        };
-        // Domain workers wrap the report command; the turn worker takes it directly.
-        if ((command.input?.command ?? command).type === type) {
-          state.flipped = true;
-          flip();
-        }
+      // Read the command before posting: the host transfers its buffer to the worker.
+      const command =
+        !state.flipped && request?.type === "execute" && request.input instanceof Uint8Array
+          ? (deserialize(request.input) as {
+              type?: string;
+              input?: { command?: { type?: string } };
+            })
+          : undefined;
+      post.apply(this, args);
+      // Domain workers wrap the report command; the turn worker takes it directly.
+      if (command && (command.input?.command ?? command).type === type) {
+        state.flipped = true;
+        flip();
       }
     });
     return state;

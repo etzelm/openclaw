@@ -7,6 +7,7 @@ import type {
   CliBackendExecuteContext,
   CliBackendLiveSessionCapability,
   CliBackendLiveSessionHandle,
+  CliBackendMessageInjection,
   CliBackendPreparedExecution,
   CliBackendToolPermissionResult,
 } from "openclaw/plugin-sdk/cli-backend";
@@ -21,7 +22,7 @@ import {
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import type { ClaudeCliSecretInput } from "./cli-process.js";
-import { CLAUDE_PROTOCOL_FIXTURE } from "./cli-runtime.test-support.js";
+import { CLAUDE_PROTOCOL_FIXTURE, resultDetail } from "./cli-runtime.test-support.js";
 import { executeClaudeCli, type ClaudeCliExecuteContext } from "./cli.runtime.js";
 
 const roots: string[] = [];
@@ -127,14 +128,6 @@ async function collect(context: CliBackendExecuteContext) {
     records.push(record);
   }
   return records;
-}
-
-function resultDetail(records: Record<string, unknown>[]): Record<string, unknown> {
-  const result = records.findLast((record) => record.type === "result");
-  expect(result).toEqual(
-    expect.objectContaining({ subtype: "success", result: expect.any(String) }),
-  );
-  return JSON.parse(String(result?.result)) as Record<string, unknown>;
 }
 
 async function fixtureReadyBeforeSettlement(
@@ -632,6 +625,8 @@ describe("Claude native stdio boundary", () => {
       });
       expect(records.filter((record) => record.type === "result")).toHaveLength(1);
       expect(records.some((record) => record.type === "assistant")).toBe(false);
+      expect(records.some((record) => record.type === "stream_event")).toBe(false);
+      expect(records.some((record) => record.user_message_uuid === "prior-turn")).toBe(false);
       const detail = resultDetail(records);
       expect(detail).toMatchObject({ user: prompt, matchedInputUuid: expect.any(String) });
       if (prompt === "second input") {
@@ -644,6 +639,171 @@ describe("Claude native stdio boundary", () => {
       }
     }
     expect(context.requestToolPermission).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { scenario: "steer-merged", results: 1 },
+    { scenario: "steer-hook-repeat", results: 1 },
+    { scenario: "steer-hook-rewrite", results: 1 },
+    { scenario: "steer-after-result", results: 2 },
+    { scenario: "steer-idle-trailer", results: 1 },
+    { scenario: "steer-notification-replay", results: 2 },
+    { scenario: "steer-completed-notification-replay", results: 2 },
+  ])(
+    "delivers same-turn input once native starts it and keeps the turn open ($scenario)",
+    async ({ scenario, results }) => {
+      let injection: CliBackendMessageInjection | undefined;
+      const context = await createContext(scenario, {
+        liveSession: createLiveSession(),
+        promptContext: { prependContext: "current private context" },
+        registerMessageInjection: (value) => {
+          injection = value;
+        },
+      });
+      const running = collect(context);
+      await receipts.waitFor(path.join(context.cwd, "turn.ready"), "ready");
+      expect(injection?.isAvailable()).toBe(true);
+      const withCurrent = vi.fn(async (submit: () => void) => submit());
+      const notificationReplay = scenario.includes("notification-replay");
+      const input = notificationReplay
+        ? "<task-notification><task-id>background-agent</task-id></task-notification>"
+        : "steering input";
+      await injection!.queueMessage(input, withCurrent);
+      expect(withCurrent).toHaveBeenCalledOnce();
+      const records = await running;
+      const resultRecords = records.filter((record) => record.type === "result");
+      const tagged = records.filter((record) => record.user_message_uuid !== undefined);
+      expect(tagged.map((record) => record.type)).toEqual(
+        expect.arrayContaining(["stream_event", "assistant", "result"]),
+      );
+      expect(new Set(tagged.map((record) => record.user_message_uuid)).size).toBe(1);
+      expect(resultRecords).toHaveLength(results);
+      // The host needs one terminal result; answers before the injected turn stay interim.
+      expect(resultRecords.map((record) => record.openclaw_interim_result === true)).toEqual([
+        ...Array.from({ length: results - 1 }, () => true),
+        false,
+      ]);
+      // Private turn context belongs to the admitted prompt, never to injected input.
+      const detail = resultDetail(records);
+      expect(detail.user).toBe(input);
+      if (notificationReplay) {
+        expect(detail.finalBackgroundAnswer).toBe(true);
+      }
+      expect(detail.privateContext).toBe("current private context");
+      expect(detail.injectedContext).toEqual({});
+      expect(detail.injectedRerunContext).toEqual(
+        scenario.startsWith("steer-hook-") ? {} : undefined,
+      );
+      expect(injection!.isAvailable()).toBe(false);
+    },
+  );
+
+  it("refuses steering before the admitted prompt submits its private context", async () => {
+    let injection: CliBackendMessageInjection | undefined;
+    const context = await createContext("steer-prompt-pending", {
+      promptContext: { prependContext: "current private context" },
+      registerMessageInjection: (value) => {
+        injection = value;
+      },
+    });
+    const iterator = executeClaudeCli(context)[Symbol.asyncIterator]();
+    try {
+      expect((await iterator.next()).value).toMatchObject({ type: "system", subtype: "init" });
+      expect(injection?.isAvailable()).toBe(false);
+      await expect(
+        injection!.queueMessage(context.prompt, async (submit) => submit()),
+      ).rejects.toThrow("The Claude CLI turn cannot accept more input.");
+    } finally {
+      await iterator.return?.();
+    }
+  });
+
+  it("suppresses private context for injected input that repeats the admitted prompt", async () => {
+    let injection: CliBackendMessageInjection | undefined;
+    const context = await createContext("steer-merged", {
+      liveSession: createLiveSession(),
+      promptContext: { prependContext: "current private context" },
+      registerMessageInjection: (value) => {
+        injection = value;
+      },
+    });
+    const running = collect(context);
+    await receipts.waitFor(path.join(context.cwd, "turn.ready"), "ready");
+    expect(injection?.isAvailable()).toBe(true);
+    await injection!.queueMessage(context.prompt, async (submit) => submit());
+    const records = await running;
+
+    const detail = resultDetail(records);
+    expect(detail.user).toBe(context.prompt);
+    expect(detail.privateContext).toBe("current private context");
+    expect(detail.injectedContext).toEqual({});
+  });
+
+  it("rejects same-turn input the native process never started", async () => {
+    let injection: CliBackendMessageInjection | undefined;
+    const context = await createContext("steer-exit", {
+      liveSession: createLiveSession(),
+      registerMessageInjection: (value) => {
+        injection = value;
+      },
+    });
+    const running = collect(context);
+    void running.catch(() => {});
+    await receipts.waitFor(path.join(context.cwd, "turn.ready"), "ready");
+    expect(injection?.isAvailable()).toBe(true);
+    await expect(
+      injection!.queueMessage("lost input", async (submit) => submit()),
+    ).rejects.toThrow();
+    await expect(running).rejects.toThrow();
+  });
+
+  it.each(["cancelled", "discarded", "refused", "completed"])(
+    "settles %s same-turn input and releases the held result",
+    async (state) => {
+      let injection: CliBackendMessageInjection | undefined;
+      const context = await createContext(`steer-${state}`, {
+        liveSession: createLiveSession(),
+        registerMessageInjection: (value) => {
+          injection = value;
+        },
+      });
+      const running = collect(context);
+      await receipts.waitFor(path.join(context.cwd, "turn.ready"), "ready");
+      expect(injection?.isAvailable()).toBe(true);
+      const receipt = injection!.queueMessage("terminal input", async (submit) => submit());
+      if (state === "completed") {
+        await expect(receipt).resolves.toBeUndefined();
+      } else {
+        await expect(receipt).rejects.toThrow(`Claude CLI ${state} the injected input.`);
+      }
+      // The held result is released as terminal instead of keeping the turn open forever.
+      const records = await running;
+      const results = records.filter((record) => record.type === "result");
+      expect(results).toHaveLength(1);
+      expect(results[0]?.openclaw_interim_result).toBeUndefined();
+    },
+  );
+
+  it("refuses same-turn input when the admitted authority fails at the write", async () => {
+    let injection: CliBackendMessageInjection | undefined;
+    const context = await createContext("steer-merged", {
+      liveSession: createLiveSession(),
+      registerMessageInjection: (value) => {
+        injection = value;
+      },
+    });
+    const running = collect(context);
+    void running.catch(() => {});
+    await receipts.waitFor(path.join(context.cwd, "turn.ready"), "ready");
+    expect(injection?.isAvailable()).toBe(true);
+    await expect(
+      injection!.queueMessage("revoked input", async () => {
+        throw new Error("revoked");
+      }),
+    ).rejects.toThrow("revoked");
+    expect(await readFile(path.join(context.cwd, "user.received"), "utf8")).toBe(
+      "synthetic user input",
+    );
   });
 
   it("rejects an already aborted run before reading its credential or creating a native process", async () => {
@@ -689,27 +849,24 @@ describe("Claude native stdio boundary", () => {
     await expect(access(path.join(context.cwd, "user.received"))).rejects.toThrow();
   });
 
-  it("sends user input only after a fresh boundary check, not the stream check", async ({
-    signal,
-  }) => {
-    let boundaryActive = true;
+  it("sends user input only after a fresh private-input check", async ({ signal }) => {
+    let loginHolds = true;
     const reason = new Error("Synthetic account reassigned before send.");
     const liveSession = createLiveSession();
     const context = await createContext("revoked-initialize", {
       liveSession,
-      assertCurrent: () => {
-        if (!boundaryActive) {
+      // The host's private-input check fails while the run itself stays current.
+      assertPrivateInputCurrent: () => {
+        if (!loginHolds) {
           throw reason;
         }
       },
-      // An always-passing stream check must never stand in for the pre-send boundary check.
-      assertStreamCurrent: () => {},
     });
     const running = collect(context);
     const outcome = running.catch((error: unknown) => error);
     try {
       await fixtureReadyBeforeSettlement(context, "initialize.ready", running, signal);
-      boundaryActive = false;
+      loginHolds = false;
     } finally {
       await writeFile(path.join(context.cwd, "initialize.release"), "release");
     }
@@ -717,19 +874,16 @@ describe("Claude native stdio boundary", () => {
     await expect(access(path.join(context.cwd, "user.received"))).rejects.toThrow();
   });
 
-  it("withholds private turn context when the boundary fails after the prompt was sent", async () => {
-    let promptSent = false;
+  it("withholds private turn context when the private-input check fails after the prompt was sent", async () => {
+    let checks = 0;
     const context = await createContext("normal", {
       prompt: "Remember orange.",
       promptContext: { prependContext: "saved private context" },
-      assertCurrent: () => {
-        if (promptSent) {
+      // The first check guards the prompt send; the login changes from there on.
+      assertPrivateInputCurrent: () => {
+        if (++checks > 1) {
           throw new Error("Synthetic account reassigned after send.");
         }
-      },
-      // The first stream check runs once the prompt was sent: the login changes from there on.
-      assertStreamCurrent: () => {
-        promptSent = true;
       },
     });
     const detail = resultDetail(await collect(context));
@@ -737,17 +891,16 @@ describe("Claude native stdio boundary", () => {
     expect(detail.privateContext).toBeUndefined();
   });
 
-  it("keeps an awaited hook decision on the stream check once the prompt was delivered", async () => {
-    let boundaryActive = true;
+  it("keeps an awaited tool hook decision independent of the private-input check", async () => {
+    let loginHolds = true;
     const approvalStarted = createDeferred<void>();
     const approval = createDeferred<CliBackendToolPermissionResult>();
     const context = await createContext("revoked-approval", {
-      assertCurrent: () => {
-        if (!boundaryActive) {
-          throw new Error("Boundary check must not run per event.");
+      assertPrivateInputCurrent: () => {
+        if (!loginHolds) {
+          throw new Error("A tool hook decision carries no saved turn context.");
         }
       },
-      assertStreamCurrent: () => {},
       requestToolPermission: () => {
         approvalStarted.resolve();
         return approval.promise;
@@ -755,7 +908,7 @@ describe("Claude native stdio boundary", () => {
     });
     const running = collect(context);
     await approvalStarted.promise;
-    boundaryActive = false;
+    loginHolds = false;
     approval.resolve({ behavior: "allow", updatedInput: { file_path: "approved.txt" } });
     const detail = resultDetail(await running);
     expect(detail.hookDecision).toMatchObject({

@@ -105,7 +105,15 @@ beforeEach(() => {
       assertCurrent() {},
     }),
   );
-  vi.spyOn(runtimeConfig, "getRuntimeConfig").mockReturnValue(cfg);
+  vi.spyOn(runtimeConfig, "captureRuntimeConfigAsyncReader").mockReturnValue(
+    Object.assign(
+      async () => {
+        runtimeConfig.setRuntimeConfigSnapshot(cfg, cfg);
+        return cfg;
+      },
+      { assertCurrent() {} },
+    ),
+  );
   vi.spyOn(configLoader, "loadModelsConfigWithSource").mockResolvedValue({
     sourceConfig: cfg,
     resolvedConfig: cfg,
@@ -124,7 +132,10 @@ beforeEach(() => {
     async (_params, read) => await read(createOwner()),
   );
 });
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  runtimeConfig.clearRuntimeConfigSnapshot();
+});
 
 async function list(options: Parameters<typeof modelsListCommand>[0]) {
   return withEnvAsync({ OPENCLAW_GATEWAY_PORT: undefined }, () =>
@@ -133,6 +144,58 @@ async function list(options: Parameters<typeof modelsListCommand>[0]) {
 }
 
 describe("models list published transport", () => {
+  it.each(["ready", "unavailable"] as const)(
+    "reports configured ids missing from a %s listing without changing availability",
+    async (status) => {
+      vi.mocked(gatewayLock.readActiveGatewayLockIdentity).mockResolvedValue(undefined);
+      const owner = createOwner({
+        modelCatalog: markPreparedModelCatalogFull({
+          ...createOwner().modelCatalog,
+          providerOutcomes: [
+            {
+              provider: "catalog-provider",
+              status,
+              unlistedConfiguredModelIds: ["Reader", "Absent"],
+            },
+          ],
+        }),
+      });
+      vi.mocked(catalog.withPreparedModelCatalogOwner).mockImplementation(async (_params, read) =>
+        read(owner),
+      );
+      await list({ json: true });
+      expect(runtime.writeJson).toHaveBeenCalledWith(
+        expect.objectContaining({
+          providerOutcomes: [
+            {
+              provider: "catalog-provider",
+              status,
+              ...(status === "ready" ? { unlistedConfiguredModelIds: ["Reader", "Absent"] } : {}),
+            },
+          ],
+          models: [
+            expect.objectContaining({
+              key: "catalog-provider/Reader",
+              available: true,
+              tags: ["default", "alias:work"],
+            }),
+          ],
+        }),
+        2,
+      );
+      const warnings = runtime.error.mock.calls
+        .map(([message]) => message)
+        .filter((message) => String(message).includes("last successful server catalog"));
+      expect(warnings).toEqual(
+        status === "ready"
+          ? ["Reader", "Absent"].map((id) =>
+              expect.stringContaining(`Configured model "catalog-provider/${id}" is not present`),
+            )
+          : [],
+      );
+    },
+  );
+
   it("refreshes the selected Gateway's inventory without resolving local provider secrets", async () => {
     vi.mocked(configLoader.loadModelsConfigWithSource).mockRejectedValue(
       new Error("Local provider secret unavailable"),
@@ -205,34 +268,6 @@ describe("models list published transport", () => {
     expect(gateway.callGateway).toHaveBeenCalledOnce();
   });
 
-  it.each([{ refresh: false, refreshFailed: true }])(
-    "uses published refresh status with rejected auth for %j",
-    async ({ refresh, refreshFailed }) => {
-      vi.mocked(gateway.callGateway).mockResolvedValue({
-        models: [model],
-        refreshFailed,
-        providerOutcomes: [{ provider: "signed-out", status: "auth-rejected" }],
-      });
-      await list({ refresh, json: true });
-      expect(runtime.error).toHaveBeenCalledWith(
-        "Model discovery authentication was rejected for signed-out. Open Models in the Control UI to check sign-in and catalog access, then retry with --refresh.",
-      );
-      if (refreshFailed) {
-        expect(runtime.error).toHaveBeenCalledWith(
-          "Model discovery could not refresh all providers. Showing the available published model list.",
-        );
-      } else {
-        expect(runtime.error).toHaveBeenCalledTimes(1);
-      }
-      expect(runtime.writeJson).toHaveBeenCalledWith(expect.objectContaining({ count: 1 }), 2);
-      expect(gateway.callGateway).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          params: { view: "default", includeDetails: true, ...(refresh ? { refresh: true } : {}) },
-        }),
-      );
-    },
-  );
-
   it.each([{ json: false, plain: false }])(
     "reports rejected discovery with empty provider inventory for %j",
     async (output) => {
@@ -264,11 +299,12 @@ describe("models list published transport", () => {
   it("preserves model rows and public discovery facts without printing raw provider errors", async () => {
     const providerOutcomes = [
       { provider: "catalog-provider", status: "ready" },
-      { provider: "xai", status: "auth-rejected", profileId: "xai:work" },
+      { provider: "\u001b[31mxai\u001b[0m", status: "auth-rejected", profileId: "work\nnext" },
       { provider: "offline", status: "unavailable" },
     ];
     vi.mocked(gateway.callGateway).mockResolvedValue({
       models: [model],
+      refreshFailed: true,
       providerOutcomes: providerOutcomes.map((outcome) => ({
         ...outcome,
         message: "synthetic-private-provider-response",
@@ -285,27 +321,17 @@ describe("models list published transport", () => {
       }),
       2,
     );
-    expect(runtime.error).toHaveBeenCalledTimes(2);
+    expect(runtime.error).toHaveBeenCalledTimes(3);
+    expect(runtime.error).toHaveBeenCalledWith(
+      "Model discovery could not refresh all providers. Showing the available published model list.",
+    );
+    expect(runtime.error).toHaveBeenCalledWith(
+      "Model discovery authentication was rejected for xai (profile work\\nnext). Open Models in the Control UI to check sign-in and catalog access, then retry with --refresh.",
+    );
     expect(runtime.error).toHaveBeenCalledWith(
       "Model discovery is unavailable for offline. Retry with --refresh; if it still fails, check the provider in Models in the Control UI.",
     );
     expect(JSON.stringify(runtime.error.mock.calls)).not.toContain("synthetic-private");
-  });
-
-  it("sanitizes provider and profile labels in discovery warnings", async () => {
-    vi.mocked(gateway.callGateway).mockResolvedValue({
-      models: [model],
-      providerOutcomes: [
-        { provider: "\u001b[31mxai\u001b[0m", profileId: "work\nnext", status: "auth-rejected" },
-      ],
-    });
-
-    await list({ plain: true });
-
-    expect(runtime.error).toHaveBeenCalledExactlyOnceWith(
-      "Model discovery authentication was rejected for xai (profile work\\nnext). Open Models in the Control UI to check sign-in and catalog access, then retry with --refresh.",
-    );
-    expect(runtime.writeStdout).toHaveBeenCalledExactlyOnceWith("catalog-provider/Reader");
   });
 
   it.each([true])(

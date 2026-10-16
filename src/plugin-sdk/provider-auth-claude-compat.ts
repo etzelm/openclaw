@@ -617,10 +617,6 @@ export function readClaudeCliCredentialsCached(
   }
 
   const value = readClaudeCliCredentials({ ...options, platform });
-  const nextFingerprint = `${readFileMtimeMs(credentialsPath) ?? "missing"}:${readFileMtimeMs(settingsPath) ?? "missing"}:${readFileMtimeMs(accountPath) ?? "missing"}`;
-  claudeCliCache =
-    ttlMs > 0 && nextFingerprint === sourceFingerprint
-      ? { value, readAt: now, cacheKey, sourceFingerprint: nextFingerprint }
-      : null;
+  claudeCliCache = ttlMs > 0 ? { value, readAt: now, cacheKey, sourceFingerprint } : null;
   return value;
 }
