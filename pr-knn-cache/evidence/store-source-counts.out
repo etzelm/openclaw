@@ -1,0 +1,12 @@
+$ Run on the Studio against the same .backup snapshots the measure-child runs used, 2026-10-17T01:1xZ and 01:2xZ (appended to the end of the measure-child-dev.out and measure-child-main.out exec sessions; copied here verbatim)
+$ node -e "const {DatabaseSync}=require('node:sqlite');const d=new DatabaseSync('agent-dev.sqlite',{readOnly:true});console.log(d.prepare('select source,count(*) n from memory_index_chunks group by source').all(), d.prepare('pragma page_size').get())"
+[
+  [Object: null prototype] { source: 'memory', n: 224 },
+  [Object: null prototype] { source: 'sessions', n: 5788 }
+] [Object: null prototype] { page_size: 4096 }
+
+$ node -e "const {DatabaseSync}=require('node:sqlite');const d=new DatabaseSync('agent-main.sqlite',{readOnly:true});console.log(d.prepare('select source,count(*) n from memory_index_chunks group by source').all())"
+[
+  [Object: null prototype] { source: 'memory', n: 35594 },
+  [Object: null prototype] { source: 'sessions', n: 7896 }
+]

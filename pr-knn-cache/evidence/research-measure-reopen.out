@@ -1,0 +1,35 @@
+$ date: 2026-10-16T23:36:28Z
+$ node /Users/openclaw/.openclaw/issues/sqlite-perf-2026-10-16/t2-01-sqlite-vec-child-reopen/evidence/measure-reopen.mjs /tmp/oc-sqlite-audit/db/agent-dev.sqlite /tmp/oc-sqlite-audit/db/agent-main.sqlite <vec0.dylib>
+node v24.20.0
+sqlite_version 3.53.4
+extension /Users/openclaw/homebrew/lib/node_modules/openclaw/node_modules/sqlite-vec-darwin-arm64/vec0.dylib
+runs=5 (median reported) after 2 warmup iterations; limit=10 k=80 dims=4096
+allowExtension omitted: enableLoadExtension(true) throws: ERR_INVALID_STATE Cannot enable extension loading because it was disabled at database creation.
+allowExtension omitted: loadExtension throws: ERR_INVALID_STATE extension loading is not allowed
+
+(a) reopen per request on agent-dev.sqlite (open+pragmas, loadExtension+vec_version, prepare, KNN .all, close)
+  open_pragmas           median=0.078 ms  runs=[0.074, 0.078, 0.072, 0.083, 0.080]
+  load_vec_and_version   median=1.313 ms  runs=[1.345, 1.329, 1.313, 1.233, 1.241]
+  first_prepare          median=0.037 ms  runs=[0.038, 0.037, 0.041, 0.037, 0.035]
+  knn_all                median=115.205 ms  runs=[118.590, 117.148, 112.855, 109.854, 115.205]
+  close                  median=0.419 ms  runs=[0.419, 0.412, 0.445, 0.420, 0.419]
+  total                  median=116.980 ms  runs=[120.467, 119.004, 114.726, 111.627, 116.980]
+  overhead_excl_knn      median=1.855 ms
+
+(b) cached handle on agent-dev.sqlite (stat dev/ino check, prepare, KNN .all)
+  stat_identity          median=0.028 ms  runs=[0.028, 0.021, 0.032, 0.027, 0.037]
+  prepare                median=0.040 ms  runs=[0.040, 0.037, 0.045, 0.037, 0.054]
+  knn_all                median=115.604 ms  runs=[113.118, 115.263, 116.092, 115.604, 116.345]
+  total                  median=115.668 ms  runs=[113.187, 115.320, 116.169, 115.668, 116.436]
+  in transaction between requests: false
+
+KNN results identical (a) vs (b): true (rows=10)
+
+agent-dev.sqlite bytes=430518272 sqlite_master_rows=206
+  open+close                    median=0.037 ms  runs=[0.040, 0.035, 0.050, 0.037, 0.032]
+  open+pragmas+schema+close     median=0.711 ms  runs=[0.711, 0.816, 0.761, 0.688, 0.669]
+
+agent-main.sqlite bytes=4855742464 sqlite_master_rows=206
+  open+close                    median=0.675 ms  runs=[0.675, 0.612, 0.674, 0.898, 0.888]
+  open+pragmas+schema+close     median=0.611 ms  runs=[0.640, 0.609, 0.611, 1.930, 0.608]
+node $E/measure-reopen.mjs /tmp/oc-sqlite-audit/db/agent-dev.sqlite    0.36s user 1.32s system 95% cpu 1.764 total

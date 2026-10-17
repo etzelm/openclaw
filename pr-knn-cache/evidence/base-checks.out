@@ -1,0 +1,22 @@
+$ Run on the Studio in a clean `git worktree add ~/work/knn-cache-main origin/main` (b0ab44081ef, `git status --short` empty), 2026-10-17T01:2xZ. Output copied verbatim from the exec session.
+$ pnpm check:max-lines-ratchet --base origin/main~1
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base 'origin/main~1'
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+[ELIFECYCLE] Command failed with exit code 1.
+
+$ node --import tsx scripts/check-deadcode-exports.mts   (last 6 lines)
+  extensions/discord/src/monitor/provider-session.runtime.ts: getAcpSessionManager
+  extensions/discord/src/monitor/provider-session.runtime.ts: isAcpRuntimeError
+  extensions/discord/src/monitor/provider-session.runtime.ts: rethrowIncognitoSessionError
+  src/agents/runtime/internal-hooks.ts: getInternalToolTurnInputScope
+  src/commands/doctor-maintenance-foreground.ts: resolveDoctorMaintenanceWaitDeadlineMs
+Delete the exports or model their real production consumers in Knip.
+
+$ Kysely guardrails on the final branch tree (after the switch to configureSqliteMaintenanceCache and oxfmt), same session:
+$ node --import ./scripts/tsx.mjs scripts/check-kysely-guardrails.mts
+Kysely guardrails OK

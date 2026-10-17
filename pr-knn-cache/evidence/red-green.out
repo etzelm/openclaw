@@ -1,0 +1,39 @@
+$ RED: the new test file copied onto an unchanged checkout of origin/main b0ab44081ef (worktree ~/work/knn-cache-main), 2026-10-17T01:07Z
+$ pnpm test src/infra/database-engine/sqlite-vector-subprocess.test.ts
+
+ FAIL  infra  src/infra/database-engine/sqlite-vector-subprocess.test.ts > budgets the page cache on the child's per-request read-only connection
+AssertionError: expected { …(2) } to deeply equal { …(2) }
+
+- Expected
++ Received
+
+  {
+    "fallbackScanRequired": false,
+    "rows": [
+      {
+-       "cache_size": -65536,
++       "cache_size": -2000,
+      },
+    ],
+  }
+
+ ❯ src/infra/database-engine/sqlite-vector-subprocess.test.ts:99:7
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  18:07:24
+   Duration  19.87s (transform 97%, setup 2%, tests 1%)
+[test] failed 1 Vitest shard in 21.84s
+[test] FAILED (exit 1)
+
+$ GREEN: final branch tree (child calls configureSqliteMaintenanceCache), 2026-10-17T01:33Z
+$ pnpm test src/infra/database-engine/sqlite-vector-subprocess.test.ts
+
+ ✓ infra  src/infra/database-engine/sqlite-vector-subprocess.test.ts > forwards a discovered SQLite library through stdin without inheriting its environment 36ms
+ ✓ infra  src/infra/database-engine/sqlite-vector-subprocess.test.ts > budgets the page cache on the child's per-request read-only connection 82ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  18:33:46
+   Duration  17.03s (transform 98%, setup 1%, tests 1%)
+[test] passed 1 Vitest shard in 19.65s

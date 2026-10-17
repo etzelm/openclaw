@@ -1,0 +1,11 @@
+$ date: 2026-10-16T23:55:12Z
+$ node /Users/openclaw/.openclaw/issues/sqlite-perf-2026-10-16/t2-01-sqlite-vec-child-reopen/evidence/measure-budgets.mjs /tmp/oc-sqlite-audit/db/agent-dev.sqlite <vec0.dylib 0.1.9>  (cwd /tmp)
+node v24.20.0; fresh connection per request; limit=24 k=192; medians of 5 warm runs after 2 warmups
+  defaults (cache_size=-2000, mmap_size=0)   median=222.846 ms runs=[222.6, 219.0, 224.0, 222.8, 233.9] identical=true
+  PRAGMA cache_size = -16384                 median=191.469 ms runs=[207.0, 190.5, 188.1, 191.5, 192.5] identical=true
+  PRAGMA cache_size = -65536                 median=66.751 ms runs=[66.0, 66.8, 65.1, 67.0, 66.9] identical=true
+  PRAGMA cache_size = -131072                median=59.922 ms runs=[60.4, 60.3, 59.9, 59.2, 58.8] identical=true
+  PRAGMA cache_size = -262144                median=59.892 ms runs=[57.0, 63.2, 59.9, 59.4, 59.9] identical=true
+  PRAGMA mmap_size = 67108864                median=238.655 ms runs=[233.5, 246.4, 242.1, 238.7, 225.5] identical=true
+  PRAGMA mmap_size = 134217728               median=206.689 ms runs=[207.1, 204.0, 206.2, 206.7, 206.7] identical=true
+  PRAGMA mmap_size = 1073741824              median=28.093 ms runs=[28.1, 28.8, 28.7, 28.1, 27.9] identical=true

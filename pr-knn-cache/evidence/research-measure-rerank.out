@@ -1,0 +1,50 @@
+$ date: 2026-10-16T23:52:22Z
+$ node /Users/openclaw/.openclaw/issues/sqlite-perf-2026-10-16/t2-01-sqlite-vec-child-reopen/evidence/measure-rerank.mjs /tmp/oc-sqlite-audit/db/agent-dev.sqlite <vec0.dylib from sqlite-vec-darwin-arm64 0.1.9>  (cwd /tmp)
+node v24.20.0 sqlite 3.53.4 vec v0.1.9
+defaults on this connection: cache_size=-2000 mmap_size=0 page_size=4096
+vec0 vector chunk blobs: 6 blobs, 100663296 bytes total, 16777216 bytes each (min)
+memory_index_chunks.embedding: 6012 rows, 32768..32768 bytes
+
+== limit=24 k=192 (production default: maxResults 6 x candidateMultiplier 4)
+  A full production query, reused connection, defaults               median=240.308 ms runs=[239.1, 241.8, 240.3, 248.2, 233.1]
+  B vec0 KNN only (id, distance), no join                            median=15.917 ms runs=[16.2, 15.9, 15.8, 15.9, 15.7]
+  C vec0 KNN selecting embedding (KNN + candidate embedding fetch)   median=242.568 ms runs=[247.2, 244.1, 240.1, 242.6, 235.5]
+  C2 embedding point lookups for the 192 candidate ids (no KNN)      median=224.840 ms runs=[222.4, 218.3, 224.8, 226.2, 225.3]
+  D same join ordering by vec0 v.distance (no v.embedding read)      median=16.251 ms runs=[16.5, 16.3, 16.2, 16.3, 16.1]
+  E fresh connection per request (today's child cycle), defaults     median=247.386 ms runs=[284.0, 261.6, 247.4, 242.1, 243.0]
+  F fresh connection per request + PRAGMA mmap_size=1073741824       median=29.876 ms runs=[31.0, 29.7, 29.7, 30.2, 29.9]
+  F2 fresh connection per request + PRAGMA cache_size=-262144        median=60.614 ms runs=[61.4, 61.6, 60.3, 60.6, 59.6]
+  G reused connection + PRAGMA cache_size=-262144 (256 MiB)          median=44.987 ms runs=[44.8, 43.9, 45.4, 45.0, 46.8]
+  H reused connection + PRAGMA mmap_size=1073741824                  median=22.898 ms runs=[22.3, 22.8, 23.0, 22.9, 22.9]
+  identical rows and distances A vs E: true (rows=24)
+  identical rows and distances A vs F: true (rows=24)
+  identical rows and distances A vs F2: true (rows=24)
+  identical rows and distances A vs G: true (rows=24)
+  identical rows and distances A vs H: true (rows=24)
+  D vs A: same id order=true, overlap=24/24, max |cosine_dist - l2^2/2| over shared ids=1.742e+2
+
+== limit=10 k=80 (limit 10)
+  A full production query, reused connection, defaults               median=110.322 ms runs=[111.3, 109.4, 112.9, 110.3, 108.1]
+  B vec0 KNN only (id, distance), no join                            median=16.001 ms runs=[15.6, 16.4, 15.8, 16.1, 16.0]
+  C vec0 KNN selecting embedding (KNN + candidate embedding fetch)   median=106.415 ms runs=[106.7, 105.9, 106.4, 105.2, 107.4]
+  C2 embedding point lookups for the 80 candidate ids (no KNN)       median=89.236 ms runs=[89.2, 88.6, 89.5, 88.8, 90.5]
+  D same join ordering by vec0 v.distance (no v.embedding read)      median=15.427 ms runs=[15.5, 15.4, 15.4, 15.2, 15.1]
+  E fresh connection per request (today's child cycle), defaults     median=106.191 ms runs=[106.5, 106.2, 105.8, 105.2, 106.9]
+  F fresh connection per request + PRAGMA mmap_size=1073741824       median=18.577 ms runs=[18.6, 18.4, 18.6, 18.6, 18.4]
+  F2 fresh connection per request + PRAGMA cache_size=-262144        median=39.100 ms runs=[39.1, 39.7, 39.0, 38.6, 39.2]
+  G reused connection + PRAGMA cache_size=-262144 (256 MiB)          median=27.498 ms runs=[27.5, 27.5, 27.2, 27.6, 28.1]
+  H reused connection + PRAGMA mmap_size=1073741824                  median=11.827 ms runs=[11.8, 11.9, 11.8, 12.7, 11.6]
+  identical rows and distances A vs E: true (rows=10)
+  identical rows and distances A vs F: true (rows=10)
+  identical rows and distances A vs F2: true (rows=10)
+  identical rows and distances A vs G: true (rows=10)
+  identical rows and distances A vs H: true (rows=10)
+  D vs A: same id order=true, overlap=10/10, max |cosine_dist - l2^2/2| over shared ids=1.742e+2
+
+vec0 stored vector L2 norms over 6012 rows: min=1.000000 max=1.000000
+
+embedding point lookup, 64 ids per set, default cache:
+  chunk_offset < 64 (start of chunk blob)                            median=0.629 ms runs=[0.6, 0.6, 0.6, 0.6, 0.6]
+  chunk_offset >= 960 (end of chunk blob)                            median=110.858 ms runs=[111.8, 110.9, 111.4, 108.2, 108.4]
+
+process resourceUsage: user=4700 ms system=12588 ms
