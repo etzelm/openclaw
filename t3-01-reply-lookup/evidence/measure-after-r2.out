@@ -1,0 +1,174 @@
+pre-round check: 
+uptime before: 21:43  up 4 days, 13:43, 1 user, load averages: 9.88 9.52 16.46
+System-wide memory free percentage: 97%
+arm=AFTER round=2 tree=<branch-worktree>
+import kernel: <branch-worktree>/src/config/sessions/conversation-delivery-store.kernel.ts
+import opener: <branch-worktree>/src/state/openclaw-agent-db.ts
+node v24.21.0 sqlite_version 3.53.4
+load at start: 21:43  up 4 days, 13:43, 1 user, load averages: 9.88 9.52 16.46 | System-wide memory free percentage: 98%
+
+######## store a: 200,000 rows over 50 conversations, synthetic mix with turn rows
+seeded rows=200000 conversations=50 mix=synthetic; turn rows=30000
+
+===== store a / no ANALYZE (sqlite_stat1 rows for conversation_deliveries: 0) | load: 21:43  up 4 days, 13:43, 1 user, load averages: 9.49 9.45 16.39 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 57.814 ms [58.111, 57.814, 57.205, 57.845, 57.362] | records 0/200 | hash 7598d56576ac2c0d
+-- case: hit, newest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-019","turn","msg-199969","msg-199969",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, newest turn row | 200 lookups median 58.071 ms [59.197, 59.713, 56.572, 56.639, 58.071] | records 200/200 | hash b39b0f0c8588f22c
+-- case: hit, oldest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-019","turn","msg-69","msg-69",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, oldest turn row | 200 lookups median 58.856 ms [58.856, 59.089, 58.858, 58.596, 58.567] | records 200/200 | hash b239a888beab8eee
+
+===== store a / after ANALYZE (sqlite_stat1 rows for conversation_deliveries: 3) | load: 21:43  up 4 days, 13:43, 1 user, load averages: 9.49 9.45 16.39 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 118.110 ms [91.697, 130.799, 97.294, 218.020, 118.110] | records 0/200 | hash 7598d56576ac2c0d
+-- case: hit, newest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-019","turn","msg-199969","msg-199969",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, newest turn row | 200 lookups median 125.585 ms [100.504, 194.272, 125.585, 150.064, 79.236] | records 200/200 | hash b39b0f0c8588f22c
+-- case: hit, oldest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-019","turn","msg-69","msg-69",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, oldest turn row | 200 lookups median 61.960 ms [60.901, 62.366, 61.960, 61.275, 61.994] | records 200/200 | hash b239a888beab8eee
+[state/agent-db] agent database clean-close receipt: written
+
+######## store b: 200,000 rows in 1 conversation, synthetic mix with turn rows
+seeded rows=200000 conversations=1 mix=synthetic; turn rows=30000
+
+===== store b / no ANALYZE (sqlite_stat1 rows for conversation_deliveries: 0) | load: 21:43  up 4 days, 13:43, 1 user, load averages: 9.13 9.37 16.32 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 2167.453 ms [3192.440, 2145.298, 2167.453, 2092.866, 2536.429] | records 0/200 | hash 7598d56576ac2c0d
+-- case: hit, newest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-199969","msg-199969",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, newest turn row | 200 lookups median 2157.320 ms [2582.424, 2157.320, 2131.471, 2149.195, 2209.526] | records 200/200 | hash 00721dde23dd530a
+-- case: hit, oldest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-55","msg-55",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, oldest turn row | 200 lookups median 2225.293 ms [2122.215, 2566.010, 2204.672, 2225.293, 2398.172] | records 200/200 | hash 12a5de9f4a2dc8d9
+
+===== store b / after ANALYZE (sqlite_stat1 rows for conversation_deliveries: 3) | load: 21:44  up 4 days, 13:44, 1 user, load averages: 8.73 9.24 15.84 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SCAN conversation
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 2145.433 ms [2378.149, 2142.101, 2139.824, 2145.433, 2367.209] | records 0/200 | hash 7598d56576ac2c0d
+-- case: hit, newest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-199969","msg-199969",1]
+  plan: SCAN conversation
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, newest turn row | 200 lookups median 2128.977 ms [2128.977, 2101.493, 2174.848, 2053.196, 2412.949] | records 200/200 | hash 00721dde23dd530a
+-- case: hit, oldest turn row
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-55","msg-55",1]
+  plan: SCAN conversation
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | hit, oldest turn row | 200 lookups median 2240.333 ms [2405.941, 2240.333, 2202.748, 2176.539, 2315.897] | records 200/200 | hash 12a5de9f4a2dc8d9
+[state/agent-db] agent database clean-close receipt: written
+
+######## store c: 666 rows over 50 conversations, observed mix (643 sent, 23 unknown, no turn rows)
+seeded rows=666 conversations=50 mix=observed; turn rows=0
+
+===== store c / no ANALYZE (sqlite_stat1 rows for conversation_deliveries: 0) | load: 21:45  up 4 days, 13:45, 1 user, load averages: 6.96 8.68 15.25 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 9.264 ms [9.152, 9.382, 9.264, 9.060, 9.926] | records 0/200 | hash 7598d56576ac2c0d
+
+===== store c / after ANALYZE (sqlite_stat1 rows for conversation_deliveries: 3) | load: 21:45  up 4 days, 13:45, 1 user, load averages: 6.96 8.68 15.25 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 9.075 ms [9.026, 9.296, 9.938, 9.075, 8.783] | records 0/200 | hash 7598d56576ac2c0d
+[state/agent-db] agent database clean-close receipt: written
+
+######## store d: 666 rows in 1 conversation, observed mix (643 sent, 23 unknown, no turn rows)
+seeded rows=666 conversations=1 mix=observed; turn rows=0
+
+===== store d / no ANALYZE (sqlite_stat1 rows for conversation_deliveries: 0) | load: 21:45  up 4 days, 13:45, 1 user, load averages: 6.96 8.68 15.25 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 16.918 ms [17.295, 16.918, 16.904, 16.996, 16.664] | records 0/200 | hash 7598d56576ac2c0d
+
+===== store d / after ANALYZE (sqlite_stat1 rows for conversation_deliveries: 3) | load: 21:45  up 4 days, 13:45, 1 user, load averages: 6.96 8.68 15.25 | System-wide memory free percentage: 98%
+-- case: miss
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["conv-000","turn","msg-absent","msg-absent",1]
+  plan: SCAN conversation
+  plan: SCAN delivery
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss | 200 lookups median 15.244 ms [15.351, 15.360, 15.244, 14.992, 14.951] | records 0/200 | hash 7598d56576ac2c0d
+[state/agent-db] agent database clean-close receipt: written
+
+######## store e: real store (APFS-cloned copy of the master backup, opened by the production opener under OPENCLAW_STATE_DIR)
+[state/agent-db] agent database schema migration pending; verifying integrity first
+[state/agent-db] agent database clean-close receipt: close-unconfirmed
+production opener refused the real store (SqliteSchemaMismatchError: OpenClaw agent database <state>/agents/main/agent/openclaw-agent.sqlite uses schema version 24; stop active agents and run openclaw doctor --fix to migrate sess); falling back to a direct node:sqlite open of the cloned file, passed to the production lookup as { db }
+conversations rows=18
+conversation_deliveries rows=0
+sqlite_stat1 rows for conversation_deliveries=1
+no eligible turn rows: hit case skipped
+
+===== store e / as-is (no ANALYZE issued by harness) | load: 21:45  up 4 days, 13:45, 1 user, load averages: 6.47 8.42 14.97 | System-wide memory free percentage: 98%
+-- case: miss (no deliveries)
+  captured SQL: select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+  captured params: ["<conversation id redacted>","turn","msg-absent","msg-absent",1]
+  plan: SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)
+  plan: SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)
+  plan: USE TEMP B-TREE FOR ORDER BY
+RESULT AFTER r2 | miss (no deliveries) | 200 lookups median 12.330 ms [12.401, 12.330, 11.952, 12.462, 12.260] | records 0/200 | hash 7598d56576ac2c0d
+
+load at end: 21:45  up 4 days, 13:45, 1 user, load averages: 6.47 8.42 14.97 | System-wide memory free percentage: 98%
+DONE
+uptime after: 21:45  up 4 days, 13:45, 1 user, load averages: 6.47 8.42 14.97

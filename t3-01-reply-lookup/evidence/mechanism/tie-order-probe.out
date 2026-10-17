@@ -1,0 +1,9 @@
+$ (cwd = base tree) tsx tie-order-probe.mts --tree . --arm BEFORE --state-root <scratch>; (cwd = branch tree) same with --arm AFTER
+Fresh agent database (no planner statistics), Node v24.21.0, node:sqlite SQLite 3.53.4
+arm=BEFORE
+inserted=op-b,op-a updated_at=5,5 returned=op-a
+inserted=op-a,op-b updated_at=5,5 returned=op-a
+arm=AFTER
+inserted=op-b,op-a updated_at=5,5 returned=op-b
+inserted=op-a,op-b updated_at=5,5 returned=op-a
+node v24.21.0 sqlite 3.53.4

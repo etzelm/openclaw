@@ -1,0 +1,46 @@
+$ node scripts/test-projects.mts src/config/sessions/session-accessor.sqlite-archive-read.test.ts src/config/sessions/session-accessor.reply-init-concurrency.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<branch-worktree>[39m
+
+[vitest-workers] local cache hit after 6931ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 1574de84b47f in 6994ms (15878 inputs, 21109 outputs)
+ ✓  runtime-config  src/config/sessions/session-accessor.reply-init-concurrency.test.ts > session accessor cross-process concurrency > observes a child that exited before the waiter attached 24ms
+ ✓  runtime-config  src/config/sessions/session-accessor.reply-init-concurrency.test.ts > session accessor cross-process concurrency > commits after same-session activity from another process 1995ms
+ ✓  runtime-config  src/config/sessions/session-accessor.reply-init-concurrency.test.ts > session accessor cross-process concurrency > rejects a transcript rewrite after another process commits an append 2556ms
+ ✓  runtime-config  src/config/sessions/session-accessor.reply-init-concurrency.test.ts > session accessor cross-process concurrency > guards a second replace after replacing without a prior read 900ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > pages the unique run generation and rejects replaced, deleted, corrupt, or ambiguous continuations 5929ms
+ ✓  runtime-config  src/config/sessions/session-accessor.reply-init-concurrency.test.ts > session accessor cross-process concurrency > refreshes a read snapshot after an append in the same locked callback 456ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/session-accessor.reply-init-concurrency.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.reply-init-concurrency.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.reply-init-concurrency.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.reply-init-concurrency.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.reply-init-concurrency.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.reply-init-concurrency.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a pre-archive store without creating its optional archive table 1641ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads committed archive blobs before file publication (compressed=false) 1896ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads committed archive blobs before file publication (compressed=true) 2953ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > retains exact multiline imported events through deletion and final-answer lookup 1496ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a short final answer beyond the runtime string limit while the caller stays responsive 10213ms
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 21:25:14
+[2m   Duration [22m 36.89s[2m (tests 55%, transform 38%, import 3%, worker 3%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 39.87s
+EXIT=0

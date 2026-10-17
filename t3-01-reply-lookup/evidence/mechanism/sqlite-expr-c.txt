@@ -1,0 +1,103 @@
+# SQLite src/expr.c at tag version-3.53.0 (curl https://raw.githubusercontent.com/sqlite/sqlite/version-3.53.0/src/expr.c). node:sqlite in Node v24.20.0 reports 3.53.4.
+
+=== src/expr.c:6478-6515
+ 6478  **
+ 6479  ** Additionally, if pExpr is a simple SQL value and the value is the
+ 6480  ** same as that currently bound to variable pVar, non-zero is returned.
+ 6481  ** Otherwise, if the values are not the same or if pExpr is not a simple
+ 6482  ** SQL value, zero is returned.
+ 6483  **
+ 6484  ** If the SQLITE_EnableQPSG flag is set on the database connection, then
+ 6485  ** this routine always returns false.
+ 6486  */
+ 6487  static SQLITE_NOINLINE int exprCompareVariable(
+ 6488    const Parse *pParse,
+ 6489    const Expr *pVar,
+ 6490    const Expr *pExpr
+ 6491  ){
+ 6492    int res = 2;
+ 6493    int iVar;
+ 6494    sqlite3_value *pL, *pR = 0;
+ 6495   
+ 6496    if( pExpr->op==TK_VARIABLE && pVar->iColumn==pExpr->iColumn ){
+ 6497      return 0;
+ 6498    }
+ 6499    if( (pParse->db->flags & SQLITE_EnableQPSG)!=0 ) return 2;
+ 6500    sqlite3ValueFromExpr(pParse->db, pExpr, SQLITE_UTF8, SQLITE_AFF_BLOB, &pR);
+ 6501    if( pR ){
+ 6502      iVar = pVar->iColumn;
+ 6503      sqlite3VdbeSetVarmask(pParse->pVdbe, iVar);
+ 6504      pL = sqlite3VdbeGetBoundValue(pParse->pReprepare, iVar, SQLITE_AFF_BLOB);
+ 6505      if( pL ){
+ 6506        if( sqlite3_value_type(pL)==SQLITE_TEXT ){
+ 6507          sqlite3_value_text(pL); /* Make sure the encoding is UTF-8 */
+ 6508        }
+ 6509        res = sqlite3MemCompare(pL, pR, 0) ? 2 : 0;
+ 6510      }
+ 6511      sqlite3ValueFree(pR);
+ 6512      sqlite3ValueFree(pL);
+ 6513    }
+ 6514    return res;
+ 6515  }
+
+=== src/expr.c:6538-6556
+ 6538  **
+ 6539  ** If pParse is not NULL and SQLITE_EnableQPSG is off then TK_VARIABLE
+ 6540  ** terms in pA with bindings in pParse->pReprepare can be matched against
+ 6541  ** literals in pB.  The pParse->pVdbe->expmask bitmask is updated for
+ 6542  ** each variable referenced.
+ 6543  */
+ 6544  int sqlite3ExprCompare(
+ 6545    const Parse *pParse,
+ 6546    const Expr *pA,
+ 6547    const Expr *pB,
+ 6548    int iTab
+ 6549  ){
+ 6550    u32 combinedFlags;
+ 6551    if( pA==0 || pB==0 ){
+ 6552      return pB==pA ? 0 : 2;
+ 6553    }
+ 6554    if( pParse && pA->op==TK_VARIABLE ){
+ 6555      return exprCompareVariable(pParse, pA, pB);
+ 6556    }
+
+=== src/expr.c:6605-6620
+ 6605        return 2;
+ 6606      }
+ 6607    }
+ 6608    if( (pA->flags & (EP_Distinct|EP_Commuted))
+ 6609       != (pB->flags & (EP_Distinct|EP_Commuted)) ) return 2;
+ 6610    if( ALWAYS((combinedFlags & EP_TokenOnly)==0) ){
+ 6611      if( combinedFlags & EP_xIsSelect ) return 2;
+ 6612      if( (combinedFlags & EP_FixedCol)==0
+ 6613       && sqlite3ExprCompare(pParse, pA->pLeft, pB->pLeft, iTab) ) return 2;
+ 6614      if( sqlite3ExprCompare(pParse, pA->pRight, pB->pRight, iTab) ) return 2;
+ 6615      if( sqlite3ExprListCompare(pA->x.pList, pB->x.pList, iTab) ) return 2;
+ 6616      if( pA->op!=TK_STRING
+ 6617       && pA->op!=TK_TRUEFALSE
+ 6618       && ALWAYS((combinedFlags & EP_Reduced)==0)
+ 6619      ){
+ 6620        if( pA->iColumn!=pB->iColumn ) return 2;
+
+=== src/expr.c:6640-6660
+ 6640  ** must never return 0 if the two ExprList objects are different, or
+ 6641  ** a malfunction will result.
+ 6642  **
+ 6643  ** Two NULL pointers are considered to be the same.  But a NULL pointer
+ 6644  ** always differs from a non-NULL pointer.
+ 6645  */
+ 6646  int sqlite3ExprListCompare(const ExprList *pA, const ExprList *pB, int iTab){
+ 6647    int i;
+ 6648    if( pA==0 && pB==0 ) return 0;
+ 6649    if( pA==0 || pB==0 ) return 1;
+ 6650    if( pA->nExpr!=pB->nExpr ) return 1;
+ 6651    for(i=0; i<pA->nExpr; i++){
+ 6652      int res;
+ 6653      Expr *pExprA = pA->a[i].pExpr;
+ 6654      Expr *pExprB = pB->a[i].pExpr;
+ 6655      if( pA->a[i].fg.sortFlags!=pB->a[i].fg.sortFlags ) return 1;
+ 6656      if( (res = sqlite3ExprCompare(0, pExprA, pExprB, iTab)) ) return res;
+ 6657    }
+ 6658    return 0;
+ 6659  }
+ 6660  

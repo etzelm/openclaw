@@ -1,0 +1,105 @@
+# SQLite source, fetched from raw.githubusercontent.com/sqlite/sqlite/<tag>/src/<file>. node:sqlite in Node v24.20.0 reports 3.53.4.
+
+=== src/where.c (version-3.53.0) :3699-3727
+ 3699  static int whereUsablePartialIndex(
+ 3700    int iTab,             /* The table for which we want an index */
+ 3701    u8 jointype,          /* The JT_* flags on the join */
+ 3702    WhereClause *pWC,     /* The WHERE clause of the query */
+ 3703    Expr *pWhere          /* The WHERE clause from the partial index */
+ 3704  ){
+ 3705    int i;
+ 3706    WhereTerm *pTerm;
+ 3707    Parse *pParse;
+ 3708  
+ 3709    if( jointype & JT_LTORJ ) return 0;
+ 3710    pParse = pWC->pWInfo->pParse;
+ 3711    while( pWhere->op==TK_AND ){
+ 3712      if( !whereUsablePartialIndex(iTab,jointype,pWC,pWhere->pLeft) ) return 0;
+ 3713      pWhere = pWhere->pRight;
+ 3714    }
+ 3715    for(i=0, pTerm=pWC->a; i<pWC->nTerm; i++, pTerm++){
+ 3716      Expr *pExpr;
+ 3717      pExpr = pTerm->pExpr;
+ 3718      if( (!ExprHasProperty(pExpr, EP_OuterON) || pExpr->w.iJoin==iTab)
+ 3719       && ((jointype & JT_OUTER)==0 || ExprHasProperty(pExpr, EP_OuterON))
+ 3720       && sqlite3ExprImpliesExpr(pParse, pExpr, pWhere, iTab)
+ 3721       && !sqlite3ExprImpliesExpr(pParse, pExpr, pWhere, -1)
+ 3722       && (pTerm->wtFlags & TERM_VNULL)==0
+ 3723      ){
+ 3724        return 1;
+ 3725      }
+ 3726    }
+ 3727    return 0;
+
+=== src/expr.c (version-3.53.0) :6827-6840
+ 6827  int sqlite3ExprImpliesExpr(
+ 6828    const Parse *pParse,
+ 6829    const Expr *pE1,
+ 6830    const Expr *pE2,
+ 6831    int iTab
+ 6832  ){
+ 6833    if( sqlite3ExprCompare(pParse, pE1, pE2, iTab)==0 ){
+ 6834      return 1;
+ 6835    }
+ 6836    if( pE2->op==TK_OR
+ 6837     && (sqlite3ExprImpliesExpr(pParse, pE1, pE2->pLeft, iTab)
+ 6838               || sqlite3ExprImpliesExpr(pParse, pE1, pE2->pRight, iTab) )
+ 6839    ){
+ 6840      return 1;
+
+=== src/whereexpr.c (version-3.53.0) :907-935
+  907      /* At this point, okToChngToIN is true if original pTerm satisfies
+  908      ** case 1.  In that case, construct a new virtual term that is
+  909      ** pTerm converted into an IN operator.
+  910      */
+  911      if( okToChngToIN ){
+  912        Expr *pDup;            /* A transient duplicate expression */
+  913        ExprList *pList = 0;   /* The RHS of the IN operator */
+  914        Expr *pLeft = 0;       /* The LHS of the IN operator */
+  915        Expr *pNew;            /* The complete IN operator */
+  916  
+  917        for(i=pOrWc->nTerm-1, pOrTerm=pOrWc->a; i>=0; i--, pOrTerm++){
+  918          if( (pOrTerm->wtFlags & TERM_OK)==0 ) continue;
+  919          assert( pOrTerm->eOperator & WO_EQ );
+  920          assert( (pOrTerm->eOperator & (WO_OR|WO_AND))==0 );
+  921          assert( pOrTerm->leftCursor==iCursor );
+  922          assert( pOrTerm->u.x.leftColumn==iColumn );
+  923          pDup = sqlite3ExprDup(db, pOrTerm->pExpr->pRight, 0);
+  924          pList = sqlite3ExprListAppend(pWInfo->pParse, pList, pDup);
+  925          pLeft = pOrTerm->pExpr->pLeft;
+  926        }
+  927        assert( pLeft!=0 );
+  928        pDup = sqlite3ExprDup(db, pLeft, 0);
+  929        pNew = sqlite3PExpr(pParse, TK_IN, pDup, 0);
+  930        if( pNew ){
+  931          int idxNew;
+  932          transferJoinMarkings(pNew, pExpr);
+  933          assert( ExprUseXList(pNew) );
+  934          pNew->x.pList = pList;
+  935          idxNew = whereClauseInsert(pWC, pNew, TERM_VIRTUAL|TERM_DYNAMIC);
+
+=== src/expr.c (version-3.44.0) :5928-5936
+ 5928  ){
+ 5929    u32 combinedFlags;
+ 5930    if( pA==0 || pB==0 ){
+ 5931      return pB==pA ? 0 : 2;
+ 5932    }
+ 5933    if( pParse && pA->op==TK_VARIABLE && exprCompareVariable(pParse, pA, pB) ){
+ 5934      return 0;
+ 5935    }
+ 5936    combinedFlags = pA->flags | pB->flags;
+
+=== src/expr.c (version-3.44.0) :6025-6037
+ 6025  int sqlite3ExprListCompare(const ExprList *pA, const ExprList *pB, int iTab){
+ 6026    int i;
+ 6027    if( pA==0 && pB==0 ) return 0;
+ 6028    if( pA==0 || pB==0 ) return 1;
+ 6029    if( pA->nExpr!=pB->nExpr ) return 1;
+ 6030    for(i=0; i<pA->nExpr; i++){
+ 6031      int res;
+ 6032      Expr *pExprA = pA->a[i].pExpr;
+ 6033      Expr *pExprB = pB->a[i].pExpr;
+ 6034      if( pA->a[i].fg.sortFlags!=pB->a[i].fg.sortFlags ) return 1;
+ 6035      if( (res = sqlite3ExprCompare(0, pExprA, pExprB, iTab)) ) return res;
+ 6036    }
+ 6037    return 0;

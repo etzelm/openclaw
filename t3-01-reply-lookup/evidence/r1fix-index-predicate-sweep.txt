@@ -1,0 +1,17 @@
+./test/fixtures/sqlite/openclaw-agent-schema-v14.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-v2026.9.9.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v21.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v22.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v27.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v26.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v24.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v25.sql: WHERE status IN ('queued', 'sent', 'replied')
+./test/fixtures/sqlite/openclaw-agent-schema-v19.sql: WHERE status IN ('queued', 'sent', 'replied')
+./src/config/sessions/conversation-delivery-store.kernel.ts: (no CREATE INDEX definition; reference only)
+./src/state/postgres-schema.generated/sqlite-agent-catalogs.json: WHERE status IN ('queued', 'sent', 'replied')
+./src/state/postgres-schema.generated/agent.postgres.sql: WHERE ("status" IN ('queued', 'sent', 'replied'))  [generated Postgres DDL, parenthesised/quoted]
+./src/state/postgres-schema.generated/agent-runtime.ts: WHERE ("status" IN ('queued', 'sent', 'replied'))  [generated Postgres runtime DDL in a TS string, quotes escaped]
+./src/state/postgres-schema.generated/sqlite-agent-catalogs.ts: (no CREATE INDEX definition; reference only)
+./src/state/sqlite-query-plan.test.ts: (no CREATE INDEX definition; reference only)
+./src/state/openclaw-agent-schema.sql: WHERE status IN ('queued', 'sent', 'replied')
+VERDICT: 13 index definitions. SQLite sources (openclaw-agent-schema.sql, 9 test fixtures, sqlite-agent-catalogs.json): all exactly WHERE status IN ('queued', 'sent', 'replied'). Generated Postgres DDL (agent.postgres.sql, agent-runtime.ts): same literals in same order but normalized as WHERE ("status" IN (...)). Not byte-identical text, but they are Postgres, not the SQLite planner path.

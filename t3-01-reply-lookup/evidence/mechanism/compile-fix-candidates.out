@@ -1,0 +1,13 @@
+kysely 0.29.6, node v24.20.0
+
+## main: .where(col, 'in', [...strings])
+select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in (?, ?, ?) order by "delivery"."updated_at" desc limit ?
+parameters ["CONVERSATION_REF","turn","REPLY_TO_ID","REPLY_TO_ID","queued","sent","replied",1]
+
+## fix A: .where(col, 'in', STATUSES.map((s) => sql.lit(s)))
+select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+parameters ["CONVERSATION_REF","turn","REPLY_TO_ID","REPLY_TO_ID",1]
+
+## fix B: .where(sql`delivery.status in (${sql.join(STATUSES.map((s) => sql.lit(s)))})`)
+select "delivery".*, "conversation"."channel" as "channel" from "conversation_deliveries" as "delivery" inner join "conversations" as "conversation" on "conversation"."conversation_id" = "delivery"."conversation_id" where "delivery"."conversation_id" = ? and "delivery"."operation_kind" = ? and ("delivery"."platform_message_id" = ? or "delivery"."prepared_message_id" = ?) and "delivery"."status" in ('queued', 'sent', 'replied') order by "delivery"."updated_at" desc limit ?
+parameters ["CONVERSATION_REF","turn","REPLY_TO_ID","REPLY_TO_ID",1]

@@ -1,0 +1,159 @@
+$ node scripts/test-projects.mts src/infra/outbound/delivery-queue.recovery.test.ts src/infra/outbound/conversation-delivery.queue-admission.test.ts src/auto-reply/reply/conversation-turn-capture.test.ts src/gateway/conversation-route-ownership.worker.test.ts src/gateway/conversation-turn.test.ts src/gateway/conversation-send.test.ts
+[vitest-workers] local cache hit after 4188ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 685aeb99ea08 in 4258ms (15878 inputs, 21109 outputs)
+[test] starting test/vitest/vitest.gateway-database-workers.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<branch-worktree>[39m
+
+ ✓  gateway-database-workers  src/gateway/conversation-turn.test.ts > runGatewayConversationTurn > replays a completed turn without inspecting its source session store 1236ms
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mwaits for the writer before its initial writable operation lookup[33m 566[2mms[22m[39m
+ ✓  gateway-database-workers  src/gateway/conversation-turn.test.ts > runGatewayConversationTurn > refuses a replaced session at admitted turn creation 616ms
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mcreates a context binding only when a discovered address starts a turn[33m 507[2mms[22m[39m
+ ✓  gateway-database-workers  src/gateway/conversation-turn.test.ts > runGatewayConversationTurn > rejects a route-owner change at the outbound session binding commit 512ms
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mregisters correlation before durable delivery and consumes a fast reply inline[33m 510[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22muses the durable prepared id when another process creates the operation during preflight[33m 495[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mreturns a prior durable reply without sending again[33m 507[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mdoes not reveal a completed reply after the route owner changes[33m 538[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mreturns a durable permanent rejection as invalid input after restart[33m 544[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mclassifies durable operation-id input reuse as invalid input[33m 515[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mconversation send through an accepted channel response[2m > [22mreports the same unknown outcome initially and on replay when an accepted response lacks identity[33m 7099[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mrequires a live binding before resuming an unfinished durable turn[33m 704[2mms[22m[39m
+ ✓  gateway-database-workers  src/gateway/conversation-turn.test.ts > runGatewayConversationTurn > rejects delivery after the admitted session generation is replaced 639ms
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22madmits the initial writable lookup before sending (aborted=false)[33m 882[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22madmits the initial writable lookup before sending (aborted=true)[33m 516[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mrejects unsupported channels before registering or sending[33m 607[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mrejects channel preflight before creating a durable operation[33m 579[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mjoins accepted send reconciliation on its original store after cancellation and config rotation[33m 973[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mdisables inline correlation when delivery changes the reserved id[33m 641[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mreplays unknown with persisted metadata and no current store access[33m 535[2mms[22m[39m
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/gateway/conversation-turn.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/gateway/conversation-turn.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/gateway/conversation-turn.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/gateway/conversation-turn.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/gateway/conversation-turn.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+[sqlite-test-lifecycle] src/gateway/conversation-turn.test.ts: retiring openclaw.sessionStateNotices
+
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-turn.test.ts[2m > [22mrunGatewayConversationTurn[2m > [22mreturns suppression without promoting it to sent[33m 701[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mreplays rejected with persisted metadata and no current store access[33m 478[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mprojects current conversation metadata for an unfinished send[33m 413[2mms[22m[39m
+ ✓  gateway-database-workers  src/gateway/conversation-send.test.ts > runGatewayConversationSend > owns durable delivery in the Gateway and binds the source session 407ms
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mdoes not reveal completed send state after the route owner changes[33m 413[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mrevalidates a route-owner change at the durable delivery attempt[33m 405[2mms[22m[39m
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mmaps unknown conversations to terminal input errors[33m 394[2mms[22m[39m
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.sessionStateNotices
+[sqlite-test-lifecycle] src/gateway/conversation-send.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ [32m✓[39m [30m[42m gateway-database-workers [49m[39m src/gateway/conversation-send.test.ts[2m > [22mrunGatewayConversationSend[2m > [22mpreserves durable operation conflicts for Gateway identity recovery[33m 410[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m29 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 20:43:04
+[2m   Duration [22m 25.19s[2m (tests 49%, transform 42%, import 6%, worker 2%, setup 1%)[22m
+
+[test] starting test/vitest/vitest.infra.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<branch-worktree>[39m
+
+ [32m✓[39m [30m[42m infra [49m[39m src/gateway/conversation-route-ownership.worker.test.ts[2m > [22mexpires plugin binding inspection when async route preparation settles[32m 232[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/gateway/conversation-route-ownership.worker.test.ts[2m > [22mfinal authority initiates current platform effects under its worker grant and joins accepted sends[33m 618[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/gateway/conversation-route-ownership.worker.test.ts[2m > [22mqueued authority initiates current platform effects under its worker grant and joins accepted sends[32m 83[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains reply ownership through writer admission: complete[33m 1577[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mfinalizes a persisted conversation operation during queue recovery[33m 1821[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains reply ownership through writer admission: cancel[33m 1690[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22msettles an explicit recovered no-send as suppression without replay[33m 2140[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains reply ownership through writer admission: timeout[33m 1512[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mkeeps an uncertainty notice owed when recovery returns no delivery identity (undefined)[33m 1541[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains reply ownership through writer admission: replace[33m 1605[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mkeeps an uncertainty notice owed when recovery returns no delivery identity (adapter_returned_no_identity)[33m 1392[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains reply ownership through writer admission: lifecycle[33m 1734[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mrejects a recovered pending final with a stale writer at onDirectAdapterHandoff[33m 1738[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22msettles ClickClack scaffold-only text as suppressed through the message adapter[33m 1712[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mconsumes a committed reply when its audit authority changes: timeout[33m 1746[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mrejects a recovered pending final with a stale writer at onPlatformSendDispatch[33m 1801[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22msettles ClickClack scaffold-only text as suppressed through the outbound adapter[33m 1705[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mconsumes a committed reply when its audit authority changes: replace[33m 1912[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mrejects a recovered pending final with a stale writer at afterHandoff[33m 2265[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mfails closed for an unfinished conversation intent without route authority[33m 1448[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mconsumes a committed reply when its audit authority changes: lifecycle[33m 2060[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22msettles explicit permanent provider rejection before notifying observers[33m 1626[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22macks a persisted suppressed conversation operation without replaying it[33m 2641[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mconsumes a committed reply when its audit authority changes: writer[33m 1897[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22msettles empty permanent provider rejection before notifying observers[33m 1543[2mms[22m[39m
+ ✓  infra  src/auto-reply/reply/conversation-turn-capture.test.ts > conversation turn capture > rechecks the session after outbound correlation: replace 1344ms
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mresumes created operation custody with a retained omitted-default completion locator[33m 1326[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22macks a persisted rejected conversation operation without replaying it[33m 2502[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mresumes created operation custody with a retained legacy-marker completion locator[33m 1337[2mms[22m[39m
+ ✓  infra  src/auto-reply/reply/conversation-turn-capture.test.ts > conversation turn capture > rechecks the session after outbound correlation: lifecycle 1521ms
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mrejects changed logical-agent before completion mutates the operation[33m 913[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mqueues the no-waiter acknowledgement without making it replayable inline[33m 1672[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mrejects changed physical-owner before completion mutates the operation[33m 801[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22macks a persisted sent conversation operation without replaying it[33m 2657[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mrejects blocked rows before backoff or reconciliation[33m 760[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mrejects changed physical-path before completion mutates the operation[33m 956[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains the source state authority when source is refused during correlation[33m 1497[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mcounts replay pacing against the recovery budget[33m 742[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mreplays within the resolved budget (45, 5)[33m 838[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/conversation-delivery.queue-admission.test.ts[2m > [22mconversation completion through the real delivery queue[2m > [22mkeeps Gateway send custody and completion on its captured root across both writer waits[33m 1927[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mreplays within the resolved budget (0.5, 0)[33m 658[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains the source state authority when ambient is refused during correlation[33m 1678[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mdead-letters max-retry entries even when conversation owner state is missing[33m 616[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mkeeps a partially sent batch unknown when a later send has a permanent rejection[33m 676[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mclassifies best-effort recovery: pre-connect failure (Error: getaddrinfo EAI_AGAIN, undefined)[33m 632[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mkeeps the logical agent on a shared physical store across admission[33m 1835[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mclassifies best-effort recovery: not dispatched after suppression (PlatformMessageNotDispatchedError: upload timed out before dispatch, adapter_returned_no_send)[33m 646[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mclassifies best-effort recovery: unmarked failure (Error: network down, undefined)[33m 706[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mretains a relative configured store when the working directory changes during correlation[33m 1469[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mclassifies best-effort recovery: transient-first batch (PlatformMessageNotDispatchedError: upload timed out before dispatch,PlatformMessageNotDispatchedError: chat not found, undefined)[33m 682[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mclassifies best-effort recovery: all-permanent batch (PlatformMessageNotDispatchedError: chat not found,PlatformMessageNotDispatchedError: chat not found, undefined)[33m 721[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mclassifies best-effort recovery: ambiguous read (PlatformMessageNotDispatchedError: upload timed out before dispatch,Error: read ECONNRESET, undefined)[33m 686[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mdoes not capture into a replacement shared-store owner with matching logical identities[33m 2665[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mfails closed without channel ingress admission proof[32m 2[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mdoes not ack an identityless partially sent best-effort batch[33m 851[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mreconciles an unknown stable send after restart recovery waits for its lease expiry[33m 630[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22matomically fences stable recovery after an adapter proves an ambiguous send was not sent[33m 585[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mconsumes a correlated reply inline and persists only a side artifact[33m 1537[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22macks unknown-after-send entries reconciled as already sent before commit hooks[33m 680[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mmoves unknown-after-send entries to failed when adapter reports not sent[33m 682[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mpreserves the durable reply and its audit artifact despite log patterns[33m 1856[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mkeeps retryable unresolved unknown-after-send entries on the queue without replaying[33m 763[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mpreserves bounded final-text recovery across storage restart: recovered[33m 1407[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mcompletes the durable reply when optional audit persistence throws[33m 1534[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mpreserves bounded final-text recovery across storage restart: exhausted[33m 1771[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mdoes not make an ordinary post-restart reply replayable inline[33m 1845[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mpreserves bounded final-text recovery across storage restart: untyped[33m 1249[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mleaves replies to plain sends for ordinary inbound dispatch[33m 1326[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mdead-letters an exhausted unknown send after retryable reconciliation fails[33m 788[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mterminalizes permanent provider errors without backoff[33m 851[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mconsumes duplicate replies that promoted an unthreaded message into a thread[33m 1613[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mpersists a nested channel rejection as the only terminal across recovery restart[33m 1842[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/auto-reply/reply/conversation-turn-capture.test.ts[2m > [22mconversation turn capture[2m > [22mcaptures a threaded reply only for the exact conversation and message[33m 1635[2mms[22m[39m
+ ✓  infra  src/auto-reply/reply/conversation-turn-capture.test.ts > conversation turn capture > falls through without claiming when the inbound session cannot be resolved 405ms
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mdoes not restore an acked entry when a recovered send commit hook fails[33m 764[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mmarks a recovered send unknown before ack so ack failure cannot make it replayable[33m 627[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mrecovers an explicit no-send after ack failure and database reopen[33m 1138[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mdirectly acks a recovered send when its post-send marker fails[33m 629[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mretains unknown-after-send when recovered-send marking and ack both fail[33m 610[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mretains later media until an early recovery ack finishes the batch[33m 616[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mowns the stable terminal when recovery fallback ack precedes provider rejection[33m 541[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mruns recovered commit hooks when marker fallback ack precedes a partial failure[33m 534[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mreplays stored delivery options during recovery[33m 511[2mms[22m[39m
+ [32m✓[39m [30m[42m infra [49m[39m src/infra/outbound/delivery-queue.recovery.test.ts[2m > [22mdelivery-queue recovery[2m > [22mcontinues past high-backoff entries and recovers ready entries behind them[33m 538[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m84 passed[39m[22m[90m (84)[39m
+[2m   Start at [22m 20:43:30
+[2m   Duration [22m 58.98s[2m (tests 67%, transform 28%, import 4%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 2 Vitest shards in 93.13s
+EXIT=0

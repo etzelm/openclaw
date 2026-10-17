@@ -1,0 +1,17 @@
+node v24.20.0 sqlite_version 3.53.4
+
+(1) index p_in ON t(x) WHERE s IN ('queued', 'sent', 'replied'); query WHERE x = ? AND <predicate>
+literal IN, same order         s IN ('queued', 'sent', 'replied')               -> SEARCH t USING INDEX p_in (x=?)
+literal IN, reordered          s IN ('sent', 'queued', 'replied')               -> SCAN t
+literal IN, two-value subset   s IN ('queued', 'sent')                          -> SCAN t
+single literal =               s = 'sent'                                       -> SCAN t
+OR of literal =, same order    (s = 'queued' OR s = 'sent' OR s = 'replied')    -> SEARCH t USING INDEX p_in (x=?)
+OR of literal =, reordered     (s = 'sent' OR s = 'queued' OR s = 'replied')    -> SCAN t
+bound IN, same order           s IN (?, ?, ?)                                   -> SCAN t
+OR of bound =                  (s = ? OR s = ? OR s = ?)                        -> SCAN t
+
+(2) delivery_queue bounded-retention policies (delivery-queue-sqlite-bound.ts:26-37), main state schema
+prefixed, bound IN     -> SEARCH delivery_queue_entries USING INDEX idx_delivery_queue_failed (status=? AND queue_name=?)
+prefixed, literal IN   -> SEARCH delivery_queue_entries USING INDEX idx_delivery_queue_bounded_retention (queue_name=? AND retention_id_prefix=?)
+global, bound IN       -> SEARCH delivery_queue_entries USING INDEX idx_delivery_queue_failed (status=?)
+global, literal IN     -> SEARCH delivery_queue_entries USING INDEX idx_delivery_queue_failed (status=?)

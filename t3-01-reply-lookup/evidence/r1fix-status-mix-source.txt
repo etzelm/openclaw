@@ -1,0 +1,6 @@
+$ gh issue view 139330 --repo openclaw/openclaw --json title,state,author,body
+title: [Bug]: Final-turn channel replies are never ledgered in conversation_deliveries (operation_kind='turn' has 0 rows); agent cannot see its own delivery receipt
+state: CLOSED
+author: todddickerson
+body line 15 (verbatim):
+`conversation_deliveries` in `openclaw-agent.sqlite` already models per-operation delivery receipts — `operation_id`, `operation_kind IN ('send','turn')`, `conversation_id`, `source_session_key`, `message_hash`, `status IN (created,queued,sent,suppressed,rejected,unknown,replied)`, `platform_message_id`, `rejection_error`, timestamps — but **only `message`-tool sends are ever written**. On a 1.2 GB agent store here: 643 `send/sent` + 23 `send/unknown` rows, **0 rows with `operation_kind='turn'`**.

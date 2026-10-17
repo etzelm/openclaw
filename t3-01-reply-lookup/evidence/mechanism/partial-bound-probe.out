@@ -1,0 +1,5 @@
+sqlite 3.53.4
+partial WHERE s = 'sent', query a = ? AND s = ? bound 'sent': SEARCH t USING INDEX p_eq (a=?)
+partial WHERE s = 'sent', query a = ? AND s = 'sent' literal: SEARCH t USING INDEX p_eq (a=?)
+partial WHERE s IN (...), query x = ? AND s IN (?, ?, ?) bound: SCAN t
+partial WHERE s IN (...), query x = ? AND s IN (...) literal: SEARCH t USING INDEX p_in (x=?)

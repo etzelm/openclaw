@@ -1,0 +1,39 @@
+Leak check (counts and file names only)
+Files scanned: 47 (PR-BODY.md, evidence files marked publishable in README.md, parity-status-sweep.mts, r1fix-* files except this one, mechanism/)
+
+PR-BODY.md pattern counts:
+  em dash U+2014 : 0
+  en dash U+2013 : 0
+  /Users : 0
+  ~/work : 0
+  <work> : 0
+  MEMORY : 0
+
+(a) real memory-file basenames (37 names), files matching:
+  evidence/final-test-sessions-dir.log
+  evidence/gate-test-sessions-dir.log
+  evidence/gate-test-sessions-rerun-failed.log
+(b) real conversation ids (18 ids), files matching:
+(c1) '/Users' files:
+  evidence/measure-before-r1.out
+  evidence/measure-before-r2.out
+  evidence/measure-after-r1.out
+  evidence/measure-after-r2.out
+  evidence/final-red.log
+  evidence/final-test-changed.log
+  evidence/final-test-sessions-dir.log
+  evidence/gate-test-consumers.log
+  evidence/gate-test-sessions-dir.log
+  evidence/gate-test-sessions-rerun-failed.log
+  evidence/r1fix-mutants.log
+  evidence/r1fix-parity-after.out
+  evidence/r1fix-parity-before.out
+  evidence/r1fix-red.log
+  evidence/r1fix-test-changed.log
+(c2) em dash U+2014 files:
+  evidence/r1fix-status-mix-source.txt
+(c3) en dash U+2013 files:
+
+Notes: r1fix-status-mix-source.txt quotes upstream issue #139330 verbatim; any em dash in it is the issue author's and is an allowed verbatim quote.
+Check (a) matches in the three sessions test logs are a false positive: the matched string is a common word that is also a memory directory entry name, and appears in ordinary vitest test names. No memory file content or private basename is present.
+Check (c1): files with /Users need scrubbing before publishing (vitest RUN lines and tree= or import header lines); the PR body has none.

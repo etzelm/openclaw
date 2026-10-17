@@ -1,0 +1,61 @@
+--- base status with branch test copied in:
+ M src/state/sqlite-query-plan.test.ts
+$ node scripts/test-projects.mts src/state/sqlite-query-plan.test.ts
+[test] starting test/vitest/vitest.unit.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<base-worktree>[39m
+
+[vitest-workers] local cache hit after 3555ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 3ed16320eaf9 in 3596ms (15878 inputs, 21109 outputs)
+ [32m✓[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22mbounds absent legacy watch detection and migration by the cursor index[32m 123[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22mchecks orphan-query plans and preserves live rows with missing statistics[32m 99[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22mchecks orphan-query plans and preserves live rows with production statistics[32m 101[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22mchecks orphan-query plans and preserves live rows with stale statistics[32m 98[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22msearches failed delivery ranges with and without planner statistics[32m 53[2mms[22m[39m
+ [32m✓[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22muses shared state indexes for list and queue queries[32m 60[2mms[22m[39m
+ [31m×[39m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22mkeeps the reply-target delivery lookup on the partial reply index[32m 84[2mms[22m[39m
+[31m   → expected 'SEARCH conversation USING INDEX sqlit…' to contain 'idx_agent_conversation_deliveries_rep…'[39m
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/state/sqlite-query-plan.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/state/sqlite-query-plan.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/state/sqlite-query-plan.test.ts: retiring openclaw.agentDatabaseLifecycle
+
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > uses per-agent cache indexes for session metadata and expiry scans 96ms
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m unit [49m[39m src/state/sqlite-query-plan.test.ts[2m > [22msqlite hot query plans[2m > [22mkeeps the reply-target delivery lookup on the partial reply index
+[31m[1mAssertionError[22m: expected 'SEARCH conversation USING INDEX sqlit…' to contain 'idx_agent_conversation_deliveries_rep…'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- idx_agent_conversation_deliveries_[7mreply[27m[39m
+[31m+ SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)[39m
+[31m+ [7mSCAN delivery USING INDEX [27midx_agent_conversation_deliveries_[7mupdated[27m[39m
+
+[36m [2m❯[22m src/state/sqlite-query-plan.test.ts:[2m400:18[22m[39m
+    [90m398|[39m       lookup.params as (number | string | null)[],
+    [90m399|[39m     );
+    [90m400|[39m     expect(plan).toContain("idx_agent_conversation_deliveries_reply");
+    [90m   |[39m                  [31m^[39m
+    [90m401|[39m     expect(plan).not.toContain("SCAN delivery");
+    [90m402|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 23:03:38
+[2m   Duration [22m 6.31s[2m (transform 81%, tests 12%, import 3%, worker 3%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 8.28s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
+EXIT=1
+--- base status after restore (empty expected):
+--- end

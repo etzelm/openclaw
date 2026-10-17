@@ -1,0 +1,33 @@
+### t3-01-reply-lookup-main d4d2c3dd1e3 status: []
+$ uptime
+23:25  up 4 days, 15:25, 1 user, load averages: 8.07 6.06 5.64
+$ pnpm test src/state/sqlite-query-plan.test.ts --maxWorkers=1   (timed run directly after one untimed warm-up run of the same tree; output filtered to result lines)
+[test] starting test/vitest/vitest.unit.config.ts
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > bounds absent legacy watch detection and migration by the cursor index 84ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > checks orphan-query plans and preserves live rows with missing statistics 96ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > checks orphan-query plans and preserves live rows with production statistics 86ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > checks orphan-query plans and preserves live rows with stale statistics 85ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > searches failed delivery ranges with and without planner statistics 52ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > uses shared state indexes for list and queue queries 48ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > uses per-agent cache indexes for session metadata and expiry scans 77ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Duration  5.80s (transform 85%, tests 9%, worker 2%, import 2%, setup 1%)
+[test] passed 1 Vitest shard in 7.55s
+### t3-01-reply-lookup d12995a52f2 status: [ M src/config/sessions/conversation-delivery-store.kernel.ts  M src/state/sqlite-query-plan.test.ts ]
+$ uptime
+23:25  up 4 days, 15:26, 1 user, load averages: 7.20 5.98 5.61
+$ pnpm test src/state/sqlite-query-plan.test.ts --maxWorkers=1   (timed run directly after one untimed warm-up run of the same tree; output filtered to result lines)
+[test] starting test/vitest/vitest.unit.config.ts
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > bounds absent legacy watch detection and migration by the cursor index 79ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > checks orphan-query plans and preserves live rows with missing statistics 107ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > checks orphan-query plans and preserves live rows with production statistics 86ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > checks orphan-query plans and preserves live rows with stale statistics 85ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > searches failed delivery ranges with and without planner statistics 50ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > uses shared state indexes for list and queue queries 56ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > keeps the reply-target delivery lookup on the partial reply index 94ms
+ ✓  unit  src/state/sqlite-query-plan.test.ts > sqlite hot query plans > uses per-agent cache indexes for session metadata and expiry scans 80ms
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Duration  5.87s (transform 81%, tests 11%, import 3%, worker 3%, setup 2%)
+[test] passed 1 Vitest shard in 7.68s
