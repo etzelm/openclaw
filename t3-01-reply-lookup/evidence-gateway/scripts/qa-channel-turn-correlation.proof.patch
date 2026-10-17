@@ -1,0 +1,18 @@
+Proof-build-only patch. Applied identically to the BEFORE (d4d2c3dd1e3) and AFTER
+(a67486386538) trees before `OPENCLAW_BUILD_PRIVATE_QA=1 pnpm build`. Not part of the
+PR. It opts the private QA test channel into `conversations.turn` reply correlation
+through the existing optional outbound hook `prepareConversationTurnMessageId`
+(src/channels/plugins/outbound.types.ts), which today only the reef channel
+implements. It changes no core file and nothing on the reply lookup path.
+
+--- a/extensions/qa-channel/src/channel.ts
++++ b/extensions/qa-channel/src/channel.ts
+@@ -276,6 +276,8 @@
+   outbound: {
+     base: {
+       deliveryMode: "direct",
++      // Proof build only: opt the QA channel into conversations.turn correlation.
++      prepareConversationTurnMessageId: () => `qa-turn-${globalThis.crypto.randomUUID()}`,
+       sendTextOnlyErrorPayloads: true,
+       sendPayload: async (ctx) => {
+         const result = await sendQaChannelMessagePayload(ctx);

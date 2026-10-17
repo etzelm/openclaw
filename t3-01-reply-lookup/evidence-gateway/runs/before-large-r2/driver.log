@@ -1,0 +1,18 @@
+2026-10-17T14:26:43.452Z arm repo HEAD tree: <before-tree>
+2026-10-17T14:26:59.249Z gateway started {"pid":15921,"model":"mock-openai/gpt-5.6-luna"}
+2026-10-17T14:26:59.250Z inbound 1 (ordinary DM) {"id":"1f70cc55-ac17-494e-9c62-5690842ce462","replyToId":null}
+2026-10-17T14:27:01.765Z outbound reply to inbound 1 {"id":"aafdeeb1-ae25-486a-8d4e-57814afb441f","replyToId":"1f70cc55-ac17-494e-9c62-5690842ce462"}
+2026-10-17T14:27:01.785Z conversations.list {"conversationRef":"conv_71092c4c8b38a1773525738441b255b9","kind":"direct","target":"dm:qa-operator"}
+2026-10-17T14:27:01.866Z conversations.turn result {"status":"sent","conversationRef":"conv_71092c4c8b38a1773525738441b255b9","channel":"qa-channel","messageId":"13ad2191-3904-468c-840f-5c7964688b9a","correlationPersisted":true,"error":"Channel delivery did not preserve its prepared message id; reply correlation was disabled."}
+2026-10-17T14:27:01.867Z turn question delivered on the bus {"id":"13ad2191-3904-468c-840f-5c7964688b9a","text":"Proof question: which colour is the sky?"}
+2026-10-17T14:27:03.377Z seeding {"deliveries":200001,"conversations":51,"plannerStatisticsRows":0}
+2026-10-17T14:27:10.260Z gateway restarted on the same state {"pid":16038}
+2026-10-17T14:27:10.260Z inbound 2 (reply, ledger miss) {"id":"ec6be29c-896b-4e1f-9be3-24c3194e9f5a","replyToId":"qa-reply-target-never-delivered"}
+2026-10-17T14:27:10.764Z observer: lookup for inbound 2 {"threadId":10,"isMainThread":false,"rowCount":0,"plan":["SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)","SCAN delivery USING INDEX idx_agent_conversation_deliveries_updated"]}
+2026-10-17T14:27:11.516Z outbound reply to inbound 2 (ordinary dispatch) {"id":"6f6191db-4f66-4d4d-addb-0470a9800b43","replyToId":"ec6be29c-896b-4e1f-9be3-24c3194e9f5a"}
+2026-10-17T14:27:11.516Z inbound 3 (reply to the turn question, matching delivery) {"id":"39ec3142-7dda-4d73-b34b-7739c2a99e50","replyToId":"13ad2191-3904-468c-840f-5c7964688b9a"}
+2026-10-17T14:27:11.769Z observer: lookup for inbound 3 {"threadId":10,"isMainThread":false,"rowCount":1,"rows":[{"operation_id":"t3-01-proof-turn","operation_kind":"turn","status":"sent","conversation_id":"conv_71092c4c8b38a1773525738441b255b9","platform_message_id":"13ad2191-3904-468c-840f-5c7964688b9a","prepared_message_id":"qa-turn-c9867115-e105-4db7-b329-3a8a4f1b8097","updated_at":1792247221863}],"plan":["SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)","SCAN delivery USING INDEX idx_agent_conversation_deliveries_updated"]}
+2026-10-17T14:27:11.769Z outbound reply to inbound 3 (ordinary dispatch) {"id":"041465fb-07bc-40ef-9a45-7cc37f32fadd","replyToId":"39ec3142-7dda-4d73-b34b-7739c2a99e50"}
+2026-10-17T14:27:12.772Z conversation_deliveries in state/agents/main/agent/openclaw-agent.sqlite {"rows":[],"counts":[]}
+2026-10-17T14:27:12.861Z conversation_deliveries in state/agents/qa/agent/openclaw-agent.sqlite {"rows":[{"operation_id":"t3-01-proof-turn","operation_kind":"turn","status":"sent","platform_message_id":"13ad2191-3904-468c-840f-5c7964688b9a","prepared_message_id":"qa-turn-c9867115-e105-4db7-b329-3a8a4f1b8097","created_at":1792247221813,"updated_at":1792247221863}],"counts":[{"operation_kind":"send","status":"created","c":6000},{"operation_kind":"send","status":"queued","c":4000},{"operation_kind":"send","status":"rejected","c":14000},{"operation_kind":"send","status":"sent","c":110000},{"operation_kind":"send","status":"suppressed","c":20000},{"operation_kind":"send","status":"unknown","c":16000},{"operation_kind":"turn","status":"replied","c":30000},{"operation_kind":"turn","status":"sent","c":1}]}
+2026-10-17T14:27:12.888Z done

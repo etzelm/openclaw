@@ -1,0 +1,17 @@
+2026-10-17T14:13:30.990Z arm repo HEAD tree: <after-tree>
+2026-10-17T14:13:45.832Z gateway started {"pid":7354,"model":"mock-openai/gpt-5.6-luna"}
+2026-10-17T14:13:45.832Z inbound 1 (ordinary DM) {"id":"e53dc2ec-a06c-4d0c-a997-6833ae2aaf9a","replyToId":null}
+2026-10-17T14:13:48.344Z outbound reply to inbound 1 {"id":"d9bd93a2-8daf-40ab-85fa-979c674424b2","replyToId":"e53dc2ec-a06c-4d0c-a997-6833ae2aaf9a"}
+2026-10-17T14:13:48.354Z conversations.list {"conversationRef":"conv_71092c4c8b38a1773525738441b255b9","kind":"direct","target":"dm:qa-operator"}
+2026-10-17T14:13:48.401Z conversations.turn result {"status":"sent","conversationRef":"conv_71092c4c8b38a1773525738441b255b9","channel":"qa-channel","messageId":"d3ea8878-d7d3-4729-a84a-daded79b28bd","correlationPersisted":true,"error":"Channel delivery did not preserve its prepared message id; reply correlation was disabled."}
+2026-10-17T14:13:48.402Z turn question delivered on the bus {"id":"d3ea8878-d7d3-4729-a84a-daded79b28bd","text":"Proof question: which colour is the sky?"}
+2026-10-17T14:13:54.143Z gateway restarted on the same state {"pid":7500}
+2026-10-17T14:13:54.143Z inbound 2 (reply, ledger miss) {"id":"b5e5c5dc-8dbc-4bb5-8229-56b250afcfdc","replyToId":"qa-reply-target-never-delivered"}
+2026-10-17T14:13:55.148Z observer: lookup for inbound 2 {"threadId":9,"isMainThread":false,"rowCount":0,"plan":["SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)","SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)","USE TEMP B-TREE FOR ORDER BY"]}
+2026-10-17T14:13:56.153Z outbound reply to inbound 2 (ordinary dispatch) {"id":"b6dd6df7-e569-4e2d-b668-b94fcbe127eb","replyToId":"b5e5c5dc-8dbc-4bb5-8229-56b250afcfdc"}
+2026-10-17T14:13:56.154Z inbound 3 (reply to the turn question, matching delivery) {"id":"7cdfac30-5b90-4dc3-9340-eeb26ba2c39e","replyToId":"d3ea8878-d7d3-4729-a84a-daded79b28bd"}
+2026-10-17T14:13:56.405Z observer: lookup for inbound 3 {"threadId":9,"isMainThread":false,"rowCount":1,"rows":[{"operation_id":"t3-01-proof-turn","operation_kind":"turn","status":"sent","conversation_id":"conv_71092c4c8b38a1773525738441b255b9","platform_message_id":"d3ea8878-d7d3-4729-a84a-daded79b28bd","prepared_message_id":"qa-turn-29606940-0983-4af1-b0f6-2ea9d8f68528","updated_at":1792246428398}],"plan":["SEARCH conversation USING INDEX sqlite_autoindex_conversations_1 (conversation_id=?)","SEARCH delivery USING INDEX idx_agent_conversation_deliveries_reply (conversation_id=?)","USE TEMP B-TREE FOR ORDER BY"]}
+2026-10-17T14:13:56.405Z outbound reply to inbound 3 (ordinary dispatch) {"id":"e7adcc98-061a-42a1-8aa7-af36bc4496fc","replyToId":"7cdfac30-5b90-4dc3-9340-eeb26ba2c39e"}
+2026-10-17T14:13:57.409Z conversation_deliveries in state/agents/main/agent/openclaw-agent.sqlite []
+2026-10-17T14:13:57.410Z conversation_deliveries in state/agents/qa/agent/openclaw-agent.sqlite [{"operation_id":"t3-01-proof-turn","operation_kind":"turn","status":"sent","platform_message_id":"d3ea8878-d7d3-4729-a84a-daded79b28bd","prepared_message_id":"qa-turn-29606940-0983-4af1-b0f6-2ea9d8f68528","created_at":1792246428364,"updated_at":1792246428398}]
+2026-10-17T14:13:57.439Z done

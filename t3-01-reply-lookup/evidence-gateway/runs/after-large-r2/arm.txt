@@ -1,0 +1,13 @@
+arm: AFTER
+date: 2026-10-17T14:25:31Z
+node: v24.21.0
+HEAD: a67486386538164828592481aca7ad2b8e925ed4
+uncommitted changes (proof patch only):
+ M extensions/qa-channel/src/channel.ts
+built reply lookup status clause in dist/:
+dist/conversation-delivery-store.kernel-Cnv1yVaY.mjs:136:	const row = executeSqliteQuerySync(database.db, db.selectFrom("conversation_deliveries as delivery").innerJoin("conversations as conversation", "conversation.conversation_id", "delivery.conversation_id").selectAll("delivery").select("conversation.channel as channel").where("delivery.conversation_id", "=", params.conversationRef).where("delivery.operation_kind", "=", "turn").where((eb) => eb.or([eb("delivery.platform_message_id", "=", params.replyToId), eb("delivery.prepared_message_id", "=", params.replyToId)])).where("delivery.status", "in", [
+dist/conversation-delivery-store.kernel-Cnv1yVaY.mjs-137-		"queued",
+dist/conversation-delivery-store.kernel-Cnv1yVaY.mjs-138-		"sent",
+dist/conversation-delivery-store.kernel-Cnv1yVaY.mjs-139-		"replied"
+dist/conversation-delivery-store.kernel-Cnv1yVaY.mjs-140-	].map((status) => sql.lit(status))).orderBy("delivery.updated_at", "desc").limit(1)).rows[0];
+driver exit: 0
