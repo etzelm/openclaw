@@ -1,0 +1,210 @@
+# arm=head head=6c4f0e654f4b110709c52ca2615764f6e5328926 dirty_files=0 mode=keyword paragraphs=100
+# node v24.21.0
+# config
+  {
+    agents: { defaults: { workspace: "<scratch>/runs/head-keyword-p100/workspace" } },
+    memory: { search: { enabled: true, provider: "none", sources: ["memory"] } },
+    plugins: { slots: { memory: "memory-core" }, entries: { "memory-core": { enabled: true } } },
+    gateway: { mode: "local" },
+  }
+$ node gen-synthetic-notes.mjs <workspace> 100
+{"file":"memory/synthetic-notes.md","mode":"create","bytes":45456,"lines":201}
+$ openclaw memory index --agent main --verbose
+a-index exit=0 ms=4000.7
+Memory Index (main)
+Provider: none (requested: none)
+Model: none
+Sources: memory (MEMORY.md + <scratch>/runs/head-keyword-p100/workspace/memory/*.md), sessions (current transcripts + retained transcript artifacts)
+
+Memory index updated (main): 1 file indexed.
+# embedding HTTP requests during a-index: 0 (stub log lines 1..0)
+# files after a-index: db=864256 wal=0
+{"tables":21,"chunks":35,"revision":36,"sources":1}
+$ node gen-synthetic-notes.mjs <workspace> 100 append
+{"file":"memory/synthetic-notes.md","mode":"append","bytes":46131,"lines":203}
+$ openclaw memory index --agent main --verbose
+b-index exit=0 ms=3783.4
+Memory Index (main)
+Provider: none (requested: none)
+Model: none
+Sources: memory (MEMORY.md + <scratch>/runs/head-keyword-p100/workspace/memory/*.md), sessions (current transcripts + retained transcript artifacts)
+
+Memory index updated (main): 1 file indexed.
+# embedding HTTP requests during b-index: 0 (stub log lines 1..0)
+# files after b-index: db=864256 wal=0
+{"tables":21,"chunks":35,"revision":39,"sources":1}
+$ openclaw memory search copperwillow --agent main --json
+c1-search exit=0 ms=3449.0
+{
+  "results": [
+    {
+      "path": "memory/synthetic-notes.md",
+      "startLine": 6,
+      "endLine": 14,
+      "score": 0.8506730636844159,
+      "textScore": 0.7561578969340813,
+      "snippet": "\nEiusmod cillum nisi do sunt excepteur veniam sunt lantern sit deserunt ea ember. Consequat magna culpa consequat ex deserunt do in elit lantern. Sunt sunt saffron sint ea cillum ad est tempor ad ea lantern excepteur et ea sit occaecat. Reprehenderit ad lantern sit ut aliquip elit lantern aliquip.\n\nIn amet qui orchard reprehenderit nostrud id tempor cobalt velit qui tempor sed meadow nulla nulla. Culpa lorem velit tempor do in id officia magna laboris elit consequat et adipiscing ad mollit incididunt. Nisi deserunt exercitation saffron adipiscing commodo harbor exercitation et. Amet saffron cupidatat occaecat culpa dolore sit nisi dolore harbor tempor velit cupidatat irure. Est culpa anim mi",
+      "source": "memory",
+      "provenance": {
+        "originClass": "agent",
+        "sessionKind": "unknown",
+        "observedAt": 1792250138714
+      }
+    }
+  ]
+}
+# embedding HTTP requests during c1-search: 0 (stub log lines 1..0)
+$ openclaw memory search tundrabeacon --agent main --json
+c2-search exit=0 ms=3485.8
+{
+  "results": [
+    {
+      "path": "memory/synthetic-notes.md",
+      "startLine": 200,
+      "endLine": 204,
+      "score": 0.861347750962781,
+      "textScore": 0.7735346599058757,
+      "snippet": "\nNulla labore dolor dolor ember incididunt adipiscing sunt ullamco dolor labore do. Ullamco nulla esse aliquip reprehenderit do pariatur lorem sed minim magna aliqua. Sed harbor sunt laborum sunt aliquip nulla do nulla sint enim do. Sint orchard commodo glacier sit magna consequat saffron cupidatat ea duis occaecat dolor ea proident. Saffron do occaecat sed orchard duis quis sed minim consequat sunt.\n\nSint adipiscing harbor veniam anim nulla duis ex voluptate sint non commodo. Adipiscing sunt lantern ember pariatur harbor commodo dolore irure id orchard et deserunt. Non nisi culpa aliqua qui aliqua lorem excepteur pariatur aliqua sint eiusmod amet glacier consectetur. Quis labore duis ullamc",
+      "source": "memory",
+      "provenance": {
+        "originClass": "agent",
+        "sessionKind": "unknown",
+        "observedAt": 1792250138714
+      }
+    }
+  ]
+}
+# embedding HTTP requests during c2-search: 0 (stub log lines 1..0)
+$ openclaw memory status --agent main --json
+d-status exit=0 ms=2807.3
+[
+  {
+    "agentId": "main",
+    "status": {
+      "backend": "builtin",
+      "files": 1,
+      "chunks": 35,
+      "dirty": false,
+      "workspaceDir": "<scratch>/runs/head-keyword-p100/workspace",
+      "dbPath": "<scratch>/runs/head-keyword-p100/state/agents/main/agent/openclaw-agent.sqlite",
+      "storage": {
+        "databaseBytes": 864256,
+        "walBytes": 0,
+        "reusableBytes": 0,
+        "embeddingCacheBytes": 0,
+        "embeddingCacheEntries": 0
+      },
+      "provider": "none",
+      "requestedProvider": "none",
+      "sources": [
+        "memory",
+        "sessions"
+      ],
+      "extraPaths": [],
+      "sourceCounts": [
+        {
+          "source": "memory",
+          "files": 1,
+          "chunks": 35,
+          "chunkBytes": 47015,
+          "dirty": false,
+          "eligible": 1,
+          "issues": []
+        },
+        {
+          "source": "sessions",
+          "files": 0,
+          "chunks": 0,
+          "chunkBytes": 0,
+          "eligible": 0,
+          "issues": [
+            "no eligible session transcripts found"
+          ]
+        }
+      ],
+      "cache": {
+        "enabled": true,
+        "entries": 0,
+        "maxEntries": 50000
+      },
+      "fts": {
+        "enabled": true,
+        "available": true
+      },
+      "vector": {
+        "enabled": false,
+        "index": {
+          "state": "empty"
+        }
+      },
+      "batch": {
+        "enabled": false,
+        "failures": 0,
+        "limit": 2,
+        "wait": true,
+        "concurrency": 2,
+        "pollIntervalMs": 2000,
+        "timeoutMs": 3600000
+      },
+      "custom": {
+        "searchMode": "hybrid",
+        "providerState": {
+          "mode": "pending",
+          "requestedProvider": "none"
+        },
+        "indexIdentity": {
+          "status": "valid"
+        },
+        "automaticRebuildNotice": {
+          "sequence": 0,
+          "warning": ""
+        }
+      }
+    },
+    "scan": {
+      "sources": [
+        {
+          "source": "memory",
+          "totalFiles": 1,
+          "issues": []
+        },
+        {
+          "source": "sessions",
+          "totalFiles": 0,
+          "issues": [
+            "no eligible session transcripts found"
+          ]
+        }
+      ],
+      "totalFiles": 1,
+      "issues": [
+        "no eligible session transcripts found"
+      ]
+    },
+    "audit": {
+      "storePath": "plugin-state:memory-core/short-term-recall/633363ec775ab3d4e478b0d19c08dbb343d092626afa2f31da4e417cbda4d2a6",
+      "lockPath": "plugin-state:memory-core/short-term-locks/633363ec775ab3d4e478b0d19c08dbb343d092626afa2f31da4e417cbda4d2a6",
+      "exists": false,
+      "entryCount": 0,
+      "promotedCount": 0,
+      "spacedEntryCount": 0,
+      "conceptTaggedEntryCount": 0,
+      "invalidEntryCount": 0,
+      "danglingEntryCount": 0,
+      "issues": []
+    },
+    "dreamingAudit": {
+      "sessionCorpusDir": "<scratch>/runs/head-keyword-p100/workspace/memory/.dreams/session-corpus",
+      "sessionCorpusFileCount": 0,
+      "suspiciousSessionCorpusFileCount": 0,
+      "suspiciousSessionCorpusLineCount": 0,
+      "sessionIngestionPath": "<scratch>/runs/head-keyword-p100/workspace/memory/.dreams/session-ingestion.json",
+      "sessionIngestionExists": false,
+      "issues": []
+    }
+  }
+]
+# embedding HTTP requests during d-status: 0 (stub log lines 1..0)
+# files after d-status: db=864256 wal=0
+{"tables":21,"chunks":35,"revision":39,"sources":1}
+# done

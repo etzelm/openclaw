@@ -1,0 +1,213 @@
+# arm=base head=fe6a3616168bca792650edb0bed09aa0462e6cc6 dirty_files=0 mode=semantic-nocache paragraphs=2000
+# node v24.21.0
+# config
+  {
+    agents: { defaults: { workspace: "<scratch>/runs/base-semantic-nocache-p2000/workspace" } },
+    memory: { search: { enabled: true, provider: "openai-compatible", model: "stub-embed-64", remote: { baseUrl: "http://<loopback>:<port>/v1" }, cache: { enabled: false }, sources: ["memory"] } },
+    plugins: { slots: { memory: "memory-core" }, entries: { "memory-core": { enabled: true } } },
+    gateway: { mode: "local" },
+  }
+$ node gen-synthetic-notes.mjs <workspace> 2000
+{"file":"memory/synthetic-notes.md","mode":"create","bytes":928017,"lines":4001}
+$ openclaw memory index --agent main --verbose
+a-index exit=0 ms=4520.6
+Memory Index (main)
+Provider: openai-compatible (requested: openai-compatible)
+Model: stub-embed-64
+Sources: memory (MEMORY.md + <scratch>/runs/base-semantic-nocache-p2000/workspace/memory/*.md), sessions (current transcripts + retained transcript artifacts)
+
+Memory index updated (main): 1 file indexed.
+# embedding HTTP requests during a-index: 133 (stub log lines 1..133)
+# files after a-index: db=5345280 wal=0
+{"tables":26,"chunks":699,"revision":700,"sources":1}
+$ node gen-synthetic-notes.mjs <workspace> 2000 append
+{"file":"memory/synthetic-notes.md","mode":"append","bytes":928692,"lines":4003}
+$ openclaw memory index --agent main --verbose
+b-index exit=0 ms=4605.5
+Memory Index (main)
+Provider: openai-compatible (requested: openai-compatible)
+Model: stub-embed-64
+Sources: memory (MEMORY.md + <scratch>/runs/base-semantic-nocache-p2000/workspace/memory/*.md), sessions (current transcripts + retained transcript artifacts)
+
+Memory index updated (main): 1 file indexed.
+# embedding HTTP requests during b-index: 133 (stub log lines 134..266)
+# files after b-index: db=5611520 wal=0
+{"tables":26,"chunks":700,"revision":1401,"sources":1}
+$ openclaw memory search copperwillow --agent main --json
+c1-search exit=0 ms=3806.4
+{
+  "results": [
+    {
+      "path": "memory/synthetic-notes.md",
+      "startLine": 6,
+      "endLine": 14,
+      "score": 0.17549057268314644,
+      "vectorScore": -0.14092808511301735,
+      "textScore": 0.8592417348235879,
+      "snippet": "\nEiusmod cillum nisi do sunt excepteur veniam sunt lantern sit deserunt ea ember. Consequat magna culpa consequat ex deserunt do in elit lantern. Sunt sunt saffron sint ea cillum ad est tempor ad ea lantern excepteur et ea sit occaecat. Reprehenderit ad lantern sit ut aliquip elit lantern aliquip.\n\nIn amet qui orchard reprehenderit nostrud id tempor cobalt velit qui tempor sed meadow nulla nulla. Culpa lorem velit tempor do in id officia magna laboris elit consequat et adipiscing ad mollit incididunt. Nisi deserunt exercitation saffron adipiscing commodo harbor exercitation et. Amet saffron cupidatat occaecat culpa dolore sit nisi dolore harbor tempor velit cupidatat irure. Est culpa anim mi",
+      "source": "memory",
+      "provenance": {
+        "originClass": "agent",
+        "sessionKind": "unknown",
+        "observedAt": 1792250288184
+      }
+    }
+  ]
+}
+# embedding HTTP requests during c1-search: 1 (stub log lines 267..267)
+$ openclaw memory search tundrabeacon --agent main --json
+c2-search exit=0 ms=3769.2
+{
+  "results": [
+    {
+      "path": "memory/synthetic-notes.md",
+      "startLine": 4002,
+      "endLine": 4004,
+      "score": 0.2426446797423103,
+      "vectorScore": -0.052137070625154346,
+      "textScore": 0.8864017031879956,
+      "snippet": "\nSint adipiscing harbor veniam anim nulla duis ex voluptate sint non commodo. Adipiscing sunt lantern ember pariatur harbor commodo dolore irure id orchard et deserunt. Non nisi culpa aliqua qui aliqua lorem excepteur pariatur aliqua sint eiusmod amet glacier consectetur. Quis labore duis ullamco ad consectetur veniam consequat sint qui duis reprehenderit nisi pariatur minim. Dolore lantern sit pariatur aliqua irure occaecat cupidatat nisi labore veniam. Cobalt enim ea velit nostrud exercitation ad ullamco labore cupidatat labore consequat sint. Laborum irure cobalt reprehenderit ember magna proident cobalt ullamco sint harbor et ad ad. Appended marker tundrabeacon.\n",
+      "source": "memory",
+      "provenance": {
+        "originClass": "agent",
+        "sessionKind": "unknown",
+        "observedAt": 1792250288184
+      }
+    }
+  ]
+}
+# embedding HTTP requests during c2-search: 1 (stub log lines 268..268)
+$ openclaw memory status --agent main --json
+d-status exit=0 ms=2981.3
+[
+  {
+    "agentId": "main",
+    "status": {
+      "backend": "builtin",
+      "files": 1,
+      "chunks": 700,
+      "dirty": false,
+      "workspaceDir": "<scratch>/runs/base-semantic-nocache-p2000/workspace",
+      "dbPath": "<scratch>/runs/base-semantic-nocache-p2000/state/agents/main/agent/openclaw-agent.sqlite",
+      "storage": {
+        "databaseBytes": 5611520,
+        "walBytes": 0,
+        "reusableBytes": 0,
+        "embeddingCacheBytes": 0,
+        "embeddingCacheEntries": 0
+      },
+      "provider": "openai-compatible",
+      "model": "stub-embed-64",
+      "requestedProvider": "openai-compatible",
+      "sources": [
+        "memory",
+        "sessions"
+      ],
+      "extraPaths": [],
+      "sourceCounts": [
+        {
+          "source": "memory",
+          "files": 1,
+          "chunks": 700,
+          "chunkBytes": 1308377,
+          "dirty": false,
+          "eligible": 1,
+          "issues": []
+        },
+        {
+          "source": "sessions",
+          "files": 0,
+          "chunks": 0,
+          "chunkBytes": 0,
+          "eligible": 0,
+          "issues": [
+            "no eligible session transcripts found"
+          ]
+        }
+      ],
+      "cache": {
+        "enabled": false,
+        "maxEntries": 50000
+      },
+      "fts": {
+        "enabled": true,
+        "available": true
+      },
+      "vector": {
+        "enabled": true,
+        "index": {
+          "state": "complete"
+        },
+        "dims": 64
+      },
+      "batch": {
+        "enabled": false,
+        "failures": 0,
+        "limit": 2,
+        "wait": true,
+        "concurrency": 2,
+        "pollIntervalMs": 2000,
+        "timeoutMs": 3600000
+      },
+      "custom": {
+        "searchMode": "hybrid",
+        "providerState": {
+          "mode": "pending",
+          "requestedProvider": "openai-compatible"
+        },
+        "indexIdentity": {
+          "status": "valid"
+        },
+        "automaticRebuildNotice": {
+          "sequence": 0,
+          "warning": ""
+        }
+      }
+    },
+    "scan": {
+      "sources": [
+        {
+          "source": "memory",
+          "totalFiles": 1,
+          "issues": []
+        },
+        {
+          "source": "sessions",
+          "totalFiles": 0,
+          "issues": [
+            "no eligible session transcripts found"
+          ]
+        }
+      ],
+      "totalFiles": 1,
+      "issues": [
+        "no eligible session transcripts found"
+      ]
+    },
+    "audit": {
+      "storePath": "plugin-state:memory-core/short-term-recall/47a8973938f5ed0d9d48f6f1f6a814cf0dc6a18c5c2f886692784fbff17ff31c",
+      "lockPath": "plugin-state:memory-core/short-term-locks/47a8973938f5ed0d9d48f6f1f6a814cf0dc6a18c5c2f886692784fbff17ff31c",
+      "exists": false,
+      "entryCount": 0,
+      "promotedCount": 0,
+      "spacedEntryCount": 0,
+      "conceptTaggedEntryCount": 0,
+      "invalidEntryCount": 0,
+      "danglingEntryCount": 0,
+      "issues": []
+    },
+    "dreamingAudit": {
+      "sessionCorpusDir": "<scratch>/runs/base-semantic-nocache-p2000/workspace/memory/.dreams/session-corpus",
+      "sessionCorpusFileCount": 0,
+      "suspiciousSessionCorpusFileCount": 0,
+      "suspiciousSessionCorpusLineCount": 0,
+      "sessionIngestionPath": "<scratch>/runs/base-semantic-nocache-p2000/workspace/memory/.dreams/session-ingestion.json",
+      "sessionIngestionExists": false,
+      "issues": []
+    }
+  }
+]
+# embedding HTTP requests during d-status: 0 (stub log lines 269..268)
+# files after d-status: db=5611520 wal=0
+{"tables":26,"chunks":700,"revision":1401,"sources":1}
+# done

@@ -1,0 +1,188 @@
+run | chunks a/b | kept ids | kept rows byte-identical (rowid, lines, hash, updated_at, emb) | kept rows with new updated_at | new ids | removed ids | revision a -> b (delta) | b-index chunk rows del/ins | b-index vec rows del/ins | b-index recall/prov upserts | embed req/inputs a-index | embed req/inputs b-index | search copperwillow hits, top | search tundrabeacon hits, top | exits a,b,c1,c2,d
+base-keyword-p100 | 35/35 | 34 | 0 | 34 | 1 | 1 | 36 -> 107 (+71) | 35/35 | 0/0 | 35/35 | 0/0 | 0/0 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:200-204 | 0,0,0,0,0
+base-keyword-p2000 | 699/700 | 699 | 0 | 699 | 1 | 0 | 700 -> 2100 (+1400) | 699/700 | 0/0 | 700/700 | 0/0 | 0/0 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:4002-4004 | 0,0,0,0,0
+base-semantic-nocache-p100 | 35/35 | 34 | 0 | 34 | 1 | 1 | 36 -> 73 (+37) | 1/35 | 35/35 | 35/35 | 7/35 | 7/35 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:200-204 | 0,0,0,0,0
+base-semantic-nocache-p2000 | 699/700 | 699 | 0 | 699 | 1 | 0 | 700 -> 1401 (+701) | 0/700 | 699/700 | 700/700 | 133/699 | 133/700 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:4002-4004 | 0,0,0,0,0
+base-semantic-p100 | 35/35 | 34 | 0 | 34 | 1 | 1 | 36 -> 73 (+37) | 1/35 | 35/35 | 35/35 | 7/35 | 1/1 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:200-204 | 0,0,0,0,0
+head-keyword-p100 | 35/35 | 34 | 34 | 0 | 1 | 1 | 36 -> 39 (+3) | 1/1 | 0/0 | 35/35 | 0/0 | 0/0 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:200-204 | 0,0,0,0,0
+head-keyword-p2000 | 699/700 | 699 | 699 | 0 | 1 | 0 | 700 -> 702 (+2) | 0/1 | 0/0 | 700/700 | 0/0 | 0/0 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:4002-4004 | 0,0,0,0,0
+head-semantic-nocache-p100 | 35/35 | 34 | 34 | 0 | 1 | 1 | 36 -> 39 (+3) | 1/1 | 1/1 | 35/35 | 7/35 | 1/1 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:200-204 | 0,0,0,0,0
+head-semantic-nocache-p2000 | 699/700 | 699 | 699 | 0 | 1 | 0 | 700 -> 702 (+2) | 0/1 | 0/1 | 700/700 | 133/699 | 1/1 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:4002-4004 | 0,0,0,0,0
+head-semantic-p100 | 35/35 | 34 | 34 | 0 | 1 | 1 | 36 -> 39 (+3) | 1/1 | 1/1 | 35/35 | 7/35 | 1/1 | 1, memory/synthetic-notes.md:6-14 | 1, memory/synthetic-notes.md:200-204 | 0,0,0,0,0
+
+# per-run detail (b-index observer totals: statements and rows per operation and table)
+
+## base-keyword-p100: distinct updated_at among all rows after b-index = 1; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  delete memory_index_chunks: 1 statements, 35 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 35 rows
+  insert memory_index_chunk_recall_metadata: 1 statements, 35 rows
+  insert memory_index_chunk_provenance: 1 statements, 35 rows
+
+## base-keyword-p2000: distinct updated_at among all rows after b-index = 1; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  delete memory_index_chunks: 1 statements, 699 rows
+  insert memory_index_chunks: 6 statements, 700 rows
+  insert memory_index_chunk_recall_metadata: 6 statements, 700 rows
+  insert memory_index_chunk_provenance: 6 statements, 700 rows
+  insert memory_index_sources: 1 statements, 1 rows
+
+## base-semantic-nocache-p100: distinct updated_at among all rows after b-index = 1; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  delete memory_index_chunks_vec: 36 statements, 35 rows
+  insert memory_index_chunks_vec: 1 statements, 35 rows
+  delete memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 35 rows
+  insert memory_index_chunk_recall_metadata: 1 statements, 35 rows
+  insert memory_index_chunk_provenance: 1 statements, 35 rows
+
+## base-semantic-nocache-p2000: distinct updated_at among all rows after b-index = 1; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  insert memory_index_chunks: 6 statements, 700 rows
+  insert memory_index_chunk_recall_metadata: 6 statements, 700 rows
+  insert memory_index_chunk_provenance: 6 statements, 700 rows
+  delete memory_index_chunks_vec: 700 statements, 699 rows
+  insert memory_index_chunks_vec: 6 statements, 700 rows
+  insert memory_index_sources: 1 statements, 1 rows
+
+## base-semantic-p100: distinct updated_at among all rows after b-index = 1; embedding cache rows after b-index = 36
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 4 statements, 4 rows
+  insert memory_embedding_cache: 1 statements, 1 rows
+  delete memory_index_chunks_vec: 36 statements, 35 rows
+  insert memory_index_chunks_vec: 1 statements, 35 rows
+  delete memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 35 rows
+  insert memory_index_chunk_recall_metadata: 1 statements, 35 rows
+  insert memory_index_chunk_provenance: 1 statements, 35 rows
+
+## head-keyword-p100: distinct updated_at among all rows after b-index = 2; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  delete memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_chunk_recall_metadata: 1 statements, 35 rows
+  insert memory_index_chunk_provenance: 1 statements, 35 rows
+
+## head-keyword-p2000: distinct updated_at among all rows after b-index = 2; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  insert memory_index_chunk_recall_metadata: 6 statements, 700 rows
+  insert memory_index_chunk_provenance: 6 statements, 700 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 1 rows
+
+## head-semantic-nocache-p100: distinct updated_at among all rows after b-index = 2; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  delete memory_index_chunks_vec: 2 statements, 1 rows
+  delete memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_chunks_vec: 1 statements, 1 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_chunk_recall_metadata: 1 statements, 35 rows
+  insert memory_index_chunk_provenance: 1 statements, 35 rows
+
+## head-semantic-nocache-p2000: distinct updated_at among all rows after b-index = 2; embedding cache rows after b-index = 0
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 3 statements, 3 rows
+  insert memory_index_chunk_recall_metadata: 6 statements, 700 rows
+  insert memory_index_chunk_provenance: 6 statements, 700 rows
+  delete memory_index_chunks_vec: 1 statements, 0 rows
+  insert memory_index_chunks_vec: 1 statements, 1 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 1 rows
+
+## head-semantic-p100: distinct updated_at among all rows after b-index = 2; embedding cache rows after b-index = 36
+  update memory_index_sources: 1 statements, 0 rows
+  insert memory_index_paths_fts: 1 statements, 0 rows
+  select memory_embedding_cache: 4 statements, 4 rows
+  insert memory_embedding_cache: 1 statements, 1 rows
+  delete memory_index_chunks_vec: 2 statements, 1 rows
+  delete memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_chunks_vec: 1 statements, 1 rows
+  insert memory_index_sources: 1 statements, 1 rows
+  insert memory_index_chunks: 1 statements, 1 rows
+  insert memory_index_chunk_recall_metadata: 1 statements, 35 rows
+  insert memory_index_chunk_provenance: 1 statements, 35 rows
+
+# cross-arm parity (BEFORE vs AFTER, same configuration)
+keyword-p100: rows 8834090ce690e418 vs 8834090ce690e418 equal; search copperwillow 5cb495d3cb3474e7 vs 5cb495d3cb3474e7 equal; search tundrabeacon 1861893e6390bc4f vs 1861893e6390bc4f equal
+keyword-p2000: rows fb561ac99df76551 vs fb561ac99df76551 equal; search copperwillow eae68e2b7b19ea14 vs eae68e2b7b19ea14 equal; search tundrabeacon dfd7fd6558eaca90 vs dfd7fd6558eaca90 equal
+semantic-nocache-p100: rows a4fe9831ed36fcb6 vs a4fe9831ed36fcb6 equal; search copperwillow c13edebc90753b6d vs c13edebc90753b6d equal; search tundrabeacon c53eb0eba83a3384 vs c53eb0eba83a3384 equal
+semantic-nocache-p2000: rows 365b9e78f0f0e473 vs 365b9e78f0f0e473 equal; search copperwillow ef2527c46779555a vs ef2527c46779555a equal; search tundrabeacon 96f834d12cc08b6a vs 96f834d12cc08b6a equal
+semantic-p100: rows a4fe9831ed36fcb6 vs a4fe9831ed36fcb6 equal; search copperwillow c13edebc90753b6d vs c13edebc90753b6d equal; search tundrabeacon c53eb0eba83a3384 vs c53eb0eba83a3384 equal
+
+# threads and built modules that wrote chunk and vector rows during b-index
+
+## base-keyword-p100: 2 records; thread 5 (isMainThread false)
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## base-keyword-p2000: 7 records; thread 5 (isMainThread false)
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## base-semantic-nocache-p100: 39 records; thread 5 (isMainThread false)
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## base-semantic-nocache-p2000: 712 records; thread 5 (isMainThread false)
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## base-semantic-p100: 39 records; thread 5 (isMainThread false)
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-Dl33Ahop.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-Dl33Ahop.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CsqacBnU.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## head-keyword-p100: 2 records; thread 5 (isMainThread false)
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## head-keyword-p2000: 1 records; thread 5 (isMainThread false)
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## head-semantic-nocache-p100: 5 records; thread 5 (isMainThread false)
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## head-semantic-nocache-p2000: 3 records; thread 5 (isMainThread false)
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js
+
+## head-semantic-p100: 5 records; thread 5 (isMainThread false)
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js
+  delete memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks_vec: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < sqlite-vector-q6dYXH-6.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js < sqlite-database-admission-DQ1A8wGm.mjs < sqlite-worker-operation-admission-CfLPdO9y.mjs
+  insert memory_index_chunks: sqlite-schema-facts-BG9HHeYe.mjs < adapters-BGyK9oJQ.mjs < kysely-sync-Do46ee5k.mjs < kysely-sync-cache-state-CKvZWeYI.mjs < kysely-sync-Do46ee5k.mjs < manager-source-index-kernel-CsU5mcWy.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-database-admission-DQ1A8wGm.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-schema-facts-BG9HHeYe.mjs < sqlite-transaction-Fo3AmVR8.mjs < sqlite-post-commit-B4YVBWgN.mjs < sqlite-transaction-Fo3AmVR8.mjs < manager-publication.worker-CnZtFDC9.mjs < sqlite-worker-binding-BTkGJnA-.mjs < openclaw-agent-execution.worker.js < sqlite-store.worker.js

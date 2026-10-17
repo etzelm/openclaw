@@ -1,0 +1,47 @@
+# build.out: t2-02 shipped-entry-point proof
+# host: Mac Studio, macOS 27.0.1, arm64; node v24.21.0; pnpm 12.11.2
+# node:sqlite SQLite 3.53.4
+
+== base
+$ git rev-parse HEAD
+fe6a3616168bca792650edb0bed09aa0462e6cc6
+$ git log -1 --format='%H %s'
+fe6a3616168bca792650edb0bed09aa0462e6cc6 test(gateway): preserve native recovery shutdown deadlines
+$ git remote get-url origin
+https://github.com/openclaw/openclaw.git
+$ git status --porcelain | wc -l (after install and build)
+0
+$ pnpm install --frozen-lockfile -> 177 log lines; tail:
+Done in 8.4s using pnpm v12.11.1
+$ pnpm build -> exit 0; tail:
+[build-all] phase timings: total 3m 59.9s; slowest write-unified-entry-dts 1m 55.1s; tsdown-packages 25s; tsdown 23.9s; ui:build 14.8s; runtime-postbuild 12.6s;
+dist probes (files containing):
+  'written.length === planned.size': 0
+  'source !== "sessions" || entry.kind === "multimodal"': 1
+  'Memory source owner changed before delta planning': 0
+
+== head
+$ git rev-parse HEAD
+6c4f0e654f4b110709c52ca2615764f6e5328926
+$ git log -1 --format='%H %s'
+6c4f0e654f4b110709c52ca2615764f6e5328926 improve(memory): reindex only changed chunks of an edited memory file
+$ git remote get-url origin
+https://github.com/openclaw/openclaw.git
+$ git status --porcelain | wc -l (after install and build)
+0
+$ pnpm install --frozen-lockfile -> 175 log lines; tail:
+Done in 6.1s using pnpm v12.11.1
+$ pnpm build -> exit 0; tail:
+[build-all] phase timings: total 3m 26.2s; slowest write-unified-entry-dts 1m 33.1s; tsdown-packages 26.2s; tsdown 21.9s; ui:build 13.3s; tsdown-ai 9.71s; runti
+dist probes (files containing):
+  'written.length === planned.size': 1
+  'source !== "sessions" || entry.kind === "multimodal"': 0
+  'Memory source owner changed before delta planning': 1
+
+$ git diff --stat base head (non-test source)
+ .../src/memory/manager-embedding-ops.ts            |  6 +++---
+ .../src/memory/manager-publication-transfer.ts     | 21 +++++++++----------
+ .../src/memory/manager-session-delta.ts            | 17 +++++++--------
+ .../src/memory/manager-source-index-kernel.ts      | 24 ++++++++--------------
+ 4 files changed, 30 insertions(+), 38 deletions(-)
+sha256 of non-test source diff: d2bbf9d27f372f2e1caff34144e9f7823222c52fd4e4dcd5cf1fd8fea71cae14

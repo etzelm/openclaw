@@ -1,0 +1,6 @@
+{
+  agents: { defaults: { workspace: "<scratch>/runs/base-semantic-nocache-p100/workspace" } },
+  memory: { search: { enabled: true, provider: "openai-compatible", model: "stub-embed-64", remote: { baseUrl: "http://<loopback>:<port>/v1" }, cache: { enabled: false }, sources: ["memory"] } },
+  plugins: { slots: { memory: "memory-core" }, entries: { "memory-core": { enabled: true } } },
+  gateway: { mode: "local" },
+}
