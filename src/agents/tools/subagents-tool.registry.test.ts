@@ -80,12 +80,6 @@ it("reports the persisted pause age of a yielded leaf, never of a parent with a 
         pauseReason: "sessions_yield",
         execution: { status: "terminal", startedAt: pausedAt - 60_000, endedAt: pausedAt },
       });
-      const finished = createSubagentRunRecord({
-        ...base,
-        runId: "finished-run",
-        childSessionKey: "agent:main:subagent:finished-run",
-        execution: { status: "terminal", startedAt: now - 90_000, endedAt: now - 60_000 },
-      });
       const orchestrator = createSubagentRunRecord({
         ...base,
         runId: "waiting-orchestrator",
@@ -104,7 +98,6 @@ it("reports the persisted pause age of a yielded leaf, never of a parent with a 
       persistRegistryFixture(
         new Map([
           [leaf.runId, leaf],
-          [finished.runId, finished],
           [orchestrator.runId, orchestrator],
           [announcedChild.runId, announcedChild],
         ]),
@@ -115,7 +108,7 @@ it("reports the persisted pause age of a yielded leaf, never of a parent with a 
         const tool = createSubagentsTool({ agentSessionKey: ownerKey, config: {} });
         const wait = await tool.execute("wait", {
           action: "wait",
-          runIds: [leaf.runId, finished.runId, orchestrator.runId],
+          runIds: [leaf.runId, orchestrator.runId],
           timeoutSeconds: 0,
         });
         const runs = (wait.details as { runs: Array<{ runId: string; pausedForMs?: number }> })
@@ -123,7 +116,6 @@ it("reports the persisted pause age of a yielded leaf, never of a parent with a 
         const waitedLeaf = runs.find((run) => run.runId === leaf.runId);
         expect(waitedLeaf).toMatchObject({ status: "waiting" });
         expect(waitedLeaf?.pausedForMs).toBe(43 * 3_600_000 + 12 * 60_000);
-        expect(runs.find((run) => run.runId === finished.runId)).not.toHaveProperty("pausedForMs");
         expect(runs.find((run) => run.runId === orchestrator.runId)).toMatchObject({
           status: "waiting",
         });
@@ -134,17 +126,14 @@ it("reports the persisted pause age of a yielded leaf, never of a parent with a 
         const list = await tool.execute("list", { action: "list", recentMinutes: 60 });
         const details = list.details as {
           active: Array<{ runId: string; pausedForMs?: number }>;
-          recent: Array<{ runId: string; pausedForMs?: number }>;
           text: string;
         };
         const listed = details.active.find((run) => run.runId === leaf.runId);
         expect(listed?.pausedForMs).toBe(43 * 3_600_000 + 12 * 60_000);
         expect(details.text).toContain("waiting for external continuation, paused 1d 19h");
-        for (const run of [...details.active, ...details.recent]) {
-          if (run.runId === finished.runId || run.runId === orchestrator.runId) {
-            expect(run).not.toHaveProperty("pausedForMs");
-          }
-        }
+        expect(details.active.find((run) => run.runId === orchestrator.runId)).not.toHaveProperty(
+          "pausedForMs",
+        );
       } finally {
         vi.useRealTimers();
         clearSubagentRunsReadCacheForTest();

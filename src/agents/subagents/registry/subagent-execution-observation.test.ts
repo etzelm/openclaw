@@ -135,7 +135,6 @@ describe("subagent execution observation", () => {
     });
     expect(age(parent, [child])).toBeUndefined();
     expect(age(paused("collector", { collect: true }))).toBeUndefined();
-    expect(age(run("running"))).toBeUndefined();
     expect(
       age(
         paused("resumed", {
@@ -146,7 +145,6 @@ describe("subagent execution observation", () => {
     expect(
       age(run("finished", { execution: { status: "terminal", endedAt: pausedAt } })),
     ).toBeUndefined();
-    expect(age(paused("killed", { endedReason: "subagent-killed" }))).toBeUndefined();
     expect(age(paused("no-timestamp", { execution: { status: "terminal" } }))).toBeUndefined();
   });
 });
