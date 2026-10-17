@@ -600,9 +600,7 @@ run/status fallback.
 
 `reason: "yielded_without_result"` marks a collector that the registry settled as
 failed after a legacy yield with no recorded outcome. Branch on it rather than on
-`error` text. It is absent on every other
-completion and independent of `schemaError`, so a settled collector with an
-`outputSchema` carries both.
+`error` text; every other completion omits it.
 
 Individual failed items do not make a mixed `agents_wait` poll a top-level tool
 error. The poll remains a successful JSON result so callers can process its

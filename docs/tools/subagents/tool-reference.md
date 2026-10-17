@@ -417,11 +417,8 @@ restores, and `agents_wait` then returns it. The sweep keeps the outcome and end
 time that earlier version recorded: a row stored as `ok` returns `done` with the
 reply its yielded turn ended on, as a collector that yields now does. A row with
 no recorded outcome returns `failed` with an error that says why and
-`reason: "yielded_without_result"`. The optional `reason` appears only on that
-registry settlement; every other done, failed, killed, or timed-out collector
-omits it, and `status` keeps its four values. Only collectors are settled this
-way: a child that declared a message wait stays paused until a continuation
-reaches it, however long that takes.
+`reason: "yielded_without_result"`. Only collectors are settled this way: a child that declared a message wait
+stays paused until a continuation reaches it, however long that takes.
 
 The registry also continues a yielded sub-agent when its announced children
 settle, including an orchestrator spawned by cron. That internal settlement

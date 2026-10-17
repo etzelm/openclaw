@@ -699,9 +699,7 @@ function planTerminalCompletion(
       entry,
       params.getRuntimeConfig(),
       { entry: prepared.collectorSession?.entry },
-      // A settled yield that kept a recorded outcome has its own result or failure; only the
-      // settlement that substituted the diagnostic error, because the row had no recorded
-      // outcome, is marked.
+      // Mark only the sweeper's diagnostic settlement of a yield with no recorded outcome.
       completeParams.settleYielded === true && currentEntry.execution.outcome === undefined
         ? "yielded_without_result"
         : undefined,
