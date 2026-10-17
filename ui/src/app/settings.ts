@@ -142,6 +142,7 @@ function isViteDevPage(): boolean {
   if (typeof document === "undefined") {
     return false;
   }
+  // Vite injects this development script outside the application's rendered DOM.
   return Boolean(document.querySelector('script[src*="/@vite/client"]'));
 }
 
@@ -606,15 +607,15 @@ export function saveSettings(
     chatWorkspaceDock: next.chatWorkspaceDock === "bottom" ? "bottom" : undefined,
     boardSessionViews:
       next.boardSessionViews && Object.keys(next.boardSessionViews).length > 0
-        ? normalizeBoardSessionViews(next.boardSessionViews)
+        ? next.boardSessionViews
         : undefined,
     sidebarSessionLayouts:
       next.sidebarSessionLayouts && Object.keys(next.sidebarSessionLayouts).length > 0
-        ? normalizeSidebarSessionLayouts(next.sidebarSessionLayouts)
+        ? next.sidebarSessionLayouts
         : undefined,
     sidebarSessionActivePanels:
       next.sidebarSessionActivePanels && Object.keys(next.sidebarSessionActivePanels).length > 0
-        ? normalizeSidebarSessionActivePanels(next.sidebarSessionActivePanels)
+        ? next.sidebarSessionActivePanels
         : undefined,
     navWidth: next.navWidth, // Persist size, not visibility: shared localStorage leaks across tabs.
     sidebarAgentsMode: next.sidebarAgentsMode === "roster" ? "roster" : "chip",
