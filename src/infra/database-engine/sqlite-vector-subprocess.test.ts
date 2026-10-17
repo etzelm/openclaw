@@ -6,7 +6,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it, vi } from "vitest";
 import { ensureSqliteLibrarySelected } from "../bun-sqlite-library.js";
-import { openNodeSqliteDatabase } from "../node-sqlite.js";
 import { runVectorKnnInSubprocess } from "./sqlite-vector-subprocess.js";
 import { matchesVectorRow } from "./vector-contract.js";
 
@@ -76,9 +75,7 @@ it("forwards a discovered SQLite library through stdin without inheriting its en
 it("budgets the page cache on the child's per-request read-only connection", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-vector-knn-"));
   const databasePath = path.join(directory, "memory.sqlite");
-  const seed = openNodeSqliteDatabase(databasePath, {});
-  seed.exec("CREATE TABLE memory_index_chunks_vec (id TEXT PRIMARY KEY)");
-  seed.close();
+  fs.writeFileSync(databasePath, "");
   const rowShape = { cache_size: "number" } as const;
   try {
     // The child runs the plan's statement verbatim, so the statement can read back the
