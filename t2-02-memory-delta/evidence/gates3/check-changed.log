@@ -1,0 +1,244 @@
+$ pnpm check:changed --base origin/main
+cwd: <branch-checkout>
+$ node scripts/check-changed.mjs --base origin/main
+[check:changed] lanes=extensions, extensionTests, docs
+[check:changed] extensions/memory-core/src/memory/manager-embedding-ops.ts: extension production
+[check:changed] extensions/memory-core/src/memory/manager-memory-delta.test.ts: extension test
+[check:changed] extensions/memory-core/src/memory/manager-publication-transfer.test.ts: extension test
+[check:changed] extensions/memory-core/src/memory/manager-publication-transfer.ts: extension production
+[check:changed] extensions/memory-core/src/memory/manager-session-delta.ts: extension production
+[check:changed] extensions/memory-core/src/memory/manager-source-index-kernel.ts: extension production
+
+[check:changed] conflict markers
+$ node scripts/check-no-conflict-markers.mjs
+
+[check:changed] line-cap growth ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-line-cap-ratchet.mts --base origin/main
+Line-cap ratchet OK: 6 changed source files; no new violations or over-cap growth.
+
+[check:changed] max-lines suppression ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base origin/main
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+[ELIFECYCLE] Command failed with exit code 1.
+
+[check:changed] assertion SAFETY comment ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base origin/main
+assertion SAFETY ratchet OK: 2599 files, 5949 grandfathered assertions.
+
+[check:changed] SQLite worker ratchet
+$ node --max-old-space-size=4096 --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base origin/main
+SQLite T1 live calls: 182 -> 182; T1-compat deprecated-only calls: 10 -> 10.
+SQLite worker ratchet OK: no T1 call-count growth against fe6a3616168bca792650edb0bed09aa0462e6cc6.
+
+[check:changed] SQLite dialect ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-database-dialect-ratchet.mts --base origin/main
+SQLite dialect scope: 4 differing production files; use --full-tree for totals.
+SQLite dialect mechanical (changed files): 0 -> 0.
+SQLite dialect design (changed files): 0 -> 0.
+SQLite dialect engine-maintenance (changed files): 0 -> 0.
+SQLite string-set owner: 0 mechanical occurrences in changed files (included above).
+SQLite primitive owners: 0 engine-maintenance matches in changed files (excluded from comparison).
+SQLite dialect ratchet OK: no construct-group growth against fe6a3616168bca792650edb0bed09aa0462e6cc6.
+
+[check:changed] test timeout race ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base origin/main
+test timeout race ratchet OK: 119 files, 262 grandfathered sites.
+
+[check:changed] first-party mock export ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base origin/main
+Mock factory ratchet OK: 9064 grandfathered factories.
+
+[check:changed] changelog attributions
+$ node --import ./scripts/tsx.mjs scripts/check-changelog-attributions.mts
+
+[check:changed] doctor deprecation registry
+$ node --import ./scripts/tsx.mjs scripts/check-doctor-deprecation-registry.ts
+[doctor-deprecation-registry] OK as of 2026-10-17
+
+[check:changed] guarded extension wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-extension-wildcard-reexports.mts
+No guarded extension wildcard re-exports found.
+
+[check:changed] plugin-sdk wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-plugin-sdk-wildcard-reexports.mts
+No plugin-sdk wildcard re-exports found in extension API barrels.
+
+[check:changed] extension test core imports
+$ node --import ./scripts/tsx.mjs scripts/check-no-extension-test-core-imports.ts
+OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4737 extension files, 0 plugin helpers checked).
+
+[check:changed] duplicate scan target coverage
+$ node scripts/check-duplicates.mjs --coverage
+[dup:check] target coverage ok
+
+[check:changed] dependency pin guard
+$ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
+PASS direct dependency pin guard: checked 759 directly declared dependency specs across 206 tracked package manifests; 0 violations.
+
+[check:changed] format changed files
+$ oxfmt --check --no-error-on-unmatched-pattern -- docs/concepts/memory-builtin.md docs/reference/database-schemas/worker-access-inventory.md extensions/memory-core/src/memory/manager-embedding-ops.ts extensions/memory-core/src/memory/manager-memory-delta.test.ts extensions/memory-core/src/memory/manager-publication-transfer.test.ts extensions/memory-core/src/memory/manager-publication-transfer.ts extensions/memory-core/src/memory/manager-session-delta.ts extensions/memory-core/src/memory/manager-source-index-kernel.ts
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 13ms on 8 files using 32 threads.
+
+[check:changed] doctor contract declaration + closure guard tests
+$ node scripts/test-projects-serial.mts src/plugins/doctor-contract-declarations.test.ts src/plugins/doctor-contract-closure-guard.test.ts
+[test] starting test/vitest/vitest.plugins.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<branch-checkout>[39m
+
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mclassifies only static value module edges[32m 46[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mkeeps broad agent runtime and heavy doctor barrels off doctor enumeration paths[32m 211[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mkeeps the runtime doctor migration helper off state DB and plugin-state graphs[32m 19[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mkeeps kysely statically unreachable from every plugin closure[33m 349[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22maccepts descriptor-only config repairs and default exports[32m 10[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22mrejects malformed or ambiguous descriptors: {"from":"old/model","to":"new","baseUrl":"https://models.example"}[32m 2[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22mrejects malformed or ambiguous descriptors: {"from":"old","to":"old","baseUrl":"https://models.example"}[32m 1[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22mrejects malformed or ambiguous descriptors: {"from":"old","to":"new","baseUrl":"not a URL"}[32m 1[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mbundled plugin doctor contract declarations[2m > [22mmatches every resolvable artifact's coerced doctor surfaces[33m 460[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mbundled plugin doctor contract declarations[2m > [22mdeclares every state migration identity and phase in module order[32m 52[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 06:38:08
+[2m   Duration [22m 2.43s[2m (tests 52%, transform 32%, setup 13%, import 4%)[22m
+
+[test] passed 1 Vitest shard in 3.28s
+
+[check:changed] plugin boundaries
+$ node --import ./scripts/tsx.mjs scripts/plugin-boundary-report.ts --summary --fail-on-eligible-compat
+Plugin Boundary Report
+
+compat deprecated=67 eligibleForRemoval=0 removalPending=15 removalPendingDue=14
+  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8582 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
+  removal-pending 2026-09-30 plugin-sdk-media-understanding-public-demotion due=true blocker=`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate readerRefs=64 readers=extensions/anthropic/media-understanding-provider.ts,extensions/browser/src/browser-tool.test-support.ts,extensions/browser/src/browser/vision.test.ts,extensions/browser/src/browser/vision.ts,extensions/browser/src/cli/browser-cli-extension.test.ts
+  removal-pending 2026-09-30 plugin-sdk-memory-host-core-public-demotion due=true blocker=host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists readerRefs=28 readers=extensions/active-memory/index.status.test.ts,extensions/active-memory/index.test.ts,extensions/active-memory/index.ts,extensions/codex/src/app-server/attempt-context.test.ts,extensions/codex/src/app-server/run-attempt-memory.test-support.ts
+  removal-pending 2026-10-01 agent-harness-terminal-result-aliases due=true blocker=AgentHarnessAttemptResult.terminal and AgentHarnessDeliveryDefaults.visibleReplies; retain until harness migration verifies that legacy terminal fields and sourceVisibleReplies are unread readerRefs=0 readers=none
+  removal-pending 2026-10-01 message-presentation-legacy-bridges due=true blocker=MessagePresentation values and channel presentation renderers; retain until reply producers and official channel packages no longer emit or read legacy interactive replies readerRefs=165 readers=extensions/a2a/src/channel.ts,extensions/a2a/src/inbound.test.ts,extensions/codex/src/app-server/run-attempt-active-turn.ts,extensions/codex/src/app-server/run-attempt.final-media.test.ts,extensions/codex/src/conversation-binding-hooks.ts
+  removal-pending 2026-10-01 official-plugin-export-aliases due=true blocker=MessagePresentation renderers and host-owned timeout/runtime behavior; retain until minimum supported official plugin packages no longer import these aliases readerRefs=22 readers=extensions/discord/api.ts,extensions/discord/src/voice/audio-worker-thread.ts,extensions/qa-lab/src/crabline-discord-thread-delivery.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.ts,extensions/qa-lab/src/live-transports/discord/discord-transcripts-authorization.runtime.test.ts
+  removal-pending 2026-10-01 plugin-sdk-channel-setup-input-fields due=true blocker=plugin-local setup input intersections that declare each owning channel field; retain each field until a new published-plugin artifact sweep finds no reader readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-runtime-api-compat-aliases due=true blocker=the namespaced plugin API and focused runtime methods named per surface; retain until all enumerated flat API and runtime aliases have no readers readerRefs=7 readers=extensions/feishu/src/bot.broadcast.routing.test.ts,extensions/feishu/src/bot.test.ts,extensions/feishu/src/comment-handler.test.ts,extensions/mattermost/src/mattermost/monitor.inbound-system-event.test.ts,src/plugin-sdk/test-helpers/plugin-runtime-mock.test.ts
+  removal-pending 2026-10-01 plugin-provider-manifest-compat-aliases due=true blocker=manifest-owned plugin kind/setup metadata and model catalog registration; retain until providers no longer publish runtime kind or legacy catalog hooks readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-sdk-provider-owned-helper-shims due=true blocker=provider-local auth, model, replay, OAuth, and stream helper APIs; retain until every helper is migrated in official providers and absent from published plugins readerRefs=510 readers=extensions/agentsapi/agentsapi-harness.lifecycle.test-helpers.ts,extensions/agentsapi/agentsapi-harness.persistence.test.ts,extensions/agentsapi/agentsapi-harness.ts,extensions/agentsapi/native-session-binding.test-api.ts,extensions/alibaba/video-generation-provider.test.ts
+  removal-pending 2026-10-01 media-legacy-projection due=true blocker=ordered `MsgContext.media` / `InboundMediaFacts[]`; typed hook `media` and `originalMedia`; `Attachment*` template variables; and `openclaw/plugin-sdk/media-local-roots`; retain until a clean published-plugin artifact sweep verifies that the legacy media surfaces have no readers readerRefs=2 readers=src/plugins/compat/media-legacy-projection.ts,test/scripts/check-deprecated-api-usage.test.ts
+  removal-pending 2026-10-01 memory-host-compatibility-aliases due=true blocker=canonical memory cache/FTS tables; retain until supported memory integrations are verified to use canonical tables without overrides and legacy table data remains preserved readerRefs=2 readers=src/plugins/compat/deprecation-marking.ts,src/plugins/contracts/extension-package-project-boundaries.test.ts
+  removal-pending 2026-10-01 plugin-sdk-broad-runtime-barrels due=true blocker=focused plugin SDK subpaths for each runtime capability; retain until bundled and published plugins no longer import any of the seven broad barrels readerRefs=877 readers=extensions/a2a/src/http.test.ts,extensions/acpx/src/runtime.ts,extensions/acpx/src/session-owner-migration.ts,extensions/active-memory/index.status.test.ts,extensions/active-memory/index.ts
+  removal-pending 2026-10-01 plugin-sdk-focused-compat-aliases due=true blocker=the focused replacement named by each TypeScript @deprecated annotation; retain until every enumerated alias has zero bundled and published readers readerRefs=471 readers=extensions/a2a/src/inbound.ts,extensions/acpx/index.test.ts,extensions/acpx/index.ts,extensions/acpx/register.runtime.test.ts,extensions/acpx/register.runtime.ts
+  removal-pending 2026-12-01 plugin-sdk-plugin-config-runtime-public-demotion due=false blocker=`api.pluginConfig`, runtime tool context config, and focused `config-contracts`, `runtime-config-snapshot`, or `config-mutation` subpaths; retain the public subpath through the 2026-12-01 window while official plugin consumers migrate readerRefs=55 readers=extensions/active-memory/index.ts,extensions/active-memory/session-policy.ts,extensions/active-memory/trigger-recall.ts,extensions/amazon-bedrock-mantle/register.sync.runtime.ts,extensions/amazon-bedrock/register.sync.runtime.ts
+plugin-sdk entrypoints=376 supportedBundledFacade=0 publicPluginOwned=1
+memory-host-sdk implementation=private-package-core-integrated private=true exports=10 sourceBridgeFiles=0 coreReferenceFiles=27
+
+[check:changed] package patch guard
+$ node --import ./scripts/tsx.mjs scripts/check-package-patches.mts
+PASS package patch guard: no new pnpm patches; 8 approved patches allowlisted.
+
+[check:changed] test temp creation report (warning-only)
+No new test temp-directory migration warnings found.
+
+[check:changed] Control UI i18n catalog
+$ pnpm ui:i18n:verify
+$ node --import ./scripts/tsx.mjs scripts/control-ui-i18n-verify.ts verify
+control-ui-i18n: raw-copy: baseline entries=78
+control-ui-i18n: source: keys=10774 literal_references=8559 template_prefix_references=315
+control-ui-i18n: plugin=memory-core keys=74 locales=20 unused_translations=0
+control-ui-i18n: plugin=workboard keys=381 locales=20 unused_translations=1180
+
+[check:changed] typecheck extensions
+$ node scripts/run-tsgo.mjs -p tsconfig.extensions.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/extensions.tsbuildinfo
+
+[check:changed] typecheck extension tests
+$ node scripts/run-tsgo.mjs -p test/tsconfig/tsconfig.extensions.test.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/extensions-test.tsbuildinfo
+
+[check:changed] coercion helper declaration guard
+$ node --import ./scripts/tsx.mjs scripts/check-coercion-helper-declarations.mts
+Coercion helper declaration guard passed (119 allowlisted declarations).
+
+[check:changed] deprecated API usage
+$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
+deprecated API usage guard passed
+
+[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  src/logging/diagnostic-memory.ts: resetDiagnosticMemoryForTest
+  src/logging/diagnostic-phase.ts: resetDiagnosticPhasesForTest
+  src/logging/diagnostic-run-activity.ts: resetDiagnosticRunActivityForTest
+  src/logging/diagnostic-runtime.ts: resetDiagnosticActivityForTest
+  src/logging/diagnostic-session-recovery-coordinator.ts: resetDiagnosticSessionRecoveryCoordinatorForTest
+  src/logging/diagnostic-session-state.ts: resetDiagnosticSessionStateForTest
+  src/logging/diagnostic-stability.ts: resetDiagnosticStabilityRecorderForTest
+Delete the exports or model their real production consumers in Knip.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  src/agents/embedded-agent-runner/tool-result-truncation.ts: toolResultWarningDedupe (toolResultTruncation)
+  src/commands/configure.wizard.test-support.ts: createWizardTestRuntime
+  src/gateway/server-methods/sessions-rewind.handler.test-support.ts: messageCutContext
+  src/gateway/test-helpers.node-invoke.ts: getConnectedNodeIdForTest
+  src/infra/worker-native-lifecycle.runtime.test-support.ts: assertNativeWorkerFields
+  src/infra/worker-task-pool.owned.test-support.ts: PostedTask
+  test/e2e/qa-lab/runtime/managed-worktrees-product-proof-fixture.ts: useWorktreeGateway
+Delete the exports or model their real production consumers in Knip.
+
+[check:changed] lint extension changed files
+[plugin-sdk boundary dts] emitted 13934 files
+Found 0 warnings and 0 errors.
+Finished in 15.6s on 6 files with 292 rules using 1 threads.
+
+[check:changed] database-first legacy-store guard
+$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
+Database-first legacy-store guard passed.
+
+[check:changed] media download helper guard
+$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+
+[check:changed] runtime sidecar loader guard
+$ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
+runtime-sidecar-loaders: local runtime sidecar loaders look OK.
+
+[check:changed] runtime import cycles
+$ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
+Import cycle check: 0 runtime value cycle(s).
+
+[check:changed] summary
+   5.44s  ok         conflict markers
+   1.34s  ok         line-cap growth ratchet
+   4.74s  failed:1   max-lines suppression ratchet
+   8.55s  ok         assertion SAFETY comment ratchet
+  52.69s  ok         SQLite worker ratchet
+   470ms  ok         SQLite dialect ratchet
+   6.51s  ok         test timeout race ratchet
+  14.04s  ok         first-party mock export ratchet
+   212ms  ok         changelog attributions
+   189ms  ok         doctor deprecation registry
+   233ms  ok         guarded extension wildcard re-exports
+   195ms  ok         plugin-sdk wildcard re-exports
+   658ms  ok         extension test core imports
+   313ms  ok         duplicate scan target coverage
+   278ms  ok         dependency pin guard
+   365ms  ok         format changed files
+   3.75s  ok         doctor contract declaration + closure guard tests
+   6.07s  ok         plugin boundaries
+   473ms  ok         package patch guard
+   281ms  ok         test temp creation report (warning-only)
+   2.56s  ok         Control UI i18n catalog
+  11.66s  ok         typecheck extensions
+  16.67s  ok         typecheck extension tests
+   6.76s  ok         coercion helper declaration guard
+   8.04s  ok         deprecated API usage
+  70.75s  failed:1   dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+  82.16s  ok         lint extension changed files
+  51.41s  ok         database-first legacy-store guard
+   330ms  ok         media download helper guard
+   7.55s  ok         runtime sidecar loader guard
+   8.07s  ok         runtime import cycles
+[check:changed] FAILED (exit 1)
+[ELIFECYCLE] Command failed with exit code 1.
+exit code: 1

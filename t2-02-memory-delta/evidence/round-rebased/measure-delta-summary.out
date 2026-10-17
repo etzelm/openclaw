@@ -1,0 +1,93 @@
+# Summary: true median of 10 pooled runs (2 rounds x 5); per-round medians (of 5) in parentheses.
+# Stores: A = agent store A (430,518,272 bytes), B = agent store B (4,855,853,056 bytes).
+# Row ops are from one committed run. Shapes: S1 append, S2 last-chunk edit, S3 trailing removal, S4 top-of-file edit, S5 file deletion.
+store | size (chunks) | mode | shape | BEFORE median ms (per round) | AFTER median ms (per round) | B/A | BEFORE chunk rows del+ins | AFTER chunk rows del+ins | revision delta B/A | WAL bytes B/A | parity equal
+A | large (678) | keyword | S1 | 61.25 (59.252/62.181) | 11.54 (11.818/11.497) | 5.31 | 678+678 | 1+1 | 1357/3 | 5476352/192512 | yes
+A | large (678) | keyword | S2 | 61.00 (62.459/56.637) | 12.31 (11.639/12.947) | 4.96 | 678+678 | 1+1 | 1357/3 | 5906432/172032 | yes
+A | large (678) | keyword | S3 | 62.98 (57.818/65.592) | 12.79 (13.151/12.433) | 4.92 | 678+677 | 2+1 | 1356/4 | 5500928/212992 | yes
+A | large (678) | keyword | S4 | 56.95 (57.209/56.631) | 61.05 (62.76/57.876) | 0.93 | 678+678 | 678+678 | 1357/1357 | 5488640/5636096 | yes
+A | large (678) | keyword | S5 | 16.55 (16.789/15.302) | 18.99 (21.734/15.305) | 0.87 | 678+0 | 678+0 | 679/679 | 2347008/2523136 | yes
+A | large (678) | semantic | S1 | 191.47 (185.995/195.226) | 12.08 (12.124/11.853) | 15.85 | 678+678 | 1+1 | 1357/3 | 11001856/225280 | yes
+A | large (678) | semantic | S2 | 192.11 (196.08/187.317) | 12.75 (12.942/11.881) | 15.07 | 678+678 | 1+1 | 1357/3 | 10993664/200704 | yes
+A | large (678) | semantic | S3 | 187.67 (186.029/194.024) | 12.14 (12.144/12.132) | 15.46 | 678+677 | 2+1 | 1356/4 | 10973184/258048 | yes
+A | large (678) | semantic | S4 | 184.52 (188.438/177.282) | 195.09 (193.765/196.095) | 0.95 | 678+678 | 678+678 | 1357/1357 | 11063296/11079680 | yes
+A | large (678) | semantic | S5 | 16.60 (15.715/17.551) | 18.71 (23.083/15.664) | 0.89 | 678+0 | 678+0 | 679/679 | 2252800/2514944 | yes
+A | medium (19) | keyword | S1 | 2.14 (2.143/2.138) | 0.78 (0.77/0.79) | 2.74 | 19+19 | 1+1 | 39/3 | 450560/110592 | yes
+A | medium (19) | keyword | S2 | 1.89 (1.887/1.901) | 0.66 (0.65/0.659) | 2.88 | 19+19 | 1+1 | 39/3 | 442368/106496 | yes
+A | medium (19) | keyword | S3 | 2.01 (1.898/2.031) | 0.89 (0.908/0.853) | 2.27 | 19+18 | 2+1 | 38/4 | 462848/131072 | yes
+A | medium (19) | keyword | S4 | 2.08 (2.234/1.946) | 2.11 (2.22/2.032) | 0.99 | 19+19 | 19+19 | 39/39 | 688128/618496 | yes
+A | medium (19) | keyword | S5 | 0.98 (1.024/0.931) | 0.93 (0.974/0.891) | 1.06 | 19+0 | 19+0 | 20/20 | 360448/372736 | yes
+A | medium (19) | semantic | S1 | 5.13 (5.185/5.084) | 1.11 (1.156/1.056) | 4.61 | 19+19 | 1+1 | 39/3 | 606208/122880 | yes
+A | medium (19) | semantic | S2 | 5.21 (5.314/5.078) | 0.98 (1.018/0.959) | 5.34 | 19+19 | 1+1 | 39/3 | 577536/114688 | yes
+A | medium (19) | semantic | S3 | 4.90 (4.84/5.014) | 1.06 (1.069/1.053) | 4.62 | 19+18 | 2+1 | 38/4 | 569344/147456 | yes
+A | medium (19) | semantic | S4 | 6.34 (6.436/5.367) | 6.23 (7.728/5.285) | 1.02 | 19+19 | 19+19 | 39/39 | 942080/921600 | yes
+A | medium (19) | semantic | S5 | 2.91 (4.921/0.994) | 1.00 (1.124/0.901) | 2.93 | 19+0 | 19+0 | 20/20 | 589824/389120 | yes
+B | large (678) | keyword | S1 | 95.34 (94.895/99.33) | 12.68 (12.716/11.998) | 7.52 | 678+678 | 1+1 | 1357/3 | 10313728/192512 | yes
+B | large (678) | keyword | S2 | 81.90 (83.002/81.71) | 12.45 (13.282/11.899) | 6.58 | 678+678 | 1+1 | 1357/3 | 9883648/172032 | yes
+B | large (678) | keyword | S3 | 85.43 (86.684/84.039) | 13.06 (12.945/13.427) | 6.54 | 678+677 | 2+1 | 1356/4 | 9789440/188416 | yes
+B | large (678) | keyword | S4 | 91.05 (91.072/89.361) | 99.98 (113.096/83.187) | 0.91 | 678+678 | 678+678 | 1357/1357 | 13021184/13664256 | yes
+B | large (678) | keyword | S5 | 30.65 (29.952/31.102) | 31.61 (33.052/28.586) | 0.97 | 678+0 | 678+0 | 679/679 | 6549504/6774784 | yes
+B | medium (19) | keyword | S1 | 2.41 (2.536/2.288) | 0.74 (0.765/0.691) | 3.23 | 19+19 | 1+1 | 39/3 | 446464/110592 | yes
+B | medium (19) | keyword | S2 | 2.25 (2.753/1.816) | 0.62 (0.665/0.605) | 3.65 | 19+19 | 1+1 | 39/3 | 479232/77824 | yes
+B | medium (19) | keyword | S3 | 1.95 (2.086/1.871) | 0.86 (0.885/0.799) | 2.27 | 19+18 | 2+1 | 38/4 | 430080/139264 | yes
+B | medium (19) | keyword | S4 | 1.90 (2.007/1.875) | 2.79 (2.077/3.85) | 0.68 | 19+19 | 19+19 | 39/39 | 643072/651264 | yes
+B | medium (19) | keyword | S5 | 0.91 (0.934/0.891) | 0.92 (0.908/0.932) | 0.99 | 19+0 | 19+0 | 20/20 | 360448/389120 | yes
+# parity mismatches: 0
+# AFTER plan (retained/written/removed, from the committed run):
+#   A|medium|keyword|S1: incremental=true retained=18 written=1 removed=1 prepared=19
+#   A|medium|keyword|S2: incremental=true retained=18 written=1 removed=1 prepared=19
+#   A|medium|keyword|S3: incremental=true retained=17 written=1 removed=2 prepared=18
+#   A|medium|keyword|S4: incremental=false retained=0 written=19 removed=0 prepared=19
+#   A|large|keyword|S1: incremental=true retained=677 written=1 removed=1 prepared=678
+#   A|large|keyword|S2: incremental=true retained=677 written=1 removed=1 prepared=678
+#   A|large|keyword|S3: incremental=true retained=676 written=1 removed=2 prepared=677
+#   A|large|keyword|S4: incremental=false retained=0 written=678 removed=0 prepared=678
+#   A|medium|semantic|S1: incremental=true retained=18 written=1 removed=1 prepared=19
+#   A|medium|semantic|S2: incremental=true retained=18 written=1 removed=1 prepared=19
+#   A|medium|semantic|S3: incremental=true retained=17 written=1 removed=2 prepared=18
+#   A|medium|semantic|S4: incremental=false retained=0 written=19 removed=0 prepared=19
+#   A|large|semantic|S1: incremental=true retained=677 written=1 removed=1 prepared=678
+#   A|large|semantic|S2: incremental=true retained=677 written=1 removed=1 prepared=678
+#   A|large|semantic|S3: incremental=true retained=676 written=1 removed=2 prepared=677
+#   A|large|semantic|S4: incremental=false retained=0 written=678 removed=0 prepared=678
+#   B|medium|keyword|S1: incremental=true retained=18 written=1 removed=1 prepared=19
+#   B|medium|keyword|S2: incremental=true retained=18 written=1 removed=1 prepared=19
+#   B|medium|keyword|S3: incremental=true retained=17 written=1 removed=2 prepared=18
+#   B|medium|keyword|S4: incremental=false retained=0 written=19 removed=0 prepared=19
+#   B|large|keyword|S1: incremental=true retained=677 written=1 removed=1 prepared=678
+#   B|large|keyword|S2: incremental=true retained=677 written=1 removed=1 prepared=678
+#   B|large|keyword|S3: incremental=true retained=676 written=1 removed=2 prepared=677
+#   B|large|keyword|S4: incremental=false retained=0 written=678 removed=0 prepared=678
+# Headers:
+#   measure-delta-A-round1.out: # measure-delta BEFORE round 1 | agent store A (430,518,272 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=fe6a3616168bca792650edb0bed09aa0462e6cc6 | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 3.7/10.6/15.7 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-A-round1.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-A-round1.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-A-round1.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=semantic
+#   measure-delta-A-round1.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=semantic
+#   measure-delta-A-round1.out: # measure-delta AFTER round 1 | agent store A (430,518,272 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=baa8b7d28b4d596a0d9de3ef96cc9603b7fca9ea | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 3.8/10.3/15.5 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-A-round1.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-A-round1.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-A-round1.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=semantic
+#   measure-delta-A-round1.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=semantic
+#   measure-delta-A-round2.out: # measure-delta AFTER round 2 | agent store A (430,518,272 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=baa8b7d28b4d596a0d9de3ef96cc9603b7fca9ea | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 4.0/9.9/15.2 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-A-round2.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-A-round2.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-A-round2.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=semantic
+#   measure-delta-A-round2.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=semantic
+#   measure-delta-A-round2.out: # measure-delta BEFORE round 2 | agent store A (430,518,272 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=fe6a3616168bca792650edb0bed09aa0462e6cc6 | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 4.0/9.8/15.1 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-A-round2.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-A-round2.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-A-round2.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=semantic
+#   measure-delta-A-round2.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=semantic
+#   measure-delta-B-round1.out: # measure-delta BEFORE round 1 | agent store B (4,855,853,056 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=fe6a3616168bca792650edb0bed09aa0462e6cc6 | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 3.5/10.2/15.4 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-B-round1.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-B-round1.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-B-round1.out: # measure-delta AFTER round 1 | agent store B (4,855,853,056 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=baa8b7d28b4d596a0d9de3ef96cc9603b7fca9ea | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 3.4/9.9/15.2 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-B-round1.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-B-round1.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-B-round2.out: # measure-delta AFTER round 2 | agent store B (4,855,853,056 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=baa8b7d28b4d596a0d9de3ef96cc9603b7fca9ea | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 3.3/9.4/14.9 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-B-round2.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-B-round2.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword
+#   measure-delta-B-round2.out: # measure-delta BEFORE round 2 | agent store B (4,855,853,056 bytes) | method: arm's own production SOURCE via scripts/tsx.mjs loader | chunking tokens=400 overlap=80 | node v24.21.0 | head=fe6a3616168bca792650edb0bed09aa0462e6cc6 | dirty=0 | sqlite=3.53.4 | page_size 4096 | runs=5 warmups=2 | loadavg 3.1/9.2/14.8 | not in loop: embedding provider, worker transport, file watcher, schema/FTS admission
+#   measure-delta-B-round2.out: # fixture medium: paragraphs=91 chunks(v1)=19 mode=keyword
+#   measure-delta-B-round2.out: # fixture large: paragraphs=3346 chunks(v1)=678 mode=keyword

@@ -1,0 +1,25 @@
+BUILD EVIDENCE (Mac Studio, rebased tree, base fe6a3616168bca792650edb0bed09aa0462e6cc6, commit baa8b7d28b4d596a0d9de3ef96cc9603b7fca9ea)
+== arm: before
+HEAD: fe6a3616168bca792650edb0bed09aa0462e6cc6
+git status --short lines: 0
+build: exit=0 (pnpm build, [build-all] phase timings: total 3m 48.9s; slowest write-unified-entry-dts 1m 54)
+dist contains new code "written.length === planned.size": 0 file(s)
+dist contains old gate (source !== "sessions" || entry.kind === "multimodal"): 1 file(s)
+dist contains message "Memory source owner changed before delta planning": 0 file(s)
+== arm: after
+HEAD: baa8b7d28b4d596a0d9de3ef96cc9603b7fca9ea
+git status --short lines: 0
+build: exit=0 (pnpm build, [build-all] phase timings: total 3m 42.5s; slowest write-unified-entry-dts 1m 47)
+dist contains new code "written.length === planned.size": 1 file(s)
+dist contains old gate (source !== "sessions" || entry.kind === "multimodal"): 0 file(s)
+dist contains message "Memory source owner changed before delta planning": 1 file(s)
+== non-test source diff base..commit (extensions/memory-core/src/memory, excluding *.test.ts)
+sha256: d2bbf9d27f372f2e1caff34144e9f7823222c52fd4e4dcd5cf1fd8fea71cae14  -
+ .../src/memory/manager-embedding-ops.ts            |  6 +++---
+ .../src/memory/manager-publication-transfer.ts     | 21 +++++++++----------
+ .../src/memory/manager-session-delta.ts            | 17 +++++++--------
+ .../src/memory/manager-source-index-kernel.ts      | 24 ++++++++--------------
+ 4 files changed, 30 insertions(+), 38 deletions(-)
+== runtime
+node v24.21.0
+node:sqlite links SQLite 3.53.4

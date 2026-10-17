@@ -1,0 +1,22 @@
+cwd: <branch-checkout>
+$ pnpm format:docs:check
+$ node --import ./scripts/tsx.mjs scripts/format-docs.mts --check
+Docs formatting clean (1365 files).
+exit 0
+$ pnpm docs:check-mdx
+$ node scripts/check-docs-mdx.mjs docs README.md
+Docs MDX check passed (1377 files, 8508ms).
+exit 0
+$ pnpm lint:docs docs/concepts/memory-builtin.md
+$ pnpm dlx --config.resolution-mode=highest markdownlint-cli2 --config config/markdownlint-cli2.jsonc docs/concepts/memory-builtin.md
+markdownlint-cli2 v0.23.3 (markdownlint v0.41.1)
+Finding: docs/concepts/memory-builtin.md docs/**/*.md docs/**/*.mdx README.md !docs/zh-CN/** !docs/.i18n/** !docs/reference/templates/** !**/.local/**
+Linting: 1355 files
+Summary: 0 issues in 0 files
+Done in 12.6s using pnpm v12.11.1
+exit 0
+$ pnpm docs:check-links
+$ node scripts/docs-link-audit.mjs
+checked_internal_links=15648
+broken_links=0
+exit 0

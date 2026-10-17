@@ -1,0 +1,37 @@
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base origin/main
+cwd: <base-checkout>
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+exit: 1
+
+$ node --import tsx scripts/check-deadcode-exports.mts
+cwd: <base-checkout>
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+production unused-export scan:
+Unused exports are not allowed:
+  src/logging/diagnostic-memory.ts: resetDiagnosticMemoryForTest
+  src/logging/diagnostic-phase.ts: resetDiagnosticPhasesForTest
+  src/logging/diagnostic-run-activity.ts: resetDiagnosticRunActivityForTest
+  src/logging/diagnostic-runtime.ts: resetDiagnosticActivityForTest
+  src/logging/diagnostic-session-recovery-coordinator.ts: resetDiagnosticSessionRecoveryCoordinatorForTest
+  src/logging/diagnostic-session-state.ts: resetDiagnosticSessionStateForTest
+  src/logging/diagnostic-stability.ts: resetDiagnosticStabilityRecorderForTest
+Delete the exports or model their real production consumers in Knip.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  src/agents/embedded-agent-runner/tool-result-truncation.ts: toolResultWarningDedupe (toolResultTruncation)
+  src/commands/configure.wizard.test-support.ts: createWizardTestRuntime
+  src/gateway/server-methods/sessions-rewind.handler.test-support.ts: messageCutContext
+  src/gateway/test-helpers.node-invoke.ts: getConnectedNodeIdForTest
+  src/infra/worker-native-lifecycle.runtime.test-support.ts: assertNativeWorkerFields
+  src/infra/worker-task-pool.owned.test-support.ts: PostedTask
+  test/e2e/qa-lab/runtime/managed-worktrees-product-proof-fixture.ts: useWorktreeGateway
+Delete the exports or model their real production consumers in Knip.
+exit: 1
+

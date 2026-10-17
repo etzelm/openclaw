@@ -1,0 +1,77 @@
+$ pnpm test extensions/memory-core/src/memory/manager-publication-transfer.test.ts
+cwd: <base-checkout>
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-publication-transfer.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<base-checkout>[39m
+
+[vitest-workers] local cache hit after 2961ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 7d6e95926ad9 in 3007ms (16618 inputs, 21954 outputs)
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mavoids unused connection work for scalar publications[32m 24[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mreads current source rows without restaging scratch or inspecting canonical connection policy[32m 239[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mrolls back a refused inline cache commit and preserves tombstones[32m 247[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22msettles a single-statement source refresh through success[32m 208[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22msettles a single-statement source refresh through stale[32m 216[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22msettles a single-statement source refresh through begin[32m 219[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22msettles a single-statement source refresh through write[32m 200[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22msettles a single-statement source refresh through transaction[32m 198[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22msettles a single-statement source refresh through commit[32m 208[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mopens keyword publication when SQLite extension loading is unavailable[32m 208[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mpublishes and deletes keyword data with an unavailable configured extension[33m 403[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mpreserves extension load failures when vector publication requires the extension[32m 226[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mpreserves the failed publication outcome (close failure: false)[33m 371[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mpreserves the failed publication outcome (close failure: true)[33m 352[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mdiscards declined preparation and reuses its healthy publication owner[32m 210[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mroundtrips an oversized Unicode record and its metadata through the native publication owner[32m 267[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mkeeps inline source replacement atomic and observes a later in-process forget[32m 246[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mkeeps concurrent large source transfers separate through their publication scopes[32m 237[2mms[22m[39m
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > publishes planned removals and keeps unchanged sessions rows searchable 247ms
+ [31m×[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mpublishes planned removals and keeps unchanged memory rows searchable[32m 229[2mms[22m[39m
+[31m   → expected [ { chunk_rowid: 1, …(2) } ] to deeply equal [ { chunk_rowid: 1, …(2) }, …(1) ][39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mroundtrips 8-coordinate cache vectors with tombstone and capacity limits[32m 240[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mroundtrips 4194305-coordinate cache vectors with tombstone and capacity limits[33m 2116[2mms[22m[39m
+ [32m✓[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mbounds each serialized batch and preserves every row when provider vectors share an array[32m 152[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-transfer.test.ts[2m > [22mbounded memory publication transfer[2m > [22mpublishes planned removals and keeps unchanged memory rows searchable
+[31m[1mAssertionError[22m: expected [ { chunk_rowid: 1, …(2) } ] to deeply equal [ { chunk_rowid: 1, …(2) }, …(1) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    {[22m
+[2m      "chunk_rowid": 1,[22m
+[32m-     "start_line": 1,[39m
+[32m-     "text": "turn 1 Violetmarker",[39m
+[32m-   },[39m
+[32m-   ObjectContaining {[39m
+[2m      "start_line": 3,[22m
+[2m      "text": "turn 3 Violetmarker",[22m
+[2m    },[22m
+[2m  ][22m
+
+[36m [2m❯[22m extensions/memory-core/src/memory/manager-publication-transfer.test.ts:[2m712:22[22m[39m
+    [90m710|[39m       delta.removedIds = [memoryChunkRowId(source, delta.entry.path, t…
+    [90m711|[39m       await expect(publish(owner, delta)).resolves.toBe(true);
+    [90m712|[39m       expect(rows()).toEqual([
+    [90m   |[39m                      [31m^[39m
+    [90m713|[39m         first,
+    [90m714|[39m         expect.objectContaining({ start_line: 3, text: "turn 3 Violetm…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (23)[39m
+[2m   Start at [22m 06:33:17
+[2m   Duration [22m 13.73s[2m (tests 53%, transform 39%, import 6%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 15.60s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
+exit code: 1

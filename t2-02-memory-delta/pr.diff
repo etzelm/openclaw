@@ -1,0 +1,466 @@
+diff --git a/docs/concepts/memory-builtin.md b/docs/concepts/memory-builtin.md
+index 256b9bb0d7e..c4eb19e82d8 100644
+--- a/docs/concepts/memory-builtin.md
++++ b/docs/concepts/memory-builtin.md
+@@ -209,8 +209,10 @@ counts. A failed full rebuild retains
+ its full-retry state; ordinary dirty content does not itself force a rebuild.
+ An index built before any content exists remains valid as content arrives;
+ restarting does not require a full rebuild just because the index started empty.
+-Growing session transcripts retain unchanged indexed chunks and embed only new
+-or changed chunks, even when the embedding cache is disabled. An explicit full
++Growing session transcripts and edited memory files retain unchanged indexed
++chunks and embed only new or changed chunks, even when the embedding cache is
++disabled. An edit that changes every chunk of a memory file, such as a line
++inserted at the top, still replaces that file's chunks. An explicit full
+ rebuild still replaces the complete index.
+ If a memory file changes or disappears during indexing, only that file's
+ unfinished work is retried incrementally. Other files finish indexing, and
+diff --git a/docs/reference/database-schemas/worker-access-inventory.md b/docs/reference/database-schemas/worker-access-inventory.md
+index 1c6bc7239fc..dbc722ce431 100644
+--- a/docs/reference/database-schemas/worker-access-inventory.md
++++ b/docs/reference/database-schemas/worker-access-inventory.md
+@@ -463,7 +463,7 @@ These are live or unproven call expressions, not measured statements per turn. T
+ | **extensions/memory-core** · `extensions/memory-core/src/memory/manager-search-postgres.ts`                         |         2/0/0/0/0 |        161 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+ | **extensions/memory-core** · `extensions/memory-core/src/memory/manager-search.ts`                                  |         3/0/0/0/0 |        364 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+ | **extensions/memory-core** · `extensions/memory-core/src/memory/manager-search.worker.ts`                           |         1/0/0/0/2 |        151 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+-| **extensions/memory-core** · `extensions/memory-core/src/memory/manager-source-index-kernel.ts`                     |         7/2/0/0/0 |        111 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
++| **extensions/memory-core** · `extensions/memory-core/src/memory/manager-source-index-kernel.ts`                     |         7/2/0/0/0 |        103 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+ | **extensions/memory-core** · `extensions/memory-core/src/memory/manager-source-state.ts`                            |         2/0/0/0/0 |        108 | manager-publication.worker.ts source.state and manager-search.worker.ts source-state/recall-metadata are the only runtime callers. Source synchronization and inspection await MemoryIndexDatabase.readSourceState; the kernel remains directly callable only by isolated tests.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+ | **extensions/memory-core** · `extensions/memory-core/src/standing-intents-kernel.ts`                                |         8/2/0/0/0 |         64 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+ | **extensions/qa-lab** · `extensions/qa-lab/src/execution-identity-storage-inspection.worker.ts`                     |         1/2/0/0/0 |         59 | Worker implementation; keep SQL in this owner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+diff --git a/extensions/memory-core/src/memory/manager-embedding-ops.ts b/extensions/memory-core/src/memory/manager-embedding-ops.ts
+index 81483159ec9..a3f1bd38c14 100644
+--- a/extensions/memory-core/src/memory/manager-embedding-ops.ts
++++ b/extensions/memory-core/src/memory/manager-embedding-ops.ts
+@@ -490,13 +490,13 @@ export abstract class MemoryManagerEmbeddingOps extends MemoryManagerEmbeddingCa
+       model: generation?.provider?.model ?? "fts-only",
+       now: Date.now(),
+       vectorReady,
++      retained,
++      removedIds,
+       ...(source === "sessions"
+         ? {
+             source,
+             agentId: this.agentId,
+             sessionId: expectDefined(entry.sessionId, "memory index session identity"),
+-            retained,
+-            removedIds,
+           }
+         : { source }),
+     };
+@@ -686,7 +686,7 @@ export abstract class MemoryManagerEmbeddingOps extends MemoryManagerEmbeddingCa
+     const database = this.database;
+     return await retainIndexedSessionChunks(preparedEntry, database, generation, () => {
+       if (this.closed || database.closed || this.database !== database) {
+-        throw new Error("Memory source owner changed before session delta planning");
++        throw new Error("Memory source owner changed before delta planning");
+       }
+     });
+   }
+diff --git a/extensions/memory-core/src/memory/manager-memory-delta.test.ts b/extensions/memory-core/src/memory/manager-memory-delta.test.ts
+new file mode 100644
+index 00000000000..9d3780f97ec
+--- /dev/null
++++ b/extensions/memory-core/src/memory/manager-memory-delta.test.ts
+@@ -0,0 +1,145 @@
++import fs from "node:fs/promises";
++import path from "node:path";
++import type { DatabaseSync } from "node:sqlite";
++import { describe, expect, it, onTestFinished, vi } from "vitest";
++import {
++  createManagerIndexFixture,
++  memoryIndexFixtureWriter,
++} from "./manager-index.test-support.js";
++
++const memoryIndex = await import("./index.js");
++
++type IndexedRow = {
++  id: string;
++  chunkRowid: number;
++  startLine: number;
++  endLine: number;
++  updatedAt: number;
++  embedded: number;
++  observedAt: number;
++};
++
++describe("memory file delta publication", () => {
++  const fixture = createManagerIndexFixture(memoryIndex);
++  const notesPath = "memory/delta-notes.md";
++  const line = (index: number) =>
++    `Entry ${index} marker${index} ${"lorem ipsum dolor sit amet ".repeat(3)}`.trim();
++  const body = (from: number, to: number) =>
++    Array.from({ length: to - from + 1 }, (_, offset) => line(from + offset));
++
++  async function writeNotes(lines: string[], mtimeMs: number) {
++    const file = path.join(fixture.paths.workspace, notesPath);
++    await fs.writeFile(file, lines.join("\n"));
++    await fs.utimes(file, mtimeMs / 1000, mtimeMs / 1000);
++  }
++
++  function readIndex(database: DatabaseSync) {
++    return {
++      chunks: database
++        .prepare(
++          `SELECT chunk.id, chunk.chunk_rowid AS chunkRowid, chunk.start_line AS startLine,
++                  chunk.end_line AS endLine, chunk.updated_at AS updatedAt,
++                  length(chunk.embedding) > 0 AS embedded,
++                  provenance.observed_at AS observedAt
++           FROM memory_index_chunks AS chunk
++           JOIN memory_index_chunk_provenance AS provenance ON provenance.chunk_id = chunk.id
++           WHERE chunk.path = ? AND chunk.source = 'memory'
++           ORDER BY chunk.start_line, chunk.id`,
++        )
++        .all(notesPath) as IndexedRow[],
++      fts: (
++        database
++          .prepare("SELECT id FROM memory_index_chunks_fts WHERE path = ? ORDER BY id")
++          .all(notesPath) as Array<{ id: string }>
++      ).map((row) => row.id),
++    };
++  }
++
++  it.each([
++    { mode: "keyword-only", semantic: false },
++    { mode: "semantic with rebuild debt", semantic: true },
++  ])("publishes appends as a delta and replaces shifted files ($mode)", async ({ semantic }) => {
++    vi.useFakeTimers({ toFake: ["Date"] });
++    const mtimes = [1_700_000_000_000, 1_700_000_100_000, 1_700_000_200_000];
++    const initial = body(1, 12);
++    await writeNotes(["# Notes", ...initial], mtimes[0] ?? 0);
++    const manager = await fixture.getFreshManager(
++      fixture.createConfig(
++        semantic
++          ? { sources: ["memory"], cacheEnabled: false }
++          : { provider: "none", sources: ["memory"], vectorEnabled: false },
++      ),
++    );
++    onTestFinished(() => manager.close());
++    Reflect.get(manager, "settings").chunking = { tokens: 64, overlap: 0 };
++    const database = Reflect.get(manager, "db") as DatabaseSync;
++    vi.setSystemTime(1_800_000_000_000);
++    await manager.sync({ reason: "initial", force: true });
++    if (semantic) {
++      memoryIndexFixtureWriter(manager)
++        .prepare(
++          `INSERT INTO memory_index_meta (key, value) VALUES ('memory_vector_rebuild_v1', '1')
++           ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
++        )
++        .run();
++    }
++    const before = readIndex(database);
++    expect(before.chunks.length).toBeGreaterThan(3);
++    expect(before.chunks.every((row) => row.embedded === Number(semantic))).toBe(true);
++    expect(before.fts).toEqual(before.chunks.map((row) => row.id).toSorted());
++
++    const appended = body(13, 18);
++    await writeNotes(["# Notes", ...initial, ...appended], mtimes[1] ?? 0);
++    vi.setSystemTime(1_800_000_100_000);
++    Reflect.set(manager, "dirty", true);
++    await manager.sync({ reason: "append" });
++    const after = readIndex(database);
++
++    // Only the trailing chunk may change; every earlier row keeps its identity.
++    const stable = before.chunks.slice(0, -1);
++    for (const row of stable) {
++      const next = after.chunks.find((candidate) => candidate.id === row.id);
++      expect(next).toEqual({ ...row, observedAt: mtimes[1] });
++    }
++    expect(after.chunks.length).toBeGreaterThan(before.chunks.length);
++    expect(after.chunks.every((row) => row.embedded === Number(semantic))).toBe(true);
++    expect(Math.max(...after.chunks.map((row) => row.endLine))).toBe(initial.length + 1 + 6);
++    expect(after.chunks.every((row) => row.observedAt === mtimes[1])).toBe(true);
++    expect(after.fts).toEqual(after.chunks.map((row) => row.id).toSorted());
++
++    const search = async (query: string) =>
++      (await manager.search(query, { lexicalOnly: true, sources: ["memory"] })).map(
++        ({ path: resultPath, startLine, endLine, score, snippet }) => ({
++          path: resultPath,
++          startLine,
++          endLine,
++          score,
++          snippet,
++        }),
++      );
++    const queries = ["marker3", "marker12", "marker16"];
++    const incremental = await Promise.all(queries.map(search));
++    expect(incremental.every((results) => results.length > 0)).toBe(true);
++    await manager.sync({ reason: "full-comparison", force: true });
++    expect(await Promise.all(queries.map(search))).toEqual(incremental);
++    expect(readIndex(database).chunks.map((row) => row.id)).toEqual(
++      after.chunks.map((row) => row.id),
++    );
++
++    // A new first line moves every later line range, so no chunk id survives.
++    await writeNotes(
++      ["Inserted preface line.", "# Notes", ...initial, ...appended],
++      mtimes[2] ?? 0,
++    );
++    vi.setSystemTime(1_800_000_200_000);
++    Reflect.set(manager, "dirty", true);
++    await manager.sync({ reason: "insert-first-line" });
++    const shifted = readIndex(database);
++
++    const appendedIds = new Set(after.chunks.map((row) => row.id));
++    expect(shifted.chunks.length).toBeGreaterThan(0);
++    expect(shifted.chunks.some((row) => appendedIds.has(row.id))).toBe(false);
++    expect(shifted.chunks.every((row) => row.updatedAt === 1_800_000_200_000)).toBe(true);
++    expect(shifted.fts).toEqual(shifted.chunks.map((row) => row.id).toSorted());
++  });
++});
+diff --git a/extensions/memory-core/src/memory/manager-publication-transfer.test.ts b/extensions/memory-core/src/memory/manager-publication-transfer.test.ts
+index bf9b60f0653..87a3c10edbb 100644
+--- a/extensions/memory-core/src/memory/manager-publication-transfer.test.ts
++++ b/extensions/memory-core/src/memory/manager-publication-transfer.test.ts
+@@ -665,57 +665,65 @@ describe("bounded memory publication transfer", () => {
+     );
+   });
+ 
+-  it("publishes planned removals and keeps unchanged session rows searchable", async () => {
+-    const owner = await createOwner();
+-    ensureMemorySessionTombstones(fixtureWriter(owner));
+-    const [template] = replacement().chunks;
+-    assert.ok(template);
+-    const turn = (line: number) => ({
+-      ...template,
+-      startLine: line,
+-      endLine: line,
+-      text: `turn ${line} Violetmarker`,
+-      hash: `turn-${line}`,
+-    });
+-    const session = (
+-      hash: string,
+-      chunks: ReturnType<typeof turn>[],
+-      retained: ReturnType<typeof turn>[] = [],
+-    ): Extract<MemorySourceIndexReplacement, { source: "sessions" }> => ({
+-      ...replacement(),
+-      source: "sessions",
+-      agentId: "main",
+-      sessionId: "delta-session",
+-      entry: { path: "sessions/main/delta.jsonl", hash, mtimeMs: 1, size: 1 },
+-      embeddings: chunks.map(() => []),
+-      chunks,
+-      retained,
+-    });
+-    const rows = () =>
+-      queryRows(
+-        owner.db,
+-        "SELECT chunk_rowid, start_line, text FROM memory_index_chunks ORDER BY start_line",
+-      );
++  it.each(["sessions", "memory"] as const)(
++    "publishes planned removals and keeps unchanged %s rows searchable",
++    async (source) => {
++      const owner = await createOwner();
++      ensureMemorySessionTombstones(fixtureWriter(owner));
++      const [template] = replacement().chunks;
++      assert.ok(template);
++      const turn = (line: number) => ({
++        ...template,
++        startLine: line,
++        endLine: line,
++        text: `turn ${line} Violetmarker`,
++        hash: `turn-${line}`,
++      });
++      const session = (
++        hash: string,
++        chunks: ReturnType<typeof turn>[],
++        retained: ReturnType<typeof turn>[] = [],
++      ): MemorySourceIndexReplacement => ({
++        ...replacement(),
++        ...(source === "sessions"
++          ? { source, agentId: "main", sessionId: "delta-session" }
++          : { source }),
++        entry: {
++          path: source === "sessions" ? "sessions/main/delta.jsonl" : "memory/delta.md",
++          hash,
++          mtimeMs: 1,
++          size: 1,
++        },
++        embeddings: chunks.map(() => []),
++        chunks,
++        retained,
++      });
++      const rows = () =>
++        queryRows(
++          owner.db,
++          "SELECT chunk_rowid, start_line, text FROM memory_index_chunks ORDER BY start_line",
++        );
+ 
+-    await publish(owner, session("v1", [turn(1), turn(2)]));
+-    const [first] = rows();
+-    const delta = session("v2", [turn(3)], [turn(1)]);
+-    delta.removedIds = [memoryChunkRowId("sessions", delta.entry.path, turn(2), delta.model)];
+-    await expect(publish(owner, delta)).resolves.toBe(true);
+-    expect(rows()).toEqual([
+-      first,
+-      expect.objectContaining({ start_line: 3, text: "turn 3 Violetmarker" }),
+-    ]);
+-    expect(owner.db.prepare("SELECT COUNT(*) AS count FROM memory_index_chunks_fts").get()).toEqual(
+-      { count: 2 },
+-    );
++      await publish(owner, session("v1", [turn(1), turn(2)]));
++      const [first] = rows();
++      const delta = session("v2", [turn(3)], [turn(1)]);
++      delta.removedIds = [memoryChunkRowId(source, delta.entry.path, turn(2), delta.model)];
++      await expect(publish(owner, delta)).resolves.toBe(true);
++      expect(rows()).toEqual([
++        first,
++        expect.objectContaining({ start_line: 3, text: "turn 3 Violetmarker" }),
++      ]);
++      expect(
++        owner.db.prepare("SELECT COUNT(*) AS count FROM memory_index_chunks_fts").get(),
++      ).toEqual({ count: 2 });
+ 
+-    expectRows(
+-      owner.db,
+-      "SELECT start_line FROM memory_index_chunks_fts WHERE memory_index_chunks_fts MATCH 'Violetmarker' ORDER BY start_line",
+-      [{ start_line: 1 }, { start_line: 3 }],
+-    );
+-  });
++      expectRows(
++        owner.db,
++        "SELECT start_line FROM memory_index_chunks_fts WHERE memory_index_chunks_fts MATCH 'Violetmarker' ORDER BY start_line",
++        [{ start_line: 1 }, { start_line: 3 }],
++      );
++    },
++  );
+ 
+   it.each([8, 4 * 1024 * 1024 + 1])(
+     "roundtrips %i-coordinate cache vectors with tombstone and capacity limits",
+diff --git a/extensions/memory-core/src/memory/manager-publication-transfer.ts b/extensions/memory-core/src/memory/manager-publication-transfer.ts
+index 5290c09e97a..43f835ca571 100644
+--- a/extensions/memory-core/src/memory/manager-publication-transfer.ts
++++ b/extensions/memory-core/src/memory/manager-publication-transfer.ts
+@@ -120,12 +120,14 @@ function* rowFragments(
+ export function memoryPublicationHeader(
+   replacement: MemorySourceIndexReplacement,
+ ): MemorySourceIndexHeader {
+-  const { chunks: _chunks, embeddings: _embeddings, ...fields } = replacement;
+-  if (fields.source !== "sessions") {
+-    return fields;
+-  }
+   // Retained rows travel in the bounded transfer, never the header.
+-  const { retained: _retained, removedIds, ...header } = fields;
++  const {
++    chunks: _chunks,
++    embeddings: _embeddings,
++    retained: _retained,
++    removedIds,
++    ...header
++  } = replacement;
+   return { ...header, delta: removedIds !== undefined };
+ }
+ 
+@@ -133,13 +135,10 @@ export function* memoryPublicationBatches(
+   replacement: MemorySourceIndexReplacement,
+ ): Generator<MemoryPublicationFragment[]> {
+   function* rows(): Generator<MemorySourceIndexRow> {
+-    if (replacement.source === "sessions") {
+-      for (const removedId of replacement.removedIds ?? []) {
+-        yield { removedId };
+-      }
++    for (const removedId of replacement.removedIds ?? []) {
++      yield { removedId };
+     }
+-    const retained = replacement.source === "sessions" ? (replacement.retained ?? []) : [];
+-    for (const chunk of retained) {
++    for (const chunk of replacement.retained ?? []) {
+       yield {
+         // Retained rows keep their stored text; identity and provenance suffice.
+         chunk: { ...row(chunk), text: "" },
+diff --git a/extensions/memory-core/src/memory/manager-session-delta.ts b/extensions/memory-core/src/memory/manager-session-delta.ts
+index e748322e810..f338312d01a 100644
+--- a/extensions/memory-core/src/memory/manager-session-delta.ts
++++ b/extensions/memory-core/src/memory/manager-session-delta.ts
+@@ -7,7 +7,7 @@ import type { MemoryIndexWorkItem, MemorySyncProviderGeneration } from "./manage
+ export type PreparedMemoryIndexEntry = {
+   entry: MemoryIndexWorkItem["entry"];
+   source: MemorySource;
+-  /** Chunks to embed and write; a session delta leaves out retained chunks. */
++  /** Chunks to embed and write; an incremental replacement leaves out retained chunks. */
+   chunks: IndexedMemoryChunk[];
+   /** Retained chunks whose small metadata changed. */
+   retained?: IndexedMemoryChunk[];
+@@ -44,12 +44,7 @@ export async function retainIndexedSessionChunks(
+ ): Promise<PreparedMemoryIndexEntry> {
+   const { entry, source, chunks } = prepared;
+   // A full reindex fills an empty shadow, which has no rows to retain.
+-  if (
+-    source !== "sessions" ||
+-    entry.kind === "multimodal" ||
+-    chunks.length === 0 ||
+-    database.isShadow
+-  ) {
++  if (entry.kind === "multimodal" || chunks.length === 0 || database.isShadow) {
+     return prepared;
+   }
+   const indexed = await database.read(
+@@ -67,7 +62,7 @@ export async function retainIndexedSessionChunks(
+   const model = generation?.provider?.model ?? "fts-only";
+   const written: IndexedMemoryChunk[] = [];
+   const retained: IndexedMemoryChunk[] = [];
+-  // Repeated transcript text yields identical rows under one id. Plan each id
++  // Repeated text yields identical rows under one id. Plan each id
+   // once so a duplicate cannot rewrite the row this delta retains.
+   const planned = new Set<string>();
+   for (const chunk of chunks) {
+@@ -90,6 +85,12 @@ export async function retainIndexedSessionChunks(
+       }
+     }
+   }
++  // An edit near the top of a memory file shifts every later line range and
++  // changes every id. Complete replacement then clears the path with one
++  // bounded vector scan, where a delta would issue scalar deletes per row.
++  if (source === "memory" && written.length === planned.size) {
++    return prepared;
++  }
+   return {
+     ...prepared,
+     chunks: written,
+diff --git a/extensions/memory-core/src/memory/manager-source-index-kernel.ts b/extensions/memory-core/src/memory/manager-source-index-kernel.ts
+index 38e93720f6b..2d3de0b3a58 100644
+--- a/extensions/memory-core/src/memory/manager-source-index-kernel.ts
++++ b/extensions/memory-core/src/memory/manager-source-index-kernel.ts
+@@ -30,26 +30,18 @@ export type MemorySourceIndexReplacement = {
+   model: string;
+   now: number;
+   vectorReady: boolean;
+-} & (
+-  | { source: "memory" }
+-  | {
+-      source: "sessions";
+-      agentId: string;
+-      sessionId: string;
+-      /** Retained chunks whose recall metadata or provenance changed. */
+-      retained?: IndexedMemoryChunk[];
+-      /** Present for a delta; computed with retained rows in the owner's planning read. */
+-      removedIds?: string[];
+-    }
+-);
++  /** Retained chunks whose recall metadata or provenance changed. */
++  retained?: IndexedMemoryChunk[];
++  /** Present for a delta; computed with retained rows in the owner's planning read. */
++  removedIds?: string[];
++} & ({ source: "memory" } | { source: "sessions"; agentId: string; sessionId: string });
+ 
+ export type MemorySourceIndexHeader = Omit<
+   MemorySourceIndexReplacement,
+   "chunks" | "embeddings" | "retained" | "removedIds"
+-> &
+-  (
++> & { delta?: boolean } & (
+     | { source: "memory" }
+-    | { source: "sessions"; agentId: string; sessionId: string; delta?: boolean }
++    | { source: "sessions"; agentId: string; sessionId: string }
+   );
+ /** A retained row refreshes metadata without replacing indexed text or embeddings. */
+ export type MemorySourceIndexRow =
+@@ -213,7 +205,7 @@ export class MemorySourceIndexKernel {
+     const { entry, source, model, now, vectorReady } = params;
+     const context = { path: entry.path, source, model, now };
+     const db = getNodeSqliteKysely<SourceIndexDatabase>(this.database);
+-    const delta = params.source === "sessions" && params.delta;
++    const { delta } = params;
+     // Re-read mutable rebuild debt in this transaction; table presence is an
+     // admitted fact. Only a clean index relates stored embeddings to vectors.
+     const reuse =

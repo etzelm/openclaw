@@ -1,0 +1,26 @@
+$ pnpm db:worker-inventory:check
+cwd: <branch-checkout>
+$ node --max-old-space-size=4096 scripts/database-worker-inventory.mjs --check
+docs/reference/database-schemas/worker-access-inventory.md is stale; run node scripts/database-worker-inventory.mjs --write
+[ELIFECYCLE] Command failed with exit code 1.
+exit 1
+$ pnpm db:worker-inventory:gen; git diff --stat -- docs/reference
+ .../database-schemas/worker-access-inventory.md    | 36 +++++++++++-----------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
+$ git diff -- docs/reference | grep '^[-+]|' | grep -c .
+34
+kernel row after gen: | **extensions/memory-core** · `extensions/memory-core/src/memory/manager-source-index-kernel.ts` | 7/2/0/0/0 | 103 | Worker implementation; keep SQL in this owner |
+
+$ pnpm db:worker-inventory:check
+cwd: <base-checkout>
+$ node --max-old-space-size=4096 scripts/database-worker-inventory.mjs --check
+docs/reference/database-schemas/worker-access-inventory.md is stale; run node scripts/database-worker-inventory.mjs --write
+[ELIFECYCLE] Command failed with exit code 1.
+exit 1
+$ pnpm db:worker-inventory:gen; git diff --stat -- docs/reference
+ .../database-schemas/worker-access-inventory.md    | 36 +++++++++++-----------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
+$ git diff -- docs/reference | grep '^[-+]|' | grep -c .
+34
+kernel row after gen: | **extensions/memory-core** · `extensions/memory-core/src/memory/manager-source-index-kernel.ts` | 7/2/0/0/0 | 111 | Worker implementation; keep SQL in this owner |
+
