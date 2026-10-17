@@ -1,0 +1,52 @@
+== base (d4d2c3dd1e3e29b7bd19914e3c9c47d40c5dde77)
+-- dist/manager-publication.worker-CJ0OnAIL.mjs:593-600
+			if (command.type === "schema.admit") {
+				db.exec("PRAGMA foreign_keys = OFF");
+				try {
+					const result = write(() => ensureMemoryIndexSchema({
+						...command.input,
+						db
+					}));
+					if (result.ok) admitSqliteSchema(db);
+-- dist/memory-schema-0H_deEG2.mjs:760-768
+	const admitted = getSqliteDatabaseAdmission(params.db, admissionKey);
+	if (admitted) {
+		backfillMemoryChunkProvenance(params.db);
+		if (admitted.ftsAvailable) try {
+			const reconcile = () => {
+				reconcileMemoryChunkFtsRows(params.db, ftsTable);
+				if (ftsTable === "memory_index_chunks_fts") backfillMemoryPathFtsRows(params.db);
+			};
+			if (params.db.isTransaction) reconcile();
+-- dist/search-admission-wNFq-T-l.mjs:320-324
+function reconcileMemoryChunkFtsRows(db, ftsTable, force = false) {
+	const rowCounts = db.prepare(`SELECT
+         (SELECT COUNT(*) FROM ${MEMORY_INDEX_CHUNKS_TABLE}) AS canonical_count,
+         (SELECT COUNT(*) FROM ${ftsTable}) AS derived_count`).get();
+	if (force || rowCounts.canonical_count !== rowCounts.derived_count) rebuildMemoryChunkFts(db, ftsTable);
+== patched (d27f9cb3eb7fb0011baf4d26610a2a4ca59fe8a1)
+-- dist/manager-publication.worker-D2onu8ze.mjs:593-600
+			if (command.type === "schema.admit") {
+				db.exec("PRAGMA foreign_keys = OFF");
+				try {
+					const result = write(() => ensureMemoryIndexSchema({
+						...command.input,
+						db
+					}));
+					if (result.ok) admitSqliteSchema(db);
+-- dist/memory-schema-D98KV85k.mjs:760-768
+	const admitted = getSqliteDatabaseAdmission(params.db, admissionKey);
+	if (admitted) {
+		backfillMemoryChunkProvenance(params.db);
+		if (admitted.ftsAvailable) try {
+			const reconcile = () => {
+				reconcileMemoryChunkFtsRows(params.db, ftsTable);
+				if (ftsTable === "memory_index_chunks_fts") backfillMemoryPathFtsRows(params.db);
+			};
+			if (params.db.isTransaction) reconcile();
+-- dist/search-admission-DU3mLXRY.mjs:320-324
+function reconcileMemoryChunkFtsRows(db, ftsTable, force = false) {
+	const rowCounts = db.prepare(`SELECT
+         (SELECT COUNT(*) FROM ${MEMORY_INDEX_CHUNKS_TABLE}) AS canonical_count,
+         (SELECT COUNT(*) FROM ${ftsTable}_docsize) AS derived_count`).get();
+	if (force || rowCounts.canonical_count !== rowCounts.derived_count) rebuildMemoryChunkFts(db, ftsTable);

@@ -1,0 +1,45 @@
+# privacy check (run on the NAS copies)
+files:       87
+## lines containing '/' (md summaries only, excluding observer and tools)
+errors.md:4:2. Search before migration, dev store, first attempt with `--agent main`: `memory search failed (main): OpenClaw agent database <path> belongs to agent dev; requested agent main.` exit 1. 
+errors.md:7:5. Config M for the main store, attempt 1 (provider copied from store meta, no remote.baseUrl), exit 1: `Memory search failed: <provider> embeddings: missing remote.baseUrl. Set it 
+errors.md:8:6. Config M for the dev store (provider endpoint on its default local address, nothing listening): exit 0, 25 hits, warning `Memory index repair failed: fetch failed | ECONNREFUSED ...`, i
+errors.md:13:All non-zero exit codes among recorded steps (final logs): dev-base/doctor=1, dev-base/refuse=1, dev-patched/doctor=1, dev-patched/refuse=1, main-base/doctor=1, main-base/refuse=1, main-p
+migration.md:3:Agent database before: PRAGMA user_version 24 (copy-check). Harness note: the copied agent database was placed in a fresh state dir with no shared state catalog, so the first doctor run
+migration.md:18:### dev base: doctor2 lines mentioning schema/migration/backup/receipt (paths replaced)
+migration.md:31:### dev patched: doctor2 lines mentioning schema/migration/backup/receipt (paths replaced)
+migration.md:57:### main base: doctor2 lines mentioning schema/migration/backup/receipt (paths replaced)
+migration.md:71:### main patched: doctor2 lines mentioning schema/migration/backup/receipt (paths replaced)
+parity.md:5:Variants: s5 = config N (provider none, spec config), each query on its own fresh cp -c -R of state-migrated-pristine (first process, no seal). s4 = config N, three queries in sequence on 
+timings.md:1:# Timings: wall ms of the whole `memory search "memory" --json --agent <id> --max-results 25` process, observer OFF, interleaved base/patched, 5 runs each
+## '.md' occurrences
+   1 errors.md:9:counts.md
+   1 migration.md:3:docs/cli/doctor/state-migrations.md
+   1 parity.md:53:counts.md
+## file-name-like tokens (all summaries + observer)
+1218 sqlite-schema-facts-Bql6amq4.mjs
+1044 worker.js
+ 696 sqlite-transaction-DNFHtRy9.mjs
+ 546 worker-CJ0OnAIL.mjs
+ 520 worker-D2onu8ze.mjs
+ 520 sqlite-worker-operation-admission-0TbdY4lt.mjs
+ 348 sqlite-database-admission-Cfra70vw.mjs
+ 320 search-admission-wNFq-T-l.mjs
+ 310 search-admission-DU3mLXRY.mjs
+ 174 sqlite-worker-binding-BQS0acWJ.mjs
+ 174 sqlite-post-commit-B-fc95zq.mjs
+ 153 adapters-BmfPXTHu.mjs
+ 144 adapters-DqCbKFAM.mjs
+ 101 memory-schema-0H_deEG2.mjs
+  97 sqlite-worker-database-admission-relay-jicqAZ-E.mjs
+  95 memory-schema-D98KV85k.mjs
+   2 counts.md
+   1 summarize.mjs
+   1 state-migrations.md
+   1 observe-final.mjs
+## '/' in observer jsonl
+(none above means zero)
+## provider/model name scan (expect no matches)
+./errors.md:7:5. Config M for the main store, attempt 1 (provider copied from store meta, no remote.baseUrl), exit 1: `Memory search failed: <provider> embeddin
+./privacy-check.out:5:errors.md:7:5. Config M for the main store, attempt 1 (provider copied from store meta, no remote.baseUrl), exit 1: `Memory search failed:
+(end scan)

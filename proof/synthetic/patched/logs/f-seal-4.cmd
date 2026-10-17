@@ -1,0 +1,1 @@
+env -i PATH=<home>/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin HOME=<scratch>/runA/patched/home OPENCLAW_STATE_DIR=<scratch>/runA/patched/state OPENCLAW_LOG_LEVEL=trace node <scratch>/patched/openclaw.mjs "memory" "search" "saffron glacier orchard" "--json" "--agent" "main" "--max-results" "25"

@@ -1,0 +1,19 @@
+# Aggregate of observer/*.jsonl: records with canonical_count > 0, grouped by store, arm, canonical_count and admission path
+# path = first-admission when a caller frame is admitSqliteMemoryTextSearch, else receipt (reconcile < ensureMemoryIndexSchema)
+# 43490 and 6012 = migrated copies before any sync; 6809 and 5863 = after the provider "none" search synced against the empty workspace (counts.md)
+# script:
+node -e 'const fs=require("fs");const g={};for(const f of fs.readdirSync(".")){const [store,arm]=f.split("-");for(const l of fs.readFileSync(f,"utf8").trim().split("\n")){if(!l)continue;const r=JSON.parse(l);if(!(r.canonical_count>0))continue;const path=r.callers.some(c=>c.startsWith("admitSqliteMemoryTextSearch "))?"first-admission":"receipt";const k=[store,arm,r.canonical_count,path].join(" ");(g[k]??=[]).push(r.stmt_ms);}}for(const [k,v] of Object.entries(g).sort()){v.sort((a,b)=>a-b);console.log(k,"n="+v.length,"min="+v[0],"median="+v[Math.floor(v.length/2)],"max="+v.at(-1))}'
+# output (stmt_ms):
+dev base 5863 receipt n=4 min=2.574 median=2.657 max=2.886
+dev base 6012 first-admission n=13 min=2.558 median=2.791 max=3.427
+dev base 6012 receipt n=3 min=2.875 median=3.348 max=182.195
+dev patched 5863 receipt n=2 min=0.078 median=0.092 max=0.092
+dev patched 6012 first-admission n=12 min=0.068 median=0.08 max=0.088
+dev patched 6012 receipt n=3 min=0.108 median=0.11 max=5.279
+main base 43490 first-admission n=26 min=22.084 median=25.784 max=30.763
+main base 43490 receipt n=3 min=26.314 median=27.342 max=2030.267
+main base 6809 receipt n=2 min=3.521 median=3.647 max=3.647
+main patched 43490 first-admission n=26 min=0.451 median=0.552 max=0.654
+main patched 43490 receipt n=3 min=0.438 median=0.46 max=73.921
+main patched 6809 receipt n=2 min=0.112 median=0.122 max=0.122
+# every record: canonical_count == derived_count (checked by the same script, no mismatch printed)

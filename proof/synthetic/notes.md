@@ -1,0 +1,11 @@
+# runA notes
+- Workspace: gen-synthetic-memory.mjs files=400 paragraphs=24 -> 401 files, 4651758 bytes, 3626 chunks (>= 3000), no regeneration needed.
+- Config validator accepted the specified openclaw.json unchanged (no errors, no edits).
+- Machine busy: load average ~23 during all runs (uptime recorded in timings.md); timings are noisy.
+- Observer stack limit: the stock observer records only 9 caller frames, which does not reach reconcileMemoryChunkFtsRows on the thread-start/seal path. Added a local variant tools/observe-deep.mjs (Error.stackTraceLimit=60, slice(2,40)), used via OC_DEEP=1 for steps e-noseal-search and e2-seal-search-deep. Stock observer used for a, d, and the other steps.
+- No-seal arm: state-noseal-pristine = cp -a of state taken after step d (before e), seal deleted; state-noseal = cp -a of pristine. Config left unchanged (points workspace/log at S/state/..., identical content). OPENCLAW_STATE_DIR points at state-noseal.
+- Steps c1/c2 (memory status) produced no observer records: status is the read-only open path (no reconcile statement).
+- Step a observer records (0/0 counts) are first creation of the empty store; the second record in a-index comes from the first-admission path.
+- Search outputs differ across arms only in observedAt fields.
+- Integrity gate record appears on the no-seal runs only (reason "no-proof"); stderr shows only the message, the full record is in logs/openclaw.log.
+- Hit pattern: the seal path emitted one reconcile record per process; every process was a worker thread (isMainThread false).

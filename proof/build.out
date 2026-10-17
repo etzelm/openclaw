@@ -1,0 +1,59 @@
+=== base
+d4d2c3dd1e3e29b7bd19914e3c9c47d40c5dde77
+status:[]
+exit=0
+exit=0
+openclaw.mjs
+
+dist:
+a2ui-BHY2cGcC.mjs
+a2ui-CJUlpB8a.mjs
+a2ui-shared-DI6_vfTr.mjs
+abort-CcE9md8r.mjs
+abort-cutoff-Cy_3zrWp.mjs
+abort-cutoff.runtime-CwBnKjMF.mjs
+abort-cutoff.runtime.js
+dist/search-admission-wNFq-T-l.mjs:323:         (SELECT COUNT(*) FROM ${ftsTable}) AS derived_count`).get();
+dist/search-admission-wNFq-T-l.mjs:324:	if (force || rowCounts.canonical_count !== rowCounts.derived_count) rebuildMemoryChunkFts(db, ftsTable);
+--- last 5 lines build-base.log
+[build-all] write-build-info
+[build-all] write-build-info done in 115ms
+[build-all] write-cli-startup-metadata
+[build-all] write-cli-startup-metadata done in 4.30s
+[build-all] phase timings: total 3m 24.5s; slowest write-unified-entry-dts 1m 39.4s; tsdown 20.3s; tsdown-packages 18.2s; ui:build 13.3s; runtime-postbuild 11.9s; check-cli-bootstrap-imports 9.37s; external-plugins:local-dist 7.87s; tsdown-ai 6.43s; plugins:assets:build 5.63s; write-cli-startup-metadata 4.30s; plugins:assets:copy 3.84s; check-plugin-sdk-exports 1.21s; build-stamp 266ms; write-build-info 115ms; runtime-postbuild-stamp 105ms; native-protocol 57ms
+=== patched
+d27f9cb3eb7fb0011baf4d26610a2a4ca59fe8a1
+status:[]
+exit=0
+exit=0
+openclaw.mjs
+
+dist:
+a2ui-B7a3QwPb.mjs
+a2ui-DADQB2Hz.mjs
+a2ui-shared-DI6_vfTr.mjs
+abort-B7jJdOJJ.mjs
+abort-cutoff-Cy_3zrWp.mjs
+abort-cutoff.runtime-BU-pNg8j.mjs
+abort-cutoff.runtime.js
+dist/search-admission-DU3mLXRY.mjs:323:         (SELECT COUNT(*) FROM ${ftsTable}_docsize) AS derived_count`).get();
+dist/search-admission-DU3mLXRY.mjs:324:	if (force || rowCounts.canonical_count !== rowCounts.derived_count) rebuildMemoryChunkFts(db, ftsTable);
+--- last 5 lines build-patched.log
+[build-all] write-build-info
+[build-all] write-build-info done in 108ms
+[build-all] write-cli-startup-metadata
+[build-all] write-cli-startup-metadata done in 3.88s
+[build-all] phase timings: total 3m 34s; slowest write-unified-entry-dts 1m 43.7s; tsdown 21.5s; tsdown-packages 19.3s; ui:build 12.9s; runtime-postbuild 10.8s; check-cli-bootstrap-imports 10.2s; tsdown-ai 8.10s; external-plugins:local-dist 7.94s; plugins:assets:build 5.74s; plugins:assets:copy 4.72s; write-cli-startup-metadata 3.88s; check-plugin-sdk-exports 1.15s; build-stamp 366ms; write-build-info 108ms; runtime-postbuild-stamp 72ms; native-protocol 57ms
+=== diff stat
+ .../src/host/memory-schema-fts-reconcile.test.ts   | 56 +++++++++++++++++++++-
+ src/infra/database-engine/sqlite-search-schema.ts  |  4 +-
+ 2 files changed, 58 insertions(+), 2 deletions(-)
+=== env
+v24.21.0
+3.53.4
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+arm64
+base: [build-all] phase timings: total 3m 24.5s; slowest write-unified-entry-dts 1m 39.4s; tsdown 20.3s; tsdown-packages 18.2s; ui:build 13.3s; runtime-postbuild 11.9s; check-cli-bootstrap-imports 9.37s; external-plugins:local-dist 7.87s; tsdown-ai 6.43s; plugins:assets:build 5.63s; write-cli-startup-metadata 4.30s; plugins:assets:copy 3.84s; check-plugin-sdk-exports 1.21s; build-stamp 266ms; write-build-info 115ms; runtime-postbuild-stamp 105ms; native-protocol 57ms
+patched: [build-all] phase timings: total 3m 34s; slowest write-unified-entry-dts 1m 43.7s; tsdown 21.5s; tsdown-packages 19.3s; ui:build 12.9s; runtime-postbuild 10.8s; check-cli-bootstrap-imports 10.2s; tsdown-ai 8.10s; external-plugins:local-dist 7.94s; plugins:assets:build 5.74s; plugins:assets:copy 4.72s; write-cli-startup-metadata 3.88s; check-plugin-sdk-exports 1.15s; build-stamp 366ms; write-build-info 108ms; runtime-postbuild-stamp 72ms; native-protocol 57ms
