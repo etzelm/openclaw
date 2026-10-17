@@ -1,0 +1,17 @@
+21:05  up 4 days, 13:05, 1 user, load averages: 52.89 55.07 44.41
+(a) fresh F_NOCACHE copy, first sequential read:
+chk-nocache.sqlite bytes=430518272 read_s=0.145 MB_per_s=2974
+(b) same file, read again immediately:
+chk-nocache.sqlite bytes=430518272 read_s=0.097 MB_per_s=4452
+(c) fresh normal cp copy, first sequential read:
+chk-cp.sqlite bytes=430518272 read_s=0.105 MB_per_s=4082
+(c2) normal cp copy, read again:
+chk-cp.sqlite bytes=430518272 read_s=0.061 MB_per_s=7013
+21:05  up 4 days, 13:05, 1 user, load averages: 52.89 55.07 44.41
+(a') fresh F_NOCACHE copy, 20000 random 4 KiB preads, first pass (seed 1):
+chk-nocache.sqlite random_4k_preads=20000 total_s=5.359 us_per_read=268.0
+(b') same offsets again:
+chk-nocache.sqlite random_4k_preads=20000 total_s=0.054 us_per_read=2.7
+(c') fresh normal cp copy, same 20000 offsets, first pass:
+chk-cp.sqlite random_4k_preads=20000 total_s=4.029 us_per_read=201.5
+21:05  up 4 days, 13:06, 1 user, load averages: 52.23 54.87 44.46

@@ -1,0 +1,580 @@
+$ node scripts/test-projects.mts packages/memory-host-sdk/src/host
+[vitest-workers] local cache hit after 2861ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared fac3ec44b5e7 in 2905ms (15878 inputs, 21109 outputs)
+[test] starting test/vitest/vitest.unit-fast.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embeddings-model-normalize.test.ts > normalizeEmbeddingModelWithPrefixes > returns default model when input is blank 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embeddings-model-normalize.test.ts > normalizeEmbeddingModelWithPrefixes > strips the first matching prefix 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embeddings-model-normalize.test.ts > normalizeEmbeddingModelWithPrefixes > keeps explicit model names when no prefix matches 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/azure-api-version-request.test.ts > moves the header into the query for example.openai.azure.com 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/azure-api-version-request.test.ts > moves the header into the query for example.services.ai.azure.com 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/azure-api-version-request.test.ts > moves the header into the query for example.cognitiveservices.azure.com 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/azure-api-version-request.test.ts > preserves non-Azure request targets for api.openai.com 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/azure-api-version-request.test.ts > preserves non-Azure request targets for openai.azure.com.evil.example 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-status.test.ts > batch-status helpers > resolves completion payload from completed status 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-status.test.ts > batch-status helpers > throws for terminal failure states 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-status.test.ts > batch-status helpers > reads a completed error file before requiring successful output 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-status.test.ts > batch-status helpers > returns completed result directly without waiting 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-status.test.ts > batch-status helpers > throws when wait disabled and batch is not complete 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-vector.test.ts > persistent memory embedding format > uses portable little-endian binary64 bytes and honors sliced buffer offsets 2ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-vector.test.ts > persistent memory embedding format > preserves finite precision that the vec0 float32 accelerator cannot retain 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-vector.test.ts > persistent memory embedding format > leaves the published JSON parser contract intact for legacy consumers 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from English conversational query 2ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from Chinese conversational query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from mixed language query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > keeps ASCII terms embedded in unspaced Chinese text 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > returns specific technical terms 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from Korean conversational query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > strips Korean particles to extract stems 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > filters Korean stop words including inflected forms 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > filters inflected Korean stop words not explicitly listed 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > does not produce bogus single-char stems from particle stripping 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > strips longest Korean trailing particles first 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > keeps stripped ASCII stems for mixed Korean tokens 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > handles mixed Korean and English query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from Japanese conversational query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > handles mixed Japanese and English query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > filters Japanese stop words 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from Spanish conversational query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from Portuguese conversational query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > filters Spanish and Portuguese question stop words 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > extracts keywords from Arabic conversational query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > filters Arabic question stop words 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > handles empty query 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > handles query with only stop words 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > removes duplicate keywords 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > with trigram tokenizer > emits whole CJK block instead of unigrams in trigram mode 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > with trigram tokenizer > splits Han runs around embedded ASCII terms in trigram mode 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > with trigram tokenizer > skips Japanese kanji bigrams in trigram mode 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > with trigram tokenizer > still filters stop words in trigram mode 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/query-expansion.test.ts > extractKeywords > with trigram tokenizer > does not affect English keyword extraction 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/session-reset-recall.test.ts > resolveSessionResetRecallCutoff > uses the first kept entry before the latest reset as the live cutoff 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/session-reset-recall.test.ts > resolveSessionResetRecallCutoff > uses the latest reset line when it keeps no earlier entries 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/session-reset-recall.test.ts > resolveSessionResetRecallCutoff > fails closed for absent or invalid reset lineage 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/session-reset-recall.test.ts > resolveSessionResetRecallCutoff > fails closed for absent or invalid reset lineage 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/session-reset-recall.test.ts > resolveSessionResetRecallCutoff > fails closed for absent or invalid reset lineage 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/session-reset-recall.test.ts > resolveSessionResetRecallCutoff > fails closed for absent or invalid reset lineage 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "<!--\n trigger: x -->" 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "<!--trigger\n: x -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "<!--trigger:\n x -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "<!--trigger:\n<!--importance: 7 -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "<!--trigger:x <!--\nimportance:7 -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "text <!--note: visible -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > strips carriers without changing the grammar of "a \t<!--trigger: x -->\r\nb \tX" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!-- trigger: <!-- project: alpha -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!-- project: outer <!-- project: inner -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!--project: a;\n b -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!--project: a; a -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!--project: \n a\n -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!--project: a\n b -->" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves project scope for "<!--project: a --> <!--project:" 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > preserves suffix selection, value validation, and ordered trigger deduplication 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > keeps long unfinished carriers unchanged and invalid project markers scoped 3ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/curated-annotations.test.ts > curated annotation grammar > parses incomplete recall annotations without pathological backtracking 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > keeps routine pending index work silent 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > reports the latest automatic sync failure 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > gives an incompatible index identity precedence over a sync failure 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > reports the failed repair prerequisite while embedding_input_format is still incompatible 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > keeps newer-index recovery visible after a prior sync failure (embedding_input_format) 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > attributes an OpenClaw-owned format mismatch and names the repair cost 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > preserves the keyword-only marker only when a pending upgrade carries it 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > preserves lexical compatibility only for an older embedding format 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > does not claim provider cost for a keyword-only index 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > rejects malformed identity diagnostic 0 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/types.test.ts > memory search staleness > rejects malformed identity diagnostic 1 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > does not expose a phantom continuation for a terminal newline 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > does not expose a phantom continuation for an empty file 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > does not expose a phantom continuation for one intentional trailing blank line 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > does not expose a phantom continuation for two intentional trailing blank lines 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > uses default line windows for non-finite from and lines values 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > preserves whole and blank lines at a 2-character boundary 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > preserves whole and blank lines at a 2-character boundary 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > preserves whole and blank lines at a 4-character boundary 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > preserves whole and blank lines at a 1-character boundary 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > uses the default character budget for non-finite maxChars values 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > does not split surrogate pairs when truncating a single line 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/read-file-shared.test.ts > memory read result slicing > keeps the continuation notice when a leading surrogate pair is dropped 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-provider-adapter-utils.test.ts > sanitizeEmbeddingCacheHeaders > removes only explicitly excluded header names 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > splits oversized chunks so each embedding input stays <= maxInputTokens bytes 2ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > does not split inside surrogate pairs (emoji) 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > retains indivisible code points when the byte cap is 1 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > retains indivisible code points when the byte cap is 2 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > retains indivisible code points when the byte cap is 3 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > uses conservative fallback limits for local providers without declared maxInputTokens 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/embedding-chunk-limits.test.ts > embedding chunk limits > honors hard safety caps lower than provider maxInputTokens 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/chunk-budget.test.ts > weighted memory chunk budgets > bounds long ASCII without losing text or source positions 2ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/chunk-budget.test.ts > weighted memory chunk budgets > bounds rare BMP ideographs without losing text or source positions 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/chunk-budget.test.ts > weighted memory chunk budgets > bounds supplementary ideographs without losing text or source positions 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/chunk-budget.test.ts > weighted memory chunk budgets > bounds odd UTF-16 split positions without losing text or source positions 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > extractBatchErrorMessage > preserves line order when nested errors precede top-level errors 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > extractBatchErrorMessage > accepts plain string response bodies 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > extractBatchErrorMessage > accepts Voyage response messages 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > EmbeddingBatchUnavailableError > survives duplicate module instances through its stable code 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > formatBatchErrorDetail > preserves short details and redacts and bounds long provider text 9ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > formatUnavailableBatchError > formats errors and non-error values 0ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/batch-error-utils.test.ts > formatUnavailableBatchError > redacts exported tokens without malformed UTF-16 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-provenance.test.ts > memory chunk provenance backfill > preserves source matching and existing provenance with WITHOUT ROWID sources 9ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-provenance.test.ts > memory chunk provenance backfill > preserves source matching and existing provenance with shadowed rowid 3ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-provenance.test.ts > memory chunk provenance backfill > keeps NULL source matching and chunk-side path collation 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-provenance.test.ts > memory chunk provenance backfill > preserves invalidation failure and rollback with caller transaction false 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-provenance.test.ts > memory chunk provenance backfill > preserves invalidation failure and rollback with caller transaction true 1ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-fts.test.ts > memory index FTS lifecycle > keeps chunk and body FTS identities aligned through writes, VACUUM, and rollback 12ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-fts.test.ts > memory index FTS lifecycle > drops path FTS and its source triggers with canonical body FTS disabled 14ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-fts.test.ts > memory index FTS lifecycle > drops path FTS and its source triggers with custom body FTS disabled 12ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-source-identity.test.ts > memory index source identity > bounds source-column inspection within a tracked transaction 14ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-source-identity.test.ts > memory index source identity > bounds source-column inspection within a untracked transaction 5ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-source-identity.test.ts > memory index source identity > bounds source-column inspection within a standalone 6ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-source-identity.test.ts > memory index source identity > rereads source columns after local rollback and foreign schema changes 16ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-schema-source-identity.test.ts > memory index source identity > keeps source-column reads subject to a changing authorizer 4ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-recall-metadata.test.ts > memory recall metadata > preserves exact project eligibility through selective candidate reads 56ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-recall-metadata.test.ts > memory recall metadata > bounds fetched bodies when unrelated projects precede a project candidate 33ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-recall-metadata.test.ts > memory recall metadata > bounds fetched bodies when unrelated projects precede a global trigger candidate 29ms
+ ✓  unit-fast  packages/memory-host-sdk/src/host/memory-recall-metadata.test.ts > memory recall metadata > stores recall metadata in a rollback-safe additive table 6ms
+
+ Test Files  17 passed (17)
+      Tests  127 passed (127)
+   Start at  22:12:14
+   Duration  1.28s (transform 66%, import 16%, setup 11%, tests 6%, worker 1%)
+
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/backend-config.test.ts > resolveMemoryBackendConfig > uses the builtin backend with automatic citations by default 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/backend-config.test.ts > resolveMemoryBackendConfig > preserves the configured citation mode 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > rejects an uppercase explicit extra file on case-sensitive hosts 5ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > drains in-flight work before propagating a concurrency failure 52ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > propagates directory creation failures 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > normalizes additional memory paths 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > lists canonical markdown and enabled multimodal files 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > propagates operational scan failures for primary memory file 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > propagates operational scan failures for workspace memory directory 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > propagates operational scan failures for configured extra path 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > propagates operational failures while discovering the canonical memory file 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > propagates operational failures while traversing a memory directory 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > names the nested directory that blocks a memory scan 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > filters notes by glob while preserving symlink skips 4ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > filters ..notes by glob while preserving symlink skips 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > filters ...notes by glob while preserving symlink skips 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > scans a shared extra root once for a union of root, wildcard, and trailing… without losing matching files 3ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > scans a shared extra root once for a bare globstar without losing matching files 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > scans a shared extra root once for brace alternatives containing separator… without losing matching files 4ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > scans a shared extra root once for an explicit hidden directory without losing matching files 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > scans a shared extra root once for an invalid pattern alongside a valid pa… without losing matching files 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > scans a shared extra root once for an unrestricted entry alongside a narro… without losing matching files 3ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > skips a symlinked workspace root file instead of aborting enumeration 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > skips a symlink when building a file entry 4ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > allows top-level dreams path casing variants 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/batch-http.test.ts > postJsonWithRetry > returns the batch payload after a transient failure 8ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/batch-http.test.ts > postJsonWithRetry > keeps HTTP 429 on the existing short batch retry budget 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/batch-http.test.ts > postJsonWithRetry > keeps HTTP 503 on the existing short batch retry budget 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/batch-http.test.ts > postJsonWithRetry > does not retry rejected batch input 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > forwards the abort signal and parses JSON on success 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > aborts response body reads for HTTP 200 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > aborts response body reads for HTTP 429 3ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > preserves HTTP cooldown and structured quota metadata 6ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > bounds non-ok response bodies before formatting the error 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > wraps malformed success JSON with the request error prefix 2ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > rejects successful JSON responses with oversized content-length 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > accepts leading-zero content-length values on successful JSON responses 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/post-json.test.ts > postJson > cancels successful JSON responses that exceed the streaming byte cap 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for { prompt_tokens: <redacted len=1>, total_tokens: <redacted len=1> } without changing vectors 3ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for { prompt_tokens: <redacted len=1> } without changing vectors 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for { total_tokens: <redacted len=1> } without changing vectors 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for undefined without changing vectors 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for { prompt_tokens: <redacted len=2> } without changing vectors 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for { prompt_tokens: <redacted len=3> } without changing vectors 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > reports validated usage for { prompt_tokens: '<redacted len=1>' } without changing vectors 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > ignores non-finite usage parsed from a valid JSON number 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > preserves positional vectors with differing dimensions 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > forwards the abort signal and sends the unchanged request 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > promotes the Azure version header before sending embeddings 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > returns indexed response vectors in their original request order 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies non-object response without exposing response contents 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies missing data without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies empty data without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies wrong vector count without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies missing embedding array without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies empty embedding without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies missing later index without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies missing first index without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies duplicate index without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies non-numeric coordinate without exposing response contents 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies a out-of-range index without exposing its value 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies a negative index without exposing its value 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies a fractional index without exposing its value 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies a non-numeric index without exposing its value 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies a null index without exposing its value 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > identifies non-finite coordinates parsed from a valid JSON number 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > preserves an empty response for an empty submitted input batch 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > accepts response-sized vectors when request input is not an array 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > logs only request and response shape metadata 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > records HTTP shape before rejecting malformed JSON 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/embeddings-remote-fetch.test.ts > fetchRemoteEmbeddingVectors > preserves provider error details, retry metadata, and credential redaction 9ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > builds markdown and multimodal file entries 10ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > retries transient markdown reads while building file entries 28ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > builds multimodal chunks lazily and rejects changed files 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > chunks mixed text and preserves surrogate pairs 1ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves a surrogate pair at the coarse split boundary 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > keeps chunks within budget when overlap carries a long segment 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > keeps chunks within budget for mixed short and long lines 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > subtracts already retained entries from the carry window 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves the weighted overlap tail for common CJK 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves the weighted overlap tail for rare BMP CJK 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves the weighted overlap tail for supplementary CJK 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves the weighted overlap tail for emoji 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves the weighted overlap tail for lone high surrogates 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > preserves the weighted overlap tail for lone low surrogates 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > chunks top-level curated entries without carrying neighboring bullets 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > strips recall annotation carriers while preserving source line positions 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > keeps promotion headings and markers out of neighboring entries 0ms
+ ✓  unit-fast-isolated  packages/memory-host-sdk/src/host/internal.test.ts > memory host SDK package internals > remaps chunk lines using JSONL source line maps 0ms
+
+ Test Files  5 passed (5)
+      Tests  89 passed (89)
+   Start at  22:12:16
+   Duration  332ms (transform 42%, import 34%, tests 19%, setup 4%, worker 1%)
+
+[test] starting test/vitest/vitest.unit.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > fully masks token assignments at a leading surrogate boundary 55ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > fully masks token assignments at a trailing surrogate boundary 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > fully masks token assignments at a intact leading pair 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > fully masks token assignments at a intact trailing pair 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > redacts repeated key text and replacement metacharacters in values 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > redacts bearer schemes case-insensitively 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > redacts quoted short bearer header values 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > redacts payment card and CVV assignments 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > settles enough records before a response clone is released 47ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > settles invalid record before a response clone is released 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > frames split UTF-8, CRLF, and an unterminated final record 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > bounds a newline-free record and cancels the stream 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > counts blank physical records against the output budget 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > cancels immediately when the consumer has enough records 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > cancels after an invalid JSONL record 0 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > cancels after an invalid JSONL record 1 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > cancels after an invalid JSONL record 2 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > settles prefix reads while a response clone remains open 51ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > settles overflow reads while a response clone remains open 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > settles length reads while a response clone remains open 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > settles preabort reads while a response clone remains open 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > does not wait for another chunk after reading the byte cap exactly 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > does not split surrogate pairs when truncating text snippets 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > cancels snippet body reads when the caller signal aborts 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > cancels JSON body reads when the caller signal aborts (prefix: undefined) 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > cancels JSON body reads when the caller signal aborts (prefix: {"ok":true}) 12ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > uses the active profile workspace with profile alone 37ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > uses the active profile workspace with explicit profile state directory 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > keeps the default agent workspace inside an overridden state directory 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > prefers an explicit workspace override to the state directory 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > keeps literal $ patterns in home when expanding tilde workspace paths 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > expands the tilde state root against OPENCLAW_HOME 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > expands the tilde workspace override against OPENCLAW_HOME 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > uses the Termux home for the default workspace when HOME is unavailable 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > uses the Termux home for the configured workspace when HOME is unavailable 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > expands the OS fallback home once for main with state override undefined 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > expands the OS fallback home once for support with state override undefined 12ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > expands the OS fallback home once for main with state override ~/state 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/response-snippet.test.ts > readMemoryHostResponseTextSnippet > rejects a JSON body with invalid UTF-8 bytes 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > redacts JSON-shaped payment card fields 14ms
+ ✓  unit  packages/memory-host-sdk/src/host/error-utils.test.ts > formatErrorMessage > merges operator redact patterns with provider-token coverage 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > rejects malformed UTF-8 in a newline-terminated record 16ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > rejects malformed UTF-8 in a unterminated final record 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > readEmbeddingBatchJsonl > accepts a null response body 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > stores embedding for successful response 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a non-array instead of storing it as a valid vector 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a array-like object instead of storing it as a valid vector 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a boolean instead of storing it as a valid vector 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a string coordinate instead of storing it as a valid vector 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a null coordinate instead of storing it as a valid vector 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a NaN coordinate instead of storing it as a valid vector 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a positive infinity coordinate instead of storing it as a valid vector 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > rejects a negative infinity coordinate instead of storing it as a valid vector 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > records provider error from line.error 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-output.test.ts > applyEmbeddingBatchOutputLine > records non-2xx response errors and empty embedding errors 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > expands the OS fallback home once for support with state override ~/state 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > resolves the absolute state override for main without home or cwd 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > resolves the absolute state override for support without home or cwd 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > resolves the absolute workspace override for main without home or cwd 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > falls back to cwd when no home source is available 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > explains how to recover when both home and cwd are unavailable 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > uses canonical workspaces even when only the legacy state directory exists 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > preserves marked legacy default workspace inheritance 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > preserves keyed first-agent inheritance 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > preserves explicit secondary workspace ownership 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveMemoryHostAgentWorkspaceDir > preserves explicit main workspace 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > resolveRememberAcrossConversations > honors keyed per-agent memory overrides 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/config-utils.test.ts > normalizeConfiguredMemoryExtraPaths > preserves distinct patterns and canonicalizes unpatterned objects 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > applies the memory excerpt budget with omitted agent limits 26ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > applies the memory excerpt budget with partial agent limits 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > applies the memory excerpt budget with an explicit agent override 19ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > follows contained workspace parent aliases while keeping extra directories strict 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > preserves read-time EAGAIN handling for workspace memory 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > preserves read-time EIO handling for workspace memory 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > retains the authorized workspace when its pathname is replaced before reading 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > retains the authorized extra directory when its pathname is replaced before reading 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > validates both storage tables with bounded catalog reads in tracked transaction 33ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > validates both storage tables with bounded catalog reads in standalone 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > validates both storage tables with bounded catalog reads in untracked transaction 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > validates both storage tables with bounded catalog reads in custom cache transaction 15ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > rereads storage contracts after local schema changes and rollback 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > rereads storage contracts after a foreign schema commit 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > keeps both catalog reads under a changing authorizer 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-upload.test.ts > uploadBatchJsonlFile > wraps malformed file-upload JSON with the request error prefix 29ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-upload.test.ts > uploadBatchJsonlFile > bounds non-ok file-upload response bodies before formatting the error 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-upload.test.ts > uploadBatchJsonlFile > rejects oversized successful file-upload JSON before parsing 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-upload.test.ts > uploadBatchJsonlFile > accepts leading-zero content-length values on successful file-upload JSON 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-upload.test.ts > uploadBatchJsonlFile > passes caller abort signals through non-ok file-upload response snippets 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-upload.test.ts > uploadBatchJsonlFile > passes caller abort signals through successful file-upload JSON reads 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-runner.test.ts > buildEmbeddingBatchGroupOptions > clamps oversized embedding batch poll intervals to the timeout budget 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-runner.test.ts > buildEmbeddingBatchGroupOptions > passes clamped poll intervals into batch group runners 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-runner.test.ts > buildEmbeddingBatchGroupOptions > keeps timeout-safe oversized embedding batch poll intervals bounded 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-runner.test.ts > buildEmbeddingBatchGroupOptions > splits embedding batch groups by serialized JSONL bytes 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-runner.test.ts > buildEmbeddingBatchGroupOptions > splits provider-rejected batch groups when the error is splittable 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/batch-runner.test.ts > buildEmbeddingBatchGroupOptions > does not split a single rejected batch request 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > retries expired OAuth once (auth=true, code=token_expired, crossOrigin=false) 42ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > retries expired OAuth once (auth=true, code=invalid_api_key, crossOrigin=false) 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > retries expired OAuth once (auth=false, code=token_expired, crossOrigin=false) 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > retries expired OAuth once (auth=true, code=token_expired, crossOrigin=true) 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > uses trusted env proxy mode when the target will use EnvHttpProxyAgent 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > keeps strict guarded fetch mode when proxy env would not proxy the target 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-http.test.ts > package withRemoteHttpResponse > passes abort signals to the guarded fetch 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-retry.test.ts > retryTransientMemoryRead > uses a short two-retry budget for transient file read errors 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/search-deadline-control.test.ts > createMemorySearchDeadlineControl > balances overlapping owned phases so one resume cannot re-arm early 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/search-deadline-control.test.ts > createMemorySearchDeadlineControl > ignores resume reports without a matching pause 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/search-deadline-control.test.ts > createMemorySearchDeadlineControl > replays the active pause to a subscriber that attaches mid-phase 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/search-deadline-control.test.ts > createMemorySearchDeadlineControl > stops notifying after unsubscribe 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-provider.test.ts > remote embedding provider request grouping > runs query batches as one request per input by default 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-provider.test.ts > remote embedding provider request grouping > keeps document singleton calls on the batch-shaped request path 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-provider.test.ts > remote embedding provider request grouping > batches query inputs when the provider declares identical query and document payloads 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-provider.test.ts > remote embedding provider request grouping > exposes the declared per-request input cap on the provider 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > reads an allowed hardlinked memory file larger than the default Root byte limit 39ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > returns not found for absent extra paths and rejects non-directory parents 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > scopes extra-path EACCES errors to the requested file 13ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > scopes extra-path EIO errors to the requested file 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > rejects extra path reads through symlinked directory components 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > enforces runbooks glob patterns through agent reads 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > enforces ..notes glob patterns through agent reads 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > enforces ...notes glob patterns through agent reads 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > enforces ~ glob patterns through agent reads 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file.test.ts > retries transient read errors for workspace memory files 30ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-error-redaction.test.ts > memory remote error redaction > redacts lower-case bearer credentials through the real remote embedding fetch path 118ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-error-redaction.test.ts > memory remote error redaction > redacts quoted short bearer credentials through the real JSON error path 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-error-redaction.test.ts > memory remote error redaction > preserves status metadata and harmless provider diagnostics 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/remote-error-redaction.test.ts > memory remote error redaction > redacts lower-case bearer credentials from batch errors without changing success 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > uses the compound chunk index after opening a fresh database and readmitting it 51ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > uses the compound chunk index after opening a existing database and readmitting it 32ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > migrates unreleased inline recall metadata without changing chunk rows 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rebuilds pre-trigger FTS rowids even when the row count matches 42ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rebuilds a populated body index when its row count diverges 9ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > counts derived rows from the FTS5 docsize table, not by scanning the FTS table 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rebuilds body and path indexes when their tokenizer changes 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs malformed fts5 derived tables 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs malformed ordinary derived tables 9ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rejects a colliding view at memory_index_chunks_fts without changing it or canonical rows 10ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rejects a colliding view at memory_index_paths_fts without changing it or canonical rows 17ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rejects a colliding view at custom_memory_fts without changing it or canonical rows 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs body indexes with indexed metadata columns 13ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs body indexes with contentless storage 12ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never drops canonical chunks for the colliding custom FTS table name memory_index_chunks 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never drops canonical chunks for the colliding custom FTS table name MEMORY_INDEX_CHUNKS 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never treats FTS-like text in an ordinary custom table as an FTS declaration 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never replaces the reserved path FTS table through the custom body alias memory_index_paths_fts 13ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never replaces the reserved path FTS table through the custom body alias MEMORY_INDEX_PATHS_FTS 9ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > keeps recall metadata ensure read-only when the schema is current 12ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > backfills missing provenance and maintains canonical FTS without insert-time provenance 31ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > upgrades canonical tables, preserves mtimes, and invalidates missing provenance 10ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > stores separate sources alongside unrelated generic tables 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rebuilds body FTS after indexing while hybrid search is disabled 15ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > backfills and maintains one path FTS row per source without changing body FTS 13ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > keeps source and path FTS identities stable across VACUUM 15ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > keeps a large stale-source delete batch aligned with path FTS 186ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > honors shipped custom cache and FTS table names 9ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > upgrades path-keyed source tables to stable identities 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > migrates composite source keys and rebuilds path FTS rowids 19ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects an unkeyed legacy table instead of claiming canonical source identity 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects a non-integer primary key instead of claiming canonical source identity 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects a descending integer primary key instead of claiming canonical source identity 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects partial path and source uniqueness instead of claiming canonical source identity 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects expression-extended path and source uniqueness instead of claiming canonical source identity 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects case-folded path uniqueness instead of claiming canonical source identity 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects a hidden generated column instead of claiming canonical source identity 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects an unexpected column default instead of claiming canonical source identity 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects a case-folded path column instead of claiming canonical source identity 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rejects an extra unique content constraint instead of claiming canonical source identity 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema.test.ts > memory index schema > rolls back a failed source-identity migration 4ms
+stderr | unknown test
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts: retiring openclaw.stateSnapshotOwners
+
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > returns not found when the requested file does not exist 36ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > returns content slices when the file exists 9ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > returns a default-sized excerpt when no line range is provided 15ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > returns a bounded window when from is provided without lines 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > honors injected defaultLines and maxChars overrides 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > returns empty text when the requested slice is past EOF 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > caps returned text to the default max chars and exposes continuation metadata 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > suggests read fallback for pathological single-line truncation in workspace memory files 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > does not advertise line continuation when a single oversized line is cut mid-line 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > omits truncation metadata when the full excerpt fits and no more lines remain 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > returns not found when the file disappears after stat 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > rejects non-memory paths 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/read-file-manager-compat.test.ts > MemoryIndexManager.readFile > allows additional memory paths and blocks symlinks 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > skips oversized and invalid cache rows visibly across three batches and reruns without writes 33ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > converts legacy vectors larger than the child heap while preserving 64-bit storage identities 1511ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > converts vectors without providers and preserves identity, provenance, cache age, and FTS maintenance 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > retains malformed-vector text and provenance while recording regeneration debt 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > rolls physical changes back with its enclosing admitted migration 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: CREATE INDEX operator_chunk_text ON memory_index_chunks(text) 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: CREATE INDEX operator_cache_age ON memory_embedding_cache(updated_at) 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: CREATE TRIGGER operator_chunk_audit AFTER UPDATE ON memory_index_chunks BEGIN SELECT 1; END 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: CREATE VIEW operator_chunk_text AS SELECT text FROM memory_index_chunks 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: CREATE TABLE operator_chunk_notes (chunk_id TEXT REFERENCES memory_index_chunks(id), note TEXT) 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: ALTER TABLE memory_index_chunks ADD COLUMN operator_note TEXT; UPDATE memory_index_chunks SET operator_note = 'preserve this note' 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses unknown persisted data or dependencies without touching the original database: ALTER TABLE memory_embedding_cache ADD COLUMN operator_note TEXT; UPDATE memory_embedding_cache SET operator_note = 'preserve this cache note' 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses mixed identity/format declarations instead of declaring conversion complete 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses mixed identity/format declarations instead of declaring conversion complete 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses mixed identity/format declarations instead of declaring conversion complete 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses malformed preexisting binary cache rows while a chunk conversion is pending 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses malformed preexisting binary cache rows while a chunk conversion is pending 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > validates an already-binary cache before completing the remaining chunk migration 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > refuses malformed binary chunks before converting a remaining legacy cache 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > preserves existing revision triggers and indexes without relying on the outer schema ensure 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > renews long synchronous conversion work periodically and releases the callback afterward 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-storage-migration.test.ts > memory storage migration > rolls back admitted changes when authority is lost inside a conversion statement 4ms
+stderr | unknown test
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files.provenance.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files.provenance.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files.provenance.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files.provenance.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > discards earlier archive lines after an authoritative assistant event identifies a dreaming run 9ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > discards earlier archive lines after an authoritative toolResult event identifies a dreaming run 3ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > does not treat run identity on user-authored transcript messages as authoritative 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > classifies owner input and its agent-derived response 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > keeps owner input trusted while downgrading its tool-tainted agent response 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > drops every assistant response in a provenance-marked heartbeat turn 2ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > does not couple user-spoofed heartbeat text to the next assistant response 16ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files.provenance.test.ts > session transcript provenance > ends a heartbeat turn when the next real user message has no text 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-yield.test.ts > buildSessionEntry responsiveness > yields at raw ordinals even for excluded archive records 8ms
+stderr | unknown test
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-yield.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-yield.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-yield.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-yield.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-yield.test.ts > buildSessionEntry responsiveness > yields at raw ordinals even for excluded sqlite records 453ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > remote embedding private-network policy > uses inference policy for allow=undefined and /v1 2034ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > remote embedding private-network policy > uses inference policy for allow=false and /v1 288ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > remote embedding private-network policy > uses inference policy for allow=undefined and /redirect 115ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > keeps batched incremental exports current across sessions, appends and rewrites 1060ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > remote embedding private-network policy > uses inference policy for allow=true and /redirect 102ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > remote embedding private-network policy > uses inference policy for allow=undefined and /v1 124ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > remote embedding private-network policy > uses inference policy for allow=false and /v1 165ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > uses inference private-DNS policy for probe.openai.azure.com, allow=undefined 136ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > uses inference private-DNS policy for probe.openai.azure.com, allow=true 84ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > preserves SQLite/archive output and callback observations for interactive transcripts 586ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > uses inference private-DNS policy for llm.corp.example, allow=undefined 88ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > uses only destination-owned remote cred… 222ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > accepts a destination-owned Authorizati… 132ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > fails before egress when a remote destination has no destination-owned auth 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > preserves SQLite/archive output and callback observations for dreaming transcripts 582ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > lets the last source replace mixed-case auth, tenant, and default headers 97ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > treats loopback address families as distinct credential destinations 1ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > treats query-distinct URLs as different credential destinations 1ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > does not inherit a chat-only subscription base URL for embeddings 350ms
+stderr | unknown test
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts: retiring openclaw.agentDatabaseLifecycle
+
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > does not redirect a custom provider URL for a chat-only subscription api mode 210ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > keeps the destination-owned credential guard when a subscription-mode provider uses a custom URL 1ms
+ ✓  unit  packages/memory-host-sdk/src/host/embeddings-remote-client.test.ts > resolveRemoteEmbeddingBearerClient > keeps the destination-owned credential guard on an explicit remote destination 1ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > preserves SQLite/archive output and callback observations for cron transcripts 569ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > preserves registered secret text in worker and inline transcript exports 569ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > keeps missing and incognito exports non-persisting (incognito=false) 902ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > keeps missing and incognito exports non-persisting (incognito=true) 11ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > finishes the transcript snapshot before callbacks can replace its rows 600ms
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > carries the admitted input fence through the reset metadata worker 795ms
+stderr | unknown test
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  unit  packages/memory-host-sdk/src/host/session-files-reset-revision.test.ts > SQLite session snapshots and reset content revision > accepts a transcript append but invalidates its prefix hash after reset 821ms
+
+ Test Files  20 passed (20)
+      Tests  240 passed (240)
+   Start at  22:12:17
+   Duration  9.95s (tests 37%, transform 31%, worker 14%, setup 11%, import 7%)
+
+[test] starting test/vitest/vitest.infra.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > reopens after clean without losing schema repair 58ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > reopens after missing seal without losing schema repair 31ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > publishes only final committed initialization after commit 9ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > publishes only final committed initialization after rollback 23ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > publishes only final committed initialization after later DDL 20ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > publishes only final committed initialization after revocation 13ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > reuses admission across handles while backfilling newly imported rows 26ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > retries transient FTS initialization failure on a later handle 27ms
+ ✓  infra  packages/memory-host-sdk/src/host/memory-schema-admission.test.ts > memory physical schema admission > admits changed options and rejects schema drift in a replacement file 38ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > includes the owning agent id in canonical archived transcript paths 4ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > keeps case-variant structural segments unowned on case-sensitive platforms 2ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > preserves case-variant Windows ownership in logical transcript paths 2ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > finds the canonical owner past a nested case-variant sessions directory 2ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > listSessionTranscriptCorpusEntriesForAgent > surfaces unexpected archive-directory scan failures 286ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files-archive-identity.test.ts > session archive identity > classifies canonical archives after owner writes without caller-thread SQLite 1930ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > preserves canonical SQLite session identity on Windows 2108ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > never aliases an invalid Windows session owner into another agent: bad owner 2ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.windows-ownership.test.ts > memory session directory ownership > never aliases an invalid Windows session owner into another agent:  Main 2ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > discovers the caller's configured store without a global runtime snapshot 2260ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > preserves corpus selection with content revisions true and archive table true (readOnly: false) 947ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > listSessionTranscriptCorpusEntriesForAgent > reads live SQLite rows by session identity while preserving archived JSONL artifacts 3201ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > preserves corpus selection with content revisions false and archive table true (readOnly: false) 834ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > listSessionTranscriptCorpusEntriesForAgent > omits symlinked archive artifacts from the session corpus 1314ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > preserves corpus selection with content revisions false and archive table false (readOnly: false) 1247ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files-archive-identity.test.ts > session archive identity > keeps registered archives from a shared custom store 3609ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > preserves corpus selection with content revisions false and archive table true (readOnly: true) 779ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > listSessionTranscriptCorpusEntriesForAgent > uses SQLite identity for entries in a custom session store 2000ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > memory session sync targets > rejects arbitrary deprecated transcript path hints 2ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > preserves the persisted export hash for wrapped Unicode messages 4ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > indexes usage-counted reset/deleted archives but still skips bak and checkpoint artifacts 4ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > does not wipe earlier or later archive messages after a user-authored cron prompt (#98241) 7ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > keeps cron-run reset archives opaque when session metadata preserves the cron key 25ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > preserves blank/malformed compressed archive line ordinals 10ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > strips inbound metadata when a user envelope is split across text blocks 3ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-files.test.ts > buildSessionEntry > drops Date-invalid numeric message timestamps 7ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-memory-sync.test.ts > memory synchronization of canonical SQLite transcripts > replaces stale recall after a closed-manager equal-size rewrite (legacy hash: false) 4684ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > preserves corpus selection with content revisions false and archive table false (readOnly: true) 779ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > classifies prompt-rich entries without decoding saved prompts (readOnly: false, retained: true) 900ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-memory-sync.test.ts > memory synchronization of canonical SQLite transcripts > replaces stale recall after a closed-manager equal-size rewrite (legacy hash: true) 1492ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > classifies prompt-rich entries without decoding saved prompts (readOnly: true, retained: true) 648ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > classifies prompt-rich entries without decoding saved prompts (readOnly: true, retained: false) 613ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > preserves admitted metadata parsing when readonly corpus discovery crosses the worker 678ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > reads worker content revisions without claiming an agent database lease 728ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > yields during filesystem discovery while retaining its store and reading fresh entries (readOnly: false) 731ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-memory-sync.test.ts > memory synchronization of canonical SQLite transcripts > preserves published recall across a cold rebuild (damaged archive: false) 3176ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > yields during filesystem discovery while retaining its store and reading fresh entries (readOnly: true) 742ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > retains the custom store's registry environment while discovery is pending (readOnly: false) 566ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-transcript-corpus.test.ts > listSessionTranscriptCorpusEntriesForAgent > retains the custom store's registry environment while discovery is pending (readOnly: true) 408ms
+ ✓  infra  packages/memory-host-sdk/src/host/session-memory-sync.test.ts > memory synchronization of canonical SQLite transcripts > preserves published recall across a cold rebuild (damaged archive: true) 2762ms
+
+ Test Files  6 passed (6)
+      Tests  49 passed (49)
+   Start at  22:12:27
+   Duration  17.12s (tests 70%, transform 19%, import 8%, setup 3%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 4 Vitest shards in 36.26s

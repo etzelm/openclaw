@@ -1,0 +1,33 @@
+$ node scripts/test-projects.mts packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts -- --maxWorkers=1
+[test] starting test/vitest/vitest.unit.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+[vitest-workers] local cache hit after 2869ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 3ea4693a3c46 in 2915ms (15878 inputs, 21109 outputs)
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rebuilds pre-trigger FTS rowids even when the row count matches 25ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rebuilds a populated body index when its row count diverges 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > counts derived rows from the FTS5 docsize table, not by scanning the FTS table 8ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rebuilds body and path indexes when their tokenizer changes 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs malformed fts5 derived tables 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs malformed ordinary derived tables 7ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rejects a colliding view at memory_index_chunks_fts without changing it or canonical rows 6ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rejects a colliding view at memory_index_paths_fts without changing it or canonical rows 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > rejects a colliding view at custom_memory_fts without changing it or canonical rows 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs body indexes with indexed metadata columns 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > repairs body indexes with contentless storage 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never drops canonical chunks for the colliding custom FTS table name memory_index_chunks 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never drops canonical chunks for the colliding custom FTS table name MEMORY_INDEX_CHUNKS 4ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never treats FTS-like text in an ordinary custom table as an FTS declaration 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never replaces the reserved path FTS table through the custom body alias memory_index_paths_fts 5ms
+ ✓  unit  packages/memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts > memory FTS schema reconciliation > never replaces the reserved path FTS table through the custom body alias MEMORY_INDEX_PATHS_FTS 6ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  22:13:11
+   Duration  4.36s (transform 92%, worker 3%, tests 3%, setup 2%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 6.18s

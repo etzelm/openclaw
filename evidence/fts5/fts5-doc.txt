@@ -1,0 +1,129 @@
+=== https://www.sqlite.org/fts5.html fetched 2026-10-16, section 4.5 The Columnsize Option
+## 4.5. The Columnsize Option
+
+Normally, FTS5 maintains a special backing table within the database that
+stores the size of each column value in tokens inserted into the main FTS5
+table in a separate table. This backing table is used by the
+[xColumnSize](https://www.sqlite.org/fts5.html#xColumnSize) API function, which is in turn used by
+the built-in [bm25 ranking function](https://www.sqlite.org/fts5.html#the_bm25_function) (and is likely to be useful
+to other ranking functions as well).
+
+In order to save space, this backing table may be omitted by setting the
+columnsize option to zero. For example:
+
+-- A table without the xColumnSize() values stored on disk:
+CREATE VIRTUAL TABLE ft USING fts5(a, b, c, columnsize=0);
+
+-- Three equivalent ways of creating a table that does store the
+-- xColumnSize() values on disk:
+CREATE VIRTUAL TABLE ft USING fts5(a, b, c);
+CREATE VIRTUAL TABLE ft USING fts5(a, b, c, columnsize=1);
+CREATE VIRTUAL TABLE ft USING fts5(a, b, columnsize='1', c);
+
+ It is an error to set the columnsize option to any value other than
+0 or 1.
+
+ If an FTS5 table is configured with columnsize=0 but is not a
+[contentless table](https://www.sqlite.org/fts5.html#contentless_tables), the xColumnSize API function
+still works, but runs much more slowly. In this case, instead of reading
+the value to return directly from the database, it reads the text value
+itself and count the tokens within it on demand.
+
+Or, if the table is also a [contentless table](https://www.sqlite.org/fts5.html#contentless_tables),
+then the following apply:
+
+- The xColumnSize API always returns -1. There is no way to determine
+ the number of tokens in a value stored within a contentless FTS5 table
+ configured with columnsize=0.
+- Each inserted row must be accompanied by an explicitly specified rowid
+ value. If a contentless table is configured with columnsize=0,
+ attempting to insert a NULL value into the rowid is an SQLITE_MISMATCH
+ error.
+- All queries on the table must be full-text queries. In other words,
+ they must use the MATCH or = operator with the table-name column as the
+ left-hand operand, or else use the table-valued function syntax. Any
+ query that is not a full-text query results in an error.
+
+ The name of the table in which the xColumnSize values are stored
+(unless columnsize=0 is specified) is "<name>_docsize", where
+<name> is the name of the FTS5 table itself. The
+[sqlite3_analyzer](https://sqlite.org/download.html)
+tool may be used on an existing database in order to determine how much
+space might be saved by recreating an FTS5 table using columnsize=0.
+
+
+=== section 9 FTS5 Data Structures (shadow table list)
+When an FTS5 virtual table is created in a database, between 3 and 5 real
+tables are created in the database. These are known as "[shadow tables](https://www.sqlite.org/vtab.html#xshadowname)", and
+are used by the virtual table module to store persistent data. They should not
+be accessed directly by the user. Many other virtual table modules, including
+[FTS3](https://www.sqlite.org/fts3.html) and [rtree](https://www.sqlite.org/rtree.html), also create and use shadow tables.
+
+FTS5 creates the following shadow tables. In each case the actual table name
+is based on the name of the FTS5 virtual table (in the following, replace
+% with the name of the virtual table to find the actual shadow table name).
+
+-- This table contains most of the full-text index data.
+CREATE TABLE %_data(id INTEGER PRIMARY KEY, block BLOB);
+
+-- This table contains the remainder of the full-text index data.
+-- It is almost always much smaller than the %_data table.
+CREATE TABLE %_idx(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID;
+
+-- Contains the values of persistent configuration parameters.
+CREATE TABLE %_config(k PRIMARY KEY, v) WITHOUT ROWID;
+
+-- Contains the size of each column of each row in the virtual table
+-- in tokens. This shadow table is not present if the "columnsize"
+-- option is set to 0.
+CREATE TABLE %_docsize(id INTEGER PRIMARY KEY, sz BLOB);
+
+-- Contains the actual data inserted into the FTS5 table. There
+-- is one "cN" column for each indexed column in the FTS5 table.
+-- This shadow table is not present for contentless or external
+-- content FTS5 tables.
+CREATE TABLE %_content(id INTEGER PRIMARY KEY, c0, c1...);
+
+
+=== section 9.3 Document Sizes Table
+## 9.3. Document Sizes Table (%_docsize table)
+
+CREATE TABLE %_docsize(
+ id INTEGER PRIMARY KEY, -- id of FTS5 row this record pertains to
+ sz BLOB -- blob containing nCol packed varints
+
+ -- The following is only present for contentless-delete tables
+ , origin INTEGER -- origin value for this row
+);
+
+Many common search result ranking functions require as an input the size
+in tokens of the result document (as a search term hit in a short document is
+considered more significant than one in a long document). To provide fast
+access to this information, for each row in the FTS5 table there exists a
+corresponding record (with the same rowid) in the %_docsize shadow table
+that contains the size of each column value in the row, in tokens.
+
+The column value sizes are stored in a blob containing one packed varint for
+each column of the FTS5 table, from left to right. The varint contains, of
+course, the total number of tokens in the corresponding column value. Unindexed
+columns are included in this vector of varints; for them the value is always
+set to zero.
+
+If the table is a [contentless-delete](https://www.sqlite.org/fts5.html#contentless_delete_tables),
+then the origin field contains the value of the origin counter when
+the top-level segment containing entries associated with the row was first
+written to the FTS index. The origin counter is an integer that is incremented
+each time a new segment is written to the database. For new segments, the
+minimum-origin and maximum-origin fields stored in the structure
+record are set to the new value of the origin counter when the segment is
+first written. For segments created by merging, the minimum and maximum-origin
+values are set to the minimum and maximum of all the segments that contributed
+to the merge. The system may therefore, by using the origin values stored in
+this table, locate the segment containing the associated FTS index entries at
+any time.
+
+This table is used by the [xColumnSize](https://www.sqlite.org/fts5.html#xColumnSize) API. It can
+be omitted altogether by specifying the
+[columnsize=0](https://www.sqlite.org/fts5.html#the_columnsize_option) option. In that case the
+xColumnSize API is still available to auxiliary functions, but runs much more
+slowly.

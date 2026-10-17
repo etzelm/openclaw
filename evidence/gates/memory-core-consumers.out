@@ -1,0 +1,217 @@
+$ node scripts/test-projects.mts extensions/memory-core/src/memory-forget-recovery.test.ts extensions/memory-core/src/memory/manager-db.test.ts extensions/memory-core/src/memory/manager-embedding-cache.test.ts extensions/memory-core/src/memory/manager-publication-admission.test.ts extensions/memory-core/src/memory/manager-publication-autocommit.test.ts extensions/memory-core/src/memory/manager-publication-settlement.test.ts extensions/memory-core/src/memory/manager-publication-transfer.test.ts extensions/memory-core/src/memory/manager-search-knn.test.ts extensions/memory-core/src/memory/manager-search-vector.test.ts extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts extensions/memory-core/src/memory/manager-search.unicode-query.test.ts extensions/memory-core/src/memory/manager-source-index-kernel.test.ts extensions/memory-core/src/memory/manager-source-state.test.ts extensions/memory-core/src/memory/manager-sync-yield.test.ts extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+[vitest-workers] local cache hit after 2919ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared d128d34ae94a in 2966ms (15878 inputs, 21109 outputs)
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > loads cached embeddings for the active provider key 49ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > handles legacy JSON cache storage without losing row identity 9ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > handles retired import cache storage without losing row identity 38ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > handles binary cache storage without losing row identity 35ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reserves space before replacing cached vectors at capacity 12ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reserves only missing capacity: below capacity 14ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reserves only missing capacity: exact capacity 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reserves only missing capacity: overflow with equal timestamps 22ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-knn.test.ts > memory vector KNN decision counts > runs KNN before chunk lookup even when planner statistics favor chunks 42ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-knn.test.ts > memory vector KNN decision counts > rejects an invalid native row before underfill counts 50ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-knn.test.ts > memory vector KNN decision counts > stops counting after fallback is decided without enumerating the remaining rows 164ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the text and exact-path statements across worker dispatch 23ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the binary64 fallback statements and score across worker dispatch 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the native vec0 KNN statement used by the child reader 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reserves only missing capacity: overflow beyond a prune batch 42ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > keeps the last value across cache batches and rolls back an interrupted publication 20ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > prunes at most 100 oldest rows per transaction 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > regenerates truncated cache data while respecting provider alias priority 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > regenerates non-finite cache data while respecting provider alias priority 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reads each requested cache row at most once with 0 canonical hits 16ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reads each requested cache row at most once with 200 canonical hits 14ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > reads each requested cache row at most once with 401 canonical hits 14ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-embedding-cache.test.ts > memory embedding cache > propagates a native cache read failure without retaining a partial cursor 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source state > loads complete indexed rows for the requested source 24ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source state > restricts source snapshots to 0 requested paths 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source state > restricts source snapshots to 3 requested paths 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source state > restricts source snapshots to 33001 requested paths 43ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source inspection extra-path diagnostics > reports skipped roots with canonical memory present: true 17ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source inspection extra-path diagnostics > reports skipped roots with canonical memory present: false 9ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-state.test.ts > memory source inspection extra-path diagnostics > keeps canonical extra roots eligible while skipping nested symlinks without a root warning 19ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > stops fallback scanning when the caller aborts and keeps later searches healthy 101ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > scans the full signed rowid domain across sparse unsafe-integer batch boundaries from 9007199254740993n 12ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > searches provider-declared model aliases while excluding arbitrary paths 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > scores blobs bit-identically to reference cosine over the decoded vector 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > preserves exact ranking without normalizing the query again for every row 26ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > picks up rows inserted during the inter-batch event-loop yield (rowid cursor) 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > keeps scored payloads and equal-score ordering when chunks change between batches 16ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > reads contender payloads from the scored batch snapshot during external writes 15ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > bounds fallback body fetches while preserving snippets in a UTF-8 database 21ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search-vector.test.ts > searchVector sqlite-vec KNN > falls back when filters hide matches beyond sqlite-vec's KNN cap 120ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > reads a reopened existing unicode61 index without rewriting it 272ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > reads a reopened existing trigram index without rewriting it 201ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC München text with either query form using unicode61 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD München text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ǽ text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ǽ text with either query form using unicode61 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ộ text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ộ text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC café東京 text with either query form using unicode61 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD café東京 text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 한국어 text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 한국어 text with either query form using unicode61 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC Μαΐου text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD Μαΐου text with either query form using unicode61 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 𑌕𑍋 text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 𑌕𑍋 text with either query form using unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC München text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD München text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ǽ text with either query form using trigram 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ǽ text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ộ text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ộ text with either query form using trigram 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC café東京 text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD café東京 text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 한국어 text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 한국어 text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC Μαΐου text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD Μαΐου text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 𑌕𑍋 text with either query form using trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 𑌕𑍋 text with either query form using trigram 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > recalls a Unicode compatibility alias with unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > retains canonical alternatives for separator mark query rèsumé 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > retains canonical alternatives for separator mark query résumé 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > retains canonical alternatives for separator mark query mǘnchen 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not broaden canonical Latin terms to separator variants with unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not broaden canonical Latin terms to separator variants with trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > keeps AND semantics for mixed-form words with unicode61 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > keeps AND semantics for mixed-form words with trigram 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > keeps short canonical trigram terms in substring fallback 5ms
+stderr | extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves whole Unicode words in MATCH-error fallback
+memory search: FTS5 MATCH failed, falling back to substring search: Error: FTS5 MATCH failed
+
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves scoped ranked limits for canonical unicode61 queries 10ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves scoped ranked limits for canonical trigram queries 9ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 München phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 café東京 phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 caféǽ phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 Kelvin phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 Ωmega phrases 9ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 ά̣ phrases 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 re̓sume phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 re̓̓sume phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical trigram München phrases 9ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical trigram Kelvin phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical trigram Ωmega phrases 5ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves whole Unicode words in MATCH-error fallback 6ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-autocommit.test.ts > atomically promotes an exact legacy identity while preserving canonical cache rows 68ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-autocommit.test.ts > promotes legacy metadata when no embedding cache table exists 29ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-autocommit.test.ts > publishes settled write tokens and fresh facts for scalar autocommits 25ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-autocommit.test.ts > retains the cache count across writes and reloads after rollback or an unscoped clear 33ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > avoids unused connection work for scalar publications 31ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > sets busy_timeout on memory sqlite connections 19ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > resets only derived memory tables, preserves their schema, and is repeatable 73ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > repairs changed and missing vectors, appends chunks, and removes empty and stale vectors 24ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > bounds 32 stale-vector deletes (append: true) 12ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > bounds 33 stale-vector deletes (append: true) 11ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > bounds 2163 stale-vector deletes (append: true) 105ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > does not create an index when there is nothing to reset 4ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > lazily adds recall metadata storage before publishing to an existing database 72ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > bounds 2163 stale-vector deletes (append: false) 100ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back stale-vector cleanup with rebuild debt (5 chunks) 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-settlement.test.ts > settles admitted native publication before a sibling write ({"failRollback":false,"failClose":false,"throwResultFailure":false}) 533ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back stale-vector cleanup with rebuild debt (2164 chunks) 98ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > keeps the last embedding for repeated IDs across 2 rows 13ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > keeps the last embedding for repeated IDs across 129 rows 23ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > repairs stale same-ID vectors in a unverified index 16ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > repairs stale same-ID vectors in a incomplete index 35ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-sync-yield.test.ts > session sync responsiveness > serves queued work before publishing a prepared session batch with 1 workers 40ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-sync-yield.test.ts > session sync responsiveness > serves queued work before publishing a prepared session batch with 4 workers 31ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > removes a stale vector table when the shadow index has no vectors 86ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-admission.test.ts > retains reindexed memory admission across a clean restart without skipping required integrity 643ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > publishes stable path and chunk identities and restores FTS maintenance 168ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > reads current source rows without restaging scratch or inspecting canonical connection policy 589ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back the source and vectors (clean: false, chunks: 4) 11ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back the source and vectors (clean: true, chunks: 4) 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back the source and vectors (clean: true, chunks: 2164) 250ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > publishes bounded chunk batches across sources ([ 129 ]) 19ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > publishes bounded chunk batches across sources ([ 64, 65 ]) 18ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > publishes bounded chunk batches across sources ([ 1, 128, 1 ]) 42ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > removes FTS tables and triggers when the shadow has FTS disabled 134ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > publishes a prepared shadow vector table 92ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > coalesces small sources while preserving searchable text and source metadata 21ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > keeps later replacements and retained metadata authoritative within a group 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > applies later removals to chunks published by an intermediate removal flush 23ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back grouped sources and vectors when a buffered provenance write fails 17ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back 2/3 vector deletes (outer: false) 9ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > rejects a stale shadow publish after a concurrent live memory update 150ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > rolls back 3/2048 vector deletes (outer: true) 87ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index native kernel > conditionally removes all source representations while retaining a sibling 7ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index session delta > keeps indexed point deletes for 2 session removals with derived data 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index session delta > keeps indexed point deletes for 33 session removals with derived data 8ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index session delta > keeps indexed point deletes for 129 session removals with derived data 17ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-source-index-kernel.test.ts > memory source index session delta > refreshes retained recall metadata and provenance without changing indexed content 24ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > preserves the live embedding cache instead of publishing the shadow cache 148ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-db.test.ts > memory manager database publication > removes aged orphan shadows under the maintenance lease but preserves young shadows 38ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > rolls back a refused inline cache commit and preserves tombstones 517ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > settles a single-statement source refresh through success 442ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-admission.test.ts > retains reindexed memory admission across a unclean restart without skipping required integrity 1531ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > settles a single-statement source refresh through stale 586ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > settles a single-statement source refresh through begin 293ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > keeps a reopened semantic index valid before discovering the provider model 2413ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-settlement.test.ts > settles admitted native publication before a sibling write ({"failRollback":true,"failClose":false,"throwResultFailure":false}) 2270ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > settles a single-statement source refresh through write 415ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > settles a single-statement source refresh through transaction 427ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > settles a single-statement source refresh through commit 280ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > returns keyword matches after an embedding failure during first search 1250ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > opens keyword publication when SQLite extension loading is unavailable 308ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > returns keyword matches after an embedding failure during failed background sync 341ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a none failure with txt corpus 3684ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > publishes and deletes keyword data with an unavailable configured extension 534ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-settlement.test.ts > settles admitted native publication before a sibling write ({"failRollback":true,"failClose":true,"throwResultFailure":false}) 1929ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > backs off when the first keyword-only publication also fails 560ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > preserves extension load failures when vector publication requires the extension 419ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > retains the original embedding cooldown after a quota failure in watch 659ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > preserves the failed publication outcome (close failure: false) 426ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > preserves the failed publication outcome (close failure: true) 527ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a index failure with txt corpus 1867ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > discards declined preparation and reuses its healthy publication owner 254ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > retains the original embedding cooldown after a quota failure in search maintenance 862ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-settlement.test.ts > settles admitted native publication before a sibling write ({"failRollback":true,"failClose":true,"throwResultFailure":true}) 1817ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > roundtrips an oversized Unicode record and its metadata through the native publication owner 307ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > updates a keyword-only index during the original embedding cooldown 631ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > keeps inline source replacement atomic and observes a later in-process forget 438ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-settlement.test.ts > preserves a committed publication when binding cleanup fails 874ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > keeps concurrent large source transfers separate through their publication scopes 329ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > falls back to keyword results when the default query embedding fails 590ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > publishes planned removals and keeps unchanged session rows searchable 257ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > roundtrips 8-coordinate cache vectors with tombstone and capacity limits 259ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > keeps explicit providers fail-closed when a runtime query embedding fails 390ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a sources failure with txt corpus 1726ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > keeps explicit required providers fail-closed when construction fails 256ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > uses keyword search when provider construction fails against an existing semantic index 494ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > caches a normal no-provider result after an expired bootstrap failure 320ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > degrades concurrent bootstrap waiters to the same keyword index 268ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a backup failure with txt corpus 1374ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > serializes provider construction when concurrent probes retry an expired failure 640ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a memory failure with txt corpus 1268ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > roundtrips 4194305-coordinate cache vectors with tombstone and capacity limits 2725ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager-publication-transfer.test.ts > bounded memory publication transfer > bounds each serialized batch and preserves every row when provider vectors share an array 199ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > keeps keyword results when semantic recovery reindex fails 811ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > syncs regular memory when USER.md is a symlink 273ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > forces provider-none memory to FTS-only when vector config is omitted 275ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > ignores persisted vector rebuild debt after reopening an FTS-only index 362ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > aborts instead of downgrading an existing semantic index to FTS-only 152ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a corpus failure with txt corpus 1287ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > self-heals missing identity on non-forced gateway sync when all chunks are FTS-only and provider is unavailable 297ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > does not rebuild missing-identity semantic chunks when the provider is unavailable 229ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory/manager.fts-only-reindex.test.ts > memory manager FTS-only reindex > removes chunks and FTS rows when the dirty source file is already deleted 245ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a origins failure with txt corpus 1298ms
+ ✓  extension-database-workers  extensions/memory-core/src/memory-forget-recovery.test.ts > memory forget > durably purges every derived owner after a memory failure with md corpus 1084ms
+
+ Test Files  15 passed (15)
+      Tests  197 passed (197)
+   Start at  22:12:47
+   Duration  21.89s (transform 51%, tests 33%, import 10%, setup 6%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 23.63s

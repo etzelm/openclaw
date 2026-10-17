@@ -1,0 +1,39 @@
+# admitted-path rounds store=main node=v24.21.0 harness=measure-admission.mjs CALLS=2 (call 2 = admitted path)
+## round 1 start: 21:50  up 4 days, 13:50, 1 user, load averages: 34.52 17.34 16.87
+[sqlite/transaction] slow SQLite transaction hold async=false callbackKind=application-transaction database=<scratch>/t1-02-db/agent-main.sqlite operation=unlabeled elapsedMs=5166 phases={"beginMs":0,"sqlMs":5166,"hostAdmissionWaitMs":0,"databaseAdmissionWaitMs":0,"commitMs":0} isMainThread=true mode=immediate pid=48168 threadId=0 thresholdMs=1000
+warmup r1 before 1: call2 admit_ms=53.307 reconcile_count_stmt_ms=28.129 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+warmup r1 after 1: call2 admit_ms=40.03 reconcile_count_stmt_ms=6.497 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+warmup r1 before 2: call2 admit_ms=106.225 reconcile_count_stmt_ms=82.571 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+warmup r1 after 2: call2 admit_ms=30.513 reconcile_count_stmt_ms=0.477 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 before 1: call2 admit_ms=145.605 reconcile_count_stmt_ms=25.424 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 after 1: call2 admit_ms=29.851 reconcile_count_stmt_ms=0.488 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 before 2: call2 admit_ms=52.414 reconcile_count_stmt_ms=27.522 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 after 2: call2 admit_ms=43.917 reconcile_count_stmt_ms=0.468 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 before 3: call2 admit_ms=50.314 reconcile_count_stmt_ms=25.906 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 after 3: call2 admit_ms=29.232 reconcile_count_stmt_ms=0.492 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 before 4: call2 admit_ms=50.691 reconcile_count_stmt_ms=25.556 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 after 4: call2 admit_ms=38.832 reconcile_count_stmt_ms=0.51 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 before 5: call2 admit_ms=58.43 reconcile_count_stmt_ms=33.727 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r1 after 5: call2 admit_ms=24.432 reconcile_count_stmt_ms=0.404 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+round 1 before: median call2 admit_ms=52.414 raw=[145.605, 52.414, 50.314, 50.691, 58.43] | median reconcile_count_stmt_ms=25.906 raw=[25.424, 27.522, 25.906, 25.556, 33.727]
+round 1 after: median call2 admit_ms=29.851 raw=[29.851, 43.917, 29.232, 38.832, 24.432] | median reconcile_count_stmt_ms=0.488 raw=[0.488, 0.468, 0.492, 0.51, 0.404]
+## round 1 end: 21:50  up 4 days, 13:50, 1 user, load averages: 29.45 17.36 16.90
+## round 2 start: 21:50  up 4 days, 13:50, 1 user, load averages: 29.45 17.36 16.90
+warmup r2 before 1: call2 admit_ms=49.065 reconcile_count_stmt_ms=25.445 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+warmup r2 after 1: call2 admit_ms=29.822 reconcile_count_stmt_ms=0.378 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+warmup r2 before 2: call2 admit_ms=47.2 reconcile_count_stmt_ms=23.614 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+warmup r2 after 2: call2 admit_ms=24.017 reconcile_count_stmt_ms=0.405 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 before 1: call2 admit_ms=52.592 reconcile_count_stmt_ms=25.077 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 after 1: call2 admit_ms=24.696 reconcile_count_stmt_ms=0.462 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 before 2: call2 admit_ms=58.294 reconcile_count_stmt_ms=26.532 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 after 2: call2 admit_ms=24.784 reconcile_count_stmt_ms=0.44 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 before 3: call2 admit_ms=52.31 reconcile_count_stmt_ms=27.375 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 after 3: call2 admit_ms=23.809 reconcile_count_stmt_ms=0.413 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 before 4: call2 admit_ms=48.002 reconcile_count_stmt_ms=24.322 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 after 4: call2 admit_ms=23.537 reconcile_count_stmt_ms=0.36 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 before 5: call2 admit_ms=48.507 reconcile_count_stmt_ms=23.967 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+run r2 after 5: call2 admit_ms=24.916 reconcile_count_stmt_ms=0.423 path=admitted total_changes=0 ftsAvailable=true counts_equal=true
+round 2 before: median call2 admit_ms=52.31 raw=[52.592, 58.294, 52.31, 48.002, 48.507] | median reconcile_count_stmt_ms=25.077 raw=[25.077, 26.532, 27.375, 24.322, 23.967]
+round 2 after: median call2 admit_ms=24.696 raw=[24.696, 24.784, 23.809, 23.537, 24.916] | median reconcile_count_stmt_ms=0.423 raw=[0.462, 0.44, 0.413, 0.36, 0.423]
+## round 2 end: 21:50  up 4 days, 13:50, 1 user, load averages: 27.42 17.14 16.82
+DONE

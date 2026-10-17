@@ -1,0 +1,9 @@
+Medians of 5 fresh processes per cell, milliseconds, schema admission (whole call). Cells are round1 / round2.
+store | chunks | warm BEFORE | warm AFTER | cold BEFORE | cold AFTER | counts equal (canonical/FTS/docsize) | path taken
+dev | 6012 | 32.5 / 32.4 | 30.2 / 29.4 | 229.7 / 220.2 | 71.6 / 72.1 | yes (6012/6012/6012) | first-admission
+main | 43490 | 78.0 / 75.6 | 52.3 / 52.1 | 2003.4 / 2059.5 | 316.7 / 325.2 | yes (43490/43490/43490) | first-admission
+
+Reconcile count statement alone (derived_count query), median ms, round1 / round2:
+store | warm BEFORE | warm AFTER | cold BEFORE | cold AFTER
+dev | 2.8 / 2.8 | 0.1 / 0.1 | 159.6 / 152.7 | 6.1 / 5.9
+main | 25.1 / 24.4 | 0.5 / 0.5 | 1727.1 / 1780.4 | 56.5 / 59.5

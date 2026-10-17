@@ -1,0 +1,33 @@
+# measure-admission cold store=main node=v24.21.0 store_bytes=4855853056
+# before=<scratch>/t1-02-fts-count-main after=<scratch>/t1-02-fts-count
+load gate: passed; waited 0 s; load1=5.44
+## round 1 start: 21:25  up 4 days, 13:25, 1 user, load averages: 5.44 22.32 34.76
+cold r1 before 1: admit_ms=1914.892 reconcile_count_stmt_ms=1635.94 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 after 1: admit_ms=316.182 reconcile_count_stmt_ms=56.469 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 before 2: admit_ms=2003.397 reconcile_count_stmt_ms=1727.053 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 after 2: admit_ms=299.673 reconcile_count_stmt_ms=51.661 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 before 3: admit_ms=1789.526 reconcile_count_stmt_ms=1505.792 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 after 3: admit_ms=316.736 reconcile_count_stmt_ms=56.373 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 before 4: admit_ms=2843.063 reconcile_count_stmt_ms=2474.106 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 after 4: admit_ms=661.542 reconcile_count_stmt_ms=142.176 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 before 5: admit_ms=2483.232 reconcile_count_stmt_ms=2195.309 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r1 after 5: admit_ms=432.43 reconcile_count_stmt_ms=114.43 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+round 1 before: median admit_ms=2003.397 raw=[1914.892, 2003.397, 1789.526, 2843.063, 2483.232] | median reconcile_count_stmt_ms=1727.053 raw=[1635.94, 1727.053, 1505.792, 2474.106, 2195.309]
+round 1 after: median admit_ms=316.736 raw=[316.182, 299.673, 316.736, 661.542, 432.43] | median reconcile_count_stmt_ms=56.469 raw=[56.469, 51.661, 56.373, 142.176, 114.43]
+## round 1 end: 21:25  up 4 days, 13:25, 1 user, load averages: 6.37 20.22 33.35
+load gate: passed; waited 0 s; load1=6.37
+## round 2 start: 21:25  up 4 days, 13:25, 1 user, load averages: 6.37 20.22 33.35
+cold r2 before 1: admit_ms=1919.738 reconcile_count_stmt_ms=1635.379 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 after 1: admit_ms=325.249 reconcile_count_stmt_ms=49.352 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 before 2: admit_ms=1958.895 reconcile_count_stmt_ms=1661.141 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 after 2: admit_ms=374.172 reconcile_count_stmt_ms=68.728 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 before 3: admit_ms=6158.192 reconcile_count_stmt_ms=5639.556 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 after 3: admit_ms=339.857 reconcile_count_stmt_ms=98.253 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 before 4: admit_ms=2059.483 reconcile_count_stmt_ms=1780.422 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 after 4: admit_ms=323.186 reconcile_count_stmt_ms=56.373 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 before 5: admit_ms=2113.376 reconcile_count_stmt_ms=1828.078 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+cold r2 after 5: admit_ms=320.642 reconcile_count_stmt_ms=59.525 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+round 2 before: median admit_ms=2059.483 raw=[1919.738, 1958.895, 6158.192, 2059.483, 2113.376] | median reconcile_count_stmt_ms=1780.422 raw=[1635.379, 1661.141, 5639.556, 1780.422, 1828.078]
+round 2 after: median admit_ms=325.249 raw=[325.249, 374.172, 339.857, 323.186, 320.642] | median reconcile_count_stmt_ms=59.525 raw=[49.352, 68.728, 98.253, 56.373, 59.525]
+## round 2 end: 21:26  up 4 days, 13:26, 1 user, load averages: 11.11 19.68 32.48
+DONE

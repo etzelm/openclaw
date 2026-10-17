@@ -1,0 +1,10 @@
+$ sysctl -n hw.model
+Mac15,14
+$ sw_vers
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+$ node -v
+v24.21.0
+$ node -e "console.log(new (require(\"node:sqlite\").DatabaseSync)(\":memory:\").prepare(\"select sqlite_version() v\").get().v)"
+3.53.4

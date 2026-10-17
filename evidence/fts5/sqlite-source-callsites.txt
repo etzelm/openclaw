@@ -1,0 +1,103 @@
+=== sqlite/sqlite tag version-3.53.0 ext/fts5/fts5_storage.c (curl -sSf https://raw.githubusercontent.com/sqlite/sqlite/version-3.53.0/ext/fts5/fts5_storage.c), sha256 fb15e02ab8341f0885d3aa8a84b7cbe1bf87264fee2c93d098f1310100a853a9, 1530 lines
+
+=== lines 655,690
+   655	
+   656	/*
+   657	** Insert a record into the %_docsize table. Specifically, do:
+   658	**
+   659	**   INSERT OR REPLACE INTO %_docsize(id, sz) VALUES(iRowid, pBuf);
+   660	**
+   661	** If there is no %_docsize table (as happens if the columnsize=0 option
+   662	** is specified when the FTS5 table is created), this function is a no-op.
+   663	*/
+   664	static int fts5StorageInsertDocsize(
+   665	  Fts5Storage *p,                 /* Storage module to write to */
+   666	  i64 iRowid,                     /* id value */
+   667	  Fts5Buffer *pBuf                /* sz value */
+   668	){
+   669	  int rc = SQLITE_OK;
+   670	  if( p->pConfig->bColumnsize ){
+   671	    sqlite3_stmt *pReplace = 0;
+   672	    rc = fts5StorageGetStmt(p, FTS5_STMT_REPLACE_DOCSIZE, &pReplace, 0);
+   673	    if( rc==SQLITE_OK ){
+   674	      sqlite3_bind_int64(pReplace, 1, iRowid);
+   675	      if( p->pConfig->bContentlessDelete ){
+   676	        i64 iOrigin = 0;
+   677	        rc = sqlite3Fts5IndexGetOrigin(p->pIndex, &iOrigin);
+   678	        sqlite3_bind_int64(pReplace, 3, iOrigin);
+   679	      }
+   680	    }
+   681	    if( rc==SQLITE_OK ){
+   682	      sqlite3_bind_blob(pReplace, 2, pBuf->p, pBuf->n, SQLITE_STATIC);
+   683	      sqlite3_step(pReplace);
+   684	      rc = sqlite3_reset(pReplace);
+   685	      sqlite3_bind_null(pReplace, 2);
+   686	    }
+   687	  }
+   688	  return rc;
+   689	}
+   690	
+
+=== lines 760,780
+   760	      if( rc==SQLITE_OK 
+   761	       && bSaveRow 
+   762	       && p->pConfig->eContent==FTS5_CONTENT_UNINDEXED
+   763	      ){
+   764	        rc = sqlite3Fts5StorageFindDeleteRow(p, iDel);
+   765	      }
+   766	    }else{
+   767	      rc = fts5StorageDeleteFromIndex(p, iDel, apVal, bSaveRow);
+   768	    }
+   769	  }
+   770	
+   771	  /* Delete the %_docsize record */
+   772	  if( rc==SQLITE_OK && pConfig->bColumnsize ){
+   773	    rc = fts5StorageGetStmt(p, FTS5_STMT_DELETE_DOCSIZE, &pDel, 0);
+   774	    if( rc==SQLITE_OK ){
+   775	      sqlite3_bind_int64(pDel, 1, iDel);
+   776	      sqlite3_step(pDel);
+   777	      rc = sqlite3_reset(pDel);
+   778	    }
+   779	  }
+   780	
+
+=== lines 885,905
+   885	          rc = sqlite3Fts5Tokenize(pConfig, 
+   886	              FTS5_TOKENIZE_DOCUMENT,
+   887	              pText, nText,
+   888	              (void*)&ctx,
+   889	              fts5StorageInsertCallback
+   890	          );
+   891	          sqlite3Fts5ClearLocale(pConfig);
+   892	        }
+   893	      }
+   894	      sqlite3Fts5BufferAppendVarint(&rc, &buf, ctx.szCol);
+   895	      p->aTotalSize[ctx.iCol] += (i64)ctx.szCol;
+   896	    }
+   897	    p->nTotalRow++;
+   898	
+   899	    if( rc==SQLITE_OK ){
+   900	      rc = fts5StorageInsertDocsize(p, iRowid, &buf);
+   901	    }
+   902	  }
+   903	  sqlite3_free(buf.p);
+   904	  rc2 = sqlite3_reset(pScan);
+   905	  if( rc==SQLITE_OK ) rc = rc2;
+
+=== lines 1085,1100
+  1085	            fts5StorageInsertCallback
+  1086	        );
+  1087	        sqlite3Fts5ClearLocale(pConfig);
+  1088	      }
+  1089	    }
+  1090	    sqlite3Fts5BufferAppendVarint(&rc, &buf, ctx.szCol);
+  1091	    p->aTotalSize[ctx.iCol] += (i64)ctx.szCol;
+  1092	  }
+  1093	  p->nTotalRow++;
+  1094	
+  1095	  /* Write the %_docsize record */
+  1096	  if( rc==SQLITE_OK ){
+  1097	    rc = fts5StorageInsertDocsize(p, iRowid, &buf);
+  1098	  }
+  1099	  sqlite3_free(buf.p);
+  1100	

@@ -1,0 +1,23 @@
+$ sed -n 150,161p extensions/memory-core/src/memory/manager.ts
+                const effectiveSettings = resolveEffectiveMemorySearchSettings(settings);
+                publishedDatabase = await MemoryIndexDatabase.openPublished({
+                  agentId,
+                  writeOptions: databaseOptions,
+                  readOnly: purpose === "status",
+                  allowExtension: effectiveSettings.store.vector.enabled,
+                  maintenanceSource: source?.publishedDatabase,
+                  schema: {
+                    cacheEnabled: effectiveSettings.cache.enabled,
+                    ftsEnabled: effectiveSettings.query.hybrid.enabled,
+                    ftsTokenizer: effectiveSettings.store.fts.tokenizer,
+                  },
+$ sed -n 121,122p src/agents/memory-search.ts
+      hybrid: {
+        enabled: true,
+$ sed -n 200,201p src/agents/memory-search.ts
+        tokenizer:
+          overrides?.store?.fts?.tokenizer ?? defaults?.store?.fts?.tokenizer ?? "unicode61",
+$ sed -n 65p src/agents/memory-search.ts
+const DEFAULT_CACHE_ENABLED = true;
+$ sed -n 211p src/agents/memory-search.ts
+      enabled: overrides?.cache?.enabled ?? defaults?.cache?.enabled ?? DEFAULT_CACHE_ENABLED,

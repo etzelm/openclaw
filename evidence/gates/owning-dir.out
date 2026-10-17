@@ -1,0 +1,307 @@
+$ node scripts/test-projects.mts src/infra/database-engine
+[vitest-workers] local cache hit after 2804ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared f2898b996fa2 in 2848ms (15878 inputs, 21109 outputs)
+[test] starting test/vitest/vitest.unit-fast.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > honors explicit SQLite selection for PostgreSQL-capable stores 1ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > registers PostgreSQL support for completed store families 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > selects PostgreSQL agents for a homogeneous configuration: {"engine":"postgres"} 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > selects PostgreSQL agents for a homogeneous configuration: {"engine":"postgres","families":{"agent":{"engine":"postgres"}}} 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > selects PostgreSQL agents independently: { families: { agent: [Object] } } 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > selects PostgreSQL agents independently: { engine: 'postgres', …(1) } 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > selects PostgreSQL agents independently: { engine: 'postgres', …(1) } 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > allows PostgreSQL state and agents with unrelated SQLite plugins 0ms
+ ✓  unit-fast  src/infra/database-engine/registry.test.ts > database engine selection > allows explicit SQLite agents alongside PostgreSQL families 0ms
+ ✓  unit-fast  src/infra/database-engine/state-port.test.ts > discovers selected and retained default with the optional plugin absent 1ms
+ ✓  unit-fast  src/infra/database-engine/state-port.test.ts > discovers disabled custom store with the optional plugin absent 0ms
+ ✓  unit-fast  src/infra/database-engine/state-port.test.ts > discovers both configured package aliases with the optional plugin absent 0ms
+ ✓  unit-fast  src/infra/database-engine/state-port.test.ts > discovers duplicate custom store and excluded Mat… with the optional plugin absent 0ms
+ ✓  unit-fast  src/infra/database-engine/admission-scope.test.ts > engine admission scope > ends synchronous admission when a callback returns or throws 2ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > computes vec0 facts for 1 dimensions from one native template 12ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > computes vec0 facts for 3 dimensions from one native template 2ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > computes vec0 facts for 1536 dimensions from one native template 4ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches a custom vec0 table name without materializing expected facts 2ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches body-fts unicode61 facts for memory_index_chunks_fts and rejects shadow drift 1ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches body-fts trigram facts for memory_index_chunks_fts and rejects shadow drift 1ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches path-fts unicode61 facts for memory_index_paths_fts and rejects shadow drift 1ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches path-fts trigram facts for memory_index_paths_fts and rejects shadow drift 1ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches body-fts unicode61 facts for custom_memory_fts and rejects shadow drift 1ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > matches path-fts trigram facts for custom_memory_paths_fts and rejects shadow drift 1ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > retains the shipped explicit unicode61 tokenizer with ' quoting 0ms
+ ✓  unit-fast  src/infra/database-engine/sqlite-memory-search-fragments.test.ts > generated memory search fragments > retains the shipped explicit unicode61 tokenizer with " quoting 0ms
+ ✓  unit-fast  src/infra/database-engine/admission-scope.test.ts > engine admission scope > refuses main-thread construction and use after boot admission 220ms
+ ✓  unit-fast  src/infra/database-engine/json-values.test.ts > preserves ordered row objects, JSON text fields, and empty projection results 5ms
+ ✓  unit-fast  src/infra/database-engine/json-values.test.ts > projects nested JSON and reparents without changing opaque data or scalar types 1ms
+ ✓  unit-fast  src/infra/database-engine/json-values.test.ts > aggregates typed tuples in key order without quoting nested arrays 1ms
+ ✓  unit-fast  src/infra/database-engine/port-provider-imports.test.ts > keeps family registration and operation cores independent of worker preparation 294ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > infers, orders and composes admitted fragments {"fragments":[]} after a canonical trigger 9ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > infers, orders and composes admitted fragments {"fragments":["labels"]} after a canonical trigger 2ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > infers, orders and composes admitted fragments {"fragments":["labels","notes"]} after a canonical trigger 2ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > refuses an active fragment whose dependency is absent 2ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > refuses cyclic active fragment dependencies 2ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > refuses an undeclared SQLite trigger 2ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > refuses an undeclared SQLite view 1ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > refuses source fragments that differ from the recorded backup 2ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > omits stale derived projection rows from copy verification 4ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > selects the registered family by id and admitted SQLite tables 0ms
+ ✓  unit-fast  src/infra/database-engine/port-provider.test.ts > names supported families when an id or SQLite store is unknown 0ms
+ ✓  unit-fast  src/infra/database-engine/open.test.ts > engine store opening > refuses existing schema_meta data without relying on a store prefix 6ms
+ ✓  unit-fast  src/infra/database-engine/open.test.ts > engine store opening > refuses existing cron_jobs data without relying on a store prefix 1ms
+ ✓  unit-fast  src/infra/database-engine/open.test.ts > engine store opening > keeps an unported store on SQLite even when PostgreSQL is configured 0ms
+ ✓  unit-fast  src/infra/database-engine/open.test.ts > engine store opening > refuses an existing PostgreSQL anchor instead of creating SQLite tables 0ms
+ ✓  unit-fast  src/infra/database-engine/search.test.ts > experimental admitted search capabilities > composes literal phrase and prefix search with caller filtering and bounds 4ms
+ ✓  unit-fast  src/infra/database-engine/search.test.ts > experimental admitted search capabilities > rejects foreign indexes and retained capabilities after native close 1ms
+ ✓  unit-fast  src/infra/database-engine/search.test.ts > experimental admitted search capabilities > preserves adapter labels and refuses unadmitted PostgreSQL descriptors 0ms
+ ↓  unit-fast  src/infra/database-engine/transcript-reader.conformance.test.ts > keeps transcript projections and retained copies equal on SQLite and PostgreSQL
+
+ Test Files  9 passed | 1 skipped (10)
+      Tests  49 passed | 1 skipped (50)
+   Start at  22:11:54
+   Duration  1.67s (transform 61%, import 26%, tests 10%, setup 2%)
+
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  unit-fast-isolated  src/infra/database-engine/context.test.ts > publishes one immutable mixed selection to existing and new async callers 1ms
+ ✓  unit-fast-isolated  src/infra/database-engine/context.test.ts > distinguishes not installed from installed SQLite and refuses a family change 1ms
+ ✓  unit-fast-isolated  src/infra/database-engine/context.test.ts > refuses to replace the PostgreSQL connection or namespace: {"connection":"postgresql://localhost/other","schemaPrefix":"test"} 0ms
+ ✓  unit-fast-isolated  src/infra/database-engine/context.test.ts > refuses to replace the PostgreSQL connection or namespace: {"connection":"postgresql://localhost/synthetic","schemaPrefix":"other"} 0ms
+ ✓  unit-fast-isolated  src/infra/database-engine/context.test.ts > refuses swapping PostgreSQL families while keeping the same DSN 0ms
+ ✓  unit-fast-isolated  src/infra/database-engine/context.test.ts > scopes the full family map across awaits without replacing the boot selection 0ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  22:11:56
+   Duration  80ms (transform 46%, setup 29%, tests 10%, import 7%, worker 7%)
+
+[test] starting test/vitest/vitest.infra.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-02-fts-count
+
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > executes SQLite without clocks or events when neither channel has a subscriber 87ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > observes statements prepared before subscription, redacting literals and never publishing bindings 3ms
+ ✓  infra  src/infra/database-engine/physical-facts.test.ts > physical database capabilities > keeps native housekeeping and copied-file recovery specific to SQLite 53ms
+ ✓  infra  src/infra/database-engine/physical-facts.test.ts > physical database capabilities > refuses malformed catalog transport and detects semantic constraint drift 3ms
+ ↓  infra  src/infra/database-engine/physical-facts.test.ts > PostgreSQL physical admission > captures one real catalog snapshot and reuses it until schema invalidation
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > counts exec, run, all and lazy iteration once each, including early iterator close 5ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > preserves immediate iterator validation and binding capture (subscribed=false) 5ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > preserves immediate iterator validation and binding capture (subscribed=true) 7ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > releases a subscribed native iterator returned before its first next 29ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > redacts SQLite literals ending in a backslash without leaking the following literal 2ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > publishes failure outcomes while preserving SQLite errors 2ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > redacts PostgreSQL literals, nested comments and dollar strings without changing identifiers or placeholders 3ms
+ ✓  infra  src/infra/database-engine/observation.test.ts > database engine observation > publishes one worker request completion for each success or error without request payloads 2ms
+ ✓  infra  src/infra/database-engine/sqlite-vec.test.ts > loadSqliteVecExtension > rejects a connection revoked while the native module imports 90ms
+ ✓  infra  src/infra/database-engine/sqlite-vec.test.ts > loadSqliteVecExtension > rejects a loaded extension when sqlite-vec functions are unavailable 51ms
+ ✓  infra  src/infra/database-engine/sqlite-vec.test.ts > loadSqliteVecExtension > returns a valid memory.search extensionPath hint when sqlite-vec is absent 25ms
+ ✓  infra  src/infra/database-engine/sqlite-vec.test.ts > loadSqliteVecExtension > falls back to the platform variant when bundled sqlite-vec load fails 28ms
+ ✓  infra  src/infra/database-engine/sqlite-vec.test.ts > loadSqliteVecExtension > rejects a platform variant when sqlite-vec functions are unavailable 17ms
+ ✓  infra  src/infra/database-engine/sqlite-vec.test.ts > loadSqliteVecExtension > preserves bundled sqlite-vec and platform variant errors when both fail 21ms
+ ↓  infra  src/infra/database-engine/port-provider.postgres.test.ts > generic database family provider > round-trips fragments, triggers, projections and private migration through backup/restore
+ ↓  infra  src/infra/database-engine/multi-namespace.postgres.test.ts > independent PostgreSQL installation namespaces > boots distinct identities concurrently and holds independent writer locks without waiting
+ ↓  infra  src/infra/database-engine/multi-namespace.postgres.test.ts > independent PostgreSQL installation namespaces > shares public extensions while isolating full text, generated columns and vector projections
+ ↓  infra  src/infra/database-engine/multi-namespace.postgres.test.ts > independent PostgreSQL installation namespaces > isolates concurrent installations in separate databases on the same server
+ ↓  infra  src/infra/database-engine/multi-namespace.postgres.test.ts > independent PostgreSQL installation namespaces > refuses drift only in its own namespace, including the scratch admission path
+ ↓  infra  src/infra/database-engine/multi-namespace.postgres.test.ts > independent PostgreSQL installation namespaces > refuses installation A's anchor paired with installation B's namespace
+ ↓  infra  src/infra/database-engine/team-reports-port.postgres.test.ts > Team Reports database port and backup > round-trips every canonical table and restores an exact PostgreSQL backup
+ ↓  infra  src/infra/database-engine/team-reports-port.postgres.test.ts > Team Reports database port and backup > loads the selected installed plugin when the bundled artifact is absent
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses changed default value
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses changed CHECK expression
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses changed partial-index predicate
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses changed trigger body
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > admits unchanged stores with one catalog read and rechecks a changed server major
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > verifies unsealed port metadata and drops scratch on refusal
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > re-admits equivalent DDL text after exact catalog comparison
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > rejects a generated DDL change at the same version
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > migrates two versions atomically and rolls back both steps on failure
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses unsupported capabilities at admission (150000, UTF8, UTF8)
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses unsupported capabilities at admission (170000, SQL_ASCII, UTF8)
+ ↓  infra  src/infra/database-engine/schema-admission.postgres.test.ts > PostgreSQL schema admission > refuses unsupported capabilities at admission (170000, UTF8, LATIN1)
+ ✓  infra  src/infra/database-engine/sqlite-vector-subprocess.test.ts > forwards a discovered SQLite library through stdin without inheriting its environment 62ms
+ ✓  infra  src/infra/database-engine/adapters.test.ts > PostgreSQL adapter open failures > preserves 28P01 diagnostics without exposing credentials 21ms
+ ✓  infra  src/infra/database-engine/adapters.test.ts > PostgreSQL adapter open failures > preserves 53300 diagnostics without exposing credentials 3ms
+ ✓  infra  src/infra/database-engine/adapters.test.ts > PostgreSQL adapter open failures > preserves undefined diagnostics without exposing credentials 3ms
+ ✓  infra  src/infra/database-engine/search-extension.test.ts > binds a SQLite search extension without issuing any SQL 41ms
+ ✓  infra  src/infra/database-engine/search-extension.test.ts > keeps canonical unicode61 search fresh after re-admission without DDL 11ms
+ ✓  infra  src/infra/database-engine/search-extension.test.ts > keeps canonical trigram search fresh after re-admission without DDL 7ms
+ ✓  infra  src/infra/database-engine/search-extension.test.ts > reuses the vector schema published by admission and invalidates it after a dimension rebuild 16ms
+ ✓  infra  src/infra/database-engine/search-extension.test.ts > reuses the vector schema published by writer and invalidates it after a dimension rebuild 10ms
+ ✓  infra  src/infra/database-engine/search-extension.test.ts > reuses the vector schema published by existing table admission and invalidates it after a dimension rebuild 70ms
+ ↓  infra  src/infra/database-engine/postgres-search.conformance.test.ts > PostgreSQL engine search conformance > composes literal terms, phrases, final-lexeme prefixes and OR with bounded ranked snippets
+ ↓  infra  src/infra/database-engine/postgres-search.conformance.test.ts > PostgreSQL engine search conformance > uses trigram contains literally, including wildcard and escape characters
+ ↓  infra  src/infra/database-engine/postgres-search.conformance.test.ts > PostgreSQL engine search conformance > computes exact float32 cosine after model/source eligibility and preserves binary64 source
+ ↓  infra  src/infra/database-engine/postgres-search.conformance.test.ts > PostgreSQL engine search conformance > synchronizes source writes and deletes transactionally and rebuilds only derived projections
+ ↓  infra  src/infra/database-engine/postgres-search.conformance.test.ts > PostgreSQL engine search conformance > rejects GIN index drift when the admitted store reopens
+ ↓  infra  src/infra/database-engine/postgres-search.conformance.test.ts > PostgreSQL engine search conformance > rejects text configuration drift when the admitted store reopens
+ ↓  infra  src/infra/database-engine/search-extension.postgres.test.ts > PostgreSQL search extension admission > installs keyword-only extensions and reopens without scratch DDL
+ ↓  infra  src/infra/database-engine/search-extension.postgres.test.ts > PostgreSQL search extension admission > installs independent vector extensions and refuses changed dimensions without changing source bytes
+ ↓  infra  src/infra/database-engine/search-extension.postgres.test.ts > PostgreSQL search extension admission > rolls back a failed installation before publishing definitions or derived objects
+ ↓  infra  src/infra/database-engine/search-extension.postgres.test.ts > PostgreSQL search extension admission > rolls back extension admission with its outer owner transaction
+ ↓  infra  src/infra/database-engine/search-extension.postgres.test.ts > PostgreSQL search extension admission > rejects derived-index tampering on readmission
+ ↓  infra  src/infra/database-engine/logbook-port.postgres.test.ts > Logbook PostgreSQL port and exact backup > retains all allocation high-water marks, rows, and file references through port and backup
+ ↓  infra  src/infra/database-engine/logbook-port.postgres.test.ts > Logbook PostgreSQL port and exact backup > registers the database for porting and frame artifacts for backup
+ ✓  infra  src/infra/database-engine/agent-port-descriptor.test.ts > omits the native vector accelerator and its auxiliary tables 65ms
+ ✓  infra  src/infra/database-engine/agent-port-descriptor.test.ts > admits optional memory indexes but omits their rebuildable rows 23ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > keeps the public resolver on the default engine (undefined), regardless of family overrides 46ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > keeps the public resolver on the default engine (sqlite), regardless of family overrides 3ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > preserves the public PostgreSQL default even when built-in families override to SQLite 5ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > captures a frozen connection from the supplied host environment for an override 6ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > refuses a store-backed secret before opening shared state 3ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > defaults to SQLite and does not resolve unused PostgreSQL credentials 3ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > applies the PostgreSQL default only to capable families and honors SQLite overrides 3ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > resolves a file SecretRef on the host with the configured prefix 6ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > refuses missing or unresolved PostgreSQL connections for a family override 0 4ms
+ ✓  infra  src/infra/database-engine/config.test.ts > host database engine selection > refuses missing or unresolved PostgreSQL connections for a family override 1 6ms
+ ✓  infra  src/infra/database-engine/port-command.postgres.test.ts > rejects incompatible PostgreSQL capabilities {"version":150000,"encoding":"UTF8","client_encoding":"UTF8"} at the query boundary 70ms
+ ✓  infra  src/infra/database-engine/port-command.postgres.test.ts > rejects incompatible PostgreSQL capabilities {"version":170000,"encoding":"LATIN1","client_encoding":"UTF8"} at the query boundary 9ms
+ ✓  infra  src/infra/database-engine/port-command.postgres.test.ts > rejects incompatible PostgreSQL capabilities {"version":170000,"encoding":"UTF8","client_encoding":"LATIN1"} at the query boundary 10ms
+ ↓  infra  src/infra/database-engine/agent-port.postgres.test.ts > agent database port > refuses ambiguous voice JSON before publishing a PostgreSQL namespace
+ ↓  infra  src/infra/database-engine/agent-port.postgres.test.ts > agent database port > round-trips compressed transcripts, FIFO work, cold archives and matched backups
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > backs up and restores the real version 24 before the registered migration
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > backs up and restores the real version 25 before the registered migration
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > captures the predecessor before migration, re-admits exact DDL, and publishes
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > rolls back partial DDL and data, retaining an exact restorable predecessor
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > refuses live Gateway custody before creating a backup or running a migration
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > keeps installed-driver schema rollback exact (foreign write: false)
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > keeps installed-driver schema rollback exact (foreign write: true)
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > keeps the real agent v27→v28 rollback exact (foreign write: false)
+ ↓  infra  src/infra/database-engine/doctor-migration.postgres.test.ts > Doctor PostgreSQL version migration > keeps the real agent v27→v28 rollback exact (foreign write: true)
+ ↓  infra  src/infra/database-engine/port.test.ts > offline database port > round-trips bounded workboard data, exact cells and cursors, and refuses literal text NUL
+ ✓  infra  src/infra/database-engine/port-command.postgres.test.ts > redacts unresolved connection SecretRefs 1063ms
+ ↓  infra  src/infra/database-engine/port-command.postgres.test.ts > preflights PostgreSQL while optional plugin artifacts are absent
+ ↓  infra  src/infra/database-engine/port-command.postgres.test.ts > workboard port PostgreSQL refusal boundaries > probes real privileges, refuses occupied/wrong-owner/RLS sources, and resumes verified staging
+ ✓  infra  src/infra/database-engine/agent-port-descriptor.test.ts > migrates only the private historical agent copy before canonical verification 1834ms
+ ↓  infra  src/infra/database-engine/state-port.postgres.test.ts > shared-state database port > round-trips the complete inventory and restores exact and sanitized backups
+ ↓  infra  src/infra/database-engine/state-port.postgres.test.ts > shared-state database port > retains absence of optional fragments and Doctor-owned history
+ ↓  infra  src/infra/database-engine/shared-feature.conformance.test.ts > prepares shared feature SQL against generated PostgreSQL DDL and preserves owner results
+ ↓  infra  src/infra/database-engine/postgres-search-admission.postgres.test.ts > PostgreSQL search admission failures > names missing unaccent with operator SQL
+ ↓  infra  src/infra/database-engine/postgres-search-admission.postgres.test.ts > PostgreSQL search admission failures > names missing pg_trgm with operator SQL
+ ↓  infra  src/infra/database-engine/postgres-search-admission.postgres.test.ts > PostgreSQL search admission failures > names missing vector with operator SQL
+ ↓  infra  src/infra/database-engine/postgres-search-admission.postgres.test.ts > PostgreSQL search admission failures > refuses unsupported exact dimensions before installing search DDL
+ ↓  infra  src/infra/database-engine/postgres-search-admission.postgres.test.ts > PostgreSQL search admission failures > names insufficient schema creation privilege
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > inspects without writing and refuses changed canonical SQLite data 2809ms
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses future version without exposing payloads or changing the source 458ms
+ ↓  infra  src/infra/database-engine/git-backup-secrets.postgres.test.ts > Git backup secret exclusion across engines > redacts the same state rows and fields with generic scope=false, including deleted bytes
+ ↓  infra  src/infra/database-engine/git-backup-secrets.postgres.test.ts > Git backup secret exclusion across engines > redacts the same agent rows and fields with generic scope=false, including deleted bytes
+ ↓  infra  src/infra/database-engine/git-backup-secrets.postgres.test.ts > Git backup secret exclusion across engines > redacts the same state rows and fields with generic scope=true, including deleted bytes
+ ↓  infra  src/infra/database-engine/git-backup-secrets.postgres.test.ts > Git backup secret exclusion across engines > redacts the same agent rows and fields with generic scope=true, including deleted bytes
+ ↓  infra  src/infra/database-engine/update-preflight.conformance.test.ts > PostgreSQL updater preflight and exact recovery > reads PostgreSQL inventory and a retained legacy SQLite agent without changing the anchor
+ ↓  infra  src/infra/database-engine/update-preflight.conformance.test.ts > PostgreSQL updater preflight and exact recovery > refuses an unsupported state family before disturbing the previous Gateway
+ ↓  infra  src/infra/database-engine/update-preflight.conformance.test.ts > PostgreSQL updater preflight and exact recovery > five-family recovery below candidate admission > admits homogeneous PostgreSQL with a retained agent without disturbing the previous Gateway
+ ↓  infra  src/infra/database-engine/update-preflight.conformance.test.ts > PostgreSQL updater preflight and exact recovery > five-family recovery below candidate admission > seals an original recovery baseline containing all PostgreSQL families
+ ↓  infra  src/infra/database-engine/update-preflight.conformance.test.ts > PostgreSQL updater preflight and exact recovery > five-family recovery below candidate admission > captures a retained PostgreSQL agent and restores local credentials after candidate failure while preserving current update history
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses unknown migration without exposing payloads or changing the source 151ms
+ ↓  infra  src/infra/database-engine/matrix-roots.postgres.test.ts > Matrix declared account-root database portability > ports every retained token/account root with the state family and restores fresh namespaces
+ ↓  infra  src/infra/database-engine/matrix-roots.postgres.test.ts > Matrix declared account-root database portability > resume recovers a partially published multi-root port and blocks ordinary startup meanwhile
+ ↓  infra  src/infra/database-engine/matrix-roots.postgres.test.ts > Matrix declared account-root database portability > rollback recovers a partially published multi-root port and blocks ordinary startup meanwhile
+ ✓  infra  src/infra/database-engine/agent-port.test.ts > discovers default, shared auth, explicit session and retained agent stores without changing the registry 4367ms
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses unknown table without exposing payloads or changing the source 112ms
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses missing table without exposing payloads or changing the source 143ms
+ ↓  infra  src/infra/database-engine/memory-public.postgres.test.ts > public PostgreSQL memory manager > indexes, searches, forgets, resets, and re-admits through public entry points
+ ↓  infra  src/infra/database-engine/memory-public.postgres.test.ts > public PostgreSQL memory manager > serves explicit keyword-only memory without pgvector and rejects semantic bootstrap by name
+ ↓  infra  src/infra/database-engine/memory-public.postgres.test.ts > public PostgreSQL memory manager > refuses configured trigram search without pg_trgm and names the administrator action
+ ↓  infra  src/infra/database-engine/memory-public.postgres.test.ts > public PostgreSQL memory manager > refuses full-text admission without unaccent and names the administrator action
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses invalid UTF8 without exposing payloads or changing the source 117ms
+ ↓  infra  src/infra/database-engine/maintenance-custody.conformance.test.ts > PostgreSQL Doctor maintenance custody > runs the config-machine-state step and a committed data step under reusable custody
+ ↓  infra  src/infra/database-engine/maintenance-custody.conformance.test.ts > PostgreSQL Doctor maintenance custody > refuses a live Gateway owner from a second anchor, including a newer PostgreSQL schema
+ ↓  infra  src/infra/database-engine/maintenance-custody.conformance.test.ts > PostgreSQL Doctor maintenance custody > refuses maintenance when the stable PostgreSQL lease contract is missing
+ ↓  infra  src/infra/database-engine/port-command.mixed.integration.test.ts > family-scoped database port > state with an unrelated PostgreSQL family > round-trips the selected family
+ ↓  infra  src/infra/database-engine/port-command.mixed.integration.test.ts > family-scoped database port > workboard with an unrelated PostgreSQL family > round-trips the selected family
+ ↓  infra  src/infra/database-engine/port-command.mixed.integration.test.ts > family-scoped database port > recovers and backs up scoped PostgreSQL agents with SQLite state
+ ↓  infra  src/infra/database-engine/port-command.mixed.integration.test.ts > family-scoped database port > interrupted scoped publication > blocks startup and supports resume
+ ↓  infra  src/infra/database-engine/port-command.mixed.integration.test.ts > family-scoped database port > interrupted scoped publication > blocks startup and supports rollback
+ ✓  infra  src/infra/database-engine/maintenance-custody.conformance.test.ts > preserves the SQLite maintenance inspection statements byte for byte 396ms
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses unknown column without exposing payloads or changing the source 116ms
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > refuses literal NUL without exposing payloads or changing the source 120ms
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=sqlite lifecycle conformance > records agent leases in the selected shared owner and releases them on close
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=sqlite lifecycle conformance > vetoes a binding that loses live authority before either deletion commits
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=sqlite lifecycle conformance > compensates a committed shared binding only after a confirmed agent rollback
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=sqlite lifecycle conformance > holds the shared retirement guard through the actual agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=sqlite lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at shared commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=sqlite lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=postgres lifecycle conformance > records agent leases in the selected shared owner and releases them on close
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=postgres lifecycle conformance > vetoes a binding that loses live authority before either deletion commits
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=postgres lifecycle conformance > compensates a committed shared binding only after a confirmed agent rollback
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=postgres lifecycle conformance > holds the shared retirement guard through the actual agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=postgres lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at shared commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=postgres lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=sqlite lifecycle conformance > records agent leases in the selected shared owner and releases them on close
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=sqlite lifecycle conformance > vetoes a binding that loses live authority before either deletion commits
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=sqlite lifecycle conformance > compensates a committed shared binding only after a confirmed agent rollback
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=sqlite lifecycle conformance > holds the shared retirement guard through the actual agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=sqlite lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at shared commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=postgres agent=sqlite lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=postgres lifecycle conformance > records agent leases in the selected shared owner and releases them on close
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=postgres lifecycle conformance > vetoes a binding that loses live authority before either deletion commits
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=postgres lifecycle conformance > compensates a committed shared binding only after a confirmed agent rollback
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=postgres lifecycle conformance > holds the shared retirement guard through the actual agent commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=postgres lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at shared commit
+ ↓  infra  src/infra/database-engine/mixed-agent-lifecycle.conformance.test.ts > state=sqlite agent=postgres lifecycle conformance > keeps separate outcomes and refuses replay after worker loss at agent commit
+ ✓  infra  src/infra/database-engine/port-command.test.ts > workboard port worker > maps foreign-key failure without exposing payloads or changing the source 319ms
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=sqlite agent=sqlite readers > cold-opens each family and preserves retained identity across close/reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=sqlite agent=sqlite readers > reads explicit and shared-main auth with warm readers and cold schema inspection
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=sqlite agent=sqlite readers > reuses prewarmed transcript readers and search after committed writes and reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=postgres agent=postgres readers > cold-opens each family and preserves retained identity across close/reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=postgres agent=postgres readers > reads explicit and shared-main auth with warm readers and cold schema inspection
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=postgres agent=postgres readers > reuses prewarmed transcript readers and search after committed writes and reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=postgres agent=sqlite readers > cold-opens each family and preserves retained identity across close/reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=postgres agent=sqlite readers > reads explicit and shared-main auth with warm readers and cold schema inspection
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=postgres agent=sqlite readers > reuses prewarmed transcript readers and search after committed writes and reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=sqlite agent=postgres readers > cold-opens each family and preserves retained identity across close/reopen
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=sqlite agent=postgres readers > reads explicit and shared-main auth with warm readers and cold schema inspection
+ ↓  infra  src/infra/database-engine/mixed-agent-readers.conformance.test.ts > state=sqlite agent=postgres readers > reuses prewarmed transcript readers and search after committed writes and reopen
+ ↓  infra  src/infra/database-engine/backup.test.ts > matched PostgreSQL backup and update recovery > restores user and Git exports and exact updater state while preserving source data and sidecars
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > round-trips canonical cells, IDs, cursors and allocation facts through the command
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a capture failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a migrate failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a stage failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a verify failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a replacement failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a config failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a config committed failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a initial manifest failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a preparing revision failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a publishing revision failure
+ ↓  infra  src/infra/database-engine/port-command.recovery.integration.test.ts > database port command PostgreSQL conformance > retains originals and recovers after a complete revision failure
+ ↓  infra  src/infra/database-engine/session-search-product.postgres.test.ts > PostgreSQL session search product flow > applies agent, session and role scope before the result cap
+ ↓  infra  src/infra/database-engine/session-search-product.postgres.test.ts > PostgreSQL session search product flow > folds diacritics, completes prefixes, ranks proximity and treats operators literally
+ ↓  infra  src/infra/database-engine/session-search-product.postgres.test.ts > PostgreSQL session search product flow > publishes appends, rebuilds the active branch and removes deleted transcripts
+ ✓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command custody and inspection > takes no persistent action for a dry run, including disabled workboard stores 949ms
+ ✓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command custody and inspection > refuses an already hosted owner before touching config or stores 87ms
+ ✓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command custody and inspection > refuses foreign physical custody instead of dispatching or mutating 273ms
+ ✓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command custody and inspection > refuses insufficient local capacity before capture 317ms
+ ✓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command custody and inspection > refuses aliased source paths without exposing database payloads 167ms
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > reconnects after a committed PostgreSQL transaction loses its reply before authorizing the anchor
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > rolls back a preparing manifest including an external configured store before any target has been verified
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > resumes an interrupted schema-2 migration using its retained migration timestamp
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > rolls back a schema-2 source after its committed WAL has been checkpointed
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > rebuilds an unverified interrupted anchor after verifying its committed namespace
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > recovers the whole registered store set after its second replacement fails (resume)
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > recovers the whole registered store set after its second replacement fails (rollback)
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > rolls back a reverse port with retained PostgreSQL writes (missing namespace: false)
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > rolls back a reverse port with retained PostgreSQL writes (missing namespace: true)
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > restores the authored environment engine value after a committed config write fails
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > restores the authored absent engine value after a committed config write fails
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > restores the authored changed environment engine value after a committed config write fails
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > resumes a complete active manifest by archiving without replacing stores or config
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > refuses source drift before the first replacement
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > refuses config drift before the first replacement
+ ↓  infra  src/infra/database-engine/port-command.integration.test.ts > database port command PostgreSQL conformance > refuses a changed recovery artifact without changing the original
+ ✓  infra  src/infra/database-engine/mixed-mode.conformance.test.ts > boots the unchanged SQLite owners, captures only SQLite statements, and reopens persisted data 709ms
+ ↓  infra  src/infra/database-engine/mixed-mode.conformance.test.ts > mixed-mode boot conformance > uses homogeneous overrides for lifecycle connections
+ ↓  infra  src/infra/database-engine/mixed-mode.conformance.test.ts > mixed-mode boot conformance > boots fresh PostgreSQL state with real SQLite agent and Workboard owners
+ ↓  infra  src/infra/database-engine/mixed-mode.conformance.test.ts > mixed-mode boot conformance > boots fresh SQLite state with the PostgreSQL Workboard opener and preserves selection on reopen
+ ↓  infra  src/infra/database-engine/mixed-mode.conformance.test.ts > mixed-mode boot conformance > refuses an existing SQLite Workboard override with the port remedy and retains its data
+
+ Test Files  14 passed | 23 skipped (37)
+      Tests  62 passed | 152 skipped (214)
+   Start at  22:11:56
+   Duration  11.25s (transform 43%, import 28%, setup 17%, tests 13%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 3 Vitest shards in 20.97s

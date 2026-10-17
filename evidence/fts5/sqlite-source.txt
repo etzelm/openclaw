@@ -1,0 +1,80 @@
+=== sqlite/sqlite tag version-3.53.0 ext/fts5/fts5_storage.c:100-131 (fetched from raw.githubusercontent.com)
+    const char *azStmt[] = {
+      "SELECT %s FROM %s T WHERE T.%Q >= ? AND T.%Q <= ? ORDER BY T.%Q ASC",
+      "SELECT %s FROM %s T WHERE T.%Q <= ? AND T.%Q >= ? ORDER BY T.%Q DESC",
+      "SELECT %s FROM %s T WHERE T.%Q=?",               /* LOOKUP  */
+      "SELECT %s FROM %s T WHERE T.%Q=?",               /* LOOKUP2  */
+
+      "INSERT INTO %Q.'%q_content' VALUES(%s)",         /* INSERT_CONTENT  */
+      "REPLACE INTO %Q.'%q_content' VALUES(%s)",        /* REPLACE_CONTENT */
+      "DELETE FROM %Q.'%q_content' WHERE id=?",         /* DELETE_CONTENT  */
+      "REPLACE INTO %Q.'%q_docsize' VALUES(?,?%s)",     /* REPLACE_DOCSIZE  */
+      "DELETE FROM %Q.'%q_docsize' WHERE id=?",         /* DELETE_DOCSIZE  */
+
+      "SELECT sz%s FROM %Q.'%q_docsize' WHERE id=?",    /* LOOKUP_DOCSIZE  */
+
+      "REPLACE INTO %Q.'%q_config' VALUES(?,?)",        /* REPLACE_CONFIG */
+      "SELECT %s FROM %s AS T",                         /* SCAN */
+    };
+    Fts5Config *pC = p->pConfig;
+    char *zSql = 0;
+
+    assert( ArraySize(azStmt)==ArraySize(p->aStmt) );
+
+    switch( eStmt ){
+      case FTS5_STMT_SCAN:
+        zSql = sqlite3_mprintf(azStmt[eStmt], 
+            pC->zContentExprlist, pC->zContent
+        );
+        break;
+
+      case FTS5_STMT_SCAN_ASC:
+      case FTS5_STMT_SCAN_DESC:
+        zSql = sqlite3_mprintf(azStmt[eStmt], pC->zContentExprlist, 
+
+=== sqlite/sqlite tag version-3.53.0 ext/fts5/fts5_main.c:495
+#define FTS5_PLAN_SCAN           5       /* No usable constraint */
+=== ext/fts5/fts5_main.c:808-813
+}
+
+static int fts5StmtType(Fts5Cursor *pCsr){
+  if( pCsr->ePlan==FTS5_PLAN_SCAN ){
+    return (pCsr->bDesc) ? FTS5_STMT_SCAN_DESC : FTS5_STMT_SCAN_ASC;
+  }
+=== ext/fts5/fts5_main.c:1622-1632
+    }
+  }else if( pConfig->zContent==0 ){
+    fts5SetVtabError(pTab,"%s: table does not support scanning",pConfig->zName);
+    rc = SQLITE_ERROR;
+  }else{
+    /* This is either a full-table scan (ePlan==FTS5_PLAN_SCAN) or a lookup
+    ** by rowid (ePlan==FTS5_PLAN_ROWID).  */
+    pCsr->ePlan = (pRowidEq ? FTS5_PLAN_ROWID : FTS5_PLAN_SCAN);
+    rc = sqlite3Fts5StorageStmt(
+        pTab->pStorage, fts5StmtType(pCsr), &pCsr->pStmt, &pTab->p.base.zErrMsg
+    );
+
+=== ext/fts5/fts5_storage.c:655-665
+
+/*
+** Insert a record into the %_docsize table. Specifically, do:
+**
+**   INSERT OR REPLACE INTO %_docsize(id, sz) VALUES(iRowid, pBuf);
+**
+** If there is no %_docsize table (as happens if the columnsize=0 option
+** is specified when the FTS5 table is created), this function is a no-op.
+*/
+static int fts5StorageInsertDocsize(
+  Fts5Storage *p,                 /* Storage module to write to */
+=== ext/fts5/fts5_storage.c:765-775
+      }
+    }else{
+      rc = fts5StorageDeleteFromIndex(p, iDel, apVal, bSaveRow);
+    }
+  }
+
+  /* Delete the %_docsize record */
+  if( rc==SQLITE_OK && pConfig->bColumnsize ){
+    rc = fts5StorageGetStmt(p, FTS5_STMT_DELETE_DOCSIZE, &pDel, 0);
+    if( rc==SQLITE_OK ){
+      sqlite3_bind_int64(pDel, 1, iDel);

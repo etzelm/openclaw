@@ -1,0 +1,9 @@
+$ git diff --stat b12191867f0 5b57dfa404b   (measured AFTER build commit vs final commit)
+ .../memory-host-sdk/src/host/memory-schema-fts-reconcile.test.ts   | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+$ git diff --quiet b12191867f0 5b57dfa404b -- src/infra/database-engine/sqlite-search-schema.ts; echo $?
+0
+$ git diff --stat d4d2c3dd1e3 5b57dfa404b
+ .../src/host/memory-schema-fts-reconcile.test.ts   | 56 +++++++++++++++++++++-
+ src/infra/database-engine/sqlite-search-schema.ts  |  4 +-
+ 2 files changed, 58 insertions(+), 2 deletions(-)

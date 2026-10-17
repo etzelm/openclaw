@@ -1,0 +1,46 @@
+store: dev
+node: v24.21.0
+sqlite: 3.53.4
+file_bytes: 430518272
+page_size: 4096
+memory_index_chunks rows: 6012
+memory_index_chunks_fts COUNT(*): 6012
+memory_index_chunks_fts_docsize COUNT(*): 6012
+DDL memory_index_chunks_fts: CREATE VIRTUAL TABLE memory_index_chunks_fts USING fts5( text, id UNINDEXED, path UNINDEXED, source UNINDEXED, model UNINDEXED, start_line UNINDEXED, end_line UNINDEXED )
+DDL memory_index_chunks_fts_content: CREATE TABLE 'memory_index_chunks_fts_content'(id INTEGER PRIMARY KEY, c0, c1, c2, c3, c4, c5, c6)
+DDL memory_index_chunks_fts_docsize: CREATE TABLE 'memory_index_chunks_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)
+dbstat memory_index_chunks_fts_content: bytes=9265152 pages=2262
+dbstat memory_index_chunks_fts_docsize: bytes=110592 pages=27
+plan BEFORE (FROM memory_index_chunks_fts): id=1 parent=0 SCAN CONSTANT ROW
+plan BEFORE (FROM memory_index_chunks_fts): id=4 parent=0 SCALAR SUBQUERY 1
+plan BEFORE (FROM memory_index_chunks_fts): id=10 parent=4 SCAN memory_index_chunks USING COVERING INDEX idx_memory_index_chunks_source
+plan BEFORE (FROM memory_index_chunks_fts): id=17 parent=0 SCALAR SUBQUERY 2
+plan BEFORE (FROM memory_index_chunks_fts): id=22 parent=17 SCAN memory_index_chunks_fts VIRTUAL TABLE INDEX 0:
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=1 parent=0 SCAN CONSTANT ROW
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=4 parent=0 SCALAR SUBQUERY 1
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=10 parent=4 SCAN memory_index_chunks USING COVERING INDEX idx_memory_index_chunks_source
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=17 parent=0 SCALAR SUBQUERY 2
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=23 parent=17 SCAN memory_index_chunks_fts_docsize
+store: main
+node: v24.21.0
+sqlite: 3.53.4
+file_bytes: 4855853056
+page_size: 4096
+memory_index_chunks rows: 43490
+memory_index_chunks_fts COUNT(*): 43490
+memory_index_chunks_fts_docsize COUNT(*): 43490
+DDL memory_index_chunks_fts: CREATE VIRTUAL TABLE memory_index_chunks_fts USING fts5( text, id UNINDEXED, path UNINDEXED, source UNINDEXED, model UNINDEXED, start_line UNINDEXED, end_line UNINDEXED )
+DDL memory_index_chunks_fts_content: CREATE TABLE 'memory_index_chunks_fts_content'(id INTEGER PRIMARY KEY, c0, c1, c2, c3, c4, c5, c6)
+DDL memory_index_chunks_fts_docsize: CREATE TABLE 'memory_index_chunks_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)
+dbstat memory_index_chunks_fts_content: bytes=84242432 pages=20567
+dbstat memory_index_chunks_fts_docsize: bytes=864256 pages=211
+plan BEFORE (FROM memory_index_chunks_fts): id=1 parent=0 SCAN CONSTANT ROW
+plan BEFORE (FROM memory_index_chunks_fts): id=4 parent=0 SCALAR SUBQUERY 1
+plan BEFORE (FROM memory_index_chunks_fts): id=10 parent=4 SCAN memory_index_chunks USING COVERING INDEX idx_memory_index_chunks_source
+plan BEFORE (FROM memory_index_chunks_fts): id=17 parent=0 SCALAR SUBQUERY 2
+plan BEFORE (FROM memory_index_chunks_fts): id=22 parent=17 SCAN memory_index_chunks_fts VIRTUAL TABLE INDEX 0:
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=1 parent=0 SCAN CONSTANT ROW
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=4 parent=0 SCALAR SUBQUERY 1
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=10 parent=4 SCAN memory_index_chunks USING COVERING INDEX idx_memory_index_chunks_source
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=17 parent=0 SCALAR SUBQUERY 2
+plan AFTER (FROM memory_index_chunks_fts_docsize): id=23 parent=17 SCAN memory_index_chunks_fts_docsize

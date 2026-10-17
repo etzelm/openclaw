@@ -1,0 +1,41 @@
+# measure-admission warm store=main node=v24.21.0 store_bytes=4855853056
+# before=<scratch>/t1-02-fts-count-main after=<scratch>/t1-02-fts-count
+load gate: passed; waited 0 s; load1=5.39
+## round 1 start: 21:24  up 4 days, 13:24, 1 user, load averages: 5.39 24.10 35.81
+warmup r1 before 1: admit_ms=1844.144 path=first-admission total_changes=0
+warmup r1 after 1: admit_ms=51.92 path=first-admission total_changes=0
+warmup r1 before 2: admit_ms=77.226 path=first-admission total_changes=0
+warmup r1 after 2: admit_ms=51.892 path=first-admission total_changes=0
+warm r1 before 1: admit_ms=75.47 reconcile_count_stmt_ms=24.423 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 after 1: admit_ms=51.685 reconcile_count_stmt_ms=0.471 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 before 2: admit_ms=75.621 reconcile_count_stmt_ms=23.969 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 after 2: admit_ms=52.985 reconcile_count_stmt_ms=0.551 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 before 3: admit_ms=79.094 reconcile_count_stmt_ms=25.784 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 after 3: admit_ms=52.26 reconcile_count_stmt_ms=0.469 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 before 4: admit_ms=78.048 reconcile_count_stmt_ms=25.097 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 after 4: admit_ms=51.226 reconcile_count_stmt_ms=0.557 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 before 5: admit_ms=78.218 reconcile_count_stmt_ms=25.308 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r1 after 5: admit_ms=52.677 reconcile_count_stmt_ms=0.479 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+round 1 before: median admit_ms=78.048 raw=[75.47, 75.621, 79.094, 78.048, 78.218] | median reconcile_count_stmt_ms=25.097 raw=[24.423, 23.969, 25.784, 25.097, 25.308]
+round 1 after: median admit_ms=52.26 raw=[51.685, 52.985, 52.26, 51.226, 52.677] | median reconcile_count_stmt_ms=0.479 raw=[0.471, 0.551, 0.469, 0.557, 0.479]
+## round 1 end: 21:24  up 4 days, 13:24, 1 user, load averages: 5.26 23.45 35.45
+load gate: passed; waited 0 s; load1=5.26
+## round 2 start: 21:24  up 4 days, 13:24, 1 user, load averages: 5.26 23.45 35.45
+warmup r2 before 1: admit_ms=76.771 path=first-admission total_changes=0
+warmup r2 after 1: admit_ms=49.816 path=first-admission total_changes=0
+warmup r2 before 2: admit_ms=72.666 path=first-admission total_changes=0
+warmup r2 after 2: admit_ms=51.429 path=first-admission total_changes=0
+warm r2 before 1: admit_ms=77.412 reconcile_count_stmt_ms=25.379 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 after 1: admit_ms=52.073 reconcile_count_stmt_ms=0.526 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 before 2: admit_ms=75.507 reconcile_count_stmt_ms=24.356 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 after 2: admit_ms=51.847 reconcile_count_stmt_ms=0.517 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 before 3: admit_ms=75.592 reconcile_count_stmt_ms=23.792 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 after 3: admit_ms=52.976 reconcile_count_stmt_ms=0.508 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 before 4: admit_ms=75.627 reconcile_count_stmt_ms=24.387 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 after 4: admit_ms=52.408 reconcile_count_stmt_ms=0.463 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 before 5: admit_ms=76.117 reconcile_count_stmt_ms=24.581 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+warm r2 after 5: admit_ms=52.068 reconcile_count_stmt_ms=0.519 path=first-admission total_changes=0 ftsAvailable=true counts_equal=true
+round 2 before: median admit_ms=75.627 raw=[77.412, 75.507, 75.592, 75.627, 76.117] | median reconcile_count_stmt_ms=24.387 raw=[25.379, 24.356, 23.792, 24.387, 24.581]
+round 2 after: median admit_ms=52.073 raw=[52.073, 51.847, 52.976, 52.408, 52.068] | median reconcile_count_stmt_ms=0.517 raw=[0.526, 0.517, 0.508, 0.463, 0.519]
+## round 2 end: 21:24  up 4 days, 13:24, 1 user, load averages: 5.08 23.11 35.26
+DONE

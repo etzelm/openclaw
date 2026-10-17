@@ -1,0 +1,26 @@
+# base tree: d4d2c3dd1e3e29b7bd19914e3c9c47d40c5dde77, status clean:        0 entries
+# CMD1: node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base origin/main
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+exit=1
+# CMD2: node --import tsx scripts/check-deadcode-exports.mts  (as in check-changed.mts:936; same as the branch run)
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  src/config/sessions/combined-store-paths.ts: discoveryReadOptions
+  src/shared/node-list-types.ts: NODE_APPROVAL_STATE_VALUES
+  src/state/user-profiles.types.ts: UserProfileAuthority
+Delete the exports or model their real production consumers in Knip.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  extensions/slack/src/monitor/slash.commands.test-harness.ts: getFirstActionElementFromCommand
+  src/config/sessions/combined-store-paths.ts: discoveryReadOptions
+  src/shared/node-list-types.ts: NODE_APPROVAL_STATE_VALUES
+  src/state/user-profiles.types.ts: UserProfileAuthority
+Delete the exports or model their real production consumers in Knip.
+exit=1
