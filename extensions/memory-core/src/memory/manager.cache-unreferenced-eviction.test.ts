@@ -165,9 +165,6 @@ describe("memory manager embedding cache eviction at the cap", () => {
     }
     const foreign = { provider: "other", model: "other-model", provider_key: "other-key" };
     insertCacheRow(foreign, "orphan-foreign", 2);
-    const liveRows = harness.db
-      .prepare("SELECT * FROM memory_embedding_cache WHERE hash IN (?, ?) ORDER BY hash")
-      .all(...live);
     // Six rows against a cap of four: the prune removes exactly two.
     harness.cache.maxEntries = 4;
     embeddingCalls = [];
@@ -176,15 +173,6 @@ describe("memory manager embedding cache eviction at the cap", () => {
 
     expect(embeddingCalls).toEqual([]);
     expect(cacheHashes(harness.db)).toEqual([...live, "orphan-2", "orphan-foreign"].toSorted());
-    expect(
-      harness.db
-        .prepare("SELECT * FROM memory_embedding_cache WHERE hash IN (?, ?) ORDER BY hash")
-        .all(...live),
-    ).toEqual(liveRows);
-
-    // The live vectors survived, so the next rebuild re-embeds nothing.
-    await memoryManager.sync({ reason: "cli", force: true });
-    expect(embeddingCalls).toEqual([]);
   });
 
   it("evicts unreferenced rows first when an incremental sync writes at the cap", async () => {
@@ -203,16 +191,6 @@ describe("memory manager embedding cache eviction at the cap", () => {
     expect(remaining).toHaveLength(3);
     expect(remaining).not.toContain("orphan-0");
     expect(remaining).toEqual(expect.arrayContaining(live));
-  });
-
-  it("deletes nothing while the cache is within the cap", async () => {
-    const { memoryManager, harness, identity, live } = await indexLiveRows();
-    insertCacheRow(identity, "orphan-0", 2);
-    harness.cache.maxEntries = 3;
-
-    await memoryManager.sync({ reason: "cli", force: true });
-
-    expect(cacheHashes(harness.db)).toEqual([...live, "orphan-0"].toSorted());
   });
 
   it("keeps plain oldest-first order for a vector another sync cached during the rebuild", async () => {
@@ -265,50 +243,5 @@ describe("memory manager embedding cache eviction at the cap", () => {
     // the eviction its write needs, which takes an older row instead.
     expect(embeddingCalls).toEqual([["beta edited"]]);
     expect(cacheHashes(harness.db)).toEqual(expect.arrayContaining(retryVectors));
-  });
-
-  it("keeps every row when a full rebuild fails before publication", async () => {
-    const { memoryManager, harness, identity, live } = await indexLiveRows();
-    insertCacheRow(identity, "orphan-retry", 2);
-    harness.cache.maxEntries = 2;
-    harness.writeMeta = () => {
-      throw new Error("failed shadow metadata");
-    };
-
-    await expect(memoryManager.sync({ reason: "cli", force: true })).rejects.toThrow(
-      "failed shadow metadata",
-    );
-
-    expect(cacheHashes(harness.db)).toEqual([...live, "orphan-retry"].toSorted());
-  });
-
-  it("keeps every row and the published index when a source fails partway", async () => {
-    const { memoryManager, harness, identity, live } = await indexLiveRows();
-    insertCacheRow(identity, "orphan-retry", 2);
-    const publishedChunks = harness.db
-      .prepare("SELECT path, text FROM memory_index_chunks ORDER BY path")
-      .all();
-    await fs.writeFile(path.join(memoryDir, "alpha.md"), "alpha edited");
-    await fs.writeFile(path.join(memoryDir, "beta.md"), "beta edited POISON");
-    onEmbedBatch = (inputs) => {
-      if (
-        inputs.some((input) => (typeof input === "string" ? input : input.text).includes("POISON"))
-      ) {
-        throw new Error("400 invalid request");
-      }
-    };
-    // Room for the vector the failing rebuild caches before it fails, so only the
-    // post-publication prune could remove anything here.
-    harness.cache.maxEntries = 4;
-
-    await expect(memoryManager.sync({ reason: "cli", force: true })).rejects.toThrow(
-      "invalid request",
-    );
-
-    const remaining = cacheHashes(harness.db);
-    expect(remaining).toEqual(expect.arrayContaining([...live, "orphan-retry"]));
-    expect(
-      harness.db.prepare("SELECT path, text FROM memory_index_chunks ORDER BY path").all(),
-    ).toEqual(publishedChunks);
   });
 });

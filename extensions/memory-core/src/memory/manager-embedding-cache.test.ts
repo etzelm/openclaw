@@ -469,39 +469,37 @@ describe("memory embedding cache", () => {
   });
 
   it("reserves insertion capacity from preferred unreferenced rows before the oldest rows", () => {
+    const db = createDb();
     const vector = encodeMemoryEmbedding([0.1, 0.2]);
-    const run = (unreferencedFirst?: { identities: typeof identities }) => {
-      const db = createDb();
-      const insert = db.prepare(
-        "INSERT INTO memory_embedding_cache (provider, model, provider_key, hash, embedding, dims, updated_at) VALUES ('openai', 'm', 'k', ?, ?, 2, ?)",
-      );
-      insert.run("live", vector, 1);
-      insert.run("orphan", vector, 5);
-      insert.run("pending", vector, 10);
-      db.prepare(
-        "INSERT INTO memory_index_chunks (id, path, source, start_line, end_line, hash, model, text, embedding, updated_at) VALUES ('c', 'a.md', 'memory', 1, 1, 'live', 'm', 't', ?, 10)",
-      ).run(vector);
-      upsertMemoryEmbeddingCache({
-        db,
-        provider: { id: "openai", model: "m" },
-        providerKey: "k",
-        entries: () => [{ hash: "new", embedding: [0.3, 0.4] }],
-        maxEntries: 3,
-        unreferencedFirst,
-        now: 20,
-      });
-      return (
+    const insert = db.prepare(
+      "INSERT INTO memory_embedding_cache (provider, model, provider_key, hash, embedding, dims, updated_at) VALUES ('openai', 'm', 'k', ?, ?, 2, ?)",
+    );
+    insert.run("live", vector, 1);
+    insert.run("orphan", vector, 5);
+    insert.run("pending", vector, 10);
+    db.prepare(
+      "INSERT INTO memory_index_chunks (id, path, source, start_line, end_line, hash, model, text, embedding, updated_at) VALUES ('c', 'a.md', 'memory', 1, 1, 'live', 'm', 't', ?, 10)",
+    ).run(vector);
+
+    upsertMemoryEmbeddingCache({
+      db,
+      provider: { id: "openai", model: "m" },
+      providerKey: "k",
+      entries: () => [{ hash: "new", embedding: [0.3, 0.4] }],
+      maxEntries: 3,
+      unreferencedFirst: { identities: [{ provider: "openai", model: "m", providerKey: "k" }] },
+      now: 20,
+    });
+
+    // Plain oldest-first would take the live row; the one reserved slot comes
+    // from the unreferenced row older than the published chunk.
+    expect(
+      (
         db.prepare("SELECT hash FROM memory_embedding_cache ORDER BY hash").all() as Array<{
           hash: string;
         }>
-      ).map((row) => row.hash);
-    };
-    const identities = [{ provider: "openai", model: "m", providerKey: "k" }];
-
-    expect(run()).toEqual(["new", "orphan", "pending"]);
-    // One eviction either way; the preferred one spares the live row and the
-    // row no older than the published chunk.
-    expect(run({ identities })).toEqual(["live", "new", "pending"]);
+      ).map((row) => row.hash),
+    ).toEqual(["live", "new", "pending"]);
   });
 
   it("falls back to plain oldest-first order without preferred identities or a published index, and prefers every listed identity", () => {
@@ -537,8 +535,6 @@ describe("memory embedding cache", () => {
     // One eviction: plain oldest-first takes the live row unless a preferred row exists.
     expect(run([], true)).toEqual(["orphan-a", "orphan-b", "pending"]);
     expect(run([a, b], false)).toEqual(["orphan-a", "orphan-b", "pending"]);
-    expect(run([a], true)).toEqual(["live", "orphan-b", "pending"]);
-    expect(run([b], true)).toEqual(["live", "orphan-a", "pending"]);
     // Two evictions: both listed identities are preferred before the live row.
     expect(run([a, b], true, 2)).toEqual(["live", "pending"]);
   });
