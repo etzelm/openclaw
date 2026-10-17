@@ -1,5 +1,5 @@
 import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { getAdmittedSqliteSchemaFacts } from "../../infra/sqlite-schema-facts.js";
+import { getAdmittedSqlSchemaFacts } from "../../infra/sqlite-schema-facts.js";
 import { freezeJsonSnapshot } from "../../shared/immutable-data.js";
 import { readOpenClawAgentDatabaseIdentity } from "../../state/openclaw-agent-db-identity.js";
 import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
@@ -126,12 +126,13 @@ export function prepareSessionEntryReplacementPublication(
         ],
         hasBoard: postimage?.sideTables.hasBoard ?? committed?.row.board_present === 1,
         activitySummaryWatermark: readSessionActivitySummary(projectedEntry)
-          ? readSessionTranscriptWatermarkInDatabase(database, projectedEntry.sessionId)
+          ? (postimage?.transcriptWatermark ??
+            readSessionTranscriptWatermarkInDatabase(database, projectedEntry.sessionId))
           : undefined,
       }),
     );
   }
-  const source = getAdmittedSqliteSchemaFacts(database.db)
+  const source = getAdmittedSqlSchemaFacts(database.db)
     ? captureSessionEntryPublicationSource(database.db, {
         ...readOpenClawAgentDatabaseIdentity(database),
         // Actor receipts carry the complete postimage at the native writer revision.
