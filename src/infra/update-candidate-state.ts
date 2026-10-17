@@ -46,7 +46,6 @@ import {
   type UpdateCandidatePluginCodeLink,
 } from "./update-candidate-plugin-code-links.js";
 import {
-  createUpdateStateIoReporter,
   createUpdateStateSnapshotReporter,
   type UpdateStateInspectionProgress,
 } from "./update-candidate-state.diagnostics.js";
@@ -85,13 +84,15 @@ type CandidateStateDatabase = Pick<
   "agent_databases" | "agent_database_leases" | "state_leases"
 >;
 
-const UpdateCandidateStateInventorySchema = z
-  .array(z.tuple([z.string(), StateDatabaseDiscoverySchema]))
-  .transform((entries) => new Map(entries));
 export const UpdateCandidateSnapshotInventorySchema = z.object({
-  databases: UpdateCandidateStateInventorySchema,
+  databases: z
+    .array(z.tuple([z.string(), StateDatabaseDiscoverySchema]))
+    .transform((entries) => new Map(entries)),
   pluginBytes: z.number().nonnegative(),
   pluginPlan: z.literal(UPDATE_CANDIDATE_PLUGIN_PLAN_FILENAME),
+  // The installed driver budgets the candidate worker's copy lifecycle.
+  // Omission retains the larger allowance used by released older workers.
+  snapshotSpace: z.literal("single-generation").optional(),
   // Published candidate workers before named snapshot warnings omit this field.
   warnings: z.array(z.string()).default([]),
 });
@@ -211,13 +212,7 @@ export async function readUpdateCandidateStateInventoryInProcess(
   const planPath = path.join(input.targetStateDir, UPDATE_CANDIDATE_PLUGIN_PLAN_FILENAME);
   await fs.writeFile(planPath, "", { mode: 0o600, flag: "wx" });
   let progressAt = Date.now();
-  const reportInventoryIo = createUpdateStateIoReporter(
-    input.stateDir,
-    "plugin inventory",
-    input.onProgress,
-  );
   const onProgress = async () => {
-    reportInventoryIo();
     const now = Date.now();
     if (now - progressAt < 1000) {
       return;
@@ -573,6 +568,7 @@ export async function snapshotUpdateCandidateState(
     candidateRoot: string;
     pluginPlanPath: string;
     databaseInventory: string[];
+    fullIntegrityCheck?: boolean;
     onProgress?: (progress: UpdateStateInspectionProgress) => void;
   },
 ): Promise<z.infer<typeof UpdateCandidateStateSnapshotSchema>> {
@@ -643,6 +639,21 @@ export async function snapshotUpdateCandidateState(
       sourcePath: snapshotSource,
       targetPath: target,
       sourceAcquisition: { mode: "isolated-process", stagingRoot: input.targetStateDir },
+      integrity:
+        snapshotSource === file
+          ? {
+              check: input.fullIntegrityCheck ? "full" : "quick",
+              tables:
+                file === shared
+                  ? [
+                      "migration_sources",
+                      "agent_database_leases",
+                      "state_leases",
+                      "agent_databases",
+                    ]
+                  : undefined,
+            }
+          : undefined,
       // The rehearsal is private and disposable; compaction would create another
       // full image and alter implicit row IDs before candidate migrations run.
       preserveRowIds: true,
@@ -716,7 +727,6 @@ export async function snapshotUpdateCandidateState(
   input.onProgress?.({ phase: "plugin snapshot", path: sourceRoot });
   const pluginPaths = await copyUpdateCandidatePlugins(plugins, {
     ...input,
-    onProgress: createUpdateStateIoReporter(sourceRoot, "plugin snapshot", input.onProgress),
     onCodeLink: (fact) => pluginCodeLinks.push(fact),
   });
   return {

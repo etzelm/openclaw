@@ -296,7 +296,12 @@ export async function monitorDiscordProvider(opts: MonitorDiscordOpts) {
               agentId: session.agentId,
               storedState: session.acp?.state,
               lastActivityAt: session.acp?.lastActivityAt,
-              providerSessionRuntime: discordProviderSessionRuntime,
+              providerSessionRuntime: {
+                getAcpSessionManager: discordProviderSessionRuntime.getAcpSessionManager,
+                isAcpRuntimeError: discordProviderSessionRuntime.isAcpRuntimeError,
+                rethrowIncognitoSessionError:
+                  discordProviderSessionRuntime.rethrowIncognitoSessionError,
+              },
             });
             if (probe.status === "uncertain") {
               uncertainProbeKeys.add(`${sessionKey}${probe.reason ? ` (${probe.reason})` : ""}`);
@@ -394,13 +399,13 @@ export async function monitorDiscordProvider(opts: MonitorDiscordOpts) {
     };
     let voiceManager: DiscordVoiceManager | null = null;
     if (voiceEnabled) {
+      const { DiscordVoiceManager } = await import("../voice/voice-runtime.js");
       const {
         DiscordVoiceGuildCreateListener,
-        DiscordVoiceManager,
         DiscordVoiceReadyListener,
         DiscordVoiceResumedListener,
         DiscordVoiceStateUpdateListener,
-      } = await import("../voice/voice-runtime.js");
+      } = await import("../voice/listeners.js");
       voiceManager = new DiscordVoiceManager({
         ...monitorOptions,
         scheduler,

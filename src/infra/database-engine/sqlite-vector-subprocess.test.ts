@@ -1,11 +1,12 @@
 import * as childProcess from "node:child_process";
 import { once } from "node:events";
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it, vi } from "vitest";
 import { ensureSqliteLibrarySelected } from "../bun-sqlite-library.js";
+import { readChildRuntimeViability } from "../child-runtime-viability.js";
 import { runVectorKnnInSubprocess } from "./sqlite-vector-subprocess.js";
 import { matchesVectorRow } from "./vector-contract.js";
 
@@ -13,6 +14,42 @@ vi.mock("node:child_process", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:child_process")>();
   return { ...actual, spawn: vi.fn(actual.spawn) };
 });
+
+it.skipIf(process.platform === "win32")(
+  "classifies a replaced runtime that cannot be executed before vector worker startup",
+  async () => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-vector-runtime-"));
+    const executable = process.execPath;
+    try {
+      process.execPath = path.join(directory, "node");
+      await fs.writeFile(process.execPath, "#!/bin/sh\nexit 0\n", { mode: 0o600 });
+      const run = () =>
+        runVectorKnnInSubprocess({
+          databasePath: "fixture:runtime-permission",
+          request: {
+            query: { sql: "", parameters: [] },
+            scopeCount: { sql: "", parameters: [] },
+            vectorTable: "vectors",
+            limit: 1,
+            candidateParameter: 0,
+            rowShape: {},
+          },
+          isRow: (_row): _row is never => false,
+        });
+      await expect(run()).rejects.toMatchObject({
+        code: "NODE_RUNTIME_UNAVAILABLE",
+        message: expect.stringContaining("Restart the Gateway."),
+      });
+      expect(readChildRuntimeViability().available).toBe(false);
+      const launches = vi.mocked(childProcess.spawn).mock.calls.length;
+      await expect(run()).rejects.toMatchObject({ code: "NODE_RUNTIME_UNAVAILABLE" });
+      expect(vi.mocked(childProcess.spawn)).toHaveBeenCalledTimes(launches);
+    } finally {
+      process.execPath = executable;
+      await fs.rm(directory, { recursive: true, force: true });
+    }
+  },
+);
 vi.mock("../bun-sqlite-library.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../bun-sqlite-library.js")>();
   return { ...actual, ensureSqliteLibrarySelected: vi.fn(actual.ensureSqliteLibrarySelected) };
@@ -73,9 +110,9 @@ it("forwards a discovered SQLite library through stdin without inheriting its en
 });
 
 it("budgets the page cache on the child's per-request read-only connection", async () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-vector-knn-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-vector-knn-"));
   const databasePath = path.join(directory, "memory.sqlite");
-  fs.writeFileSync(databasePath, "");
+  await fs.writeFile(databasePath, "");
   const rowShape = { cache_size: "number" } as const;
   try {
     // The child runs the plan's statement verbatim, so the statement can read back the
@@ -106,6 +143,6 @@ it("budgets the page cache on the child's per-request read-only connection", asy
         await closed;
       }
     }
-    fs.rmSync(directory, { force: true, recursive: true });
+    await fs.rm(directory, { force: true, recursive: true });
   }
 });
