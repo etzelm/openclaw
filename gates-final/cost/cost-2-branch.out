@@ -1,0 +1,33 @@
+# run 2 arm branch 1eb5dfb0566 load before: { 43.94 40.41 39.37 }
+$ pnpm test extensions/memory-core/src/memory/manager-search.test.ts --maxWorkers=1
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search.test.ts --maxWorkers=1
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-search-prepare
+
+[vitest-workers] local cache hit after 8231ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 454d14a026a4 in 8287ms (16684 inputs, 22044 outputs)
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword trigram fallback > applies fallback lexical boosts without exceeding bounded scores 40ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword boosted relevance > preserves unicode61 relevance differences before dated-note decay 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > returns FTS hits indexed under a different embedding model 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > does not return orphaned old-model FTS rows without a live chunk 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword relaxed question ranking > keeps the answer inside a bounded unicode61 candidate pool 22ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds unicode61 retries 10ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds trigram retries 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection 18ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection 16ms
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  15:10:18
+   Duration  14.38s (transform 95%, setup 2%, import 2%, tests 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 25.22s
+real 26.13
+user 10.31
+sys 52.66
+EXIT 0
+# load after: { 45.42 40.95 39.58 }

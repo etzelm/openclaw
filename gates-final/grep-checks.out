@@ -1,0 +1,9 @@
+# final commit 1eb5dfb0566
+$ git grep -n -e openclaw_memory_normalized_contains -e openclaw_memory_exact_path_specificity HEAD -- . ":!*.test.ts"
+HEAD:extensions/memory-core/src/memory/manager-search.ts:31:const EXACT_PATH_SPECIFICITY_SQL_FUNCTION = "openclaw_memory_exact_path_specificity";
+HEAD:extensions/memory-core/src/memory/manager-search.ts:32:const NORMALIZED_CONTAINS_SQL_FUNCTION = "openclaw_memory_normalized_contains";
+
+# callers of DatabaseSync open() (reopen of a connection object): production sources
+$ git grep -nE "(prototype\.open|(db|database|sqlite|connection|conn|reader|writer|handle)\.open\(\))" HEAD -- "src/**/*.ts" "extensions/**/*.ts" "packages/**/*.ts" ":!*.test.ts" ":!*test-support*"
+HEAD:src/infra/node-sqlite.ts:276:    sqlite.DatabaseSync.prototype.open.call(database);
+# the only hit is the reopen wrapper that openNodeSqliteDatabase installs on its connections; no production code calls it

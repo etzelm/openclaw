@@ -1,0 +1,31 @@
+# run 1 arm base a7e31844f2e load before: { 47.03 40.60 39.40 }
+$ pnpm test extensions/memory-core/src/memory/manager-search.test.ts --maxWorkers=1
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search.test.ts --maxWorkers=1
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-search-prepare-main
+
+[vitest-workers] local cache hit after 8268ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 7ebd1b7c5c43 in 8320ms (16684 inputs, 22044 outputs)
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword trigram fallback > applies fallback lexical boosts without exceeding bounded scores 34ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword boosted relevance > preserves unicode61 relevance differences before dated-note decay 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > returns FTS hits indexed under a different embedding model 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > does not return orphaned old-model FTS rows without a live chunk 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword relaxed question ranking > keeps the answer inside a bounded unicode61 candidate pool 20ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds unicode61 retries 11ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds trigram retries 8ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  15:10:01
+   Duration  13.08s (transform 95%, setup 3%, import 2%, tests 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 16.93s
+real 18.54
+user 9.79
+sys 26.97
+EXIT 0
+# load after: { 43.94 40.41 39.37 }

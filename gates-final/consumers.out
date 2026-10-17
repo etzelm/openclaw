@@ -1,0 +1,166 @@
+$ pnpm test extensions/memory-core/src/memory/manager-search-orchestration.test.ts extensions/memory-core/src/memory/manager-search-path.test.ts extensions/memory-core/src/memory/manager-search-worker.test.ts extensions/memory-core/src/memory/manager-search.unicode-query.test.ts extensions/memory-core/doctor-contract-api.test.ts extensions/memory-core/src/memory-forget.test.ts extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts extensions/memory-core/src/memory/manager-search.postgres.test.ts
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search-orchestration.test.ts extensions/memory-core/src/memory/manager-search-path.test.ts extensions/memory-core/src/memory/manager-search-worker.test.ts extensions/memory-core/src/memory/manager-search.unicode-query.test.ts extensions/memory-core/doctor-contract-api.test.ts extensions/memory-core/src/memory-forget.test.ts extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts extensions/memory-core/src/memory/manager-search.postgres.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-search-prepare
+
+[vitest] still running with no output for 30000ms.
+[vitest-workers] local cache hit after 43789ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared ba56785ec780 in 43937ms (16684 inputs, 22044 outputs)
+[vitest] still running with no output for 60000ms.
+[vitest] still running with no output for 30000ms.
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > reuses published facts across searches and observes the next publication 4927ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.test.ts > sees published replacements through reused search and curated readers 5997ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > invalidates keyword snapshots before changing the fallback provider 2573ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > rejects a query whose 6 dimensions no longer match the index 3131ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.test.ts > cancels post-probe metadata reads and releases the generation for publication 9471ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > keeps configured provider fallback available after query dimension drift 6073ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > falls back to keyword results after bounded query embedding retries are exhausted with unset provider 3331ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.test.ts > discards a worker hit forgotten before authoritative metadata enrichment 6064ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > keeps a healthy local provider active when the caller cancels search 4263ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.test.ts > settles a completed fused search before close and a queued forget 6858ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > rejects admitted keyword cancellation before embedding (lexicalOnly=false) 5421ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > rejects bootstrap retrieval when shared worker admission is full and recovers after drain 3732ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.test.ts > settles a cancelled fused search before close and a queued forget 8144ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > rejects vector retrieval when shared worker admission is full and recovers after drain 2899ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.test.ts > keeps the owner's SQLite writer lock across worker reads and reader close 3245ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > rejects caller cancellation during hybrid fallback scanning 6263ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > keeps zero-hit keyword fallback in one provider-backed worker request 3354ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > keeps remember-only session transcripts out of ordinary manager searches 7937ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > imports legacy memory host events into plugin state 3039ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > recovers appends written through an open legacy descriptor after archival 2701ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > searches the published index without flushing dirty sessions 6283ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > warns without importing when a checkpointed host event archive changes other than by append 2366ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > refuses to replay a checkpointless older archive after a newer generation 2965ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > keeps search usable while maintenance syncs a full memory retry 6453ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > does not import newer host event generations before an older source is repaired 4614ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > canonicalizes and deduplicates aliased legacy host event sources 3909ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > ignores symlinked memory with no legacy sources 33ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > rejects claimed host events beneath symlinked workspace parents 130ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > rebuilds automatic maintenance from the revision after a concurrent memory purge 9971ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > imports the newest retained tail from an oversized legacy host event log 5422ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > keeps transient CLI search off the serving manager write path 3329ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > does not let a no-op sync hide a later detached failure 4326ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > resumes a partially committed host event import before archiving the source 6209ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > leaves legacy host events in place when plugin-wide SQLite capacity is exhausted 17ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > reserves plugin-wide capacity for the migrated workspace cursor and checkpoint 1837ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-orchestration.test.ts > memory index > restores a maintenance generation when a null fallback leaves it dirty 3027ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > retires an empty legacy memory host event source without claiming an import 1878ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > removes an empty legacy memory sidecar placeholder without warning 67ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > ignores a legacy sidecar symlink to the populated canonical agent database 270ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps the warning for a legacy sidecar symlink to a different data-bearing database 401ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > preserves the main sidecar when a companion stat fails with ELOOP 418ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > creates migrated FTS tables with the configured legacy tokenizer 580ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > migrates all retired configured legacy memory sidecar paths 775ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > copies shared retired configured legacy sidecars to each configured agent 644ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > restores legacy sidecar vector rows for vector-backed search 824ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > leaves malformed legacy vector sidecars retryable 472ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps legacy vector sidecars retryable when sqlite-vec cannot load 445ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > archives legacy vector sidecars when memory search is disabled 459ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > copies custom vector sidecars to a discoverable retry path when the canonical retry exists 740ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > archives conflicting custom derived indexes without creating a retry copy 705ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > copies custom sidecars to the retry path when canonical database setup fails 31ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical metadata and archives a conflicting derived legacy index 625ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical chunks and archives a conflicting derived legacy index 873ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical cache collisions while importing remaining legacy rows 635ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical cache rows when a legacy collision has declared dimensions differ 620ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical cache rows when a legacy collision has embedding lengths differ 637ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical cache rows when a legacy collision has the canonical embedding is malformed 933ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical cache rows when a legacy collision has the legacy embedding is malformed 611ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical cache rows when a legacy collision has both declared dimensions are missing 666ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > previews an unresolved session without creating the absent agent store 2040ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > leaves legacy vector sidecars in place when vector dimensions conflict 737ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > keeps canonical vector rows and archives a conflicting derived legacy index 852ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > leaves legacy vector sidecars in place when vector rows have no chunk 1139ms
+ ✓ |extension-database-workers| extensions/memory-core/doctor-contract-api.test.ts > memory-core doctor dreaming migration > rebuilds stale FTS from canonical chunks while importing legacy rows 1073ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > previews and forgets sessions without fetching unrelated session bodies 6356ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > reads a reopened existing unicode61 index without rewriting it 1515ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > reads a reopened existing trigram index without rewriting it 691ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC München text with either query form using unicode61 18ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD München text with either query form using unicode61 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ǽ text with either query form using unicode61 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ǽ text with either query form using unicode61 55ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ộ text with either query form using unicode61 16ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ộ text with either query form using unicode61 24ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC café東京 text with either query form using unicode61 22ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD café東京 text with either query form using unicode61 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 한국어 text with either query form using unicode61 6ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 한국어 text with either query form using unicode61 14ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC Μαΐου text with either query form using unicode61 54ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD Μαΐου text with either query form using unicode61 13ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 𑌕𑍋 text with either query form using unicode61 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 𑌕𑍋 text with either query form using unicode61 20ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC München text with either query form using trigram 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD München text with either query form using trigram 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ǽ text with either query form using trigram 153ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > purges an archived-only session selected by its session ID 6107ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ǽ text with either query form using trigram 127ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC ộ text with either query form using trigram 42ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD ộ text with either query form using trigram 37ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC café東京 text with either query form using trigram 15ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD café東京 text with either query form using trigram 12ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 한국어 text with either query form using trigram 54ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 한국어 text with either query form using trigram 25ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC Μαΐου text with either query form using trigram 11ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD Μαΐου text with either query form using trigram 20ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFC 𑌕𑍋 text with either query form using trigram 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > matches NFD 𑌕𑍋 text with either query form using trigram 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > recalls a Unicode compatibility alias with unicode61 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > retains canonical alternatives for separator mark query rèsumé 6ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > retains canonical alternatives for separator mark query résumé 161ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > retains canonical alternatives for separator mark query mǘnchen 30ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not broaden canonical Latin terms to separator variants with unicode61 24ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not broaden canonical Latin terms to separator variants with trigram 130ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > keeps AND semantics for mixed-form words with unicode61 11ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > keeps AND semantics for mixed-form words with trigram 20ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > keeps short canonical trigram terms in substring fallback 127ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves scoped ranked limits for canonical unicode61 queries 13ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves scoped ranked limits for canonical trigram queries 36ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 München phrases 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 café東京 phrases 43ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 caféǽ phrases 72ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 Kelvin phrases 40ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 Ωmega phrases 19ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 ά̣ phrases 34ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 re̓sume phrases 33ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical unicode61 re̓̓sume phrases 35ms
+stderr | extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves whole Unicode words in MATCH-error fallback
+memory search: FTS5 MATCH failed, falling back to substring search: Error: FTS5 MATCH failed
+
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical trigram München phrases 111ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical trigram Kelvin phrases 14ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > does not double-count canonical trigram Ωmega phrases 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.unicode-query.test.ts > memory keyword query Unicode forms > preserves whole Unicode words in MATCH-error fallback 64ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > leaves the original memory file intact when a rewrite fails mid-write 3884ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > keeps filename token matching strict so foo.md does not match unrelated .md paths 76ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > bounds first-chunk work with stale statistics for unicode61 query common 96ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > bounds first-chunk work with stale statistics for trigram query README.md 199ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > bounds first-chunk work with stale statistics for trigram query 成语 183ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > applies short CJK trigram substring matching to the path table 96ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > bridges NFC trigram queries to partial NFD path spellings 38ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > matches partial Unicode path text with the default unicode61 tokenizer 121ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-path.test.ts > searchPathKeyword > bounds exact-path headroom independently from lexical candidates 337ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > durably tombstones an unresolved explicit session without changing mixed-newline artifacts 3220ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > preserves mixed line endings when purging corpus, memory, and backups 3479ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the text and exact-path statements across worker dispatch 87ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the binary64 fallback statements and score across worker dispatch 95ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the native vec0 KNN statement used by the child reader 21ms
+ ↓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.postgres.test.ts > PostgreSQL memory search worker > applies model, source and candidate eligibility before exact nearest limit
+ ↓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.postgres.test.ts > PostgreSQL memory search worker > uses unaccented full text with source filtering and the unchanged 0.7/0.3 hybrid merge
+ ↓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.postgres.test.ts > PostgreSQL memory search worker > ranks trigram similarity before limits for body and path substring queries
+ ↓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.postgres.test.ts > PostgreSQL memory search worker > keeps keyword-only publication/search usable without pgvector and names semantic capability failure
+ ↓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.postgres.test.ts > PostgreSQL memory search worker > re-admits persisted search projections after closing and reopening the worker store
+ ↓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.postgres.test.ts > PostgreSQL memory search worker > reports PostgreSQL counts and storage without native or catalog probes
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > removes staged backfill entries when their source session is forgotten 5000ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory-forget.test.ts > memory forget > does not purge a dotted-suffix session when an unresolved selector is its prefix 2441ms
+
+ Test Files  7 passed | 1 skipped (8)
+      Tests  135 passed | 6 skipped (141)
+   Start at  12:19:55
+   Duration  236.78s (tests 47%, transform 44%, import 7%, setup 2%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 271.26s
+EXIT 0

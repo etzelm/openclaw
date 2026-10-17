@@ -1,0 +1,33 @@
+# timing: real dev store (6,012 chunks)
+searches per rep 400, 2 warm-up passes over 20 inputs, 5 reps per run, fresh node process per run; order BEFORE, AFTER, AFTER, BEFORE
+connection: built openSqliteReadOnlyDatabase (sqlite-snapshot-source-Cqnw_hx4.mjs) + built enableNodeSqliteKyselyStatementCache (kysely-sync-cache-state-CKvZWeYI.mjs)
+node v24.21.0 sqlite 3.53.4
+
+run round arm    load1@start load1@end waited_s | rep means (us per search) | median | script_wall_ms process_uptime_ms
+1   1     before       7.85      7.85      660 | 1206.0 1163.9 1202.1 1198.4 1193.7 | 1198.4 | 2785 2801
+2   1     after        7.85      7.95        0 | 1183.2 1139.6 1126.0 1077.0 1096.8 | 1126.0 | 2795 2811
+3   2     after        7.95      7.95        0 | 1167.3 1132.0 1096.2 1048.8 1016.4 | 1096.2 | 2514 2530
+4   2     before       7.95      7.87        0 | 1273.8 1335.7 1326.8 1311.6 1305.6 | 1311.6 | 2938 2954
+
+## per-round medians of the 5 rep means (us)
+round 1: BEFORE 1198.4  AFTER 1126.0  saving 72.3 us (6.0 percent)
+round 2: BEFORE 1311.6  AFTER 1096.2  saving 215.4 us (16.4 percent)
+
+## overall median over all 10 rep means per arm (us per search)
+BEFORE 1239.9  AFTER 1111.4  saving 128.5 us (10.4 percent)
+rep-mean range: BEFORE 1163.9..1335.7  AFTER 1016.4..1183.2
+process wall (node start to exit, ms): BEFORE 2801, 2954  AFTER 2811, 2530  (whole process: module load plus all searches; includes about 1,080 searches on main, 2,040 on dev and synthetic)
+
+## supplemental runs (not part of the 2-round protocol; same harness, order ABBA ABBA = before after after before before after after before)
+run arm    load1@start load1@end waited_s | rep means (us) | median
+1   before       3.45      3.58        0 | 1202.3 1215.3 1167.7 1161.2 1153.2 | 1167.7
+2   after        3.58      3.58        0 | 1100.4 1048.7 1003.1 982.8 973.1 | 1003.1
+3   after        3.58      3.53        0 | 1069.8 1000.3 992.1 964.9 970.2 | 992.1
+4   before       3.53      3.53        0 | 1238.2 1249.4 1177.8 1233.4 1114.8 | 1233.4
+5   before       3.53      3.57        0 | 1192.9 1164.1 1166.1 1120.9 1218.7 | 1166.1
+6   after        3.57      3.57        0 | 1130.2 1039.4 991.2 1000.7 975.3 | 1000.7
+7   after        3.57      3.52        0 | 1081.2 1009.4 1004.0 985.4 1007.4 | 1007.4
+8   before       3.52      3.52        0 | 1218.9 1177.0 1155.2 1169.6 1142.4 | 1169.6
+supplemental overall median over 20 rep means per arm: BEFORE 1173.3  AFTER 1001.9  saving 171.4 us (14.6 percent)
+combined protocol + supplemental median over 30 rep means per arm: BEFORE 1196.0  AFTER 1027.9  saving 168.1 us (14.1 percent)
+

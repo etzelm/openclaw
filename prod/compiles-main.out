@@ -1,0 +1,92 @@
+# compile counting: real main store (43,634 chunks)
+authorizer installed via DatabaseSync.prototype.setAuthorizer.call before the first search (repo instance wrapper bypassed, statement cache stays on)
+per search: C = SQLITE_READ callbacks on table memory_index_chunks (outer statement compiles x reads), P = db.prepare calls, F = db.function registrations, T = total authorizer callbacks
+
+## first10
+search q            |  BEFORE C   P  F    T |  AFTER C   P  F    T
+  1 memory          |         86   4  3  283 |       43   4  2  161
+  2 project         |         86   4  3  271 |       43   4  0  116
+  3 notes           |         43   0  3  160 |        0   0  0    5
+  4 config          |         43   0  3  160 |        0   0  0    5
+  5 agent           |         43   0  3  160 |        0   0  0    5
+  6 session         |         43   0  3  160 |        0   0  0    5
+  7 update          |         43   0  3  160 |        0   0  0    5
+  8 error           |         43   0  3  160 |        0   0  0    5
+  9 memory          |         43   0  3  160 |        0   0  0    5
+ 10 project         |         43   0  3  160 |        0   0  0    5
+totals over first10: BEFORE C=516 P=8 F=30 | AFTER C=86 P=8 F=2
+
+## all20x3
+search q            |  BEFORE C   P  F    T |  AFTER C   P  F    T
+  1 memory          |         43   0  3  160 |        0   0  0    5
+  2 project         |         43   0  3  160 |        0   0  0    5
+  3 notes           |         43   0  3  160 |        0   0  0    5
+  4 config          |         43   0  3  160 |        0   0  0    5
+  5 agent           |         43   0  3  160 |        0   0  0    5
+  6 session         |         43   0  3  160 |        0   0  0    5
+  7 update          |         43   0  3  160 |        0   0  0    5
+  8 error           |         43   0  3  160 |        0   0  0    5
+  9 q09             |         43   0  3  160 |        0   0  0    5
+ 10 q10             |         43   0  3  160 |        0   0  0    5
+ 11 q11             |         43   0  3  160 |        0   0  0    5
+ 12 q12             |         43   0  3  160 |        0   0  0    5
+ 13 q13             |         43   0  3  160 |        0   0  0    5
+ 14 q14             |         43   0  3  160 |        0   0  0    5
+ 15 q15             |         43   0  3  160 |        0   0  0    5
+ 16 q16             |         43   0  3  160 |        0   0  0    5
+ 17 q17             |         43   0  3  160 |        0   0  0    5
+ 18 q18             |         43   0  3  160 |        0   0  0    5
+ 19 q19             |         43   0  3  160 |        0   0  0    5
+ 20 q20             |         43   0  3  160 |        0   0  0    5
+ 21 memory          |         43   0  3  160 |        0   0  0    5
+ 22 project         |         43   0  3  160 |        0   0  0    5
+ 23 notes           |         43   0  3  160 |        0   0  0    5
+ 24 config          |         43   0  3  160 |        0   0  0    5
+ 25 agent           |         43   0  3  160 |        0   0  0    5
+ 26 session         |         43   0  3  160 |        0   0  0    5
+ 27 update          |         43   0  3  160 |        0   0  0    5
+ 28 error           |         43   0  3  160 |        0   0  0    5
+ 29 q09             |         43   0  3  160 |        0   0  0    5
+ 30 q10             |         43   0  3  160 |        0   0  0    5
+ 31 q11             |         43   0  3  160 |        0   0  0    5
+ 32 q12             |         43   0  3  160 |        0   0  0    5
+ 33 q13             |         43   0  3  160 |        0   0  0    5
+ 34 q14             |         43   0  3  160 |        0   0  0    5
+ 35 q15             |         43   0  3  160 |        0   0  0    5
+ 36 q16             |         43   0  3  160 |        0   0  0    5
+ 37 q17             |         43   0  3  160 |        0   0  0    5
+ 38 q18             |         43   0  3  160 |        0   0  0    5
+ 39 q19             |         43   0  3  160 |        0   0  0    5
+ 40 q20             |         43   0  3  160 |        0   0  0    5
+ 41 memory          |         43   0  3  160 |        0   0  0    5
+ 42 project         |         43   0  3  160 |        0   0  0    5
+ 43 notes           |         43   0  3  160 |        0   0  0    5
+ 44 config          |         43   0  3  160 |        0   0  0    5
+ 45 agent           |         43   0  3  160 |        0   0  0    5
+ 46 session         |         43   0  3  160 |        0   0  0    5
+ 47 update          |         43   0  3  160 |        0   0  0    5
+ 48 error           |         43   0  3  160 |        0   0  0    5
+ 49 q09             |         43   0  3  160 |        0   0  0    5
+ 50 q10             |         43   0  3  160 |        0   0  0    5
+ 51 q11             |         43   0  3  160 |        0   0  0    5
+ 52 q12             |         43   0  3  160 |        0   0  0    5
+ 53 q13             |         43   0  3  160 |        0   0  0    5
+ 54 q14             |         43   0  3  160 |        0   0  0    5
+ 55 q15             |         43   0  3  160 |        0   0  0    5
+ 56 q16             |         43   0  3  160 |        0   0  0    5
+ 57 q17             |         43   0  3  160 |        0   0  0    5
+ 58 q18             |         43   0  3  160 |        0   0  0    5
+ 59 q19             |         43   0  3  160 |        0   0  0    5
+ 60 q20             |         43   0  3  160 |        0   0  0    5
+totals over all20x3: BEFORE C=2580 P=0 F=180 | AFTER C=0 P=0 F=0
+
+## authorizer callbacks by action:table, search 1, 2, 3 and 10 of first10
+BEFORE search 1: {"SQLITE_FUNCTION:":41,"SQLITE_PRAGMA:data_version":3,"SQLITE_READ:memory_index_chunks":86,"SQLITE_READ:memory_index_chunks_fts":25,"SQLITE_READ:memory_index_chunks_fts_config":4,"SQLITE_READ:memory_index_chunks_fts_content":9,"SQLITE_READ:memory_index_chunks_fts_docsize":2,"SQLITE_READ:memory_index_chunks_fts_idx":4,"SQLITE_READ:memory_index_paths_fts":48,"SQLITE_READ:memory_index_paths_fts_config":4,"SQLITE_READ:memory_index_paths_fts_content":8,"SQLITE_READ:memory_index_paths_fts_docsize":2,"SQLITE_READ:memory_index_paths_fts_idx":8,"SQLITE_SELECT:":39}
+BEFORE search 2: {"SQLITE_FUNCTION:":41,"SQLITE_PRAGMA:data_version":3,"SQLITE_READ:memory_index_chunks":86,"SQLITE_READ:memory_index_chunks_fts":25,"SQLITE_READ:memory_index_chunks_fts_content":9,"SQLITE_READ:memory_index_chunks_fts_docsize":2,"SQLITE_READ:memory_index_chunks_fts_idx":4,"SQLITE_READ:memory_index_paths_fts":48,"SQLITE_READ:memory_index_paths_fts_content":8,"SQLITE_READ:memory_index_paths_fts_docsize":2,"SQLITE_READ:memory_index_paths_fts_idx":8,"SQLITE_SELECT:":35}
+BEFORE search 3: {"SQLITE_FUNCTION:":21,"SQLITE_PRAGMA:data_version":3,"SQLITE_READ:memory_index_chunks":43,"SQLITE_READ:memory_index_chunks_fts":14,"SQLITE_READ:memory_index_chunks_fts_content":9,"SQLITE_READ:memory_index_chunks_fts_docsize":2,"SQLITE_READ:memory_index_chunks_fts_idx":4,"SQLITE_READ:memory_index_paths_fts":24,"SQLITE_READ:memory_index_paths_fts_content":8,"SQLITE_READ:memory_index_paths_fts_docsize":2,"SQLITE_READ:memory_index_paths_fts_idx":8,"SQLITE_SELECT:":22}
+BEFORE search 10: {"SQLITE_FUNCTION:":21,"SQLITE_PRAGMA:data_version":3,"SQLITE_READ:memory_index_chunks":43,"SQLITE_READ:memory_index_chunks_fts":14,"SQLITE_READ:memory_index_chunks_fts_content":9,"SQLITE_READ:memory_index_chunks_fts_docsize":2,"SQLITE_READ:memory_index_chunks_fts_idx":4,"SQLITE_READ:memory_index_paths_fts":24,"SQLITE_READ:memory_index_paths_fts_content":8,"SQLITE_READ:memory_index_paths_fts_docsize":2,"SQLITE_READ:memory_index_paths_fts_idx":8,"SQLITE_SELECT:":22}
+AFTER search 1: {"SQLITE_FUNCTION:":21,"SQLITE_PRAGMA:data_version":2,"SQLITE_READ:memory_index_chunks":43,"SQLITE_READ:memory_index_chunks_fts":14,"SQLITE_READ:memory_index_chunks_fts_config":4,"SQLITE_READ:memory_index_chunks_fts_content":9,"SQLITE_READ:memory_index_chunks_fts_docsize":2,"SQLITE_READ:memory_index_chunks_fts_idx":4,"SQLITE_READ:memory_index_paths_fts":24,"SQLITE_READ:memory_index_paths_fts_config":4,"SQLITE_READ:memory_index_paths_fts_content":4,"SQLITE_READ:memory_index_paths_fts_docsize":2,"SQLITE_READ:memory_index_paths_fts_idx":4,"SQLITE_SELECT:":24}
+AFTER search 2: {"SQLITE_FUNCTION:":21,"SQLITE_READ:memory_index_chunks":43,"SQLITE_READ:memory_index_chunks_fts":14,"SQLITE_READ:memory_index_paths_fts":24,"SQLITE_SELECT:":14}
+AFTER search 3: {"SQLITE_FUNCTION:":1,"SQLITE_READ:memory_index_chunks_fts":3,"SQLITE_SELECT:":1}
+AFTER search 10: {"SQLITE_FUNCTION:":1,"SQLITE_READ:memory_index_chunks_fts":3,"SQLITE_SELECT:":1}
+

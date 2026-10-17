@@ -1,0 +1,24 @@
+# per-table authorizer callbacks, steady-state search 10 of first10 (input 'project', second use): real dev store (6,012 chunks)
+FTS5 shadow tables = *_fts_content, *_fts_docsize, *_fts_idx, *_fts_data, *_fts_config
+
+action:table                                     BASE     M1     M2   FULL
+SQLITE_FUNCTION:                                   21     21     21      1
+SQLITE_PRAGMA:data_version                          3      0      3      0
+SQLITE_READ:memory_index_chunks                    43     43     43      0
+SQLITE_READ:memory_index_chunks_fts                14     14     14      3
+SQLITE_READ:memory_index_chunks_fts_content         9      0      9      0
+SQLITE_READ:memory_index_chunks_fts_docsize         2      0      2      0
+SQLITE_READ:memory_index_chunks_fts_idx             4      0      4      0
+SQLITE_READ:memory_index_paths_fts                 24     24     24      0
+SQLITE_READ:memory_index_paths_fts_idx              8      0      8      0
+SQLITE_SELECT:                                     19     14     19      1
+TOTAL                                             147    116    147      5
+FTS5 shadow-table READ subtotal                    23      0     23      0
+SQLITE_PRAGMA:data_version                          3      0      3      0
+
+## shadow-table callbacks per search across all 60 (min/median/max), steady state searches 21-60 and search 1
+BASE: search1 33; searches 21-60 min 23 median 33 max 33
+M1: search1 0; searches 21-60 min 0 median 0 max 0
+M2: search1 33; searches 21-60 min 23 median 33 max 33
+FULL: search1 0; searches 21-60 min 0 median 0 max 0
+

@@ -1,0 +1,179 @@
+# M2 on final commit 1eb5dfb05660: SQL rewrite kept, functions re-registered on every call against the shared state
+$ git diff
+diff --git a/extensions/memory-core/src/memory/manager-search.ts b/extensions/memory-core/src/memory/manager-search.ts
+index be75071da68..b90292160c5 100644
+--- a/extensions/memory-core/src/memory/manager-search.ts
++++ b/extensions/memory-core/src/memory/manager-search.ts
+@@ -198,11 +198,11 @@ type SearchSqlFunctionState = {
+ const searchSqlFunctions = new WeakMap<DatabaseSync, SearchSqlFunctionState>();
+ 
+ function resolveSearchSqlFunctions(db: DatabaseSync): SearchSqlFunctionState {
+-  const registered = searchSqlFunctions.get(db);
+-  if (registered) {
+-    return registered;
+-  }
+-  const state: SearchSqlFunctionState = { substringMatchers: new Map(), matchExactPath: () => 0 };
++  // HALF-PATCH M2: keep the shared state but re-register the functions on every call.
++  const state: SearchSqlFunctionState = searchSqlFunctions.get(db) ?? {
++    substringMatchers: new Map(),
++    matchExactPath: () => 0,
++  };
+   db.function(NORMALIZED_CONTAINS_SQL_FUNCTION, { deterministic: true }, (value, query) =>
+     typeof value === "string" && typeof query === "string"
+       ? Number(state.substringMatchers.get(query)?.test(value.normalize("NFC")) === true)
+$ pnpm test extensions/memory-core/src/memory/manager-search.test.ts
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-half-M2
+
+[vitest-workers] local cache miss after 7692ms
+[vitest] still running with no output for 30000ms.
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js (48:0) [33m[MODULE_LEVEL_DIRECTIVE] [0mThe semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js" may not be preserved when bundling.
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js:48:1 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m48 │[0m ''
+ [38;5;240m   │[0m ─┬  
+ [38;5;240m   │[0m  ╰── module level directive may not be preserved
+ [38;5;240m   │[0m 
+ [38;5;240m   │[0m [38;5;115mHelp[0m: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+[38;5;246m────╯[0m
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js (6:0) [33m[MODULE_LEVEL_DIRECTIVE] [0mThe semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js" may not be preserved when bundling.
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js:6:1 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m6 │[0m ''
+ [38;5;240m  │[0m ─┬  
+ [38;5;240m  │[0m  ╰── module level directive may not be preserved
+ [38;5;240m  │[0m 
+ [38;5;240m  │[0m [38;5;115mHelp[0m: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+[38;5;246m───╯[0m
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js (11:0) [33m[MODULE_LEVEL_DIRECTIVE] [0mThe semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js" may not be preserved when bundling.
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js:11:1 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m11 │[0m ''
+ [38;5;240m   │[0m ─┬  
+ [38;5;240m   │[0m  ╰── module level directive may not be preserved
+ [38;5;240m   │[0m 
+ [38;5;240m   │[0m [38;5;115mHelp[0m: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+[38;5;246m────╯[0m
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js (9:0) [33m[MODULE_LEVEL_DIRECTIVE] [0mThe semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js" may not be preserved when bundling.
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js:9:1 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m9 │[0m ''
+ [38;5;240m  │[0m ─┬  
+ [38;5;240m  │[0m  ╰── module level directive may not be preserved
+ [38;5;240m  │[0m 
+ [38;5;240m  │[0m [38;5;115mHelp[0m: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+[38;5;246m───╯[0m
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js (12:0) [33m[MODULE_LEVEL_DIRECTIVE] [0mThe semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js" may not be preserved when bundling.
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js:12:1 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m12 │[0m ''
+ [38;5;240m   │[0m ─┬  
+ [38;5;240m   │[0m  ╰── module level directive may not be preserved
+ [38;5;240m   │[0m 
+ [38;5;240m   │[0m [38;5;115mHelp[0m: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+[38;5;246m────╯[0m
+
+[vitest] still running with no output for 60000ms.
+[vitest-workers] prepared 91ac5e6beefb in 64012ms (16684 inputs, 22044 outputs)
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword trigram fallback > applies fallback lexical boosts without exceeding bounded scores 187ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword boosted relevance > preserves unicode61 relevance differences before dated-note decay 57ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > returns FTS hits indexed under a different embedding model 12ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > does not return orphaned old-model FTS rows without a live chunk 9ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword relaxed question ranking > keeps the answer inside a bounded unicode61 candidate pool 73ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds unicode61 retries 29ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds trigram retries 9ms
+ × |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection 25ms
+   → expected [ …(50) ] to deeply equal [ …(2) ]
+ × |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection 21ms
+   → expected [ …(50) ] to deeply equal [ …(2) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection
+ FAIL  |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection
+AssertionError: expected [ …(50) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  [
+    "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
+    "openclaw_memory_normalized_contains",
+  ]
+
+ ❯ extensions/memory-core/src/memory/manager-search.test.ts:394:12
+    392|         expect
+    393|           .soft(registerFunction.mock.calls.map(([name]) => name).toSo…
+    394|           .toEqual([
+       |            ^
+    395|             "openclaw_memory_exact_path_specificity",
+    396|             "openclaw_memory_normalized_contains",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  12:59:07
+   Duration  82.86s (transform 98%, setup 1%, import 1%, tests 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 99.51s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
+EXIT 1

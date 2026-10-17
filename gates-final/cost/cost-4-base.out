@@ -1,0 +1,32 @@
+# run 4 arm base a7e31844f2e load before: { 53.21 44.39 40.99 }
+$ pnpm test extensions/memory-core/src/memory/manager-search.test.ts --maxWorkers=1
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search.test.ts --maxWorkers=1
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-search-prepare-main
+
+[vitest] still running with no output for 30000ms.
+[vitest-workers] local cache hit after 29717ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared f30016e6416f in 29838ms (16684 inputs, 22044 outputs)
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword trigram fallback > applies fallback lexical boosts without exceeding bounded scores 185ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword boosted relevance > preserves unicode61 relevance differences before dated-note decay 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > returns FTS hits indexed under a different embedding model 40ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > does not return orphaned old-model FTS rows without a live chunk 16ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword relaxed question ranking > keeps the answer inside a bounded unicode61 candidate pool 29ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds unicode61 retries 13ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds trigram retries 9ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  15:11:51
+   Duration  51.62s (transform 97%, setup 1%, import 1%, tests 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 72.67s
+real 75.99
+user 12.29
+sys 139.81
+EXIT 0
+# load after: { 56.96 47.05 42.25 }

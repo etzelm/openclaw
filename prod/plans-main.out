@@ -1,0 +1,80 @@
+# query plans (EXPLAIN QUERY PLAN with the same bound parameters on the same connection): real main store (43,634 chunks)
+sqlite 3.53.4; statements = every statement executed by searchKeywordWithFallback for the 20 inputs (bound values never printed)
+
+RESULT: 80 statements compared BEFORE vs AFTER (matched by position within each search and by SQL shape): plans identical 80, different 0
+
+## per query
+q01                    statements  4  plans identical 4  different 0
+q02                    statements  4  plans identical 4  different 0
+q03                    statements  4  plans identical 4  different 0
+q04                    statements  4  plans identical 4  different 0
+q05                    statements  4  plans identical 4  different 0
+q06                    statements  4  plans identical 4  different 0
+q07                    statements  4  plans identical 4  different 0
+q08                    statements  4  plans identical 4  different 0
+q09                    statements  4  plans identical 4  different 0
+q10                    statements  4  plans identical 4  different 0
+q11                    statements  4  plans identical 4  different 0
+q12                    statements  4  plans identical 4  different 0
+q13                    statements  4  plans identical 4  different 0
+q14                    statements  4  plans identical 4  different 0
+q15                    statements  4  plans identical 4  different 0
+q16                    statements  4  plans identical 4  different 0
+q17                    statements  4  plans identical 4  different 0
+q18                    statements  4  plans identical 4  different 0
+q19                    statements  4  plans identical 4  different 0
+q20                    statements  4  plans identical 4  different 0
+
+## per statement shape (shape = sha256 of SQL with 'LIMIT +?' -> 'LIMIT ?' and "(? || '')" -> '?' normalized; BEFORE and AFTER raw SQL differ in 4/4 shapes)
+
+### shape daab333f84: 20 executions; raw SQL differs between arms in 20 of them
+normalized SQL: SELECT id, path, source, start_line, end_line, text, memory_index_chunks_fts.rank AS rank FROM memory_index_chunks_fts WHERE memory_index_chunks_fts MATCH ? AND memory_index_chunks_fts.rank MATCH 'bm25()' AND EXISTS (SELECT 1 FROM memory_index_chunks c WHERE c.id = memory_index_chunks_fts.id) AND source IN (?) ORDER BY rank ASC LIMIT ?
+plan variant 1 (20 executions), id|parent|detail:
+  8|0|SCAN memory_index_chunks_fts VIRTUAL TABLE INDEX 32:rM7
+  16|0|SEARCH c EXISTS USING COVERING INDEX sqlite_autoindex_memory_index_chunks_1 (id=?)
+
+### shape 72b5543278: 20 executions; raw SQL differs between arms in 20 of them
+normalized SQL: WITH candidates AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) ), pattern_candidates AS MATERIALIZED ( SELECT path, source FROM candidates WHERE (path LIKE ? ESCAPE '\' OR path LIKE ? ESCAPE '\' OR path LIKE ? ESCAPE '\' OR path LIKE ? ESCAPE '\') ), scored_paths AS MATERIALIZED ( SELECT path, source, openclaw_memory_exact_path_specificity(path) AS exact_path_specificity FROM pattern_candidates ), exact_paths AS MATERIALIZED ( SELECT path, source, exact_path_specificity FROM scored_paths WHERE exact_path_specificity > 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = scored_paths.path AND live.source = scored_paths.source) ORDER BY exact_path_specificity DESC, path ASC, source ASC LIMIT ? ) SELECT c.id, exact_paths.path, exact_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, exact_paths.exact_path_specificity FROM exact_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = exact_paths.path AND candidate.source = exact_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY exact_paths.exact_path_specificity DESC, exact_paths.path ASC, exact_paths.source ASC
+plan variant 1 (20 executions), id|parent|detail:
+  3|0|MATERIALIZE exact_paths
+  6|3|MATERIALIZE scored_paths
+  9|6|MATERIALIZE pattern_candidates
+  12|9|MATERIALIZE candidates
+  15|12|SCAN memory_index_paths_fts VIRTUAL TABLE INDEX 0:M2
+  32|9|SCAN candidates
+  56|6|SCAN pattern_candidates
+  76|3|SCAN scored_paths
+  80|3|SEARCH live EXISTS USING COVERING INDEX idx_memory_index_chunks_path_source (path=? AND source=?)
+  104|3|USE TEMP B-TREE FOR ORDER BY
+  116|0|SCAN exact_paths
+  118|0|SEARCH c USING INDEX sqlite_autoindex_memory_index_chunks_1 (id=?)
+  120|0|CORRELATED SCALAR SUBQUERY 6
+  126|120|SEARCH candidate USING INDEX idx_memory_index_chunks_path_source (path=? AND source=?)
+  145|120|USE TEMP B-TREE FOR ORDER BY
+
+### shape 7c8cf9e651: 20 executions; raw SQL differs between arms in 20 of them
+normalized SQL: WITH retained_paths AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source, bm25(memory_index_paths_fts) AS rank FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) AND openclaw_memory_exact_path_specificity(memory_index_paths_fts.path) > 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = memory_index_paths_fts.path AND live.source = memory_index_paths_fts.source) ORDER BY rank ASC, memory_index_paths_fts.path ASC, memory_index_paths_fts.source ASC LIMIT ? ) SELECT c.id, retained_paths.path, retained_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, retained_paths.rank FROM retained_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = retained_paths.path AND candidate.source = retained_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY retained_paths.rank ASC, retained_paths.path ASC, retained_paths.source ASC
+plan variant 1 (20 executions), id|parent|detail:
+  3|0|MATERIALIZE retained_paths
+  12|3|SCAN memory_index_paths_fts VIRTUAL TABLE INDEX 0:M2
+  22|3|SEARCH live EXISTS USING COVERING INDEX idx_memory_index_chunks_path_source (path=? AND source=?)
+  47|3|USE TEMP B-TREE FOR ORDER BY
+  59|0|SCAN retained_paths
+  61|0|SEARCH c USING INDEX sqlite_autoindex_memory_index_chunks_1 (id=?)
+  63|0|CORRELATED SCALAR SUBQUERY 3
+  69|63|SEARCH candidate USING INDEX idx_memory_index_chunks_path_source (path=? AND source=?)
+  88|63|USE TEMP B-TREE FOR ORDER BY
+
+### shape cdf8785140: 20 executions; raw SQL differs between arms in 20 of them
+normalized SQL: WITH retained_paths AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source, bm25(memory_index_paths_fts) AS rank FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) AND openclaw_memory_exact_path_specificity(memory_index_paths_fts.path) = 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = memory_index_paths_fts.path AND live.source = memory_index_paths_fts.source) ORDER BY rank ASC, memory_index_paths_fts.path ASC, memory_index_paths_fts.source ASC LIMIT ? ) SELECT c.id, retained_paths.path, retained_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, retained_paths.rank FROM retained_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = retained_paths.path AND candidate.source = retained_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY retained_paths.rank ASC, retained_paths.path ASC, retained_paths.source ASC
+plan variant 1 (20 executions), id|parent|detail:
+  3|0|MATERIALIZE retained_paths
+  12|3|SCAN memory_index_paths_fts VIRTUAL TABLE INDEX 0:M2
+  22|3|SEARCH live EXISTS USING COVERING INDEX idx_memory_index_chunks_path_source (path=? AND source=?)
+  47|3|USE TEMP B-TREE FOR ORDER BY
+  59|0|SCAN retained_paths
+  61|0|SEARCH c USING INDEX sqlite_autoindex_memory_index_chunks_1 (id=?)
+  63|0|CORRELATED SCALAR SUBQUERY 3
+  69|63|SEARCH candidate USING INDEX idx_memory_index_chunks_path_source (path=? AND source=?)
+  88|63|USE TEMP B-TREE FOR ORDER BY
+

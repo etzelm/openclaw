@@ -1,0 +1,17 @@
+node v24.21.0 sqlite 3.53.4
+MATCH literal, rank MATCH 'bm25()', ORDER BY rank, LIMIT literal (no params)
+  run 1: rows=5 callbacks=19 {"PRAGMA":1,"SELECT":4,"READ:t":3,"FUNCTION":1,"READ:t_idx":4,"READ:t_docsize":2,"READ:t_content":4}
+  run 2: rows=5 callbacks=5 {"SELECT":1,"READ:t":3,"FUNCTION":1}
+  run 3: rows=5 callbacks=5 {"SELECT":1,"READ:t":3,"FUNCTION":1}
+MATCH ?, ORDER BY rank, LIMIT +?
+  run 1: rows=5 callbacks=5 {"SELECT":1,"READ:t":3,"FUNCTION":1}
+  run 2: rows=5 callbacks=5 {"SELECT":1,"READ:t":3,"FUNCTION":1}
+  run 3: rows=5 callbacks=5 {"SELECT":1,"READ:t":3,"FUNCTION":1}
+MATCH ?, ORDER BY rank, LIMIT ?
+  run 1: rows=5 callbacks=13 {"SELECT":2,"READ:t":8,"FUNCTION":3}
+  run 2: rows=5 callbacks=13 {"SELECT":2,"READ:t":8,"FUNCTION":3}
+  run 3: rows=5 callbacks=13 {"SELECT":2,"READ:t":8,"FUNCTION":3}
+MATCH ?, no ORDER BY, LIMIT +?
+  run 1: rows=5 callbacks=0 {}
+  run 2: rows=5 callbacks=0 {}
+  run 3: rows=5 callbacks=0 {}

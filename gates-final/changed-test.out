@@ -1,0 +1,31 @@
+$ pnpm test extensions/memory-core/src/memory/manager-search.test.ts extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search.test.ts extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-search-prepare
+
+[vitest-workers] local cache hit after 7094ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared ee3927e116d3 in 7211ms (16684 inputs, 22044 outputs)
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword trigram fallback > applies fallback lexical boosts without exceeding bounded scores 31ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword boosted relevance > preserves unicode61 relevance differences before dated-note decay 7ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > returns FTS hits indexed under a different embedding model 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > does not return orphaned old-model FTS rows without a live chunk 4ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword relaxed question ranking > keeps the answer inside a bounded unicode61 candidate pool 20ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds unicode61 retries 12ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds trigram retries 9ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the text and exact-path statements across worker dispatch 21ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the binary64 fallback statements and score across worker dispatch 4ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts > SQLite memory search statement compatibility > retains the native vec0 KNN statement used by the child reader 4ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection 24ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection 19ms
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  12:10:08
+   Duration  16.51s (transform 96%, setup 2%, import 1%, tests 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 19.52s
+EXIT 0

@@ -1,0 +1,111 @@
+# dist-diff: built chunk containing searchKeywordWithFallback
+BEFORE: <home>/work/t1-01-search-prepare-main/dist/manager-status-state-BrlNrGUe.mjs
+AFTER:  <home>/work/t1-01-search-prepare/dist/manager-status-state-BBw_5o57.mjs
+
+## built SQL fragments (grep -n 'LIMIT\|LIKE')
+--- t1-01-search-prepare-main/dist/manager-status-state-BrlNrGUe.mjs
+177: 	const ordering = `${params.sourceFilter.sql}\n ORDER BY rowid ASC\n LIMIT ?`;
+400:       ORDER BY rank ${rankOrder} LIMIT ?`;
+406:            LIMIT max(0, ? - (SELECT count(*) FROM matches))
+412:          ${matchQuery ? `ORDER BY rank ${rankOrder}` : ""} LIMIT ?`;
+503: 	const projectFirstChunks = (paths, score, direction) => `SELECT c.id, ${paths}.path, ${paths}.source,\n       c.start_line, c.end_line, ${snippet.sql} AS text, ${paths}.${score}\n  FROM ${paths}\n  CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = (\n    SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source\n     WHERE candidate.path = ${paths}.path\n       AND candidate.source = ${paths}.source\n     ORDER BY candidate.start_line, candidate.end_line, candidate.id\n     LIMIT 1\n  )\n ORDER BY ${paths}.${score} ${direction}, ${paths}.path ASC, ${paths}.source ASC`;
+508: 		const qualifiedPatternClause = exactCandidatePatterns.map(() => `${pathColumn} LIKE ? ESCAPE '\\'`).join(" OR ");
+510: 		const candidateCtes = useLexicalCandidates ? `candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${planSubstringFilter}${params.sourceFilter.sql}\n), pattern_candidates AS MATERIALIZED (\n  SELECT path, source FROM candidates\n   WHERE (${exactCandidatePatterns.map(() => "path LIKE ? ESCAPE '\\'").join(" OR ")})\n)` : `pattern_candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE (${qualifiedPatternClause})${params.sourceFilter.sql}\n)`;
+517: 		const statement = `WITH ${candidateCtes}, scored_paths AS MATERIALIZED (\n  SELECT path, source,\n         ${EXACT_PATH_SPECIFICITY_SQL_FUNCTION}(path) AS exact_path_specificity\n    FROM pattern_candidates\n), exact_paths AS MATERIALIZED (\n  SELECT path, source, exact_path_specificity FROM scored_paths\n   WHERE exact_path_specificity > 0\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = scored_paths.path\n                    AND live.source = scored_paths.source)\n   ORDER BY exact_path_specificity DESC, path ASC, source ASC\n   LIMIT ?\n)\n` + projectFirstChunks("exact_paths", "exact_path_specificity", "DESC");
+543: 		const statement = `WITH retained_paths AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source,\n         ${matchQuery ? rank : "0"} AS rank\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${filter}${params.sourceFilter.sql}${qualifiedSpecificityClause}\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = ${params.pathFtsTable}.path\n                    AND live.source = ${params.pathFtsTable}.source)\n   ORDER BY rank ${rankOrder}, ${params.pathFtsTable}.path ASC, ${params.pathFtsTable}.source ASC\n   LIMIT ?\n)\n` + projectFirstChunks("retained_paths", "rank", rankOrder);
+--- t1-01-search-prepare/dist/manager-status-state-BBw_5o57.mjs
+177: 	const ordering = `${params.sourceFilter.sql}\n ORDER BY rowid ASC\n LIMIT ?`;
+412:       ORDER BY rank ${rankOrder} LIMIT +?`;
+418:            LIMIT max(0, ? - (SELECT count(*) FROM matches))
+424:          ${matchQuery ? `ORDER BY rank ${rankOrder}` : ""} LIMIT +?`;
+515: 	const projectFirstChunks = (paths, score, direction) => `SELECT c.id, ${paths}.path, ${paths}.source,\n       c.start_line, c.end_line, ${snippet.sql} AS text, ${paths}.${score}\n  FROM ${paths}\n  CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = (\n    SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source\n     WHERE candidate.path = ${paths}.path\n       AND candidate.source = ${paths}.source\n     ORDER BY candidate.start_line, candidate.end_line, candidate.id\n     LIMIT 1\n  )\n ORDER BY ${paths}.${score} ${direction}, ${paths}.path ASC, ${paths}.source ASC`;
+520: 		const qualifiedPatternClause = exactCandidatePatterns.map(() => `${pathColumn} LIKE (? || '') ESCAPE '\\'`).join(" OR ");
+522: 		const candidateCtes = useLexicalCandidates ? `candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${planSubstringFilter}${params.sourceFilter.sql}\n), pattern_candidates AS MATERIALIZED (\n  SELECT path, source FROM candidates\n   WHERE (${exactCandidatePatterns.map(() => "path LIKE (? || '') ESCAPE '\\'").join(" OR ")})\n)` : `pattern_candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE (${qualifiedPatternClause})${params.sourceFilter.sql}\n)`;
+529: 		const statement = `WITH ${candidateCtes}, scored_paths AS MATERIALIZED (\n  SELECT path, source,\n         ${EXACT_PATH_SPECIFICITY_SQL_FUNCTION}(path) AS exact_path_specificity\n    FROM pattern_candidates\n), exact_paths AS MATERIALIZED (\n  SELECT path, source, exact_path_specificity FROM scored_paths\n   WHERE exact_path_specificity > 0\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = scored_paths.path\n                    AND live.source = scored_paths.source)\n   ORDER BY exact_path_specificity DESC, path ASC, source ASC\n   LIMIT +?\n)\n` + projectFirstChunks("exact_paths", "exact_path_specificity", "DESC");
+555: 		const statement = `WITH retained_paths AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source,\n         ${matchQuery ? rank : "0"} AS rank\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${filter}${params.sourceFilter.sql}${qualifiedSpecificityClause}\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = ${params.pathFtsTable}.path\n                    AND live.source = ${params.pathFtsTable}.source)\n   ORDER BY rank ${rankOrder}, ${params.pathFtsTable}.path ASC, ${params.pathFtsTable}.source ASC\n   LIMIT +?\n)\n` + projectFirstChunks("retained_paths", "rank", rankOrder);
+
+## full diff -u BEFORE AFTER
+--- BEFORE
++++ AFTER
+@@ -299,11 +299,23 @@
+ 		const extensionIndex = basename.lastIndexOf(".");
+ 		const stem = extensionIndex > 0 ? basename.slice(0, extensionIndex) : basename;
+ 		return normalizedQuery === stem ? 1 : 0;
++	};
++}
++const searchSqlFunctions = /* @__PURE__ */ new WeakMap();
++function resolveSearchSqlFunctions(db) {
++	const registered = searchSqlFunctions.get(db);
++	if (registered) return registered;
++	const state = {
++		substringMatchers: /* @__PURE__ */ new Map(),
++		matchExactPath: () => 0
+ 	};
++	db.function(NORMALIZED_CONTAINS_SQL_FUNCTION, { deterministic: true }, (value, query) => typeof value === "string" && typeof query === "string" ? Number(state.substringMatchers.get(query)?.test(value.normalize("NFC")) === true) : 0);
++	db.function(EXACT_PATH_SPECIFICITY_SQL_FUNCTION, { deterministic: true }, (candidatePath) => typeof candidatePath === "string" ? state.matchExactPath(candidatePath) : 0);
++	searchSqlFunctions.set(db, state);
++	return state;
+ }
+ function registerSubstringSqlFunction(db, terms) {
+-	const matchers = new Map(terms.map((term) => [term, literalSearchMatcher(term)]));
+-	db.function(NORMALIZED_CONTAINS_SQL_FUNCTION, { deterministic: true }, (value, query) => typeof value === "string" && typeof query === "string" ? Number(matchers.get(query)?.test(value.normalize("NFC")) === true) : 0);
++	resolveSearchSqlFunctions(db).substringMatchers = new Map(terms.map((term) => [term, literalSearchMatcher(term)]));
+ }
+ function buildSubstringFilter(terms, column, matchAny = false) {
+ 	if (terms.length === 0) return "";
+@@ -397,7 +409,7 @@
+ 		const ranked = `SELECT ${columns}, ${rank} AS rank
+       FROM ${params.ftsTable}
+       WHERE ${matchClause}${liveChunkClause}${params.sourceFilter.sql}
+-      ORDER BY rank ${rankOrder} LIMIT ?`;
++      ORDER BY rank ${rankOrder} LIMIT +?`;
+ 		const mixedOr = params.matchAny && matchQuery && terms.length > 0;
+ 		const sql = mixedOr ? `WITH matches AS MATERIALIZED (${ranked}), substrings AS (
+            SELECT ${columns}, NULL AS rank FROM ${params.ftsTable}
+@@ -409,7 +421,7 @@
+          ORDER BY rank ${rankOrder} NULLS LAST` : `SELECT ${columns}, ${matchQuery ? rank : "NULL"} AS rank
+          FROM ${params.ftsTable}
+          WHERE ${matchClause}${filter}${liveChunkClause}${params.sourceFilter.sql}
+-         ${matchQuery ? `ORDER BY rank ${rankOrder}` : ""} LIMIT ?`;
++         ${matchQuery ? `ORDER BY rank ${rankOrder}` : ""} LIMIT +?`;
+ 		return executeSqliteQuerySync(params.db, { compile: () => CompiledQuery.raw(sql, [
+ 			...match?.parameters ?? [],
+ 			...mixedOr ? [...params.sourceFilter.params, params.limit] : [],
+@@ -493,7 +505,7 @@
+ 	const planSubstringFilter = buildSubstringFilter(plan.substringTerms, pathColumn);
+ 	registerSubstringSqlFunction(params.db, plan.substringTerms);
+ 	const matchExactPath = prepareExactPathMatcher(params.query);
+-	params.db.function(EXACT_PATH_SPECIFICITY_SQL_FUNCTION, { deterministic: true }, (candidatePath) => typeof candidatePath === "string" ? matchExactPath(candidatePath) : 0);
++	resolveSearchSqlFunctions(params.db).matchExactPath = matchExactPath;
+ 	const projectPathRow = (row, pathScore, exactPathSpecificity = matchExactPath(row.path)) => Object.assign(projectMemorySearchRow(row, params.snippetMaxChars, pathScore), {
+ 		textScore: 0,
+ 		pathScore,
+@@ -505,16 +517,16 @@
+ 	const exactPathLimit = Math.max(0, Math.floor(params.exactPathLimit ?? params.limit));
+ 	const exactCandidatePatterns = buildExactPathCandidatePatterns(params.query);
+ 	const loadExactRows = (useLexicalCandidates) => {
+-		const qualifiedPatternClause = exactCandidatePatterns.map(() => `${pathColumn} LIKE ? ESCAPE '\\'`).join(" OR ");
++		const qualifiedPatternClause = exactCandidatePatterns.map(() => `${pathColumn} LIKE (? || '') ESCAPE '\\'`).join(" OR ");
+ 		const match = plan.matchQuery ? fullText.match(index, plan.matchQuery).compile(dialect) : void 0;
+-		const candidateCtes = useLexicalCandidates ? `candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${planSubstringFilter}${params.sourceFilter.sql}\n), pattern_candidates AS MATERIALIZED (\n  SELECT path, source FROM candidates\n   WHERE (${exactCandidatePatterns.map(() => "path LIKE ? ESCAPE '\\'").join(" OR ")})\n)` : `pattern_candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE (${qualifiedPatternClause})${params.sourceFilter.sql}\n)`;
++		const candidateCtes = useLexicalCandidates ? `candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${planSubstringFilter}${params.sourceFilter.sql}\n), pattern_candidates AS MATERIALIZED (\n  SELECT path, source FROM candidates\n   WHERE (${exactCandidatePatterns.map(() => "path LIKE (? || '') ESCAPE '\\'").join(" OR ")})\n)` : `pattern_candidates AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source\n    FROM ${params.pathFtsTable}\n   WHERE (${qualifiedPatternClause})${params.sourceFilter.sql}\n)`;
+ 		const candidateParams = useLexicalCandidates ? [
+ 			...match?.parameters ?? [],
+ 			...plan.substringTerms,
+ 			...params.sourceFilter.params,
+ 			...exactCandidatePatterns
+ 		] : [...exactCandidatePatterns, ...params.sourceFilter.params];
+-		const statement = `WITH ${candidateCtes}, scored_paths AS MATERIALIZED (\n  SELECT path, source,\n         ${EXACT_PATH_SPECIFICITY_SQL_FUNCTION}(path) AS exact_path_specificity\n    FROM pattern_candidates\n), exact_paths AS MATERIALIZED (\n  SELECT path, source, exact_path_specificity FROM scored_paths\n   WHERE exact_path_specificity > 0\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = scored_paths.path\n                    AND live.source = scored_paths.source)\n   ORDER BY exact_path_specificity DESC, path ASC, source ASC\n   LIMIT ?\n)\n` + projectFirstChunks("exact_paths", "exact_path_specificity", "DESC");
++		const statement = `WITH ${candidateCtes}, scored_paths AS MATERIALIZED (\n  SELECT path, source,\n         ${EXACT_PATH_SPECIFICITY_SQL_FUNCTION}(path) AS exact_path_specificity\n    FROM pattern_candidates\n), exact_paths AS MATERIALIZED (\n  SELECT path, source, exact_path_specificity FROM scored_paths\n   WHERE exact_path_specificity > 0\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = scored_paths.path\n                    AND live.source = scored_paths.source)\n   ORDER BY exact_path_specificity DESC, path ASC, source ASC\n   LIMIT +?\n)\n` + projectFirstChunks("exact_paths", "exact_path_specificity", "DESC");
+ 		return executeSqliteQuerySync(params.db, { compile: () => CompiledQuery.raw(statement, [
+ 			...candidateParams,
+ 			exactPathLimit,
+@@ -540,7 +552,7 @@
+ 			...terms,
+ 			...params.sourceFilter.params
+ 		];
+-		const statement = `WITH retained_paths AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source,\n         ${matchQuery ? rank : "0"} AS rank\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${filter}${params.sourceFilter.sql}${qualifiedSpecificityClause}\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = ${params.pathFtsTable}.path\n                    AND live.source = ${params.pathFtsTable}.source)\n   ORDER BY rank ${rankOrder}, ${params.pathFtsTable}.path ASC, ${params.pathFtsTable}.source ASC\n   LIMIT ?\n)\n` + projectFirstChunks("retained_paths", "rank", rankOrder);
++		const statement = `WITH retained_paths AS MATERIALIZED (\n  SELECT ${params.pathFtsTable}.path, ${params.pathFtsTable}.source,\n         ${matchQuery ? rank : "0"} AS rank\n    FROM ${params.pathFtsTable}\n   WHERE ${match?.sql ?? "1=1"}${filter}${params.sourceFilter.sql}${qualifiedSpecificityClause}\n     AND EXISTS (SELECT 1 FROM memory_index_chunks live\n                  WHERE live.path = ${params.pathFtsTable}.path\n                    AND live.source = ${params.pathFtsTable}.source)\n   ORDER BY rank ${rankOrder}, ${params.pathFtsTable}.path ASC, ${params.pathFtsTable}.source ASC\n   LIMIT +?\n)\n` + projectFirstChunks("retained_paths", "rank", rankOrder);
+ 		return executeSqliteQuerySync(params.db, { compile: () => CompiledQuery.raw(statement, [
+ 			...queryParams,
+ 			resultLimit,

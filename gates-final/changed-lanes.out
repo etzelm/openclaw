@@ -1,0 +1,33 @@
+$ pnpm changed:lanes --json --base a7e31844f2edcc6a0a783549f1f5c1394ec83fb8
+$ node scripts/changed-lanes.mjs --json --base a7e31844f2edcc6a0a783549f1f5c1394ec83fb8
+{
+  "paths": [
+    "extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts",
+    "extensions/memory-core/src/memory/manager-search.test.ts",
+    "extensions/memory-core/src/memory/manager-search.ts"
+  ],
+  "lanes": {
+    "core": false,
+    "coreTests": false,
+    "ui": false,
+    "extensions": true,
+    "extensionTests": true,
+    "scripts": false,
+    "testRoot": false,
+    "apps": false,
+    "docs": false,
+    "tooling": false,
+    "liveDockerTooling": false,
+    "bundledChannelConfigMetadata": false,
+    "releaseMetadata": false,
+    "all": false
+  },
+  "extensionImpactFromCore": false,
+  "docsOnly": false,
+  "reasons": [
+    "extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts: extension test",
+    "extensions/memory-core/src/memory/manager-search.test.ts: extension test",
+    "extensions/memory-core/src/memory/manager-search.ts: extension production"
+  ]
+}
+EXIT 0

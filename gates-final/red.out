@@ -1,0 +1,306 @@
+$ pnpm test extensions/memory-core/src/memory/manager-search.test.ts
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-search.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+ RUN  v5.0.3 <scratch>/t1-01-search-prepare-main
+
+[vitest-workers] local cache hit after 11019ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 64d054e023d9 in 11083ms (16684 inputs, 22044 outputs)
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword trigram fallback > applies fallback lexical boosts without exceeding bounded scores 38ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword boosted relevance > preserves unicode61 relevance differences before dated-note decay 8ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > returns FTS hits indexed under a different embedding model 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword cross-model FTS visibility (issue #48300) > does not return orphaned old-model FTS rows without a live chunk 5ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword relaxed question ranking > keeps the answer inside a bounded unicode61 candidate pool 80ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds unicode61 retries 20ms
+ ✓ |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeyword zero-hit fallback > preserves AND precision and bounds trigram retries 10ms
+ × |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection 32ms
+   → expected [ …(25) ] to deeply equal [ …(2) ]
+   → expected [ Array(94) ] to deeply equal []
+ × |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection 68ms
+   → expected [ …(25) ] to deeply equal [ …(2) ]
+   → expected [ Array(90) ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection
+ FAIL  |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection
+AssertionError: expected [ …(25) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  [
+    "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_exact_path_specificity",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
++   "openclaw_memory_normalized_contains",
+    "openclaw_memory_normalized_contains",
+  ]
+
+ ❯ extensions/memory-core/src/memory/manager-search.test.ts:394:12
+    392|         expect
+    393|           .soft(registerFunction.mock.calls.map(([name]) => name).toSo…
+    394|           .toEqual([
+       |            ^
+    395|             "openclaw_memory_exact_path_specificity",
+    396|             "openclaw_memory_normalized_contains",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps unicode61 search statements reusable across searches on one connection
+AssertionError: expected [ Array(94) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++ ]
+
+ ❯ extensions/memory-core/src/memory/manager-search.test.ts:406:12
+    404|         expect
+    405|           .soft(searchSql.flatMap((sql) => sql.match(/\b(?:LIMIT|LIKE)…
+    406|           .toEqual([]);
+       |            ^
+    407|
+    408|         expect(results[1]?.path.rows.map((row) => row.id)).toContain("…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |extension-database-workers| extensions/memory-core/src/memory/manager-search.test.ts > searchKeywordWithFallback statement reuse > keeps trigram search statements reusable across searches on one connection
+AssertionError: expected [ Array(90) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIKE ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++   "LIMIT ?",
++ ]
+
+ ❯ extensions/memory-core/src/memory/manager-search.test.ts:406:12
+    404|         expect
+    405|           .soft(searchSql.flatMap((sql) => sql.match(/\b(?:LIMIT|LIKE)…
+    406|           .toEqual([]);
+       |            ^
+    407|
+    408|         expect(results[1]?.path.rows.map((row) => row.id)).toContain("…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  12:51:38
+   Duration  19.84s (transform 95%, import 2%, setup 2%, tests 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 26.80s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
+EXIT 1

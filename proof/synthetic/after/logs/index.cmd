@@ -1,0 +1,1 @@
+env -i PATH=<home>/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin HOME=<scratch>/scratch/after/home OPENCLAW_STATE_DIR=<scratch>/scratch/after/state OPENCLAW_LOG_LEVEL=trace node <home>/work/t1-01-search-prepare/openclaw.mjs "memory" "index" "--force" "--agent" "main" "--verbose"

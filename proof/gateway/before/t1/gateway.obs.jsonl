@@ -1,0 +1,280 @@
+{"t":1792260122597,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":15.2,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260122597,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":61.6}
+{"t":1792260123331,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":25.3,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260123331,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":57.7}
+{"t":1792260123341,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","us":102.3,"sql":"SELECT id, path, source, start_line, end_line, text, memory_index_chunks_fts.rank AS rank FROM memory_index_chunks_fts WHERE memory_index_chunks_fts MATCH ? AND memory_index_chunks_fts.rank MATCH 'bm25()' AND EXISTS (SELECT 1 FROM memory_index_chunks c WHERE c.id = memory_index_chunks_fts.id) AND source IN (?) ORDER BY rank ASC LIMIT ?"}
+{"t":1792260123345,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3657.6,"rows":200}
+{"t":1792260123352,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260123352,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260123353,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"path_exact","sqlHash":"72b554327826","us":149,"sql":"WITH candidates AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) ), pattern_candidates AS MATERIALIZED ( SELECT path, source FROM candidates WHERE (path LIKE ? ESCAPE '\\' OR path LIKE ? ESCAPE '\\' OR path LIKE ? ESCAPE '\\' OR path LIKE ? ESCAPE '\\') ), scored_paths AS MATERIALIZED ( SELECT path, source, openclaw_memory_exact_path_specificity(path) AS exact_path_specificity FROM pattern_candidates ), exact_paths AS MATERIALIZED ( SELECT path, source, exact_path_specificity FROM scored_paths WHERE exact_path_specificity > 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = scored_paths.path AND live.source = scored_paths.source) ORDER BY exact_path_specificity DESC, path ASC, source ASC LIMIT ? ) SELECT c.id, exact_paths.path, exact_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, exact_paths.exact_path_specificity FROM exact_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = exact_paths.path AND candidate.source = exact_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY exact_paths.exact_path_specificity DESC, exact_paths.path ASC, exact_paths.source ASC"}
+{"t":1792260123353,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":292,"rows":0}
+{"t":1792260123354,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260123354,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","us":53.3,"sql":"WITH retained_paths AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source, bm25(memory_index_paths_fts) AS rank FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) AND openclaw_memory_exact_path_specificity(memory_index_paths_fts.path) > 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = memory_index_paths_fts.path AND live.source = memory_index_paths_fts.source) ORDER BY rank ASC, memory_index_paths_fts.path ASC, memory_index_paths_fts.source ASC LIMIT ? ) SELECT c.id, retained_paths.path, retained_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, retained_paths.rank FROM retained_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = retained_paths.path AND candidate.source = retained_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY retained_paths.rank ASC, retained_paths.path ASC, retained_paths.source ASC"}
+{"t":1792260123354,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":64.5,"rows":0}
+{"t":1792260123354,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","us":34,"sql":"WITH retained_paths AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source, bm25(memory_index_paths_fts) AS rank FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) AND openclaw_memory_exact_path_specificity(memory_index_paths_fts.path) = 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = memory_index_paths_fts.path AND live.source = memory_index_paths_fts.source) ORDER BY rank ASC, memory_index_paths_fts.path ASC, memory_index_paths_fts.source ASC LIMIT ? ) SELECT c.id, retained_paths.path, retained_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, retained_paths.rank FROM retained_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = retained_paths.path AND candidate.source = retained_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY retained_paths.rank ASC, retained_paths.path ASC, retained_paths.source ASC"}
+{"t":1792260123354,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":44.8,"rows":0}
+{"t":1792260124079,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":10.9,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260124079,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":49.1}
+{"t":1792260124084,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","us":34.1,"sql":"SELECT id, path, source, start_line, end_line, text, memory_index_chunks_fts.rank AS rank FROM memory_index_chunks_fts WHERE memory_index_chunks_fts MATCH ? AND memory_index_chunks_fts.rank MATCH 'bm25()' AND EXISTS (SELECT 1 FROM memory_index_chunks c WHERE c.id = memory_index_chunks_fts.id) AND source IN (?) ORDER BY rank ASC LIMIT ?"}
+{"t":1792260124088,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3503.3,"rows":200}
+{"t":1792260124094,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260124094,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260124094,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"path_exact","sqlHash":"72b554327826","us":101,"sql":"WITH candidates AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) ), pattern_candidates AS MATERIALIZED ( SELECT path, source FROM candidates WHERE (path LIKE ? ESCAPE '\\' OR path LIKE ? ESCAPE '\\' OR path LIKE ? ESCAPE '\\' OR path LIKE ? ESCAPE '\\') ), scored_paths AS MATERIALIZED ( SELECT path, source, openclaw_memory_exact_path_specificity(path) AS exact_path_specificity FROM pattern_candidates ), exact_paths AS MATERIALIZED ( SELECT path, source, exact_path_specificity FROM scored_paths WHERE exact_path_specificity > 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = scored_paths.path AND live.source = scored_paths.source) ORDER BY exact_path_specificity DESC, path ASC, source ASC LIMIT ? ) SELECT c.id, exact_paths.path, exact_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, exact_paths.exact_path_specificity FROM exact_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = exact_paths.path AND candidate.source = exact_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY exact_paths.exact_path_specificity DESC, exact_paths.path ASC, exact_paths.source ASC"}
+{"t":1792260124095,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":124.5,"rows":0}
+{"t":1792260124095,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260124095,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","us":41.8,"sql":"WITH retained_paths AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source, bm25(memory_index_paths_fts) AS rank FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) AND openclaw_memory_exact_path_specificity(memory_index_paths_fts.path) > 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = memory_index_paths_fts.path AND live.source = memory_index_paths_fts.source) ORDER BY rank ASC, memory_index_paths_fts.path ASC, memory_index_paths_fts.source ASC LIMIT ? ) SELECT c.id, retained_paths.path, retained_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, retained_paths.rank FROM retained_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = retained_paths.path AND candidate.source = retained_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY retained_paths.rank ASC, retained_paths.path ASC, retained_paths.source ASC"}
+{"t":1792260124095,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":58.4,"rows":0}
+{"t":1792260124095,"pid":55276,"thr":19,"ev":"prepare","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","us":39.1,"sql":"WITH retained_paths AS MATERIALIZED ( SELECT memory_index_paths_fts.path, memory_index_paths_fts.source, bm25(memory_index_paths_fts) AS rank FROM memory_index_paths_fts WHERE memory_index_paths_fts MATCH ? AND memory_index_paths_fts.source IN (?) AND openclaw_memory_exact_path_specificity(memory_index_paths_fts.path) = 0 AND EXISTS (SELECT 1 FROM memory_index_chunks live WHERE live.path = memory_index_paths_fts.path AND live.source = memory_index_paths_fts.source) ORDER BY rank ASC, memory_index_paths_fts.path ASC, memory_index_paths_fts.source ASC LIMIT ? ) SELECT c.id, retained_paths.path, retained_paths.source, c.start_line, c.end_line, COALESCE(CAST(substr(CAST(c.text AS BLOB), 1, ?) AS TEXT), c.text) AS text, retained_paths.rank FROM retained_paths CROSS JOIN memory_index_chunks c INDEXED BY sqlite_autoindex_memory_index_chunks_1 ON c.id = ( SELECT candidate.id FROM memory_index_chunks candidate INDEXED BY idx_memory_index_chunks_path_source WHERE candidate.path = retained_paths.path AND candidate.source = retained_paths.source ORDER BY candidate.start_line, candidate.end_line, candidate.id LIMIT 1 ) ORDER BY retained_paths.rank ASC, retained_paths.path ASC, retained_paths.source ASC"}
+{"t":1792260124095,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":46.9,"rows":0}
+{"t":1792260124809,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12.7,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260124810,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":56.2}
+{"t":1792260124819,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3920.5,"rows":200}
+{"t":1792260124825,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260124825,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260124826,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":164.6,"rows":0}
+{"t":1792260124826,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260124826,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":79.4,"rows":0}
+{"t":1792260124826,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":52.7,"rows":0}
+{"t":1792260125565,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":15,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260125565,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":60.7}
+{"t":1792260125574,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":4020.8,"rows":200}
+{"t":1792260125580,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260125581,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260125581,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":203.7,"rows":0}
+{"t":1792260125581,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260125581,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":79.4,"rows":0}
+{"t":1792260125581,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":57,"rows":0}
+{"t":1792260126282,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":9.9,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260126282,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":49.5}
+{"t":1792260126292,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":4214.2,"rows":200}
+{"t":1792260126298,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260126298,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260126298,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":250.8,"rows":0}
+{"t":1792260126298,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260126299,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":88.3,"rows":0}
+{"t":1792260126299,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":58.3,"rows":0}
+{"t":1792260126999,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":18.2,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260127000,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":60.3}
+{"t":1792260127009,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3924.7,"rows":200}
+{"t":1792260127015,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260127015,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260127015,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":165.8,"rows":0}
+{"t":1792260127015,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260127015,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":76,"rows":0}
+{"t":1792260127015,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.7,"rows":0}
+{"t":1792260127722,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":13.1,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260127722,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":54}
+{"t":1792260127730,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3684.2,"rows":200}
+{"t":1792260127737,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260127737,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260127737,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":172.6,"rows":0}
+{"t":1792260127737,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260127737,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":89.4,"rows":0}
+{"t":1792260127737,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":65.7,"rows":0}
+{"t":1792260128437,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12.3,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260128438,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":53.7}
+{"t":1792260128446,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3714.8,"rows":200}
+{"t":1792260128451,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260128451,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260128452,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":184.5,"rows":0}
+{"t":1792260128452,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260128452,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":76.4,"rows":0}
+{"t":1792260128452,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.6,"rows":0}
+{"t":1792260129123,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12.3,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260129123,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":52.2}
+{"t":1792260129131,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3780,"rows":200}
+{"t":1792260129137,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260129137,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260129137,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":146,"rows":0}
+{"t":1792260129138,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260129138,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":71.8,"rows":0}
+{"t":1792260129138,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":56.4,"rows":0}
+{"t":1792260129792,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":11.2,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260129793,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":52.6}
+{"t":1792260129801,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3833.3,"rows":200}
+{"t":1792260129806,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260129807,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260129807,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":139.9,"rows":0}
+{"t":1792260129807,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260129807,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":73.6,"rows":0}
+{"t":1792260129807,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.9,"rows":0}
+{"t":1792260130513,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":13.6,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260130513,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":53.8}
+{"t":1792260130521,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":4048.5,"rows":200}
+{"t":1792260130528,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260130528,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260130528,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":155.1,"rows":0}
+{"t":1792260130528,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260130528,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":82,"rows":0}
+{"t":1792260130528,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":58.4,"rows":0}
+{"t":1792260131216,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260131217,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":53.5}
+{"t":1792260131224,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3561,"rows":200}
+{"t":1792260131230,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260131230,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260131230,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":145.4,"rows":0}
+{"t":1792260131230,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260131231,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":108.1,"rows":0}
+{"t":1792260131231,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":66.5,"rows":0}
+{"t":1792260131908,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":10.8,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260131908,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":49.5}
+{"t":1792260131916,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3600.5,"rows":200}
+{"t":1792260131922,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260131922,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260131922,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":144.6,"rows":0}
+{"t":1792260131922,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260131922,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":93.1,"rows":0}
+{"t":1792260131922,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":66.6,"rows":0}
+{"t":1792260132609,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":10.3,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260132609,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":49}
+{"t":1792260132616,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3754.3,"rows":200}
+{"t":1792260132622,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260132622,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260132623,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":151.3,"rows":0}
+{"t":1792260132623,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260132623,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":72.5,"rows":0}
+{"t":1792260132623,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.2,"rows":0}
+{"t":1792260133292,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":10,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260133292,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":49.1}
+{"t":1792260133300,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3845.3,"rows":200}
+{"t":1792260133306,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260133306,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260133306,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":149.5,"rows":0}
+{"t":1792260133306,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260133307,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":71.6,"rows":0}
+{"t":1792260133307,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":52.8,"rows":0}
+{"t":1792260134012,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":10.7,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260134012,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":50.4}
+{"t":1792260134020,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3665.3,"rows":200}
+{"t":1792260134025,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260134026,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260134026,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":136.4,"rows":0}
+{"t":1792260134026,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260134026,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":71.9,"rows":0}
+{"t":1792260134026,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":51.7,"rows":0}
+{"t":1792260139870,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":11.5,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260139870,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":51.2}
+{"t":1792260139879,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3494.1,"rows":200}
+{"t":1792260139886,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260139886,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260139887,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":169.9,"rows":0}
+{"t":1792260139887,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260139887,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":73.8,"rows":0}
+{"t":1792260139887,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":51,"rows":0}
+{"t":1792260140601,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":11.6,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260140602,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":53.9}
+{"t":1792260140609,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3250.8,"rows":200}
+{"t":1792260140616,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260140616,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260140616,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":154.4,"rows":0}
+{"t":1792260140616,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260140616,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":70.7,"rows":0}
+{"t":1792260140616,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":50.5,"rows":0}
+{"t":1792260145849,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":18.9,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260145854,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":52.5}
+{"t":1792260145870,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":7828,"rows":200}
+{"t":1792260145878,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260145879,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260145879,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":158.2,"rows":0}
+{"t":1792260145880,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260145880,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":76,"rows":0}
+{"t":1792260145880,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":54.8,"rows":0}
+{"t":1792260147330,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":13,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260147330,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":50.8}
+{"t":1792260147338,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3863.7,"rows":200}
+{"t":1792260147345,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260147345,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260147346,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":190.5,"rows":0}
+{"t":1792260147346,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260147346,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":75.3,"rows":0}
+{"t":1792260147346,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.6,"rows":0}
+{"t":1792260148061,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":15.7,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260148061,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":55.6}
+{"t":1792260148069,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3749.3,"rows":200}
+{"t":1792260148075,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260148075,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260148076,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":188.9,"rows":0}
+{"t":1792260148076,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260148076,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":72.4,"rows":0}
+{"t":1792260148076,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.3,"rows":0}
+{"t":1792260148802,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12.1,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260148802,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":54.5}
+{"t":1792260148810,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3684,"rows":200}
+{"t":1792260148817,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260148817,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260148817,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":178.5,"rows":0}
+{"t":1792260148817,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260148818,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":132,"rows":0}
+{"t":1792260148818,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":63,"rows":0}
+{"t":1792260149527,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":11.8,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260149527,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":52.6}
+{"t":1792260149535,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3673.3,"rows":200}
+{"t":1792260149541,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260149541,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260149542,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":175.1,"rows":0}
+{"t":1792260149542,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260149542,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":76,"rows":0}
+{"t":1792260149542,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.3,"rows":0}
+{"t":1792260150291,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260150291,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":51.5}
+{"t":1792260150300,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3985.9,"rows":200}
+{"t":1792260150307,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260150307,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260150307,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":201.4,"rows":0}
+{"t":1792260150307,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260150308,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":78.3,"rows":0}
+{"t":1792260150308,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":54.5,"rows":0}
+{"t":1792260151046,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":11.8,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260151046,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":52.2}
+{"t":1792260151055,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3733.4,"rows":200}
+{"t":1792260151061,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260151062,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260151062,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":174,"rows":0}
+{"t":1792260151062,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260151062,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":225.7,"rows":0}
+{"t":1792260151063,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":110.2,"rows":0}
+{"t":1792260151789,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":10.8,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260151790,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":47.4}
+{"t":1792260151797,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3660.5,"rows":200}
+{"t":1792260151804,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260151804,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260151804,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":190.9,"rows":0}
+{"t":1792260151804,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260151804,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":80.3,"rows":0}
+{"t":1792260151804,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":54.3,"rows":0}
+{"t":1792260152515,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":12.3,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260152516,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":52.7}
+{"t":1792260152523,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3372.3,"rows":200}
+{"t":1792260152529,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260152529,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260152530,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":142.3,"rows":0}
+{"t":1792260152530,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260152530,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":70.4,"rows":0}
+{"t":1792260152530,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":53.7,"rows":0}
+{"t":1792260153248,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":13.8,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260153248,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":54.4}
+{"t":1792260153258,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3901.6,"rows":200}
+{"t":1792260153264,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260153264,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260153264,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":181.6,"rows":0}
+{"t":1792260153264,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260153265,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":78.5,"rows":0}
+{"t":1792260153265,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":54.9,"rows":0}
+{"t":1792260153998,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":13.8,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260153998,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":55.3}
+{"t":1792260154006,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":3749.7,"rows":200}
+{"t":1792260154012,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260154012,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260154013,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":156.9,"rows":0}
+{"t":1792260154013,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260154013,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":74,"rows":0}
+{"t":1792260154013,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":57.1,"rows":0}
+{"t":1792260154744,"pid":55276,"thr":13,"ev":"prepare","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","us":13.7,"sql":"SELECT (SELECT COUNT(*) FROM memory_index_chunks) AS canonical_count, (SELECT COUNT(*) FROM memory_index_chunks_fts_docsize) AS derived_count"}
+{"t":1792260154745,"pid":55276,"thr":13,"ev":"run","db":1,"shape":"reconcile_count","sqlHash":"3d5b652d4207","m":"get","us":54}
+{"t":1792260154753,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"chunk_keyword","sqlHash":"daab333f84d9","m":"all","us":4000.6,"rows":200}
+{"t":1792260154759,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260154759,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_exact_path_specificity"}
+{"t":1792260154760,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_exact","sqlHash":"72b554327826","m":"all","us":172.9,"rows":0}
+{"t":1792260154760,"pid":55276,"thr":19,"ev":"fn","db":1,"name":"openclaw_memory_normalized_contains"}
+{"t":1792260154760,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"7c8cf9e651bc","m":"all","us":79.3,"rows":0}
+{"t":1792260154760,"pid":55276,"thr":19,"ev":"run","db":1,"shape":"path_lexical","sqlHash":"cdf87851408a","m":"all","us":55.4,"rows":0}

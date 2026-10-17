@@ -1,0 +1,92 @@
+measured AFTER build commit: 1e4ab3159514a72e77e53dab106e605b0680b98d tree 17f17d2dc228a27c7190c09318d91784f92bfc78
+final branch commit: 1eb5dfb05660b50142664dd4253b5815d70af165 tree d0ce84496068a16125647b22a8941dcfab15203e
+base: a7e31844f2edcc6a0a783549f1f5c1394ec83fb8
+
+$ git diff --stat 1e4ab3159514a72e77e53dab106e605b0680b98d HEAD
+ .../src/memory/manager-search-worker.sqlite.test.ts            |  9 +++++----
+ extensions/memory-core/src/memory/manager-search.test.ts       |  5 ++++-
+ extensions/memory-core/src/memory/manager-search.ts            | 10 ++++++----
+ 3 files changed, 15 insertions(+), 9 deletions(-)
+
+# production file: comment lines only (see diff below); the rebuilt dist of the final commit is byte-identical in every JS chunk to the measured build (dist-rebuild-diff.out)
+$ git diff 1e4ab3159514a72e77e53dab106e605b0680b98d HEAD
+diff --git a/extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts b/extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts
+index 18b0aefa948..d28ca6e6370 100644
+--- a/extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts
++++ b/extensions/memory-core/src/memory/manager-search-worker.sqlite.test.ts
+@@ -17,12 +17,13 @@ import { executeMemorySearchWorkerQuery } from "./manager-search.worker.js";
+ 
+ // Frozen from the unchanged direct SQLite helpers before routing these cases through
+ // worker dispatch. Hash the exact SQL bytes, including whitespace and statement order.
++// Keyword entries include the `LIMIT +?` and `LIKE (? || '')` bindings.
+ const baselineStatements = {
+   keyword: [
+-    "4ef955cb4eb5d833877cc5481645d12d752c8ec66b563c9450f698551657be2d",
+-    "e0eb673f20e6406407742bdf77b68a4339fb325f93c57767d13341b8428aa173",
+-    "fa8fb1408e402a805b1bc7b4fdf56cd7a4574c43ef745c1b7c2a5cf7c74aa25f",
+-    "60ff181c3ad4dbf8a65f4ed156c75f1a49a1b2b6223f511a2d3786ce106aa950",
++    "0d8edb57312b94e844b0dbb9c5b52492984c7144b0128e97b10b08a4db6c61f1",
++    "d21b7990e9e84dd27defe48d362fbc1b9052516c16f7f12ed8585f816a7f804d",
++    "0452ff06b004ffa625a01700b4807576c1fc9b47fb5692b2228e9073a6e62416",
++    "6e57716adee36fd2e181a5439b23095e7b5c7efe8c37a14521ca767088e493cc",
+   ],
+   fallback: [
+     "93b82ea8ca193cfa2452b7c06fc751197a8ce4a6dcc1530908e7e5f1f1b41f38",
+diff --git a/extensions/memory-core/src/memory/manager-search.test.ts b/extensions/memory-core/src/memory/manager-search.test.ts
+index ff06c9ff0cb..f79c1935770 100644
+--- a/extensions/memory-core/src/memory/manager-search.test.ts
++++ b/extensions/memory-core/src/memory/manager-search.test.ts
+@@ -375,7 +375,7 @@ describe("searchKeywordWithFallback statement reuse", () => {
+             sourceFilter: { sql: "", params: [] },
+           },
+         });
+-      const queries = ["alpha beta", "beta.md", "café"];
++      const queries = ["alpha beta", "beta.md", "café"] as const;
+       const db = createDb();
+       try {
+         const registerFunction = vi.spyOn(db, "function");
+@@ -385,6 +385,8 @@ describe("searchKeywordWithFallback statement reuse", () => {
+           results.push(await search(db, query));
+         }
+         const repeated = await search(db, queries[0]);
++        // Searches await between their body and path statements, so these interleave.
++        const concurrent = await Promise.all(queries.map((query) => search(db, query)));
+ 
+         // Replacing a function expires every statement on the connection.
+         expect
+@@ -406,6 +408,7 @@ describe("searchKeywordWithFallback statement reuse", () => {
+         expect(results[1]?.path.rows.map((row) => row.id)).toContain("beta");
+         expect(results[2]?.path.rows.map((row) => row.id)).toContain("cafe");
+         expect(repeated).toEqual(results[0]);
++        expect(concurrent).toEqual(results);
+         for (const [index, query] of queries.entries()) {
+           const fresh = createDb();
+           try {
+diff --git a/extensions/memory-core/src/memory/manager-search.ts b/extensions/memory-core/src/memory/manager-search.ts
+index 362684a50cf..be75071da68 100644
+--- a/extensions/memory-core/src/memory/manager-search.ts
++++ b/extensions/memory-core/src/memory/manager-search.ts
+@@ -31,9 +31,10 @@ import {
+ const EXACT_PATH_SPECIFICITY_SQL_FUNCTION = "openclaw_memory_exact_path_specificity";
+ const NORMALIZED_CONTAINS_SQL_FUNCTION = "openclaw_memory_normalized_contains";
+ // Since SQLite 3.47 a bare bound LIMIT value or LIKE pattern is plan-relevant
+-// (3.53 select.c:2538, whereexpr.c:208-215), and node:sqlite clears bindings
+-// before every run, so such a statement recompiles each time. Search SQL binds
+-// them as `LIMIT +?` and `LIKE (? || '')` instead; no LIKE here uses an index.
++// (sqlite3ExprIsInteger and isLikeOrGlob call sqlite3VdbeSetVarmask; 3.53.4
++// select.c:2538, whereexpr.c:208-215), and node:sqlite clears bindings before
++// every run, so such a statement recompiles each time. Search SQL binds them as
++// `LIMIT +?` and `LIKE (? || '')` instead; no LIKE here can use an index.
+ 
+ function loadKeywordRowsWithFallback<T>(
+   plan: { matchQuery: TextQuery | null; substringTerms: string[] },
+@@ -192,7 +193,8 @@ type SearchSqlFunctionState = {
+ 
+ // Replacing a SQL function expires every prepared statement on the connection,
+ // so register once per connection and let each search swap the state read here.
+-// Searches run their statements synchronously after setting it.
++// Searches set it and run their statements synchronously, so it is fixed for a
++// whole statement run; every call site passes a column, never a constant.
+ const searchSqlFunctions = new WeakMap<DatabaseSync, SearchSqlFunctionState>();
+ 
+ function resolveSearchSqlFunctions(db: DatabaseSync): SearchSqlFunctionState {
