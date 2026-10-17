@@ -14,7 +14,6 @@ import {
   buildAnnounceIdFromChildRun,
   buildAnnounceIdempotencyKey,
 } from "../../announce-idempotency.js";
-import { isSilentAgentReplyText } from "../../embedded-agent-runner/message-visibility.js";
 import type { SubagentAnnounceDeliveryResult } from "../announce/subagent-announce-dispatch.js";
 import type { SubagentRunOutcome } from "../subagent-run-outcome.types.js";
 import { resolveSubagentChildSessionOwner } from "./subagent-child-session-owner.js";
@@ -246,6 +245,15 @@ export const captureSubagentRunResult = async (
             waitForReply: entry.expectsCompletionMessage === true,
             outcome,
             ...(sessionTarget ? { sessionTarget } : {}),
+            // Only unreachable yielded collectors need a historical execution window.
+            ...(entry.collect === true && entry.pauseReason === "sessions_yield"
+              ? {
+                  completedCollectorTurn: {
+                    startedAt: outcome.startedAt ?? entry.execution.startedAt ?? entry.createdAt,
+                    endedAt: outcome.endedAt ?? entry.execution.endedAt ?? Number.NaN,
+                  },
+                }
+              : {}),
           }),
       );
       assertCaptureCurrent();
@@ -326,7 +334,7 @@ export const refreshFrozenResultFromSession = async (
     return false;
   }
   const trimmed = captured?.trim();
-  if (!trimmed || isSilentAgentReplyText(trimmed)) {
+  if (!trimmed) {
     return false;
   }
   // Reply capture yields while registration can transfer session ownership.
