@@ -6,7 +6,6 @@ import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
 import { useSessionStoreTempDirs } from "../../test-utils/session-state-cleanup.js";
 import { readActiveTranscriptEntryAnchor, replaceSessionEntry } from "./session-accessor.js";
 import {
-  loadTranscriptReadSnapshotSync,
   readTranscriptExportSnapshotFromDatabase,
   readTranscriptExportSnapshotReadOnlySync,
   readTranscriptStatsSync,
@@ -217,55 +216,27 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
     expect(slowHolds()).toEqual([]);
   });
 
-  it("parses fenced read payloads outside the read transaction", async () => {
-    const { events, scope } = await seedSession();
-    chargeWorkToClock(2_000);
-    const snapshot = loadTranscriptReadSnapshotSync(scope, { readOnly: true });
-    expect(snapshot.events).toEqual(events);
-    expect(slowHolds()).toEqual([]);
+  it("surfaces the payload length error from a corrupt compressed row", async () => {
+    const { scope } = await seedSession();
+    const { db } = openOpenClawAgentDatabase(
+      toDatabaseOptions(resolveSqliteTranscriptReadScope(scope)),
+    );
+    db.prepare(
+      "UPDATE transcript_events SET event_utf8_bytes = event_utf8_bytes + 1 WHERE session_id = ? AND event_zstd IS NOT NULL",
+    ).run(scope.sessionId);
+    const read = () => readTranscriptExportSnapshotReadOnlySync(scope);
+    expect(read).toThrow(/Compressed transcript payload length does not match/u);
+    // The same error from a later slice, after earlier slices committed and were parsed.
+    chunkBudget.bytes = 1;
+    expect(read).toThrow(/Compressed transcript payload length does not match/u);
   });
 
-  it.each([
-    [
-      "export snapshot",
-      (scope: Parameters<typeof loadTranscriptReadSnapshotSync>[0]) =>
-        readTranscriptExportSnapshotReadOnlySync(scope),
-    ],
-    [
-      "fenced read",
-      (scope: Parameters<typeof loadTranscriptReadSnapshotSync>[0]) =>
-        loadTranscriptReadSnapshotSync(scope, { readOnly: true }),
-    ],
-  ])(
-    "surfaces the payload length error from a corrupt compressed row (%s)",
-    async (_name, read) => {
-      const { scope } = await seedSession();
-      const { db } = openOpenClawAgentDatabase(
-        toDatabaseOptions(resolveSqliteTranscriptReadScope(scope)),
-      );
-      db.prepare(
-        "UPDATE transcript_events SET event_utf8_bytes = event_utf8_bytes + 1 WHERE session_id = ? AND event_zstd IS NOT NULL",
-      ).run(scope.sessionId);
-      expect(() => read(scope)).toThrow(/Compressed transcript payload length does not match/u);
-      // The same error from a later slice, after earlier slices committed and were parsed.
-      chunkBudget.bytes = 1;
-      expect(() => read(scope)).toThrow(/Compressed transcript payload length does not match/u);
-    },
-  );
-  const readers = [
-    [
-      "export snapshot",
-      (
-        scope: Parameters<typeof loadTranscriptReadSnapshotSync>[0],
-        projectEvent?: (event: unknown) => unknown,
-      ) => readTranscriptExportSnapshotReadOnlySync(scope, { projectEvent })?.events,
-    ],
-    [
-      "fenced read",
-      (scope: Parameters<typeof loadTranscriptReadSnapshotSync>[0]) =>
-        loadTranscriptReadSnapshotSync(scope, { readOnly: true }).events,
-    ],
-  ] as const;
+  function readEvents(
+    scope: Awaited<ReturnType<typeof seedSession>>["scope"],
+    projectEvent?: (event: unknown) => unknown,
+  ) {
+    return readTranscriptExportSnapshotReadOnlySync(scope, { projectEvent })?.events;
+  }
 
   it("captures one slice of payloads per read transaction and parses it in between", async () => {
     const { events, scope } = await seedSession();
@@ -274,40 +245,34 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
       transactionLog.entries.push("parse");
       return event;
     });
-    expect(readers[0][1](scope, projectEvent)).toEqual(events);
+    expect(readEvents(scope, projectEvent)).toEqual(events);
     // One row per transaction; the last transaction finds no further rows.
     expect(transactionLog.entries).toEqual([
       ...events.flatMap(() => ["transaction", "parse"]),
       "transaction",
     ]);
-    transactionLog.entries = [];
-    expect(readers[1][1](scope)).toEqual(events);
-    expect(transactionLog.entries).toEqual([...events.map(() => "transaction"), "transaction"]);
   });
 
-  it.each(readers)(
-    "rereads in one transaction when the transcript changes between chunks (%s)",
-    async (_name, read) => {
-      const { events, scope } = await seedSession();
-      chunkBudget.bytes = 1;
-      const { db } = openOpenClawAgentDatabase(
-        toDatabaseOptions(resolveSqliteTranscriptReadScope(scope)),
-      );
-      // An in-place rewrite of the already parsed first row, with the update time writers bump.
-      transactionLog.afterFirst = () => {
-        db.prepare(
-          `UPDATE transcript_events SET event_json = json_set(event_json, '$.cwd', 'rewritten')
-           WHERE session_id = ? AND seq = (SELECT min(seq) FROM transcript_events WHERE session_id = ?)`,
-        ).run(scope.sessionId, scope.sessionId);
-        db.prepare(
-          "UPDATE session_windows SET transcript_updated_at = coalesce(transcript_updated_at, 0) + 1 WHERE session_id = ?",
-        ).run(scope.sessionId);
-      };
-      expect(read(scope)).toEqual([{ ...events[0], cwd: "rewritten" }, ...events.slice(1)]);
-      // First slice, the transaction that saw the new version, then one whole reread.
-      expect(transactionLog.entries).toEqual(["transaction", "transaction", "transaction"]);
-    },
-  );
+  it("rereads in one transaction when the transcript changes between chunks", async () => {
+    const { events, scope } = await seedSession();
+    chunkBudget.bytes = 1;
+    const { db } = openOpenClawAgentDatabase(
+      toDatabaseOptions(resolveSqliteTranscriptReadScope(scope)),
+    );
+    // An in-place rewrite of the already parsed first row, with the update time writers bump.
+    transactionLog.afterFirst = () => {
+      db.prepare(
+        `UPDATE transcript_events SET event_json = json_set(event_json, '$.cwd', 'rewritten')
+         WHERE session_id = ? AND seq = (SELECT min(seq) FROM transcript_events WHERE session_id = ?)`,
+      ).run(scope.sessionId, scope.sessionId);
+      db.prepare(
+        "UPDATE session_windows SET transcript_updated_at = coalesce(transcript_updated_at, 0) + 1 WHERE session_id = ?",
+      ).run(scope.sessionId);
+    };
+    expect(readEvents(scope)).toEqual([{ ...events[0], cwd: "rewritten" }, ...events.slice(1)]);
+    // First slice, the transaction that saw the new version, then one whole reread.
+    expect(transactionLog.entries).toEqual(["transaction", "transaction", "transaction"]);
+  });
   // UTF-8 stores CJK at 3 bytes per character and UTF-16 stores every unit in 2 bytes, so a
   // string-length budget undercounts the copied column in both database encodings.
   it.each(["UTF-8", "UTF-16le"] as const)(
@@ -343,18 +308,13 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
         transactionLog.entries.push(`parse ${event.id}`);
         return event;
       });
-      expect(readers[0][1](scope, projectEvent as (event: unknown) => unknown)).toEqual(events);
+      expect(readEvents(scope, projectEvent as (event: unknown) => unknown)).toEqual(events);
       // Each Unicode row alone reaches the budget, so each one ends its slice.
       const entries = transactionLog.entries;
       for (const { id } of unicode) {
         expect(entries[entries.indexOf(`parse ${id}`) + 1]).toBe("transaction");
       }
       expect(projectEvent.mock.calls.map(([event]) => event)).toEqual(events);
-      // The fenced read captures through the same slices.
-      const exportTransactions = entries.filter((entry) => entry === "transaction").length;
-      transactionLog.entries = [];
-      expect(readers[1][1](scope)).toEqual(events);
-      expect(transactionLog.entries).toHaveLength(exportTransactions);
     },
   );
 
@@ -379,7 +339,7 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
       transactionLog.entries.push(`parse ${event.id}`);
       return event;
     });
-    expect(readers[0][1](scope, projectEvent as (event: unknown) => unknown)).toEqual(events);
+    expect(readEvents(scope, projectEvent as (event: unknown) => unknown)).toEqual(events);
     const entries = transactionLog.entries;
     for (const id of ["entry-0", "entry-2"]) {
       expect(entries[entries.indexOf(`parse ${id}`) + 1]).toBe("transaction");
@@ -438,26 +398,6 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
   function entryContent(result: Awaited<ReturnType<typeof prepareSessionMemoryEntries>>[number]) {
     return "entry" in result ? result.entry?.content : undefined;
   }
-
-  it("reads a transcript above the snapshot limit in slices after the memory export batch transaction", async () => {
-    const batched = await seedSession();
-    const sliced = await seedSession("UTF-8", undefined, LARGE_ROWS);
-    expect(readTranscriptStatsSync(sliced.scope).sizeBytes).toBeGreaterThan(4 * MIB);
-    const [inBatch] = await prepareSessionMemoryEntries([memoryEntry(batched.scope)]);
-    // Within the retained-snapshot limit the transcript is read inside the one batch transaction.
-    expect(transactionLog.entries).toEqual(["transaction"]);
-    transactionLog.entries = [];
-    chunkBudget.bytes = 1;
-    const [afterBatch] = await prepareSessionMemoryEntries([memoryEntry(sliced.scope)]);
-    // The batch transaction reads the statistics only; the rows follow one per transaction.
-    expect(transactionLog.entries).toEqual([
-      "transaction",
-      ...sliced.events.map(() => "transaction"),
-      "transaction",
-    ]);
-    expect(entryContent(afterBatch!)).toContain(MARKER);
-    expect(entryContent(inBatch!)).toContain(MARKER);
-  });
 
   it("matches the batch head while unchanged and rereads it after a write", async () => {
     const { scope, events } = await seedSession("UTF-8", undefined, LARGE_ROWS);

@@ -42,9 +42,8 @@ export async function prepareSessionMemoryEntry(request: SessionEntryWorkerInput
 export async function prepareSessionMemoryEntries(
   entries: SessionEntriesWorkerInput["entries"],
 ): Promise<SessionTranscriptWorkerValues["session-entries"]["entries"]> {
-  const prepared: (Snapshot | TranscriptExportBatchHead | null | "cold")[] = entries.map(
-    () => null,
-  );
+  const prepared: (Snapshot | null | "cold")[] = entries.map(() => null);
+  const sliced = new Map<number, TranscriptExportBatchHead>();
   const groups = new Map<
     string,
     { index: number; resolved: ReturnType<typeof resolveSqliteTranscriptReadScope> }[]
@@ -77,7 +76,11 @@ export async function prepareSessionMemoryEntries(
                     { sliceAboveBytes: MAX_SNAPSHOT_BYTES },
                   ),
                 );
-                prepared[index] = "sliced" in snapshot ? snapshot.sliced : snapshot;
+                if ("sliced" in snapshot) {
+                  sliced.set(index, snapshot.sliced);
+                } else {
+                  prepared[index] = snapshot;
+                }
               } catch (error) {
                 if (!(error instanceof SessionTranscriptColdError)) {
                   throw error;
@@ -92,11 +95,8 @@ export async function prepareSessionMemoryEntries(
     );
   }
   // Transcripts above the retention limit read in short slices after the batch transaction.
-  for (const [index, request] of entries.entries()) {
-    const batchHead = prepared[index];
-    if (!batchHead || batchHead === "cold" || !("head" in batchHead)) {
-      continue;
-    }
+  for (const [index, batchHead] of sliced) {
+    const request = entries[index]!;
     try {
       // An unchanged transcript keeps the batch statistics instead of reading them again.
       prepared[index] = runWithSessionTranscriptReadFence(
@@ -118,7 +118,7 @@ export async function prepareSessionMemoryEntries(
   return Promise.all(
     entries.map(async (request, index) => {
       const snapshot = prepared[index]!;
-      if (snapshot === "cold" || (snapshot && "head" in snapshot)) {
+      if (snapshot === "cold") {
         return { cold: true as const };
       }
       retainSnapshot(snapshotKey(request), snapshot);

@@ -183,7 +183,9 @@ export function readTranscriptExportSnapshotReadOnlySync(
   batchHead?: TranscriptExportBatchHead,
 ) {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const transaction: TranscriptReadTransaction = (read) =>
+  const transaction: TranscriptSliceTransaction<Pick<OpenClawAgentDatabase, "db" | "path">> = (
+    read,
+  ) =>
     withOpenClawAgentDatabaseReadOnly(
       (database) =>
         runSqliteDeferredTransactionSync(database.db, () => read(database), {
@@ -195,15 +197,21 @@ export function readTranscriptExportSnapshotReadOnlySync(
   const result =
     (options.projection === "reset-boundary"
       ? undefined
-      : readTranscriptEventsInChunks({
-          sessionId: resolved.sessionId,
-          maxEventBytes: scope.maxEventBytes,
-          projectEvent: options.projectEvent,
+      : readTranscriptEventsInSlices({
           transaction,
+          projectEvent: options.projectEvent,
+          readVersion: (database) =>
+            readTranscriptContextVersionInTransaction(database, resolved.sessionId),
           head: (database, version) =>
             batchHead && isSameTranscriptContextVersion(version, batchHead.version)
               ? batchHead.head
               : readTranscriptExportHead(database, resolved, options),
+          // The byte admission check covers the whole fenced transcript once, in the first slice.
+          readSlice: (database, { first, ...range }) =>
+            readTranscriptPayloadChunkFromDatabase(database, resolved.sessionId, {
+              ...range,
+              maxEventBytes: first ? scope.maxEventBytes : undefined,
+            }),
         })) ??
     transaction((database) =>
       readTranscriptExportSnapshotFromDatabase(database, resolved, scope, options),
@@ -252,39 +260,30 @@ export function loadTranscriptReadSnapshotSync(
   options: { readOnly?: boolean; resolvedScope?: ResolvedTranscriptReadScope } = {},
 ): SessionTranscriptReadSnapshot {
   const resolved = options.resolvedScope ?? resolveSqliteTranscriptReadScope(scope);
+  const read = (database: Pick<OpenClawAgentDatabase, "db" | "path">) =>
+    runSqliteDeferredTransactionSync(
+      database.db,
+      () => {
+        const fence = resolveSqliteSessionTranscriptReadFence({ database, ...resolved });
+        return {
+          events: loadTranscriptEventsFromDatabase(database, resolved.sessionId, {
+            beforeEventSeq: fence?.beforeRawSeq,
+            maxEventBytes: scope.maxEventBytes,
+          }),
+          version: readTranscriptContextVersionInTransaction(database, resolved.sessionId),
+        };
+      },
+      { databaseLabel: database.path, operationLabel: "session transcript fenced read" },
+    );
   const databaseOptions = toDatabaseOptions(resolved);
-  const transaction: TranscriptReadTransaction = (read) => {
-    const run = (database: TranscriptReadDatabase) =>
-      runSqliteDeferredTransactionSync(database.db, () => read(database), {
-        databaseLabel: database.path,
-        operationLabel: "session transcript fenced read",
-      });
-    return options.readOnly
-      ? withOpenClawAgentDatabaseReadOnly(run, databaseOptions)
-      : { found: true, value: run(openOpenClawAgentDatabase(databaseOptions)) };
-  };
-  const head = (database: TranscriptReadDatabase) => ({
-    beforeEventSeq: resolveSqliteSessionTranscriptReadFence({ database, ...resolved })
-      ?.beforeRawSeq,
-  });
-  const result =
-    readTranscriptEventsInChunks({
-      sessionId: resolved.sessionId,
-      maxEventBytes: scope.maxEventBytes,
-      transaction,
-      head,
-    }) ??
-    transaction((database) => ({
-      events: loadTranscriptEventsFromDatabase(database, resolved.sessionId, {
-        beforeEventSeq: head(database).beforeEventSeq,
-        maxEventBytes: scope.maxEventBytes,
-      }),
-      version: readTranscriptContextVersionInTransaction(database, resolved.sessionId),
-    }));
+  if (!options.readOnly) {
+    return read(openOpenClawAgentDatabase(databaseOptions));
+  }
+  const result = withOpenClawAgentDatabaseReadOnly(read, databaseOptions);
   if (!result.found) {
     throw new SessionTranscriptStorageUnavailableError(result.reason);
   }
-  return { events: result.value.events, version: result.value.version };
+  return result.value;
 }
 
 /** Reads a complete maintenance transcript and its lifecycle snapshot from one transaction. */
@@ -462,9 +461,6 @@ export function loadTranscriptEventsFromDatabase(
   });
 }
 
-type TranscriptReadDatabase = Pick<OpenClawAgentDatabase, "db" | "path">;
-type TranscriptReadTransaction = TranscriptSliceTransaction<TranscriptReadDatabase>;
-
 /** Captures fenced payload text after `afterEventSeq`, decoded by SQLite, up to the slice budget. */
 function readTranscriptPayloadChunkFromDatabase(
   database: Pick<OpenClawAgentDatabase, "db">,
@@ -486,31 +482,6 @@ function readTranscriptPayloadChunkFromDatabase(
       ),
     ),
   );
-}
-
-/** Bounded slices of the whole transcript, each read in its own short transaction. */
-function readTranscriptEventsInChunks<
-  Head extends { beforeEventSeq?: number; afterEventSeq?: number; skipEvents?: boolean },
->(params: {
-  sessionId: string;
-  maxEventBytes?: number;
-  projectEvent?: (event: TranscriptEvent) => TranscriptEvent;
-  transaction: TranscriptReadTransaction;
-  head: (database: TranscriptReadDatabase, version: SessionTranscriptContextVersion) => Head;
-}) {
-  const { sessionId, maxEventBytes } = params;
-  return readTranscriptEventsInSlices({
-    transaction: params.transaction,
-    head: params.head,
-    projectEvent: params.projectEvent,
-    readVersion: (database) => readTranscriptContextVersionInTransaction(database, sessionId),
-    // The byte admission check covers the whole fenced transcript once, in the first slice.
-    readSlice: (database, { first, ...range }) =>
-      readTranscriptPayloadChunkFromDatabase(database, sessionId, {
-        ...range,
-        maxEventBytes: first ? maxEventBytes : undefined,
-      }),
-  });
 }
 
 export function readTranscriptSnapshot(
