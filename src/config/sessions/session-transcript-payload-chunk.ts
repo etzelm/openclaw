@@ -73,7 +73,7 @@ export function readTranscriptEventsInSlices<
   readVersion: (database: Database) => SessionTranscriptContextVersion;
   readSlice: (
     database: Database,
-    range: { afterEventSeq?: number; beforeEventSeq?: number; first: boolean },
+    range: { afterEventSeq?: number; beforeEventSeq?: number },
   ) => TranscriptPayloadChunk;
   projectEvent?: (event: TranscriptEvent) => TranscriptEvent;
 }):
@@ -92,7 +92,6 @@ export function readTranscriptEventsInSlices<
         : readSlice(database, {
             afterEventSeq: head.afterEventSeq,
             beforeEventSeq: head.beforeEventSeq,
-            first: true,
           }),
       version,
     };
@@ -111,7 +110,7 @@ export function readTranscriptEventsInSlices<
     const afterEventSeq: number | undefined = chunk.lastSeq;
     const next = transaction((database): TranscriptPayloadChunk | undefined =>
       isSameTranscriptContextVersion(readVersion(database), version)
-        ? readSlice(database, { afterEventSeq, beforeEventSeq: head.beforeEventSeq, first: false })
+        ? readSlice(database, { afterEventSeq, beforeEventSeq: head.beforeEventSeq })
         : undefined,
     );
     if (!next.found) {

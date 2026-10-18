@@ -6,14 +6,15 @@ import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
 import { useSessionStoreTempDirs } from "../../test-utils/session-state-cleanup.js";
 import { readActiveTranscriptEntryAnchor, replaceSessionEntry } from "./session-accessor.js";
 import {
-  readTranscriptExportSnapshotFromDatabase,
   readTranscriptExportSnapshotReadOnlySync,
+  readTranscriptExportSnapshotsFromDatabase,
   readTranscriptStatsSync,
 } from "./session-accessor.sqlite-read.js";
 import {
   resolveSqliteTranscriptReadScope,
   toDatabaseOptions,
 } from "./session-accessor.sqlite-scope.js";
+import { readTranscriptContextVersionInTransaction } from "./session-accessor.sqlite-transcript-state.js";
 import { appendTranscriptMessage } from "./session-accessor.sqlite-transcript-write.js";
 import { replaceTranscriptEvents } from "./session-accessor.sqlite-transcript-write.test-support.js";
 import { prepareSessionMemoryEntries } from "./session-memory-entry.worker.js";
@@ -40,19 +41,27 @@ vi.mock("../../infra/sqlite-transaction.js", async () => {
   const actual = await vi.importActual<typeof import("../../infra/sqlite-transaction.js")>(
     "../../infra/sqlite-transaction.js",
   );
+  const logged = (label: string | undefined) => {
+    if (label?.startsWith("session transcript")) {
+      transactionLog.entries.push("transaction");
+      const afterFirst = transactionLog.afterFirst;
+      transactionLog.afterFirst = undefined;
+      afterFirst?.();
+    }
+  };
   return {
     ...actual,
     runSqliteDeferredTransactionSync: ((db, operation, options) => {
       const result = actual.runSqliteDeferredTransactionSync(db, operation, options);
-      const label = options?.operationLabel;
-      if (label?.startsWith("session transcript")) {
-        transactionLog.entries.push("transaction");
-        const afterFirst = transactionLog.afterFirst;
-        transactionLog.afterFirst = undefined;
-        afterFirst?.();
-      }
+      logged(options?.operationLabel);
       return result;
     }) as typeof actual.runSqliteDeferredTransactionSync,
+    // The memory export batch reads through the engine-neutral read snapshot.
+    runSqliteReadSnapshotSync: ((db, operation, options) => {
+      const result = actual.runSqliteReadSnapshotSync(db, operation, options);
+      logged(options?.operationLabel);
+      return result;
+    }) as typeof actual.runSqliteReadSnapshotSync,
   };
 });
 
@@ -68,10 +77,12 @@ vi.mock("./session-accessor.sqlite-transcript-stats.js", async () => {
       statsReads.count++;
       return actual.readTranscriptStatsFromDatabase(...args);
     }) as typeof actual.readTranscriptStatsFromDatabase,
-    readTranscriptExportStatsFromDatabase: ((...args) => {
+    readTranscriptStatsBatchFromDatabase: ((
+      ...args: Parameters<typeof actual.readTranscriptStatsBatchFromDatabase>
+    ) => {
       statsReads.count++;
-      return actual.readTranscriptExportStatsFromDatabase(...args);
-    }) as typeof actual.readTranscriptExportStatsFromDatabase,
+      return actual.readTranscriptStatsBatchFromDatabase(...args);
+    }) as typeof actual.readTranscriptStatsBatchFromDatabase,
   };
 });
 
@@ -405,24 +416,26 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
       toDatabaseOptions(resolveSqliteTranscriptReadScope(scope)),
     );
     const readBatchHead = () => {
-      const snapshot = readTranscriptExportSnapshotFromDatabase(
+      const resolved = resolveSqliteTranscriptReadScope(scope);
+      const [snapshot] = readTranscriptExportSnapshotsFromDatabase(
         { db, path: databasePath },
-        resolveSqliteTranscriptReadScope(scope),
-        scope,
-        {},
-        { sliceAboveBytes: 0 },
+        [{ resolved, scope, options: {} }],
+        { deferAboveBytes: 0 },
       );
-      if (!("sliced" in snapshot)) {
-        throw new Error("expected a sliced export");
+      if (snapshot === "cold" || !snapshot?.deferred) {
+        throw new Error("expected a deferred export");
       }
-      return snapshot.sliced;
+      return {
+        snapshot,
+        version: readTranscriptContextVersionInTransaction({ db }, resolved.sessionId),
+      };
     };
     chunkBudget.bytes = 1;
     const unchanged = readBatchHead();
     statsReads.count = 0;
     const same = readTranscriptExportSnapshotReadOnlySync(scope, {}, unchanged);
     expect(statsReads.count).toBe(0);
-    expect(same?.stats).toEqual(unchanged.head.stats);
+    expect(same?.stats).toEqual(unchanged.snapshot.stats);
     expect(same?.events).toHaveLength(events.length);
 
     const stale = readBatchHead();
@@ -432,7 +445,7 @@ describe("SQLite transcript readers release the read snapshot before parsing", (
     statsReads.count = 0;
     const changed = readTranscriptExportSnapshotReadOnlySync(scope, {}, stale);
     expect(statsReads.count).toBe(1);
-    expect(changed?.stats.eventCount).toBe(stale.head.stats.eventCount + 1);
+    expect(changed?.stats.eventCount).toBe(stale.snapshot.stats.eventCount + 1);
     expect(changed?.events).toHaveLength(events.length + 1);
     expect(JSON.stringify(changed?.events.at(-1))).toContain(`${MARKER} appended`);
   });
