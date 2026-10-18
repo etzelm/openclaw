@@ -92,8 +92,8 @@ export async function prepareSessionMemoryEntries(
               };
             });
             // Transcripts the retained-snapshot cache admits (at most MAX_SNAPSHOT_BYTES) are read
-            // inside the batch transaction; larger ones, which the cache never retains, are read
-            // in slices after it.
+            // inside the batch transaction; on SQLite, larger ones, which the cache never retains,
+            // are read in slices after it.
             const exported = readTranscriptExportSnapshotsFromDatabase(database, requests, {
               deferAboveBytes: MAX_SNAPSHOT_BYTES,
             });

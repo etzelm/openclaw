@@ -6,6 +6,7 @@ import {
   iterateSqliteQuerySync,
   prepareSqliteQuerySync,
 } from "../../infra/kysely-sync.js";
+import { isPostgresSqlConnection } from "../../infra/sql-connection.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
 import { runSqliteReadOperationSync } from "../../infra/sqlite-schema-facts.js";
 import {
@@ -228,13 +229,15 @@ export function readTranscriptExportSnapshotReadOnlySync(
 
 /**
  * Export metadata and only requested deltas within the caller's read transaction. With
- * `deferAboveBytes`, a transcript whose recorded size exceeds it keeps its rows unread and
- * returns `deferred` for `readTranscriptExportSnapshotReadOnlySync` after that transaction.
+ * `deferAboveBytes` on SQLite, a transcript whose recorded size exceeds it keeps its rows unread
+ * and returns `deferred` for `readTranscriptExportSnapshotReadOnlySync` after that transaction.
+ * PostgreSQL ignores it: the stalled checkpoint is a SQLite WAL problem, and PostgreSQL buffers
+ * every query result, so unbounded slice queries would refetch the remaining rows.
  */
 export function readTranscriptExportSnapshotsFromDatabase(
   database: Pick<OpenClawAgentDatabase, "db" | "path">,
   requests: readonly TranscriptExportRequest[],
-  { deferAboveBytes }: { deferAboveBytes?: number } = {},
+  { deferAboveBytes = Number.POSITIVE_INFINITY }: { deferAboveBytes?: number } = {},
 ): Array<TranscriptExportSnapshot | "cold"> {
   const exportStats = readTranscriptStatsBatchFromDatabase(
     database,
@@ -272,7 +275,7 @@ export function readTranscriptExportSnapshotsFromDatabase(
           beforeEventSeq: fence?.beforeRawSeq,
           maxEventBytes: scope.maxEventBytes,
         });
-        if (deferAboveBytes !== undefined && stats.sizeBytes > deferAboveBytes) {
+        if (stats.sizeBytes > deferAboveBytes && !isPostgresSqlConnection(database.db)) {
           snapshot.deferred = { afterSeq: previous?.throughSeq, throughSeq };
         } else {
           pending.push({ request, snapshot, throughSeq, afterSeq: previous?.throughSeq });
