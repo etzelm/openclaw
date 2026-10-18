@@ -1,0 +1,42 @@
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+production unused-export scan:
+Unused exports are not allowed:
+  extensions/slack/src/monitor/types.ts: SlackAppHomeOpenedEvent
+  src/agents/tools/heartbeat-response-tool.ts: createHeartbeatResponseTool
+  src/logging/diagnostic-memory.ts: resetDiagnosticMemoryForTest
+  src/logging/diagnostic-phase.ts: resetDiagnosticPhasesForTest
+  src/logging/diagnostic-run-activity.ts: resetDiagnosticRunActivityForTest
+  src/logging/diagnostic-runtime.ts: resetDiagnosticActivityForTest
+  src/logging/diagnostic-session-recovery-coordinator.ts: resetDiagnosticSessionRecoveryCoordinatorForTest
+  src/logging/diagnostic-session-state.ts: resetDiagnosticSessionStateForTest
+  src/logging/diagnostic-stability.ts: resetDiagnosticStabilityRecorderForTest
+  src/tui/tui-activity-status.ts: resolveTuiProgramState
+Delete the exports or model their real production consumers in Knip.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  extensions/browser/chrome-extension/background.lifecycle-test-helpers.ts: relayRequest
+  extensions/memory-core/src/memory/manager-index.test-support.ts: ManagerIndexFixture
+  extensions/slack/src/monitor/types.ts: SlackAppHomeOpenedEvent
+  src/agents/agent-tools.turn-authority.test-support.ts: expectGated
+  src/agents/command/session-store.test-support.ts: seedSessionFixture
+  src/agents/embedded-agent-runner/compact.hooks.harness.ts: selectAgentHarnessMock
+  src/agents/embedded-agent-runner/run/message-tool-terminal.test-support.ts: terminalModel
+  src/agents/tools/web-fetch.test-harness.ts: createBaseWebFetchToolConfig
+  src/cli/gateway-cli/run-cleanup-receipt.test-support.ts: GatewayLoopStart
+  src/gateway/gateway-connection.test-mocks.ts: isLoopbackHostMock
+  src/gateway/gateway-connection.test-mocks.ts: isSecureWebSocketUrlMock
+  src/gateway/gateway-connection.test-mocks.ts: loadConfigMock
+  src/gateway/gateway-connection.test-mocks.ts: resolveConfigPathMock
+  src/gateway/gateway-connection.test-mocks.ts: resolveGatewayPortMock
+  src/gateway/gateway-connection.test-mocks.ts: resolveStateDirMock
+  src/gateway/server.agent-runtime-authority-proof.test-support.ts: observe
+  src/gateway/server.agent-runtime-authority-proof.test-support.ts: rpcObservation
+  src/gateway/session-observer-suite.test-support.ts: persistedDigest
+  src/infra/npm-managed-root.test-support.ts: writeLockfile
+  src/tui/tui-activity-status.ts: resolveTuiProgramState
+  test/e2e/qa-lab/runtime/gateway-node-mcp.test-support.ts: createMcpServers
+  test/scripts/mantis-telegram.test-support.ts: canonicalPlan
+  test/scripts/mantis-telegram.test-support.ts: planDigest
+Delete the exports or model their real production consumers in Knip.

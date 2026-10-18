@@ -1,0 +1,33 @@
+# Harness at merged tree 79a4c3bb3bc (tree 40b1adb06cea) vs the r15 reference captured at 13078e36c7e
+# rows: ref 37, this run 37
+# synthetic claude writes its transcript under CLAUDE_CONFIG_DIR (main 08d89a8bdf5, #175549, reads it there, as real Claude writes it);
+# interrupted-fresh removes that projects dir too. Diffs of both harness scripts are in summary-harness3.txt.
+## raw diff (< r15 ref, > this run)
+7c7
+< interrupted-allowed | exit=0 exit=143 exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1407:0,0,0 61:0,0,0+ctx1809:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+---
+> interrupted-allowed | exit=0 exit=1 exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1407:0,0,0 61:0,0,0+ctx1809:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+9,10c9,10
+< interrupted-reassign-before-context | exit=0 exit=143 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1423:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1258:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-reassign-before-send | exit=0 exit=143 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1420:0,0,0 61:0,0,0+ctx1822:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+---
+> interrupted-reassign-before-context | exit=0 exit=1 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1423:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1258:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-reassign-before-send | exit=0 exit=1 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1420:0,0,0 61:0,0,0+ctx1822:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+12c12
+< interrupted-revoke-before-send | exit=0 exit=143 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1418:0,0,0 61:0,0,0+ctx1820:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+---
+> interrupted-revoke-before-send | exit=0 exit=1 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1418:0,0,0 61:0,0,0+ctx1820:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+35a36
+> sed: after-skill-config-dir-added/boundary-by-turn.txt: No such file or directory
+raw diff EXIT 1
+## diff after (a) dropping the outcomes2.sh sed stderr line for skill-config-dir-added (no boundary file at either head)
+## and (b) treating turn 2's client exit code in the six interrupted-* rows as one value: the probe SIGKILLs the Gateway, then
+## sends SIGTERM to the client; the client exits 1 on its own when it sees the connection close first, else 143 (race)
+normalized diff EXIT 0
+## turn 2 client lines in the interrupted runs (both exit codes print main's connection-closed message):
+after-interrupted-allowed: turn 2 client exit=1 | 1 connection-closed line(s)
+after-interrupted-fresh: turn 2 client exit=143 | 1 connection-closed line(s)
+after-interrupted-reassign-before-context: turn 2 client exit=1 | 1 connection-closed line(s)
+after-interrupted-reassign-before-send: turn 2 client exit=1 | 1 connection-closed line(s)
+after-interrupted-revoke-before-context: turn 2 client exit=143 | 1 connection-closed line(s)
+after-interrupted-revoke-before-send: turn 2 client exit=1 | 1 connection-closed line(s)

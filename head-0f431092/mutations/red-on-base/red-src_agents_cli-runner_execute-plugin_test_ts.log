@@ -1,0 +1,100 @@
+$ node scripts/test-projects.mts src/agents/cli-runner/execute-plugin.test.ts
+[test] starting test/vitest/vitest.agents-support.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$BASE[39m
+
+[vitest-workers] local cache hit after 3442ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared e01c88c263c4 in 3491ms (16661 inputs, 22043 outputs)
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mstreams plugin events through the canonical host output boundary[32m 243[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdoes not disclose private context when history access changes during permission preparation[32m 5[2mms[22m[39m
+ [31m×[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdoes not disclose private input when a native login changes after the plugin started[32m 5[2mms[22m[39m
+[31m   → promise resolved "{ reason: 'exit', exitCode: +0, …(6) }" instead of rejecting[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mruns plugin user questions with current caller authority (revoked=false)[32m 8[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mruns plugin user questions with current caller authority (revoked=true)[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mrejects caller revocation before restart or plugin execution[32m 8[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mrejects admission revocation before restart or plugin execution[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdoes not close a successor or execute after caller revocation during restart cleanup[32m 5[2mms[22m[39m
+ ✓  agents-support  src/agents/cli-runner/execute-plugin.test.ts > plugin-owned CLI execution host boundary > restarts true fresh sessions while preserving legitimate no-resume warm reuse 5ms
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mrejects missing or replaced required generations but permits a deliberate cold recovery[32m 6[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mrecovers an invalidated control-only resume[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdoes not replay an invalidated resume while native approval is pending[32m 55[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdoes not replay an invalidated resume while operator input is pending[32m 54[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mclaims prepared resources only for the original process and cleans after its exit[32m 5[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mnever silently prompts or grants under allowlist policy[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mfails closed for unnamed and unavailable native tools before requesting approval[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mretains safe standing approvals only for the exact live process and current turn policy[32m 6[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdenies approval when admission authority closes during the awaited decision[32m 2[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdenies approval when caller authority closes during the awaited decision[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mcancels an in-flight native approval and never releases its late decision[32m 53[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mfences a retained permission callback as soon as its turn finishes[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mpreserves a provider-error subtype if the plugin throws while draining[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mrejects an interim result without its continuation final[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mnever replays substantive assistant output after a no-output timeout[32m 56[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mkeeps an active native approval alive beyond the ordinary no-output watchdog[32m 54[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mkeeps tracked background work alive beyond the ordinary no-output watchdog[32m 55[2mms[22m[39m
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDomainPublication.exec-approvals
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+[sqlite-test-lifecycle] src/agents/cli-runner/execute-plugin.test.ts: retiring openclaw.pluginStateObservationCache
+
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mpreserves streamed assistant output after the caller deadline expires[32m 53[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI ask_user timeout[2m > [22mkeeps the earlier overall deadline authoritative[32m 3[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI ask_user timeout[2m > [22muses the exact question deadline[32m 7[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI ask_user timeout[2m > [22mdoes not let a short question shrink the blocked-tool watchdog floor[32m 4[2mms[22m[39m
+ [32m✓[39m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI ask_user timeout[2m > [22mrestores the remaining ordinary watchdog when ask_user clears early[32m 3[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[45m agents-support [49m[39m src/agents/cli-runner/execute-plugin.test.ts[2m > [22mplugin-owned CLI execution host boundary[2m > [22mdoes not disclose private input when a native login changes after the plugin started
+[31m[1mAssertionError[22m: promise resolved "{ reason: 'exit', exitCode: +0, …(6) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "durationMs": 2,[39m
+[31m+   "exitCode": 0,[39m
+[31m+   "exitSignal": null,[39m
+[31m+   "noOutputTimedOut": false,[39m
+[31m+   "reason": "exit",[39m
+[31m+   "stderr": "",[39m
+[31m+   "stdout": "",[39m
+[31m+   "timedOut": false,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/agents/cli-runner/execute-plugin.test.ts:[2m227:47[22m[39m
+    [90m225|[39m       yield SUCCESS_RESULT;
+    [90m226|[39m     };
+    [90m227|[39m     await expect(runPlugin(context, execute)).rejects.toThrow("Private…
+    [90m   |[39m                                               [31m^[39m
+    [90m228|[39m   });
+    [90m229|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m30 passed[39m[22m[90m (31)[39m
+[2m   Start at [22m 19:27:46
+[2m   Duration [22m 8.84s[2m (transform 77%, import 12%, tests 8%, worker 2%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 11.00s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

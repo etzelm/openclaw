@@ -1,0 +1,168 @@
+HEAD 79a4c3bb3bc52f0cd94d1f1ac020f75f5a58d4fe TREE 40b1adb06cea98e037337d3f2967f9a3320ecdf3 dirty=0
+targeted: every changed test file vs merged main (10 files: extensions/anthropic/cli-runtime.test.ts src/agents/cli-credentials.test.ts src/agents/cli-runner/cli-live-session-registry.test.ts src/agents/cli-runner/execute-plugin.test.ts src/agents/cli-runner/execute.native-history-owner.test.ts src/agents/cli-runner/history-boundary.native-login.test.ts src/agents/cli-runner/history-boundary.test.ts src/agents/cli-runner/prepare-native-history.test.ts src/config/sessions/cli-history-owner-probe.test.ts src/plugin-sdk/provider-auth-claude-compat.test.ts ) EXIT 0
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ Test Files  5 passed (5)
+      Tests  103 passed (103)
+ Test Files  1 passed (1)
+      Tests  53 passed (53)
+[test] passed 6 Vitest shards in 84.44s
+targeted: r15 set, files still present (17 files) EXIT 0
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+ Test Files  4 passed (4)
+      Tests  145 passed (145)
+ Test Files  3 passed (3)
+      Tests  50 passed (50)
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ Test Files  5 passed (5)
+      Tests  103 passed (103)
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+[test] passed 7 Vitest shards in 181.06s
+shipped readClaudeCliCredentials consumers EXIT 0
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+leak check (temporary afterEach assertion in src/agents/cli-runner/prepare-native-history.test.ts) EXIT 0
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+restored: HEAD 79a4c3bb3bc52f0cd94d1f1ac020f75f5a58d4fe TREE 40b1adb06cea98e037337d3f2967f9a3320ecdf3 dirty=0
+pair prepare-native-history + admission, 1 worker, run 1 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+pair prepare-native-history + admission, 1 worker, run 2 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+pair prepare-native-history + admission, 1 worker, run 3 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+redgreen RED1-RED10 EXIT 0 HEAD 79a4c3bb3bc52f0cd94d1f1ac020f75f5a58d4fe TREE 40b1adb06cea98e037337d3f2967f9a3320ecdf3 dirty=0
+## RED1 host sends SessionManager writer facts without the owner-check request
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+      Tests  25 passed (25)
+## RED2 metadata host never answers the owner probe
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+      Tests  25 passed (25)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED4 the UserPromptSubmit response goes out on the stream check alone
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent
+      Tests  1 failed | 52 passed (53)
+      Tests  53 passed (53)
+## RED5 the native login is attested without the operator's opt-in
+ FAIL   agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED6 an owner check that throws escapes the probe answer instead of meaning does-not-hold
+ FAIL   runtime-config  src/config/sessions/cli-history-owner-probe.test.ts > CLI history owner probe > treats an owner check that throws as not holding
+      Tests  1 failed (1)
+      Tests  1 passed (1)
+## RED7 the credential-root split guard is removed
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED8 CLAUDE_CODE_OAUTH_TOKEN drops out of the non-native auth env list
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED9 the profile request is sent without its timeout signal
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED10 saved-history strictness keyed on a resumed session id
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a fresh recovery turn whose environment selects another login
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## GREEN (all seven owning files, unmutated)
+      Tests  1 passed (1)
+      Tests  29 passed (29)
+      Tests  33 passed (33)
+      Tests  53 passed (53)
+pnpm tsgo:core EXIT 0
+pnpm tsgo:core:test EXIT 0
+pnpm tsgo:extensions EXIT 0
+pnpm tsgo:extensions:test EXIT 0
+pnpm build EXIT 0
+[build-all] phase timings: total 3m 38.9s; slowest write-unified-entry-dts 1m 46s; tsdown 23.7s; tsdown-packages 23.2s; ui:build 14.3s; external-plugins:local-dist 12.1s; runtime-postbuild 9.29s; check-cli-bootstrap-imports 8.55s; tsdown-ai 6.12s; plugins:assets:build 5.49s; write-cli-startup-metadata 3.76s; plugins:assets:copy 3.67s; check-plugin-sdk-exports 1.19s; build-stamp 158ms; write-build-info 107ms; runtime-postbuild-stamp 72ms; native-protocol 62ms
+harness run-after EXIT 0
+harness run-upgrade EXIT 0
+harness outcomes raw diff vs r15 EXIT 1 (30 lines)
+check:changed --base ee2c67141c142860b341eeed7d94e80427a922e4 EXIT 1
+   4.63s  failed:1   max-lines suppression ratchet
+   665ms  failed:1   core tsgo graph boundary
+  66.74s  failed:1   dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+check:changed ok steps: 41
+check-env-var-count EXIT 1
+git diff --check ee2c67141c142860b341eeed7d94e80427a922e4 HEAD EXIT 0
+oxfmt --check (changed files) EXIT 0
+lane src/agents/cli-runner/ EXIT 0
+[test] starting test/vitest/vitest.unit-fast.config.ts
+ Test Files  11 passed (11)
+      Tests  46 passed (46)
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+ Test Files  3 passed (3)
+      Tests  12 passed (12)
+[test] starting test/vitest/vitest.infra.config.ts
+ Test Files  7 passed (7)
+      Tests  227 passed (227)
+[test] starting test/vitest/vitest.agents-support.config.ts
+ Test Files  37 passed (37)
+      Tests  458 passed (458)
+[test] starting test/vitest/vitest.agents-core-isolated.config.ts
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+[test] passed 5 Vitest shards in 137.67s
+lane extensions/anthropic/ EXIT 0
+[test] starting test/vitest/vitest.extension-providers.config.ts
+ Test Files  35 passed (35)
+      Tests  414 passed | 1 skipped (415)
+[test] passed 1 Vitest shard in 24.48s
+lane src/plugin-sdk/provider-auth-claude-compat.test.ts EXIT 0
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+[test] passed 1 Vitest shard in 1.38s
+lane src/agents/sessions/ EXIT 0
+[test] starting test/vitest/vitest.unit-fast.config.ts
+ Test Files  15 passed | 1 skipped (16)
+      Tests  89 passed | 1 skipped (90)
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+ Test Files  7 passed (7)
+      Tests  62 passed (62)
+[test] starting test/vitest/vitest.infra.config.ts
+ Test Files  28 passed (28)
+      Tests  374 passed (374)
+[test] starting test/vitest/vitest.agents-support.config.ts
+ Test Files  55 passed | 1 skipped (56)
+      Tests  702 passed | 4 skipped (706)
+[test] passed 4 Vitest shards in 235.22s
+lane src/config/sessions/ EXIT 0
+[test] starting test/vitest/vitest.infra.config.ts
+ Test Files  18 passed (18)
+      Tests  221 passed (221)
+[test] starting test/vitest/vitest.runtime-config.config.ts
+ Test Files  363 passed | 2 skipped (365)
+      Tests  3264 passed | 10 skipped (3274)
+[test] passed 2 Vitest shards in 734.43s
+end: HEAD 79a4c3bb3bc52f0cd94d1f1ac020f75f5a58d4fe TREE 40b1adb06cea98e037337d3f2967f9a3320ecdf3 dirty=0
+ALL DONE
+HEAD 79a4c3bb3bc52f0cd94d1f1ac020f75f5a58d4fe TREE 40b1adb06cea98e037337d3f2967f9a3320ecdf3 dirty=0
+child change: 81c81 <   const dir = path.join(process.env.HOME ?? "", ".claude", "projects", cwd.replace(/[^a-zA-Z0-9]/g, "-")); --- >   const dir = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(process.env.HOME ?? "", ".claude"), "projects", cwd.replace(/[^a-zA-Z0-9]/g, "-")); 
+probe change: 98c98 <     rm -rf "$HOME/.claude/projects" --- >     rm -rf "$HOME/.claude/projects" "$CLAUDE_CONFIG_DIR/projects" 
+harness run-after EXIT 0
+harness run-upgrade EXIT 0
+harness outcomes raw diff vs r15 EXIT 1 (16 lines)
+DONE
