@@ -1,0 +1,43 @@
+# run root: runs-rebased; runs: 48; failed exits: none
+# base heads: fd3a2122b95e07f7d00631675b4147e8275855b1
+# after heads: da23f8b0772faa3cfe386da7e69c33be39693415
+
+## Timing (observer off): index step wall ms and CPU user+sys s (CLI process tree), median per round and pooled
+W2-none base: pooled wall 6,796 ms, cpu 8.3 s, n=6 | r1 wall 7,333 ms, cpu 8.6 s, n=3 | r2 wall 6,259 ms, cpu 8.0 s, n=3 | load1 16.1..24.6
+  wall ms: r1-1=7,550 r1-2=7,333 r1-3=5,578 r2-1=8,256 r2-2=5,837 r2-3=6,259
+  cpu s:   r1-1=8.8 r1-2=8.6 r1-3=7.4 r2-1=9.7 r2-2=7.7 r2-3=8.0
+  host main-thread cpu s (cpu probe, n=6): median 2.8 | r1-1=3.5 r1-2=3.2 r1-3=2.2 r2-1=3.4 r2-2=2.2 r2-3=2.4
+  maxRSS MB median: 1,056
+W2-none after: pooled wall 5,690 ms, cpu 7.7 s, n=6 | r1 wall 5,500 ms, cpu 7.5 s, n=3 | r2 wall 5,945 ms, cpu 7.8 s, n=3 | load1 14.5..24.0
+  wall ms: r1-1=5,461 r1-2=5,500 r1-3=5,673 r2-1=5,985 r2-2=5,945 r2-3=5,708
+  cpu s:   r1-1=7.3 r1-2=7.5 r1-3=7.8 r2-1=7.9 r2-2=7.8 r2-3=7.6
+  host main-thread cpu s (cpu probe, n=6): median 2.3 | r1-1=2.2 r1-2=2.2 r1-3=2.3 r2-1=2.4 r2-2=2.3 r2-3=2.3
+  maxRSS MB median: 1,058
+W3-dev base: pooled wall 45,356 ms, cpu 48.7 s, n=10 | r1 wall 51,883 ms, cpu 51.0 s, n=5 | r2 wall 44,576 ms, cpu 48.4 s, n=5 | load1 8.2..47.4
+  wall ms: r1-1=43,237 r1-2=40,667 r1-3=65,789 r1-4=88,513 r1-5=51,883 r2-1=51,400 r2-2=44,576 r2-3=41,476 r2-4=42,840 r2-5=46,137
+  cpu s:   r1-1=46.9 r1-2=44.0 r1-3=58.6 r1-4=67.5 r1-5=51.0 r2-1=51.6 r2-2=48.4 r2-3=45.8 r2-4=46.3 r2-5=48.9
+  host main-thread cpu s (cpu probe, n=10): median 16.0 | r1-1=14.7 r1-2=14.2 r1-3=20.0 r1-4=22.8 r1-5=16.6 r2-1=16.9 r2-2=15.7 r2-3=14.9 r2-4=15.3 r2-5=16.3
+  maxRSS MB median: 1,993
+W3-dev after: pooled wall 40,882 ms, cpu 44.0 s, n=10 | r1 wall 49,102 ms, cpu 48.8 s, n=5 | r2 wall 40,562 ms, cpu 43.8 s, n=5 | load1 4.4..39.7
+  wall ms: r1-1=36,946 r1-2=37,676 r1-3=88,263 r1-4=87,703 r1-5=49,102 r2-1=37,295 r2-2=55,782 r2-3=39,658 r2-4=40,562 r2-5=41,203
+  cpu s:   r1-1=40.3 r1-2=41.1 r1-3=66.0 r1-4=66.7 r1-5=48.8 r2-1=40.7 r2-2=54.4 r2-3=43.6 r2-4=43.8 r2-5=44.2
+  host main-thread cpu s (cpu probe, n=10): median 13.0 | r1-1=11.8 r1-2=11.8 r1-3=21.3 r1-4=20.4 r1-5=14.2 r2-1=11.8 r2-2=16.3 r2-3=12.8 r2-4=12.9 r2-5=13.2
+  maxRSS MB median: 2,038
+
+## Single observer-off runs (tag t<n>)
+W3-main after t1: wall 52,137 ms, cpu 55.4 s, host main-thread cpu 13.1 s, maxRSS 2,079 MB, load1 8.4, exit 0
+W3-main base t1: wall 56,996 ms, cpu 60.7 s, host main-thread cpu 15.2 s, maxRSS 2,050 MB, load1 15.8, exit 0
+
+## Serialization counters (observed runs, index step)
+W2-none base: chunks=284 | host vector-array stringify calls=2,464 (8.7/chunk) coords=1,261,568 chars=26,994,989 ms=98.2 | host per-number stringify calls=1,149,953 ms=172.1 | host parse chars=29,207,233 ms=75.1 | worker parse calls=860 chars=74,330,436 ms=121.1 | wall=13,671 ms (observer on) | cpu=14.3 s
+W2-none after: chunks=284 | host vector-array stringify calls=2,272 (8.0/chunk) coords=1,163,264 chars=24,891,149 ms=96.5 | host per-number stringify calls=1,149,881 ms=160.6 | host parse chars=29,209,668 ms=77.7 | worker parse calls=860 chars=74,329,302 ms=125.6 | wall=17,108 ms (observer on) | cpu=16.1 s
+W3-dev base: chunks=6,075 | host vector-array stringify calls=94,952 (15.6/chunk) coords=48,615,424 chars=1,040,333,030 ms=4656.3 | host per-number stringify calls=24,318,844 ms=3438.7 | host parse chars=542,450,193 ms=994.9 | worker parse calls=39,520 chars=1,656,046,468 ms=2897.3 | wall=84,714 ms (observer on) | cpu=67.6 s
+W3-dev after: chunks=6,075 | host vector-array stringify calls=48,600 (8.0/chunk) coords=24,883,200 chars=532,482,115 ms=2695.1 | host per-number stringify calls=24,301,462 ms=3886.0 | host parse chars=542,473,348 ms=1172.4 | worker parse calls=39,520 chars=1,656,046,613 ms=3275.7 | wall=131,086 ms (observer on) | cpu=88.9 s
+W3-main base: chunks=7,021 | host vector-array stringify calls=81,968 (11.7/chunk) coords=41,967,616 chars=898,083,302 ms=6278.4 | host per-number stringify calls=28,246,135 ms=7530.0 | host parse chars=627,535,344 ms=2104.4 | worker parse calls=33,340 chars=1,873,899,946 ms=5411.9 | wall=297,376 ms (observer on) | cpu=161.5 s
+W3-main after: chunks=7,021 | host vector-array stringify calls=56,168 (8.0/chunk) coords=28,758,016 chars=615,405,005 ms=3365.4 | host per-number stringify calls=28,236,460 ms=5985.3 | host parse chars=627,545,992 ms=1615.4 | worker parse calls=33,340 chars=1,873,900,100 ms=4340.1 | wall=180,216 ms (observer on) | cpu=116.8 s
+
+## Parity (stored bytes) across all runs of a cell
+W2-none: 18 runs (9 base, 9 after); chunks=284 cache=284; chunks_id_embedding=88fc680e794ebc20 embedding_cache=3569a10987c29246 vec_by_id=ce4f547038d953e5 vec_chunks=e01f8cd6e1497954 vec_info=c1951856df3d5394
+W3-dev: 26 runs (13 base, 13 after); chunks=6075 cache=6410; chunks_id_embedding=a4982293f36e3180 embedding_cache=ebe55dd99b88df93 vec_by_id=50b511076f364476 vec_chunks=348e38e3b020ce11 vec_info=c1951856df3d5394
+W3-main: 4 runs (2 base, 2 after); chunks=7021 cache=50000; chunks_id_embedding=448a42cfd37aa993 embedding_cache=66acd7386feb1be1 vec_by_id=0269459b66ef8593 vec_chunks=f21cdf2e55a0c7c0 vec_info=c1951856df3d5394
+# parity mismatches: 0

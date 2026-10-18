@@ -1,0 +1,304 @@
+diff --git a/extensions/memory-core/src/memory/manager-publication-print-once.test.ts b/extensions/memory-core/src/memory/manager-publication-print-once.test.ts
+new file mode 100644
+index 00000000000..ec4e0af34c5
+--- /dev/null
++++ b/extensions/memory-core/src/memory/manager-publication-print-once.test.ts
+@@ -0,0 +1,126 @@
++import fs from "node:fs/promises";
++import path from "node:path";
++import { encodeMemoryEmbedding } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { MemoryIndexDatabase } from "./manager-database-context.js";
++import {
++  createManagerIndexFixture,
++  memoryIndexFixtureWriter,
++} from "./manager-index.test-support.js";
++import * as transfer from "./manager-publication-transfer.js";
++import type { MemoryIndexManager } from "./manager.js";
++
++const { closeAllMemorySearchManagers, getMemorySearchManager } = await import("./index.js");
++
++// Matches the fixture provider: one count per token, four dimensions per chunk.
++const DIMENSIONS = 4;
++const embedText = (text: string) =>
++  ["alpha", "beta", "image", "audio"].map((token) => text.toLowerCase().split(token).length - 1);
++
++describe("memory publication host printing", () => {
++  const fixture = createManagerIndexFixture({
++    getMemorySearchManager,
++    closeAllMemorySearchManagers,
++  });
++  afterEach(() => vi.restoreAllMocks());
++
++  // The observable assumes the JSON transfer format: each printed vector is one numeric array.
++  async function syncCountingVectorCoordinates(manager: MemoryIndexManager) {
++    const stringify = JSON.stringify;
++    let coordinates = 0;
++    vi.spyOn(JSON, "stringify").mockImplementation(((value: unknown, ...rest: unknown[]) => {
++      if (Array.isArray(value) && value.every((item) => typeof item === "number")) {
++        coordinates += value.length;
++      }
++      return (stringify as (...args: unknown[]) => string)(value, ...rest);
++    }) as typeof JSON.stringify);
++    try {
++      await manager.sync({ reason: "print-once", force: true });
++    } finally {
++      vi.mocked(JSON.stringify).mockRestore();
++    }
++    const rows = memoryIndexFixtureWriter(manager)
++      .prepare("SELECT text, embedding FROM memory_index_chunks WHERE source = 'memory'")
++      .all() as Array<{ text: string; embedding: Uint8Array }>;
++    return { coordinates, rows };
++  }
++
++  // Only source-wide batch embedding publishes several files as one group.
++  async function createManager(sourceWide = false) {
++    return await fixture.getFreshManager(
++      fixture.createConfig({
++        provider: sourceWide ? "batch-wide-test" : "gemini",
++        model: "mock-embed",
++        batchEnabled: sourceWide,
++        sources: ["memory"],
++        vectorEnabled: false,
++        cacheEnabled: false,
++      }),
++    );
++  }
++
++  function expectStoredVectors(rows: Array<{ text: string; embedding: Uint8Array }>) {
++    for (const row of rows) {
++      expect(new Uint8Array(row.embedding)).toEqual(
++        new Uint8Array(encodeMemoryEmbedding(embedText(row.text))),
++      );
++    }
++  }
++
++  it("prints each row of a published source group once", async () => {
++    for (let index = 0; index < 6; index++) {
++      await fs.writeFile(
++        path.join(fixture.paths.memory, `group-${index}.md`),
++        `# Group ${index}\nAlpha note ${index}.\nBeta line ${index}.\n`,
++      );
++    }
++    const manager = await createManager(true);
++    const publish = vi.spyOn(MemoryIndexDatabase.prototype, "replaceSource");
++    const { coordinates, rows } = await syncCountingVectorCoordinates(manager);
++    expect(publish).toHaveBeenCalledTimes(1);
++    const group = publish.mock.calls[0]?.[0];
++    expect(Array.isArray(group) && group.length > 1).toBe(true);
++    expect(coordinates).toBe(rows.length * DIMENSIONS);
++    expectStoredVectors(rows);
++  });
++
++  it("prints each row of a source refused by the group byte budget once", async () => {
++    // JSON prints each control character as six characters, so a file of 200 lines of 120 of them
++    // prints to roughly 300 KiB in the group accounting (two bytes per printed character) across
++    // about 20 rows. One file fits an inline command and two files stay far below the row limit
++    // but exceed the 512 KiB group budget, which refuses the second file by bytes alone.
++    for (let index = 0; index < 3; index++) {
++      await fs.writeFile(
++        path.join(fixture.paths.memory, `budget-${index}.md`),
++        Array.from(
++          { length: 200 },
++          (_, line) => `Alpha ${index} ${line} ${"\u0001".repeat(120)}`,
++        ).join("\n"),
++      );
++    }
++    const manager = await createManager(true);
++    const publish = vi.spyOn(MemoryIndexDatabase.prototype, "replaceSource");
++    const group = vi.spyOn(transfer, "memoryPublicationGroup");
++    const { coordinates, rows } = await syncCountingVectorCoordinates(manager);
++    expect(group.mock.results.some((result) => result.value === undefined)).toBe(true);
++    expect(publish.mock.calls.length).toBeGreaterThan(1);
++    expect(coordinates).toBe(rows.length * DIMENSIONS);
++    expectStoredVectors(rows);
++  });
++
++  it("prints each row of a staged source once", async () => {
++    await fs.writeFile(
++      path.join(fixture.paths.memory, "large.md"),
++      Array.from(
++        { length: 30_000 },
++        (_, index) => `Alpha memory line ${index} with beta filler text.`,
++      ).join("\n"),
++    );
++    const manager = await createManager();
++    const { coordinates, rows } = await syncCountingVectorCoordinates(manager);
++    const staged = rows.filter((row) => row.text.includes("memory line"));
++    expect(staged.reduce((bytes, row) => bytes + row.text.length, 0)).toBeGreaterThan(512 * 1024);
++    expect(coordinates).toBe(rows.length * DIMENSIONS);
++    expectStoredVectors(rows);
++  });
++});
+diff --git a/extensions/memory-core/src/memory/manager-publication-transfer.test.ts b/extensions/memory-core/src/memory/manager-publication-transfer.test.ts
+index 00b5a6e7303..a34d73dc3ea 100644
+--- a/extensions/memory-core/src/memory/manager-publication-transfer.test.ts
++++ b/extensions/memory-core/src/memory/manager-publication-transfer.test.ts
+@@ -20,7 +20,9 @@ import { readMemoryDatabaseRevision } from "./manager-db-kernel.js";
+ import {
+   memoryEmbeddingCacheBatches,
+   memoryPublicationBatches,
++  memoryPublicationGroup,
+   memoryPublicationInline,
++  releaseMemoryPublication,
+ } from "./manager-publication-transfer.js";
+ import {
+   bindSqliteWorkerBackend,
+@@ -834,4 +836,26 @@ describe("bounded memory publication transfer", () => {
+     );
+     expect(rows).toEqual(input.chunks.map((row) => ({ chunk: row, embedding: expectedVector })));
+   });
++
++  it("reuses printed fragments per chunks array until the embeddings change or it is released", () => {
++    const first = replacement();
++    const printed = memoryPublicationInline(first)?.fragments;
++    expect(printed).toBeDefined();
++    expect(memoryPublicationInline({ ...first })?.fragments).toBe(printed);
++    const other = replacement("second source text");
++    const group = memoryPublicationGroup([first, other])!;
++    const again = memoryPublicationGroup([first, other])!;
++    expect(group[0]?.fragments).toBe(printed);
++    again.forEach((source, index) => expect(source.fragments).toBe(group[index]?.fragments));
++    const changed = { ...first, embeddings: [[...first.embeddings[0]!]] };
++    const reprinted = memoryPublicationInline(changed)?.fragments;
++    expect(reprinted).not.toBe(printed);
++    expect(reprinted).toEqual(printed);
++    releaseMemoryPublication(changed);
++    const released = memoryPublicationInline(changed)?.fragments;
++    expect(released).not.toBe(reprinted);
++    expect(released).toEqual(reprinted);
++    // Retained rows are printed inputs too: a different array reprints.
++    expect(memoryPublicationInline({ ...changed, retained: [] })?.fragments).not.toBe(released);
++  });
+ });
+diff --git a/extensions/memory-core/src/memory/manager-publication-transfer.ts b/extensions/memory-core/src/memory/manager-publication-transfer.ts
+index 43f835ca571..e645251760d 100644
+--- a/extensions/memory-core/src/memory/manager-publication-transfer.ts
++++ b/extensions/memory-core/src/memory/manager-publication-transfer.ts
+@@ -131,8 +131,60 @@ export function memoryPublicationHeader(
+   return { ...header, delta: removedIds !== undefined };
+ }
+ 
++// A probe prints at most two batches; sources too large for one command keep them with the
++// unread generator so staging resumes the same print instead of repeating it.
++// The manager rebuilds the replacement object for every admission check, so probes key on the
++// prepared chunks array and are reused only while every printed input is the same object.
++type PublicationProbe = {
++  source: MemorySourceIndexReplacement["source"];
++  embeddings: readonly number[][];
++  retained: MemorySourceIndexReplacement["retained"];
++  removedIds: MemorySourceIndexReplacement["removedIds"];
++  fragments?: MemoryPublicationFragment[];
++  staged?: { head: MemoryPublicationFragment[][]; rest: Generator<MemoryPublicationFragment[]> };
++};
++// Prepared entries outlive their publication within a batch, so settled probes are released.
++const publicationProbes = new WeakMap<MemorySourceIndexReplacement["chunks"], PublicationProbe>();
++
++/** Drop the printed fragments once a publication settles; a late call only reprints. */
++export function releaseMemoryPublication(
++  replacement: MemorySourceIndexReplacement | readonly MemorySourceIndexReplacement[],
++) {
++  for (const item of Array.isArray(replacement) ? replacement : [replacement]) {
++    publicationProbes.delete(item.chunks);
++  }
++}
++
++function probeFor(replacement: MemorySourceIndexReplacement) {
++  const probe = publicationProbes.get(replacement.chunks);
++  if (!probe) {
++    return undefined;
++  }
++  return probe.source === replacement.source &&
++    probe.retained === replacement.retained &&
++    probe.removedIds === replacement.removedIds &&
++    probe.embeddings.length === replacement.embeddings.length &&
++    probe.embeddings.every((vector, index) => vector === replacement.embeddings[index])
++    ? probe
++    : undefined;
++}
++
+ export function* memoryPublicationBatches(
+   replacement: MemorySourceIndexReplacement,
++): Generator<MemoryPublicationFragment[]> {
++  const probe = probeFor(replacement);
++  if (!probe?.staged) {
++    yield* printPublicationBatches(replacement);
++    return;
++  }
++  const { head, rest } = probe.staged;
++  probe.staged = undefined;
++  yield* head;
++  yield* rest;
++}
++
++function* printPublicationBatches(
++  replacement: MemorySourceIndexReplacement,
+ ): Generator<MemoryPublicationFragment[]> {
+   function* rows(): Generator<MemorySourceIndexRow> {
+     for (const removedId of replacement.removedIds ?? []) {
+@@ -167,12 +219,29 @@ export function* memoryPublicationBatches(
+ 
+ /** Ordinary sources fit one bounded command; larger sources retain chunked transfer. */
+ export function memoryPublicationInline(replacement: MemorySourceIndexReplacement) {
+-  const batches = memoryPublicationBatches(replacement);
+-  const first = batches.next();
+-  if (!batches.next().done) {
+-    return undefined;
++  let probe = probeFor(replacement);
++  if (!probe) {
++    const rest = printPublicationBatches(replacement);
++    const head: MemoryPublicationFragment[][] = [];
++    while (head.length < 2) {
++      const batch = rest.next();
++      if (batch.done) {
++        break;
++      }
++      head.push(batch.value);
++    }
++    probe = {
++      source: replacement.source,
++      embeddings: [...replacement.embeddings],
++      retained: replacement.retained,
++      removedIds: replacement.removedIds,
++      ...(head.length < 2 ? { fragments: head[0] ?? [] } : { staged: { head, rest } }),
++    };
++    publicationProbes.set(replacement.chunks, probe);
+   }
+-  return { header: memoryPublicationHeader(replacement), fragments: first.value ?? [] };
++  return probe.fragments
++    ? { header: memoryPublicationHeader(replacement), fragments: probe.fragments }
++    : undefined;
+ }
+ 
+ /** A group shares one bounded worker request and one native transaction. */
+diff --git a/extensions/memory-core/src/memory/manager-publication.ts b/extensions/memory-core/src/memory/manager-publication.ts
+index 0fe396310c9..af1e2922b2e 100644
+--- a/extensions/memory-core/src/memory/manager-publication.ts
++++ b/extensions/memory-core/src/memory/manager-publication.ts
+@@ -23,6 +23,7 @@ import {
+   memoryPublicationGroup,
+   memoryPublicationHeader,
+   memoryPublicationInline,
++  releaseMemoryPublication,
+ } from "./manager-publication-transfer.js";
+ import type { MemorySourceIndexReplacement } from "./manager-source-index-kernel.js";
+ 
+@@ -126,7 +127,17 @@ export async function retryMemoryPublication<T>(params: {
+ }
+ 
+ /** Small publications use one request; larger inputs retain their bounded transfer scope. */
+-export async function publishMemorySource(params: {
++export async function publishMemorySource(params: Parameters<typeof publishMemorySourceOnce>[0]) {
++  // Preparation may splice the group, so capture its members before publishing.
++  const printed = Array.isArray(params.replacement) ? [...params.replacement] : params.replacement;
++  try {
++    return await publishMemorySourceOnce(params);
++  } finally {
++    releaseMemoryPublication(printed);
++  }
++}
++
++async function publishMemorySourceOnce(params: {
+   replacement: MemorySourceIndexReplacement | MemorySourceIndexReplacement[];
+   state: () => MemoryPublicationState;
+   execute: PublicationScope["execute"];

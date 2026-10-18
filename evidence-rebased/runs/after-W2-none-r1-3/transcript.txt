@@ -1,0 +1,28 @@
+# arm=after head=da23f8b0772faa3cfe386da7e69c33be39693415 dirty_files=0 workload=W2 store=none tag=r1-3
+# node v24.21.0
+# uptime: 19:03  up  4:44, 1 user, load averages: 14.51 30.05 33.89
+# memory_pressure: System-wide memory free percentage: 98%
+{"workload":"W2","files":4,"bytes":360338,"sha256":"0a769f70ae88d42505f4f14a4d0427f4e6ec6e4afb3c464f5b337ca14d7c0ab8"}
+$ openclaw memory index --agent main --force --verbose
+a-index exit=0 ms=5672.5
+# files after a-index: db=37867520 wal=0
+{"chunks":284,"cache":284,"vecRowids":284,"revision":1}
+$ openclaw memory status --agent main --json
+b-status exit=0 ms=3126.3
+$ openclaw memory search copperwillow --agent main --json
+c-search exit=0 ms=4106.8
+== summary after-W2-none-r1-3
+index: exit=0 wall=5672.5 ms; status exit=0 3126.3 ms; search exit=0 4106.8 ms
+chunks: new=284 total=284 (pre-store chunks=n/a) x4096=1,163,264
+main: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=0 chars=0 ms=0.0
+worker: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=0 chars=0 ms=0.0
+cpu main process (us): undefined; threads=0 nonFinal=0
+embedding requests: {"requests":61,"inputs":285,"chars":437035}
+observer rows (index step):
+hashes: chunks=88fc680e794ebc20 (284) new=88fc680e794ebc20 (284) cache=3569a10987c29246 cache_nopk=5f27ae5fa9d4b190 (284) vec_by_id=ce4f547038d953e5 (284) eq={"f32":0,"f64asF32":0,"none":284}
+  memory_index_chunks_vec_chunks: e01f8cd6e1497954 rows=1
+  memory_index_chunks_vec_info: c1951856df3d5394 rows=4
+  memory_index_chunks_vec_rowids: 6eea4f0754b14a26 rows=284
+  memory_index_chunks_vec_vector_chunks00: 0f353d138d48fc5c rows=1
+# uptime end: 19:03  up  4:44, 1 user, load averages: 13.88 29.16 33.50
+# done

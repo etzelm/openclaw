@@ -1,0 +1,51 @@
+# arm=after head=da23f8b0772faa3cfe386da7e69c33be39693415 dirty_files=0 workload=W3 store=main tag=obs
+# node v24.21.0
+# uptime: 18:17  up  3:57, 1 user, load averages: 52.95 51.90 48.24
+# memory_pressure: System-wide memory free percentage: 98%
+# store copy: agent-main (4855853056 bytes) in 95 ms
+{"workload":"W3","files":62,"bytes":255972,"sha256":"3854869444be7f0ce3b31e8b4165e332d32b53a683857c741648910200512b67"}
+prep-doctor1 exit=1 ms=46078.3
+prep-agents-add exit=0 ms=3475.0
+prep-doctor2 exit=0 ms=118397.8
+{"chunks":43490,"cache":50000,"vecRowids":43490,"revision":897498}
+$ openclaw memory index --agent main --force --verbose
+a-index exit=0 ms=180216.4
+# files after a-index: db=4855898112 wal=0
+{"chunks":7021,"cache":50000,"vecRowids":7021,"revision":897499}
+$ openclaw memory status --agent main --json
+b-status exit=0 ms=37424.8
+$ openclaw memory search copperwillow --agent main --json
+c-search exit=0 ms=45025.3
+== summary after-W3-main-obs
+index: exit=0 wall=180216.4 ms; status exit=0 37424.8 ms; search exit=0 45025.3 ms
+chunks: new=7021 total=7021 (pre-store chunks=43490) x4096=28,758,016
+main: numarr stringify calls=56,168 items=28,758,016 outChars=615,405,005 ms=3365.4 | per-number calls=28,236,460 outChars=575,623,443 ms=5985.3 | typed=0 | parse calls=16,204 chars=627,545,992 ms=1615.4
+worker: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=33,340 chars=1,873,900,100 ms=4340.1
+cpu main process (us): {"user":99352,"system":95561}; threads=17 nonFinal=6
+embedding requests: {"requests":1140,"inputs":7020,"chars":8137851}
+observer rows (index step):
+  worker delete memory_embedding_cache: calls=2277 rows=7010
+  worker delete memory_index_chunks: calls=450 rows=0
+  worker delete memory_index_chunks_fts: calls=2 rows=0
+  worker delete memory_index_chunks_vec: calls=7021 rows=0
+  worker delete memory_index_sources: calls=15 rows=0
+  worker insert memory_embedding_cache: calls=1139 rows=7010
+  worker insert memory_index_chunk_provenance: calls=394 rows=7021
+  worker insert memory_index_chunk_recall_metadata: calls=391 rows=7021
+  worker insert memory_index_chunks: calls=391 rows=7021
+  worker insert memory_index_chunks_vec: calls=407 rows=7021
+  worker insert memory_index_meta: calls=2 rows=2
+  worker insert memory_index_paths_fts: calls=2 rows=0
+  worker insert memory_index_sources: calls=435 rows=435
+  worker insert memory_index_state: calls=2 rows=0
+  worker select memory_embedding_cache: calls=1144 rows=1144
+  worker update memory_index_sources: calls=3 rows=0
+  worker update memory_index_state: calls=411 rows=411
+hashes: chunks=448a42cfd37aa993 (7021) new=448a42cfd37aa993 (7021) cache=66acd7386feb1be1 cache_nopk=c0d270a5bd9c1328 (50000) vec_by_id=0269459b66ef8593 (7021) eq={"f32":0,"f64asF32":0,"none":7021}
+  memory_index_chunks_vec_chunks: f21cdf2e55a0c7c0 rows=7
+  memory_index_chunks_vec_info: c1951856df3d5394 rows=4
+  memory_index_chunks_vec_rowids: d802892720169a2c rows=7021
+  memory_index_chunks_vec_vector_chunks00: 23a465d1b85d80b7 rows=7
+# main-store DB copy deleted after the run (T203_KEEP_DB=1 keeps it)
+# uptime end: 18:26  up  4:07, 1 user, load averages: 51.54 48.14 46.83
+# done

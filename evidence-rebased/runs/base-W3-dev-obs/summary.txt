@@ -1,0 +1,28 @@
+== summary base-W3-dev-obs
+index: exit=0 wall=84713.8 ms; status exit=0 40965 ms; search exit=0 68562.1 ms
+chunks: new=6075 total=6075 (pre-store chunks=6012) x4096=24,883,200
+main: numarr stringify calls=94,952 items=48,615,424 outChars=1,040,333,030 ms=4656.3 | per-number calls=24,318,844 outChars=495,478,316 ms=3438.7 | typed=0 | parse calls=14,251 chars=542,450,193 ms=994.9
+worker: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=39,520 chars=1,656,046,468 ms=2897.3
+cpu main process (us): {"user":89728,"system":21970}; threads=15 nonFinal=5
+embedding requests: {"requests":982,"inputs":6059,"chars":7015255}
+observer rows (index step):
+  worker delete memory_index_chunks: calls=598 rows=0
+  worker delete memory_index_chunks_fts: calls=2 rows=0
+  worker delete memory_index_chunks_vec: calls=6075 rows=0
+  worker insert memory_embedding_cache: calls=981 rows=6044
+  worker insert memory_index_chunk_provenance: calls=589 rows=6075
+  worker insert memory_index_chunk_recall_metadata: calls=586 rows=6075
+  worker insert memory_index_chunks: calls=586 rows=6075
+  worker insert memory_index_chunks_vec: calls=597 rows=6075
+  worker insert memory_index_meta: calls=2 rows=2
+  worker insert memory_index_paths_fts: calls=2 rows=0
+  worker insert memory_index_sources: calls=598 rows=598
+  worker insert memory_index_state: calls=2 rows=0
+  worker select memory_embedding_cache: calls=5 rows=5
+  worker update memory_index_sources: calls=3 rows=0
+  worker update memory_index_state: calls=587 rows=587
+hashes: chunks=a4982293f36e3180 (6075) new=a4982293f36e3180 (6075) cache=ebe55dd99b88df93 cache_nopk=934ea59d0440c711 (6410) vec_by_id=50b511076f364476 (6075) eq={"f32":0,"f64asF32":0,"none":6075}
+  memory_index_chunks_vec_chunks: 348e38e3b020ce11 rows=6
+  memory_index_chunks_vec_info: c1951856df3d5394 rows=4
+  memory_index_chunks_vec_rowids: f2e16c7d816c16d4 rows=6075
+  memory_index_chunks_vec_vector_chunks00: 3d9b27590513d165 rows=6

@@ -1,0 +1,30 @@
+== summary after-W3-main-obs
+index: exit=0 wall=180216.4 ms; status exit=0 37424.8 ms; search exit=0 45025.3 ms
+chunks: new=7021 total=7021 (pre-store chunks=43490) x4096=28,758,016
+main: numarr stringify calls=56,168 items=28,758,016 outChars=615,405,005 ms=3365.4 | per-number calls=28,236,460 outChars=575,623,443 ms=5985.3 | typed=0 | parse calls=16,204 chars=627,545,992 ms=1615.4
+worker: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=33,340 chars=1,873,900,100 ms=4340.1
+cpu main process (us): {"user":99352,"system":95561}; threads=17 nonFinal=6
+embedding requests: {"requests":1140,"inputs":7020,"chars":8137851}
+observer rows (index step):
+  worker delete memory_embedding_cache: calls=2277 rows=7010
+  worker delete memory_index_chunks: calls=450 rows=0
+  worker delete memory_index_chunks_fts: calls=2 rows=0
+  worker delete memory_index_chunks_vec: calls=7021 rows=0
+  worker delete memory_index_sources: calls=15 rows=0
+  worker insert memory_embedding_cache: calls=1139 rows=7010
+  worker insert memory_index_chunk_provenance: calls=394 rows=7021
+  worker insert memory_index_chunk_recall_metadata: calls=391 rows=7021
+  worker insert memory_index_chunks: calls=391 rows=7021
+  worker insert memory_index_chunks_vec: calls=407 rows=7021
+  worker insert memory_index_meta: calls=2 rows=2
+  worker insert memory_index_paths_fts: calls=2 rows=0
+  worker insert memory_index_sources: calls=435 rows=435
+  worker insert memory_index_state: calls=2 rows=0
+  worker select memory_embedding_cache: calls=1144 rows=1144
+  worker update memory_index_sources: calls=3 rows=0
+  worker update memory_index_state: calls=411 rows=411
+hashes: chunks=448a42cfd37aa993 (7021) new=448a42cfd37aa993 (7021) cache=66acd7386feb1be1 cache_nopk=c0d270a5bd9c1328 (50000) vec_by_id=0269459b66ef8593 (7021) eq={"f32":0,"f64asF32":0,"none":7021}
+  memory_index_chunks_vec_chunks: f21cdf2e55a0c7c0 rows=7
+  memory_index_chunks_vec_info: c1951856df3d5394 rows=4
+  memory_index_chunks_vec_rowids: d802892720169a2c rows=7021
+  memory_index_chunks_vec_vector_chunks00: 23a465d1b85d80b7 rows=7

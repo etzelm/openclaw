@@ -1,0 +1,43 @@
+# arm=base head=fd3a2122b95e07f7d00631675b4147e8275855b1 dirty_files=0 workload=W2 store=none tag=obs
+# node v24.21.0
+# uptime: 18:04  up  3:45, 1 user, load averages: 53.08 47.40 45.64
+# memory_pressure: System-wide memory free percentage: 95%
+{"workload":"W2","files":4,"bytes":360338,"sha256":"0a769f70ae88d42505f4f14a4d0427f4e6ec6e4afb3c464f5b337ca14d7c0ab8"}
+$ openclaw memory index --agent main --force --verbose
+a-index exit=0 ms=13671.3
+# files after a-index: db=37871616 wal=0
+{"chunks":284,"cache":284,"vecRowids":284,"revision":1}
+$ openclaw memory status --agent main --json
+b-status exit=0 ms=6086.6
+$ openclaw memory search copperwillow --agent main --json
+c-search exit=0 ms=9690.5
+== summary base-W2-none-obs
+index: exit=0 wall=13671.3 ms; status exit=0 6086.6 ms; search exit=0 9690.5 ms
+chunks: new=284 total=284 (pre-store chunks=n/a) x4096=1,163,264
+main: numarr stringify calls=2,464 items=1,261,568 outChars=26,994,989 ms=98.2 | per-number calls=1,149,953 outChars=23,423,957 ms=172.1 | typed=0 | parse calls=1,469 chars=29,207,233 ms=75.1
+worker: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=860 chars=74,330,436 ms=121.1
+cpu main process (us): {"user":93540,"system":50233}; threads=11 nonFinal=2
+embedding requests: {"requests":61,"inputs":285,"chars":437035}
+observer rows (index step):
+  worker delete memory_index_chunks: calls=4 rows=0
+  worker delete memory_index_chunks_fts: calls=3 rows=0
+  worker delete memory_index_chunks_vec: calls=284 rows=0
+  worker insert memory_embedding_cache: calls=60 rows=284
+  worker insert memory_index_chunk_provenance: calls=7 rows=284
+  worker insert memory_index_chunk_recall_metadata: calls=4 rows=284
+  worker insert memory_index_chunks: calls=4 rows=284
+  worker insert memory_index_chunks_vec: calls=4 rows=284
+  worker insert memory_index_meta: calls=2 rows=2
+  worker insert memory_index_paths_fts: calls=2 rows=0
+  worker insert memory_index_sources: calls=4 rows=4
+  worker insert memory_index_state: calls=2 rows=0
+  worker select memory_embedding_cache: calls=5 rows=5
+  worker update memory_index_sources: calls=3 rows=0
+  worker update memory_index_state: calls=5 rows=5
+hashes: chunks=88fc680e794ebc20 (284) new=88fc680e794ebc20 (284) cache=3569a10987c29246 cache_nopk=5f27ae5fa9d4b190 (284) vec_by_id=ce4f547038d953e5 (284) eq={"f32":0,"f64asF32":0,"none":284}
+  memory_index_chunks_vec_chunks: e01f8cd6e1497954 rows=1
+  memory_index_chunks_vec_info: c1951856df3d5394 rows=4
+  memory_index_chunks_vec_rowids: ad0fa26e9aeea51e rows=284
+  memory_index_chunks_vec_vector_chunks00: 772dd3c3f221946f rows=1
+# uptime end: 18:05  up  3:46, 1 user, load averages: 43.70 45.62 45.05
+# done

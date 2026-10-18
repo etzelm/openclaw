@@ -1,0 +1,33 @@
+# arm=after head=da23f8b0772faa3cfe386da7e69c33be39693415 dirty_files=0 workload=W3 store=dev tag=r1-5
+# node v24.21.0
+# uptime: 18:59  up  4:40, 1 user, load averages: 39.70 39.98 37.20
+# memory_pressure: System-wide memory free percentage: 98%
+# store copy: agent-dev (430518272 bytes) in 44 ms
+{"workload":"W3","files":62,"bytes":255972,"sha256":"3854869444be7f0ce3b31e8b4165e332d32b53a683857c741648910200512b67"}
+prep-doctor1 exit=1 ms=23604.1
+prep-agents-add exit=0 ms=2204.4
+prep-doctor2 exit=0 ms=30516.9
+{"chunks":6012,"cache":377,"vecRowids":6012,"revision":61441}
+$ openclaw memory index --agent dev --force --verbose
+a-index exit=0 ms=49101.9
+# files after a-index: db=633548800 wal=0
+{"chunks":6075,"cache":6410,"vecRowids":6075,"revision":61442}
+$ openclaw memory status --agent dev --json
+b-status exit=0 ms=4089.6
+$ openclaw memory search copperwillow --agent dev --json
+c-search exit=0 ms=5496.0
+== summary after-W3-dev-r1-5
+index: exit=0 wall=49101.9 ms; status exit=0 4089.6 ms; search exit=0 5496 ms
+chunks: new=6075 total=6075 (pre-store chunks=6012) x4096=24,883,200
+main: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=0 chars=0 ms=0.0
+worker: numarr stringify calls=0 items=0 outChars=0 ms=0.0 | per-number calls=0 outChars=0 ms=0.0 | typed=0 | parse calls=0 chars=0 ms=0.0
+cpu main process (us): undefined; threads=0 nonFinal=0
+embedding requests: {"requests":982,"inputs":6059,"chars":7015255}
+observer rows (index step):
+hashes: chunks=a4982293f36e3180 (6075) new=a4982293f36e3180 (6075) cache=ebe55dd99b88df93 cache_nopk=934ea59d0440c711 (6410) vec_by_id=50b511076f364476 (6075) eq={"f32":0,"f64asF32":0,"none":6075}
+  memory_index_chunks_vec_chunks: 348e38e3b020ce11 rows=6
+  memory_index_chunks_vec_info: c1951856df3d5394 rows=4
+  memory_index_chunks_vec_rowids: 1df2b6841da0b69d rows=6075
+  memory_index_chunks_vec_vector_chunks00: 1952926d425d6ebc rows=6
+# uptime end: 19:01  up  4:42, 1 user, load averages: 31.35 37.94 36.85
+# done

@@ -1,0 +1,56 @@
+# clean base checkout fd3a2122b95e07f7d00631675b4147e8275855b1
+$ pnpm deadcode:exports
+$ node --import ./scripts/tsx.mjs scripts/check-deadcode-exports.mts
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+[deadcode] Knip script unused-export scan still running after 60s.
+[deadcode] Knip production unused-export scan still running after 120s.
+[deadcode] Knip full-tree unused-export scan still running after 120s.
+[deadcode] Knip script unused-export scan still running after 120s.
+[deadcode] Knip production unused-export scan still running after 180s.
+[deadcode] Knip full-tree unused-export scan still running after 180s.
+[deadcode] Knip script unused-export scan still running after 180s.
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  src/agents/tools/heartbeat-response-tool.ts: createHeartbeatResponseTool
+  src/logging/diagnostic-memory.ts: resetDiagnosticMemoryForTest
+  src/logging/diagnostic-phase.ts: resetDiagnosticPhasesForTest
+  src/logging/diagnostic-run-activity.ts: resetDiagnosticRunActivityForTest
+  src/logging/diagnostic-runtime.ts: resetDiagnosticActivityForTest
+  src/logging/diagnostic-session-recovery-coordinator.ts: resetDiagnosticSessionRecoveryCoordinatorForTest
+  src/logging/diagnostic-session-state.ts: resetDiagnosticSessionStateForTest
+  src/logging/diagnostic-stability.ts: resetDiagnosticStabilityRecorderForTest
+Delete the exports or model their real production consumers in Knip.
+[deadcode] Knip full-tree unused-export scan still running after 240s.
+[deadcode] Knip full-tree unused-export scan still running after 300s.
+[deadcode] Knip full-tree unused-export scan still running after 360s.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  extensions/browser/chrome-extension/background.lifecycle-test-helpers.ts: relayRequest
+  extensions/memory-core/src/memory/manager-index.test-support.ts: ManagerIndexFixture
+  src/agents/agent-tools.turn-authority.test-support.ts: expectGated
+  src/agents/command/session-store.test-support.ts: seedSessionFixture
+  src/agents/embedded-agent-runner/compact.hooks.harness.ts: selectAgentHarnessMock
+  src/agents/embedded-agent-runner/run/message-tool-terminal.test-support.ts: terminalModel
+  src/cli/gateway-cli/run-cleanup-receipt.test-support.ts: GatewayLoopStart
+  src/gateway/gateway-connection.test-mocks.ts: isLoopbackHostMock
+  src/gateway/gateway-connection.test-mocks.ts: isSecureWebSocketUrlMock
+  src/gateway/gateway-connection.test-mocks.ts: loadConfigMock
+  src/gateway/gateway-connection.test-mocks.ts: resolveConfigPathMock
+  src/gateway/gateway-connection.test-mocks.ts: resolveGatewayPortMock
+  src/gateway/gateway-connection.test-mocks.ts: resolveStateDirMock
+  src/gateway/server.agent-runtime-authority-proof.test-support.ts: observe
+  src/gateway/server.agent-runtime-authority-proof.test-support.ts: rpcObservation
+  src/gateway/session-observer-suite.test-support.ts: persistedDigest
+  src/infra/npm-managed-root.test-support.ts: writeLockfile
+  test/e2e/qa-lab/runtime/gateway-node-mcp.test-support.ts: createMcpServers
+  test/helpers/gateway-integration-fixtures.ts: closeHttpServer
+  test/helpers/gateway-integration-fixtures.ts: listenLoopback
+  test/scripts/mantis-telegram.test-support.ts: canonicalPlan
+  test/scripts/mantis-telegram.test-support.ts: planDigest
+  ui/src/e2e/activity-assertions.test-support.ts: readBox
+  ui/src/pages/chat/chat-pane-placement.test-support.ts: retryPlacementSession
+Delete the exports or model their real production consumers in Knip.
+[ELIFECYCLE] Command failed with exit code 1.
+exit=1

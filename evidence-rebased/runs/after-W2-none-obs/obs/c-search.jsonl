@@ -1,0 +1,18 @@
+{"event":"observer-loaded","pid":79450,"threadId":0,"isMainThread":true,"at":1792285551877}
+{"event":"observer-loaded","pid":79452,"threadId":0,"isMainThread":true,"at":1792285551995}
+{"event":"observer-loaded","pid":79452,"threadId":2,"isMainThread":false,"at":1792285554722}
+{"event":"observer-loaded","pid":79452,"threadId":3,"isMainThread":false,"at":1792285554734}
+{"event":"observer-loaded","pid":79452,"threadId":4,"isMainThread":false,"at":1792285554796}
+{"event":"observer-loaded","pid":79452,"threadId":5,"isMainThread":false,"at":1792285555226}
+{"ev":"sql","pid":79452,"threadId":5,"isMainThread":false,"op":"update","table":"memory_index_sources","method":"run","changes":0,"sql":"WITH missing AS MATERIALIZED ( SELECT chunk.id FROM memory_index_chunks AS chunk LEFT JOIN memory_index_chunk_provenance AS provenance ON provenance.chunk_id = "}
+{"ev":"sql","pid":79452,"threadId":5,"isMainThread":false,"op":"insert","table":"memory_index_chunk_provenance","method":"exec","sql":"WITH missing AS MATERIALIZED ( SELECT chunk.id FROM memory_index_chunks AS chunk LEFT JOIN memory_index_chunk_provenance AS provenance ON provenance.chunk_id = "}
+{"ev":"sql","pid":79452,"threadId":5,"isMainThread":false,"op":"insert","table":"memory_index_paths_fts","method":"exec","sql":"INSERT INTO memory_index_paths_fts (rowid, path, source) SELECT id, path, source FROM memory_index_sources WHERE NOT EXISTS (SELECT 1 FROM memory_index_paths_ft"}
+{"event":"observer-loaded","pid":79452,"threadId":6,"isMainThread":false,"at":1792285556096}
+{"event":"observer-loaded","pid":79452,"threadId":7,"isMainThread":false,"at":1792285556732}
+{"event":"observer-loaded","pid":79452,"threadId":8,"isMainThread":false,"at":1792285557745}
+{"ev":"sql","pid":79452,"threadId":6,"isMainThread":false,"op":"select","table":"memory_embedding_cache","method":"all","rows":1,"sql":"select count(*) as \"entries\", coalesce(sum(octet_length(\"embedding\")), ?) as \"bytes\" from \"memory_embedding_cache\""}
+{"ev":"sql","pid":79452,"threadId":6,"isMainThread":false,"op":"select","table":"memory_embedding_cache","method":"all","rows":1,"sql":"select count(*) as \"entries\", coalesce(sum(octet_length(\"embedding\")), ?) as \"bytes\" from \"memory_embedding_cache\""}
+{"event":"observer-loaded","pid":79452,"threadId":9,"isMainThread":false,"at":1792285559360}
+{"event":"totals-interim","pid":79452,"threadId":5,"isMainThread":false,"at":1792285559780,"numarr":{"calls":0,"items":0,"outChars":0,"ms":0,"maxItems":0},"typed":{"calls":0,"items":0,"outChars":0,"ms":0},"num":{"calls":0,"outChars":0,"ms":0},"parse":{"calls":20,"inChars":227373,"ms":0.7099570000000313},"stringifyAll":{"calls":1670},"threadCpu":{"user":630137,"system":448126},"rss":904966784}
+{"event":"totals-final","pid":79452,"threadId":0,"isMainThread":true,"at":1792285559837,"numarr":{"calls":0,"items":0,"outChars":0,"ms":0,"maxItems":0},"typed":{"calls":0,"items":0,"outChars":0,"ms":0},"num":{"calls":2128,"outChars":26720,"ms":0.4285239999751411},"parse":{"calls":556,"inChars":5103030,"ms":26.27175100000045},"stringifyAll":{"calls":38952},"threadCpu":{"user":1609252,"system":874208},"processCpu":{"user":5512994,"system":2530384},"rss":849371936}
+{"event":"totals-final","pid":79450,"threadId":0,"isMainThread":true,"at":1792285559872,"numarr":{"calls":0,"items":0,"outChars":0,"ms":0,"maxItems":0},"typed":{"calls":0,"items":0,"outChars":0,"ms":0},"num":{"calls":0,"outChars":0,"ms":0},"parse":{"calls":0,"inChars":0,"ms":0},"stringifyAll":{"calls":4},"threadCpu":{"user":62211,"system":41279},"processCpu":{"user":89601,"system":45247},"rss":32264464}

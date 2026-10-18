@@ -1,0 +1,90 @@
+# test files at da23f8b0772faa3cfe386da7e69c33be39693415; production files restored to fd3a2122b95:
+M  extensions/memory-core/src/memory/manager-publication-transfer.ts
+M  extensions/memory-core/src/memory/manager-publication.ts
+$ node scripts/test-projects.mts extensions/memory-core/src/memory/manager-publication-print-once.test.ts
+[test] starting test/vitest/vitest.extension-database-workers.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m<after>[39m
+
+[vitest-workers] local cache hit after 5780ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared e9a03ad7c392 in 5846ms (16678 inputs, 22057 outputs)
+ [31m×[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-print-once.test.ts[2m > [22mmemory publication host printing[2m > [22mprints each row of a published source group once[33m 1574[2mms[22m[39m
+[31m   → expected 164 to be 28 // Object.is equality[39m
+ [31m×[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-print-once.test.ts[2m > [22mmemory publication host printing[2m > [22mprints each row of a source refused by the group byte budget once[33m 788[2mms[22m[39m
+[31m   → expected 736 to be 244 // Object.is equality[39m
+ [31m×[39m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-print-once.test.ts[2m > [22mmemory publication host printing[2m > [22mprints each row of a staged source once[33m 1019[2mms[22m[39m
+[31m   → expected 5368 to be 4292 // Object.is equality[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-print-once.test.ts[2m > [22mmemory publication host printing[2m > [22mprints each row of a published source group once
+[31m[1mAssertionError[22m: expected 164 to be 28 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 28[39m
+[31m+ 164[39m
+
+[36m [2m❯[22m extensions/memory-core/src/memory/manager-publication-print-once.test.ts:[2m83:25[22m[39m
+    [90m 81|[39m     const group = publish.mock.calls[0]?.[0];
+    [90m 82|[39m     expect(Array.isArray(group) && group.length > 1).toBe(true);
+    [90m 83|[39m     expect(coordinates).toBe(rows.length * DIMENSIONS);
+    [90m   |[39m                         [31m^[39m
+    [90m 84|[39m     expectStoredVectors(rows);
+    [90m 85|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-print-once.test.ts[2m > [22mmemory publication host printing[2m > [22mprints each row of a source refused by the group byte budget once
+[31m[1mAssertionError[22m: expected 736 to be 244 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 244[39m
+[31m+ 736[39m
+
+[36m [2m❯[22m extensions/memory-core/src/memory/manager-publication-print-once.test.ts:[2m107:25[22m[39m
+    [90m105|[39m     expect(group.mock.results.some((result) => result.value === undefi…
+    [90m106|[39m     expect(publish.mock.calls.length).toBeGreaterThan(1);
+    [90m107|[39m     expect(coordinates).toBe(rows.length * DIMENSIONS);
+    [90m   |[39m                         [31m^[39m
+    [90m108|[39m     expectStoredVectors(rows);
+    [90m109|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m [30m[42m extension-database-workers [49m[39m extensions/memory-core/src/memory/manager-publication-print-once.test.ts[2m > [22mmemory publication host printing[2m > [22mprints each row of a staged source once
+[31m[1mAssertionError[22m: expected 5368 to be 4292 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 4292[39m
+[31m+ 5368[39m
+
+[36m [2m❯[22m extensions/memory-core/src/memory/manager-publication-print-once.test.ts:[2m123:25[22m[39m
+    [90m121|[39m     const staged = rows.filter((row) => row.text.includes("memory line…
+    [90m122|[39m     expect(staged.reduce((bytes, row) => bytes + row.text.length, 0)).…
+    [90m123|[39m     expect(coordinates).toBe(rows.length * DIMENSIONS);
+    [90m   |[39m                         [31m^[39m
+    [90m124|[39m     expectStoredVectors(rows);
+    [90m125|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 17:52:54
+[2m   Duration [22m 18.69s[2m (transform 68%, tests 21%, import 10%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 22.66s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.
+test exit=1
+restored; porcelain lines:        0

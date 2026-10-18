@@ -1,0 +1,35 @@
+$ pnpm changed:lanes --json --base origin/main
+$ node scripts/changed-lanes.mjs --json --base origin/main
+{
+  "paths": [
+    "extensions/memory-core/src/memory/manager-publication-print-once.test.ts",
+    "extensions/memory-core/src/memory/manager-publication-transfer.test.ts",
+    "extensions/memory-core/src/memory/manager-publication-transfer.ts",
+    "extensions/memory-core/src/memory/manager-publication.ts"
+  ],
+  "lanes": {
+    "core": false,
+    "coreTests": false,
+    "ui": false,
+    "extensions": true,
+    "extensionTests": true,
+    "scripts": false,
+    "testRoot": false,
+    "apps": false,
+    "docs": false,
+    "tooling": false,
+    "liveDockerTooling": false,
+    "bundledChannelConfigMetadata": false,
+    "releaseMetadata": false,
+    "all": false
+  },
+  "extensionImpactFromCore": false,
+  "docsOnly": false,
+  "reasons": [
+    "extensions/memory-core/src/memory/manager-publication-print-once.test.ts: extension test",
+    "extensions/memory-core/src/memory/manager-publication-transfer.test.ts: extension test",
+    "extensions/memory-core/src/memory/manager-publication-transfer.ts: extension production",
+    "extensions/memory-core/src/memory/manager-publication.ts: extension production"
+  ]
+}
+exit=0
