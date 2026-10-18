@@ -1,6 +1,5 @@
 import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { CHANNEL_IDS } from "../channels/ids.js";
 import {
   clearMemoryPluginState,
@@ -142,6 +141,52 @@ describe("buildAgentSystemPrompt", () => {
       ["## Documentation", "Docs: /tmp/openclaw/docs", "Source: /tmp/openclaw"],
     ],
     [
+      "points can't-do claims at session capabilities and the docs index",
+      { toolNames: ["read", "session_status", "web_fetch"] },
+      [
+        "Can't-do claims: a missing tool or failed call shows this session's limits, not OpenClaw's; check `session_status` with `capabilities=true`, then the docs index https://docs.openclaw.ai/llms.txt before saying OpenClaw can't.",
+      ],
+    ],
+    [
+      "uses local docs instead of the remote index without a web tool",
+      {
+        docsPath: "/workspace/docs",
+        toolNames: ["read", "session_status"],
+        sandboxInfo: { enabled: true },
+      },
+      [
+        "check `session_status` with `capabilities=true`, then the local docs before saying OpenClaw can't.",
+      ],
+      ["llms.txt"],
+    ],
+    [
+      "never names an unavailable capability route in can't-do guidance",
+      { toolNames: ["read"], sandboxInfo: { enabled: true } },
+      [
+        "Can't-do claims: a missing tool or failed call shows this session's limits, not OpenClaw's; say what you could not check.",
+      ],
+      ["capabilities=true", "llms.txt"],
+    ],
+    [
+      "acknowledges unavailable docs retrieval in a sandbox without web tools",
+      { toolNames: ["read"], sandboxInfo: { enabled: true } },
+      [
+        "Docs: https://docs.openclaw.ai",
+        "docs could not be checked; mark recalled behavior as unverified",
+      ],
+      ["docs mirror first when web exists", "inspect GitHub source"],
+    ],
+    [
+      "keeps mirror guidance when a sandbox can discover a web tool",
+      {
+        toolNames: ["read"],
+        capabilityToolNames: ["web_fetch"],
+        sandboxInfo: { enabled: true },
+      },
+      ["Docs: https://docs.openclaw.ai", "docs mirror first when web exists"],
+      ["mark recalled behavior as unverified"],
+    ],
+    [
       "uses limited bootstrap wording for constrained user-facing runs",
       { bootstrapMode: "limited" },
       ["## Bootstrap Pending", "cannot safely finish full BOOTSTRAP.md"],
@@ -233,18 +278,30 @@ describe("buildAgentSystemPrompt", () => {
 
   it.each<PromptCase>([
     [
-      "uses Slack typed presentation hints instead of generic inline button config guidance",
+      "keeps generic callback guidance without a plugin override",
       {
         toolNames: ["message"],
         runtimeInfo: {
-          channel: "slack",
+          channel: "custom",
+          capabilities: ["inlineButtons"],
         },
-        messageToolHints: [
-          "- Use `presentation` buttons/selects for discrete choices or parameter picks instead of asking the user to type one.",
-        ],
       },
-      ["`presentation` buttons/selects"],
-      ["Inline buttons not enabled for slack", 'presentation={"blocks":[{"type":"buttons"'],
+      ['"action":{"type":"callback"'],
+      [],
+    ],
+    [
+      "leaves custom button guidance to the plugin regardless of channel",
+      {
+        toolNames: ["message"],
+        runtimeInfo: {
+          channel: "custom",
+          capabilities: ["inlineButtons"],
+          customInlineButtonHint: true,
+        },
+        messageToolHints: ["- Custom button guidance."],
+      },
+      ["- Custom button guidance."],
+      ['"action":{"type":"callback"', "Inline buttons OFF"],
     ],
   ])("%s", expectPromptCase);
   it("advertises YouTube embeds only in full webchat prompts below the cache boundary", () => {
@@ -480,10 +537,9 @@ describe("buildAgentSystemPrompt", () => {
     }
   });
 
-  it("filters invalid paths and renders typed project context in canonical order", () => {
+  it("filters blank paths and renders typed project context in canonical order", () => {
     const prompt = renderPrompt({
       contextFiles: [
-        { path: undefined as unknown as string, content: "Missing path" },
         { path: "   ", content: "Blank path" },
         { path: "MEMORY.md", content: "Durable facts" },
         { path: "dir\\SOUL.md", content: "Windows persona" },
@@ -496,7 +552,6 @@ describe("buildAgentSystemPrompt", () => {
     expect(prompt).toContain("SOUL.md: persona/tone.");
     expect(prompt).toContain("MEMORY.md: durable");
     expect(prompt).toContain("Durable facts");
-    expect(prompt).not.toContain("Missing path");
     expect(prompt).not.toContain("Blank path");
     expect(prompt.indexOf("## AGENTS.md")).toBeLessThan(prompt.indexOf("## ./SOUL.md"));
     expect(prompt.indexOf("## ./SOUL.md")).toBeLessThan(prompt.indexOf("## MEMORY.md"));
@@ -586,7 +641,7 @@ describe("buildAgentSystemPrompt", () => {
       expect(prompt).toContain("Group/channel:");
       expect(prompt).toContain("current source is default target");
       expect(prompt).not.toContain("## Silent Replies");
-      expect(prompt).not.toContain(SILENT_REPLY_TOKEN);
+      expect(prompt).not.toContain("Only that whole reply is silent.");
       expect(prompt).not.toContain("`send`: `target` + `message`.");
     },
   );
@@ -681,7 +736,7 @@ describe("buildAgentSystemPrompt", () => {
     const toolSchemaDirectoryPrompt =
       "Available deferred-schema tools:\n- fake_calendar: Schedule an event";
     const prompt = renderPrompt({
-      toolNames: ["tool_search", "tool_describe", "tool_call"],
+      toolNames: ["tool_search", "tool_describe", "dispatch_action"],
       toolSchemaDirectoryPrompt,
     });
     const boundary = prompt.indexOf(SYSTEM_PROMPT_CACHE_BOUNDARY);
