@@ -30,10 +30,7 @@ import type {
 } from "./session-accessor.sqlite-contract.js";
 import { readSessionStateDeleteSnapshot } from "./session-accessor.sqlite-delete-snapshot.js";
 import type { SessionStateDeleteSnapshot } from "./session-accessor.sqlite-delete-snapshot.types.js";
-import {
-  readTranscriptExportInSlices,
-  type TranscriptExportBatchHead,
-} from "./session-accessor.sqlite-export-slices.js";
+import { readTranscriptExportInSlices } from "./session-accessor.sqlite-export-slices.js";
 import {
   getSessionKysely,
   resolveSqliteTranscriptReadScope,
@@ -61,6 +58,7 @@ import { readHotSessionTranscriptSnapshot } from "./session-cold-storage-read.js
 import { SessionTranscriptColdError } from "./session-cold-storage-state.js";
 import type { SessionTranscriptReadSnapshot } from "./session-history-read.types.js";
 import { SqliteTranscriptMutationConflictError } from "./session-mutation-conflict-error.js";
+import type { SessionTranscriptContextVersion } from "./session-transcript-context-version.types.js";
 import { SessionTranscriptStorageUnavailableError } from "./session-transcript-projection-error.js";
 import { assertTranscriptEventReadBudget } from "./session-transcript-read-bytes.js";
 import {
@@ -180,8 +178,11 @@ type TranscriptExportSnapshot = {
   sessionKey: string | undefined;
   generation?: string | null;
   throughSeq?: number;
-  /** Rows after `afterSeq` through `throughSeq` that a sliced read still has to add. */
-  deferred?: { afterSeq?: number; throughSeq: number };
+  /**
+   * Rows after `afterSeq` through `throughSeq` that a sliced read still has to add, and the
+   * transcript context version this head was read at.
+   */
+  deferred?: { afterSeq?: number; throughSeq: number; version: SessionTranscriptContextVersion };
 };
 
 type TranscriptExportRequest = {
@@ -200,13 +201,13 @@ type TranscriptExportRead = {
 
 /**
  * Snapshot export payloads and their identity without opening the writable lifecycle, reading
- * the rows in bounded slices after the head. A `batchHead` is reused while the transcript
- * context version still matches it.
+ * the rows in bounded slices after the head. A deferred `batchHead` is reused while the
+ * transcript context version still matches it.
  */
 export function readTranscriptExportSnapshotReadOnlySync(
   scope: SessionTranscriptReadScope,
   options: TranscriptExportOptions = {},
-  batchHead?: TranscriptExportBatchHead<TranscriptExportSnapshot>,
+  batchHead?: TranscriptExportSnapshot,
 ) {
   const resolved = resolveSqliteTranscriptReadScope(scope);
   const request = { resolved, scope, options };
@@ -276,7 +277,8 @@ export function readTranscriptExportSnapshotsFromDatabase(
           maxEventBytes: scope.maxEventBytes,
         });
         if (stats.sizeBytes > deferAboveBytes && !isPostgresSqlConnection(database.db)) {
-          snapshot.deferred = { afterSeq: previous?.throughSeq, throughSeq };
+          const version = readTranscriptContextVersionInTransaction(database, resolved.sessionId);
+          snapshot.deferred = { afterSeq: previous?.throughSeq, throughSeq, version };
         } else {
           pending.push({ request, snapshot, throughSeq, afterSeq: previous?.throughSeq });
         }

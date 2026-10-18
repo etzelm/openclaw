@@ -7,7 +7,6 @@ import { LruCache } from "../../infra/lru-cache.js";
 import { runSqliteReadSnapshotSync } from "../../infra/sqlite-transaction.js";
 import { prepareAssistantTranscriptText } from "../../shared/chat-message-content.js";
 import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { TranscriptExportBatchHead } from "./session-accessor.sqlite-export-slices.js";
 import {
   readTranscriptExportSnapshotReadOnlySync,
   readTranscriptExportSnapshotsFromDatabase,
@@ -16,7 +15,6 @@ import {
   resolveSqliteTranscriptReadScope,
   toDatabaseOptions,
 } from "./session-accessor.sqlite-scope.js";
-import { readTranscriptContextVersionInTransaction } from "./session-accessor.sqlite-transcript-state.js";
 import { SessionTranscriptColdError } from "./session-cold-storage-state.js";
 import { runWithSessionTranscriptReadFence } from "./session-transcript-read-fence.js";
 import type {
@@ -49,10 +47,7 @@ export async function prepareSessionMemoryEntries(
   entries: SessionEntriesWorkerInput["entries"],
 ): Promise<SessionTranscriptWorkerValues["session-entries"]["entries"]> {
   const prepared: (Snapshot | null | "cold")[] = entries.map(() => null);
-  const sliced = new Map<
-    number,
-    { options: ExportRequest["options"]; batchHead: TranscriptExportBatchHead<Snapshot> }
-  >();
+  const sliced = new Map<number, { options: ExportRequest["options"]; batchHead: Snapshot }>();
   const groups = new Map<
     string,
     { index: number; resolved: ReturnType<typeof resolveSqliteTranscriptReadScope> }[]
@@ -97,19 +92,10 @@ export async function prepareSessionMemoryEntries(
             const exported = readTranscriptExportSnapshotsFromDatabase(database, requests, {
               deferAboveBytes: MAX_SNAPSHOT_BYTES,
             });
-            for (const [offset, { index, resolved }] of group.entries()) {
+            for (const [offset, { index }] of group.entries()) {
               const snapshot = exported[offset]!;
               if (snapshot !== "cold" && snapshot.deferred) {
-                sliced.set(index, {
-                  options: requests[offset]!.options,
-                  batchHead: {
-                    snapshot,
-                    version: readTranscriptContextVersionInTransaction(
-                      database,
-                      resolved.sessionId,
-                    ),
-                  },
-                });
+                sliced.set(index, { options: requests[offset]!.options, batchHead: snapshot });
               } else {
                 prepared[index] = snapshot;
               }

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { channel } from "node:diagnostics_channel";
 import path from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { withEngineStoreAdmission } from "../../infra/database-engine/admission-scope.js";
 import {
   mixedAgentConnection,
@@ -22,14 +22,6 @@ import {
 } from "./session-accessor.sqlite-scope.js";
 import { replaceSqliteTranscriptEventsInTransaction } from "./session-accessor.sqlite-transcript-store.js";
 import { prepareSessionMemoryEntries } from "./session-memory-entry.worker.js";
-
-// One payload per slice, so a sliced read would issue one payload query per row.
-vi.mock("./session-transcript-payload-chunk.js", async () => ({
-  ...(await vi.importActual<typeof import("./session-transcript-payload-chunk.js")>(
-    "./session-transcript-payload-chunk.js",
-  )),
-  TRANSCRIPT_PAYLOAD_CHUNK_BYTES: 1,
-}));
 
 const MIB = 1024 * 1024;
 const statements = channel("openclaw.database.statement");
@@ -62,7 +54,8 @@ describe.skipIf(!mixedAgentConnection)(
       };
       const events = [
         { type: "session", version: 3, id: sessionId, timestamp: "2026-04-01T05:46:39.000Z" },
-        // Two 2.5 MiB rows take the transcript past the 4 MiB retained-snapshot limit.
+        // Two 2.5 MiB rows take the transcript past the 4 MiB retained-snapshot limit, and each
+        // fills a 2 MiB slice, so a sliced read would issue one payload query per row.
         ...[0, 1].map((index) => ({
           type: "message",
           id: `entry-${index}`,
