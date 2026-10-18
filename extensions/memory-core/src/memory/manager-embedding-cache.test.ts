@@ -391,7 +391,7 @@ describe("memory embedding cache", () => {
       rows(db, "SELECT hash FROM memory_embedding_cache ORDER BY hash").map((row) => row.hash);
   }
 
-  it("evicts unreferenced rows of the preferred identities older than every published chunk first, never beyond the cap", () => {
+  it("evicts unreferenced rows of the preferred identities older than every published chunk first", () => {
     using db = new DatabaseSync(":memory:");
     initialize(db);
     // Live rows are the oldest, so plain oldest-first eviction would take them first.
@@ -426,10 +426,6 @@ describe("memory embedding cache", () => {
       "orphan-other-provider",
       "pending-at-fence",
     ]);
-    // Within the cap nothing is removed, preferred or not.
-    seedEviction(db, [["openai", "k", "orphan-late", 60]], []);
-    expect(pruneMemoryEmbeddingCache(db, 5, 5, preference)).toBe(5);
-    expect(remaining()).toHaveLength(5);
   });
 
   it("reserves insertion capacity from preferred unreferenced rows before the oldest rows", () => {

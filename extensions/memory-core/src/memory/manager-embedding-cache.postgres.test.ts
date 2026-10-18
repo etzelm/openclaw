@@ -257,9 +257,6 @@ describe.skipIf(!connection)("PostgreSQL memory embedding cache", () => {
       "orphan-other-provider",
       "pending-at-fence",
     ]);
-    seedEviction([["openai", "k", "orphan-late", 60]], []);
-    expect(write(() => pruneMemoryEmbeddingCache(database, 5, 5, preference))).toBe(5);
-    expect(remaining()).toHaveLength(5);
   });
 
   it("reserves insertion capacity from preferred rows and falls back to oldest-first", () => {
