@@ -21,6 +21,7 @@ export type DevicesProps = {
   devicesLoading: boolean;
   devicesError: string | null;
   devicesList: DevicePairingList | null;
+  devicesDeciding: readonly string[];
   canPairDevice: boolean;
   canManagePairing: boolean;
   canAdmin: boolean;

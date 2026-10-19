@@ -81,6 +81,8 @@ type InventoryState = NodesRequestState & {
   devicesQueuedRefresh: QueuedRefresh;
   devicesError: string | null;
   devicesList: DevicePairingList | null;
+  // Device and node pairing requestIds with an approve or reject in flight.
+  devicesDeciding: readonly string[];
 };
 
 type ExecApprovalsState = NodesRequestState & {
@@ -110,6 +112,7 @@ export function createInitialDevicesState(
     devicesQueuedRefresh: "none",
     devicesError: null,
     devicesList: null,
+    devicesDeciding: [],
     execApprovalsLoading: false,
     execApprovalsSaving: false,
     execApprovalsDirty: false,
@@ -212,12 +215,34 @@ async function runDeviceMutation<T>(
   }
 }
 
+// One decision per request: the Gateway answers a repeat with "unknown requestId",
+// which would replace the accepted outcome with an error.
+async function decidePairing(
+  state: InventoryState,
+  requestId: string,
+  decide: () => Promise<unknown>,
+) {
+  if (state.devicesDeciding.includes(requestId)) {
+    return;
+  }
+  state.devicesDeciding = [...state.devicesDeciding, requestId];
+  try {
+    await decide();
+  } finally {
+    state.devicesDeciding = state.devicesDeciding.filter((id) => id !== requestId);
+  }
+}
+
 export async function approveDevicePairing(state: InventoryState, requestId: string) {
-  await runDeviceMutation(state, (client) => client.request("device.pair.approve", { requestId }));
+  await decidePairing(state, requestId, () =>
+    runDeviceMutation(state, (client) => client.request("device.pair.approve", { requestId })),
+  );
 }
 
 export async function rejectDevicePairing(state: InventoryState, requestId: string) {
-  await runDeviceMutation(state, (client) => client.request("device.pair.reject", { requestId }));
+  await decidePairing(state, requestId, () =>
+    runDeviceMutation(state, (client) => client.request("device.pair.reject", { requestId })),
+  );
 }
 
 export type InventoryRemovalRequest = {
@@ -327,13 +352,15 @@ export async function renameDevice(
 }
 
 export function approveNodePairingRequest(state: InventoryState, requestId: string) {
-  return runInventoryMutation(state, (client) =>
-    client.request("node.pair.approve", { requestId }),
+  return decidePairing(state, requestId, () =>
+    runInventoryMutation(state, (client) => client.request("node.pair.approve", { requestId })),
   );
 }
 
 export function rejectNodePairingRequest(state: InventoryState, requestId: string) {
-  return runInventoryMutation(state, (client) => client.request("node.pair.reject", { requestId }));
+  return decidePairing(state, requestId, () =>
+    runInventoryMutation(state, (client) => client.request("node.pair.reject", { requestId })),
+  );
 }
 
 /**

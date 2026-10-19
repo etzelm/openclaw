@@ -597,6 +597,7 @@ export function DevicesPage(props: { routeData?: DevicesRouteData }) {
       devicesLoading: devices.devicesLoading,
       devicesError: devices.devicesError,
       devicesList: devices.devicesList,
+      devicesDeciding: devices.devicesDeciding,
       canPairDevice: canAdmin,
       canManagePairing,
       canAdmin,

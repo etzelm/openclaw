@@ -21,6 +21,37 @@ async function copyDeviceId(id: string) {
   showToast({ message: copied ? t("devices.inventory.deviceIdCopied") : t("common.copyFailed") });
 }
 
+export function PendingDeviceDecisions(props: {
+  devices: DevicesProps;
+  requestId: string;
+  name: string;
+}) {
+  const disabled = () =>
+    !props.devices.connected ||
+    !props.devices.canManagePairing ||
+    props.devices.devicesDeciding.includes(props.requestId);
+  return (
+    <>
+      <button
+        class="btn btn--sm"
+        disabled={disabled()}
+        aria-label={t("devices.inventory.approveName", { name: props.name })}
+        onClick={() => props.devices.onDeviceApprove(props.requestId)}
+      >
+        {t("devices.inventory.approve")}
+      </button>
+      <button
+        class="btn btn--sm"
+        disabled={disabled()}
+        aria-label={t("devices.inventory.rejectName", { name: props.name })}
+        onClick={() => props.devices.onDeviceReject(props.requestId)}
+      >
+        {t("devices.inventory.reject")}
+      </button>
+    </>
+  );
+}
+
 export function DeviceEntryMenu(props: {
   devices: DevicesProps;
   entry: {
@@ -33,6 +64,9 @@ export function DeviceEntryMenu(props: {
   };
 }) {
   const id = createUniqueId();
+  const deciding = () =>
+    props.entry.pendingRequestId !== undefined &&
+    props.devices.devicesDeciding.includes(props.entry.pendingRequestId);
   const actions = createMemo(() => [
     {
       value: "desktop",
@@ -96,7 +130,8 @@ export function DeviceEntryMenu(props: {
             id: action.value,
             label: t(action.labelKey),
             disabled:
-              action.pairing && (!props.devices.connected || !props.devices.canManagePairing),
+              (action.pairing && (!props.devices.connected || !props.devices.canManagePairing)) ||
+              ((action.value === "approve" || action.value === "reject") && deciding()),
             attributes: {
               title:
                 action.pairing && props.devices.connected && !props.devices.canManagePairing
