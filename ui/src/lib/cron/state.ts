@@ -88,6 +88,7 @@ export function createInitialCronState<Row = CronJob>(
     cronScopedTotal: null,
     cronScopedNextWakeAtMs: null,
     cronError: null,
+    cronNotice: null,
     cronForm: { ...DEFAULT_CRON_FORM },
     cronCreateOpen: false,
     cronFieldErrors: {},

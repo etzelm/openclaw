@@ -87,14 +87,20 @@ function createStateWithRequest(request: unknown, overrides: Partial<CronState>)
 }
 
 it.each([
-  ["queued", "Run queued. Run ID: run-due", "due", true],
-  ["not-due", "This automation is not due yet.", "force", false],
-  ["already-running", "This automation is already running.", "force", false],
-  ["stopped", "The scheduler is stopped.", "force", false],
-  ["invalid-spec", "This automation has an invalid schedule or payload.", "force", true],
+  ["queued", "Run queued. Run ID: run-due", "due", true, "cronNotice"],
+  ["not-due", "This automation is not due yet.", "force", false, "cronNotice"],
+  ["already-running", "This automation is already running.", "force", false, "cronNotice"],
+  ["stopped", "The scheduler is stopped.", "force", false, "cronError"],
+  [
+    "invalid-spec",
+    "This automation has an invalid schedule or payload.",
+    "force",
+    true,
+    "cronError",
+  ],
 ] as const)(
   "reports %s and refreshes only recorded runs",
-  async (reason, message, mode, refresh) => {
+  async (reason, message, mode, refresh, field) => {
     const request = vi.fn(async (method: string) => {
       if (method === "cron.run") {
         return reason === "queued"
@@ -111,7 +117,10 @@ it.each([
     });
     const state = createStateWithRequest(request, { cronRunsScope: "job", cronRunsJobId: "job" });
     await runCronJob(state, "job", mode);
-    expect(state.cronError).toBe(`job: ${message}`);
+    expect(state.cronError).toBe(field === "cronError" ? `job: ${message}` : null);
+    if (field === "cronNotice") {
+      expect(state.cronNotice).toBe(`job: ${message}`);
+    }
     expect(request).toHaveBeenCalledWith("cron.run", { id: "job", mode });
     if (refresh) {
       expect(request).toHaveBeenCalledWith("cron.runs", expect.objectContaining({ id: "job" }));

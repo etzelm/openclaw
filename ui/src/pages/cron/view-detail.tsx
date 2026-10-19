@@ -51,6 +51,11 @@ export function DetailView(
         <AdminRequired {...props} />
         {hasDetailTabs() ? <DetailTabs {...props} /> : undefined}
         <ErrorBanner error={props.error} />
+        {props.notice ? (
+          <div class="callout" role="status">
+            {props.notice}
+          </div>
+        ) : undefined}
         <div
           id="cron-detail-panel"
           class="cron-tab-panel"

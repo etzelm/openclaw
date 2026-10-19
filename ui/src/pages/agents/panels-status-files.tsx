@@ -195,7 +195,7 @@ export function AgentCron(params: {
   scopedTotal: number | null;
   scopedNextWakeAtMs: number | null;
   loading: boolean;
-  error: string | null;
+  feedback: { error: string | null; notice: string | null };
   canRunNow: boolean;
   onRefresh: () => void;
   onLoadMore: () => void;
@@ -209,7 +209,14 @@ export function AgentCron(params: {
         t("agents.context.schedulingSubtitle"),
         params.onSelectPanel,
       )}
-      {params.error ? <div class="callout danger">{params.error}</div> : undefined}
+      {params.feedback.error ? (
+        <div class="callout danger">{params.feedback.error}</div>
+      ) : undefined}
+      {params.feedback.notice ? (
+        <div class="callout" role="status">
+          {params.feedback.notice}
+        </div>
+      ) : undefined}
       <SettingsSection
         title={t("agents.cronPanel.schedulerTitle")}
         description={t("agents.cronPanel.schedulerSubtitle")}

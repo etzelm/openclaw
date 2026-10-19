@@ -57,6 +57,7 @@ export function createCronViewProps(overrides: Partial<CronProps> = {}): CronPro
     jobsSortBy: "nextRunAtMs",
     jobsSortDir: "asc",
     error: null,
+    notice: null,
     busy: false,
     form: { ...DEFAULT_CRON_FORM },
     heartbeatScratch: "",

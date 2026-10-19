@@ -73,7 +73,7 @@ export function createAgentViewTestProps(
       scopedTotal: null,
       scopedNextWakeAtMs: null,
       loading: false,
-      error: null,
+      feedback: { error: null, notice: null },
       onRefresh: () => undefined,
       onLoadMore: () => undefined,
       onRunNow: () => undefined,

@@ -924,7 +924,7 @@ export function createAgentsPageState(
         scopedTotal: state.cron.cronScopedTotal,
         scopedNextWakeAtMs: state.cron.cronScopedNextWakeAtMs,
         loading: state.cron.cronLoading,
-        error: state.cron.cronError,
+        feedback: { error: state.cron.cronError, notice: state.cron.cronNotice },
         onRefresh: () => void refreshCron(),
         onLoadMore: () =>
           void runCronTask((cronState) =>

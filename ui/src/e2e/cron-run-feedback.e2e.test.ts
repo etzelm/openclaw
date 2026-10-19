@@ -30,20 +30,30 @@ function job(id: string, name: string): CronJob {
 }
 
 const outcomes = [
-  { reason: "already-running", mode: "force", message: "This automation is already running." },
-  { reason: "not-due", mode: "due", message: "This automation is not due yet." },
-  { reason: "queued", mode: "force", message: "Run queued. Run ID: synthetic-run-alpha" },
-  { reason: "error", mode: "force", message: "Synthetic run request unavailable" },
+  {
+    reason: "already-running",
+    mode: "force",
+    message: "This automation is already running.",
+    role: "status",
+  },
+  { reason: "not-due", mode: "due", message: "This automation is not due yet.", role: "status" },
+  {
+    reason: "queued",
+    mode: "force",
+    message: "Run queued. Run ID: synthetic-run-alpha",
+    role: "status",
+  },
+  { reason: "error", mode: "force", message: "Synthetic run request unavailable", role: "alert" },
 ] as const;
 
 suite.define(() => {
   it.each(
-    outcomes.flatMap(({ reason, mode, message }) =>
-      [true, false].map((sameJob) => ({ reason, mode, message, sameJob })),
+    outcomes.flatMap(({ reason, mode, message, role }) =>
+      [true, false].map((sameJob) => ({ reason, mode, message, role, sameJob })),
     ),
   )(
     "attributes $reason feedback to the requested automation (same job=$sameJob)",
-    async ({ reason, mode, message, sameJob }) => {
+    async ({ reason, mode, message, role, sameJob }) => {
       const artifacts = createControlUiE2eArtifactDir(`cron-run-feedback-${reason}-${sameJob}`);
       await suite.withPage(createControlUiE2eContextOptions(), async ({ page }) => {
         const alpha = job("feedback-alpha", "Alpha synthetic automation");
@@ -102,8 +112,13 @@ suite.define(() => {
           }
           // The action's busy control settles after its feedback publication.
           await expect.poll(() => selectedRun.isEnabled()).toBe(true);
-          const feedback = await page.locator(".cron-error-banner").allTextContents();
+          // Only failures are announced as alerts; answered requests are neutral status.
+          const feedback = await page
+            .getByRole(role)
+            .filter({ hasText: message })
+            .allTextContents();
           expect(feedback.join("\n")).toContain(message);
+          expect(await page.locator(".cron-error-banner").count()).toBe(role === "alert" ? 1 : 0);
           if (!sameJob) {
             expect(feedback.join("\n")).toContain(alpha.name);
           }

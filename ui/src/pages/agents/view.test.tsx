@@ -169,7 +169,6 @@ describe("renderAgents", () => {
           scopedTotal: 1,
           scopedNextWakeAtMs,
           loading: false,
-          error: null,
         },
       },
       container,
@@ -241,7 +240,7 @@ describe("renderAgents", () => {
             scopedTotal: 51,
             scopedNextWakeAtMs: null,
             loading: cronState.cronLoading,
-            error: cronState.cronError,
+            feedback: { error: cronState.cronError, notice: cronState.cronNotice },
             onLoadMore: () => {
               const nextPage = loadCronJobsPage(cronState, { append: true, tableFilters: true });
               renderCurrentPage();
@@ -947,4 +946,26 @@ it.each([
   } else {
     expect(onCronRunNow).not.toHaveBeenCalled();
   }
+});
+
+it.each([
+  [
+    "notice",
+    "Weekly report: Run queued. Run ID: run-1",
+    '.callout[role="status"]',
+    ".callout.danger",
+  ],
+  [
+    "error",
+    "Weekly report: The scheduler is stopped.",
+    ".callout.danger",
+    '.callout[role="status"]',
+  ],
+] as const)("renders Run Now %s feedback in its own callout", (field, message, shown, hidden) => {
+  const container = document.createElement("div");
+  const props = createProps({ activePanel: "cron", selectedAgentId: "alpha" });
+  const feedback = { error: null, notice: null, [field]: message };
+  renderView({ ...props, cron: { ...props.cron, feedback } }, container);
+  expect(container.querySelector(shown)?.textContent).toBe(message);
+  expect(container.querySelector(hidden)).toBeNull();
 });

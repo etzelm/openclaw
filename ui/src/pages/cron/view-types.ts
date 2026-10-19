@@ -43,6 +43,7 @@ export type CronProps = {
   jobsSortBy: CronJobsSortBy;
   jobsSortDir: CronSortDir;
   error: string | null;
+  notice: string | null;
   busy: boolean;
   form: CronFormState;
   eventSource?: CronEventSourceView;
