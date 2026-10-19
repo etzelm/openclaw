@@ -1,0 +1,250 @@
+# Round-2b gate summary (EXIT codes). Merge tip a7f6d8a88c7b6069fcba53840378619533a6e377, tree 40e8a5a73478451147e4a244119a3507e0926e97, merge base 372095136effb8dcaf2d9e59ace8bae193a6573b.
+
+## merge steps (gates/merge/)
+install EXIT 0
+config:docs:gen EXIT 0
+config:docs:check EXIT 0
+INSTALL DONE
+
+## gates.sh (gates/final/summary.txt)
+HEAD a7f6d8a88c7b6069fcba53840378619533a6e377 TREE 40e8a5a73478451147e4a244119a3507e0926e97 dirty=0
+start Mon Oct 19 06:52:59 PDT 2026 load 22.15 11.62 6.47
+oxfmt --check (changed files) EXIT 0
+oxlint (changed .ts, default config) EXIT 0
+oxlint core config (changed src .ts) EXIT 0
+git diff --check 372095136effb8dcaf2d9e59ace8bae193a6573b HEAD EXIT 0
+pnpm tsgo:core EXIT 0
+pnpm tsgo:core:test EXIT 0
+pnpm tsgo:extensions EXIT 0
+pnpm tsgo:extensions:test EXIT 0
+targeted: every changed test file (9 files: extensions/anthropic/cli-runtime.test.ts src/agents/cli-credentials.test.ts src/agents/cli-runner/cli-live-session-registry.test.ts src/agents/cli-runner/execute-plugin.test.ts src/agents/cli-runner/execute.native-history-owner.test.ts src/agents/cli-runner/history-boundary.native-login.test.ts src/agents/cli-runner/history-boundary.test.ts src/agents/cli-runner/prepare-native-history.test.ts src/plugin-sdk/provider-auth-claude-compat.test.ts ) EXIT 0
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ Test Files  5 passed (5)
+      Tests  104 passed (104)
+ Test Files  1 passed (1)
+      Tests  53 passed (53)
+[test] passed 5 Vitest shards in 72.87s
+targeted: r15 set, files still present (16 files) EXIT 0
+ Test Files  1 passed (1)
+      Tests  35 passed (35)
+ Test Files  4 passed (4)
+      Tests  146 passed (146)
+ Test Files  2 passed (2)
+      Tests  49 passed (49)
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ Test Files  5 passed (5)
+      Tests  104 passed (104)
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+[test] passed 7 Vitest shards in 140.61s
+shipped readClaudeCliCredentials consumers EXIT 0
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+pair prepare-native-history + admission, 1 worker, run 1 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+pair prepare-native-history + admission, 1 worker, run 2 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+pair prepare-native-history + admission, 1 worker, run 3 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+redgreen RED1-RED5,RED7-RED12 EXIT 0 HEAD a7f6d8a88c7b6069fcba53840378619533a6e377 TREE 40e8a5a73478451147e4a244119a3507e0926e97 dirty=0
+## RED1 host sends SessionManager writer facts without the owner-check request
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+      Tests  26 passed (26)
+## RED2 metadata host never answers the owner probe
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+      Tests  26 passed (26)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED4 the UserPromptSubmit response goes out on the stream check alone
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent
+      Tests  1 failed | 52 passed (53)
+      Tests  53 passed (53)
+## RED5 the native login is attested without the operator's opt-in
+ FAIL   agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED7 the credential-root split guard is removed
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED8 CLAUDE_CODE_OAUTH_TOKEN drops out of the non-native auth env list
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED9 the profile request is sent without its timeout signal
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED10 saved-history strictness keyed on a resumed session id
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a fresh recovery turn whose environment selects another login
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED11 a native login lookup that throws escapes instead of meaning no owner
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check
+      Tests  1 failed | 25 passed (26)
+      Tests  26 passed (26)
+## RED12 the throw is caught only at the coverage check (the first round-2 placement), not at the boundary checks
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check
+      Tests  26 passed (26)
+## GREEN (all five owning files, unmutated)
+      Tests  29 passed (29)
+      Tests  34 passed (34)
+      Tests  53 passed (53)
+pnpm build EXIT 0
+[build-all] phase timings: total 2m 31.9s; slowest write-unified-entry-dts 56.6s; tsdown-packages 19.5s; tsdown 17.4s; ui:build 15.6s; external-plugins:local-dist 8.90s; check-cli-bootstrap-imports 7.23s; plugins:assets:build 6.22s; tsdown-ai 5.54s; plugins:assets:copy 4.54s; runtime-postbuild 4.15s; write-cli-startup-metadata 3.64s; check-plugin-sdk-exports 1.11s; build-stamp 132ms; write-build-info 107ms; runtime-postbuild-stamp 71ms; native-protocol 57ms
+harness run-after EXIT 0
+harness run-upgrade (2026.10.4) EXIT 0
+harness run-upgrade-1005 EXIT 0
+upgrade 2026.10.5 row: upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+harness outcomes raw diff vs round2 148b78f9f4a EXIT 0 (0 lines)
+vs outcomes-after.round2-148b78f9.txt: identical after masking (38 lines)
+vs outcomes-after.txt: identical after masking (38 lines)
+vs outcomes-after.prevmerge.txt: identical after masking (38 lines)
+lanes start load 5.52 4.74 6.70
+lane src/agents/cli-runner/ EXIT 0 (load after 11.63 7.59 7.55)
+      Tests  12 passed (12)
+      Tests  232 passed (232)
+      Tests  450 passed (450)
+      Tests  5 passed (5)
+      Tests  59 passed (59)
+ Test Files  1 passed (1)
+ Test Files  13 passed (13)
+ Test Files  3 passed (3)
+ Test Files  37 passed (37)
+ Test Files  7 passed (7)
+[test] passed 5 Vitest shards in 136.17s
+[test] starting test/vitest/vitest.agents-core-isolated.config.ts
+[test] starting test/vitest/vitest.agents-support.config.ts
+[test] starting test/vitest/vitest.infra.config.ts
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+[test] starting test/vitest/vitest.unit-fast.config.ts
+lane extensions/anthropic/ EXIT 0 (load after 10.24 7.53 7.53)
+      Tests  417 passed | 1 skipped (418)
+ Test Files  37 passed (37)
+[test] passed 1 Vitest shard in 23.30s
+[test] starting test/vitest/vitest.extension-providers.config.ts
+lane src/plugin-sdk/provider-auth-claude-compat.test.ts EXIT 0 (load after 9.82 7.49 7.51)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+[test] passed 1 Vitest shard in 1.27s
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+lane src/agents/sessions/ EXIT 0 (load after 21.03 15.37 10.89)
+      Tests  375 passed (375)
+      Tests  62 passed (62)
+      Tests  703 passed | 4 skipped (707)
+      Tests  89 passed | 1 skipped (90)
+ Test Files  15 passed | 1 skipped (16)
+ Test Files  28 passed (28)
+ Test Files  55 passed | 1 skipped (56)
+ Test Files  7 passed (7)
+[test] passed 4 Vitest shards in 181.60s
+[test] starting test/vitest/vitest.agents-support.config.ts
+[test] starting test/vitest/vitest.infra.config.ts
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+[test] starting test/vitest/vitest.unit-fast.config.ts
+lane src/config/sessions/ EXIT 1 (load after 39.44 38.46 26.72)
+      Tests  1 failed | 3321 passed | 11 skipped (3333)
+      Tests  224 passed (224)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > enforces a physical archive budget without ordinary host SQLite calls
+ Test Files  1 failed | 363 passed | 2 skipped (366)
+ Test Files  18 passed (18)
+[test] failed 2 Vitest shards in 744.80s
+[test] starting test/vitest/vitest.infra.config.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+check:changed --base 372095136effb8dcaf2d9e59ace8bae193a6573b EXIT 1
+   4.60s  failed:1   max-lines suppression ratchet
+   764ms  failed:1   core tsgo graph boundary
+check:changed ok steps: 42
+check-env-var-count EXIT 1
+OPENCLAW_* count 460 exceeds budget 452; update config/env-var-count-budget.txt
+end: HEAD a7f6d8a88c7b6069fcba53840378619533a6e377 TREE 40e8a5a73478451147e4a244119a3507e0926e97 dirty=0 Mon Oct 19 07:54:56 PDT 2026
+ALL DONE
+
+## base.sh on pristine main 372095136ef (gates/final/base-summary.txt)
+base HEAD 372095136effb8dcaf2d9e59ace8bae193a6573b dirty=0 main install EXIT 0 start Mon Oct 19 07:55:16 PDT 2026
+check:changed failed step on tree: ___4.60s__failed:1___max-lines_suppression_ratchet
+check:changed failed step on tree: ___764ms__failed:1___core_tsgo_graph_boundary
+max-lines ratchet on main, --base main itself EXIT 1
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+core tsgo graph boundary on main EXIT 1
+  test/tsconfig/tsconfig.core.test.json: gateway-root: 724 test roots exceeds the advisory 720 limit; rebalance when convenient
+  test/tsconfig/tsconfig.core.test.json: plugins-platform: 725 test roots exceeds the advisory 720 limit; rebalance when convenient
+dead export scan on main EXIT 0
+env-var count on main EXIT 1
+OPENCLAW_* count 460 exceeds budget 452; update config/env-var-count-budget.txt
+dead exports main 0 pr 0 identical=yes
+base dirty after checks=0
+copied from a7f6d8a88c7b6069fcba53840378619533a6e377: extensions/anthropic/cli-runtime.test.ts src/agents/cli-credentials.test.ts src/agents/cli-runner/cli-live-session-registry.test.ts src/agents/cli-runner/execute-plugin.test.ts src/agents/cli-runner/execute.native-history-owner.test.ts src/agents/cli-runner/history-boundary.native-login.test.ts src/agents/cli-runner/history-boundary.test-support.ts src/agents/cli-runner/history-boundary.test.ts src/agents/cli-runner/prepare-native-history.test.ts src/plugin-sdk/provider-auth-claude-compat.test.ts
+== RED on main: extensions/anthropic/cli-runtime.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  2 failed | 51 passed (53)
+== RED on main: src/agents/cli-credentials.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+== RED on main: src/agents/cli-runner/cli-live-session-registry.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+== RED on main: src/agents/cli-runner/execute-plugin.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  1 failed | 30 passed (31)
+== RED on main: src/agents/cli-runner/execute.native-history-owner.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+== RED on main: src/agents/cli-runner/history-boundary.native-login.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  25 failed | 1 passed (26)
+== RED on main: src/agents/cli-runner/history-boundary.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+== RED on main: src/agents/cli-runner/prepare-native-history.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+== RED on main: src/plugin-sdk/provider-auth-claude-compat.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  29 failed (29)
+base restored: 0 changes
+BASE DONE Mon Oct 19 08:32:55 PDT 2026
+
+## src/config/sessions/ repro (gates/final/repro-summary.txt)
+config/sessions lane failed at the tree; repro start Mon Oct 19 07:58:44 PDT 2026 load 4.08 6.16 12.80
+failing files: src/config/sessions/session-history-archive-pruning.admission.test.ts
+== tree a7f6d8a88c7b6069fcba53840378619533a6e377 dirty=0
+alone src/config/sessions/session-history-archive-pruning.admission.test.ts EXIT 0 load 3.81 5.94 12.52
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+== main 372095136effb8dcaf2d9e59ace8bae193a6573b dirty=0
+alone src/config/sessions/session-history-archive-pruning.admission.test.ts EXIT 0 load 9.80 7.07 12.59
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+main build EXIT 0
+lane src/config/sessions/ on main EXIT 1 load 39.33 34.09 25.57
+      Tests  1 failed | 3321 passed | 11 skipped (3333)
+      Tests  224 passed (224)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > enforces a physical archive budget without ordinary host SQLite calls
+ Test Files  1 failed | 363 passed | 2 skipped (366)
+ Test Files  18 passed (18)
+[test] failed 2 Vitest shards in 766.75s
+lane src/config/sessions/ rerun on tree EXIT 0 load 67.54 67.39 54.30
+      Tests  224 passed (224)
+      Tests  3322 passed | 11 skipped (3333)
+ Test Files  18 passed (18)
+ Test Files  364 passed | 2 skipped (366)
+[test] passed 2 Vitest shards in 1054.29s
+REPRO DONE Mon Oct 19 08:32:55 PDT 2026

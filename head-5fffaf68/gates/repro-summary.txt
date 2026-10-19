@@ -1,0 +1,25 @@
+config/sessions lane failed at the tree; repro start Mon Oct 19 07:58:44 PDT 2026 load 4.08 6.16 12.80
+failing files: src/config/sessions/session-history-archive-pruning.admission.test.ts
+== tree a7f6d8a88c7b6069fcba53840378619533a6e377 dirty=0
+alone src/config/sessions/session-history-archive-pruning.admission.test.ts EXIT 0 load 3.81 5.94 12.52
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+== main 372095136effb8dcaf2d9e59ace8bae193a6573b dirty=0
+alone src/config/sessions/session-history-archive-pruning.admission.test.ts EXIT 0 load 9.80 7.07 12.59
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+main build EXIT 0
+lane src/config/sessions/ on main EXIT 1 load 39.33 34.09 25.57
+      Tests  1 failed | 3321 passed | 11 skipped (3333)
+      Tests  224 passed (224)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > enforces a physical archive budget without ordinary host SQLite calls
+ Test Files  1 failed | 363 passed | 2 skipped (366)
+ Test Files  18 passed (18)
+[test] failed 2 Vitest shards in 766.75s
+lane src/config/sessions/ rerun on tree EXIT 0 load 67.54 67.39 54.30
+      Tests  224 passed (224)
+      Tests  3322 passed | 11 skipped (3333)
+ Test Files  18 passed (18)
+ Test Files  364 passed | 2 skipped (366)
+[test] passed 2 Vitest shards in 1054.29s
+REPRO DONE Mon Oct 19 08:32:55 PDT 2026
