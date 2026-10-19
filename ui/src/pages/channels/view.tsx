@@ -83,7 +83,9 @@ export function ChannelsView(props: ChannelsProps) {
           </div>
         ) : undefined}
         {props.channels.channelsError ? (
-          <div class="callout danger">{props.channels.channelsError}</div>
+          <div class="callout danger" role="alert">
+            {props.channels.channelsError}
+          </div>
         ) : undefined}
         {props.wizardHost.blockedByDirtyConfig() && props.config.configFormDirty ? (
           <div class="callout warn">{t("channels.hub.saveBeforeSetup")}</div>

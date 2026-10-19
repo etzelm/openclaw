@@ -64,6 +64,25 @@ describe("channel hub refresh actions", () => {
     expect(onPairingRefresh).toHaveBeenCalledOnce();
     expect(onRefresh).toHaveBeenCalledWith(true);
   });
+
+  it("announces a channel status failure as an alert", () => {
+    const props = createProps({
+      ts: Date.now(),
+      channelOrder: [],
+      channelLabels: {},
+      channels: {},
+      channelAccounts: {},
+      channelDefaultAccountId: {},
+    });
+    props.channels.channelsError = "Channel status unavailable";
+    const container = document.createElement("div");
+
+    renderChannelView(ChannelsView, props, container);
+
+    expect(
+      Array.from(container.querySelectorAll('[role="alert"]'), (alert) => alert.textContent),
+    ).toEqual(["Channel status unavailable"]);
+  });
 });
 
 function createChannelPlugin(overrides: Partial<PluginCatalogItem> = {}): PluginCatalogItem {
