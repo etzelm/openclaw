@@ -45,8 +45,10 @@ import {
   subscribeModelCatalogCache,
   subscribeModelCatalogChanges,
 } from "../../lib/model-catalog-store.ts";
-import { projectOwner, projectSource } from "../../lib/reactive/projection.ts";
+import { observeState } from "../../lib/reactive/observe-state.ts";
+import { projectOwner } from "../../lib/reactive/projection.ts";
 import { parseAgentSessionKey } from "../../lib/sessions/session-key.ts";
+import { createAgentConfigActions } from "./agent-config-actions.ts";
 import type { GeneratedAvatar } from "./avatar-picker.tsx";
 import {
   loadAgentFileContent,
@@ -64,7 +66,7 @@ import {
   setIdentityAvatar,
   setIdentityDraftField,
 } from "./identity-actions.ts";
-import { createAgentModelActions } from "./model-config.ts";
+import type { AgentMemoryTarget } from "./memory/memory-panel-state.ts";
 import type { AgentIdentityDraft } from "./panels-overview.tsx";
 import {
   navigateToAgent,
@@ -73,8 +75,7 @@ import {
 } from "./route-navigation.ts";
 import type { AgentsRouteData } from "./route.ts";
 import { createAgentSelectionDrafts } from "./selection-drafts.ts";
-import { clearAgentSkillFilter, createAgentSkillActions, loadAgentSkills } from "./skills.ts";
-import { createAgentToolActions } from "./tool-config.ts";
+import { clearAgentSkillFilter, loadAgentSkills } from "./skills.ts";
 import type { AgentsProps } from "./view.tsx";
 
 type AgentsRequestSources = Partial<Pick<ApplicationContext, "agents" | "agentIdentity">>;
@@ -102,79 +103,68 @@ export function createAgentsPageState(
 ) {
   let routeData = initialRouteData;
   let active = true;
-  let publish = () => {};
   const [skillsFilter, setSkillsFilter] = createSignal("");
-  const applicationConfig = projectOwner(context.config, (config) => config);
   const identities = projectOwner(context.agentIdentity, (identity) => identity.entries());
   const channels = projectOwner(context.channels, (source) => source.state);
   const navigation = projectOwner(context.navigation, (source) => source.snapshot);
   // The domain helpers mutate then read their state synchronously; Solid only observes it.
-  const state = new Proxy<AgentsPageData>(
-    {
-      agentsList: null,
-      agentsSelectedId: null,
-      toolsCatalogLoading: false,
-      toolsCatalogLoadingAgentId: null,
-      toolsCatalogError: null,
-      toolsCatalogResult: null,
-      toolsEffectiveLoading: false,
-      toolsEffectiveLoadingKey: null,
-      toolsEffectiveResultKey: null,
-      toolsEffectiveError: null,
-      toolsEffectiveResult: null,
-      chatModelCatalogStatus: createPanelRefreshStatus(),
-      agentFilesLoading: false,
-      agentFilesError: null,
-      agentFilesList: null,
-      agentFileEditors: {},
-      agentFileConflict: null,
-      agentFileActive: null,
-      agentFileSaving: false,
-      agentIdentityLoading: false,
-      identityDraft: { name: null, emoji: null, avatar: null },
-      identitySaving: false,
-      identityError: null,
-      agentSkillsLoading: false,
-      agentSkillsError: null,
-      agentSkillsReport: null,
-      agentSkillsAgentId: null,
-      cron: createInitialCronState(),
-      agentFileWriteRevisions: new Map(),
-      get agents() {
-        return context.agents;
-      },
-      get sessions() {
-        return context.sessions;
-      },
-      get sessionsResult() {
-        return context.sessions.state.result;
-      },
-      get client() {
-        return gateway.client;
-      },
-      get connected() {
-        return gateway.connected;
-      },
-      get requestGeneration() {
-        return gateway.epoch;
-      },
-      get sessionKey() {
-        return context.gateway.snapshot.sessionKey;
-      },
-      get agentsPanel() {
-        return routeData?.panel ?? DEFAULT_AGENT_PANEL;
-      },
+  const observation = observeState<AgentsPageData>({
+    agentsList: null,
+    agentsSelectedId: null,
+    toolsCatalogLoading: false,
+    toolsCatalogLoadingAgentId: null,
+    toolsCatalogError: null,
+    toolsCatalogResult: null,
+    toolsEffectiveLoading: false,
+    toolsEffectiveLoadingKey: null,
+    toolsEffectiveResultKey: null,
+    toolsEffectiveError: null,
+    toolsEffectiveResult: null,
+    chatModelCatalogStatus: createPanelRefreshStatus(),
+    agentFilesLoading: false,
+    agentFilesError: null,
+    agentFilesList: null,
+    agentFileEditors: {},
+    agentFileConflict: null,
+    agentFileActive: null,
+    agentFileSaving: false,
+    agentIdentityLoading: false,
+    identityDraft: { name: null, emoji: null, avatar: null },
+    identitySaving: false,
+    identityError: null,
+    agentSkillsLoading: false,
+    agentSkillsError: null,
+    agentSkillsReport: null,
+    agentSkillsAgentId: null,
+    cron: createInitialCronState(),
+    agentFileWriteRevisions: new Map(),
+    get agents() {
+      return context.agents;
     },
-    {
-      set(target, key, value) {
-        if (!Object.is(Reflect.get(target, key), value)) {
-          Reflect.set(target, key, value);
-          publish();
-        }
-        return true;
-      },
+    get sessions() {
+      return context.sessions;
     },
-  );
+    get sessionsResult() {
+      return context.sessions.state.result;
+    },
+    get client() {
+      return gateway.client;
+    },
+    get connected() {
+      return gateway.connected;
+    },
+    get requestGeneration() {
+      return gateway.epoch;
+    },
+    get sessionKey() {
+      return context.gateway.snapshot.sessionKey;
+    },
+    get agentsPanel() {
+      return routeData?.panel ?? DEFAULT_AGENT_PANEL;
+    },
+  });
+  const state = observation.state;
+  const publish = observation.invalidate;
   const selectionDrafts = createAgentSelectionDrafts(state, resetSelectionState);
   let identitySaves = selectionDrafts.bindContext(context);
   let identityAutosaveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -190,11 +180,13 @@ export function createAgentsPageState(
     unsubscribe: () => void;
   } | null = null;
   let normalizedLocation = "";
-  const configEditor = {
+  const configActions = createAgentConfigActions({
     getRuntimeConfig: () => context.runtimeConfig,
     canUpdate: (agentId: string) =>
       agentId === state.agentsSelectedId && canCall("config.set", "operator.admin"),
-  };
+    getReport: () => state.agentSkillsReport,
+    onPrimaryChanged: () => void refreshVisibleToolsEffectiveForCurrentSession(state),
+  });
   const githubIdentity = createGitHubIdentity({
     runExternalMutation: (task, options) =>
       context.runtimeConfig.runExternalMutation(task, options),
@@ -222,7 +214,13 @@ export function createAgentsPageState(
         stopCatalog?.();
         catalogClient = state.client;
         stopCatalog = catalogClient
-          ? subscribeModelCatalogCache(catalogClient, () => publish())
+          ? subscribeModelCatalogCache(
+              catalogClient,
+              () => publish(),
+              () => ({
+                agentId: state.agentsSelectedId ?? undefined,
+              }),
+            )
           : undefined;
       }
       syncGitHubIdentity(state.agentsSelectedId);
@@ -501,6 +499,7 @@ export function createAgentsPageState(
     githubIdentity.sync({
       client: state.client,
       connected: state.connected,
+      permissionsReady: snapshot.phase === "connected" && Boolean(snapshot.hello),
       target: agentId
         ? {
             kind: "shared",
@@ -778,14 +777,11 @@ export function createAgentsPageState(
 
   async function refreshAgents(mode: "ensure" | "refresh" | "save" = "refresh") {
     const client = state.client;
-    if (mode === "save" && (!client || !canCall("config.set", "operator.admin"))) {
+    if (!client || (mode === "save" && !canCall("config.set", "operator.admin"))) {
       return;
     }
     const generation = state.requestGeneration;
     const agents = context.agents;
-    if (!client) {
-      return;
-    }
     if (mode === "save" && !(await context.runtimeConfig.save())) {
       return;
     }
@@ -804,16 +800,13 @@ export function createAgentsPageState(
   }
 
   async function selectDefaultAgent(agentId: string) {
-    if (!canCall("config.set", "operator.admin")) {
+    const client = state.client;
+    if (!client || !canCall("config.set", "operator.admin")) {
       return;
     }
-    const client = state.client;
     const generation = state.requestGeneration;
     const agents = context.agents;
     const runtimeConfig = context.runtimeConfig;
-    if (!client) {
-      return;
-    }
     const canDispatch = () =>
       context.runtimeConfig === runtimeConfig &&
       isCurrentRequest(client, generation, undefined, { agents }) &&
@@ -903,6 +896,7 @@ export function createAgentsPageState(
       error: agentsState.agentsError,
       agentsList: state.agentsList,
       selectedAgentId,
+      memoryTarget,
       activePanel: state.agentsPanel,
       config: configState,
       channels: {
@@ -978,7 +972,6 @@ export function createAgentsPageState(
         identities.read().map((entry) => [entry.agentId, entry]),
       ),
       overview: {
-        applicationConfig: applicationConfig.read(),
         identityDraft: state.identityDraft,
         identityScope: state.requestGeneration,
         identitySaving: state.identitySaving,
@@ -1027,10 +1020,7 @@ export function createAgentsPageState(
           return result;
         },
         onIdentitySave: () => scheduleIdentitySave(0),
-        ...createAgentModelActions({
-          ...configEditor,
-          onPrimaryChanged: () => void refreshVisibleToolsEffectiveForCurrentSession(state),
-        }),
+        ...configActions.models,
         // Availability facts (provider keys added/removed, new models) go
         // stale in the per-agent cache; opening the picker re-reads them,
         // mirroring the chat composer's on-open refresh.
@@ -1048,10 +1038,7 @@ export function createAgentsPageState(
             void loadAgentSkills(state, selectedAgentId);
           }
         },
-        ...createAgentSkillActions({
-          ...configEditor,
-          getReport: () => state.agentSkillsReport,
-        }),
+        ...configActions.skills,
         onClear: (agentId) => clearAgentSkills(agentId),
       },
       tools: {
@@ -1066,7 +1053,7 @@ export function createAgentsPageState(
           context.navigate("profile", { hash: "#settings-profile-github-connections" }),
         runtimeSessionKey: state.sessionKey,
         runtimeSessionMatchesSelectedAgent: selectedAgentId === chatAgentId(),
-        ...createAgentToolActions(configEditor),
+        ...configActions.tools,
       },
       pinnedAgentIds: navigation.read().pinnedAgentIds,
       onTogglePinnedAgent: (agentId) => togglePinnedAgent(context.navigation, agentId),
@@ -1086,16 +1073,11 @@ export function createAgentsPageState(
       onSetDefault: (agentId) => void selectDefaultAgent(agentId),
     };
   }
-  const projection = projectSource(context, {
-    read: () => state,
-    subscribe: (_source, notify) => {
-      publish = notify;
-      return () => {
-        publish = () => {};
-      };
-    },
-    equality: "revision",
-  });
+
+  const memoryTarget: AgentMemoryTarget = {
+    read: () => state.agentsSelectedId,
+    subscribe: observation.subscribe,
+  };
   onSettled(() => {
     gateway.connect();
     syncAgentState();
@@ -1148,7 +1130,7 @@ export function createAgentsPageState(
       selectionDrafts.retainCurrentIdentity();
       clearIdentityAutosave();
       active = false;
-      publish = () => {};
+      observation.dispose();
       for (const stop of stops) {
         stop();
       }
@@ -1159,7 +1141,7 @@ export function createAgentsPageState(
   });
   return {
     read(): AgentsProps {
-      projection.read();
+      observation.read();
       return viewProps();
     },
     setRouteData(next?: AgentsRouteData) {
