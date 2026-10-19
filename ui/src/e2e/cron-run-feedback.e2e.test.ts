@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import type { CronJob } from "../api/types.ts";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
+import { defaultControlUiFeatureMethods } from "../test-helpers/control-ui-e2e-defaults.ts";
 import { installMockGateway } from "../test-helpers/control-ui-e2e.ts";
 import { cronListResponseFixture } from "../test-helpers/cron.ts";
 import {
@@ -131,4 +132,46 @@ suite.define(() => {
       });
     },
   );
+
+  it("announces a queued Run now on the agent Automations panel as status", async () => {
+    const artifacts = createControlUiE2eArtifactDir("cron-run-feedback-agent-panel");
+    await suite.withPage(createControlUiE2eContextOptions(), async ({ page }) => {
+      const alpha = { ...job("feedback-alpha", "Alpha synthetic automation"), agentId: "main" };
+      const gateway = await installMockGateway(page, {
+        // The agent panel gates its automation reads and Run now on the advertised methods.
+        featureMethods: [...defaultControlUiFeatureMethods, "cron.list", "cron.run"],
+        methodResponses: {
+          "agents.list": {
+            agents: [{ id: "main", name: "Main agent" }],
+            defaultId: "main",
+            mainKey: "main",
+            scope: "agent",
+          },
+          "cron.list": cronListResponseFixture({
+            jobs: [alpha],
+            snapshotRevision: "agent-run-feedback-fixture",
+            total: 1,
+            offset: 0,
+            limit: 50,
+            hasMore: false,
+            nextOffset: null,
+          }),
+          "cron.status": { enabled: true, jobs: 1, triggersEnabled: true },
+          "cron.run": { ok: true, enqueued: true, runId: "synthetic-run-alpha" },
+        },
+      });
+      try {
+        await page.goto(`${suite.server.baseUrl}settings/agents/main/cron`);
+        const row = page.locator(".settings-row").filter({ hasText: alpha.name });
+        await row.getByRole("button", { name: "Run now" }).click();
+        await gateway.waitForRequest("cron.run");
+        await expect
+          .poll(() => page.getByRole("status").filter({ hasText: "Run queued" }).allTextContents())
+          .toEqual([`${alpha.name}: Run queued. Run ID: synthetic-run-alpha`]);
+        expect(await page.locator("#agent-panel .callout.danger").count()).toBe(0);
+      } finally {
+        await page.screenshot({ path: `${artifacts}/final.png`, fullPage: true });
+      }
+    });
+  });
 });

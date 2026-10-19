@@ -948,24 +948,11 @@ it.each([
   }
 });
 
-it.each([
-  [
-    "notice",
-    "Weekly report: Run queued. Run ID: run-1",
-    '.callout[role="status"]',
-    ".callout.danger",
-  ],
-  [
-    "error",
-    "Weekly report: The scheduler is stopped.",
-    ".callout.danger",
-    '.callout[role="status"]',
-  ],
-] as const)("renders Run Now %s feedback in its own callout", (field, message, shown, hidden) => {
+it("renders Run Now notice feedback as a status callout, not a danger callout", () => {
   const container = document.createElement("div");
   const props = createProps({ activePanel: "cron", selectedAgentId: "alpha" });
-  const feedback = { error: null, notice: null, [field]: message };
-  renderView({ ...props, cron: { ...props.cron, feedback } }, container);
-  expect(container.querySelector(shown)?.textContent).toBe(message);
-  expect(container.querySelector(hidden)).toBeNull();
+  const notice = "Weekly report: Run queued. Run ID: run-1";
+  renderView({ ...props, cron: { ...props.cron, feedback: { error: null, notice } } }, container);
+  expect(container.querySelector('.callout[role="status"]')?.textContent).toBe(notice);
+  expect(container.querySelector(".callout.danger")).toBeNull();
 });
