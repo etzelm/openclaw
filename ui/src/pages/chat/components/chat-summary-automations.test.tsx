@@ -47,11 +47,17 @@ function sequence(...pages: (Page | Promise<Page>)[]) {
   pages.forEach((response) => request.mockResolvedValueOnce(response));
   return request;
 }
-function component(request = sequence(page([job()])), presented = true, offline = false) {
+function component(
+  request = sequence(page([job()])),
+  presented = true,
+  offline = false,
+  scopes = ["operator.read"],
+) {
   const source = createApplicationGateway({
     ...createApplicationGateway().gateway.snapshot,
     client: createTestGatewayClient(request),
     phase: offline ? "offline" : "connected",
+    hello: { type: "hello-ok", protocol: 4, auth: { role: "operator", scopes } },
     assistantAgentId: "ops",
     sessionKey: "agent:ops:task",
   });
@@ -76,8 +82,8 @@ function component(request = sequence(page([job()])), presented = true, offline 
       }),
     empty: () =>
       waitForSolid(() => expect(element.querySelector(".chat-summary__automations")).toBeNull()),
-    cron: (action = "updated") =>
-      source.publishEvent({ type: "event", event: "cron", payload: { action } }),
+    cron: (action = "updated", payload: Record<string, unknown> = {}) =>
+      source.publishEvent({ type: "event", event: "cron", payload: { ...payload, action } }),
     update: (next: Partial<Props>) => {
       setProps((current) => ({ ...current, ...next }));
       flush();
@@ -117,6 +123,72 @@ it.each([false, true])("coalesces hidden refreshes: %s", async (hiddenEvents) =>
   current.publish(current.gateway.snapshot);
   flush();
   expect(current.request).toHaveBeenCalledTimes(hiddenEvents ? 2 : 3);
+});
+
+it.each([false, true])(
+  "drains one trailing inventory after cron events arrive during a read (hidden=%s)",
+  async (hidden) => {
+    const pending = createDeferred<Page>();
+    const current = component(
+      sequence(page([job()]), pending.promise, page([job({ name: "Current automation" })])),
+    );
+    const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+    try {
+      await current.ready();
+      current.cron();
+      current.cron();
+      current.cron();
+      current.cron();
+      expect(current.request).toHaveBeenCalledTimes(2);
+      if (hidden) {
+        visibility.mockReturnValue("hidden");
+        document.dispatchEvent(new Event("visibilitychange"));
+      }
+
+      pending.resolve(page([job({ name: "Older automation" })]));
+      if (hidden) {
+        await current.ready("Older automation");
+        expect(current.request).toHaveBeenCalledTimes(2);
+        visibility.mockReturnValue("visible");
+        document.dispatchEvent(new Event("visibilitychange"));
+      }
+      await current.ready("Current automation");
+      expect(current.request).toHaveBeenCalledTimes(3);
+    } finally {
+      current.unmount();
+      visibility.mockRestore();
+    }
+  },
+);
+
+it("updates a held automation's runtime state without rereading its inventory", async () => {
+  const current = component(sequence(page([job()])).mockResolvedValue(page([job()])));
+  await current.ready();
+  const eventJob = {
+    id: "summary-job",
+    name: "Check the task",
+    agentId: "ops",
+    enabled: true,
+  };
+  current.cron("started", {
+    jobId: "summary-job",
+    job: { ...eventJob, updatedAtMs: 2, state: { runningAtMs: 2 } },
+  });
+  await current.ready("Running");
+  expect(current.request).toHaveBeenCalledTimes(1);
+
+  current.cron("finished", {
+    jobId: "summary-job",
+    job: {
+      ...eventJob,
+      updatedAtMs: 3,
+      state: { lastRunAtMs: 3, lastRunStatus: "ok", nextRunAtMs: 600_003 },
+    },
+  });
+  await current.ready("Every 10m");
+  expect(current.element.textContent).not.toContain("Running");
+  expect(current.request).toHaveBeenCalledTimes(1);
+  current.unmount();
 });
 
 it("admits only presented session-scoped reads and uses the existing automation destination", async () => {
@@ -177,6 +249,13 @@ it("omits confirmed-empty sections and preserves manual collapse until the conte
   await current.ready();
   expect(find("details")).toBe(group);
   expect(group.open).toBe(false);
+  const link = find(".chat-summary__automation");
+  current.update({ presented: false });
+  current.update({ presented: true });
+  await current.ready();
+  expect(find("details")).toBe(group);
+  expect(group.open).toBe(false);
+  expect(find(".chat-summary__automation")).toBe(link);
   current.request.mockResolvedValueOnce(page());
   current.cron("removed");
   await current.empty();
@@ -298,4 +377,49 @@ it("uses the inventory continuation rather than silently dropping additional aut
   expect(element.querySelectorAll(".chat-summary__automation")).toHaveLength(2);
   expect(element.textContent).toContain("Running");
   expect(find(".chat-summary__automation-more")).toBeNull();
+});
+
+it("omits automation reads and retry UI without read authority", async () => {
+  const current = component(undefined, true, false, [
+    "operator.sessions.read",
+    "operator.sessions.write",
+  ]);
+  await current.empty();
+  current.cron();
+  window.dispatchEvent(new Event("focus"));
+  current.update({ presented: false });
+  current.update({ presented: true });
+  expect(current.request).not.toHaveBeenCalled();
+  expect(current.element.textContent).toBe("");
+});
+
+it.each([false, true])("retires automation access and late pages: loaded=%s", async (loaded) => {
+  const pending = createDeferred<Page>();
+  const current = component(sequence(loaded ? page([job()]) : pending.promise));
+  if (loaded) {
+    await current.ready();
+    current.request.mockReturnValueOnce(pending.promise);
+    current.cron();
+  }
+  flush();
+  const authorized = current.gateway.snapshot;
+  current.publish({
+    ...authorized,
+    hello: {
+      type: "hello-ok",
+      protocol: 4,
+      auth: { role: "operator", scopes: ["operator.sessions.read"] },
+    },
+  });
+  await current.empty();
+  pending.resolve(page([job({ name: "Retired automation" })]));
+  await pending.promise;
+  flush();
+  current.cron();
+  expect(current.request).toHaveBeenCalledTimes(loaded ? 2 : 1);
+  expect(current.element.textContent).toBe("");
+  current.request.mockResolvedValueOnce(page([job({ name: "Current automation" })]));
+  current.publish(authorized);
+  await current.ready("Current automation");
+  expect(current.element.textContent).not.toContain("Retired automation");
 });
