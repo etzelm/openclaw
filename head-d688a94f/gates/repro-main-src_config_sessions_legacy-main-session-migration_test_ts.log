@@ -1,0 +1,51 @@
+$ node scripts/test-projects.mts src/config/sessions/legacy-main-session-migration.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$BASE[39m
+
+[vitest-workers] local cache hit after 8561ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 567874f3203f in 8761ms (16756 inputs, 22143 outputs)
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > scales legacy store path inspection linearly with the fleet 222ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > migrates an in-place alias atomically to the owner key 3417ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > reports the not-armed outcome 3ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > reports the migrated-in-place outcome 1386ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > reports the divergent-aliases outcome 1172ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > preserves a canonical owner created while alias deletion is preparing 2705ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > quarantines losing claims without overwriting existing quarantine keys (assigned owner: false) 2349ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > quarantines losing claims without overwriting existing quarantine keys (assigned owner: true) 2044ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > uses an explicit migration owner when the multi-agent roster is unambiguous 739ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > proves an unresolved-owner store clean when it has no legacy rows 9ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > keeps unresolved ownership advisory when a candidate store is unreadable 3ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > keeps detection non-throwing for unreadable stores and treats ENOENT as absence 8ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > doctor-fix reads only legacy-targeted transcripts across stores without materializing them 2267ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > detect reads only legacy-targeted transcripts across stores without materializing them 1247ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > rejects startup when session-store discovery fails 2ms
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > reports legacy session repairs without rewriting stored claims at startup 3644ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] src/config/sessions/legacy-main-session-migration.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > keys the startup shortcut to source layout and makes Doctor rescan 4419ms
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m17 passed[39m[22m[90m (17)[39m
+[2m   Start at [22m 20:16:43
+[2m   Duration [22m 43.35s[2m (tests 60%, transform 36%, import 4%, worker 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 48.43s

@@ -1,0 +1,61 @@
+$ node scripts/test-projects.mts src/config/sessions/session-accessor.sqlite-archive-read.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$BASE[39m
+
+[vitest-workers] local cache hit after 15327ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 1f1cdbbad85e in 15537ms (16756 inputs, 22143 outputs)
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > pages the unique run generation and rejects replaced, deleted, corrupt, or ambiguous continuations 16200ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a pre-archive store without creating its optional archive table 5225ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads committed archive blobs before file publication (compressed=false) 4725ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads committed archive blobs before file publication (compressed=true) 7777ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > retains exact multiline imported events through deletion and final-answer lookup 4409ms
+[vitest] still running with no output for 30000ms.
+ ×  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a short final answer beyond the runtime string limit while the caller stays responsive 30017ms
+[31m   → Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-archive-read.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a short final answer beyond the runtime string limit while the caller stays responsive
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+ ❯ <anonymous> src/config/sessions/session-accessor.sqlite-archive-read.test.ts:<redacted len=6>
+    [90m917|[39m     );
+    [90m918|[39m     let heartbeats = 0;
+    [90m919|[39m     const heartbeat = setInterval(() => {
+    [90m   |[39m                              [31m^[39m
+    [90m920|[39m       heartbeats += 1;
+    [90m921|[39m     }, 10);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 21:10:37
+[2m   Duration [22m 118.11s[2m (tests 67%, transform 30%, import 2%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] failed 1 Vitest shard in 126.37s
+[test] FAILED (exit 1)
+[ELIFECYCLE] Test failed. See above for more details.

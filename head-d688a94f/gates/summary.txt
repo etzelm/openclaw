@@ -1,0 +1,440 @@
+# Round-2 gate summary (EXIT codes). Head 148b78f9f4add3020ce9b983c9afc1a190cd40b2, tree 289f4e9808179195bc779b5293f7ff9773aa0d47, merge base 53bcf5095e74fd2e8323b16a507e4ca3d4a2c6b2.
+# The two 'targeted:' EXIT values are masked by a command substitution (always 0); their result is the runner's '[test] passed N Vitest shards' line in each log.
+
+## pre-checks before the tree was frozen, at f0a28e5a5b7 (gates/pre/)
+oxfmt=0
+oxlint=0
+tsgo:core=0
+tsgo:core:test=0
+tsgo:extensions=0
+tsgo:extensions:test=0
+done
+
+## gates.sh (gates/final/summary.txt)
+HEAD 148b78f9f4add3020ce9b983c9afc1a190cd40b2 TREE 289f4e9808179195bc779b5293f7ff9773aa0d47 dirty=0
+targeted: every changed test file vs merged main (9 files: extensions/anthropic/cli-runtime.test.ts src/agents/cli-credentials.test.ts src/agents/cli-runner/cli-live-session-registry.test.ts src/agents/cli-runner/execute-plugin.test.ts src/agents/cli-runner/execute.native-history-owner.test.ts src/agents/cli-runner/history-boundary.native-login.test.ts src/agents/cli-runner/history-boundary.test.ts src/agents/cli-runner/prepare-native-history.test.ts src/plugin-sdk/provider-auth-claude-compat.test.ts ) EXIT 0
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ Test Files  5 passed (5)
+      Tests  104 passed (104)
+ Test Files  1 passed (1)
+      Tests  53 passed (53)
+[test] passed 5 Vitest shards in 41.43s
+targeted: r15 set, files still present (16 files) EXIT 0
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+ Test Files  4 passed (4)
+      Tests  146 passed (146)
+ Test Files  2 passed (2)
+      Tests  49 passed (49)
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ Test Files  5 passed (5)
+      Tests  104 passed (104)
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+[test] passed 7 Vitest shards in 117.52s
+shipped readClaudeCliCredentials consumers EXIT 0
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+leak check (temporary afterEach assertion in src/agents/cli-runner/prepare-native-history.test.ts) EXIT 0
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+restored: HEAD 148b78f9f4add3020ce9b983c9afc1a190cd40b2 TREE 289f4e9808179195bc779b5293f7ff9773aa0d47 dirty=0
+pair prepare-native-history + admission, 1 worker, run 1 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+pair prepare-native-history + admission, 1 worker, run 2 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+pair prepare-native-history + admission, 1 worker, run 3 EXIT 0
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+redgreen RED1-RED5,RED7-RED12 EXIT 0 HEAD 148b78f9f4add3020ce9b983c9afc1a190cd40b2 TREE 289f4e9808179195bc779b5293f7ff9773aa0d47 dirty=0
+## RED1 host sends SessionManager writer facts without the owner-check request
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+      Tests  26 passed (26)
+## RED2 metadata host never answers the owner probe
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+      Tests  26 passed (26)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED4 the UserPromptSubmit response goes out on the stream check alone
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent
+      Tests  1 failed | 52 passed (53)
+      Tests  53 passed (53)
+## RED5 the native login is attested without the operator's opt-in
+ FAIL   agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED7 the credential-root split guard is removed
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED8 CLAUDE_CODE_OAUTH_TOKEN drops out of the non-native auth env list
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED9 the profile request is sent without its timeout signal
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded
+      Tests  1 failed | 28 passed (29)
+      Tests  29 passed (29)
+## RED10 saved-history strictness keyed on a resumed session id
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a fresh recovery turn whose environment selects another login
+      Tests  1 failed | 3 passed (4)
+      Tests  4 passed (4)
+## RED11 a native login lookup that throws escapes instead of meaning no owner
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check
+      Tests  1 failed | 25 passed (26)
+      Tests  26 passed (26)
+## RED12 the throw is caught only at the coverage check (the first round-2 placement), not at the boundary checks
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check
+      Tests  26 passed (26)
+## GREEN (all five owning files, unmutated)
+      Tests  29 passed (29)
+      Tests  34 passed (34)
+      Tests  53 passed (53)
+pnpm tsgo:core EXIT 0
+pnpm tsgo:core:test EXIT 0
+pnpm tsgo:extensions EXIT 0
+pnpm tsgo:extensions:test EXIT 0
+pnpm build EXIT 0
+[build-all] phase timings: total 8m 17s; slowest write-unified-entry-dts 4m 30.4s; tsdown 1m 10.8s; ui:build 40.1s; check-cli-bootstrap-imports 26s; runtime-postbuild 25.3s; plugins:assets:build 16.7s; plugins:assets:copy 14.2s; write-cli-startup-metadata (reused) 13.3s; external-plugins:local-dist 7.07s; tsdown-ai (reused) 4.88s; tsdown-packages (reused) 4.76s; check-plugin-sdk-exports 3.60s; build-stamp 399ms; write-build-info 318ms; runtime-postbuild-stamp 280ms; native-protocol 123ms
+harness run-after EXIT 0
+harness run-upgrade EXIT 0
+harness outcomes raw diff vs r15 EXIT 1 (16 lines)
+harness outcomes raw diff vs previous merged head 79a4c3bb3bc EXIT 1 (8 lines)
+check:changed --base 53bcf5095e74fd2e8323b16a507e4ca3d4a2c6b2 EXIT 1
+  15.86s  failed:1   max-lines suppression ratchet
+   2.48s  failed:1   core tsgo graph boundary
+ 266.10s  failed:1   dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+check:changed ok steps: 41
+check-env-var-count EXIT 1
+git diff --check 53bcf5095e74fd2e8323b16a507e4ca3d4a2c6b2 HEAD EXIT 0
+oxfmt --check (changed files) EXIT 0
+lane src/agents/cli-runner/ EXIT 0
+[test] starting test/vitest/vitest.unit-fast.config.ts
+ Test Files  12 passed (12)
+      Tests  47 passed (47)
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+ Test Files  3 passed (3)
+      Tests  12 passed (12)
+[test] starting test/vitest/vitest.infra.config.ts
+ Test Files  7 passed (7)
+      Tests  230 passed (230)
+[test] starting test/vitest/vitest.agents-support.config.ts
+ Test Files  37 passed (37)
+      Tests  459 passed (459)
+[test] starting test/vitest/vitest.agents-core-isolated.config.ts
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+[test] passed 5 Vitest shards in 396.78s
+lane extensions/anthropic/ EXIT 0
+[test] starting test/vitest/vitest.extension-providers.config.ts
+ Test Files  35 passed (35)
+      Tests  414 passed | 1 skipped (415)
+[test] passed 1 Vitest shard in 70.18s
+lane src/plugin-sdk/provider-auth-claude-compat.test.ts EXIT 0
+[test] starting test/vitest/vitest.plugin-sdk.config.ts
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+[test] passed 1 Vitest shard in 4.47s
+lane src/agents/sessions/ EXIT 0
+[test] starting test/vitest/vitest.unit-fast.config.ts
+ Test Files  15 passed | 1 skipped (16)
+      Tests  89 passed | 1 skipped (90)
+[test] starting test/vitest/vitest.unit-fast-isolated.config.ts
+ Test Files  7 passed (7)
+      Tests  62 passed (62)
+[test] starting test/vitest/vitest.infra.config.ts
+ Test Files  28 passed (28)
+      Tests  374 passed (374)
+[test] starting test/vitest/vitest.agents-support.config.ts
+ Test Files  55 passed | 1 skipped (56)
+      Tests  702 passed | 4 skipped (706)
+[test] passed 4 Vitest shards in 660.25s
+lane src/config/sessions/ EXIT 1
+[test] starting test/vitest/vitest.infra.config.ts
+ Test Files  18 passed (18)
+      Tests  221 passed (221)
+[test] starting test/vitest/vitest.runtime-config.config.ts
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts [ src/config/sessions/session-transcript-reconcile.lifecycle.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-accessor.parent-fork.test.ts [ src/config/sessions/session-accessor.parent-fork.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-accessor.recovery.test.ts [ src/config/sessions/session-accessor.recovery.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-archive.byte-limit.test.ts [ src/config/sessions/session-accessor.sqlite-archive.byte-limit.test.ts ]
+ FAIL   runtime-config  src/config/sessions/transcript.test.ts [ src/config/sessions/transcript.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-history-events.legacy.test.ts [ src/config/sessions/session-accessor.sqlite-history-events.legacy.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-accessor.focused-reads.test.ts [ src/config/sessions/session-accessor.focused-reads.test.ts ]
+ FAIL   runtime-config  src/config/sessions/lifecycle.test.ts [ src/config/sessions/lifecycle.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-reaction-store.test.ts [ src/config/sessions/session-reaction-store.test.ts ]
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > queues dirty agents behind one reusable fleet worker and releases each database lease
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > resolves one session before unrelated projection repair completes
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > awaits pending-pass backoff while coalescing writes and keeping ready sessions available
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps canonical publication distinct from parent cache eviction (explicit close: false)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps canonical publication distinct from parent cache eviction (explicit close: true)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after clean preflight/worker startup
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after worker-create preflight/worker startup
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after preflight-transaction preflight/worker startup
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after preflight-commit preflight/worker startup
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps the operation pending until lease release after done
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps the operation pending until lease release after failed
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-cleanup-reclamation.test.ts > SQLite lifecycle cleanup reclamation > rejects a stale entry plan before mutation after an awaited replace
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-cleanup-reclamation.test.ts > SQLite lifecycle cleanup reclamation > rejects a stale entry plan before mutation after an awaited delete
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-cleanup-reclamation.test.ts > SQLite lifecycle cleanup reclamation > keeps published history when the entry changes during final materialization
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-cleanup-reclamation.test.ts > SQLite lifecycle cleanup reclamation > reclaims cold orphan-only history and republishes pending archives on a cold empty pass
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-cleanup-reclamation.test.ts > SQLite lifecycle cleanup reclamation > reclaims cold orphan-only history and republishes pending archives on a cold empty pass
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-cleanup-reclamation.test.ts > SQLite lifecycle cleanup reclamation > keeps the event loop responsive while committing a large transcript
+ FAIL   runtime-config  src/config/sessions/incognito-session-transcript.test.ts > preserves durable physical ownership (default store)
+ FAIL   runtime-config  src/config/sessions/incognito-session-transcript.test.ts > preserves durable physical ownership (custom store)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > scales legacy store path inspection linearly with the fleet
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > migrates an in-place alias atomically to the owner key
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > reports the not-armed outcome
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > reports the migrated-in-place outcome
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > reports the divergent-aliases outcome
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > preserves a canonical owner created while alias deletion is preparing
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > quarantines losing claims without overwriting existing quarantine keys (assigned owner: false)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > quarantines losing claims without overwriting existing quarantine keys (assigned owner: true)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > uses an explicit migration owner when the multi-agent roster is unambiguous
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > proves an unresolved-owner store clean when it has no legacy rows
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > keeps unresolved ownership advisory when a candidate store is unreadable
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > legacy main session migration > keeps detection non-throwing for unreadable stores and treats ENOENT as absence
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > doctor-fix reads only legacy-targeted transcripts across stores without materializing them
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > detect reads only legacy-targeted transcripts across stores without materializing them
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > rejects startup when session-store discovery fails
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > reports legacy session repairs without rewriting stored claims at startup
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > keys the startup shortcut to source layout and makes Doctor rescan
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.test.ts > keys the startup shortcut to source layout and makes Doctor rescan
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves a competing creation committed while the initial entry is prepared
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves adopted history without selecting a new projection
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > prepares and adopts a complete target without decoding sibling entries
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves normalized and opaque target identities after reopening
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves native warm listing but refuses corrupt worker input for a mismatched-time target
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves native warm listing but refuses corrupt worker input for a mismatched-time target
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves native warm listing but refuses corrupt worker input for a nul target
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > preserves native warm listing but refuses corrupt worker input for a nul target
+ FAIL   runtime-config  src/config/sessions/session-accessor.creation-snapshot.test.ts > session creation snapshot > keeps the target and sibling labels on one snapshot across an external commit and callback await
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps concurrent first writes in one custom store (sessions.json)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps concurrent first writes in one custom store (custom.json)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps entry commit integrity checks off the caller thread
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > admits worker updater invocation through its owner
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > admits legacy callback updater invocation through its owner
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > admits incognito updater invocation through its owner
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > returns an accepted unchanged patch receipt without publishing a new source
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > captures the queued state owner before admission (ambient=true)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps the physical database owner for logical rows in a shared store
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > retains FIFO, caller context and publication across cold admission
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rejects dispose before updater admission and recovers the lane
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rejects physical replacement before updater admission and recovers the lane
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rechecks cancel authority after cold commit admission
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rechecks revoke authority after cold commit admission
+ FAIL   runtime-config  src/config/sessions/session-cold-storage.admission.test.ts > cold transcript storage write admission > queues a borrowed foreground write while a cold Worker owns admission
+ FAIL   runtime-config  src/config/sessions/session-accessor.reset-boundary-race.test.ts > reset boundary concurrency > does not commit a reset after its caller closes during entry preparation
+ FAIL   runtime-config  src/config/sessions/session-accessor.reset-boundary-race.test.ts > reset boundary concurrency > parents the single reset boundary without hydrating caller message bodies
+ FAIL   runtime-config  src/config/sessions/session-accessor.reset-boundary-race.test.ts > reset boundary concurrency > parents the bulk lifecycle reset boundary without hydrating caller message bodies
+ FAIL   runtime-config  src/config/sessions/session-accessor.reset-boundary-race.test.ts > reset boundary concurrency > parents the bulk lifecycle reset boundary without hydrating caller message bodies
+ FAIL   runtime-config  src/config/sessions/session-accessor.reset-boundary-race.test.ts > reset boundary concurrency > preserves navigation nulls and raw parser semantics in reset reads
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > keeps native page cleanup outside archive admission
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > retires a queued archive removal without waiting for unrelated archive work
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > skips writer admission when the archive budget target is already satisfied
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > lets foreground writes settle while archive pruning scans physical usage
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > enforces a physical archive budget without ordinary host SQLite calls
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > rejects another agent's archive without changing its canonical row or file
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > native page reclamation defers without waiting for a pinned reader
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > native page reclamation defers without waiting for a pinned writer
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > bounds broker page reclamation and stops when its owner is revoked between units
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at read-result (revoked)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at before-read (unpublished)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (revoked)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (unpublished)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (republished)
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves an unpublished canonical archive whose owner appears after legacy inventory
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > excludes peer publication until atomic legacy removal settles
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > refuses cleanup rebound to an identical destination database
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > hands off foreign partition
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > hands off new destination
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves anchored history and recorded idempotency ownership across stores
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (before-copy)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (during-delete)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (destination-change)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (destination-disposal)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (destination-watermark-delete)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (destination-watermark-replace)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves source claims when transfer authority changes (destination-watermark-missing)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves every retained generation through a existing-current cross-store handoff
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves every retained generation through a cold cross-store handoff
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves every retained generation through a utf16 cross-store handoff
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves accepted and consumed inputs through cross-store migration
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves accepted and consumed inputs through in-place migration
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves operator Stop in-place completion semantics
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves final destination completion semantics
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves final source over retryable destination completion semantics
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves newer retryable source completion semantics
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > retains source evidence when a pending input changes during deletion preparation
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > retains source evidence when a completion changes during deletion preparation
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves source context only when the committed cut is a fork (rewind)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves source context only when the committed cut is a fork (switch)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves source context only when the committed cut is a fork (fork)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context when the worker cut commit is refused
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context after rewind rejects missing
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context after rewind rejects assistant-1
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context after rewind rejects off-path-user
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context after switch rejects missing
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context after switch rejects user-1
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-message-cut-native.test.ts > message cuts and native context ownership > preserves native context after switch rejects assistant-2
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.native-exit.test.ts > joins queued plan-start on native exit (scheduled=false)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.native-exit.test.ts > joins queued active-chunk on native exit (scheduled=false)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.native-exit.test.ts > joins queued fts-chunk on native exit (scheduled=false)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.native-exit.test.ts > joins queued plan-finish on native exit (scheduled=false)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.native-exit.test.ts > joins queued done on native exit (scheduled=false)
+ FAIL   runtime-config  src/config/sessions/session-transcript-reconcile.native-exit.test.ts > joins queued active-chunk on native exit (scheduled=true)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > bounds cap work and finishes eligible capacity maintenance (automatic)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > bounds cap work and finishes eligible capacity maintenance (inline)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > bounds cap work and finishes eligible capacity maintenance (protected)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > releases the cap writer between batches and honors new protection (victim)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > releases the cap writer between batches and honors new protection (remaining)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > keeps the first cap receipt and stops later batches when maintenance authority retires
+ FAIL   runtime-config  src/config/sessions/session-pending-input-operations.test.ts > preserves custody errors for worker-side request-hash mismatches
+ FAIL   runtime-config  src/config/sessions/incognito-session-transcript.test.ts > preserves durable physical ownership (exact store)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps target preparation integrity checks off the caller thread
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > pins the selected root for relative native reopen patch work
+ FAIL   runtime-config  src/config/sessions/session-accessor.reset-boundary-race.test.ts > reset boundary concurrency > parents the single reset boundary without hydrating caller message bodies
+ FAIL   runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (complete)
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.handoff.test.ts > preserves the verified cold archive during an in-place key migration
+ FAIL   runtime-config  src/config/sessions/legacy-main-session-migration.input-handoff.test.ts > legacy main session input handoff > preserves newer retryable destination completion semantics
+ FAIL   runtime-config  src/config/sessions/session-transcript-search.worker.test.ts > reuses completed readiness after idle writer eviction and observes a later transcript write
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a short final answer beyond the runtime string limit while the caller stays responsive
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > retains FIFO, caller context and publication across cold admission
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rejects dispose before updater admission and recovers the lane
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rejects physical replacement before updater admission and recovers the lane
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rechecks cancel authority after cold commit admission
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rechecks revoke authority after cold commit admission
+ FAIL   runtime-config  src/config/sessions/session-compound-worker.test.ts > preserves reset conflict identity and does not overwrite a concurrent entry (boundary=false)
+ FAIL   runtime-config  src/config/sessions/session-compound-worker.test.ts > preserves reset conflict identity and does not overwrite a concurrent entry (boundary=true)
+ FAIL   runtime-config  src/config/sessions/session-compound-worker.test.ts > rolls collaboration cleanup back with a refused reset and clears only the committed target
+ FAIL   runtime-config  src/config/sessions/session-compound-worker.test.ts > preserves worker custody refusal identity so callers cannot fall back to another dispatch
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > releases the cap writer between batches and honors new protection (victim)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > releases the cap writer between batches and honors new protection (remaining)
+ FAIL   runtime-config  src/config/sessions/session-accessor.sqlite-maintenance-cap.test.ts > keeps the first cap receipt and stops later batches when maintenance authority retires
+ Test Files  26 failed | 336 passed | 2 skipped (364)
+      Tests  134 failed | 3159 passed | 10 skipped (3303)
+[test] failed 2 Vitest shards in 2698.30s
+end: HEAD 148b78f9f4add3020ce9b983c9afc1a190cd40b2 TREE 289f4e9808179195bc779b5293f7ff9773aa0d47 dirty=0
+ALL DONE
+
+## post.sh: probe-note row rerun, upgrade from 2026.10.5 (gates/final/summary-post.txt)
+HEAD 148b78f9f4add3020ce9b983c9afc1a190cd40b2 TREE 289f4e9808179195bc779b5293f7ff9773aa0d47 dirty=0
+probe-note plugin restored from evidence commit 1e6c130ad78e head-5fd72055/harness/plugins/probe-note: index.mjs openclaw.plugin.json 
+note-resumed-allowed rerun EXIT 0
+row: note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx1310:0,0,0 52:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+r15 row: note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx1310:0,0,0 52:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+prev-merge row: note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx1310:0,0,0 52:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+harness run-upgrade-1005 EXIT 0
+upgrade 2026.10.5 row: upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+upgrade 2026.10.4 row: upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+end HEAD 148b78f9f4add3020ce9b983c9afc1a190cd40b2 dirty=0
+POST DONE
+
+## harness compare, turn-2 client exit code of interrupted rows masked (gates/final/harness-compare.txt)
+vs r15 (13078e36c7e): identical after masking (      38 lines)
+vs previous merged head 79a4c3bb3bc: identical after masking
+
+## base.sh on pristine main (gates/final/base-summary.txt)
+main install EXIT 0
+base HEAD 53bcf5095e74fd2e8323b16a507e4ca3d4a2c6b2 dirty=0
+max-lines ratchet on main, --base main itself (empty diff) EXIT 1
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+core tsgo graph boundary on main EXIT 1
+  test/tsconfig/tsconfig.core.test.json: plugins-platform: 723 test roots exceeds the advisory 720 limit; rebalance when convenient
+dead export scan on main EXIT 1
+env-var count on main EXIT 1
+OPENCLAW_* count 459 exceeds budget 452; update config/env-var-count-budget.txt
+dead exports main      101 pr      101 identical=yes
+base dirty after checks=0
+copied from 148b78f9f4add3020ce9b983c9afc1a190cd40b2: extensions/anthropic/cli-runtime.test.ts src/agents/cli-credentials.test.ts src/agents/cli-runner/cli-live-session-registry.test.ts src/agents/cli-runner/execute-plugin.test.ts src/agents/cli-runner/execute.native-history-owner.test.ts src/agents/cli-runner/history-boundary.native-login.test.ts src/agents/cli-runner/history-boundary.test-support.ts src/agents/cli-runner/history-boundary.test.ts src/agents/cli-runner/prepare-native-history.test.ts src/plugin-sdk/provider-auth-claude-compat.test.ts
+== RED on main: extensions/anthropic/cli-runtime.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  2 failed | 51 passed (53)
+== RED on main: src/agents/cli-credentials.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+== RED on main: src/agents/cli-runner/cli-live-session-registry.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+== RED on main: src/agents/cli-runner/execute-plugin.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  1 failed | 30 passed (31)
+== RED on main: src/agents/cli-runner/execute.native-history-owner.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+== RED on main: src/agents/cli-runner/history-boundary.native-login.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  25 failed | 1 passed (26)
+== RED on main: src/agents/cli-runner/history-boundary.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+== RED on main: src/agents/cli-runner/prepare-native-history.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+== RED on main: src/plugin-sdk/provider-auth-claude-compat.test.ts EXIT 1
+ Test Files  1 failed (1)
+      Tests  29 failed (29)
+base restored: 0 changes
+BASE DONE
+
+## repro.sh: src/config/sessions/ lane failure, alone on both trees, full-lane reruns (gates/final/repro-summary.txt)
+start Sun Oct 18 20:11:22 PDT 2026 load 18.85 19.70 23.92
+== tree 148b78f9f4add3020ce9b983c9afc1a190cd40b2 dirty=0
+alone src/config/sessions/session-transcript-reconcile.lifecycle.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+alone src/config/sessions/legacy-main-session-migration.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+alone src/config/sessions/session-accessor.sqlite-entry-admission.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+== main 53bcf5095e74fd2e8323b16a507e4ca3d4a2c6b2 dirty=0
+alone src/config/sessions/session-transcript-reconcile.lifecycle.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+alone src/config/sessions/legacy-main-session-migration.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+alone src/config/sessions/session-accessor.sqlite-entry-admission.test.ts EXIT 0
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+== full lane rerun on tree, load 15.76 17.39 21.05
+lane src/config/sessions/ rerun EXIT 1 load 34.04 38.15 37.27
+ Test Files  18 passed (18)
+      Tests  221 passed (221)
+ Test Files  2 failed | 360 passed | 2 skipped (364)
+      Tests  3 failed | 3290 passed | 10 skipped (3303)
+[test] failed 2 Vitest shards in 2995.90s
+   1 src/config/sessions/session-accessor.sqlite-archive-read.test.ts
+   2 src/config/sessions/session-transcript-reconcile.lifecycle.test.ts
+== full lane on main, load 34.04 38.15 37.27
+lane src/config/sessions/ on main EXIT 2
+[test] failed 0 Vitest shards in 17.70s
+REPRO DONE Sun Oct 18 21:08:33 PDT 2026
+
+## session-accessor.sqlite-archive-read.test.ts alone on both trees (gates/final/repro-archive-read.txt)
+alone tree 148b78f9f4a src/config/sessions/session-accessor.sqlite-archive-read.test.ts (EXIT not captured: $? was masked by a command substitution; the vitest lines below are the result) load 21.79 31.37 34.64
+ ×  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a short final answer beyond the runtime string limit while the caller stays responsive 30023ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+alone main 53bcf5095e7 src/config/sessions/session-accessor.sqlite-archive-read.test.ts (EXIT not captured: $? was masked by a command substitution; the vitest lines below are the result) load 26.38 29.21 33.26
+ ×  runtime-config  src/config/sessions/session-accessor.sqlite-archive-read.test.ts > SQLite transcript archive reads > reads a short final answer beyond the runtime string limit while the caller stays responsive 30017ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)

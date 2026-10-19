@@ -1,0 +1,44 @@
+$ node scripts/test-projects.mts src/config/sessions/session-transcript-reconcile.lifecycle.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$TREE[39m
+
+[vitest-workers] local cache hit after 11716ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 3d41f0fcdb02 in 11837ms (16757 inputs, 22146 outputs)
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > queues dirty agents behind one reusable fleet worker and releases each database lease 10605ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > drains later fixture owners without waiting for an unrelated state directory 22ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > resolves one session before unrelated projection repair completes 4239ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > awaits pending-pass backoff while coalescing writes and keeping ready sessions available 8202ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps canonical publication distinct from parent cache eviction (explicit close: false) 2703ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps canonical publication distinct from parent cache eviction (explicit close: true) 2468ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after clean preflight/worker startup 2114ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after worker-create preflight/worker startup 3313ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after preflight-transaction preflight/worker startup 2678ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > releases its handle for idle retirement after preflight-commit preflight/worker startup 2898ms
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps the operation pending until lease release after done 3802ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-transcript-reconcile.lifecycle.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  runtime-config  src/config/sessions/session-transcript-reconcile.lifecycle.test.ts > session transcript reconcile worker lifecycle > keeps the operation pending until lease release after failed 3855ms
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 20:11:27
+[2m   Duration [22m 68.11s[2m (tests 69%, transform 27%, import 2%, worker 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 73.98s

@@ -1,0 +1,50 @@
+$ node scripts/test-projects.mts src/config/sessions/session-accessor.sqlite-entry-admission.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$BASE[39m
+
+[vitest-workers] local cache hit after 8575ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 4b190ef65434 in 8729ms (16756 inputs, 22143 outputs)
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps concurrent first writes in one custom store (sessions.json) 1788ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps concurrent first writes in one custom store (custom.json) 1701ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps target preparation integrity checks off the caller thread 1643ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps entry commit integrity checks off the caller thread 1045ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > admits worker updater invocation through its owner 1189ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > admits legacy callback updater invocation through its owner 1331ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > admits incognito updater invocation through its owner 10ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > returns an accepted unchanged patch receipt without publishing a new source 1073ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > captures the queued state owner before admission (ambient=true) 1039ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > keeps the physical database owner for logical rows in a shared store 1362ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > retains FIFO, caller context and publication across cold admission 1130ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rejects dispose before updater admission and recovers the lane 2194ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rejects physical replacement before updater admission and recovers the lane 2583ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rechecks cancel authority after cold commit admission 1175ms
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > rechecks revoke authority after cold commit admission 1104ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] src/config/sessions/session-accessor.sqlite-entry-admission.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+ ✓  runtime-config  src/config/sessions/session-accessor.sqlite-entry-admission.test.ts > pins the selected root for relative native reopen patch work 1112ms
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m16 passed[39m[22m[90m (16)[39m
+[2m   Start at [22m 20:17:33
+[2m   Duration [22m 39.19s[2m (tests 55%, transform 40%, import 4%, worker 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 44.05s
