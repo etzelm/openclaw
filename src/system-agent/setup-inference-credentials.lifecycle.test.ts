@@ -46,6 +46,7 @@ import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import type { ProviderAuthChoiceMetadata } from "../plugins/provider-auth-choices.js";
 import * as providerChoices from "../plugins/provider-auth-choices.js";
+import * as providerRuntime from "../plugins/providers.runtime.js";
 import type { ProviderPlugin } from "../plugins/types.js";
 import { createNonExitingRuntime } from "../runtime.js";
 import { createDeferredCore } from "../shared/deferred.js";
@@ -206,7 +207,6 @@ describe("setup inference credential provider lifetime", () => {
             agentDir: state.agentDir(),
             effects: { credentialsSaved: false },
             beforePersistentEffect: async () => {},
-            deps: {},
             params: {
               kind: "provider-auth",
               authChoice: id,
@@ -466,8 +466,8 @@ it.each([
         },
       ],
     };
-    setup.deps.resolveManifestProviderAuthChoice = () => choice;
-    setup.deps.resolvePluginProviders = () => [provider];
+    setup.resolveManifestProviderAuthChoice.mockReturnValue(choice);
+    vi.spyOn(providerRuntime, "resolvePluginProvidersCore").mockReturnValue([provider]);
     mockPluginRegistry(["meta", "muse", "codex", "openai"].map((id) => pluginRecord(id)));
     const phases: string[] = [];
     const verifySetup = vi.fn(async () => {
@@ -525,7 +525,6 @@ it.each([
           runtime: createNonExitingRuntime(),
           prompter: setup.prompter,
           onActivationStarted: () => phases.push("activate"),
-          deps: setup.deps,
           assertCurrent: () => {
             if (!authorized) {
               throw new Error("setup authority revoked");
@@ -565,7 +564,6 @@ it.each([
           activate({
             ...params,
             nativeSessionCatalogsEnabled: false,
-            deps: setup.deps,
           }),
         ),
       );
