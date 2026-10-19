@@ -1,5 +1,6 @@
 import { createMemo, For } from "solid-js";
 import { Icon } from "../../components/solid/icon.tsx";
+import { isComposingKeyboardEvent, recordCompositionEnd } from "../../lib/ime.ts";
 import { pathDisplayName } from "../../lib/path-display.ts";
 import { t } from "../../lib/reactive/i18n.ts";
 import { nativeListener } from "../../lib/solid-native-listener.ts";
@@ -165,9 +166,11 @@ export function ProjectChip(props: { params: ProjectChipOptions; focus?: Project
                   event.target instanceof HTMLInputElement ? event.target.value : "",
                 )
               }
+              onCompositionEnd={recordCompositionEnd}
               ref={nativeListener("keydown", (event: KeyboardEvent) => {
                 if (
                   event.key === "Enter" &&
+                  !isComposingKeyboardEvent(event) &&
                   view().cloneInput &&
                   props.params.projectAddAvailable
                 ) {
