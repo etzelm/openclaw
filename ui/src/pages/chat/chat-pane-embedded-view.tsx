@@ -123,6 +123,7 @@ function DesktopPanel(props: Props) {
       prop:presented={presented()}
       prop:refreshOnPresentation={props.desktopRefreshOnPresentation}
       prop:requestedSource={props.desktopSource}
+      prop:runtimeConfig={props.desktopRuntimeConfig}
       prop:sessionKey={props.state.sessionKey}
       prop:onFocusTargetChange={props.onDesktopFocusTargetChange}
     />

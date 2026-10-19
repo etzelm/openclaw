@@ -98,6 +98,7 @@ export function sidebarPanelFixtureParams(
     desktopRefreshOnPresentation: false,
     desktopAvailable: false,
     desktopSource: null,
+    desktopRuntimeConfig: null,
     desktopFocusHref: "",
     onDesktopFocusTargetChange: vi.fn(),
     dashboard: null,
