@@ -30,6 +30,22 @@ function job(id: string, name: string): CronJob {
   };
 }
 
+function cronResponses(jobs: CronJob[]) {
+  return {
+    "cron.list": cronListResponseFixture({
+      jobs,
+      snapshotRevision: `run-feedback-${jobs.length}`,
+      total: jobs.length,
+      offset: 0,
+      limit: 50,
+      hasMore: false,
+      nextOffset: null,
+    }),
+    "cron.runs": { entries: [], total: 0, offset: 0, limit: 50, hasMore: false },
+    "cron.status": { enabled: true, jobs: jobs.length, triggersEnabled: true },
+  };
+}
+
 const outcomes = [
   {
     reason: "already-running",
@@ -63,19 +79,7 @@ suite.define(() => {
         const pageErrors: string[] = [];
         page.on("pageerror", (error) => pageErrors.push(String(error)));
         const gateway = await installMockGateway(page, {
-          methodResponses: {
-            "cron.list": cronListResponseFixture({
-              jobs: [alpha, beta],
-              snapshotRevision: "run-feedback-fixture",
-              total: 2,
-              offset: 0,
-              limit: 50,
-              hasMore: false,
-              nextOffset: null,
-            }),
-            "cron.runs": { entries: [], total: 0, offset: 0, limit: 50, hasMore: false },
-            "cron.status": { enabled: true, jobs: 2, triggersEnabled: true },
-          },
+          methodResponses: cronResponses([alpha, beta]),
         });
         try {
           await page.goto(`${suite.server.baseUrl}cron`);
@@ -132,6 +136,113 @@ suite.define(() => {
       });
     },
   );
+
+  it.each(outcomes)(
+    "keeps $reason feedback from an overview row on the overview",
+    async ({ reason, mode, message, role }) => {
+      const artifacts = createControlUiE2eArtifactDir(`cron-run-feedback-overview-${reason}`);
+      await suite.withPage(createControlUiE2eContextOptions(), async ({ page }) => {
+        const alpha = job("feedback-alpha", "Alpha synthetic automation");
+        const gateway = await installMockGateway(page, {
+          methodResponses: cronResponses([
+            alpha,
+            job("feedback-beta", "Beta synthetic automation"),
+          ]),
+        });
+        try {
+          await page.goto(`${suite.server.baseUrl}cron`);
+          const alphaRow = page.locator(`[data-test-id="cron-row-${alpha.id}"]`);
+          await alphaRow.waitFor({ state: "visible" });
+          await gateway.deferNext("cron.run", { id: alpha.id, mode });
+          if (mode === "due") {
+            await alphaRow.locator(".cron-job-menu__trigger").click();
+            await alphaRow.locator('[data-value="run-if-due"]').click();
+          } else {
+            await page.locator(`[data-test-id="cron-row-run-${alpha.id}"]`).click();
+          }
+          await gateway.waitForRequest("cron.run");
+          if (reason === "error") {
+            await gateway.rejectDeferred("cron.run", { code: "UNAVAILABLE", message });
+          } else if (reason === "queued") {
+            await gateway.resolveDeferred("cron.run", {
+              ok: true,
+              enqueued: true,
+              runId: "synthetic-run-alpha",
+            });
+          } else {
+            await gateway.resolveDeferred("cron.run", { ok: true, ran: false, reason });
+          }
+          await expect
+            .poll(() => page.getByRole(role).filter({ hasText: message }).allTextContents())
+            .toEqual([`${alpha.name}: ${message}`]);
+          expect(await page.locator('[data-panel-mode="overview"]').count()).toBe(1);
+          expect(await page.locator(".cron-error-banner").count()).toBe(role === "alert" ? 1 : 0);
+        } finally {
+          await page.screenshot({ path: `${artifacts}/final.png` });
+        }
+      });
+    },
+  );
+
+  it("keeps the Create & run now acknowledgement after returning to the overview", async () => {
+    const artifacts = createControlUiE2eArtifactDir("cron-run-feedback-create-run");
+    await suite.withPage(createControlUiE2eContextOptions(), async ({ page }) => {
+      const created = job("feedback-created", "Created synthetic automation");
+      const gateway = await installMockGateway(page, {
+        methodResponses: {
+          ...cronResponses([]),
+          "cron.add": created,
+          "cron.run": { ok: true, enqueued: true, runId: "synthetic-run-created" },
+        },
+      });
+      try {
+        await page.goto(`${suite.server.baseUrl}cron`);
+        await page.locator('[data-test-id="cron-new-task"]').click();
+        await page.locator("#cron-name").fill(created.name);
+        await page.locator("#cron-payload-text").fill("Synthetic run feedback check");
+        await gateway.setMethodResponse("cron.list", cronResponses([created])["cron.list"]);
+        await page.locator('[data-test-id="cron-submit-run"]').click();
+        const request = await gateway.waitForRequest("cron.run");
+        expect(request.params).toMatchObject({ id: created.id, mode: "force" });
+        await expect
+          .poll(() => page.getByRole("status").filter({ hasText: "Run queued" }).allTextContents())
+          .toEqual([`${created.name}: Run queued. Run ID: synthetic-run-created`]);
+        expect(await page.locator('[data-panel-mode="overview"]').count()).toBe(1);
+        expect(await page.locator(".cron-error-banner").count()).toBe(0);
+      } finally {
+        await page.screenshot({ path: `${artifacts}/final.png` });
+      }
+    });
+  });
+
+  it("clears the run notice when the route search changes", async () => {
+    const artifacts = createControlUiE2eArtifactDir("cron-run-feedback-route-reset");
+    await suite.withPage(createControlUiE2eContextOptions(), async ({ page }) => {
+      const alpha = job("feedback-alpha", "Alpha synthetic automation");
+      await installMockGateway(page, {
+        methodResponses: {
+          ...cronResponses([alpha]),
+          "cron.run": { ok: true, enqueued: true, runId: "synthetic-run-alpha" },
+        },
+      });
+      try {
+        await page.goto(`${suite.server.baseUrl}cron`);
+        await page.locator(`[data-test-id="cron-row-${alpha.id}"] .cron-table__name`).click();
+        await page.locator('[data-test-id="cron-run-now"]').click();
+        const notice = page.getByRole("status").filter({ hasText: "Run queued" });
+        await expect.poll(() => notice.count()).toBe(1);
+        await page.evaluate((url) => {
+          history.pushState(null, "", url);
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        }, `${suite.server.baseUrl}cron?from=synthetic-link`);
+        // A search without a job target keeps the open editor but retires its action feedback.
+        await expect.poll(() => notice.count()).toBe(0);
+        expect(await page.locator(".cron-detail-title").textContent()).toContain(alpha.name);
+      } finally {
+        await page.screenshot({ path: `${artifacts}/final.png` });
+      }
+    });
+  });
 
   it("announces a queued Run now on the agent Automations panel as status", async () => {
     const artifacts = createControlUiE2eArtifactDir("cron-run-feedback-agent-panel");

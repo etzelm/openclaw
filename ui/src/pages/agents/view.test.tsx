@@ -947,12 +947,3 @@ it.each([
     expect(onCronRunNow).not.toHaveBeenCalled();
   }
 });
-
-it("renders Run Now notice feedback as a status callout, not a danger callout", () => {
-  const container = document.createElement("div");
-  const props = createProps({ activePanel: "cron", selectedAgentId: "alpha" });
-  const notice = "Weekly report: Run queued. Run ID: run-1";
-  renderView({ ...props, cron: { ...props.cron, feedback: { error: null, notice } } }, container);
-  expect(container.querySelector('.callout[role="status"]')?.textContent).toBe(notice);
-  expect(container.querySelector(".callout.danger")).toBeNull();
-});
