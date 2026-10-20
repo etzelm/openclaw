@@ -1,0 +1,30 @@
+$ node scripts/test-projects.mts src/config/sessions/startup-migration.registry-recovery.test.ts
+[vitest-workers] local cache hit after 3841ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared 77a0939ee02f in 3897ms (16792 inputs, 21709 outputs)
+[test] starting test/vitest/vitest.infra.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$TREE[39m
+
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > preserves the cold database lifetime for maintenance without a runtime handoff 1281ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > preserves the preexisting database lifetime for maintenance without a runtime handoff 1068ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > does not create a missing configured agent database during startup maintenance 5ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > observes in-process deletion on the next startup and preserves surviving stores (cleanup completed: false) 2970ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > observes in-process deletion on the next startup and preserves surviving stores (cleanup completed: true) 3143ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with missing deletion history 2935ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with receipt-held deletion history 2821ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with malformed-receipt deletion history 2832ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > prepares and projects ordinary stores with malformed-journal deletion history 2900ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > re-registers durable lineage children before configured-only runtime reads 1848ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > keeps copied state directories self-contained for combined gateway reads 833ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > keeps the event loop responsive while repairing a cold registry startup contract 537ms
+ ✓  infra  src/config/sessions/startup-migration.registry-recovery.test.ts > keeps the event loop responsive while repairing a cold main-key startup contract 820ms
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 22:04:36
+[2m   Duration [22m 29.94s[2m (tests 81%, transform 16%, import 3%, setup 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 38.04s

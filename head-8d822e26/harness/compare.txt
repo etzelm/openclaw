@@ -1,0 +1,30 @@
+# outcomes-after.txt at 8d822e2632d vs head-5fffaf68 (5fffaf68380). Mask 1: turn-2 client exit code of interrupted-* rows (1 vs 143 race).
+after mask 1, these rows differ:
+7,12c7,12
+< interrupted-allowed | exit=0 exit=RACE exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1407:0,0,0 61:0,0,0+ctx1809:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-fresh | exit=0 exit=RACE exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1405:0,0,0 529:1,0,0+ctx1807:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-reassign-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1423:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1258:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-reassign-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1420:0,0,0 61:0,0,0+ctx1822:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+< interrupted-revoke-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1421:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1256:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-revoke-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1418:0,0,0 61:0,0,0+ctx1820:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+---
+> interrupted-allowed | exit=0 exit=RACE exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1398:0,0,0 61:0,0,0+ctx1800:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-fresh | exit=0 exit=RACE exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1396:0,0,0 529:1,0,0+ctx1798:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-reassign-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1414:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1249:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-reassign-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1411:0,0,0 61:0,0,0+ctx1813:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+> interrupted-revoke-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1412:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1247:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-revoke-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1409:0,0,0 61:0,0,0+ctx1811:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+
+# Mask 2: also mask context byte counts
+identical after mask 2 (39 lines)
+
+# Context byte counts of the rows that differ (old -> new)
+interrupted-allowed: ctx1407 ctx1809 -> ctx1398 ctx1800 
+interrupted-fresh: ctx1405 ctx1807 -> ctx1396 ctx1798 
+interrupted-reassign-before-context: ctx1423 ctx0 ctx1258 -> ctx1414 ctx0 ctx1249 
+interrupted-reassign-before-send: ctx1420 ctx1822 -> ctx1411 ctx1813 
+interrupted-revoke-before-context: ctx1421 ctx0 ctx1256 -> ctx1412 ctx0 ctx1247 
+interrupted-revoke-before-send: ctx1418 ctx1820 -> ctx1409 ctx1811 
+
+# Why: these contexts name the run workspace. Here it is $HOME/work/s3-harness/runs/..., at head-5fffaf68 $HOME/work/pr-164796-h/harness/runs/..., 9 characters longer. Context line here:
+work/s3-harness/runs/after-interrupted-allowed/workspace

@@ -1,0 +1,13 @@
+# Evidence for head 8d822e2632d (tree 934c1340971d65c3c7717818c3a97daacdb5e5c5)
+
+Round 3 of the simplification, two commits on 5fffaf68380: `27ff3327776` (tests: one incognito case, interrupted inputs on a refresh-due turn, an unusable Keychain payload that parses; six redundant cases dropped) and `8d822e2632d` (`resolveCliChildEnv` drops a `baseEnv` parameter no caller passed). Base 372095136ef.
+
+Every gate, lane, red/green run and harness scenario here ran at commit c8e525c2f12 (tree 934c1340971, `gates/identity.txt`), the unsigned commit of the same tree; the pushed head is its signed copy. Exception: `mutations/matrix/` ran at e72e9e9a14c, the first round 3 commit, whose production code differs from the head only by the removed parameter (`mutations/matrix/identity.txt`). Paths are redacted to `$RUN`, `$TREE`, `$GATES`, `$TOOLS`, `$OUT`, `$TMPDIR` and `$HOME`. Logs from the previous head that this round did not rerun (main-alone checks, red-on-base, release installs) stay in `head-5fffaf68/`.
+
+- `gates/summary.txt`: exit code of every step of `gates/gates.sh` (build, four tsgo, targeted, five owning lanes, diff check, oxfmt, check:changed, madge import cycles).
+- `gates/f-lane-src_config_sessions_.log`: the first run failed one test (`startup-migration.registry-recovery.test.ts`, `database is locked`, load average 31 to 54 from other work on the host) and the runner stopped there. That file is not in and does not import this diff; it passes alone three times (`repro-registry-recovery-*.log`), and the full lane rerun passes (`repro-tree-lane-config-sessions.log`: 18 + 364 files, 224 + 3322 tests).
+- `gates/f-check-changed.log`: 42 ok, 2 failed (max-lines ratchet on three `ui/` files, core test shard root budget 724/725 vs 720), as on 372095136ef (`head-5fffaf68/gates/main-check-*.log`; the root budget was rerun on 372095136ef and 5fffaf68380 this round with the same numbers).
+- `mutations/redgreen.log`: RED1 to RED5 and RED7 to RED12 at this tree, each red when mutated and green when restored.
+- `mutations/matrix/`: 75 production mutations (`mutations.py`), each applied alone, the nine owning test files run, every failing case recorded, production restored and the tree checked clean (`matrix.log`: every mutation fails at least one case).
+- `harness/`: the same 36 scenarios plus the 2026.10.4 and 2026.10.5 upgrade arms on the built dist. `compare.txt`: identical to `head-5fffaf68/harness/outcomes-after.txt` except the known turn-2 exit-code race and, in the six Gateway-interrupt rows, context byte counts 9 lower, because those contexts name the run workspace and this run's harness directory path is 9 characters shorter.
+- `runs/`: whole records for the scenarios the PR body links.

@@ -1,0 +1,1999 @@
+[
+ {
+  "id": "M01",
+  "desc": "an unattested native login still gets an owner",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when the child authenticates another way"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M02",
+  "desc": "preparation ignores the backend env (owner from the Gateway login)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > binds execution to the login the spawned environment selects",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when the child authenticates another way",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up at each private-input boundary and coverage commit, never at a liveness check",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > owns history by the attested credential, never by the account record beside it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses private input at the readable boundary once the login is reassigned",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a refresh-due turn without saved history but keeps covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check",
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  14 failed | 85 passed (99)"
+  ],
+  "secs": 74,
+  "clean_after": true
+ },
+ {
+  "id": "M03",
+  "desc": "preparation ignores the run's skill env overrides",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves the owner under the run's skill env overrides, as execution does"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M04",
+  "desc": "ANTHROPIC_API_KEY drops out of the non-native auth env list",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when the child authenticates another way",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_API_KEY instead of the stored login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M05",
+  "desc": "a forwarded credential does not suppress the native owner",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when a forwarded credential is in play"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 70,
+  "clean_after": true
+ },
+ {
+  "id": "M06",
+  "desc": "a node-placed CLI still gets the Gateway's native owner",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when the CLI is placed on a node"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M07",
+  "desc": "no prepared backend falls back to the Gateway process env",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when there is no prepared backend to derive the child environment from"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M08",
+  "desc": "an unresolvable login passes the boundary check",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses private input at the readable boundary once the login is reassigned",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  6 failed | 93 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M09",
+  "desc": "boundary lookups are memoized per Date.now() instant",
+  "applied": true,
+  "diffstat": "1 file changed, 8 insertions(+)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 68,
+  "clean_after": true
+ },
+ {
+  "id": "M10",
+  "desc": "assertReadable skips the native login recheck",
+  "applied": true,
+  "diffstat": "1 file changed, 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up at each private-input boundary and coverage commit, never at a liveness check",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses private input at the readable boundary once the login is reassigned"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 68,
+  "clean_after": true
+ },
+ {
+  "id": "M11",
+  "desc": "liveness checks look the login up too",
+  "applied": true,
+  "diffstat": "1 file changed, 4 insertions(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up at each private-input boundary and coverage commit, never at a liveness check",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up once for a worker turn commit, however many rows it covers"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 72,
+  "clean_after": true
+ },
+ {
+  "id": "M12",
+  "desc": "the turn worker asks the host once per row, not once per commit",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 4 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up once for a worker turn commit, however many rows it covers"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 76,
+  "clean_after": true
+ },
+ {
+  "id": "M13",
+  "desc": "bindExecutionEnv does not rebind to the spawn env",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > binds execution to the login the spawned environment selects",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 72,
+  "clean_after": true
+ },
+ {
+  "id": "M14",
+  "desc": "detachment is not sticky",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a turn without saved history under another login but never covers it"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M15",
+  "desc": "coverage commit does not look the login up",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up at each private-input boundary and coverage commit, never at a liveness check",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up once for a worker turn commit, however many rows it covers",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check",
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  8 failed | 91 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M16",
+  "desc": "host actor path covers without the owner check",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 68,
+  "clean_after": true
+ },
+ {
+  "id": "M17",
+  "desc": "attestation cache key ignores the token (Cache identity)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > binds execution to the login the spawned environment selects",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > owns history by the attested credential, never by the account record beside it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses private input at the readable boundary once the login is reassigned",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a turn without saved history under another login but never covers it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account",
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > answers the synchronous check only for a token this process attested",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > evicts the oldest attestation beyond its bound",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > never asks the network for an expired token, but keeps an owner attested before",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a body that is not JSON",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a body without an account uuid",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a network error that echoes the request",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after an HTTP 401",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after an error status whose body still names an account",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand on a confirmed absence from the password lookup alone",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand when a failed password lookup is followed by a confirmed absence",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > reads the Keychain login without trusting the file beside it",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  15 failed | 13 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  12 failed | 87 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M18",
+  "desc": "owner taken from the .claude.json account record when present",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > binds execution to the login the spawned environment selects",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > owns history by the attested credential, never by the account record beside it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a turn without saved history under another login but never covers it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > reads the Keychain login without trusting the file beside it",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > owns a credential for account B by B even beside an account record for A",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  3 failed | 25 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  6 failed | 93 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M19",
+  "desc": "attestation cache keyed by login location, not token (failure keeps the previous owner)",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > owns history by the attested credential, never by the account record beside it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses private input at the readable boundary once the login is reassigned",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account",
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > answers the synchronous check only for a token this process attested",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > evicts the oldest attestation beyond its bound"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 26 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  9 failed | 90 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M20",
+  "desc": "settle does not wait for the background attestation",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 74,
+  "clean_after": true
+ },
+ {
+  "id": "M21",
+  "desc": "a mid-run token attested to another account does not detach",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 81,
+  "clean_after": true
+ },
+ {
+  "id": "M22",
+  "desc": "the turn worker trusts the facts without asking the host",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > keeps a reply but stops coverage once the login can no longer be established",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > looks the login up once for a worker turn commit, however many rows it covers"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  3 failed | 96 passed (99)"
+  ],
+  "secs": 100,
+  "clean_after": true
+ },
+ {
+  "id": "M23",
+  "desc": "turn host answers with a verdict captured before preparation, not in the transaction",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 82,
+  "clean_after": true
+ },
+ {
+  "id": "M24",
+  "desc": "an expired, never-attested token is sent to the profile endpoint",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > never asks the network for an expired token, but keeps an owner attested before"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 73,
+  "clean_after": true
+ },
+ {
+  "id": "M25",
+  "desc": "a refresh-due turn still replays history",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a refresh-due turn without saved history but keeps covering it",
+   "agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > keeps coverage but sends no saved history while the CLI is about to rotate the token"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  2 failed | 3 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 77,
+  "clean_after": true
+ },
+ {
+  "id": "M26",
+  "desc": "settle does not attest the token the CLI rotated to",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a refresh-due turn without saved history but keeps covering it"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 68,
+  "clean_after": true
+ },
+ {
+  "id": "M27",
+  "desc": "metadata host never answers the owner probe (RED2)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 74,
+  "clean_after": true
+ },
+ {
+  "id": "M28",
+  "desc": "metadata worker trusts the facts without asking the host",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check",
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > uses a reopenable one-use token descriptor and reaps its tree",
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > keeps an awaited tool hook decision independent of the private-input check"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 51 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 189,
+  "clean_after": true
+ },
+ {
+  "id": "M29",
+  "desc": "report worker trusts the facts without asking the host",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M30",
+  "desc": "a throwing lookup escapes (RED11)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 5 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M31",
+  "desc": "preparation does not pass the prepared backend",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > keeps coverage but sends no saved history while the CLI is about to rotate the token",
+   "agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > seeds saved history for the same native login with no auth profile"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 77,
+  "clean_after": true
+ },
+ {
+  "id": "M32",
+  "desc": "attestation without the operator opt-in (RED5)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M33",
+  "desc": "fingerprint ignores which native account owns the login",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > owns history by the attested credential, never by the account record beside it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  2 failed | 97 passed (99)"
+  ],
+  "secs": 71,
+  "clean_after": true
+ },
+ {
+  "id": "M34",
+  "desc": "a refresh-due writer still allows the raw reseed",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > keeps coverage but sends no saved history while the CLI is about to rotate the token"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 77,
+  "clean_after": true
+ },
+ {
+  "id": "M35",
+  "desc": "a refresh-due turn still reads interrupted inputs from the transcript",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > keeps coverage but sends no saved history while the CLI is about to rotate the token"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 75,
+  "clean_after": true
+ },
+ {
+  "id": "M36",
+  "desc": "execution never binds the spawn env",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > binds the owner to the environment the child is spawned with",
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a fresh recovery turn whose environment selects another login",
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  3 failed | 96 passed (99)"
+  ],
+  "secs": 79,
+  "clean_after": true
+ },
+ {
+  "id": "M37",
+  "desc": "strictness only for a fresh recovery prompt (RED3)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 77,
+  "clean_after": true
+ },
+ {
+  "id": "M38",
+  "desc": "strictness only for a resumed session (RED10)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a fresh recovery turn whose environment selects another login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 71,
+  "clean_after": true
+ },
+ {
+  "id": "M39",
+  "desc": "settle only after a successful run, not in finally",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > settles the native login even when the run fails"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 80,
+  "clean_after": true
+ },
+ {
+  "id": "M40",
+  "desc": "prompt send without the private-input check",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > revalidates assertPrivateInputCurrent after initialization before sending input",
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 51 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 76,
+  "clean_after": true
+ },
+ {
+  "id": "M41",
+  "desc": "UserPromptSubmit answer on the stream check alone (RED4)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 3 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 52 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 74,
+  "clean_after": true
+ },
+ {
+  "id": "M42",
+  "desc": "every hook answer, tool hooks too, takes the private-input check",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > keeps an awaited tool hook decision independent of the private-input check",
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 51 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 78,
+  "clean_after": true
+ },
+ {
+  "id": "M43",
+  "desc": "plugin host never passes the private-input check",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/execute-plugin.test.ts > plugin-owned CLI execution host boundary > does not disclose private input when a native login changes after the plugin started"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 76,
+  "clean_after": true
+ },
+ {
+  "id": "M44",
+  "desc": "warm reuse ignores the native owner",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > does not reuse a warm process across a native login owner change"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M45",
+  "desc": "non-Claude backends get a native owner",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "agents-core  src/agents/cli-credentials.test.ts > cli credentials > resolves a native login owner only for backends that own one"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 16 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M46",
+  "desc": "credential-root split guard removed (RED7)",
+  "applied": true,
+  "diffstat": "1 file changed, 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M47",
+  "desc": "CLAUDE_CODE_OAUTH_TOKEN drops out of the non-native list (RED8)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M48",
+  "desc": "profile request without its timeout signal (RED9)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M49",
+  "desc": "profile request follows redirects",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M50",
+  "desc": "an error status body is trusted",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after an error status whose body still names an account"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M51",
+  "desc": "a response without an account uuid still yields an owner",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a body without an account uuid"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M52",
+  "desc": "a failed attestation is cached",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a body that is not JSON",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a body without an account uuid",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after a network error that echoes the request",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after an HTTP 401",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > has no owner, and caches nothing, after an error status whose body still names an account"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  5 failed | 23 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 76,
+  "clean_after": true
+ },
+ {
+  "id": "M53",
+  "desc": "an attested token is asked again (no work reuse)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > answers the synchronous check only for a token this process attested",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > never asks the network for an expired token, but keeps an owner attested before"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 26 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M54",
+  "desc": "the attestation map is unbounded",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > attestation cache > evicts the oldest attestation beyond its bound"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 70,
+  "clean_after": true
+ },
+ {
+  "id": "M55",
+  "desc": "the child env falls back to the process env per variable",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 68,
+  "clean_after": true
+ },
+ {
+  "id": "M56",
+  "desc": "the API key helper guard is removed",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M57",
+  "desc": "the user settings env guard is removed",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M58",
+  "desc": "a relative config root is accepted",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner for a relative config root the child would resolve against its own cwd"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M59",
+  "desc": "Keychain service and account from the process env",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 2 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > derives the Keychain service and account from the child's environment"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 69,
+  "clean_after": true
+ },
+ {
+  "id": "M60",
+  "desc": "the credentials file beside a readable Keychain login is preferred",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload without consulting the file",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > reads the Keychain login without trusting the file beside it"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 26 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M61",
+  "desc": "an unreadable Keychain payload falls through to the file",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload without consulting the file"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M62",
+  "desc": "an unknown Keychain state lets the file stand",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 26 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M63",
+  "desc": "a failed password lookup skips the metadata probe (absent assumed only on 44)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 3 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand when a failed password lookup is followed by a confirmed absence",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 26 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M64",
+  "desc": "item-not-found detection accepts any failure",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M65",
+  "desc": "actor transcript path trusts the facts without the live owner check",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M66",
+  "desc": "actor transcript path drops the live owner check (never confirms)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M67",
+  "desc": "no credential: owner taken from a leftover account record",
+  "applied": true,
+  "diffstat": "1 file changed, 2 insertions(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > has no native owner when the child authenticates another way",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > does not trust a leftover account record without a credential",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses an unusable Keychain payload without consulting the file",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > refuses when both lookups fail for a reason other than absence",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > fails closed when the Keychain item exists but cannot be read",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  5 failed | 23 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M68",
+  "desc": "ANTHROPIC_AUTH_TOKEN drops out of the non-native list",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects ANTHROPIC_AUTH_TOKEN instead of the stored login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M69",
+  "desc": "CLAUDE_CODE_USE_BEDROCK drops out of the non-native list",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_BEDROCK instead of the stored login",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  2 failed | 26 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M70",
+  "desc": "CLAUDE_CODE_USE_VERTEX drops out of the non-native list",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_USE_VERTEX instead of the stored login"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M71",
+  "desc": "coverage ignores contiguity (main's rule, reached through an owner skip)",
+  "applied": true,
+  "diffstat": "1 file changed, 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > records a turn whose login changed after preparation without covering it"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M72",
+  "desc": "execution binds the Gateway process env instead of the spawn env",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > binds the owner to the environment the child is spawned with"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  1 failed | 98 passed (99)"
+  ],
+  "secs": 65,
+  "clean_after": true
+ },
+ {
+  "id": "M73",
+  "desc": "a confirmed-absent password lookup still runs the metadata probe",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 3 deletions(-)",
+  "rc": 1,
+  "failed": [
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > macOS Keychain > ambiguous lookups with a stale credentials file > lets the file stand on a confirmed absence from the password lookup alone"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 27 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 67,
+  "clean_after": true
+ },
+ {
+  "id": "M74",
+  "desc": "the config dir comes from the Gateway process env",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > attests a token the CLI rotated mid-run before covering the run's rows",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > binds execution to the login the spawned environment selects",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a transcript report whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > does not cover a turn commit whose login is reassigned while the command is queued",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > owns history by the attested credential, never by the account record beside it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > records a turn whose login changed after preparation without covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > refuses private input at the readable boundary once the login is reassigned",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > rejects a recovery boundary for a reassigned or revoked login, uncached, at the same instant",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves ownership from the backend-selected config dir, not the Gateway login",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > resolves the owner under the run's skill env overrides, as execution does",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a refresh-due turn without saved history but keeps covering it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > runs a turn without saved history under another login but never covers it",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > stops coverage when a mid-run token attests to another account",
+   "agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check",
+   "infra  src/agents/cli-runner/history-boundary.incognito.test.ts > covers an incognito native-login turn only while its attested login holds",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > does not fall back to the process env for variables the child lacks",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the user settings env block selects another login",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split",
+   "plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the config dir the child receives, not the process one"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  1 failed | 1 passed (2)",
+   "Tests  1 failed | 29 passed (30)",
+   "Test Files  1 failed (1)",
+   "Tests  4 failed | 24 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 passed (1)",
+   "Tests  53 passed (53)",
+   "Test Files  1 failed | 4 passed (5)",
+   "Tests  15 failed | 84 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ },
+ {
+  "id": "M76",
+  "desc": "the private-input check runs after the prompt is sent",
+  "applied": true,
+  "diffstat": "1 file changed, 1 insertion(+), 1 deletion(-)",
+  "rc": 1,
+  "failed": [
+   "extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio boundary > revalidates assertPrivateInputCurrent after initialization before sending input"
+  ],
+  "failed_files": [],
+  "summary": [
+   "Test Files  2 passed (2)",
+   "Tests  30 passed (30)",
+   "Test Files  1 passed (1)",
+   "Tests  28 passed (28)",
+   "Test Files  1 passed (1)",
+   "Tests  17 passed (17)",
+   "Test Files  1 failed (1)",
+   "Tests  1 failed | 52 passed (53)",
+   "Test Files  5 passed (5)",
+   "Tests  99 passed (99)"
+  ],
+  "secs": 66,
+  "clean_after": true
+ }
+]
