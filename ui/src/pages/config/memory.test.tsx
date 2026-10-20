@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 
+import { getQueriesForElement } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { expect, it, vi } from "vitest";
 import { ConfigForm } from "../../components/config-form.render.tsx";
@@ -69,6 +70,13 @@ function renderInto(overrides: Partial<MemoryViewProps> = {}): HTMLElement {
   flush();
   return container;
 }
+
+it("names the page with a level-one heading", () => {
+  const container = renderInto();
+  expect(getQueriesForElement(container).getByRole("heading", { level: 1 }).textContent).toBe(
+    "Memory",
+  );
+});
 
 it("translates declared labels on each read without changing row order", async () => {
   const rows = () =>

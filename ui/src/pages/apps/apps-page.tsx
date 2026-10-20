@@ -138,7 +138,7 @@ export function AppsPage(props: AppsPageProps) {
       <ShellLayoutBoundary traits={{ toolbarHeader: true }}>
         <section class="content-header">
           <div>
-            <div class="page-title">{titleForRoute("apps")}</div>
+            <h1 class="page-title">{titleForRoute("apps")}</h1>
           </div>
         </section>
       </ShellLayoutBoundary>

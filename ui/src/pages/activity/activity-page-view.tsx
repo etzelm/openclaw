@@ -482,7 +482,7 @@ export function ActivityPageView(pageProps: { page: ActivityPageState }) {
       <ShellLayoutBoundary traits={{ toolbarHeader: true, activityPage: true }}>
         <section class="content-header">
           <div>
-            <div class="page-title">{titleForRoute("activity")}</div>
+            <h1 class="page-title">{titleForRoute("activity")}</h1>
             <Show when={route()?.mode !== "live"}>
               <div class="page-sub">{t("subtitles.activity")}</div>
             </Show>
