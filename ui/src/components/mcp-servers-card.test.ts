@@ -237,14 +237,32 @@ describe("openclaw-mcp-servers-card", () => {
     expect(disable.disabled).toBe(true);
     expect(disable.textContent?.trim()).toBe("Working…");
     expect(actionButton(card, "Add server").disabled).toBe(true);
+    expect(disable.getAttribute("aria-label")).toBeNull();
     completion.resolve(true);
     await waitForFast(() => {
       expect(disable.disabled).toBe(false);
       expect(card.querySelector('[role="status"]')?.textContent).toBe("Disabled MCP server local.");
     });
     expect(disable.textContent?.trim()).toBe("Disable");
+    expect(disable.getAttribute("aria-label")).toBe("Disable local");
     disable.click();
     await waitForFast(() => expect(harness.patch).toHaveBeenCalledTimes(2));
+  });
+  it("names each row action after its server and keeps the visible label", async () => {
+    const client = new GatewayBrowserClient({ url: "ws://gateway-a.example.test" });
+    const { card } = await mountCard({
+      gateway: createApplicationGateway(
+        createGateway({ client, methods: ["mcp.authLogin"] }).snapshot,
+      ).gateway,
+      config: configWith({ docs: oauthServer, search: { ...oauthServer, enabled: false } }),
+    });
+    const named = (name: string) =>
+      [...card.querySelectorAll("button")]
+        .filter((button) => button.getAttribute("aria-label") === name)
+        .map((button) => button.textContent?.trim());
+    expect(named("Sign in docs")).toEqual(["Sign in"]);
+    expect(named("Disable docs")).toEqual(["Disable"]);
+    expect(named("Enable search")).toEqual(["Enable"]);
   });
   it("starts the selected connector and keeps a usable link when the popup is blocked", async () => {
     const { card, request, open, connection } = await mountLoginCard();
