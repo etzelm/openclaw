@@ -1,12 +1,14 @@
 import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import type { SessionsRecoverParams } from "../../../../packages/gateway-protocol/src/index.js";
 import type { GatewaySessionRow } from "../../api/types.ts";
+import { pathForPluginSettings } from "../../app-route-paths.ts";
 import { t } from "../../i18n/index.ts";
 import { formatUiError } from "../../lib/format-error.ts";
 import {
   readSessionMethodAccess,
   type SessionMethodAccess,
 } from "../../lib/session-method-access.ts";
+import type { CatalogSessionKey } from "../../lib/sessions/catalog-key.ts";
 import { resolveSessionCreateParams } from "../../lib/sessions/create.ts";
 import { scopedAgentParamsForSession } from "../../lib/sessions/index.ts";
 import {
@@ -15,6 +17,7 @@ import {
   resolveAgentIdFromSessionKey,
   resolveUiSessionNavigationParentKey,
 } from "../../lib/sessions/session-key.ts";
+import { pluginDetailLocation } from "../plugins/detail-tabs.ts";
 import { cloneChatAttachmentsForIndependentOwner } from "./attachment-payload-store.ts";
 import { clearChatHistory } from "./chat-history-actions.ts";
 import { isExpiredIncognitoSession, setChatError } from "./chat-history-state.ts";
@@ -41,6 +44,36 @@ export abstract class ChatPaneSessionCreation extends ChatPaneRetainedPresentati
       generation: number;
     } | null;
   } = { recovering: false, creatingIncognito: false, restartFallback: null };
+
+  /** Explains a catalog composer that cannot continue, with a settings route when one helps. */
+  protected catalogComposerReason(catalogKey: CatalogSessionKey | null) {
+    const { catalogHost, catalogLoading, catalogSession } = this.history;
+    // Avoid flashing view-only while metadata loads; failed lookups still explain the gate.
+    if (!catalogKey || catalogLoading || catalogSession?.canContinue === true) {
+      return null;
+    }
+    if (catalogHost?.kind === "node") {
+      return { text: t("chat.catalog.remoteViewOnly") };
+    }
+    // Stopgap without a row reason field: Codex withholds only continuation from archivable
+    // local rows when supervision is off, pinned by
+    // extensions/codex/src/session-catalog-supervision-gate.test.ts.
+    if (catalogKey.catalogId !== "codex" || catalogSession?.canArchive !== true) {
+      return { text: t("chat.catalog.unsupportedViewOnly") };
+    }
+    const location = pluginDetailLocation(
+      { pathname: pathForPluginSettings("codex", this.context.basePath), search: "" },
+      true,
+    );
+    return {
+      text: t("chat.catalog.codexSupervisionDisabled"),
+      action: {
+        label: t("chat.catalog.openCodexSettings"),
+        href: `${location.pathname}${location.search}`,
+        onNavigate: () => this.context.navigate("plugin-settings", location),
+      },
+    };
+  }
 
   protected sessionDisabledBanner(params: {
     catalogDisabledReason: string | null | undefined;

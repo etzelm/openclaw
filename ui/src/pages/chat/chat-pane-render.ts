@@ -194,18 +194,8 @@ export class ChatPaneRuntime extends ChatPaneLayoutRender {
         gatewaySnapshot.client?.instanceId,
         state.sessionKey,
       );
-    // Avoid flashing view-only while metadata loads; failed lookups still explain the gate.
-    // Codex withholds only continuation from archivable local rows when supervision is off.
-    const catalogDisabledReason =
-      catalogKey &&
-      !this.history.catalogLoading &&
-      this.history.catalogSession?.canContinue !== true
-        ? this.history.catalogHost?.kind === "node"
-          ? t("chat.catalog.remoteViewOnly")
-          : catalogKey.catalogId === "codex" && this.history.catalogSession?.canArchive === true
-            ? t("chat.catalog.codexSupervisionDisabled")
-            : t("chat.catalog.unsupportedViewOnly")
-        : null;
+    const catalogReason = this.catalogComposerReason(catalogKey);
+    const catalogDisabledReason = catalogReason?.text ?? null;
     const { closePanelSlot, openPanelSlot, sessionWorkspace } = createChatPaneRails({
       state,
       sidebarLayout,
@@ -351,6 +341,7 @@ export class ChatPaneRuntime extends ChatPaneLayoutRender {
         // Send carries connection recovery; offline it stays enabled for the outbox, so only
         // this band can explain an unresolved initial turn.
         (state.connected ? null : pendingReason),
+      disabledReasonAction: catalogReason?.action,
       disabledReasonTone:
         !composerAccess ||
         disabledReason ||

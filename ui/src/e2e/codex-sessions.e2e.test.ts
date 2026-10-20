@@ -536,14 +536,17 @@ suite.define(() => {
       name: "supervision off",
       canArchive: true,
       reason:
-        "Codex supervision is off, so this session is view-only. Set plugins.entries.codex.config.supervision.enabled to true to continue it here.",
+        "Codex supervision is off, so this session is view-only. Enable it in the Codex plugin settings (supervision.enabled).",
+      settingsLinks: 1,
     },
     {
       name: "not continuable",
       canArchive: false,
       reason: "This external session source is view-only.",
+      settingsLinks: 0,
     },
-  ])("explains a view-only local Codex session ($name)", async ({ canArchive, reason }) => {
+  ])("explains a view-only local Codex session ($name)", async (row) => {
+    const { canArchive, reason } = row;
     const page = await suite.browser.newPage();
     const gateway = await installMockGateway(page, {
       featureMethods: catalogMethods,
@@ -580,6 +583,14 @@ suite.define(() => {
       await catalogPane.locator(".agent-chat__composer-combobox > textarea").isDisabled(),
     ).toBe(true);
     expect(await gateway.getRequests("sessions.catalog.continue")).toHaveLength(0);
+    const openSettings = catalogPane.getByRole("link", { name: "Open settings", exact: true });
+    expect(await openSettings.count()).toBe(row.settingsLinks);
+    if (row.settingsLinks) {
+      await openSettings.click();
+      await expect
+        .poll(() => `${new URL(page.url()).pathname}${new URL(page.url()).search}`)
+        .toBe("/settings/plugins/codex?view=settings");
+    }
     await page.close();
   });
 

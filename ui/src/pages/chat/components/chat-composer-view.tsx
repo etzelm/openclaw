@@ -9,6 +9,7 @@ import "../../../styles/chat/composer-surface.css";
 import { Icon } from "../../../components/solid/icon.tsx";
 import { McpAppContextStrip } from "../../../components/solid/mcp-app-context-strip.tsx";
 import { clearCompositionEnd } from "../../../lib/ime.ts";
+import { shouldHandleNavigationClick } from "../../../lib/navigation-click.ts";
 import { elementRef } from "../../../lib/reactive/element-ref.ts";
 import { t } from "../../../lib/reactive/i18n.ts";
 import { liveValue } from "../../../lib/reactive/live-value.ts";
@@ -229,6 +230,22 @@ export function renderChatComposerView(
             {status.icon}
           </span>
           <span class="agent-chat__composer-status-text">{status.text}</span>
+          <Show when={props.disabledReason ? props.disabledReasonAction : undefined}>
+            {(action) => (
+              <a
+                class="btn btn--sm"
+                href={action().href}
+                onClick={(event: MouseEvent) => {
+                  if (shouldHandleNavigationClick(event)) {
+                    event.preventDefault();
+                    action().onNavigate();
+                  }
+                }}
+              >
+                {action().label}
+              </a>
+            )}
+          </Show>
         </div>
       </div>
     ) : undefined;
