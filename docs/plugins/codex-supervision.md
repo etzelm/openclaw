@@ -676,6 +676,9 @@ change has not refreshed its advertised capabilities.
 ineligible state, its host is offline, or another action is pending. For a
 paired-node row, also verify `operator.admin` and that all three continuation
 commands are advertised and permitted. Terminal access alone is insufficient.
+For a Gateway-local row, Continue also requires `supervision.enabled: true`;
+with it off the transcript stays readable and Chat links to the Codex plugin
+settings.
 Send from a Gateway-local stored or idle session viewer to create a separate
 branch. Continuing a source that already has a supervised Chat opens that Chat.
 
