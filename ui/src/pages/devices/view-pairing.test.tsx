@@ -262,10 +262,14 @@ describe("device pairing dialog", () => {
       }),
     );
 
-    expect(view.queryByRole("status")).toBeNull();
+    const waiting = "Run the command on the device, then review its pairing request here.";
+    const status = view.getByRole("status");
+    expect(status.textContent).toBe("");
+    view.getByText(waiting);
     setPendingCount(1);
     flush();
-    const status = view.getByRole("status");
+    expect(view.getByRole("status")).toBe(status);
+    expect(view.queryByText(waiting)).toBeNull();
     expect(status.textContent).toBe("Device requests waiting for review: 1");
     setPendingCount(2);
     flush();
@@ -273,6 +277,8 @@ describe("device pairing dialog", () => {
     expect(status.textContent).toBe("Device requests waiting for review: 2");
     setPendingCount(0);
     flush();
-    expect(view.queryByRole("status")).toBeNull();
+    expect(view.getByRole("status")).toBe(status);
+    expect(status.textContent).toBe("");
+    view.getByText(waiting);
   });
 });
