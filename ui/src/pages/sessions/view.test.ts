@@ -359,7 +359,7 @@ describe("sessions view", () => {
     await Promise.resolve();
 
     const button = container.querySelector<HTMLButtonElement>(
-      'button[aria-label="Open session menu"]',
+      'button[aria-label="Open session menu: agent:main:dashboard:1"]',
     );
     if (!button) {
       throw new Error("Expected session menu button");
