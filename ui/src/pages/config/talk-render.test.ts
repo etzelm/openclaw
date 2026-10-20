@@ -81,7 +81,7 @@ describe("renderTalk", () => {
     await updatePickers(container);
 
     const provider = container.querySelector<HTMLInputElement>(".settings-segmented__input");
-    expect(provider?.disabled).toBe(true);
+    expect(provider?.hasAttribute("aria-disabled")).toBe(true);
     const voice = [...container.querySelectorAll<HTMLSelectElement>("select")];
     expect(voice).toHaveLength(1);
     expect(voice.every((select) => select.disabled)).toBe(true);

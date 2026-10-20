@@ -595,7 +595,7 @@ describe("Talk device and voice wake settings", () => {
       )!;
     expect(page.textContent).toContain("This Mac");
     expect(
-      row("Voice Wake").querySelector<HTMLInputElement>(".settings-toggle__input")?.disabled,
+      row("Voice Wake").querySelector(".settings-toggle__input")?.hasAttribute("aria-disabled"),
     ).toBe(true);
     expect(row("Voice Wake").textContent).toContain("macOS 26");
     row("Hold Right Option to talk").click();
@@ -625,19 +625,19 @@ describe("Talk device and voice wake settings", () => {
     snapshot.voice.wakeEnabled = true;
     publishSnapshot();
     expect(
-      row("Voice Wake").querySelector<HTMLInputElement>(".settings-toggle__input")?.disabled,
+      row("Voice Wake").querySelector(".settings-toggle__input")?.hasAttribute("aria-disabled"),
     ).toBe(false);
     row("Voice Wake").click();
     expect(nativeDeviceSettings.set).toHaveBeenCalledWith("voice.wakeEnabled", false);
     snapshot.voice.wakeEnabled = false;
     publishSnapshot();
     expect(
-      row("Voice Wake").querySelector<HTMLInputElement>(".settings-toggle__input")?.disabled,
+      row("Voice Wake").querySelector(".settings-toggle__input")?.hasAttribute("aria-disabled"),
     ).toBe(true);
     snapshot.voice.supported = true;
     publishSnapshot();
     expect(
-      row("Voice Wake").querySelector<HTMLInputElement>(".settings-toggle__input")?.disabled,
+      row("Voice Wake").querySelector(".settings-toggle__input")?.hasAttribute("aria-disabled"),
     ).toBe(false);
   });
 

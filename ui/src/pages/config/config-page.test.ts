@@ -526,7 +526,7 @@ it("stages policy changes through patchForm and confirms Update now before overl
   expect(checkingButton.textContent?.trim()).toBe("Update now");
   expect(checkingButton).toMatchObject({ disabled: true, title: "Checking for updates…" });
   expect(status()).toContain("Checking for updates…");
-  expect(container.querySelector<HTMLInputElement>(".settings-segmented__input")?.disabled).toBe(
+  expect(container.querySelector(".settings-segmented__input")?.hasAttribute("aria-disabled")).toBe(
     true,
   );
   context.overlays.snapshot.updateStatusRefreshing = false;

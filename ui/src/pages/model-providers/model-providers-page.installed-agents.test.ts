@@ -316,7 +316,7 @@ it("distinguishes failed and pending discovery and lets Check again recover mode
     expect(agentText(page)).toMatch(/discovering models/i);
     expect(agentText(page)).not.toMatch(/sign.in/i);
   });
-  expect(toggle(page)).toMatchObject({ disabled: false });
+  expect(toggle(page).hasAttribute("aria-disabled")).toBe(false);
   refreshButton(page, ".model-providers__installed-agents").click();
   await waitForSolid(() => {
     expect(agentRow(page, "qwen")?.textContent).toMatch(/models available/i);
@@ -347,7 +347,8 @@ it("saves the enabled flag and keeps it over a list read that started earlier", 
 
   await waitForSolid(() => {
     expect(reads).toBe(3);
-    expect(toggle(page)).toMatchObject({ checked: false, disabled: false });
+    expect(toggle(page)).toMatchObject({ checked: false });
+    expect(toggle(page).hasAttribute("aria-disabled")).toBe(false);
   });
   expect(runtimeConfig.patch).toHaveBeenCalledWith(
     expect.objectContaining({ raw: nativeAgents(false) }),
@@ -460,7 +461,7 @@ it("keeps the list readable but locked without admin access", async () => {
 
   clickAgent(page);
 
-  expect(toggle(page)).toMatchObject({ disabled: true });
+  expect(toggle(page).hasAttribute("aria-disabled")).toBe(true);
   expect(page.querySelector(".model-providers__installed-agents")?.textContent).toContain(
     "Model changes require operator.admin access.",
   );

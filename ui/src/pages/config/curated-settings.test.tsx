@@ -157,16 +157,18 @@ describe("plugin-owned Dreaming settings presentation", () => {
     const container = renderInto(null, vi.fn(), true);
 
     expect(
-      [...container.querySelectorAll<HTMLInputElement>("input")].every((input) => input.disabled),
-    ).toBe(true);
-    expect(
-      [...container.querySelectorAll<HTMLInputElement>(".settings-toggle__input")].every(
-        (toggle) => toggle.disabled,
+      [...container.querySelectorAll<HTMLInputElement>("input")].every((input) =>
+        input.matches(':disabled, [aria-disabled="true"]'),
       ),
     ).toBe(true);
     expect(
-      [...container.querySelectorAll<HTMLInputElement>(".settings-segmented__input")].every(
-        (input) => input.disabled,
+      [...container.querySelectorAll<HTMLInputElement>(".settings-toggle__input")].every((toggle) =>
+        toggle.hasAttribute("aria-disabled"),
+      ),
+    ).toBe(true);
+    expect(
+      [...container.querySelectorAll(".settings-segmented__input")].every((input) =>
+        input.hasAttribute("aria-disabled"),
       ),
     ).toBe(true);
   });

@@ -332,7 +332,7 @@ describe("renderUpdates", () => {
     expect(container.textContent).toContain("This Mac");
     expect(row("App version").textContent).toContain("2026.9.3 (build 42)");
     const automatic = toggle("Check for updates automatically");
-    expect(automatic.hasAttribute("disabled")).toBe(false);
+    expect(automatic.hasAttribute("aria-disabled")).toBe(false);
     automatic.checked = false;
     automatic.dispatchEvent(new Event("change"));
     expect(nativeDeviceSettings.set).toHaveBeenCalledWith("updates.automatic", false);
@@ -441,7 +441,7 @@ describe("renderUpdates", () => {
     expect(selected?.checked).toBe(true);
     const automatic = automaticUpdatesControl().toggle;
     expect(automatic.checked).toBe(false);
-    expect(automatic.hasAttribute("disabled")).toBe(true);
+    expect(automatic.hasAttribute("aria-disabled")).toBe(true);
     expect(row("Automatic updates").textContent).toContain("never installs them automatically");
   });
 
@@ -457,10 +457,10 @@ describe("renderUpdates", () => {
 
     const checks = toggle("Check for updates");
     expect(checks.checked).toBe(false);
-    expect(checks.hasAttribute("disabled")).toBe(false);
+    expect(checks.hasAttribute("aria-disabled")).toBe(false);
     const automatic = automaticUpdatesControl().toggle;
     expect(automatic.checked).toBe(true);
-    expect(automatic.hasAttribute("disabled")).toBe(true);
+    expect(automatic.hasAttribute("aria-disabled")).toBe(true);
     expect(row("Automatic updates").textContent).toContain("Check for updates");
     checks.checked = true;
     checks.dispatchEvent(new Event("change"));
@@ -503,7 +503,7 @@ describe("renderUpdates", () => {
     });
 
     const automatic = automaticUpdatesControl();
-    expect(automatic.toggle.hasAttribute("disabled")).toBe(disabled);
+    expect(automatic.toggle.hasAttribute("aria-disabled")).toBe(disabled);
     if (description) {
       expect(automatic.row.textContent).toContain(description);
     }
@@ -796,12 +796,12 @@ describe("renderUpdates", () => {
       "Administrator access is required",
     );
     expect(
-      [...row("Release channel").querySelectorAll<HTMLInputElement>('input[type="radio"]')].every(
-        (input) => input.disabled,
+      [...row("Release channel").querySelectorAll('input[type="radio"]')].every((input) =>
+        input.hasAttribute("aria-disabled"),
       ),
     ).toBe(true);
-    expect(toggle("Automatic updates")?.hasAttribute("disabled")).toBe(true);
-    expect(toggle("Check for updates")?.hasAttribute("disabled")).toBe(true);
+    expect(toggle("Automatic updates")?.hasAttribute("aria-disabled")).toBe(true);
+    expect(toggle("Check for updates")?.hasAttribute("aria-disabled")).toBe(true);
     expect(row("Update now").querySelector<HTMLButtonElement>("button")?.disabled).toBe(true);
     expect(row("Status").querySelector("button")).toBeNull();
     expect(row("Gateway version").textContent).toContain("2026.8.1");

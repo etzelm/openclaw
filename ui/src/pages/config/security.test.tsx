@@ -134,12 +134,13 @@ describe("Security", () => {
         overridden ? 1 : 0,
       );
       const full = expectButtonByText(container, "Full");
-      expect(full.querySelector<HTMLInputElement>(".settings-segmented__input")?.disabled).toBe(
+      expect(full.querySelector(".settings-segmented__input")?.hasAttribute("aria-disabled")).toBe(
         busy,
       );
       expect(
-        expectRowByTitle(container, "Browser enabled").querySelector<HTMLInputElement>("input")
-          ?.disabled,
+        expectRowByTitle(container, "Browser enabled")
+          .querySelector("input")
+          ?.hasAttribute("aria-disabled"),
       ).toBe(busy);
       if (busy || overridden) {
         full.click();
