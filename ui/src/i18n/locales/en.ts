@@ -2437,6 +2437,8 @@ export const en: TranslationMap & {
     catalog: {
       remoteViewOnly: "This session is on a paired device and is view-only.",
       unsupportedViewOnly: "This external session source is view-only.",
+      codexSupervisionDisabled:
+        "Codex supervision is off, so this session is view-only. Set plugins.entries.codex.config.supervision.enabled to true to continue it here.",
       sessionMenu: "External session actions",
       openInOpenClaw: "Open in OpenClaw",
       importToOpenClaw: "Import to OpenClaw",

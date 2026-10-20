@@ -531,6 +531,58 @@ suite.define(() => {
     }
   });
 
+  it.each([
+    {
+      name: "supervision off",
+      canArchive: true,
+      reason:
+        "Codex supervision is off, so this session is view-only. Set plugins.entries.codex.config.supervision.enabled to true to continue it here.",
+    },
+    {
+      name: "not continuable",
+      canArchive: false,
+      reason: "This external session source is view-only.",
+    },
+  ])("explains a view-only local Codex session ($name)", async ({ canArchive, reason }) => {
+    const page = await suite.browser.newPage();
+    const gateway = await installMockGateway(page, {
+      featureMethods: catalogMethods,
+      methodResponses: {
+        "sessions.catalog.list": {
+          catalogs: [
+            makeCatalog("codex", "Codex", [
+              makeHost("gateway:local", "Local Codex", [
+                makeNativeSession("thread-1", "Release checklist", {
+                  source: "cli",
+                  canContinue: false,
+                  canArchive,
+                }),
+              ]),
+            ]),
+          ],
+        },
+        "sessions.catalog.read": {
+          hostId: "gateway:local",
+          threadId: "thread-1",
+          items: [{ id: "u1", type: "userMessage", text: "prepare release" }],
+        },
+      },
+    });
+    await page.goto(`${suite.server.baseUrl}chat`);
+    await expandCodingSection(page);
+    await page.getByText("Release checklist", { exact: true }).click();
+    const catalogPane = page
+      .locator("openclaw-chat-pane.chat-pane-cache__pane--visible")
+      .filter({ hasText: "prepare release" });
+    await catalogPane.getByText("prepare release", { exact: true }).waitFor();
+    await expect.poll(() => catalogPane.getByText(reason, { exact: true }).count()).toBe(1);
+    expect(
+      await catalogPane.locator(".agent-chat__composer-combobox > textarea").isDisabled(),
+    ).toBe(true);
+    expect(await gateway.getRequests("sessions.catalog.continue")).toHaveLength(0);
+    await page.close();
+  });
+
   it("adopts from the native chat composer, navigates, and auto-sends", async () => {
     const page = await suite.browser.newPage();
     const gateway = await installMockGateway(page, {

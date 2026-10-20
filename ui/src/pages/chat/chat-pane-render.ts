@@ -195,13 +195,16 @@ export class ChatPaneRuntime extends ChatPaneLayoutRender {
         state.sessionKey,
       );
     // Avoid flashing view-only while metadata loads; failed lookups still explain the gate.
+    // Codex withholds only continuation from archivable local rows when supervision is off.
     const catalogDisabledReason =
       catalogKey &&
       !this.history.catalogLoading &&
       this.history.catalogSession?.canContinue !== true
         ? this.history.catalogHost?.kind === "node"
           ? t("chat.catalog.remoteViewOnly")
-          : t("chat.catalog.unsupportedViewOnly")
+          : catalogKey.catalogId === "codex" && this.history.catalogSession?.canArchive === true
+            ? t("chat.catalog.codexSupervisionDisabled")
+            : t("chat.catalog.unsupportedViewOnly")
         : null;
     const { closePanelSlot, openPanelSlot, sessionWorkspace } = createChatPaneRails({
       state,

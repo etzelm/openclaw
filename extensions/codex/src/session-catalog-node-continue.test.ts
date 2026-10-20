@@ -67,6 +67,7 @@ function registerProvider(
     api,
     bindingStore: createCodexTestBindingStore(),
     control,
+    getPluginConfig: () => ({ supervision: { enabled: true } }),
     getRuntimeConfig,
   });
   return getProvider()!;
