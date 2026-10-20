@@ -1,0 +1,57 @@
+From d20c06b61fb2206cb6c97802732124cda6edd394 Mon Sep 17 00:00:00 2001
+From: Mitchell Etzel <etzelm@users.noreply.github.com>
+Date: Tue, 20 Oct 2026 09:47:50 -0700
+Subject: [PATCH] fix(agents): send a compaction continuation once after it is
+ persisted
+
+- #177050 (07b59a0976d) persists internal retry prompts as hidden internal_system rows.
+- #136236 retained the compaction continuation instruction across later invisible retries because that prompt was not saved.
+- A reasoning-only retry after a compaction continuation then sent the instruction twice: once replayed from history and once appended to the retry prompt.
+- Drop the retained instruction once the internal prompt carrying it is persisted.
+- Fixes test/gateway-openai-compaction-replay.e2e.test.ts on main.
+---
+ .../run.session-prompt-state.test.ts                 | 12 ++++++++++++
+ .../run/session-prompt-state.ts                      |  4 ++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/src/agents/embedded-agent-runner/run.session-prompt-state.test.ts b/src/agents/embedded-agent-runner/run.session-prompt-state.test.ts
+index 49d8c4e37d5..78f492853dd 100644
+--- a/src/agents/embedded-agent-runner/run.session-prompt-state.test.ts
++++ b/src/agents/embedded-agent-runner/run.session-prompt-state.test.ts
+@@ -474,6 +474,18 @@ describe("embedded run session prompt state", () => {
+     expect(prompt.match(/Continue from the compacted transcript/gu)).toHaveLength(1);
+   });
+ 
++  it("drops a retained compaction continuation once its internal prompt is persisted", async () => {
++    await using state = await createState();
++    state.activateCompactionContinuation("continue after compaction");
++    state.activateInternalPrompt("visible-answer retry");
++    expect(state.activePrompt.override).toBe("visible-answer retry\n\ncontinue after compaction");
++
++    state.onUserMessagePersisted(makeUserMessage(state.activePrompt.override));
++    state.activateInternalPrompt("empty-response retry");
++
++    expect(state.activePrompt.override).toBe("empty-response retry");
++  });
++
+   it("keeps a draft revision pending until its owned projection is ready", async () => {
+     const reconcile = await import("../../config/sessions/session-transcript-reconcile.js");
+     const projection = createDeferred();
+diff --git a/src/agents/embedded-agent-runner/run/session-prompt-state.ts b/src/agents/embedded-agent-runner/run/session-prompt-state.ts
+index a908f47089a..822cf185ff1 100644
+--- a/src/agents/embedded-agent-runner/run/session-prompt-state.ts
++++ b/src/agents/embedded-agent-runner/run/session-prompt-state.ts
+@@ -154,6 +154,10 @@ export async function createEmbeddedRunSessionPromptState(input: {
+   const onUserMessagePersisted: NonNullable<
+     RunEmbeddedAgentParamsWithSessionFile["onUserMessagePersisted"]
+   > = (message) => {
++    // A persisted internal prompt replays its compaction instruction from history.
++    if (activePrompt.internal) {
++      clearCompactionContinuation();
++    }
+     const messageMetadata = message as {
+       __openclaw?: { beforeAgentRunBlocked?: unknown };
+     };
+-- 
+2.54.0 (Apple Git-157)
+

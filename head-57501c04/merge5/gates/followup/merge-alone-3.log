@@ -1,0 +1,51 @@
+$ node scripts/test-projects.mts src/config/sessions/session-history-archive-pruning.admission.test.ts
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$TREE[39m
+
+[vitest-workers] local cache hit after 3582ms
+[vitest-workers] reused local compiler outputs
+[vitest-workers] prepared a5177200103f in 3627ms (16795 inputs, 21785 outputs)
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > keeps native page cleanup outside archive admission 144ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > retires a queued archive removal without waiting for unrelated archive work 1483ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > skips writer admission when the archive budget target is already satisfied 1119ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > lets foreground writes settle while archive pruning scans physical usage 1355ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > enforces a physical archive budget without ordinary host SQLite calls 1389ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > rejects another agent's archive without changing its canonical row or file 1191ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > native page reclamation defers without waiting for a pinned reader 230ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > native page reclamation defers without waiting for a pinned writer 210ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > bounds broker page reclamation and stops when its owner is revoked between units 545ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at read-result (revoked) 1121ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at before-read (unpublished) 1331ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (complete) 1141ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (revoked) 1110ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (unpublished) 1336ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves item writer authority at after-unlink (republished) 1132ms
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > preserves an unpublished canonical archive whose owner appears after legacy inventory 1199ms
+[90mstderr[2m | unknown test
+[22m[39m[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateReadWorkers
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/config/sessions/session-history-archive-pruning.admission.test.ts: retiring openclaw.pluginStatePublication
+
+ ✓  runtime-config  src/config/sessions/session-history-archive-pruning.admission.test.ts > excludes peer publication until atomic legacy removal settles 1139ms
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m17 passed[39m[22m[90m (17)[39m
+[2m   Start at [22m 11:56:19
+[2m   Duration [22m 23.06s[2m (tests 75%, transform 22%, import 3%, worker 1%)[22m
+
+[vitest-workers] verifying completed generation before cleanup
+[vitest-workers] retained completed compiler outputs for reuse
+[test] passed 1 Vitest shard in 24.51s

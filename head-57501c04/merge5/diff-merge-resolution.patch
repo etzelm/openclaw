@@ -1,0 +1,62 @@
+commit af1d1ce4a2aee17f413256a4241a9c9f9b4c4e0d
+Merge: d20c06b61fb 051bf6fa4d0
+Author: Mitchell Etzel <etzelm@users.noreply.github.com>
+Date:   Tue Oct 20 10:31:38 2026 -0700
+
+    Merge remote-tracking branch 'origin/main' into fix/cli-native-history-owner
+    
+    # Conflicts:
+    #       src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+    #       src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
+
+diff --git a/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts b/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+remerge CONFLICT (content): Merge conflict in src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+index fff5ab391bb..fb6cf63ae93 100644
+--- a/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
++++ b/src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts
+@@ -36,11 +36,8 @@ export function advanceCliHistoryBoundaryRangeInTransaction(
+   range: { first: number; last: number },
+   writer: CliHistoryWriterFacts,
+   assertCurrent: () => void,
+-<<<<<<< d20c06b61fb (fix(agents): send a compaction continuation once after it is persisted)
+   confirmsOwner?: () => boolean,
+-=======
+   onEntryUpdated?: (entry: InternalSessionEntry) => void,
+->>>>>>> 051bf6fa4d0 (test(ui): route widget gestures through the touch emulator (#178578))
+ ): boolean {
+   if (range.last < range.first) {
+     return false;
+@@ -55,16 +52,12 @@ export function advanceCliHistoryBoundaryRangeInTransaction(
+     return false;
+   }
+   assertCurrent();
+-<<<<<<< d20c06b61fb (fix(agents): send a compaction continuation once after it is persisted)
+   if (!cliHistoryOwnerHolds(writer, confirmsOwner)) {
+     return false;
+   }
+-  writeSessionEntry(database, scope.sessionKey, next, { previousEntry: entry });
+-=======
+   const updatedEntry = writeSessionEntry(database, scope.sessionKey, next, {
+     previousEntry: entry,
+   });
+   onEntryUpdated?.(updatedEntry);
+->>>>>>> 051bf6fa4d0 (test(ui): route widget gestures through the touch emulator (#178578))
+   return true;
+ }
+diff --git a/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts b/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
+remerge CONFLICT (content): Merge conflict in src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
+index e48fb58d025..aeccb6297d0 100644
+--- a/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
++++ b/src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts
+@@ -219,11 +219,8 @@ export function bindSqliteWorkerBackend(
+                   },
+                   target.cliWriter,
+                   authorizeCommit,
+-<<<<<<< d20c06b61fb (fix(agents): send a compaction continuation once after it is persisted)
+                   ownerProbe?.holds,
+-=======
+                   onEntryUpdated,
+->>>>>>> 051bf6fa4d0 (test(ui): route widget gestures through the touch emulator (#178578))
+                 )
+               : false;
+           const { entry, refusal: rebound } = readCurrentEntry();

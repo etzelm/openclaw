@@ -1,0 +1,26 @@
+# bad: [79506514289f3d51342af165dc0f6f9c0638a40b] fix(doctor): recognize deserialized systemd user managers in the process census (#178117)
+# good: [7525fae0d51ddc5978d5f317cdd6e8691239011d] test(gateway,ui,config): remove low-value tests (batch d227) (#175688)
+git bisect start '79506514289' '7525fae0d51'
+# good: [63029f00c50df37dea63ddd2be522e1dabad7e5a] test(browser): remove unused extension setup helper
+git bisect good 63029f00c50df37dea63ddd2be522e1dabad7e5a
+# bad: [7b7bc3d2e2396292f32502285535e1d848a35689] refactor(ui): simplify chat rendering ownership and derivations (#177461)
+git bisect bad 7b7bc3d2e2396292f32502285535e1d848a35689
+# good: [f95deb6e01d90c4eabaf5d6c59152c949c453eb7] test: remove orphaned Meet and Talk support declarations
+git bisect good f95deb6e01d90c4eabaf5d6c59152c949c453eb7
+# good: [cf4ed79af63987c3e9d31da0c91e518424799551] test(ui,core,plugins): remove low-value tests (batch d289) (#177291)
+git bisect good cf4ed79af63987c3e9d31da0c91e518424799551
+# good: [9cac4f60caa32991129fb02399d1e7b3bb176d06] refactor(video): centralize supported duration normalization (#177391)
+git bisect good 9cac4f60caa32991129fb02399d1e7b3bb176d06
+# bad: [248aa9a5f6781a94a59c6b5103df43025aa3242c] test(agents): distinguish hidden recovery prompts from user turns
+git bisect bad 248aa9a5f6781a94a59c6b5103df43025aa3242c
+# bad: [e5c3e991cf0801566319e16040a08b167301cc1f] test(zalo): keep webhook payload type private
+git bisect bad e5c3e991cf0801566319e16040a08b167301cc1f
+# good: [7cc0d61c1d619bfb0a9dbecf0381f4a86f2105e7] test(plugins,core): remove low-value tests (batch d297) (#177359)
+git bisect good 7cc0d61c1d619bfb0a9dbecf0381f4a86f2105e7
+# bad: [a99b54e6693f8fbc5182d30e2faff66ba845f98f] chore(ui): remove redundant usage filter type
+git bisect bad a99b54e6693f8fbc5182d30e2faff66ba845f98f
+# bad: [07b59a0976dd8439e9225b5141280df5d78b2323] fix: rate-limited runs lose the prompt cache on retry (#177050)
+git bisect bad 07b59a0976dd8439e9225b5141280df5d78b2323
+# good: [808cb5d124ccf003ec346809f64b3170b38dcd63] fix(health): warn when persisted quarantine reads fail (#177408)
+git bisect good 808cb5d124ccf003ec346809f64b3170b38dcd63
+# first bad commit: [07b59a0976dd8439e9225b5141280df5d78b2323] fix: rate-limited runs lose the prompt cache on retry (#177050)

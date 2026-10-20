@@ -1,0 +1,29 @@
+== PR head 53ff5be1f3b1887519fce52dc145323c2d671817 Tue Oct 20 09:48:20 PDT 2026
+install head rc=0
+build head rc=0
+build-ai head rc=0
+e2e head run 1 rc=1 AssertionError: expected [ …(3) ] to have a length of 2 but got 3
+e2e head run 2 rc=1 AssertionError: expected [ …(3) ] to have a length of 2 but got 3
+e2e head run 3 rc=1 AssertionError: expected [ …(3) ] to have a length of 2 but got 3
+== fix d20c06b61fb2206cb6c97802732124cda6edd394 tree 45cac6fa3acd0626ca0fca0dc6377381bef6ef07 dirty=0 Tue Oct 20 09:53:27 PDT 2026
+build fix rc=0
+build-ai fix rc=0
+e2e fix run 1 rc=0       Tests  1 passed (1)
+e2e fix run 2 rc=0       Tests  1 passed (1)
+e2e fix run 3 rc=0       Tests  1 passed (1)
+lane src/agents/embedded-agent-runner/ rc=0  Test Files  116 passed (116)       Tests  1541 passed (1541) [test] passed 7 Vitest shards in 673.51s 
+pnpm tsgo:core rc=0
+pnpm tsgo:core:test rc=0
+pnpm tsgo:extensions rc=0
+pnpm tsgo:extensions:test rc=0
+targeted PR files rc=0 [test] passed 5 Vitest shards in 69.58s
+madge rc=0 Madge import cycle check: 0 cycle(s).
+oxfmt --check (38 files vs 79506514289) rc=0 Finished in 15ms on 35 files using 32 threads.
+git diff --check 53ff5be1f3b..HEAD rc=0
+server.chat-cli-auth run 1 rc=0       Tests  5 passed (5)
+server.chat-cli-auth run 2 rc=0       Tests  5 passed (5)
+server.chat-cli-auth run 3 rc=0       Tests  5 passed (5)
+worker-turn-launcher run 1 rc=0       Tests  34 passed (34)
+worker-turn-launcher run 2 rc=0       Tests  34 passed (34)
+worker-turn-launcher run 3 rc=0       Tests  34 passed (34)
+DONE Tue Oct 20 10:24:39 PDT 2026

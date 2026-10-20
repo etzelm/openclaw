@@ -1,0 +1,87 @@
+running '$WORK/bisect-step.sh'
+Bisecting: 439 revisions left to test after this (roughly 9 steps)
+[7b7bc3d2e2396292f32502285535e1d848a35689] refactor(ui): simplify chat rendering ownership and derivations (#177461)
+running '$WORK/bisect-step.sh'
+Bisecting: 219 revisions left to test after this (roughly 8 steps)
+[f95deb6e01d90c4eabaf5d6c59152c949c453eb7] test: remove orphaned Meet and Talk support declarations
+running '$WORK/bisect-step.sh'
+Bisecting: 109 revisions left to test after this (roughly 7 steps)
+[cf4ed79af63987c3e9d31da0c91e518424799551] test(ui,core,plugins): remove low-value tests (batch d289) (#177291)
+running '$WORK/bisect-step.sh'
+Bisecting: 54 revisions left to test after this (roughly 6 steps)
+[9cac4f60caa32991129fb02399d1e7b3bb176d06] refactor(video): centralize supported duration normalization (#177391)
+running '$WORK/bisect-step.sh'
+Bisecting: 27 revisions left to test after this (roughly 5 steps)
+[248aa9a5f6781a94a59c6b5103df43025aa3242c] test(agents): distinguish hidden recovery prompts from user turns
+running '$WORK/bisect-step.sh'
+Bisecting: 13 revisions left to test after this (roughly 4 steps)
+[e5c3e991cf0801566319e16040a08b167301cc1f] test(zalo): keep webhook payload type private
+running '$WORK/bisect-step.sh'
+Bisecting: 6 revisions left to test after this (roughly 3 steps)
+[7cc0d61c1d619bfb0a9dbecf0381f4a86f2105e7] test(plugins,core): remove low-value tests (batch d297) (#177359)
+running '$WORK/bisect-step.sh'
+Bisecting: 3 revisions left to test after this (roughly 2 steps)
+[a99b54e6693f8fbc5182d30e2faff66ba845f98f] chore(ui): remove redundant usage filter type
+running '$WORK/bisect-step.sh'
+Bisecting: 0 revisions left to test after this (roughly 1 step)
+[07b59a0976dd8439e9225b5141280df5d78b2323] fix: rate-limited runs lose the prompt cache on retry (#177050)
+running '$WORK/bisect-step.sh'
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+[808cb5d124ccf003ec346809f64b3170b38dcd63] fix(health): warn when persisted quarantine reads fail (#177408)
+running '$WORK/bisect-step.sh'
+07b59a0976dd8439e9225b5141280df5d78b2323 is the first bad commit
+commit 07b59a0976dd8439e9225b5141280df5d78b2323
+Author: Ayaan Zaidi <hi@obviy.us>
+Date:   Mon Oct 19 08:18:46 2026 -0700
+
+    fix: rate-limited runs lose the prompt cache on retry (#177050)
+    
+    ## What Problem This Solves
+    
+    Fixes: after a provider rate limit (HTTP 429) or another transient failure, the retry and the next turn resend the whole conversation and miss the prompt cache.
+    
+    ## User Impact
+    
+    User impact: sessions that hit a rate limit keep their prompt cache on the retry and on the following turns, so retries cost fewer uncached input tokens and answer sooner. Internal retry prompts stay hidden from the transcript, as before. There is no configuration, schema or migration change.
+    
+    ## Why This Change Was Made
+    
+    A transient retry continues the turn with an internal prompt ("Continue the current task…"). That prompt was sent to the model but deliberately not saved. The turn-scoped runtime context sent right after it *was* saved. So the transcript kept the runtime context without the prompt in front of it. The retry and the next run then replayed a different history than the model had already seen: a role change at the old prompt's position. On OpenAI Responses that also drops `previous_response_id` and resends the full input.
+    
+    Internal prompts now take the same path as runtime-only prompts (#137273): submission saves them as hidden `internal_system` input (`display: false`). Because an internal prompt has no transcript recorder to capture a model-facing projection, it is submitted and saved as the exact text the model receives (`modelPrompt`, or hook prepend + prompt + append). Replay then sends the same bytes. One helper, `resolveModelPromptText`, now owns that text for both normal and internal prompts.
+    
+    This keeps #122908's guarantee: internal recovery prompts never appear as operator-authored messages.
+    
+    ## Evidence
+    
+    - **Production pattern (OpenAI Responses Gateway, 4.3 h, logs only):** 227 user-turn `historyRewrite` cache drops. 205 of them were inside a run that had just received `429 rate_limit_exceeded` (tokens per minute). In 215 the model, route and cache key were unchanged, so the cache was lost only because the replayed history changed. Median cached tokens kept after a drop: 12%.
+    - **Embedded runner, 4 routes** (`src/agents/embedded-agent-runner.prompt-cache.test.ts`, extended with a rate-limited tool continuation and a following turn). It runs through `runEmbeddedAgent` with the durable transcript and byte-level provider prefix checks:
+      - `main`: **4 failed** (OpenAI Responses, Chat Completions, Anthropic Messages, Anthropic in-history), each `prefix changed … path=$.role` on the turn after the retry.
+      - This branch: **4 passed**.
+    - **Real Gateway E2E** (`test/e2e/qa-lab/runtime/gateway-rate-limit-prompt-cache.e2e.test.ts`): `chat.send` runs through a QA-lab Gateway, with the mock OpenAI provider returning one 429 on the tool continuation, then an ordinary second turn.
+      - `main`: **failed**, `request 4 breaks request 3 prefix at input[4]: was user/message, now assistant/message`.
+      - This branch: **passed**.
+      - `gateway-rpc-chat.e2e.test.ts`: 9 of 9 passed.
+      - Mock provider suite: 189 of 189 passed.
+    - **Related suites:** 59 files cover submit, LLM boundary, retries, model fallback, settled-turn finalization and the worker runtime. All pass, except one worker background-exec timing test (`worker.runtime.test.ts > stops registered background execs after anchor`, `ENOENT exec.pid`). It failed once under heavy host load and passed 71/71 when its file was rerun alone.
+    - `pnpm check:changed`: format, typecheck and lint pass for the changed files. Remaining failures (`max-lines suppression ratchet`, `core tsgo graph boundary`, `dead export scan`) are in files this PR does not touch and are already on `main`.
+    - **Not covered:** the WebSocket Responses transport, Codex-native turns, and a live provider check of `cached_tokens`.
+    
+    No overlap with Pash/Sarah changes.
+    
+    **Merge danger:** two-way door. Reverting restores the old behavior. New transcripts gain one hidden `internal_system` user row per internal retry prompt; older builds already read such rows (runtime-only turns write them today). **Blast radius:** embedded runs that retry with an internal prompt (transient provider errors, outer model fallback after dispatch, plugin-runtime refresh, compaction and settled-turn continuations), on all providers. If it is wrong, the model would see an extra hidden continuation prompt in replayed history.
+    
+    Co-authored-by: Ayaan Zaidi <hi@obviy.us>
+
+ .../mock-openai/mock-openai-after-tool-failures.ts |  35 ++++++
+ .../providers/mock-openai/mock-openai-contracts.ts |   3 +-
+ .../mock-openai/mock-openai-responses-http.ts      |   3 +
+ .../qa-lab/src/providers/mock-openai/server.ts     |  16 ++-
+ .../embedded-agent-runner.prompt-cache.test.ts     |  28 ++++-
+ .../run/attempt-llm-boundary.ts                    |  20 ++--
+ .../run/attempt-prompt-submit.ts                   |  49 +++++----
+ .../gateway-rate-limit-prompt-cache.e2e.test.ts    | 118 +++++++++++++++++++++
+ 8 files changed, 228 insertions(+), 44 deletions(-)
+ create mode 100644 extensions/qa-lab/src/providers/mock-openai/mock-openai-after-tool-failures.ts
+ create mode 100644 test/e2e/qa-lab/runtime/gateway-rate-limit-prompt-cache.e2e.test.ts
+bisect found first bad commit

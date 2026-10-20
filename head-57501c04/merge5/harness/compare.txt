@@ -1,0 +1,166 @@
+# outcomes-after.txt at merge5 af1d1ce4a2a (tree 76779f6d8d2) vs merge4 a0d666e123c (tree 20792bab1d8). Reference = '<', this run = '>'.
+# Mask: turn-2 client exit code of interrupted-* rows (1 vs 143 race).
+lines: ref=39 new=39
+2,35c2,35
+< allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< different-account | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< empty-first-turn-switch | exit=1 exit=0 | -/-/REFUSED 467/fresh | 467:0,1,0+ctx1310:0,0,0 | t1:known/1 t2:known/3 | stubProfileRequests=2
+< expired-unattested | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+< interrupted-allowed | exit=0 exit=RACE exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1398:0,0,0 61:0,0,0+ctx1800:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-fresh | exit=0 exit=RACE exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1396:0,0,0 529:1,0,0+ctx1798:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-reassign-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1414:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1249:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-reassign-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1411:0,0,0 61:0,0,0+ctx1813:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+< interrupted-revoke-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1412:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1247:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-revoke-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1409:0,0,0 61:0,0,0+ctx1811:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+< keychain-allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< keychain-ambiguous-prep | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:none t2:none | stubProfileRequests=0
+< keychain-fails-at-commit | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< keychain-fails-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+< note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx1310:0,0,0 52:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< optin-later | exit=0 exit=0 exit=0 exit=0 | 85/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none +known/2 t4:none +known/4 | stubProfileRequests=3
+< optin-withdrawn | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+< optout-allowed | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:none t2:none | stubProfileRequests=0
+< profile-401 | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< profile-timeout | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< queued-reassign | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< reassign-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+< record-credential-mismatch | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< record-relabel | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< refresh-due | exit=0 exit=0 exit=0 | 85/fresh 484/fresh 655/fresh | 85:1,0,0+ctx1310:0,0,0 484:0,1,0+ctx1145:0,0,0 655:1,1,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=4
+< resumed-allowed | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx1310:0,0,0 83:0,1,0+ctx1310:0,0,0 50:0,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=3
+< resumed-coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx1310:0,0,0 83:0,1,0+ctx1310:0,0,0 50:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< resumed-reassign-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx1310:0,0,0 50:0,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+< resumed-revoke-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx1310:0,0,0 50:0,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+< revoke-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+< revoked | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+< rotate-after-send | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< skill-config-dir | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+---
+> allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> different-account | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> empty-first-turn-switch | exit=1 exit=0 | -/-/REFUSED 467/fresh | 467:0,1,0+ctx987:0,0,0 | t1:known/1 t2:known/3 | stubProfileRequests=2
+> expired-unattested | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+> interrupted-allowed | exit=0 exit=RACE exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1075:0,0,0 61:0,0,0+ctx1477:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-fresh | exit=0 exit=RACE exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1073:0,0,0 529:1,0,0+ctx1475:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-reassign-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1091:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx926:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-reassign-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1088:0,0,0 61:0,0,0+ctx1490:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+> interrupted-revoke-before-context | exit=0 exit=RACE exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1089:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx924:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-revoke-before-send | exit=0 exit=RACE exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1086:0,0,0 61:0,0,0+ctx1488:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+> keychain-allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> keychain-ambiguous-prep | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:none t2:none | stubProfileRequests=0
+> keychain-fails-at-commit | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> keychain-fails-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+> note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx987:0,0,0 52:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> optin-later | exit=0 exit=0 exit=0 exit=0 | 85/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 79:0,0,1+ctx989:0,0,0 510:0,0,1+ctx989:0,0,0 | t1:none t2:none t3:none +known/2 t4:none +known/4 | stubProfileRequests=3
+> optin-withdrawn | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+> optout-allowed | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:none t2:none | stubProfileRequests=0
+> profile-401 | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> profile-timeout | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> queued-reassign | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> reassign-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+> record-credential-mismatch | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> record-relabel | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> refresh-due | exit=0 exit=0 exit=0 | 85/fresh 484/fresh 655/fresh | 85:1,0,0+ctx987:0,0,0 484:0,1,0+ctx822:0,0,0 655:1,1,0+ctx987:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=4
+> resumed-allowed | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx987:0,0,0 83:0,1,0+ctx987:0,0,0 50:0,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=3
+> resumed-coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx987:0,0,0 83:0,1,0+ctx987:0,0,0 50:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> resumed-reassign-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx987:0,0,0 50:0,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+> resumed-revoke-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx987:0,0,0 50:0,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+> revoke-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+> revoked | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+> rotate-after-send | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> skill-config-dir | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+37,39c37,39
+< skill-config-dir-added | exit=0 exit=0 exit=0 exit=0 | 85/fresh 516/fresh 449/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 | | stubProfileRequests=4
+< skill-config-dir-persistent | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+---
+> skill-config-dir-added | exit=0 exit=0 exit=0 exit=0 | 85/fresh 516/fresh 449/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 | | stubProfileRequests=4
+> skill-config-dir-persistent | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx822:0,0,0 79:0,0,1+ctx989:0,0,0 510:0,0,1+ctx989:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+DIFFERS after exit-race mask (above)
+# unmasked diff:
+2,35c2,35
+< allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< different-account | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< empty-first-turn-switch | exit=1 exit=0 | -/-/REFUSED 467/fresh | 467:0,1,0+ctx1310:0,0,0 | t1:known/1 t2:known/3 | stubProfileRequests=2
+< expired-unattested | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+< interrupted-allowed | exit=0 exit=143 exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1398:0,0,0 61:0,0,0+ctx1800:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-fresh | exit=0 exit=143 exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1396:0,0,0 529:1,0,0+ctx1798:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-reassign-before-context | exit=0 exit=1 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1414:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1249:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-reassign-before-send | exit=0 exit=143 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1411:0,0,0 61:0,0,0+ctx1813:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+< interrupted-revoke-before-context | exit=0 exit=1 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1412:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1247:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-revoke-before-send | exit=0 exit=1 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1409:0,0,0 61:0,0,0+ctx1811:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+< keychain-allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< keychain-ambiguous-prep | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:none t2:none | stubProfileRequests=0
+< keychain-fails-at-commit | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< keychain-fails-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+< note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx1310:0,0,0 52:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< optin-later | exit=0 exit=0 exit=0 exit=0 | 85/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none +known/2 t4:none +known/4 | stubProfileRequests=3
+< optin-withdrawn | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+< optout-allowed | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:none t2:none | stubProfileRequests=0
+< profile-401 | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< profile-timeout | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< queued-reassign | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< reassign-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+< record-credential-mismatch | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+< record-relabel | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< refresh-due | exit=0 exit=0 exit=0 | 85/fresh 484/fresh 655/fresh | 85:1,0,0+ctx1310:0,0,0 484:0,1,0+ctx1145:0,0,0 655:1,1,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=4
+< resumed-allowed | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx1310:0,0,0 83:0,1,0+ctx1310:0,0,0 50:0,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=3
+< resumed-coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx1310:0,0,0 83:0,1,0+ctx1310:0,0,0 50:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< resumed-reassign-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx1310:0,0,0 50:0,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+< resumed-revoke-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx1310:0,0,0 50:0,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+< revoke-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+< revoked | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+< rotate-after-send | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx1310:0,0,0 551:1,1,0+ctx1310:0,0,0 451:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+< skill-config-dir | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+---
+> allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> different-account | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> empty-first-turn-switch | exit=1 exit=0 | -/-/REFUSED 467/fresh | 467:0,1,0+ctx987:0,0,0 | t1:known/1 t2:known/3 | stubProfileRequests=2
+> expired-unattested | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+> interrupted-allowed | exit=0 exit=143 exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1075:0,0,0 61:0,0,0+ctx1477:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-fresh | exit=0 exit=1 exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1073:0,0,0 529:1,0,0+ctx1475:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-reassign-before-context | exit=0 exit=1 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1091:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx926:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-reassign-before-send | exit=0 exit=143 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1088:0,0,0 61:0,0,0+ctx1490:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+> interrupted-revoke-before-context | exit=0 exit=143 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1089:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx924:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-revoke-before-send | exit=0 exit=1 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1086:0,0,0 61:0,0,0+ctx1488:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+> keychain-allowed | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> keychain-ambiguous-prep | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:none t2:none | stubProfileRequests=0
+> keychain-fails-at-commit | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> keychain-fails-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+> note-resumed-allowed | exit=0 exit=0 | 85/fresh 52/resume | 85:1,0,0+ctx987:0,0,0 52:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> optin-later | exit=0 exit=0 exit=0 exit=0 | 85/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 79:0,0,1+ctx989:0,0,0 510:0,0,1+ctx989:0,0,0 | t1:none t2:none t3:none +known/2 t4:none +known/4 | stubProfileRequests=3
+> optin-withdrawn | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+> optout-allowed | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:none t2:none | stubProfileRequests=0
+> profile-401 | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> profile-timeout | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> queued-reassign | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> reassign-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+> record-credential-mismatch | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+> record-relabel | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> refresh-due | exit=0 exit=0 exit=0 | 85/fresh 484/fresh 655/fresh | 85:1,0,0+ctx987:0,0,0 484:0,1,0+ctx822:0,0,0 655:1,1,0+ctx987:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=4
+> resumed-allowed | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx987:0,0,0 83:0,1,0+ctx987:0,0,0 50:0,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 t3:known/6 | stubProfileRequests=3
+> resumed-coverage-switch | exit=0 exit=0 exit=0 | 85/fresh 83/resume 50/resume | 85:1,0,0+ctx987:0,0,0 83:0,1,0+ctx987:0,0,0 50:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> resumed-reassign-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx987:0,0,0 50:0,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+> resumed-revoke-before-send | exit=0 exit=1 exit=0 | 85/fresh -/-/REFUSED 50/resume | 85:1,0,0+ctx987:0,0,0 50:0,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 t3:known/5 | stubProfileRequests=3
+> revoke-before-send | exit=0 exit=1 | 85/fresh -/-/REFUSED | 85:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/3 | stubProfileRequests=2
+> revoked | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=1
+> rotate-after-send | exit=0 exit=0 exit=0 | 85/fresh 551/fresh 451/fresh | 85:1,0,0+ctx987:0,0,0 551:1,1,0+ctx987:0,0,0 451:0,0,0+ctx822:0,0,0 | t1:known/2 t2:known/3 t3:unknown | stubProfileRequests=3
+> skill-config-dir | exit=0 exit=0 | 85/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 | t1:known/2 t2:unknown | stubProfileRequests=2
+37,39c37,39
+< skill-config-dir-added | exit=0 exit=0 exit=0 exit=0 | 85/fresh 516/fresh 449/fresh 449/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 449:0,0,0+ctx1145:0,0,0 449:0,0,0+ctx1145:0,0,0 | | stubProfileRequests=4
+< skill-config-dir-persistent | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx1310:0,0,0 516:1,0,0+ctx1310:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+< upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+---
+> skill-config-dir-added | exit=0 exit=0 exit=0 exit=0 | 85/fresh 516/fresh 449/fresh 449/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 449:0,0,0+ctx822:0,0,0 449:0,0,0+ctx822:0,0,0 | | stubProfileRequests=4
+> skill-config-dir-persistent | exit=0 exit=0 | 85/fresh 516/fresh | 85:1,0,0+ctx987:0,0,0 516:1,0,0+ctx987:0,0,0 | t1:known/2 t2:known/4 | stubProfileRequests=2
+> upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx822:0,0,0 79:0,0,1+ctx989:0,0,0 510:0,0,1+ctx989:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+# outcomes-upgrade-1005.txt:
+1c1
+< upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx1145:0,0,0 79:0,0,1+ctx1312:0,0,0 510:0,0,1+ctx1312:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
+---
+> upgrade | exit=0 exit=0 exit=0 exit=0 exit=0 exit=0 | 85/fresh 48/fresh 449/fresh 79/fresh 510/fresh | 85:1,0,0+ctx669:0,0,0 48:0,0,0+ctx669:0,0,0 449:0,0,0+ctx822:0,0,0 79:0,0,1+ctx989:0,0,0 510:0,0,1+ctx989:0,0,0 | t1:none t2:none t3:none t4:none +known/2 t5:none +known/4 | stubProfileRequests=3
