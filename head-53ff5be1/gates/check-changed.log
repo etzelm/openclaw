@@ -1,0 +1,2336 @@
+$ node scripts/check-changed.mjs --base 79506514289f3d51342af165dc0f6f9c0638a40b
+[check:changed] lanes=core, coreTests, extensions, extensionTests, docs, bundledChannelConfigMetadata
+[check:changed] extension-impacting surface; extension typecheck included
+[check:changed] extensions/anthropic/cli-runtime.test.ts: extension test
+[check:changed] extensions/anthropic/cli.runtime.ts: extension production
+[check:changed] extensions/anthropic/openclaw.plugin.json: bundled channel config metadata input
+[check:changed] extensions/anthropic/openclaw.plugin.json: extension production
+[check:changed] src/agents/cli-credentials.test.ts: core test
+[check:changed] src/agents/cli-credentials.ts: core production
+[check:changed] src/agents/cli-runner/cli-live-session-registry.test.ts: core test
+[check:changed] src/agents/cli-runner/cli-live-session-registry.ts: core production
+[check:changed] src/agents/cli-runner/execute-plugin.test.ts: core test
+[check:changed] src/agents/cli-runner/execute-plugin.ts: core production
+[check:changed] src/agents/cli-runner/execute.native-history-owner.test.ts: core test
+[check:changed] src/agents/cli-runner/execute.ts: core production
+[check:changed] src/agents/cli-runner/execution-env.ts: core production
+[check:changed] src/agents/cli-runner/history-boundary.incognito.test.ts: core test
+[check:changed] src/agents/cli-runner/history-boundary.native-login.test.ts: core test
+[check:changed] src/agents/cli-runner/history-boundary.test-support.ts: core test
+[check:changed] src/agents/cli-runner/history-boundary.test.ts: core test
+[check:changed] src/agents/cli-runner/history-boundary.ts: core production
+[check:changed] src/agents/cli-runner/prepare-native-history.test.ts: core test
+[check:changed] src/agents/cli-runner/prepare.ts: core production
+[check:changed] src/agents/cli-runner/types.ts: core production
+[check:changed] src/agents/sessions/session-manager-metadata-command.ts: core production
+[check:changed] src/agents/sessions/session-manager-metadata-runtime.ts: core production
+[check:changed] src/agents/sessions/session-manager-metadata.worker.ts: core production
+[check:changed] src/config/sessions/cli-history-boundary.ts: core production
+[check:changed] src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts: core production
+[check:changed] src/config/sessions/session-accessor.sqlite-transcript-reports.ts: core production
+[check:changed] src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts: core production
+[check:changed] src/config/sessions/session-actor-memory-events.ts: core production
+[check:changed] src/config/sessions/session-actor-memory-transcript.ts: core production
+[check:changed] src/config/sessions/session-turn.ts: core production
+[check:changed] src/config/sessions/session-turn.worker.ts: core production
+[check:changed] src/plugin-sdk/provider-auth-claude-compat.test.ts: core test
+[check:changed] src/plugin-sdk/provider-auth-claude-compat.ts: public core/plugin contract affects extensions
+
+[check:changed] conflict markers
+$ node scripts/check-no-conflict-markers.mjs
+
+[check:changed] line-cap growth ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-line-cap-ratchet.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+Line-cap ratchet OK: 32 changed source files; no new violations or over-cap growth.
+
+[check:changed] max-lines suppression ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/chat/components/chat-message.test.tsx: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/config/config-page-state.ts: Remove the new max-lines suppression and split the file.
+New max-lines suppressions are forbidden; split these files:
+  ui/src/pages/sessions/sessions-page-state.ts: Remove the new max-lines suppression and split the file.
+[ELIFECYCLE] Command failed with exit code 1.
+
+[check:changed] assertion SAFETY comment ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+assertion SAFETY ratchet OK: 2525 files, 5797 grandfathered assertions.
+
+[check:changed] SQLite worker ratchet
+$ node --max-old-space-size=4096 --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+SQLite T1 live calls: 171 -> 171; T1-compat deprecated-only calls: 15 -> 15.
+SQLite worker ratchet OK: no T1 call-count growth against 79506514289f3d51342af165dc0f6f9c0638a40b.
+
+[check:changed] SQLite dialect ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-database-dialect-ratchet.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+SQLite dialect scope: 21 differing production files; use --full-tree for totals.
+SQLite dialect mechanical (changed files): 0 -> 0.
+SQLite dialect design (changed files): 0 -> 0.
+SQLite dialect engine-maintenance (changed files): 0 -> 0.
+SQLite string-set owner: 0 mechanical occurrences in changed files (included above).
+SQLite primitive owners: 0 engine-maintenance matches in changed files (excluded from comparison).
+SQLite dialect ratchet OK: no construct-group growth against 79506514289f3d51342af165dc0f6f9c0638a40b.
+
+[check:changed] test timeout race ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+test timeout race ratchet OK: 117 files, 234 grandfathered sites.
+
+[check:changed] first-party mock export ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base 79506514289f3d51342af165dc0f6f9c0638a40b
+Mock factory ratchet OK: 8160 grandfathered factories.
+
+[check:changed] changelog attributions
+$ node --import ./scripts/tsx.mjs scripts/check-changelog-attributions.mts
+
+[check:changed] doctor deprecation registry
+$ node --import ./scripts/tsx.mjs scripts/check-doctor-deprecation-registry.ts
+[doctor-deprecation-registry] OK as of 2026-10-20
+
+[check:changed] guarded extension wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-extension-wildcard-reexports.mts
+No guarded extension wildcard re-exports found.
+
+[check:changed] plugin-sdk wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-plugin-sdk-wildcard-reexports.mts
+No plugin-sdk wildcard re-exports found in extension API barrels.
+
+[check:changed] extension test core imports
+$ node --import ./scripts/tsx.mjs scripts/check-no-extension-test-core-imports.ts
+OK: extension test files, support helpers, and plugin test helpers avoid direct core test/internal imports (4846 extension files, 0 plugin helpers checked).
+
+[check:changed] duplicate scan target coverage
+$ node scripts/check-duplicates.mjs --coverage
+[dup:check] target coverage ok
+
+[check:changed] dependency pin guard
+$ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
+PASS direct dependency pin guard: checked 769 directly declared dependency specs across 208 tracked package manifests; 0 violations.
+
+[check:changed] format changed files
+$ node scripts/run-format.mts --check --no-error-on-unmatched-pattern -- docs/.generated/config-baseline.counts.json docs/.generated/config-baseline.sha256 docs/gateway/cli-backends.md extensions/anthropic/cli-runtime.test.ts extensions/anthropic/cli.runtime.ts extensions/anthropic/openclaw.plugin.json src/agents/cli-credentials.test.ts src/agents/cli-credentials.ts src/agents/cli-runner/cli-live-session-registry.test.ts src/agents/cli-runner/cli-live-session-registry.ts src/agents/cli-runner/execute-plugin.test.ts src/agents/cli-runner/execute-plugin.ts src/agents/cli-runner/execute.native-history-owner.test.ts src/agents/cli-runner/execute.ts src/agents/cli-runner/execution-env.ts src/agents/cli-runner/history-boundary.incognito.test.ts src/agents/cli-runner/history-boundary.native-login.test.ts src/agents/cli-runner/history-boundary.test-support.ts src/agents/cli-runner/history-boundary.test.ts src/agents/cli-runner/history-boundary.ts src/agents/cli-runner/prepare-native-history.test.ts src/agents/cli-runner/prepare.ts src/agents/cli-runner/types.ts src/agents/sessions/session-manager-metadata-command.ts src/agents/sessions/session-manager-metadata-runtime.ts src/agents/sessions/session-manager-metadata.worker.ts src/config/sessions/cli-history-boundary.ts src/config/sessions/session-accessor.sqlite-cli-history-boundary.ts src/config/sessions/session-accessor.sqlite-transcript-reports.ts src/config/sessions/session-accessor.sqlite-transcript-reports.worker.ts src/config/sessions/session-actor-memory-events.ts src/config/sessions/session-actor-memory-transcript.ts src/config/sessions/session-turn.ts src/config/sessions/session-turn.worker.ts src/plugin-sdk/provider-auth-claude-compat.test.ts src/plugin-sdk/provider-auth-claude-compat.ts
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 8ms on 33 files using 32 threads.
+
+[check:changed] doctor contract declaration + closure guard tests
+$ node scripts/test-projects-serial.mts src/plugins/doctor-contract-declarations.test.ts src/plugins/doctor-contract-closure-guard.test.ts
+[test] starting test/vitest/vitest.plugins.config.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m$HOME/work/pr-164796-merge4[39m
+
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mclassifies only static value module edges[32m 88[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mkeeps broad agent runtime and heavy doctor barrels off doctor enumeration paths[32m 254[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mkeeps the runtime doctor migration helper off state DB and plugin-state graphs[32m 24[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-closure-guard.test.ts[2m > [22mdoctor contract import closures[2m > [22mkeeps kysely statically unreachable from every plugin closure[33m 456[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22maccepts descriptor-only config repairs and default exports[32m 10[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22mrejects malformed or ambiguous descriptors: {"from":"old/model","to":"new","baseUrl":"https://models.example"}[32m 2[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22mrejects malformed or ambiguous descriptors: {"from":"old","to":"old","baseUrl":"https://models.example"}[32m 1[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mprovider rename descriptors[2m > [22mrejects malformed or ambiguous descriptors: {"from":"old","to":"new","baseUrl":"not a URL"}[32m 1[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mbundled plugin doctor contract declarations[2m > [22mmatches every resolvable artifact's coerced doctor surfaces[33m 531[2mms[22m[39m
+ [32m✓[39m [30m[45m plugins [49m[39m src/plugins/doctor-contract-declarations.test.ts[2m > [22mbundled plugin doctor contract declarations[2m > [22mdeclares every state migration identity and phase in module order[32m 70[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 23:34:13
+[2m   Duration [22m 3.29s[2m (tests 47%, transform 37%, setup 13%, import 3%)[22m
+
+[test] passed 1 Vitest shard in 4.93s
+
+[check:changed] bundled channel config metadata
+$ node --import ./scripts/tsx.mjs scripts/generate-bundled-channel-config-metadata.ts --check
+
+[check:changed] config docs baseline
+$ node --import ./scripts/tsx.mjs scripts/generate-config-doc-baseline.ts --check
+OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+
+[check:changed] Plugin SDK package exports
+$ node --import ./scripts/tsx.mjs scripts/sync-plugin-sdk-exports.mts --check
+plugin-sdk registration synced.
+
+[check:changed] Plugin SDK surface budget
+$ node --max-old-space-size=8192 --import ./scripts/tsx.mjs scripts/plugin-sdk-surface-report.mts --check
+all SDK entrypoints:
+  entrypoints: 380
+  exports: 7395
+  callable exports: 4550
+  deprecated exports: 387
+  deprecated callable exports: 299
+  unique entrypoint-qualified exports: 7395
+public package SDK entrypoints:
+  entrypoints: 156
+  exports: 3810
+  callable exports: 2208
+  deprecated exports: 219
+  deprecated callable exports: 159
+  unique entrypoint-qualified exports: 3810
+local-only SDK entrypoints:
+  entrypoints: 224
+  exports: 3585
+  callable exports: 2342
+  deprecated exports: 168
+  deprecated callable exports: 140
+  unique entrypoint-qualified exports: 3585
+deprecated public subpaths: 2
+deprecated barrel subpaths: 0
+public wildcard reexports: 0
+package-exported forbidden subpaths: 0
+shipped Plugin SDK v2026.10.5: no unauthorized removals
+
+[check:changed] plugin boundaries
+$ node --import ./scripts/tsx.mjs scripts/plugin-boundary-report.ts --summary --fail-on-eligible-compat
+Plugin Boundary Report
+
+compat deprecated=68 eligibleForRemoval=0 removalPending=15 removalPendingDue=14
+  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8593 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
+  removal-pending 2026-09-30 plugin-sdk-media-understanding-public-demotion due=true blocker=`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate readerRefs=61 readers=extensions/anthropic/media-understanding-provider.ts,extensions/browser/src/browser-tool.test-support.ts,extensions/browser/src/browser/vision.test.ts,extensions/browser/src/browser/vision.ts,extensions/browser/src/cli/browser-cli-extension.test.ts
+  removal-pending 2026-09-30 plugin-sdk-memory-host-core-public-demotion due=true blocker=host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists readerRefs=28 readers=extensions/active-memory/index.status.test.ts,extensions/active-memory/index.test.ts,extensions/active-memory/index.ts,extensions/codex/src/app-server/attempt-context.test.ts,extensions/codex/src/app-server/run-attempt-memory.test-support.ts
+  removal-pending 2026-10-01 agent-harness-terminal-result-aliases due=true blocker=AgentHarnessAttemptResult.terminal and AgentHarnessDeliveryDefaults.visibleReplies; retain until harness migration verifies that legacy terminal fields and sourceVisibleReplies are unread readerRefs=0 readers=none
+  removal-pending 2026-10-01 message-presentation-legacy-bridges due=true blocker=MessagePresentation values and channel presentation renderers; retain until reply producers and official channel packages no longer emit or read legacy interactive replies readerRefs=163 readers=extensions/a2a/src/channel.ts,extensions/a2a/src/inbound.test.ts,extensions/codex/src/app-server/run-attempt-active-turn.ts,extensions/codex/src/app-server/run-attempt.final-media.test.ts,extensions/codex/src/conversation-binding-hooks.ts
+  removal-pending 2026-10-01 official-plugin-export-aliases due=true blocker=MessagePresentation renderers and host-owned timeout/runtime behavior; retain until minimum supported official plugin packages no longer import these aliases readerRefs=21 readers=extensions/discord/api.ts,extensions/discord/src/voice/audio-worker-thread.ts,extensions/qa-lab/src/crabline-discord-thread-delivery.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.ts,extensions/qa-lab/src/live-transports/discord/discord-transcripts-authorization.runtime.test.ts
+  removal-pending 2026-10-01 plugin-sdk-channel-setup-input-fields due=true blocker=plugin-local setup input intersections that declare each owning channel field; retain each field until a new published-plugin artifact sweep finds no reader readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-runtime-api-compat-aliases due=true blocker=the namespaced plugin API and focused runtime methods named per surface; retain until all enumerated flat API and runtime aliases have no readers readerRefs=7 readers=extensions/feishu/src/bot.broadcast.routing.test.ts,extensions/feishu/src/bot.test.ts,extensions/mattermost/src/mattermost/monitor.inbound-system-event.test.ts,extensions/nextcloud-talk/src/inbound.behavior.test.ts,src/plugin-sdk/test-helpers/plugin-runtime-mock.test.ts
+  removal-pending 2026-10-01 plugin-provider-manifest-compat-aliases due=true blocker=manifest-owned plugin kind/setup metadata and model catalog registration; retain until providers no longer publish runtime kind or legacy catalog hooks readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-sdk-provider-owned-helper-shims due=true blocker=provider-local auth, model, replay, OAuth, and stream helper APIs; retain until every helper is migrated in official providers and absent from published plugins readerRefs=508 readers=extensions/agentsapi/agentsapi-harness.lifecycle.test-helpers.ts,extensions/agentsapi/agentsapi-harness.persistence.test.ts,extensions/agentsapi/agentsapi-harness.ts,extensions/agentsapi/native-session-binding.test-api.ts,extensions/alibaba/video-generation-provider.test.ts
+  removal-pending 2026-10-01 media-legacy-projection due=true blocker=ordered `MsgContext.media` / `InboundMediaFacts[]`; typed hook `media` and `originalMedia`; `Attachment*` template variables; and `openclaw/plugin-sdk/media-local-roots`; retain until a clean published-plugin artifact sweep verifies that the legacy media surfaces have no readers readerRefs=2 readers=src/plugins/compat/media-legacy-projection.ts,test/scripts/check-deprecated-api-usage.test.ts
+  removal-pending 2026-10-01 memory-host-compatibility-aliases due=true blocker=canonical memory cache/FTS tables; retain until supported memory integrations are verified to use canonical tables without overrides and legacy table data remains preserved readerRefs=2 readers=src/plugins/compat/deprecation-marking.ts,src/plugins/contracts/extension-package-project-boundaries.test.ts
+  removal-pending 2026-10-01 plugin-sdk-broad-runtime-barrels due=true blocker=focused plugin SDK subpaths for each runtime capability; retain until bundled and published plugins no longer import any of the seven broad barrels readerRefs=876 readers=extensions/a2a/src/http.test.ts,extensions/acpx/src/runtime.ts,extensions/acpx/src/session-owner-migration.ts,extensions/active-memory/index.status.test.ts,extensions/active-memory/index.ts
+  removal-pending 2026-10-01 plugin-sdk-focused-compat-aliases due=true blocker=the focused replacement named by each TypeScript @deprecated annotation; retain until every enumerated alias has zero bundled and published readers readerRefs=468 readers=extensions/a2a/src/inbound.ts,extensions/acpx/index.test.ts,extensions/acpx/index.ts,extensions/acpx/register.runtime.startup.test.ts,extensions/acpx/register.runtime.test.ts
+  removal-pending 2026-12-01 plugin-sdk-plugin-config-runtime-public-demotion due=false blocker=`api.pluginConfig`, runtime tool context config, and focused `config-contracts`, `runtime-config-snapshot`, or `config-mutation` subpaths; retain the public subpath through the 2026-12-01 window while official plugin consumers migrate readerRefs=59 readers=extensions/active-memory/index.ts,extensions/active-memory/session-policy.ts,extensions/active-memory/trigger-recall.ts,extensions/amazon-bedrock-mantle/register.sync.runtime.ts,extensions/amazon-bedrock/register.sync.runtime.ts
+plugin-sdk entrypoints=380 supportedBundledFacade=0 publicPluginOwned=1
+memory-host-sdk implementation=private-package-core-integrated private=true exports=10 sourceBridgeFiles=0 coreReferenceFiles=27
+
+[check:changed] wrapper shadowing
+$ node --import ./scripts/tsx.mjs scripts/check-wrapper-shadowing.mts
+wrapper shadowing guard passed.
+
+[check:changed] package patch guard
+$ node --import ./scripts/tsx.mjs scripts/check-package-patches.mts
+PASS package patch guard: no new pnpm patches; 8 approved patches allowlisted.
+
+[check:changed] test temp creation report (warning-only)
+New test temp-directory migration warnings:
+- src/agents/cli-credentials.test.ts:546 new mkdtemp temp directory creation: const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-native-owner-"));
+- src/agents/cli-runner/history-boundary.incognito.test.ts:181 new mkdtemp temp directory creation: const configDir = fs.mkdtempSync(join(os.tmpdir(), "openclaw-incognito-claude-"));
+Prefer useAutoCleanupTempDirTracker(afterEach) from test/helpers/temp-dir.ts for new test-owned temp directories.
+
+[check:changed] core tsgo graph boundary
+$ node --import ./scripts/tsx.mjs scripts/check-tsgo-core-boundary.mts
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: gateway-root: 726 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: plugins-platform: 727 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget exceeded
+[ELIFECYCLE] Command failed with exit code 1.
+
+[check:changed] Control UI i18n catalog
+$ pnpm ui:i18n:verify
+$ node --import ./scripts/tsx.mjs scripts/control-ui-i18n-verify.ts verify
+control-ui-i18n: raw-copy: baseline entries=79
+control-ui-i18n: source: keys=10834 literal_references=8545 template_prefix_references=312
+control-ui-i18n: plugin=memory-core keys=74 locales=21 unused_translations=0
+control-ui-i18n: plugin=nostr keys=61 locales=21 unused_translations=0
+control-ui-i18n: plugin=whatsapp keys=23 locales=21 unused_translations=0
+control-ui-i18n: plugin=workboard keys=381 locales=21 unused_translations=1180
+
+[check:changed] typecheck core
+$ node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/core.tsbuildinfo
+
+[check:changed] typecheck core tests
+$ node scripts/run-tsgo-core-test-shards.mjs
+[tsgo:agents-root] passed in 2.0s
+[tsgo:agents-other] passed in 2.1s
+[tsgo:agents-tools] passed in 2.0s
+[tsgo:gateway-root] passed in 2.5s
+[tsgo:gateway-server] passed in 3.5s
+[tsgo:gateway-other] passed in 3.7s
+[tsgo:infra] passed in 3.9s
+[tsgo:state-logging] passed in 2.6s
+[tsgo:commands] passed in 2.2s
+[tsgo:plugins-platform] passed in 2.4s
+[tsgo:config-cli] passed in 2.1s
+[tsgo:messaging] passed in 2.1s
+[tsgo:services] passed in 2.1s
+[tsgo:other] passed in 2.0s
+[tsgo:ui-pages] passed in 2.3s
+[tsgo:ui-e2e] passed in 2.5s
+[tsgo:ui-other] passed in 2.2s
+[tsgo:packages] passed in 2.1s
+[tsgo:plugin-sdk] passed in 2.0s
+[tsgo:commands-doctor] passed in 2.3s
+[tsgo:cli-update] passed in 2.3s
+[tsgo:gateway-methods] passed in 2.5s
+[tsgo:ui-chat] passed in 2.3s
+[tsgo:agents-sessions] passed in 2.1s
+[tsgo:services-cron] passed in 1.2s
+[tsgo:ui-app] passed in 1.2s
+[tsgo:ui-components] passed in 1.1s
+[tsgo:claws] passed in 0.8s
+[tsgo:ui-e2e-chat] passed in 1.2s
+
+[check:changed] typecheck extensions
+$ node scripts/run-tsgo.mjs -p tsconfig.extensions.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/extensions.tsbuildinfo
+
+[check:changed] typecheck extension tests
+$ node scripts/run-tsgo.mjs -p test/tsconfig/tsconfig.extensions.test.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/extensions-test.tsbuildinfo
+
+[check:changed] coercion helper declaration guard
+$ node --import ./scripts/tsx.mjs scripts/check-coercion-helper-declarations.mts
+Coercion helper declaration guard passed (119 allowlisted declarations).
+
+[check:changed] deprecated API usage
+$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
+deprecated API usage guard passed
+
+[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+[deadcode] Knip script unused-export scan still running after 60s.
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  ui/src/lib/keyboard-shortcut-contract.ts: formatKeyboardShortcutCombo
+Delete the exports or model their real production consumers in Knip.
+[deadcode] Knip full-tree unused-export scan passed with 0 entries.
+
+[check:changed] lint core
+$ node --import ./scripts/tsx.mjs scripts/run-oxlint-shards.mts --only=core
+[oxlint] shard concurrency 1 (cpus=32, memGB=512)
+[oxlint:core] starting
+[oxlint:core] still running after 30s
+[oxlint:core] still running after 60s
+[oxlint:core] still running after 90s
+[oxlint:core] still running after 120s
+[oxlint:core] still running after 150s
+[oxlint:core] still running after 180s
+[oxlint:core] still running after 210s
+[oxlint:core] still running after 240s
+[oxlint:core] still running after 270s
+[oxlint:core] still running after 300s
+[oxlint:core] still running after 330s
+[oxlint:core] still running after 360s
+[oxlint:core] still running after 390s
+
+  ! eslint(max-lines): File has too many lines (1063).
+      ,-[ui/src/app/app-shell-gateway.test.ts:1111:4]
+ 1110 |   );
+ 1111 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  ! solid(reactivity): The reactive variable 'user' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/chat-avatar.test.tsx:489:18]
+ 488 | 
+ 489 |     setUser({ ...user() });
+     :                  ^^^^^^
+ 490 |     flush();
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/components/modal-dialog.test.tsx:185:11]
+ 184 |               <button autofocus>Other action</button>
+ 185 | ,->           <textarea
+ 186 | |               ref={(element) => {
+ 187 | |                 input = element;
+ 188 | |               }}
+ 189 | |               autofocus
+ 190 | `->           ></textarea>
+ 191 |             </openclaw-modal-dialog>
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/components/modal-dialog.test.tsx:229:13]
+ 228 |             </button>
+ 229 |             <video controls tabindex="0"></video>
+     :             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 230 |           </openclaw-modal-dialog>
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/lib/hover-marquee.browser.test.tsx:18:57]
+ 17 |     () => (
+ 18 |       <a class="session-row-host" href="#session" style="display:block;width:180px">
+    :                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 19 |         <HoverMarquee content={title()} class="sidebar-recent-session__name" options={{}} />
+    `----
+
+  ! eslint(max-lines): File has too many lines (1287).
+      ,-[ui/src/pages/activity/activity-page.test.ts:1364:4]
+ 1363 |   );
+ 1364 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  ! solid(reactivity): This tracked scope should not be async. Solid's reactivity only tracks synchronously.
+    ,-[ui/src/app/navigation-surface-view.test.tsx:55:20]
+ 54 |         refreshRequired={refreshRequired()}
+ 55 |         onRefresh={async () => false}
+    :                    ^^^^^^^^^^^^^^^^^
+ 56 |       />
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/plugins/control-ui-dashboard.tsx:118:8]
+ 117 |     undefined,
+ 118 |     () => {
+     :        ^^
+ 119 |       const current = resource();
+     `----
+
+  ! eslint(max-lines): File has too many lines (1142).
+      ,-[src/state/openclaw-agent-db.postgres.test.ts:1163:4]
+ 1162 |   });
+ 1163 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/app/update-confirmation.runtime.tsx:229:56]
+ 228 |                   <div class="exec-approval-title">{view().route.title}</div>
+ 229 |                   <div class="exec-approval-sub" style="white-space: pre-line">
+     :                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+ 230 |                     {view().body}
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/app/navigation-surface.browser.test.tsx:33:15]
+ 32 |         class="shell shell--navigation-rail shell--nav-collapsed"
+ 33 |         style="animation: none; --shell-nav-rail-width: 52px"
+    :               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 34 |       >
+    `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+    ,-[ui/src/app/navigation-surface.browser.test.tsx:36:11]
+ 35 |             <div class="shell-chrome-controls">
+ 36 | ,->           <button
+ 37 | |               class="shell-chrome-controls__button shell-chrome-controls__search"
+ 38 | |               type="button"
+ 39 | |               aria-label="Search"
+ 40 | `->           ></button>
+ 41 |             </div>
+    `----
+
+  ! solid(reactivity): This tracked scope should not be async. Solid's reactivity only tracks synchronously.
+    ,-[ui/src/app/navigation-surface.browser.test.tsx:48:24]
+ 47 |             refreshRequired={true}
+ 48 |             onRefresh={async () => false}
+    :                        ^^^^^^^^^^^^^^^^^
+ 49 |           />
+    `----
+
+  ! solid(reactivity): The reactive variable 'props' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/chat-composer-solid.test.tsx:460:23]
+ 459 |   const [props, setProps] = createSignal({ readDictation: () => controller, onSend: firstSend });
+ 460 |   const actionProps = merge(props);
+     :                       ^^^^^^^^^^^^
+ 461 |   const view = mountSolid(() => <ComposerDictationSendAction {...actionProps} />);
+     `----
+
+  ! solid(reactivity): The reactive variable 'agent' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/solid/identity-avatar.test.tsx:147:21]
+ 146 |     try {
+ 147 |       setAgent({ ...agent() });
+     :                     ^^^^^^^
+ 148 |       flush();
+     `----
+
+  ! solid(reactivity): The reactive variable 'agent' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/solid/identity-avatar.test.tsx:154:19]
+ 153 | 
+ 154 |     setAgent({ ...agent(), avatar: "/avatar/sidebar-synthetic", pending: false });
+     :                   ^^^^^^^
+ 155 |     flush();
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/components/lobster-pet-dismiss-menu.tsx:21:14]
+ 20 |       class="lobster-pet-dismiss-menu__position"
+ 21 |       style={`--lobster-pet-menu-x: ${params.position.x}px; --lobster-pet-menu-y: ${params.position.y}px;`}
+    :              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 22 |     >
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:160:54]
+ 159 |           <Show when={props.look.shiny}>
+ 160 |             <span class="lobster-pet__sparkle" style="--i:0;left:12%;bottom:64%">
+     :                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 161 |               ✦
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:163:54]
+ 162 |             </span>
+ 163 |             <span class="lobster-pet__sparkle" style="--i:1;left:76%;bottom:82%">
+     :                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 164 |               ✦
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:167:46]
+ 166 |           </Show>
+ 167 |           <span class="lobster-pet__z" style="--i:0">
+     :                                              ^^^^^^^
+ 168 |             z
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:170:46]
+ 169 |           </span>
+ 170 |           <span class="lobster-pet__z" style="--i:1">
+     :                                              ^^^^^^^
+ 171 |             z
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:173:46]
+ 172 |           </span>
+ 173 |           <span class="lobster-pet__z" style="--i:2">
+     :                                              ^^^^^^^
+ 174 |             Z
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:176:51]
+ 175 |           </span>
+ 176 |           <span class="lobster-pet__bubble" style="--i:0" />
+     :                                                   ^^^^^^^
+ 177 |           <span class="lobster-pet__bubble" style="--i:1" />
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:177:51]
+ 176 |           <span class="lobster-pet__bubble" style="--i:0" />
+ 177 |           <span class="lobster-pet__bubble" style="--i:1" />
+     :                                                   ^^^^^^^
+ 178 |           <span class="lobster-pet__bubble" style="--i:2" />
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:178:51]
+ 177 |           <span class="lobster-pet__bubble" style="--i:1" />
+ 178 |           <span class="lobster-pet__bubble" style="--i:2" />
+     :                                                   ^^^^^^^
+ 179 |           <span class="lobster-pet__heart">♥</span>
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:289:18]
+ 288 |           class="lobster-pet lobster-pet--shell"
+ 289 |           style={`${view().shellStyle};--lob-x:${view().shellPoint.x}px;--lob-y:${view().shellPoint.y}px`}
+     :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 290 |           aria-hidden="true"
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/lobster-pet-scene-view.tsx:301:20]
+ 300 |             class={["lobster-bottle", { "lobster-bottle--open": bottle().opened }]}
+ 301 |             style={`--lob-x:${view().bottlePoint.x}px`}
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 302 |             title={bottle().opened ? bottle().fortune : "a message in a bottle"}
+     `----
+
+  ! solid(reactivity): The reactive variable 'progressScope' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/lib/board/widgets/session-progress.tsx:87:20]
+ 86 |   );
+ 87 |   const progress = projectProgressCard(progressScope);
+    :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 88 |   const rosterScope = createMemo(
+    `----
+
+  ! solid(reactivity): The reactive variable 'agentId' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-agent-menu-switcher.tsx:108:52]
+ 107 |     as: "div",
+ 108 |     id: `${AGENT_VALUE_PREFIX}${encodeURIComponent(agentId())}`,
+     :                                                    ^^^^^^^^^
+ 109 |     get label() {
+     `----
+
+  ! solid(reactivity): The reactive variable 'agents' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-agent-menu-switcher.tsx:235:23]
+ 234 |   }
+ 235 |   for (const agent of agents()) {
+     :                       ^^^^^^^^
+ 236 |     entries.push(
+     `----
+
+  ! solid(reactivity): The reactive variable 'autofocusAll' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-agent-menu-switcher.tsx:223:31]
+ 222 |         "aria-current": params.allAgentsScope ? "true" : undefined,
+ 223 |         "data-initial-focus": autofocusAll() ? "" : undefined,
+     :                               ^^^^^^^^^^^^^^
+ 224 |       },
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-agent-menu-switcher.tsx:240:12]
+ 239 |         params,
+ 240 |         () => agent === autofocusAgent(),
+     :            ^^
+ 241 |         () =>
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-agent-menu-switcher.tsx:241:12]
+ 240 |         () => agent === autofocusAgent(),
+ 241 |         () =>
+     :            ^^
+ 242 |           (nameCounts().get(
+     `----
+
+  ! eslint(max-lines): File has too many lines (733).
+     ,-[ui/src/app/bootstrap.ts:758:2]
+ 757 |   };
+ 758 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): The reactive variable 'activate' should be wrapped in a function for reactivity. This includes event handler bindings on native elements, which are not reactive like other JSX props.
+     ,-[ui/src/pages/meetings/meetings-page.tsx:553:13]
+ 552 |   const activate = () => refreshLive(true);
+ 553 |   onCleanup(listen(document, "visibilitychange", activate));
+     :             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 554 |   onCleanup(listen(globalThis, "focus", activate));
+     `----
+
+  ! solid(reactivity): The reactive variable 'activate' should be wrapped in a function for reactivity. This includes event handler bindings on native elements, which are not reactive like other JSX props.
+     ,-[ui/src/pages/meetings/meetings-page.tsx:554:13]
+ 553 |   onCleanup(listen(document, "visibilitychange", activate));
+ 554 |   onCleanup(listen(globalThis, "focus", activate));
+     :             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 555 |   onCleanup(() => {
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/solid/gateway-url-confirmation.tsx:118:46]
+ 117 |   return (
+ 118 |     <openclaw-gateway-url-confirmation style="display: contents">
+     :                                              ^^^^^^^^^^^^^^^^^^^
+ 119 |       <Show when={input.props?.pendingGatewayUrl ? input.props : undefined}>
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/activity/activity-page-view.tsx:168:53]
+ 167 |     // Ordered append/reset receipts preserve stream-follow intent across each publication.
+ 168 |     return pageProps.page.liveActivity.subscribe(() => {
+     :                                                     ^^
+ 169 |       const current = liveSnapshot();
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/new-session-runtime.test.tsx:79:77]
+ 78 |         const { params } = pickerParams(true);
+ 79 |         vi.spyOn(params.place.browser, "popoverOpen").mockImplementation(() => open());
+    :                                                                             ^^
+ 80 |         vi.spyOn(params.place.browser, "popoverCallbacks").mockReturnValue({
+    `----
+
+  ! eslint(max-lines): File has too many lines (701).
+     ,-[src/cron/isolated-agent/run-prompt-executor.ts:743:2]
+ 742 |   };
+ 743 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): The reactive variable 'props.pendingMessage' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/draft-body.solid.tsx:46:10]
+ 45 | ) {
+ 46 |   return props.pendingMessage
+    :          ^^^^^^^^^^^^^^^^^^^^
+ 47 |     ? (props.completion?.label ?? props.statusLabel ?? t("newSession.starting"))
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.completion?.label' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/draft-body.solid.tsx:47:8]
+ 46 |   return props.pendingMessage
+ 47 |     ? (props.completion?.label ?? props.statusLabel ?? t("newSession.starting"))
+    :        ^^^^^^^^^^^^^^^^^^^^^^^
+ 48 |     : undefined;
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.statusLabel' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/draft-body.solid.tsx:47:35]
+ 46 |   return props.pendingMessage
+ 47 |     ? (props.completion?.label ?? props.statusLabel ?? t("newSession.starting"))
+    :                                   ^^^^^^^^^^^^^^^^^
+ 48 |     : undefined;
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.value' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:17:9]
+ 16 |   return {
+ 17 |     id: params.value,
+    :         ^^^^^^^^^^^^
+ 18 |     label: params.label,
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.label' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:18:12]
+ 17 |     id: params.value,
+ 18 |     label: params.label,
+    :            ^^^^^^^^^^^^
+ 19 |     type: "radio",
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.checked' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:20:14]
+ 19 |     type: "radio",
+ 20 |     checked: params.checked,
+    :              ^^^^^^^^^^^^^^
+ 21 |     class: "sidebar-session-sort-menu__item",
+    `----
+
+  ! solid(components-return-once): Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:57:5]
+ 56 |   if (!params.owners.length && params.ownerFilterId === null && !params.involvingMe) {
+ 57 |     return [];
+    :     ^^^^^^^^^^
+ 58 |   }
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.owners.length' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:56:8]
+ 55 | }): MenuEntry[] {
+ 56 |   if (!params.owners.length && params.ownerFilterId === null && !params.involvingMe) {
+    :        ^^^^^^^^^^^^^^^^^^^^
+ 57 |     return [];
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.ownerFilterId' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:56:32]
+ 55 | }): MenuEntry[] {
+ 56 |   if (!params.owners.length && params.ownerFilterId === null && !params.involvingMe) {
+    :                                ^^^^^^^^^^^^^^^^^^^^
+ 57 |     return [];
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.involvingMe' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:56:66]
+ 55 | }): MenuEntry[] {
+ 56 |   if (!params.owners.length && params.ownerFilterId === null && !params.involvingMe) {
+    :                                                                  ^^^^^^^^^^^^^^^^^^
+ 57 |     return [];
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.owners.find' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:59:25]
+ 58 |   }
+ 59 |   const selectedOwner = params.owners.find((owner) => owner.id === params.ownerFilterId);
+    :                         ^^^^^^^^^^^^^^^^^^
+ 60 |   const selectedName = selectedOwner?.label ?? selectedOwner?.id;
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.ownerFilterId' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:59:68]
+ 58 |   }
+ 59 |   const selectedOwner = params.owners.find((owner) => owner.id === params.ownerFilterId);
+    :                                                                    ^^^^^^^^^^^^^^^^^^^^
+ 60 |   const selectedName = selectedOwner?.label ?? selectedOwner?.id;
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.owners.length' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:63:64]
+ 62 |     ? t("sessionsView.specificOwnerSelected", { name: selectedName })
+ 63 |     : t("sessionsView.specificOwnerAvailable", { count: String(params.owners.length) });
+    :                                                                ^^^^^^^^^^^^^^^^^^^^
+ 64 |   return [
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.ownerFilterId' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:77:16]
+ 76 |       value: "owner:",
+ 77 |       checked: params.ownerFilterId === null && !params.involvingMe,
+    :                ^^^^^^^^^^^^^^^^^^^^
+ 78 |       label: t("sessionsView.allOwners"),
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.involvingMe' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:77:50]
+ 76 |       value: "owner:",
+ 77 |       checked: params.ownerFilterId === null && !params.involvingMe,
+    :                                                  ^^^^^^^^^^^^^^^^^^
+ 78 |       label: t("sessionsView.allOwners"),
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.involvingMe' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:82:16]
+ 81 |       value: "involving-me",
+ 82 |       checked: params.involvingMe,
+    :                ^^^^^^^^^^^^^^^^^^
+ 83 |       label: t("sessionsView.involvingMe"),
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.owners.length' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:85:9]
+ 84 |     }),
+ 85 |     ...(params.owners.length
+    :         ^^^^^^^^^^^^^^^^^^^^
+ 86 |       ? [
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.compact' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:88:17]
+ 87 |           {
+ 88 |             id: params.compact ? "compact:open-specific-owner" : "specific-owner",
+    :                 ^^^^^^^^^^^^^^
+ 89 |             label,
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.compact' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:93:23]
+ 92 |             closeOnSelect: false,
+ 93 |             children: params.compact ? undefined : SidebarOwnerOptions(params),
+    :                       ^^^^^^^^^^^^^^
+ 94 |             [params.compact ? "content" : "trigger"]: (
+    `----
+
+  ! solid(reactivity): The reactive variable 'params.compact' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/solid/sidebar-owner-filter.tsx:94:14]
+ 93 |             children: params.compact ? undefined : SidebarOwnerOptions(params),
+ 94 |             [params.compact ? "content" : "trigger"]: (
+    :              ^^^^^^^^^^^^^^
+ 95 |               <>
+    `----
+
+  ! solid(reactivity): The reactive variable 'syncCatalog' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/config/talk-page.tsx:538:3]
+ 537 |   ];
+ 538 |   syncCatalog(catalogConnection(context.gateway));
+     :   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 539 |   refreshCatalogOnConfigChange(context.runtimeConfig.state);
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/config/talk-page.tsx:531:34]
+ 530 |     // Retire catalog reads on every connection transition, even within one render.
+ 531 |     context.gateway.subscribe(() => syncCatalog(catalogConnection(context.gateway))),
+     :                                  ^^
+ 532 |     // Config receipts acknowledge model resets and admit a fresh catalog read.
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/config/memory-page.tsx:464:28]
+ 463 |       // Config receipts retire obsolete support probes before their results can settle.
+ 464 |       runtime.subscribe(() => syncSupport(application.runtimeConfig)),
+     :                            ^^
+ 465 |       // Route receipts retire the plugin's settings scope before its pending reads settle.
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/config/session-storage.tsx:173:33]
+ 172 |   }
+ 173 |   const ageValue = liveValue(() => ageDraft() ?? String(storageConfig().afterDays));
+     :                                 ^^
+ 174 |   async function runNow() {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/cron/view-runs.tsx:446:46]
+ 445 |   let row!: HTMLDivElement;
+ 446 |   onSettled(() => props.onRunMount?.(row, () => props.entry));
+     :                                              ^^
+ 447 |   return (
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/components/ip-location.tsx:42:69]
+ 41 |   return (
+ 42 |     <openclaw-ip-location ref={(element) => (host = element)} style="display: contents">
+    :                                                                     ^^^^^^^^^^^^^^^^^^^
+ 43 |       <Loading on={ip()} fallback={null}>
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:41:20]
+ 40 |                 class="dreams__star"
+ 41 | ,->             style={`
+ 42 | |                 top: ${s.top}%;
+ 43 | |                 left: ${s.left}%;
+ 44 | |                 width: ${s.size}px;
+ 45 | |                 height: ${s.size}px;
+ 46 | |                 background: ${s.hue === "accent" ? "var(--accent-muted)" : "var(--text)"};
+ 47 | |                 animation-delay: ${s.delay}s;
+ 48 | `->             `}
+ 49 |               />
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:62:19]
+ 61 |             class="dreams__bubble-dot"
+ 62 |             style="top: calc(50% - 160px); left: calc(50% - 120px); width: 12px; height: 12px; animation-delay: 0.2s;"
+    :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 63 |           />
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-scene.tsx:66:19]
+ 65 |             class="dreams__bubble-dot"
+ 66 |             style="top: calc(50% - 120px); left: calc(50% - 90px); width: 8px; height: 8px; animation-delay: 0.4s;"
+    :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 67 |           />
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/agents/memory/view-wiki.tsx:80:19]
+ 79 |             label={current().page.title || t("dreaming.wiki.previewFallbackTitle")}
+ 80 |             style="--openclaw-modal-width: 1120px"
+    :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 81 |             onModal-cancel={() => props.onCloseWikiPreview()}
+    `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+    ,-[ui/src/pages/agents/memory/memory-panel-view.tsx:46:15]
+ 45 |             >
+ 46 |               <span class="dreams__phase-toggle-dot"></span>
+    :               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 47 |               <span class="dreams__phase-toggle-label">
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/session-progress-card-projection.test.tsx:25:39]
+ 24 |     replaceSource = setSource;
+ 25 |     progress = projectProgressCard(() => ({ ...source() }));
+    :                                       ^^
+ 26 |     const content = createMemo(() => redraw(progress.read()));
+    `----
+
+  ! solid(reactivity): For proper analysis, a variable should be used to capture the result of this function call.
+     ,-[ui/src/components/desktop/desktop-panel-solid.tsx:275:23]
+ 274 |               content={content}
+ 275 | ,->           connection={merge(() => props.view, {
+ 276 | |               get showApps() {
+ 277 | |                 const target = props.view.focusTarget();
+ 278 | |                 return (
+ 279 | |                   target.source !== null &&
+ 280 | |                   desktopSourceForEnvironment({ id: target.source }).kind === "environment"
+ 281 | |                 );
+ 282 | |               },
+ 283 | |               get pictureInPictureControl() {
+ 284 | |                 return pictureInPictureControl();
+ 285 | |               },
+ 286 | |               get audioControl() {
+ 287 | |                 return audioControl();
+ 288 | |               },
+ 289 | `->           })}
+ 290 |             />
+     `----
+
+  ! solid(components-return-once): Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+     ,-[ui/src/pages/chat/components/chat-disclosure.browser.test.tsx:103:9]
+ 102 |             });
+ 103 | ,->         return kind === "work" ? (
+ 104 | |             <WorkGroupSummary
+ 105 | |               item={{ key: "work", durationMs: null, groups }}
+ 106 | |               options={{ expanded: props.expanded, onToggle: toggle }}
+ 107 | |             />
+ 108 | |           ) : kind === "activity" ? (
+ 109 | |             <ActivityGroup groups={groups} options={options()} presentation="standalone" />
+ 110 | |           ) : kind === "tool" ? (
+ 111 | |             <ChatToolCard
+ 112 | |               card={{
+ 113 | |                 id: "search",
+ 114 | |                 name: "web_search",
+ 115 | |                 args: { query: "disclosures" },
+ 116 | |                 completed: true,
+ 117 | |               }}
+ 118 | |               options={{ messageKey: "tool", expanded: props.expanded, onToggleExpanded: toggle }}
+ 119 | |             />
+ 120 | |           ) : kind === "tool-output" ? (
+ 121 | |             <MessageGroup group={output} options={options()} />
+ 122 | |           ) : (
+ 123 | |             <openclaw-chat-tool-raw>
+ 124 | |               <RawOutputToggle text="Copyable output" />
+ 125 | |             </openclaw-chat-tool-raw>
+ 126 | `->         );
+ 127 |           }
+     `----
+
+  ! solid(prefer-structured-class): Manually building class strings re-runs the whole expression on every change. In Solid 2.0, `class` accepts arrays and objects directly: `class={[base, { active: active() }]}`.
+    ,-[ui/src/pages/chat/components/chat-image-loading.browser.test.tsx:47:18]
+ 46 |         <div
+ 47 |           class={`chat-group ${role()}`}
+    :                  ^^^^^^^^^^^^^^^^^^^^^^
+ 48 |           style={props.maxWidth ? { "--chat-message-max-width": `${props.maxWidth}px` } : undefined}
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/sessions/session-row.tsx:220:23]
+ 219 |       event instanceof KeyboardEvent ? menuTrigger : null,
+ 220 |       (trigger, x, y) => props.onOpenSessionMenu(row(), { x, y }, trigger),
+     :                       ^^
+ 221 |     );
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-summary-automations.tsx:75:26]
+ 74 |     next.cronJobsSortBy = "name";
+ 75 |     next.canRefresh = () =>
+    :                          ^^
+ 76 |       cron === next &&
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-summary-automations.tsx:159:55]
+ 158 |       // Connection publications retire request scopes before the next cron event is delivered.
+ 159 |       const unsubscribe = source.subscribe((snapshot) => {
+     :                                                       ^^
+ 160 |         if (!current()) {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-summary-automations.tsx:182:64]
+ 181 |       });
+ 182 |       const unsubscribeEvents = source.subscribeEvents((event) => {
+     :                                                                ^^
+ 183 |         if (current() && event.event === "cron") {
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.browser.test.tsx:54:22]
+ 53 |             <section
+ 54 |               style={`width: 500px; padding-top: 260px; opacity: ${mode === "props" && !presented() ? 0 : 1}`}
+    :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 55 |             >
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/pages/chat/components/chat-pull-requests.browser.test.tsx:143:48]
+ 142 |           <style>{`${baseStyles}${layoutStyles}${detailsStyles}`}</style>
+ 143 |           <section class="chat-details" style={`position:relative;width:${width}px`}>
+     :                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 144 |             <ChatPullRequests
+     `----
+
+  ! solid(reactivity): The reactive variable 'props' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-context-window-control.test.tsx:45:19]
+ 44 |     expect(onSelect).toHaveBeenCalledExactlyOnceWith("200k", "agent:main:synthetic");
+ 45 |     setProps({ ...props(), disabled: true });
+    :                   ^^^^^^^
+ 46 |     flush();
+    `----
+
+  ! solid(reactivity): The reactive variable 'props' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-context-window-control.test.tsx:79:19]
+ 78 |     expect(onSelect).toHaveBeenLastCalledWith("1m", "agent:main:synthetic");
+ 79 |     setProps({ ...props(), selected: "1m" });
+    :                   ^^^^^^^
+ 80 |     flush();
+    `----
+
+  ! solid(reactivity): The reactive variable 'props' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-context-window-control.test.tsx:86:19]
+ 85 |     expect(bubbled).not.toHaveBeenCalled();
+ 86 |     setProps({ ...props(), selected: "unavailable" });
+    :                   ^^^^^^^
+ 87 |     flush();
+    `----
+
+  ! eslint(max-lines): File has too many lines (1007).
+      ,-[src/agents/embedded-agent-runner/run/terminal-preparation.test.ts:1072:4]
+ 1071 |   });
+ 1072 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  ! eslint(max-lines): File has too many lines (714).
+     ,-[ui/src/pages/model-setup/model-setup-owner.ts:753:2]
+ 752 |   };
+ 753 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-question-resource.tsx:173:37]
+ 172 |     }
+ 173 |     await operation(async (current) => {
+     :                                     ^^
+ 174 |       assertUploadsEnabled(context?.config);
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/terminal/terminal-panel-view.tsx:24:45]
+ 23 |   // Header content moves outside the panel's delegated event root.
+ 24 |   const toggle = nativeListener("click", () => props.view().picker.onToggle());
+    :                                             ^^
+ 25 |   const focusOut = nativeListener("focusout", (event) => props.view().picker.onFocusOut(event));
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/terminal/terminal-panel-view.tsx:25:55]
+ 24 |   const toggle = nativeListener("click", () => props.view().picker.onToggle());
+ 25 |   const focusOut = nativeListener("focusout", (event) => props.view().picker.onFocusOut(event));
+    :                                                       ^^
+ 26 |   return (
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/terminal-start-view.tsx:10:34]
+  9 | }) {
+ 10 |   const hostValue = liveValue(() => props.params.hostId);
+    :                                  ^^
+ 11 |   const hidden = () =>
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/cloud-target-view.tsx:91:50]
+ 90 |     [accessibilityHints(), unavailableReason()].filter(Boolean).join(", ");
+ 91 |   const select = nativeListener("click", (event) => {
+    :                                                  ^^
+ 92 |     if (props.item.disabled) {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/new-session/target-controls-view.tsx:117:36]
+ 116 |   });
+ 117 |   const folderValue = liveValue(() => props.params.place.folder);
+     :                                    ^^
+ 118 |   const deviceFolderValue = liveValue(() => props.params.place.deviceFolder?.path ?? "");
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/new-session/target-controls-view.tsx:118:42]
+ 117 |   const folderValue = liveValue(() => props.params.place.folder);
+ 118 |   const deviceFolderValue = liveValue(() => props.params.place.deviceFolder?.path ?? "");
+     :                                          ^^
+ 119 |   const view = createMemo(() => {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/new-session/palette-session-settings-view.tsx:238:47]
+ 237 |                 properties.options.draft.place.workspacePath())));
+ 238 |     const choose = nativeListener("click", () => selectMachine(props.machine, props.choice.id));
+     :                                               ^^
+ 239 |     const row = () => (
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/new-session/palette-session-settings-view.tsx:95:53]
+ 94 |   onSettled(() => properties.registerClose(close));
+ 95 |   const keydown = nativeListener("keydown", (event) => {
+    :                                                     ^^
+ 96 |     if (event.defaultPrevented || event.isComposing || event.keyCode === 229) {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/test-helpers/config-form-fixtures.tsx:44:31]
+ 43 |           });
+ 44 |           return component(() => value().props);
+    :                               ^^
+ 45 |         },
+    `----
+
+  ! solid(components-return-once): Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+    ,-[ui/src/pages/chat/components/chat-files-panel.tsx:77:11]
+ 76 |             get icon() {
+ 77 | ,->           return content.kind === "mcp-app" ? (
+ 78 | |               <Icon name="puzzle" />
+ 79 | |             ) : (
+ 80 | |               <AttachmentFileIcon filename={label} mode="preview-with-favicon" />
+ 81 | `->           );
+ 82 |             },
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/cloud-workers/cloud-worker-environments.tsx:235:27]
+ 234 |         // This native microtask samples settled state once for polling, without subscribing.
+ 235 |         queueMicrotask(() => {
+     :                           ^^
+ 236 |           if (!gateway.isCurrent(scope)) {
+     `----
+
+  ! solid(reactivity): The reactive variable 'remaining' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/session-hovercard-solid.tsx:264:35]
+ 263 |               registerLink={registerLink}
+ 264 |               staticParticipants={remaining()}
+     :                                   ^^^^^^^^^^^
+ 265 |               totalCount={otherCount()}
+     `----
+
+  ! eslint(max-lines): File has too many lines (707).
+     ,-[ui/src/pages/new-session/draft-place-state.ts:780:2]
+ 779 |   }
+ 780 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+    ,-[ui/src/pages/chat/test-helpers/chat-scroll-input.tsx:45:23]
+ 44 |     [
+ 45 |       ["video", () => <video controls></video>],
+    :                       ^^^^^^^^^^^^^^^^
+ 46 |       ["audio", () => <audio controls></audio>],
+    `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+    ,-[ui/src/pages/chat/test-helpers/chat-scroll-input.tsx:46:23]
+ 45 |       ["video", () => <video controls></video>],
+ 46 |       ["audio", () => <audio controls></audio>],
+    :                       ^^^^^^^^^^^^^^^^
+ 47 |     ] as const
+    `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-transcript-scroll-ownership.test.tsx:662:35]
+ 661 |     // Retain downward nested scrolling and media boundaries in restoration.
+ 662 |     ["native video", "End", () => <video controls></video>, true],
+     :                                   ^^^^^^^^^^^^^^^^
+ 663 |     ["native audio paging", "PageDown", () => <audio controls></audio>, false],
+     `----
+
+  ! solid(self-closing-comp): Empty components are self-closing.
+     ,-[ui/src/pages/chat/components/chat-transcript-scroll-ownership.test.tsx:663:47]
+ 662 |     ["native video", "End", () => <video controls></video>, true],
+ 663 |     ["native audio paging", "PageDown", () => <audio controls></audio>, false],
+     :                                               ^^^^^^^^^^^^^^^^
+ 664 |     ...nativeControlNavigationCases.filter(
+     `----
+
+  ! eslint(max-lines): File has too many lines (704).
+     ,-[ui/src/pages/model-providers/login-controller.ts:736:78]
+ 735 | 
+ 736 | export type ModelProviderLogin = ReturnType<typeof createModelProviderLogin>;
+     :                                                                              ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/plugins/control-ui-settings-components.solid.tsx:32:39]
+ 31 |     const [state, setState] = createSignal({ value: initial }, { ownedWrite: true });
+ 32 |     const stop = render(() => view(() => state().value), container);
+    :                                       ^^
+ 33 |     let active = true;
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/plugins/control-ui-settings-components.solid.tsx:99:23]
+  98 |         return (
+  99 |           <div style={`${lobsterLookStyle(look())};display:contents`}>
+     :                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 100 |             <LobsterSvg
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/channels/channel-settings-presentation.tsx:460:44]
+ 459 |     // Locale receipts refresh the separately mounted channel settings presentation.
+ 460 |     const stopLocale = locale.subscribe(() => props.presentation.sync());
+     :                                            ^^
+ 461 |     return () => {
+     `----
+
+  ! solid(reactivity): The reactive variable 'progressScope' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/chat-pane-runtime-view.tsx:205:22]
+ 204 |     );
+ 205 |     const progress = projectProgressCard(progressScope);
+     :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 206 |     const cacheProgress = () => {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-request-checks.tsx:47:43]
+ 46 |     // Apply each native close edge synchronously; parking preserves disclosure intent.
+ 47 |     const stop = overlay.subscribe((open) => {
+    :                                           ^^
+ 48 |       if (props.presented) {
+    `----
+
+  ! solid(reactivity): The reactive variable 'sync' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-request-checks.tsx:39:3]
+ 38 |   // Synchronize the native disclosure with the pane presentation and overlay owner.
+ 39 |   createEffect(() => [props.presented, props.dismissed], sync);
+    :   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 40 |   onSettled(() => {
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.branchDismissed' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:71:7]
+ 70 |   return Boolean(
+ 71 |     (!props.branchDismissed && props.branch) ||
+    :       ^^^^^^^^^^^^^^^^^^^^^
+ 72 |     (!props.pullRequests.length &&
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.branch' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:71:32]
+ 70 |   return Boolean(
+ 71 |     (!props.branchDismissed && props.branch) ||
+    :                                ^^^^^^^^^^^^
+ 72 |     (!props.pullRequests.length &&
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.pullRequests.length' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:72:7]
+ 71 |     (!props.branchDismissed && props.branch) ||
+ 72 |     (!props.pullRequests.length &&
+    :       ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 73 |       (retainedPublication(props.publication) ||
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.publication' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:73:28]
+ 72 |     (!props.pullRequests.length &&
+ 73 |       (retainedPublication(props.publication) ||
+    :                            ^^^^^^^^^^^^^^^^^
+ 74 |         (!props.branchDismissed &&
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.branchDismissed' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:74:11]
+ 73 |       (retainedPublication(props.publication) ||
+ 74 |         (!props.branchDismissed &&
+    :           ^^^^^^^^^^^^^^^^^^^^^
+ 75 |           props.publication?.canPublishShared &&
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.publication?.canPublishShared' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:75:11]
+ 74 |         (!props.branchDismissed &&
+ 75 |           props.publication?.canPublishShared &&
+    :           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 76 |           !props.publication.canPublishPersonal &&
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.publication.canPublishPersonal' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:76:12]
+ 75 |           props.publication?.canPublishShared &&
+ 76 |           !props.publication.canPublishPersonal &&
+    :            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 77 |           props.publication.options?.shared))),
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.publication.options?.shared' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:77:11]
+ 76 |           !props.publication.canPublishPersonal &&
+ 77 |           props.publication.options?.shared))),
+    :           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 78 |   );
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.pullRequests.length' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-pull-requests.tsx:82:10]
+ 81 | export function hasChatPullRequests(props: ChatPullRequestsProps): boolean {
+ 82 |   return props.pullRequests.length > 0 || showWorkRow(props);
+    :          ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 83 | }
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.sidebarLayout' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:50:18]
+ 49 | function layoutModel(props: ChatPaneLayoutMenuProps) {
+ 50 |   const layout = props.sidebarLayout;
+    :                  ^^^^^^^^^^^^^^^^^^^
+ 51 |   const definitions = props.panelDefinitions ?? [];
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.panelDefinitions' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:51:23]
+ 50 |   const layout = props.sidebarLayout;
+ 51 |   const definitions = props.panelDefinitions ?? [];
+    :                       ^^^^^^^^^^^^^^^^^^^^^^
+ 52 |   const side = layout ? sidebarActivePanel(layout) : undefined;
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.onLayoutChange' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:58:17]
+ 57 |   const actions: ChatQuickAction[] = [];
+ 58 |   if (layout && props.onLayoutChange && (split || layout.expanded)) {
+    :                 ^^^^^^^^^^^^^^^^^^^^
+ 59 |     actions.push({
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.onLayoutChange' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:72:17]
+ 71 |   }
+ 72 |   if (layout && props.onLayoutChange && split && side && mainDefinition && sideDefinition) {
+    :                 ^^^^^^^^^^^^^^^^^^^^
+ 73 |     actions.push({
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.narrow' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:86:6]
+ 85 |     !layout.expanded &&
+ 86 |     !props.narrow &&
+    :      ^^^^^^^^^^^^
+ 87 |     props.onLayoutChange
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.onLayoutChange' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:87:5]
+ 86 |     !props.narrow &&
+ 87 |     props.onLayoutChange
+    :     ^^^^^^^^^^^^^^^^^^^^
+ 88 |   ) {
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.onCloseSidePanel' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:100:33]
+  99 |   }
+ 100 |   if (side && sideDefinition && props.onCloseSidePanel) {
+     :                                 ^^^^^^^^^^^^^^^^^^^^^^
+ 101 |     actions.push({
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onToggleSidePanel' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:108:7]
+ 107 |   }
+ 108 |   if (props.onToggleSidePanel) {
+     :       ^^^^^^^^^^^^^^^^^^^^^^^
+ 109 |     actions.push({
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onToggleSidePanel' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:115:19]
+ 114 |       active: split,
+ 115 |       onActivate: props.onToggleSidePanel,
+     :                   ^^^^^^^^^^^^^^^^^^^^^^^
+ 116 |     });
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.layoutMenuActions' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:118:20]
+ 117 |   }
+ 118 |   actions.push(...(props.layoutMenuActions ?? []));
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^
+ 119 |   for (const [id, label, icon, callback] of [
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onOpenSplitView' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:120:60]
+ 119 |   for (const [id, label, icon, callback] of [
+ 120 |     ["open-split-view", "chat.splitView.open", "columns2", props.onOpenSplitView],
+     :                                                            ^^^^^^^^^^^^^^^^^^^^^
+ 121 |     ["split-down", "chat.splitView.splitDown", "panelBottomOpen", props.onSplitDown],
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onSplitDown' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:121:67]
+ 120 |     ["open-split-view", "chat.splitView.open", "columns2", props.onOpenSplitView],
+ 121 |     ["split-down", "chat.splitView.splitDown", "panelBottomOpen", props.onSplitDown],
+     :                                                                   ^^^^^^^^^^^^^^^^^
+ 122 |     ["split-right", "chat.splitView.splitRight", "panelRightOpen", props.onSplitRight],
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onSplitRight' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:122:68]
+ 121 |     ["split-down", "chat.splitView.splitDown", "panelBottomOpen", props.onSplitDown],
+ 122 |     ["split-right", "chat.splitView.splitRight", "panelRightOpen", props.onSplitRight],
+     :                                                                    ^^^^^^^^^^^^^^^^^^
+ 123 |     ["close-pane", "chat.splitView.closePane", "x", props.onClosePane],
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onClosePane' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:123:53]
+ 122 |     ["split-right", "chat.splitView.splitRight", "panelRightOpen", props.onSplitRight],
+ 123 |     ["close-pane", "chat.splitView.closePane", "x", props.onClosePane],
+     :                                                     ^^^^^^^^^^^^^^^^^
+ 124 |   ] as const) {
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.narrow' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:125:23]
+ 124 |   ] as const) {
+ 125 |     if (callback && (!props.narrow || (id !== "split-down" && id !== "split-right"))) {
+     :                       ^^^^^^^^^^^^
+ 126 |       actions.push({
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.actionsDisabled' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:131:19]
+ 130 |         icon,
+ 131 |         disabled: props.actionsDisabled,
+     :                   ^^^^^^^^^^^^^^^^^^^^^
+ 132 |         onActivate: () =>
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.onLayoutChange' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:137:17]
+ 136 |   }
+ 137 |   if (layout && props.onLayoutChange && !props.narrow && split) {
+     :                 ^^^^^^^^^^^^^^^^^^^^
+ 138 |     for (const [dock, label, icon] of [
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.narrow' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:137:42]
+ 136 |   }
+ 137 |   if (layout && props.onLayoutChange && !props.narrow && split) {
+     :                                          ^^^^^^^^^^^^
+ 138 |     for (const [dock, label, icon] of [
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.panelMenuActions' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-panel-actions.tsx:153:43]
+ 152 |   }
+ 153 |   const panelActions: ChatQuickAction[] = props.panelMenuActions ?? [];
+     :                                           ^^^^^^^^^^^^^^^^^^^^^^
+ 154 |   const allActions = [...actions, ...panelActions];
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/input-dialog-view.tsx:63:23]
+ 62 |     // The view update re-enables the input before restoring its editing focus.
+ 63 |     queueMicrotask(() => {
+    :                       ^^
+ 64 |       if (!props.settled()) {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/workspace-icon.tsx:26:41]
+ 25 |       revision();
+ 26 |       return loader.withActiveRoutes(() =>
+    :                                         ^^
+ 27 |         props.routeUrl && props.authReady && undecodableRouteUrl() !== props.routeUrl
+    `----
+
+  ! solid(reactivity): The reactive variable 'host' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/app-sidebar-session-list-render.tsx:157:10]
+ 156 |       const host = createMemo(() => params.host);
+ 157 | ,->   return renderSessionListFrame(
+ 158 | |       host,
+ 159 | |       <div class="sidebar-recent-sessions">
+ 160 | |         {renderPendingSessionCreateRow(host)}
+ 161 | |         {renderSessionListBody(params)}
+ 162 | |         {renderRosterLoadMore(
+ 163 | |           host(),
+ 164 | |           params.sections,
+ 165 | |           params.nativeSessionsHaveMore,
+ 166 | |           params.nativeSessionsLoading,
+ 167 | |         )}
+ 168 | |         {renderPersonalSessionEmpty(
+ 169 | |           host(),
+ 170 | |           params.empty && params.sections.every((section) => section.totalRowCount === 0),
+ 171 | |           host().connected &&
+ 172 | |             host().sessionData.sessionsResult !== null &&
+ 173 | |             !host().sessionData.sessionsLoading &&
+ 174 | |             !host().sessionData.sessionMutationError &&
+ 175 | |             !params.nativeSessionsHaveMore &&
+ 176 | |             params.catalogs.catalogs.length === 0 &&
+ 177 | |             areSessionCatalogsSettled(host().sessionData),
+ 178 | |         )}
+ 179 | |         {host().sessionsStatusFilter === "archived" && params.empty ? (
+ 180 | |           <span class="sidebar-session-empty-hint">{t("sessionsView.noArchivedSessions")}</span>
+ 181 | |         ) : undefined}
+ 182 | |       </div>,
+ 183 | `->   );
+ 184 |     }
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+     ,-[ui/src/components/sidebar-update-card.tsx:588:13]
+ 587 |       ref={(element) => (host = element)}
+ 588 |       style="display: contents"
+     :             ^^^^^^^^^^^^^^^^^^^
+ 589 |       class={props.class}
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/sidebar-attention.tsx:84:25]
+ 83 |     if (trigger) {
+ 84 |       queueMicrotask(() => {
+    :                         ^^
+ 85 |         if (!disposed && generation === panelGeneration && scope === routeScope()) {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-attention.tsx:129:23]
+ 128 |     setPanelOpen(true);
+ 129 |     queueMicrotask(() => {
+     :                       ^^
+ 130 |       if (!disposed && generation === panelGeneration && scope === routeScope()) {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-attention.tsx:137:23]
+ 136 |     setSelectedTab(tab);
+ 137 |     queueMicrotask(() => {
+     :                       ^^
+ 138 |       if (disposed || !panelOpen() || selectedTab() !== tab) {
+     `----
+
+  ! solid(reactivity): The reactive variable 'handleOutsideInteraction' should be wrapped in a function for reactivity. This includes event handler bindings on native elements, which are not reactive like other JSX props.
+     ,-[ui/src/components/sidebar-attention.tsx:228:13]
+ 227 | 
+ 228 |   onCleanup(listen(document, "pointerdown", handleOutsideInteraction, true));
+     :             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 229 |   onCleanup(listen(document, "keydown", handleOutsideInteraction, true));
+     `----
+
+  ! solid(reactivity): The reactive variable 'handleOutsideInteraction' should be wrapped in a function for reactivity. This includes event handler bindings on native elements, which are not reactive like other JSX props.
+     ,-[ui/src/components/sidebar-attention.tsx:229:13]
+ 228 |   onCleanup(listen(document, "pointerdown", handleOutsideInteraction, true));
+ 229 |   onCleanup(listen(document, "keydown", handleOutsideInteraction, true));
+     :             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 230 |   onCleanup(listen(window, "blur", handleWindowBlur));
+     `----
+
+  ! solid(reactivity): The reactive variable 'handleWindowBlur' should be wrapped in a function for reactivity. This includes event handler bindings on native elements, which are not reactive like other JSX props.
+     ,-[ui/src/components/sidebar-attention.tsx:230:13]
+ 229 |   onCleanup(listen(document, "keydown", handleOutsideInteraction, true));
+ 230 |   onCleanup(listen(window, "blur", handleWindowBlur));
+     :             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 231 |   onCleanup(() => {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/sidebar-attention.tsx:91:32]
+ 90 |   }
+ 91 |   panelDismissals.set(host, () => {
+    :                                ^^
+ 92 |     const wasOpen = !disposed && panelOpen();
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/app-sidebar-session-catalog-row.tsx:155:25]
+ 154 |         event instanceof KeyboardEvent ? (controls.catalogMenu ?? null) : null,
+ 155 |         (trigger, x, y) => openMenu(x, y, trigger ?? undefined),
+     :                         ^^
+ 156 |       );
+     `----
+
+  ! solid(reactivity): The reactive variable 'liveRowsByKey' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-catalog-render.tsx:34:10]
+ 33 |   const liveRowsByKey = createMemo(() => catalogSessionRowsByKey(params.snapshot.liveRows));
+ 34 |   return renderCatalogGroup(() => params.catalog, liveRowsByKey, params);
+    :          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 35 | }
+    `----
+
+  ! solid(reactivity): The reactive variable 'session' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-catalog-render.tsx:81:11]
+ 80 |             {(session) =>
+ 81 | ,->           renderCatalogSessionRow(
+ 82 | |               readCatalog,
+ 83 | |               readHost,
+ 84 | |               session,
+ 85 | |               readLiveRowsByKey,
+ 86 | |               params,
+ 87 | |               rowProps.projectChild === true,
+ 88 | `->           )
+ 89 |             }
+    `----
+
+  ! solid(reactivity): The reactive variable 'host' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/components/app-sidebar-session-catalog-render.tsx:424:26]
+ 423 |             <For each={readCatalog().visibleHosts} keyed={(host) => host.hostId}>
+ 424 |               {(host) => renderCatalogHostGroup(readCatalog, host, readLiveRowsByKey, params)}
+     :                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 425 |             </For>
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/sidebar-menus.tsx:644:50]
+ 643 |           {(menu) =>
+ 644 |             agentMenuAvatars.withActiveRoutes(() =>
+     :                                                  ^^
+ 645 |               state.menuRenderer!.renderSidebarAgentMenuForMenus(menus, view, menu, avatars.read),
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/select-picker-view.tsx:224:27]
+ 223 |       if (initialKey) {
+ 224 |         queueMicrotask(() => {
+     :                           ^^
+ 225 |           if (searching()) {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/select-picker-view.tsx:213:23]
+ 212 |     );
+ 213 |     queueMicrotask(() => {
+     :                       ^^
+ 214 |       if (!props.host.isConnected) {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-row-render.tsx:92:74]
+ 91 |   const openMenuFromEvent: JSX.EventHandler<HTMLDivElement, MouseEvent | KeyboardEvent> = (event) =>
+ 92 |     handleContextMenuEvent(event, controls.link ?? null, (trigger, x, y) => {
+    :                                                                          ^^
+ 93 |       const catalogMenu = display()?.catalogMenu;
+    `----
+
+  ! solid(reactivity): The reactive variable 'host' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-row-render.tsx:88:22]
+ 87 |     toolName = createMemo(() => subtitleState().toolName);
+ 88 |   const indicators = renderSidebarSessionIndicators(host, session, display, icon);
+    :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 89 |   const { running, stateId, metaId, pullRequest, childrenExpanded } = indicators;
+    `----
+
+  ! solid(reactivity): The reactive variable 'session' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-row-render.tsx:88:22]
+ 87 |     toolName = createMemo(() => subtitleState().toolName);
+ 88 |   const indicators = renderSidebarSessionIndicators(host, session, display, icon);
+    :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 89 |   const { running, stateId, metaId, pullRequest, childrenExpanded } = indicators;
+    `----
+
+  ! solid(reactivity): The reactive variable 'display' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-row-render.tsx:88:22]
+ 87 |     toolName = createMemo(() => subtitleState().toolName);
+ 88 |   const indicators = renderSidebarSessionIndicators(host, session, display, icon);
+    :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 89 |   const { running, stateId, metaId, pullRequest, childrenExpanded } = indicators;
+    `----
+
+  ! solid(reactivity): The reactive variable 'icon' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/components/app-sidebar-session-row-render.tsx:88:22]
+ 87 |     toolName = createMemo(() => subtitleState().toolName);
+ 88 |   const indicators = renderSidebarSessionIndicators(host, session, display, icon);
+    :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 89 |   const { running, stateId, metaId, pullRequest, childrenExpanded } = indicators;
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/app-sidebar-rail.tsx:367:81]
+ 366 |     if (!host.sidebarSnapshot) {
+ 367 |       handleContextMenuEvent(event, trigger ?? pin ?? null, (menuTrigger, x, y) =>
+     :                                                                                 ^^
+ 368 |         host.sidebarMenus.openRailPinMenu(serialized, label(), x, y, menuTrigger),
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-header-session-menu.tsx:144:14]
+ 143 |     readState,
+ 144 |     (action) => props.onAction(action),
+     :              ^^
+ 145 |     close,
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/solid/mcp-app-context-strip.tsx:45:45]
+ 44 |   onCleanup(
+ 45 |     context.gateway.subscribeEvents((event) => {
+    :                                             ^^
+ 46 |       if (event.event !== "mcp.app.hostContextChanged") {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer-view.tsx:602:33]
+ 601 |   });
+ 602 |   const valueRef = liveValue(() => {
+     :                                 ^^
+ 603 |     const next = value();
+     `----
+
+  ! solid(reactivity): The reactive variable 'props.draftSource' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer-goal-mode.tsx:18:6]
+ 17 |   const liveMode = (props: ChatComposerProps) =>
+ 18 |     (props.draftSource ? props.draftSource.read().goalDraftMode : props.goalDraftMode) ?? null;
+    :      ^^^^^^^^^^^^^^^^^
+ 19 |   const [pending, setPending] = state.goalPending;
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.draftSource.read' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer-goal-mode.tsx:18:26]
+ 17 |   const liveMode = (props: ChatComposerProps) =>
+ 18 |     (props.draftSource ? props.draftSource.read().goalDraftMode : props.goalDraftMode) ?? null;
+    :                          ^^^^^^^^^^^^^^^^^^^^^^
+ 19 |   const [pending, setPending] = state.goalPending;
+    `----
+
+  ! solid(reactivity): The reactive variable 'props.goalDraftMode' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer-goal-mode.tsx:18:67]
+ 17 |   const liveMode = (props: ChatComposerProps) =>
+ 18 |     (props.draftSource ? props.draftSource.read().goalDraftMode : props.goalDraftMode) ?? null;
+    :                                                                   ^^^^^^^^^^^^^^^^^^^
+ 19 |   const [pending, setPending] = state.goalPending;
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer-emoji.tsx:62:48]
+ 61 |     // A close edge dismisses the editing target even if the overlay reopens before rendering.
+ 62 |     unsubscribePopup = popup?.subscribe((open) => {
+    :                                                ^^
+ 63 |       if (!open && state.items.length) {
+    `----
+
+  ! solid(reactivity): The reactive variable 'options.trackScroll' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer-menu.tsx:24:43]
+ 23 |   );
+ 24 |   const scrollRef = useScrollState(false, options.trackScroll !== false, {
+    :                                           ^^^^^^^^^^^^^^^^^^^
+ 25 |     revision: () => options.revision,
+    `----
+
+  ! solid(reactivity): The reactive variable 'context' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-composer.tsx:144:10]
+ 143 |   onSettled(() => listen(document, "visibilitychange", () => prediction.sync()));
+ 144 |   return renderChatComposerView(context, currentProps, state);
+     :          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 145 | }
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-composer.tsx:70:34]
+ 69 |   onCleanup(
+ 70 |     voice.dictation.subscribe(() => {
+    :                                  ^^
+ 71 |       if (voice.dictation.locksComposer) {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/chat-outbox-recovery.tsx:88:46]
+ 87 |       host &&
+ 88 |       chatRunPresentation(host).subscribe(() => {
+    :                                              ^^
+ 89 |         if (messages === host.chatMessages) {
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/file-draft-recovery-dialog-view.tsx:44:56]
+ 43 |     }
+ 44 |     const ok = await copyToClipboard(entry.content, () => current(entry));
+    :                                                        ^^
+ 45 |     if (current(entry)) {
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-typing-indicator.tsx:77:18]
+ 76 |           class="chat-group user chat-group--peer chat-group--sender-tint chat-group--with-footer chat-group--typing"
+ 77 |           style={`--chat-sender-hue: ${resolveIdentityHue(sender())}`}
+    :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 78 |           aria-live="off"
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-subagent-activity.tsx:76:18]
+ 75 |           data-status={props.row.status}
+ 76 |           style={`--chat-details-avatar-hue: ${fnv1aUtf16(props.row.key) % 360}`}
+    :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 77 |           aria-hidden="true"
+    `----
+
+  ! solid(reactivity): The reactive variable 'readInput' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-agent-run-frame.tsx:135:28]
+ 134 |             const [readInput, write] = createSignal({ part: value, options }, { ownedWrite: true });
+ 135 |             insert(parent, render(readInput), end);
+     :                            ^^^^^^^^^^^^^^^^^
+ 136 |             return { start, end, write, dispose };
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-welcome.tsx:93:63]
+ 92 |     >
+ 93 |       <div ref={welcomeRef} class="agent-chat__welcome" style="--agent-color: var(--accent)">
+    :                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 94 |         <div class="agent-chat__welcome-identity">
+    `----
+
+  ! solid(reactivity): 'runId' captures the value of the reactive variable 'failure' at setup, but a returned function reads the capture later — it will never update. Call 'failure' inside the returned function instead, or prefix 'runId' with 'initial'/'default'/'static' if a one-time snapshot is intended.
+     ,-[ui/src/pages/chat/components/chat-divider.tsx:100:19]
+  99 |   const actions = createMemo(() => {
+ 100 |     const runId = failure().runId;
+     :                   ^^^^^^^^^
+ 101 |     const recovery = props.recovery;
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/solid/popover.tsx:70:50]
+ 69 |     const disconnectAnchor = anchor.connect();
+ 70 |     const disconnectControl = control.connect(() =>
+    :                                                  ^^
+ 71 |       props.ref?.({
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-message-attachment-status-solid.tsx:40:47]
+ 39 | ): JSX.Element {
+ 40 |   const copyRef = attachmentContextCopyRef(() => ({ name: props.label }));
+    :                                               ^^
+ 41 |   const unavailable = () => props.reason !== undefined;
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-clawhub-card.tsx:209:47]
+ 208 |     // Connection edges retire request generations and icon URLs before later replies arrive.
+ 209 |     const stop = context.gateway.subscribe(() => void load());
+     :                                               ^^
+ 210 |     const activate = () => {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/widget-card-view.tsx:297:47]
+ 296 |     onSettled(() => {
+ 297 |       widgetFramePromptActive.set(element, () => props.promptAllowed());
+     :                                               ^^
+ 298 |       widgetFrameResize.set(element, (nextHeight) => {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/widget-card-view.tsx:298:51]
+ 297 |       widgetFramePromptActive.set(element, () => props.promptAllowed());
+ 298 |       widgetFrameResize.set(element, (nextHeight) => {
+     :                                                   ^^
+ 299 |         setReportedHeight(nextHeight);
+     `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/components/elapsed-time.tsx:34:54]
+ 33 |   return (
+ 34 |     <openclaw-elapsed-time class={props.class} style="display: contents">
+    :                                                      ^^^^^^^^^^^^^^^^^^^
+ 35 |       {label()}
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/solid/person-reference.tsx:210:36]
+ 209 |     const route = context?.router.getState().location;
+ 210 |     portal.renderContents(card, () =>
+     :                                    ^^
+ 211 |       updatePersonActivityCard(
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/solid/person-reference.tsx:284:14]
+ 283 |           250,
+ 284 |           () => {
+     :              ^^
+ 285 |             if (portal.held) {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-attachment-preview-chip.tsx:22:41]
+ 21 | }) {
+ 22 |   const ref = attachmentAdmissionRef(() => props.elementRef);
+    :                                         ^^
+ 23 |   const label = () => (
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-attachment-file.tsx:63:47]
+ 62 |   const name = () => props.label ?? props.attachment.fileName ?? t("chat.attachments.attachedFile");
+ 63 |   const copyRef = attachmentContextCopyRef(() => ({ name: name() }));
+    :                                               ^^
+ 64 |   const content = () => (
+    `----
+
+  ! solid(reactivity): The reactive variable 'measurementOptions' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-message-text-view.tsx:211:20]
+ 210 |   );
+ 211 |   const overflow = messageOverflowRef(measurementOptions, () => props.getNodes());
+     :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 212 |   return (
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/chat-message-text-view.tsx:211:62]
+ 210 |   );
+ 211 |   const overflow = messageOverflowRef(measurementOptions, () => props.getNodes());
+     :                                                              ^^
+ 212 |   return (
+     `----
+
+  ! solid(reactivity): The reactive variable 'item' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-session-activity.solid.tsx:86:33]
+ 85 |                 {(item, index) => {
+ 86 |                   const entry = props.renderEntry(item, index);
+    :                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 87 |                   return (
+    `----
+
+  ! solid(reactivity): The reactive variable 'index' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-session-activity.solid.tsx:86:33]
+ 85 |                 {(item, index) => {
+ 86 |                   const entry = props.renderEntry(item, index);
+    :                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 87 |                   return (
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/components/solid/identity-avatar-image.tsx:83:25]
+ 82 |       // Refs run before their wrapper is inserted; cached decodes emit no event.
+ 83 |       queueMicrotask(() => {
+    :                         ^^
+ 84 |         if (
+    `----
+
+  ! solid(reactivity): For proper analysis, a variable should be used to capture the result of this function call.
+    ,-[ui/src/components/theme-brand-icon.tsx:18:36]
+ 17 |   return (
+ 18 |     <openclaw-theme-brand-icon {...omit(props, "branding", "children")}>
+    :                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 19 |       <Show when={artwork()} fallback={<Icon name="mark" />}>
+    `----
+
+  ! eslint(max-lines): File has too many lines (745).
+     ,-[ui/src/pages/chat/chat-thread-build.ts:800:2]
+ 799 |   );
+ 800 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/plugins/control-ui-view.solid.tsx:385:68]
+ 384 |   const mountDefault = (target: HTMLElement) => mount(target, DefaultView);
+ 385 |   const mountCompanion = (target: HTMLElement) => mount(target, () => props.renderCompanion?.());
+     :                                                                    ^^
+ 386 |   function ReplacementView() {
+     `----
+
+  ! solid(reactivity): 'api' captures the value of the reactive variable 'read' at setup, but a returned function reads the capture later — it will never update. Call 'read' inside the returned function instead, or prefix 'api' with 'initial'/'default'/'static' if a one-time snapshot is intended.
+     ,-[ui/src/components/solid/menu-machine.ts:454:19]
+ 453 |     ) {
+ 454 |       const api = read();
+     :                   ^^^^^^
+ 455 |       const result = type
+     `----
+
+  ! solid(reactivity): 'api' captures the value of the reactive variable 'read' at setup, but a returned function reads the capture later — it will never update. Call 'read' inside the returned function instead, or prefix 'api' with 'initial'/'default'/'static' if a one-time snapshot is intended.
+     ,-[ui/src/components/solid/menu-machine.ts:509:19]
+ 508 |     trigger(parentBinding?: MenuBinding, disabled = false) {
+ 509 |       const api = read();
+     :                   ^^^^^^
+ 510 |       const result = parentBinding
+     `----
+
+  ! solid(reactivity): 'result' captures the value of the reactive variable 'read' at setup, but a returned function reads the capture later — it will never update. Call 'read' inside the returned function instead, or prefix 'result' with 'initial'/'default'/'static' if a one-time snapshot is intended.
+     ,-[ui/src/components/solid/menu-machine.ts:581:22]
+ 580 |     content() {
+ 581 |       const result = read().getContentProps();
+     :                      ^^^^^^
+ 582 |       const {
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/components/solid/menu.tsx:400:50]
+ 399 |     const disconnectAnchor = anchor.connect();
+ 400 |     const disconnectControl = control.connect(() =>
+     :                                                  ^^
+ 401 |       props.ref?.({
+     `----
+
+  ! solid(components-return-once): Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+     ,-[ui/src/components/solid/menu.tsx:460:17]
+ 459 |                     }));
+ 460 | ,->                 return initialRenderCustom ? (
+ 461 | |                     initialRenderCustom(attributes)
+ 462 | |                   ) : (
+ 463 | |                     <Item
+ 464 | |                       {...item().attributes}
+ 465 | |                       {...attributes}
+ 466 | |                       onClick={(event: MouseEvent) => {
+ 467 | |                         item().attributes?.onClick?.(event);
+ 468 | |                         if (!event.defaultPrevented) {
+ 469 | |                           attributes.onClick?.(event);
+ 470 | |                         }
+ 471 | |                       }}
+ 472 | |                       onContextMenu={(event: MouseEvent) => {
+ 473 | |                         item().attributes?.onContextMenu?.(event);
+ 474 | |                         if (item().href !== undefined) {
+ 475 | |                           event.stopPropagation();
+ 476 | |                         }
+ 477 | |                       }}
+ 478 | |                       type={item().href === undefined && !item().as ? "button" : undefined}
+ 479 | |                       href={item().disabled ? undefined : item().href}
+ 480 | |                       class={["oc-menu-item", item().class]}
+ 481 | |                       value={item().attributes?.value ?? item().id}
+ 482 | |                       data-variant={item().variant}
+ 483 | |                       disabled={item().href === undefined ? item().disabled : undefined}
+ 484 | |                     >
+ 485 | |                       <Show when={item().type}>
+ 486 | |                         <span class="oc-menu-item__check" aria-hidden="true">
+ 487 | |                           {item().checked ? "✓" : ""}
+ 488 | |                         </span>
+ 489 | |                       </Show>
+ 490 | |                       <Show when={item().icon}>
+ 491 | |                         <span class="oc-menu-item__icon">{item().icon}</span>
+ 492 | |                       </Show>
+ 493 | |                       <span class={["oc-menu-item__label", item().labelClass]}>
+ 494 | |                         {item().content ?? item().label}
+ 495 | |                       </span>
+ 496 | |   
+ 497 | |                       <Show when={item().details}>
+ 498 | |                         <span class="oc-menu-item__details">{item().details}</span>
+ 499 | |                       </Show>
+ 500 | |                     </Item>
+ 501 | `->                 );
+ 502 |                   };
+     `----
+
+  ! solid(reactivity): For proper analysis, a variable should be used to capture the result of this function call.
+    ,-[ui/src/pages/chat/components/browser-tab-card.tsx:73:7]
+ 72 |           target &&
+ 73 | ,->       createMemo<ControlUiLinkPreview | undefined>(
+ 74 | |           () => loadLinkPreview(target.client, target.url),
+ 75 | |           { loadingValue: undefined },
+ 76 | `->       )
+ 77 |         );
+    `----
+
+  ! solid(reactivity): For proper analysis, a variable should be used to capture the result of this function call.
+     ,-[ui/src/pages/chat/components/browser-tab-card.tsx:121:7]
+ 120 |           target &&
+ 121 | ,->       createMemo<string | undefined>(
+ 122 | |           () =>
+ 123 | |             loadBrowserTabThumbnail({
+ 124 | |               client: target.client,
+ 125 | |               tab: target.tab,
+ 126 | |               revision: target.revision,
+ 127 | |               resourceBasePath: target.context.resourceBasePath,
+ 128 | |               authToken: resolveControlUiAuthToken({
+ 129 | |                 hello: target.context.gateway.snapshot.hello,
+ 130 | |                 settings: { token: target.context.gateway.connection.token },
+ 131 | |                 password: target.context.gateway.connection.password,
+ 132 | |               }),
+ 133 | |             }),
+ 134 | |           { loadingValue: undefined },
+ 135 | `->       )
+ 136 |         );
+     `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+     ,-[ui/src/pages/chat/components/browser-tab-card.tsx:167:36]
+ 166 |     if (value === "copy-url") {
+ 167 |       void copyToClipboard(url, () => active && props.preview?.url === url);
+     :                                    ^^
+ 168 |     } else if (value === "open-new-tab") {
+     `----
+
+  ! solid(reactivity): The reactive variable 'capture' should be wrapped in a function for reactivity. This includes event handler bindings on native elements, which are not reactive like other JSX props.
+     ,-[ui/src/pages/chat/components/chat-transcript-layout-solid.tsx:257:21]
+ 256 |           const capture = (event: Event) => snapshot().captureInteractionResize(event);
+ 257 |           onCleanup(listen(element, "click", capture, true));
+     :                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 258 |           const content = () => (
+     `----
+
+  ! eslint(max-lines): File has too many lines (701).
+     ,-[ui/src/pages/chat/components/chat-transcript-virtualizer-host.ts:776:2]
+ 775 |   };
+ 776 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-transcript-geometry-updates.browser.test.tsx:28:25]
+ 27 |     key: `row-${index}`,
+ 28 |     content: <div style="height: 120px">Row {index}</div>,
+    :                         ^^^^^^^^^^^^^^^
+ 29 |   }));
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-transcript-geometry-updates.browser.test.tsx:39:29]
+ 38 |         key: row.key,
+ 39 |         content: <div style="height: 360px">Row {index}</div>,
+    :                             ^^^^^^^^^^^^^^^
+ 40 |       }));
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-transcript-geometry-updates.browser.test.tsx:94:45]
+ 93 |   return (
+ 94 |     <div class="chat-thread-viewport" style="height: 400px; flex: none; padding: 20px 0">
+    :                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 95 |       <div class="chat-thread" style="overflow-anchor: none">
+    `----
+
+  ! solid(style-prop): Use an object for the style prop instead of a string.
+    ,-[ui/src/pages/chat/components/chat-transcript-geometry-updates.browser.test.tsx:95:38]
+ 94 |     <div class="chat-thread-viewport" style="height: 400px; flex: none; padding: 20px 0">
+ 95 |       <div class="chat-thread" style="overflow-anchor: none">
+    :                                      ^^^^^^^^^^^^^^^^^^^^^^^
+ 96 |         {props.contents}
+    `----
+
+  ! eslint(max-lines): File has too many lines (704).
+     ,-[src/state/openclaw-database-preflight.ts:732:2]
+ 731 |   return result;
+ 732 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-attachment-card-solid.tsx:32:41]
+ 31 | ) {
+ 32 |   const ref = attachmentAdmissionRef(() => props.elementRef);
+    :                                         ^^
+ 33 |   const copyRef = attachmentContextCopyRef(() => ({
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-attachment-card-solid.tsx:33:47]
+ 32 |   const ref = attachmentAdmissionRef(() => props.elementRef);
+ 33 |   const copyRef = attachmentContextCopyRef(() => ({
+    :                                               ^^
+ 34 |     name: props.label,
+    `----
+
+  ! solid(reactivity): This function should be passed to a tracked scope (like createEffect) or an event handler because it contains reactivity, or else changes will be ignored.
+    ,-[ui/src/pages/chat/components/chat-attachment-card-solid.tsx:58:47]
+ 57 | ) {
+ 58 |   const copyRef = attachmentContextCopyRef(() => ({
+    :                                               ^^
+ 59 |     name: props.label,
+    `----
+
+  ! eslint(max-lines): File has too many lines (703).
+     ,-[src/commands/daemon-install-helpers.ts:729:2]
+ 728 |     : `Tip: rerun \`${formatCliCommand("openclaw gateway install")}\` after fixing the error.`;
+ 729 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (707).
+     ,-[src/gateway/server/ws-connection/message-handler.ts:748:2]
+ 747 |   return onMessage;
+ 748 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (723).
+     ,-[src/agents/harness/execution-environment.ts:759:2]
+ 758 |   );
+ 759 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (701).
+     ,-[src/agents/code-mode-execution.ts:753:2]
+ 752 |   }
+ 753 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (725).
+     ,-[src/gateway/session-worktree-preparation.ts:761:2]
+ 760 |   return prepared.ok ? ok({ ...prepared.value, ...(withCommit ? { withCommit } : {}) }) : prepared;
+ 761 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (705).
+     ,-[src/agents/agent-tools.ts:743:2]
+ 742 |   return createOpenClawCodingToolsInternalAsync(options);
+ 743 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+  ! eslint(max-lines): File has too many lines (710).
+     ,-[src/gateway/node-registry-private.ts:750:2]
+ 749 |   }
+ 750 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+Found 223 warnings and 0 errors.
+Finished in 391.7s on 34641 files with 292 rules using 1 threads.
+[oxlint:core] passed
+
+[check:changed] lint extensions
+$ node scripts/run-oxlint.mjs --tsconfig extensions/tsconfig.json extensions
+[plugin-sdk boundary dts] emitted 12992 files
+
+  ! eslint(max-lines): File has too many lines (1020).
+      ,-[extensions/telegram/src/telegram-ingress-coalescing.e2e.test.ts:1098:4]
+ 1097 |   );
+ 1098 | });
+      :    ^
+      `----
+  help: Maximum allowed is 1000.
+
+  ! eslint(max-lines): File has too many lines (715).
+     ,-[extensions/crabbox/src/crabbox-worker-warm-image-store.ts:763:2]
+ 762 |   }
+ 763 | }
+     :  ^
+     `----
+  help: Maximum allowed is 700.
+
+Found 2 warnings and 0 errors.
+Finished in 187.8s on 11035 files with 292 rules using 1 threads.
+
+[check:changed] native state schema version guard
+native state schema version guard passed (v29)
+
+[check:changed] database-first legacy-store guard
+$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
+Database-first legacy-store guard passed.
+
+[check:changed] media download helper guard
+$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+
+[check:changed] runtime sidecar loader guard
+$ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
+runtime-sidecar-loaders: local runtime sidecar loaders look OK.
+
+[check:changed] runtime import cycles
+$ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
+Import cycle check: 0 runtime value cycle(s).
+
+[check:changed] webhook body guard
+$ node --import ./scripts/tsx.mjs scripts/check-webhook-auth-body-order.mts
+
+[check:changed] pairing store guard
+$ node --import ./scripts/tsx.mjs scripts/check-no-pairing-store-group-auth.mts
+
+[check:changed] pairing account guard
+$ node --import ./scripts/tsx.mjs scripts/check-pairing-account-scope.mts
+
+[check:changed] summary
+   6.94s  ok         conflict markers
+   1.93s  ok         line-cap growth ratchet
+  10.13s  failed:1   max-lines suppression ratchet
+  13.77s  ok         assertion SAFETY comment ratchet
+  87.44s  ok         SQLite worker ratchet
+   714ms  ok         SQLite dialect ratchet
+   7.36s  ok         test timeout race ratchet
+  17.25s  ok         first-party mock export ratchet
+   369ms  ok         changelog attributions
+   286ms  ok         doctor deprecation registry
+   391ms  ok         guarded extension wildcard re-exports
+   319ms  ok         plugin-sdk wildcard re-exports
+   1.50s  ok         extension test core imports
+   610ms  ok         duplicate scan target coverage
+   827ms  ok         dependency pin guard
+   309ms  ok         format changed files
+   5.94s  ok         doctor contract declaration + closure guard tests
+   6.54s  ok         bundled channel config metadata
+   4.90s  ok         config docs baseline
+   217ms  ok         Plugin SDK package exports
+   4.48s  ok         Plugin SDK surface budget
+   6.70s  ok         plugin boundaries
+  10.22s  ok         wrapper shadowing
+   872ms  ok         package patch guard
+   721ms  ok         test temp creation report (warning-only)
+   2.10s  failed:1   core tsgo graph boundary
+   4.94s  ok         Control UI i18n catalog
+   2.90s  ok         typecheck core
+  63.89s  ok         typecheck core tests
+   2.88s  ok         typecheck extensions
+   4.70s  ok         typecheck extension tests
+  13.86s  ok         coercion helper declaration guard
+  19.68s  ok         deprecated API usage
+ 112.92s  failed:1   dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+ 392.63s  ok         lint core
+ 276.12s  ok         lint extensions
+    46ms  ok         native state schema version guard
+  24.51s  ok         database-first legacy-store guard
+   505ms  ok         media download helper guard
+   9.67s  ok         runtime sidecar loader guard
+  14.30s  ok         runtime import cycles
+   397ms  ok         webhook body guard
+   9.55s  ok         pairing store guard
+   9.05s  ok         pairing account guard
+[check:changed] FAILED (exit 1)
+[ELIFECYCLE] Command failed with exit code 1.

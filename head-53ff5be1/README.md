@@ -1,0 +1,11 @@
+# Evidence for head 53ff5be1f3b (merge of main 79506514289, tree 20792bab1d8b0fa13961de231a62626e642bec22)
+
+The pushed head is the signed copy of commit a0d666e123c (same tree), the merge of origin/main 79506514289 into 8d822e2632d. Every log here ran at that tree (`gates/summary.txt` prints commit, tree and main at the start; load average per step). `gates/pristine/` ran on a clean checkout of 79506514289 with its own install. Paths are redacted.
+
+Resolution (`../diff-merge-resolution.patch` in the staging dir; summarized here): main's #177839 folded `live-session-fingerprint.ts` into `createCliLiveSessionCapability` in `cli-live-session-registry.ts`; the PR's five-line `nativeLoginOwnerHash` field is re-applied there with that file's `sha256Hex` import. The registry test keeps main's version plus the PR's warm-reuse case on main's async `createOwner` helper. The config baseline is regenerated (plugin 4761 = main 4759 + 2).
+
+- `gates/summary.txt`: build, four tsgo, targeted (10 files, 227 tests), lanes cli-runner (756), anthropic (417 + 1 skipped), compat (28), agents/sessions, diff check, oxfmt, madge all exit 0.
+- `gates/lane-config-sessions*.log`: one case fails in the wide lane, `session-accessor.sqlite-archive-read.test.ts` "reads a short final answer beyond the runtime string limit" (30 s timeout, load 53 to 92). It passes alone twice here (`pristine/merged-archive-read-alone-*.log`), and the same wide lane on pristine 79506514289 fails the same case with the same totals, 1 failed / 3358 passed / 13 skipped (`pristine/lane-config-sessions.log`).
+- `gates/check-changed.log`: 41 ok, 3 failed (max-lines ratchet on three `ui/` files, core test root budget 726/727 vs 720, unused export `formatKeyboardShortcutCombo`); all three fail identically on pristine 79506514289 (`pristine/`). No `ui/` file differs between main and this merge.
+- `gates/redgreen.log`: RED1 to RED12 unchanged (every target line survived the merge), plus RED13 (drop `nativeLoginOwnerHash` at its new owner: the registry case fails 1 of 39, passes 39/39 restored).
+- `harness/compare.txt`: the 36 scenarios and the 2026.10.4 upgrade row are identical to `head-8d822e26/harness/outcomes-after.txt` after the known turn-2 exit-code race mask; the 2026.10.5 upgrade arm is byte-identical.

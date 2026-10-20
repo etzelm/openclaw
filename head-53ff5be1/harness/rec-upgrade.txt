@@ -1,0 +1,55 @@
+######## after / upgrade from v2026.10.4
+[released install] 2026.10.4
+turn 1 exit=0
+turn 2 exit=0
+doctor exit=0
+turn 3 exit=0
+turn 4 exit=0
+turn 5 exit=0
+[turn1 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=85 trigger=user useResume=false session=none resumeSession=none reuse=none historyPrompt=none
+[turn2 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+cli exec: provider=claude-cli model=claude-sonnet-5 promptChars=48 trigger=user useResume=false session=none resumeSession=none reuse=invalidated:missing-transcript historyPrompt=none
+[turn3 openclaw log]
+cli session history refused across auth boundary: reason=auth-unknown
+[turn4 openclaw log]
+[turn5 openclaw log]
+[prompt canaries per user message, and its UserPromptSubmit context]
+user-32660-1.txt: chars=85 PINEAPPLE-7=1 MANGO-5=0 | context bytes=669
+user-32739-1.txt: chars=48 PINEAPPLE-7=0 MANGO-5=0 | context bytes=669
+user-33312-1.txt: chars=449 PINEAPPLE-7=0 MANGO-5=0 | context bytes=1145
+user-33709-1.txt: chars=79 PINEAPPLE-7=0 MANGO-5=1 | context bytes=1312
+user-34140-1.txt: chars=510 PINEAPPLE-7=0 MANGO-5=1 | context bytes=1312
+[stored boundary after each turn]
+after turn 1: cliHistoryBoundary none
+after turn 2: cliHistoryBoundary none
+after turn 3: cliHistoryBoundary none
+after turn 4: cliHistoryBoundary none
+cliHistoryBoundary {"state":"known","maxSeq":2}
+after turn 5: cliHistoryBoundary none
+cliHistoryBoundary {"state":"known","maxSeq":4}
+[transcript rows before the upgrade (written by 2026.10.4)]
+session=harness-session seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+session=harness-session seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session seq=3 role=user text="What is the codeword?"
+session=harness-session seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session cliHistoryBoundary none
+[tables used: transcript_events (session_id,seq,event_json,created_at,event_zstd,event_utf8_bytes,navigation_json), session_nodes]
+[transcript rows and boundaries after turn 5]
+session=harness-session seq=1 role=user text="Remember: the vault codeword is PINEAPPLE-7. Reply STORED."
+session=harness-session seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session seq=3 role=user text="What is the codeword?"
+session=harness-session seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session seq=5 role=user text="What is the codeword?"
+session=harness-session seq=6 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session-2 seq=1 role=user text="Remember: the new codeword is MANGO-5. Reply STORED."
+session=harness-session-2 seq=2 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session-2 seq=3 role=user text="What is the codeword?"
+session=harness-session-2 seq=4 role=assistant text="[{\"type\":\"text\",\"text\":\"STORED\"}]"
+session=harness-session cliHistoryBoundary none
+session=harness-session-2 cliHistoryBoundary {"state":"known","maxSeq":4}
+[agents.defaults.workspace before and after]
+before: $HOME/work/m4-harness/runs/after-upgrade/workspace
+after: $HOME/work/m4-harness/runs/after-upgrade/workspace

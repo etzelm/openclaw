@@ -1,0 +1,222 @@
+commit a0d666e123cb0981a7609660852cf1c447cdfd6f
+Merge: 8d822e2632d8d38a9683f10c3bc682b5c12851a5 79506514289f3d51342af165dc0f6f9c0638a40b
+Tree: 20792bab1d8b0fa13961de231a62626e642bec22
+
+    Merge remote-tracking branch 'origin/main' into fix/cli-native-history-owner
+
+
+diff --git a/docs/.generated/config-baseline.sha256 b/docs/.generated/config-baseline.sha256
+remerge CONFLICT (content): Merge conflict in docs/.generated/config-baseline.sha256
+index 955607af1b8..e127020b7dd 100644
+--- a/docs/.generated/config-baseline.sha256
++++ b/docs/.generated/config-baseline.sha256
+@@ -1,11 +1,4 @@
+-<<<<<<< 8d822e2632d (refactor(cli-runner): drop the child env base parameter no caller passes)
+-5378c5b726f4bfb1fdec4b05ca34585b3015b7f1caa18391faed21d12d1e80ca  config-baseline.json
+-ec11012490888dd4c574ff4943b996a26cfc644bc567c1ea20b946dda6e2fd51  config-baseline.core.json
+-767720827b1ebf168ddc0eddff8bd9db552a68bc80c035223f415adbfc5da3f1  config-baseline.channel.json
+-2623a07e6bf59a2b5b0158daed6c988dee2edb2b9c8178b36f3b6404e7dd606a  config-baseline.plugin.json
+-=======
+-8d2d3997f9e91e3072ddf9d9d3b38dc2e8917a993c4ef9daa3e904005034149e  config-baseline.json
++41db2d9b0b5542daf9024ff62d016859eebbc7db9b668fc2712a1f57d79c6946  config-baseline.json
+ 4cffc4657c89eb80a96133c4f02ff4404ead2f3a4a175d44b91fc724d0e22588  config-baseline.core.json
+ 767720827b1ebf168ddc0eddff8bd9db552a68bc80c035223f415adbfc5da3f1  config-baseline.channel.json
+-00a9f29315506d6111e48ff4a5cfd3dd96ceb39d7e7dd9875cd05e4365cd7f2a  config-baseline.plugin.json
+->>>>>>> 79506514289 (fix(doctor): recognize deserialized systemd user managers in the process census (#178117))
++2ce573a6ab375c1a612562089d470f2e01ce4eabdb18ce49ad7f4609d24ea958  config-baseline.plugin.json
+diff --git a/src/agents/cli-runner/cli-live-session-registry.test.ts b/src/agents/cli-runner/cli-live-session-registry.test.ts
+remerge CONFLICT (content): Merge conflict in src/agents/cli-runner/cli-live-session-registry.test.ts
+index 36b4759adc1..bddf1e3e39a 100644
+--- a/src/agents/cli-runner/cli-live-session-registry.test.ts
++++ b/src/agents/cli-runner/cli-live-session-registry.test.ts
+@@ -196,34 +196,29 @@ describe("generic plugin-owned live session registry", () => {
+     );
+   });
+ 
+-<<<<<<< 8d822e2632d (refactor(cli-runner): drop the child env base parameter no caller passes)
+-  it("does not reuse a warm process across a native login owner change", () => {
+-    const withOwner = (authFingerprint: string | undefined) => {
+-      const context = buildPreparedCliRunContext({ systemPrompt: "Original system policy." });
++  it("does not reuse a warm process across a native login owner change", async () => {
++    const withOwner = async (authFingerprint: string | undefined) => {
++      const { context } = await createOwner({ systemPrompt: "Original system policy." });
+       if (authFingerprint) {
+         context.cliHistoryWriter = {
+           authFingerprint,
+           bindsNativeLogin: true,
+         } as NonNullable<typeof context.cliHistoryWriter>;
+       }
+-      return buildCliLiveSessionFingerprint({
++      return createCliLiveSessionCapability({
+         context,
+         argv: ["claude", "-p", "--resume", "native-session"],
+         env: { PATH: "/usr/bin:/bin", CLAUDE_CONFIG_DIR: "/fixture/claude" },
+-      });
++        beginCapture() {},
++        abortSignal: new AbortController().signal,
++      }).fingerprint;
+     };
+-    expect(withOwner("a".repeat(64))).toBe(withOwner("a".repeat(64)));
+-    expect(withOwner("b".repeat(64))).not.toBe(withOwner("a".repeat(64)));
+-    expect(withOwner(undefined)).not.toBe(withOwner("a".repeat(64)));
++    const ownerA = await withOwner("a".repeat(64));
++    expect(await withOwner("a".repeat(64))).toBe(ownerA);
++    expect(await withOwner("b".repeat(64))).not.toBe(ownerA);
++    expect(await withOwner(undefined)).not.toBe(ownerA);
+   });
+ 
+-  it("keeps fresh and resumed process fingerprints identical without hiding prompt changes", () => {
+-    const fresh = buildPreparedCliRunContext({ systemPrompt: "Original system policy." });
+-    const resumed = buildPreparedCliRunContext({ systemPrompt: "Original system policy." });
+-    const changed = buildPreparedCliRunContext({ systemPrompt: "Changed system policy." });
+-    const mcpFresh = buildPreparedCliRunContext({ systemPrompt: "Original system policy." });
+-    const mcpResumed = buildPreparedCliRunContext({ systemPrompt: "Original system policy." });
+-=======
+   it("keeps fresh and resumed process fingerprints identical without hiding prompt changes", async () => {
+     const fresh = (await createOwner({ systemPrompt: "Original system policy." })).context;
+     const resumed = (await createOwner({ systemPrompt: "Original system policy." })).context;
+@@ -242,7 +237,6 @@ describe("generic plugin-owned live session registry", () => {
+         abortSignal: new AbortController().signal,
+       }).fingerprint;
+     }
+->>>>>>> 79506514289 (fix(doctor): recognize deserialized systemd user managers in the process census (#178117))
+     mcpFresh.preparedBackend.mcpConfigHash = "stable-mcp-config";
+     mcpResumed.preparedBackend.mcpConfigHash = "stable-mcp-config";
+     const env = { PATH: "/usr/bin:/bin" };
+diff --git a/src/agents/cli-runner/cli-live-session-registry.ts b/src/agents/cli-runner/cli-live-session-registry.ts
+index fcf92a2d6d8..8020dcd9f36 100644
+--- a/src/agents/cli-runner/cli-live-session-registry.ts
++++ b/src/agents/cli-runner/cli-live-session-registry.ts
+@@ -269,6 +269,11 @@ export function createCliLiveSessionCapability(params: {
+       promptToolNamesHash: context.promptToolNamesHash,
+       mcpResumeHash: context.preparedBackend.mcpResumeHash ?? context.preparedBackend.mcpConfigHash,
+       credentialFingerprint: context.preparedBackend.secretInput?.fingerprint,
++      // A warm child keeps the login it started with. Reuse it only while the native owner
++      // this run was prepared under is the one it was started under.
++      nativeLoginOwnerHash: context.cliHistoryWriter?.bindsNativeLogin
++        ? sha256Hex(context.cliHistoryWriter.authFingerprint)
++        : undefined,
+       skillsFingerprint,
+       env: Object.keys(params.env)
+         .toSorted()
+diff --git a/src/agents/cli-runner/live-session-fingerprint.ts b/src/agents/cli-runner/live-session-fingerprint.ts
+deleted file mode 100644
+remerge CONFLICT (modify/delete): src/agents/cli-runner/live-session-fingerprint.ts deleted in 79506514289 (fix(doctor): recognize deserialized systemd user managers in the process census (#178117)) and modified in 8d822e2632d (refactor(cli-runner): drop the child env base parameter no caller passes).  Version 8d822e2632d (refactor(cli-runner): drop the child env base parameter no caller passes) of src/agents/cli-runner/live-session-fingerprint.ts left in tree.
+index f239a69280b..00000000000
+--- a/src/agents/cli-runner/live-session-fingerprint.ts
++++ /dev/null
+@@ -1,114 +0,0 @@
+-import { sha256Hex } from "../../infra/crypto-digest.js";
+-import type { PreparedCliRunContext } from "./types.js";
+-
+-/** Fingerprints every process-stable input without retaining secrets or volatile artifact paths. */
+-export function buildCliLiveSessionFingerprint(params: {
+-  context: PreparedCliRunContext;
+-  argv: readonly string[];
+-  argv0?: string;
+-  env: Readonly<Record<string, string>>;
+-}): string {
+-  const context = params.context;
+-  const managedGrant = context.preparedBackend.mcpClientGrantCapture;
+-  const normalizeGrantToken = params.env.OPENCLAW_MCP_TOKEN === managedGrant?.transportToken;
+-  const normalizeMcpConfigPath = Boolean(context.preparedBackend.mcpConfigHash);
+-  const skillSnapshot = context.params.skillsSnapshot;
+-  const skillsFingerprint = skillSnapshot
+-    ? sha256Hex(
+-        JSON.stringify({
+-          promptHash: sha256Hex(skillSnapshot.prompt),
+-          skillFilter: skillSnapshot.skillFilter,
+-          skills: skillSnapshot.skills,
+-          librarySelections: skillSnapshot.librarySelections,
+-          resolvedSkills: (skillSnapshot.resolvedSkills ?? []).map((skill) => ({
+-            name: skill.name,
+-            description: skill.description,
+-            contentHash: skill.contentHash,
+-            filePath: skill.filePath,
+-            sourceInfo: skill.sourceInfo,
+-          })),
+-          // Shipped Plugin SDK callers may omit prepared content identities; retain their version
+-          // contract. Loaded snapshots use content identity, not watcher invalidation epochs.
+-          version: skillSnapshot.resolvedSkills?.every((skill) => Boolean(skill.contentHash))
+-            ? undefined
+-            : skillSnapshot.version,
+-        }),
+-      )
+-    : undefined;
+-  const omittedValueFlags = new Set(
+-    [
+-      context.preparedBackend.backend.systemPromptArg,
+-      context.preparedBackend.backend.systemPromptFileArg,
+-      "--session-id",
+-      "--resume",
+-      "-r",
+-    ].filter((entry): entry is string => typeof entry === "string" && entry.length > 0),
+-  );
+-  const unstableValueFlags = new Set(
+-    [
+-      normalizeMcpConfigPath ? "--mcp-config" : undefined,
+-      skillsFingerprint ? "--plugin-dir" : undefined,
+-      skillsFingerprint ? "--plugin-dir-no-mcp" : undefined,
+-    ].filter((entry): entry is string => typeof entry === "string" && entry.length > 0),
+-  );
+-  const argv: string[] = [];
+-  for (let index = 0; index < params.argv.length; index += 1) {
+-    const value = params.argv[index] ?? "";
+-    if (omittedValueFlags.has(value)) {
+-      index += 1;
+-      continue;
+-    }
+-    if ([...omittedValueFlags].some((flag) => value.startsWith(`${flag}=`))) {
+-      continue;
+-    }
+-    if (unstableValueFlags.has(value)) {
+-      argv.push("<unstable>");
+-      index += 1;
+-      continue;
+-    }
+-    if ([...unstableValueFlags].some((flag) => value.startsWith(`${flag}=`))) {
+-      argv.push("<unstable>");
+-      continue;
+-    }
+-    argv.push(value);
+-  }
+-
+-  return sha256Hex(
+-    JSON.stringify({
+-      argv,
+-      argv0: params.argv0,
+-      workspaceDirHash: sha256Hex(context.workspaceDir),
+-      cwdHash: context.cwdHash ?? sha256Hex(context.cwd ?? context.workspaceDir),
+-      provider: context.params.provider,
+-      model: context.normalizedModel,
+-      // A warm process fixes its prompt at initialization; changed bytes require restart.
+-      systemPromptHash: sha256Hex(context.systemPrompt),
+-      agentAccountId: context.params.agentAccountId,
+-      authProfileIdHash: context.effectiveAuthProfileId
+-        ? sha256Hex(context.effectiveAuthProfileId)
+-        : undefined,
+-      authEpochHash: context.authEpoch ? sha256Hex(context.authEpoch) : undefined,
+-      extraSystemPromptHash: context.extraSystemPromptHash,
+-      promptToolNamesHash: context.promptToolNamesHash,
+-      mcpResumeHash: context.preparedBackend.mcpResumeHash ?? context.preparedBackend.mcpConfigHash,
+-      credentialFingerprint: context.preparedBackend.secretInput?.fingerprint,
+-      // A warm child keeps the login it started with. Reuse it only while the native owner
+-      // this run was prepared under is the one it was started under.
+-      nativeLoginOwnerHash: context.cliHistoryWriter?.bindsNativeLogin
+-        ? sha256Hex(context.cliHistoryWriter.authFingerprint)
+-        : undefined,
+-      skillsFingerprint,
+-      env: Object.keys(params.env)
+-        .toSorted()
+-        .filter((key) => key !== "OPENCLAW_MCP_CLI_CAPTURE_KEY")
+-        .map((key) => [
+-          key,
+-          key === "OPENCLAW_MCP_TOKEN" && normalizeGrantToken
+-            ? "<managed-mcp-grant>"
+-            : params.env[key]
+-              ? sha256Hex(params.env[key])
+-              : "",
+-        ]),
+-    }),
+-  );
+-}

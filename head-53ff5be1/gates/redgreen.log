@@ -1,0 +1,143 @@
+## RED1 host sends SessionManager writer facts without the owner-check request
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 2 to be 1 // Object.is equality
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:665:29
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:146:59
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:146:9
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:139:5
+-- restored:
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+(checkout clean)
+## RED2 metadata host never answers the owner probe
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > covers a SessionManager append only while the native login owner holds
+AssertionError: expected 0 to be greater than 0
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:661:23
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:146:59
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:146:9
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:139:5
+-- restored:
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+(checkout clean)
+## RED3 execute.ts back to the earlier rule: only a fresh recovery prompt is strict
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a resumed turn that replays history under another login
+AssertionError: promise resolved "{ text: 'done', …(5) }" instead of rejecting
+ ❯ src/agents/cli-runner/execute.native-history-owner.test.ts:93:69
+      Tests  1 failed | 3 passed (4)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+(checkout clean)
+## RED4 the UserPromptSubmit response goes out on the stream check alone
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+-- mutated:
+ FAIL   extension-providers  extensions/anthropic/cli-runtime.test.ts > Claude native stdio private-input check > withholds private turn context when the private-input check fails after the prompt was sent
+AssertionError: expected 'saved private context' to be undefined
+ ❯ extensions/anthropic/cli-runtime.test.ts:872:35
+      Tests  1 failed | 52 passed (53)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  53 passed (53)
+(checkout clean)
+## RED5 the native login is attested without the operator's opt-in
+ 1 file changed, 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/prepare-native-history.test.ts > native Claude login history on preparation > never sends the native token to Anthropic unless the operator opted in
+AssertionError: expected { …(12) } to be undefined
+ ❯ src/agents/cli-runner/prepare-native-history.test.ts:214:38
+      Tests  1 failed | 2 passed (3)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+(checkout clean)
+## RED7 the credential-root split guard is removed
+ 1 file changed, 2 deletions(-)
+-- mutated:
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > reads the child's API key helper and secure-storage split
+AssertionError: expected 'uuid:uuid-a' to be undefined
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:237:9
+      Tests  1 failed | 27 passed (28)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  28 passed (28)
+(checkout clean)
+## RED8 CLAUDE_CODE_OAUTH_TOKEN drops out of the non-native auth env list
+ 1 file changed, 1 deletion(-)
+-- mutated:
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when the child selects CLAUDE_CODE_OAUTH_TOKEN instead of the stored login
+AssertionError: expected 'uuid:uuid-a' to be undefined
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:270:9
+      Tests  1 failed | 27 passed (28)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  28 passed (28)
+(checkout clean)
+## RED9 the profile request is sent without its timeout signal
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   plugin-sdk  src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > sends only the access token, only to the Anthropic profile endpoint, bounded
+AssertionError: expected undefined to be an instance of AbortSignal
+ ❯ src/plugin-sdk/provider-auth-claude-compat.test.ts:86:26
+      Tests  1 failed | 27 passed (28)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  28 passed (28)
+(checkout clean)
+## RED10 saved-history strictness keyed on a resumed session id
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/execute.native-history-owner.test.ts > native login history owner at execution > spawns nothing for a fresh recovery turn whose environment selects another login
+AssertionError: promise resolved "{ text: 'done', …(5) }" instead of rejecting
+ ❯ src/agents/cli-runner/execute.native-history-owner.test.ts:85:50
+      Tests  1 failed | 3 passed (4)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+(checkout clean)
+## RED11 a native login lookup that throws escapes instead of meaning no owner
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check
+      Tests  1 failed | 21 passed (22)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+(checkout clean)
+## RED12 the throw is caught only at the coverage check (the first round-2 placement), not at the boundary checks
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/history-boundary.native-login.test.ts > native CLI login owner > treats a login lookup that throws as no owner at every check
+AssertionError: expected [Function] to throw error including 'CLI history authority changed' but got 'ENOTDIR: not a directory, lstat \'/pr…'
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:684:59
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:146:59
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:146:9
+ ❯ src/agents/cli-runner/history-boundary.native-login.test.ts:139:5
+-- restored:
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+(checkout clean)
+## RED13 the re-applied warm-reuse fingerprint field is dropped (nativeLoginOwnerHash)
+ 1 file changed, 3 deletions(-)
+-- mutated:
+ FAIL   agents-support  src/agents/cli-runner/cli-live-session-registry.test.ts > generic plugin-owned live session registry > does not reuse a warm process across a native login owner change
+AssertionError: expected '2c7e491b6afd8d8b1bc88d8a81d0731385e92…' not to be '2c7e491b6afd8d8b1bc88d8a81d0731385e92…' // Object.is equality
+      Tests  1 failed | 38 passed (39)
+-- restored:
+ Test Files  1 passed (1)
+      Tests  39 passed (39)
+(checkout clean)
+## GREEN (all six owning files, unmutated)
+ Test Files  1 passed (1)
+      Tests  28 passed (28)
+ Test Files  4 passed (4)
+      Tests  68 passed (68)
+ Test Files  1 passed (1)
+      Tests  53 passed (53)
+       0

@@ -1,0 +1,19 @@
+# outcomes-after.txt at merge a0d666e123c (tree 20792bab1d8) vs round3 head-8d822e26 (8d822e2632d). Reference = '<', this run = '>'.
+# Mask: turn-2 client exit code of interrupted-* rows (1 vs 143 race).
+lines: ref=39 new=39
+IDENTICAL after exit-race mask
+# unmasked diff:
+7,8c7,8
+< interrupted-allowed | exit=0 exit=1 exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1398:0,0,0 61:0,0,0+ctx1800:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+< interrupted-fresh | exit=0 exit=1 exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1396:0,0,0 529:1,0,0+ctx1798:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+---
+> interrupted-allowed | exit=0 exit=143 exit=0 | 85/fresh -/- 61/resume | 85:1,0,0+ctx1398:0,0,0 61:0,0,0+ctx1800:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+> interrupted-fresh | exit=0 exit=143 exit=0 | 85/fresh -/- 529/fresh | 85:1,0,0+ctx1396:0,0,0 529:1,0,0+ctx1798:0,0,1 | t1:known/2 t2:known/2 t3:known/4 | stubProfileRequests=3
+11,12c11,12
+< interrupted-revoke-before-context | exit=0 exit=143 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1412:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1247:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+< interrupted-revoke-before-send | exit=0 exit=143 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1409:0,0,0 61:0,0,0+ctx1811:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+---
+> interrupted-revoke-before-context | exit=0 exit=1 exit=0 exit=0 | 85/fresh -/- 61/resume 61/resume | 85:1,0,0+ctx1412:0,0,0 61:0,0,0+ctx0:0,0,0 61:0,0,0+ctx1247:0,0,0 | t1:known/2 t2:known/2 t3:known/3 t4:unknown | stubProfileRequests=4
+> interrupted-revoke-before-send | exit=0 exit=1 exit=1 exit=0 | 85/fresh -/- -/-/REFUSED 61/resume | 85:1,0,0+ctx1409:0,0,0 61:0,0,0+ctx1811:0,0,1 | t1:known/2 t2:known/2 t3:known/3 t4:known/5 | stubProfileRequests=4
+# outcomes-upgrade-1005.txt:
+IDENTICAL
