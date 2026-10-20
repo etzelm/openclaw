@@ -321,7 +321,7 @@ export function DevicePairSetup(props: DevicePairSetupProps) {
                         </p>
                       }
                     >
-                      <div class="callout warn device-pair-setup__pending">
+                      <div class="callout warn device-pair-setup__pending" role="status">
                         <span>
                           {t("devices.pairing.pending", { count: String(props.pendingCount) })}
                         </span>
