@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 
 import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { getByRole } from "@solidjs/testing-library";
 import { createComponent, createSignal, flush } from "solid-js";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { createDeferred as deferred } from "../../../../../test/helpers/promise.js";
@@ -632,6 +633,27 @@ describe("AgentMemoryPanel gateway lifecycle", () => {
     expect(card.querySelector("button")).toBe(details);
     expect(document.activeElement).toBe(details);
   });
+
+  it.each([true, false])(
+    "exposes the dreaming toggle as a switch named Dreaming (enabled: %s)",
+    async (enabled) => {
+      const request = vi.fn(async (method: string) =>
+        method === "doctor.memory.status" ? { dreaming: { enabled } } : emptyReply(method),
+      );
+      const page = await createPage(contextWithGateway(createTestGatewayClient(request), true));
+      const toggle = getByRole<HTMLButtonElement>(page.container, "switch", { name: "Dreaming" });
+      await waitForSolid(() => expect(toggle.disabled).toBe(false));
+      expect(toggle.getAttribute("aria-checked")).toBe(String(enabled));
+      toggle.click();
+      flush();
+      expect(page.state.view().toggle.open).toBe(true);
+      expect(toggle.getAttribute("aria-checked")).toBe(String(enabled));
+      page.state.view().toggle.onCancel();
+      flush();
+      expect(page.state.view().toggle.open).toBe(false);
+      expect(toggle.getAttribute("aria-checked")).toBe(String(enabled));
+    },
+  );
 
   it.each([false, true])(
     "renders engine Off without presenting a cached runtime payload (latent override: %s)",
