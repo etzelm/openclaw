@@ -389,6 +389,13 @@ describe("ChatPullRequests", () => {
     expect(onOpenSessionDiff).toHaveBeenCalledOnce();
   });
 
+  it("names the Create PR link with its visible text and the branch", () => {
+    paint({ pullRequests: [], branch: sessionBranch() });
+    const link = container.querySelector<HTMLAnchorElement>("a.chat-pr__create");
+    expect(link?.textContent).toBe("Create PR");
+    expect(link?.getAttribute("aria-label")).toBe("Create PR for claude/cloud-workers-live-events");
+  });
+
   it("hides the Create PR link while the branch has no createUrl", () => {
     paint({
       pullRequests: [],
