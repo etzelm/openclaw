@@ -73,7 +73,7 @@ it("expires presence without another event, catches up after hiding, and stops o
           }
         : activityResponse(method, params),
     );
-    current().opts.onHello?.(activityHello());
+    current().testOptions.onHello?.(activityHello());
     const page = createActivityPage(context, {
       pathname: "/activity/person",
       search: "",
@@ -94,7 +94,7 @@ it("expires presence without another event, catches up after hiding, and stops o
     };
     let presenceVersion = 0;
     const publishPresence = (lastActivityAt: number) => {
-      current().opts.onEvent?.(
+      current().testOptions.onEvent?.(
         createGatewayEvent("presence", {
           reset: true,
           version: ++presenceVersion,
