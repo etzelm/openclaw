@@ -742,7 +742,15 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts): Promise<void> 
         return;
       }
 
-      const rawText = extractMessageText(content.content);
+      // Extraction renders attacker-controlled content shapes; a failure here must
+      // never tear down the shared SSE stream (the event would replay unacked forever).
+      let rawText: string;
+      try {
+        rawText = extractMessageText(content.content);
+      } catch (error: unknown) {
+        runtime.log?.(`[tlon] Failed to extract message text: ${formatErrorMessage(error)}`);
+        return;
+      }
       if (!rawText.trim()) {
         return;
       }
@@ -754,7 +762,6 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts): Promise<void> 
         author: senderShip,
         content: rawText,
         timestamp: sentAt,
-        id: messageId,
       });
 
       const { allowedShips, senderAllowed, mentionDecision, parentId, isAdmissionAllowed } =
@@ -935,7 +942,14 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts): Promise<void> 
         );
       }
 
-      const rawText = extractMessageText(essay.content);
+      // Same extraction-failure containment as the channels firehose above.
+      let rawText: string;
+      try {
+        rawText = extractMessageText(essay.content);
+      } catch (error: unknown) {
+        runtime.log?.(`[tlon] Failed to extract message text: ${formatErrorMessage(error)}`);
+        return;
+      }
       if (!rawText.trim()) {
         return;
       }
