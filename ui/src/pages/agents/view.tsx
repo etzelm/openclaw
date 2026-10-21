@@ -19,10 +19,11 @@ import { registerEnglishCatalog, t } from "../../lib/reactive/i18n.ts";
 import { ReasonedDisabledControl } from "../plugins/reasoned-disabled-control.tsx";
 import type { AgentsPageView } from "./agents-page-state.ts";
 import { AgentMemoryPanel } from "./memory/memory-panel.tsx";
+import { AgentCron } from "./panel-cron.tsx";
 import { AgentFiles } from "./panels-files.tsx";
 import { AgentOverview } from "./panels-overview.tsx";
 import { AgentSkills } from "./panels-skills.tsx";
-import { AgentChannels, AgentCron } from "./panels-status-files.tsx";
+import { AgentChannels } from "./panels-status-files.tsx";
 import { AgentTools } from "./panels-tools-skills.tsx";
 
 registerEnglishCatalog(registerSettingsEnglish);
@@ -65,7 +66,7 @@ export function AgentsPageHeader() {
 }
 
 export function Agents(props: AgentsProps) {
-  const config = createMemo(() => currentConfigObject(props.config), { equals: false });
+  const config = () => currentConfigObject(props.config);
   const defaultId = () =>
     props.readData().agentsList?.selectionRequired
       ? null
