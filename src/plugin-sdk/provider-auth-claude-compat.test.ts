@@ -253,6 +253,32 @@ describe("attestClaudeNativeLoginOwner", () => {
       expect(await attest({ platform: "linux", env })).toBeUndefined();
     });
 
+    it("has no owner when Claude's managed settings or a drop-in select another login", async () => {
+      const configDir = tempDirs.make("openclaw-claude-config-");
+      loginIn(configDir, "uuid-a");
+      const managedSettingsDir = tempDirs.make("openclaw-claude-managed-");
+      const options = {
+        platform: "linux" as const,
+        env: { CLAUDE_CONFIG_DIR: configDir },
+        managedSettingsDir,
+      };
+      const writeManaged = (file: string, value: unknown) => {
+        fs.mkdirSync(path.dirname(path.join(managedSettingsDir, file)), { recursive: true });
+        fs.writeFileSync(path.join(managedSettingsDir, file), JSON.stringify(value));
+      };
+      // Claude skips hidden and non-JSON drop-ins.
+      writeManaged("managed-settings.json", { env: { DISABLE_TELEMETRY: "1" } });
+      writeManaged("managed-settings.d/.10-auth.json", { apiKeyHelper: "echo synthetic" });
+      writeManaged("managed-settings.d/10-auth.txt", { env: { ANTHROPIC_API_KEY: "synthetic" } });
+      expect(await attest(options)).toBe("uuid:uuid-a");
+      writeManaged("managed-settings.json", { apiKeyHelper: "echo synthetic" });
+      expect(readClaudeNativeLoginOwner(options)).toBeUndefined();
+      expect(await attest(options)).toBeUndefined();
+      writeManaged("managed-settings.json", {});
+      writeManaged("managed-settings.d/20-auth.json", { env: { ANTHROPIC_API_KEY: "synthetic" } });
+      expect(await attest(options)).toBeUndefined();
+    });
+
     it.each([
       "ANTHROPIC_API_KEY",
       "ANTHROPIC_AUTH_TOKEN",
