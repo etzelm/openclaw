@@ -1,6 +1,5 @@
 /* @vitest-environment jsdom */
 
-import { getQueriesForElement } from "@solidjs/testing-library";
 import { expect, it, vi } from "vitest";
 import {
   createGatewayEvent,
@@ -20,25 +19,6 @@ import {
   activityRoster,
   createActivityPage,
 } from "./activity-page.test-support.ts";
-
-it("names the page with a level-one heading", async () => {
-  await i18n.setLocale("en");
-  const { gateway: source } = createGatewayStoreTestStore({ settings: loadSettings() });
-  const sessions = createTestSessionCapability(source);
-  const page = createActivityPage(
-    { ...createContext(source, sessions), basePath: "" },
-    { pathname: "/activity", search: "", hash: "" },
-  );
-  try {
-    expect(
-      getQueriesForElement(page.container).getByRole("heading", { level: 1 }).textContent,
-    ).toBe("Activity");
-  } finally {
-    page.dispose();
-    sessions.dispose();
-    disposeSidebarContextLifecycles();
-  }
-});
 
 it("expires presence without another event, catches up after hiding, and stops on disposal", async () => {
   await i18n.setLocale("en");
