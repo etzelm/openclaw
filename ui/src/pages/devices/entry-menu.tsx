@@ -30,7 +30,7 @@ export function PendingDeviceDecisions(props: {
     props.devices.inventorySaving ||
     !props.devices.connected ||
     !props.devices.canManagePairing ||
-    props.devices.devicesDeciding.includes(props.requestId);
+    props.devices.devicesDeciding.some((decision) => decision.requestId === props.requestId);
   return (
     <>
       <button
@@ -67,7 +67,9 @@ export function DeviceEntryMenu(props: {
   const id = createUniqueId();
   const deciding = () =>
     props.entry.pendingRequestId !== undefined &&
-    props.devices.devicesDeciding.includes(props.entry.pendingRequestId);
+    props.devices.devicesDeciding.some(
+      (decision) => decision.requestId === props.entry.pendingRequestId,
+    );
   const actions = () => [
     {
       value: "desktop",

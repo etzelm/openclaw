@@ -193,7 +193,7 @@ describe("devices pending rendering", () => {
         pending: [pendingDevice("req-1", "Device One"), pendingDevice("req-2", "Device Two")],
         paired: [],
       },
-      devicesDeciding: ["req-1"],
+      devicesDeciding: [{ requestId: "req-1" }],
     });
     const decisions = Array.from(
       getSection(container, "Pending approval").querySelectorAll("button"),
@@ -556,7 +556,7 @@ describe("devices inventory rendering", () => {
           pendingRequestId: "node-req-1",
         },
       ],
-      devicesDeciding: ["node-req-1"],
+      devicesDeciding: [{ requestId: "node-req-1" }],
     });
     const row = getSettingsRow(container, "clawmac");
     for (const action of ["approve", "reject"]) {

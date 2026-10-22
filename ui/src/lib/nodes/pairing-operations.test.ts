@@ -56,6 +56,27 @@ it.each(actions)(
   },
 );
 
+it("keeps a replacement decision guarded when a retired request settles", async () => {
+  const retired = deferred<unknown>();
+  const replacement = deferred<unknown>();
+  const request = vi
+    .fn()
+    .mockReturnValueOnce(retired.promise)
+    .mockReturnValueOnce(replacement.promise)
+    .mockResolvedValue({ pending: [], paired: [] });
+  const state = pairing.createInitialDevicesState({ client: { request }, connected: true });
+  const first = pairing.approveDevicePairing(state, "request-1");
+  state.requestGeneration += 1;
+  state.devicesDeciding = [];
+  const second = pairing.approveDevicePairing(state, "request-1");
+  retired.resolve({});
+  await first;
+  await pairing.rejectDevicePairing(state, "request-1");
+  expect(request).toHaveBeenCalledTimes(2);
+  replacement.resolve({});
+  await second;
+});
+
 it.each(actions)("%s refresh/error", async (method, run, isNode, failed) => {
   const { mutation, devices, nodes, request, state, settled, start } = setup();
   const current = isNode ? vi.fn() : request;

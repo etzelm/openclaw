@@ -82,7 +82,7 @@ type InventoryState = NodesRequestState & {
   devicesError: string | null;
   devicesList: DevicePairingList | null;
   // Device and node pairing requestIds with an approve or reject in flight.
-  devicesDeciding: readonly string[];
+  devicesDeciding: readonly { requestId: string }[];
 };
 
 type ExecApprovalsState = NodesRequestState & {
@@ -219,14 +219,16 @@ async function decidePairing(
   requestId: string,
   decide: () => Promise<unknown>,
 ) {
-  if (state.devicesDeciding.includes(requestId)) {
+  if (state.devicesDeciding.some((decision) => decision.requestId === requestId)) {
     return;
   }
-  state.devicesDeciding = [...state.devicesDeciding, requestId];
+  const decision = { requestId };
+  state.devicesDeciding = [...state.devicesDeciding, decision];
   try {
     await decide();
   } finally {
-    state.devicesDeciding = state.devicesDeciding.filter((id) => id !== requestId);
+    // A retired decision must not release a replacement for the same request.
+    state.devicesDeciding = state.devicesDeciding.filter((pending) => pending !== decision);
   }
 }
 
