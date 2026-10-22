@@ -67,31 +67,40 @@ const outcomes = [
   ["not-due", "This automation is not due yet.", "force", false, "cronNotice"],
   ["already-running", "This automation is already running.", "force", false, "cronNotice"],
   ["stopped", "The scheduler is stopped.", "force", false, "cronError"],
-  ["invalid-spec", "This automation has an invalid schedule or payload.", "force", true, "cronError"],
+  [
+    "invalid-spec",
+    "This automation has an invalid schedule or payload.",
+    "force",
+    true,
+    "cronError",
+  ],
 ] as const;
-it.each(outcomes)("reports %s with history refresh", async (reason, message, mode, refresh, field) => {
-  const request = vi.fn(async (method: string) => {
-    if (method === "cron.runs" && reason === "queued") {
-      throw new Error("run history refresh unavailable");
+it.each(outcomes)(
+  "reports %s with history refresh",
+  async (reason, message, mode, refresh, field) => {
+    const request = vi.fn(async (method: string) => {
+      if (method === "cron.runs" && reason === "queued") {
+        throw new Error("run history refresh unavailable");
+      }
+      return method === "cron.run"
+        ? reason === "queued"
+          ? { ok: true, enqueued: true, runId: "run-due" }
+          : { ok: true, ran: false, reason }
+        : method === "cron.runs"
+          ? { entries: [], total: 0, offset: 0, limit: 50, hasMore: false }
+          : {};
+    });
+    const state = createStateWithRequest(request, { cronRunsScope: "job", cronRunsJobId: "job" });
+    expect(await cron.runCronJob(state, "job", mode)).toBeUndefined();
+    expect(state.cronError).toBe(field === "cronError" ? `job: ${message}` : null);
+    if (field === "cronNotice") {
+      expect(state.cronNotice).toBe(`job: ${message}`);
     }
-    return method === "cron.run"
-      ? reason === "queued"
-        ? { ok: true, enqueued: true, runId: "run-due" }
-        : { ok: true, ran: false, reason }
-      : method === "cron.runs"
-        ? { entries: [], total: 0, offset: 0, limit: 50, hasMore: false }
-        : {};
-  });
-  const state = createStateWithRequest(request, { cronRunsScope: "job", cronRunsJobId: "job" });
-  expect(await cron.runCronJob(state, "job", mode)).toBeUndefined();
-  expect(state.cronError).toBe(field === "cronError" ? `job: ${message}` : null);
-  if (field === "cronNotice") {
-    expect(state.cronNotice).toBe(`job: ${message}`);
-  }
-  expect(request).toHaveBeenCalledWith("cron.run", { id: "job", mode });
-  if (refresh) {
-    expect(request).toHaveBeenCalledWith("cron.runs", expect.objectContaining({ id: "job" }));
-  } else {
-    expect(request).not.toHaveBeenCalledWith("cron.runs", expect.anything());
-  }
-});
+    expect(request).toHaveBeenCalledWith("cron.run", { id: "job", mode });
+    if (refresh) {
+      expect(request).toHaveBeenCalledWith("cron.runs", expect.objectContaining({ id: "job" }));
+    } else {
+      expect(request).not.toHaveBeenCalledWith("cron.runs", expect.anything());
+    }
+  },
+);

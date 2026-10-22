@@ -20,7 +20,13 @@ import { isCronJobActiveFailure, isCronJobRunning } from "../../lib/cron-status.
 import { formatRelativeTimestamp } from "../../lib/format.ts";
 import { t } from "../../lib/reactive/i18n.ts";
 import { CRON_SUGGESTIONS, suggestionFormPatch } from "./suggestions.ts";
-import { AdminRequired, ErrorBanner, EnabledSwitch, JobMenu, NoticeBanner } from "./view-controls.tsx";
+import {
+  AdminRequired,
+  ErrorBanner,
+  EnabledSwitch,
+  JobMenu,
+  NoticeBanner,
+} from "./view-controls.tsx";
 import {
   describeJobSchedule,
   JobStateIndicator,
