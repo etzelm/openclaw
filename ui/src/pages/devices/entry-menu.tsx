@@ -1,4 +1,4 @@
-import { createMemo, createUniqueId, Show } from "solid-js";
+import { createUniqueId, Show } from "solid-js";
 import { openDesktopFocus } from "../../components/desktop/desktop-focus-window.ts";
 import { Icon } from "../../components/solid/icon.tsx";
 import { Menu, type MenuItem } from "../../components/solid/menu.tsx";
@@ -21,37 +21,6 @@ async function copyDeviceId(id: string) {
   showToast({ message: copied ? t("devices.inventory.deviceIdCopied") : t("common.copyFailed") });
 }
 
-export function PendingDeviceDecisions(props: {
-  devices: DevicesProps;
-  requestId: string;
-  name: string;
-}) {
-  const disabled = () =>
-    !props.devices.connected ||
-    !props.devices.canManagePairing ||
-    props.devices.devicesDeciding.includes(props.requestId);
-  return (
-    <>
-      <button
-        class="btn btn--sm"
-        disabled={disabled()}
-        aria-label={t("devices.inventory.approveName", { name: props.name })}
-        onClick={() => props.devices.onDeviceApprove(props.requestId)}
-      >
-        {t("devices.inventory.approve")}
-      </button>
-      <button
-        class="btn btn--sm"
-        disabled={disabled()}
-        aria-label={t("devices.inventory.rejectName", { name: props.name })}
-        onClick={() => props.devices.onDeviceReject(props.requestId)}
-      >
-        {t("devices.inventory.reject")}
-      </button>
-    </>
-  );
-}
-
 export function DeviceEntryMenu(props: {
   devices: DevicesProps;
   entry: {
@@ -64,10 +33,7 @@ export function DeviceEntryMenu(props: {
   };
 }) {
   const id = createUniqueId();
-  const deciding = () =>
-    props.entry.pendingRequestId !== undefined &&
-    props.devices.devicesDeciding.includes(props.entry.pendingRequestId);
-  const actions = createMemo(() => [
+  const actions = () => [
     {
       value: "desktop",
       labelKey: "devices.inventory.openDesktop",
@@ -114,7 +80,7 @@ export function DeviceEntryMenu(props: {
       pairing: true,
       run: () => props.entry.onRemove?.(),
     },
-  ]);
+  ];
   return (
     <Show when={props.entry.deviceId || props.entry.desktopEnvironment}>
       <Menu
@@ -130,8 +96,10 @@ export function DeviceEntryMenu(props: {
             id: action.value,
             label: t(action.labelKey),
             disabled:
-              (action.pairing && (!props.devices.connected || !props.devices.canManagePairing)) ||
-              ((action.value === "approve" || action.value === "reject") && deciding()),
+              action.pairing &&
+              (props.devices.inventorySaving ||
+                !props.devices.connected ||
+                !props.devices.canManagePairing),
             attributes: {
               title:
                 action.pairing && props.devices.connected && !props.devices.canManagePairing
