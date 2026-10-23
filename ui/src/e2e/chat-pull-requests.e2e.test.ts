@@ -772,7 +772,9 @@ suite.define(() => {
     await pollCount(page.getByRole("button", { name: "Choose a new publication" })).toBe(1);
     await pollText(page.locator("[data-publication-account]")).toContain("Publish as @system-bot");
     expect(
-      await page.getByRole("link", { name: "Create PR for openclaw/rejected-publication" }).count(),
+      await page
+        .getByRole("link", { name: "Create a pull request for openclaw/rejected-publication" })
+        .count(),
     ).toBe(0);
     await capturePublication(page, "03-publication-failed.png");
   });

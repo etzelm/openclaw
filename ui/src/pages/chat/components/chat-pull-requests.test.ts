@@ -6,6 +6,8 @@ import type { ControlUiSessionPullRequestCheckDetails } from "../../../../../src
 import { createDeferred } from "../../../../../test/helpers/promise.js";
 import { GatewayBrowserClient } from "../../../api/gateway.ts";
 import type { ApplicationGateway, ApplicationGatewaySnapshot } from "../../../app/gateway.ts";
+import { i18n } from "../../../i18n/index.ts";
+import { captureI18nStateForTesting } from "../../../i18n/lib/translate.test-support.ts";
 import { mountSolid } from "../../../test-helpers/mount-solid.ts";
 import { flush } from "../../../test-helpers/solid-settle.ts";
 import type { ChatCiDetailsElement } from "./chat-ci-details.ts";
@@ -389,12 +391,26 @@ describe("ChatPullRequests", () => {
     expect(onOpenSessionDiff).toHaveBeenCalledOnce();
   });
 
-  it("names the Create PR link with its visible text and the branch", () => {
-    paint({ pullRequests: [], branch: sessionBranch() });
-    const link = container.querySelector<HTMLAnchorElement>("a.chat-pr__create");
-    expect(link?.textContent).toBe("Create PR");
-    expect(link?.getAttribute("aria-label")).toBe("Create PR for claude/cloud-workers-live-events");
-  });
+  it.each([
+    { locale: "en", label: "Create PR" },
+    { locale: "fr", label: "Créer une demande de fusion" },
+  ] as const)(
+    "names the Create PR link with its visible text and branch in $locale",
+    async ({ locale, label }) => {
+      const restoreI18n = captureI18nStateForTesting();
+      const branch = sessionBranch();
+      try {
+        await i18n.setLocale(locale);
+        paint({ pullRequests: [], branch });
+        const link = container.querySelector<HTMLAnchorElement>("a.chat-pr__create");
+        expect(link?.textContent).toBe(label);
+        expect(link?.getAttribute("aria-label")).toContain(label);
+        expect(link?.getAttribute("aria-label")).toContain(branch.branch);
+      } finally {
+        await restoreI18n();
+      }
+    },
+  );
 
   it("hides the Create PR link while the branch has no createUrl", () => {
     paint({
