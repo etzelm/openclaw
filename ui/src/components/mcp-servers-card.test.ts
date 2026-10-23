@@ -226,7 +226,10 @@ describe("openclaw-mcp-servers-card", () => {
   });
   it("admits one mutation before rendering busy and releases it after completion", async () => {
     const { card, harness } = await mountCard({
-      config: configWith({ local: { command: "node" } }),
+      config: configWith({
+        local: { command: "node" },
+        other: { command: "node", enabled: false },
+      }),
     });
     const completion = deferred<boolean>();
     harness.patch.mockReturnValueOnce(completion.promise);
@@ -237,7 +240,10 @@ describe("openclaw-mcp-servers-card", () => {
     expect(disable.disabled).toBe(true);
     expect(disable.textContent?.trim()).toBe("Working…");
     expect(actionButton(card, "Add server").disabled).toBe(true);
-    expect(disable.getAttribute("aria-label")).toBeNull();
+    expect(disable.getAttribute("aria-label")).toBe("Working… local");
+    const other = actionButton(card, "Working… other");
+    expect(other.disabled).toBe(true);
+    expect(other.textContent?.trim()).toBe("Working…");
     completion.resolve(true);
     await waitForFast(() => {
       expect(disable.disabled).toBe(false);

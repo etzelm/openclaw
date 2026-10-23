@@ -43,6 +43,7 @@ const enMcp = {
     removeConfirmMessage:
       "This deletes the server's saved configuration, such as its command or URL, arguments, headers, and environment. This cannot be undone.",
     working: "Working…",
+    workingNamed: "Working… {name}",
   },
   mcpPage: {
     intro: "Connect and manage MCP servers that provide tools to OpenClaw.",
