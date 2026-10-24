@@ -63,9 +63,9 @@ export abstract class ChatPaneSessionCreation extends ChatPaneRetainedPresentati
       true,
     );
     return {
-      text: t("chat.catalog.codexSupervisionDisabled"),
+      text: t("chat.codexSupervisionDisabled"),
       action: {
-        label: t("chat.catalog.openCodexSettings"),
+        label: t("chat.openCodexSettings"),
         href: `${location.pathname}${location.search}`,
         onNavigate: () => this.context.navigate("plugin-settings", location),
       },
