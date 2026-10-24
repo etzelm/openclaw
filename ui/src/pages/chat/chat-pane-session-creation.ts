@@ -22,6 +22,7 @@ import { cloneChatAttachmentsForIndependentOwner } from "./attachment-payload-st
 import { clearChatHistory } from "./chat-history-actions.ts";
 import { isExpiredIncognitoSession, setChatError } from "./chat-history-state.ts";
 import { createChatModelSetupBanner } from "./chat-model-setup.ts";
+import { resolveChatPaneParentSession } from "./chat-pane-header-identity.ts";
 import { ChatPaneRetainedPresentation } from "./chat-pane-retained-presentation.ts";
 import {
   NEW_SESSION_ACTIVE_RUN_MESSAGE,
@@ -30,7 +31,6 @@ import {
   preparePaneSessionHandoff,
 } from "./chat-pane-shared.ts";
 import { canCreateChatSession, selectedChatSessionRow } from "./chat-state-route.ts";
-import { resolveChatPaneParentSession } from "./components/chat-pane-header.ts";
 
 /** Creates or resets a conversation while guarding its asynchronous ownership. */
 export abstract class ChatPaneSessionCreation extends ChatPaneRetainedPresentation {
@@ -45,7 +45,6 @@ export abstract class ChatPaneSessionCreation extends ChatPaneRetainedPresentati
     } | null;
   } = { recovering: false, creatingIncognito: false, restartFallback: null };
 
-  /** Explains a catalog composer that cannot continue, with a settings route when one helps. */
   protected catalogComposerReason(catalogKey: CatalogSessionKey | null) {
     const { catalogHost, catalogLoading, catalogSession } = this.history;
     // Avoid flashing view-only while metadata loads; failed lookups still explain the gate.
@@ -55,9 +54,7 @@ export abstract class ChatPaneSessionCreation extends ChatPaneRetainedPresentati
     if (catalogHost?.kind === "node") {
       return { text: t("chat.catalog.remoteViewOnly") };
     }
-    // Stopgap without a row reason field: Codex withholds only continuation from archivable
-    // local rows when supervision is off, pinned by
-    // extensions/codex/src/session-catalog-supervision-gate.test.ts.
+    // Archivable local Codex rows withhold continuation only when supervision is off.
     if (catalogKey.catalogId !== "codex" || catalogSession?.canArchive !== true) {
       return { text: t("chat.catalog.unsupportedViewOnly") };
     }

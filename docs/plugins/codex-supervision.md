@@ -667,8 +667,8 @@ For every supervision config field, see
 ## Troubleshooting
 
 **No sessions appear:** verify that `@openclaw/codex` is installed, both the
-plugin and `supervision.enabled` are true, the current plugin allowlist permits
-`codex`, and the sessions are not archived. Gateway activation changes hot-apply;
+plugin and native conversation discovery are enabled, the current plugin allowlist
+permits `codex`, and the sessions are not archived. Gateway activation changes hot-apply;
 refresh the catalog after they finish. Restart a node if its local activation
 change has not refreshed its advertised capabilities.
 

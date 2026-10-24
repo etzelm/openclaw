@@ -74,67 +74,50 @@ async function registerLocalCatalog(pluginConfig: unknown) {
 describe("Codex catalog supervision gate", () => {
   it.each([
     { state: "absent", pluginConfig: undefined, canContinue: false },
+    { state: "disabled", pluginConfig: { supervision: { enabled: false } }, canContinue: false },
     { state: "enabled", pluginConfig: { supervision: { enabled: true } }, canContinue: true },
   ])(
-    "supervision $state sets local canContinue to $canContinue",
-    async ({ pluginConfig, canContinue }) => {
+    "gates local continuation with supervision $state while preserving archive eligibility",
+    async ({ pluginConfig, canContinue: expectedCanContinue }) => {
       const { list } = await registerLocalCatalog(pluginConfig);
-      const sessions = (await list()).flatMap((host) => host.sessions);
-
-      const idleCli = sessions.filter((s) => s.status === "idle" && s.source === "cli");
-      expect(idleCli.length).toBeGreaterThan(0);
-      for (const session of idleCli) {
-        expect(session).toMatchObject({ canContinue, canArchive: true });
-      }
-    },
-  );
-
-  // Control UI infers "supervision off" from a local Codex row with canArchive true and
-  // canContinue false (catalogComposerReason in ui/src/pages/chat/chat-pane-session-creation.ts).
-  // Keep that combination exclusive to supervision off, or replace the inference with a row reason.
-  it("only supervision off yields local rows that can archive but not continue", async () => {
-    const shape = async (pluginConfig: unknown) => {
-      const hosts = await (await registerLocalCatalog(pluginConfig)).list();
-      // The primary home and a suffixed source home are both local and both gated.
+      const hosts = await list();
+      expect(hosts).toHaveLength(2);
       expect(hosts.map((host) => host.hostId)).toContain("gateway:local");
       expect(hosts.some((host) => host.hostId.startsWith("gateway:local:"))).toBe(true);
-      return {
-        rows: hosts
-          .flatMap((host) => host.sessions)
-          .map(({ status, source, canArchive, canContinue }) => ({
+      // The UI identifies supervision-disabled rows by archive eligibility without continuation.
+      for (const host of hosts) {
+        expect(
+          host.sessions.map(({ status, source, canArchive, canContinue }) => [
             status,
             source,
             canArchive,
             canContinue,
-          })),
-      };
-    };
-    const on = await shape({ supervision: { enabled: true } });
-    const off = await shape({ supervision: { enabled: false } });
-
-    expect(on.rows.filter((row) => row.canArchive && !row.canContinue)).toEqual([]);
-    expect(on.rows.filter((row) => row.canArchive && row.canContinue).length).toBeGreaterThan(0);
-    const archivable = (rows: typeof on.rows) =>
-      rows.map(({ status, source, canArchive }) => ({ status, source, canArchive }));
-    expect(archivable(off.rows)).toEqual(archivable(on.rows));
-    expect(off.rows.filter((row) => row.canContinue)).toEqual([]);
-  });
+          ]),
+        ).toEqual([
+          ["idle", "cli", true, expectedCanContinue],
+          ["idle", "exec", false, false],
+          ["notLoaded", "cli", true, expectedCanContinue],
+          ["notLoaded", "exec", false, false],
+          ["active", "cli", false, false],
+          ["active", "exec", false, false],
+        ]);
+      }
+    },
+  );
 
   it("rejects local continuation before adoption when supervision is disabled", async () => {
     const { provider, list, createSessionEntry, processCodexHome } = await registerLocalCatalog({
       supervision: { enabled: false },
     });
     const [host] = await list();
-    const session = host?.sessions[0];
-    expect(session).toBeDefined();
-
+    const session = host!.sessions[0]!;
     await withEnvAsync({ CODEX_HOME: processCodexHome }, async () => {
       await expect(
         provider.continueSession!({
           agentId: "main",
           hostId: host!.hostId,
-          threadId: session!.threadId,
-          ...(session!.sourceHomeId ? { sourceHomeId: session!.sourceHomeId } : {}),
+          threadId: session.threadId,
+          sourceHomeId: session.sourceHomeId,
           clientScopes: ["operator.admin"],
         }),
       ).rejects.toThrow("Codex supervision is disabled");
