@@ -1,0 +1,30 @@
+PR openclaw/openclaw#178929 end-to-end evidence (managed-settings auth change), run 2026-10-24 on a Mac mini (macOS, arm64)
+HEAD   f7426894653ade432f926a2c17f0b92b3cfcd88a
+tree   244095c462f822da9133bdc1d51b87101e0300ed
+base   d48dfd6c974dcfe27eb6a3f1089b353bd8ab61e4 (merge-base of HEAD and origin/main; origin/main was d48dfd6c974 when the BEFORE file was taken.
+       A concurrent fetch at 14:57:55 -0700, after the BEFORE build, moved origin/main to 23b07a8ce50; the restored file's blob is
+       483078eefb3f9b96a18b800c3e018de036a305fe at both d48dfd6c974 and 23b07a8ce50, the PR diff's base blob)
+node   v24.22.1 (both arms); pnpm build in the worktree
+entry  built CLI: node <worktree>/openclaw.mjs agent --local (shipped entry), both arms; no source-entry fallback was needed
+
+BEFORE arm: tree at HEAD with only src/plugin-sdk/provider-auth-claude-compat.ts replaced by origin/main's copy, then built
+  worktree diff during build:
+     M src/plugin-sdk/provider-auth-claude-compat.ts
+     src/plugin-sdk/provider-auth-claude-compat.ts | 60 ++-------------------------
+     1 file changed, 4 insertions(+), 56 deletions(-)
+  build exit=0
+  [build-all] phase timings: total 4m 1.7s; slowest write-unified-entry-dts 1m 39.5s; tsdown-packages 34.9s; ui:build 29.5s; tsdown 25s; external-plugins:local-dist 10.1s; tsdown-ai 7.90s; check-cli-bootstrap-imports 7.62s; plugins:assets:build 5.92s; runtime-postbuild 5s; plugins:assets:copy 4.79s; write-cli-startup-metadata 3.90s; build-stamp 1.92s; check-plugin-sdk-exports 1.36s; runtime-postbuild-stamp 326ms; runtime:scripts:check 177ms; write-build-info 121ms; native-protocol 101ms
+  after restoring the file: git status --short = '' (empty = clean); HEAD/tree = f7426894653ade432f926a2c17f0b92b3cfcd88a 244095c462f822da9133bdc1d51b87101e0300ed 
+  dist check: no dist file contains 'managed-settings.d'
+
+AFTER arm: HEAD f7426894653 exactly, clean worktree, built
+  worktree diff during build: '' (empty = clean)
+  build exit=0
+  [build-all] phase timings: total 3m 8s; slowest write-unified-entry-dts 1m 35.8s; tsdown 24.8s; ui:build 8.23s; external-plugins:local-dist 7.73s; check-cli-bootstrap-imports 7.09s; plugins:assets:build 5.96s; runtime-postbuild 4.97s; write-cli-startup-metadata (reused) 4.32s; plugins:assets:copy 4.27s; tsdown-ai (reused) 3.48s; build-stamp 2.59s; tsdown-packages (reused) 2.31s; check-plugin-sdk-exports 1.49s; runtime:scripts:check 366ms; runtime-postbuild-stamp 350ms; write-build-info 154ms; native-protocol 87ms
+  after build: git status --short = ''; HEAD/tree = f7426894653ade432f926a2c17f0b92b3cfcd88a 244095c462f822da9133bdc1d51b87101e0300ed 
+  dist check: dist/cli-credentials-*.mjs and dist/worker/*.mjs contain 'managed-settings.d'
+
+Isolation: every run has its own HOME, OPENCLAW_STATE_DIR, OPENCLAW_CONFIG_PATH, CLAUDE_CONFIG_DIR under $RUN; USER=harness-user.
+Keychain: resolveClaudeCliKeychainService (src/plugin-sdk/provider-auth-claude-compat.ts) suffixes the service with sha256(CLAUDE_CONFIG_DIR)[0:8] when CLAUDE_CONFIG_DIR is set, and the account is $USER (harness-user).
+  e.g. after-managed-control -> 'Claude Code-credentials-719ca1f2' / harness-user; /usr/bin/security find-generic-password for it exits 44 (not found). The default item 'Claude Code-credentials' is never queried.
+Real managed dirs: '/Library/Application Support/ClaudeCode' and /etc/claude-code do not exist on this host and were never created; shim/managed-settings-shim.mjs redirects reads of the former to $RUN/managed.

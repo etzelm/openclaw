@@ -1,0 +1,48 @@
+--mcp-config
+/var/folders/2v/xywmwzcs2cz3tt0tnndq_khc0000gn/T/openclaw-cli-mcp-AWhMCx/mcp.json
+{
+  "mcpServers": {
+    "openclaw": {
+      "type": "http",
+      "url": "http://127.0.0.1:54927/mcp",
+      "alwaysLoad": true,
+      "headers": {
+        "Authorization": "Bearer 4921e99ccbbd8c03262bb78bc23d876476140a6868361a404e05641f016a390b",
+        "x-openclaw-cli-capture-key": "6cc9d2a9-5d42-4b1d-8c53-9db226830036"
+      },
+      "timeout": 3610000
+    }
+  }
+}
+
+--effort
+high
+--settings
+{"disableAllHooks":true,"enabledPlugins":{},"autoMemoryEnabled":false,"claudeMdExcludes":["**/CLAUDE.md","**/CLAUDE.local.md","**/.claude/rules/**"]}
+--disable-slash-commands
+--no-chrome
+--strict-mcp-config
+--disallowedTools
+Bash(run_in_background:true),CronCreate,Monitor,ScheduleWakeup
+--print
+--input-format
+stream-json
+--output-format
+stream-json
+--verbose
+--include-partial-messages
+--replay-user-messages
+--permission-prompt-tool
+stdio
+--permission-mode
+default
+--setting-sources
+
+--model
+claude-sonnet-5
+--tools
+
+--allowedTools
+mcp__openclaw__dashboard,mcp__openclaw__nodes,mcp__openclaw__mobile_ui,mcp__openclaw__automations,mcp__openclaw__sessions_create,mcp__openclaw__sessions,mcp__openclaw__theme,mcp__openclaw__terminal,mcp__openclaw__portal,mcp__openclaw__message,mcp__openclaw__tts,mcp__openclaw__transcripts,mcp__openclaw__presence,mcp__openclaw__gateway,mcp__openclaw__plugins,mcp__openclaw__openclaw,mcp__openclaw__agents_list,mcp__openclaw__get_goal,mcp__openclaw__create_goal,mcp__openclaw__update_goal,mcp__openclaw__skill_workshop,mcp__openclaw__progress_card,mcp__openclaw__ask_user,mcp__openclaw__secrets,mcp__openclaw__sessions_list,mcp__openclaw__sessions_history,mcp__openclaw__sessions_search,mcp__openclaw__conversations_list,mcp__openclaw__conversations_send,mcp__openclaw__conversations_turn,mcp__openclaw__sessions_send,mcp__openclaw__sessions_spawn,mcp__openclaw__agents_wait,mcp__openclaw__sessions_yield,mcp__openclaw__subagents,mcp__openclaw__session_status,mcp__openclaw__web_fetch,mcp__openclaw__teams_meetings,mcp__openclaw__zoom_meetings,mcp__openclaw__browser,mcp__openclaw__canvas,mcp__openclaw__file_fetch,mcp__openclaw__dir_list,mcp__openclaw__dir_fetch,mcp__openclaw__file_write,mcp__openclaw__github_read,mcp__openclaw__github_search,mcp__openclaw__google_meet,mcp__openclaw__memory_search,mcp__openclaw__memory_get,mcp__openclaw__intent,mcp__openclaw__node_inference,mcp__openclaw__talk_voice,mcp__openclaw__ls,mcp__openclaw__read,mcp__openclaw__edit,mcp__openclaw__write,mcp__openclaw__apply_patch,mcp__openclaw__exec,mcp__openclaw__process
+--session-id
+b66afe7f-d8a1-4997-8f5d-52ac5a835698

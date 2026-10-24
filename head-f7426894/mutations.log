@@ -1,0 +1,41 @@
+## RED0 production file at origin/main
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 4ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected 'uuid:uuid-a' to be undefined
+## RED1 managed-file read errors not contained
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > keeps the owner when a managed settings file cannot be resolved 3ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > keeps the owner when a managed settings file cannot be resolved
+  Error: EACCES: permission denied
+  Serialized Error: { code: 'EACCES' }
+## RED2 drop-in directory never read
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 7ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected 'uuid:uuid-a' to be undefined
+## RED3 hidden drop-ins not skipped
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 4ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected undefined to be 'uuid:uuid-a' // Object.is equality
+## RED4 non-.json drop-ins not skipped
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 6ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected undefined to be 'uuid:uuid-a' // Object.is equality
+## RED5 managed apiKeyHelper ignored
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 5ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected 'uuid:uuid-a' to be undefined
+## RED6 managed env auth keys ignored
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 4ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected 'uuid:uuid-a' to be undefined
+## RED7 test redirect removed (fixtures not reached through fs)
+exit=1 ['Tests  1 failed | 29 passed (30)']
+  × |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login 4ms
+  FAIL  |plugin-sdk| src/plugin-sdk/provider-auth-claude-compat.test.ts > attestClaudeNativeLoginOwner > supplied environment > has no owner when Claude's managed settings or a drop-in select another login
+  AssertionError: expected 'uuid:uuid-a' to be undefined
