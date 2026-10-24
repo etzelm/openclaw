@@ -216,8 +216,6 @@ type ClaudeNativeLoginOptions = {
   execSync?: typeof execSync;
   /** Environment the `claude` process receives. Defaults to the Gateway process. */
   env?: NodeJS.ProcessEnv;
-  /** Test seam; defaults to Claude's admin-managed settings directory for `platform`. */
-  managedSettingsDir?: string;
 };
 
 /** Anthropic's account lookup for a Claude OAuth access token, the one Claude CLI itself uses. */
@@ -331,10 +329,7 @@ function readClaudeNativeLoginCredential(
       resolveClaudeCliConfigDir(homeDir, env) ||
     readClaudeApiKeyHelper(homeDir, env) ||
     userSettingsSelectNonNativeAuth(homeDir, env) ||
-    managedSettingsSelectNonNativeAuth(
-      options.managedSettingsDir ??
-        resolveClaudeManagedSettingsDir(options.platform ?? process.platform),
-    )
+    managedSettingsSelectNonNativeAuth(options.platform ?? process.platform)
   ) {
     return undefined;
   }
@@ -420,7 +415,8 @@ function resolveClaudeManagedSettingsDir(platform: NodeJS.Platform): string {
  * auth key. A later file can only blank such a key, so checking each file alone may refuse
  * too often but never misses one. MDM and server-managed policy are not readable here.
  */
-function managedSettingsSelectNonNativeAuth(dir: string): boolean {
+function managedSettingsSelectNonNativeAuth(platform: NodeJS.Platform): boolean {
+  const dir = resolveClaudeManagedSettingsDir(platform);
   const dropInDir = path.join(dir, CLAUDE_MANAGED_SETTINGS_DROP_IN_DIR);
   let dropIns: string[] = [];
   try {
@@ -434,7 +430,14 @@ function managedSettingsSelectNonNativeAuth(dir: string): boolean {
     path.join(dir, CLAUDE_MANAGED_SETTINGS_FILE),
     ...dropIns.map((name) => path.join(dropInDir, name)),
   ].some((file) => {
-    const settings = asNonArrayRecord(loadJsonFileThroughSymlink(file));
+    let settings: Record<string, unknown>;
+    try {
+      settings = asNonArrayRecord(loadJsonFileThroughSymlink(file));
+    } catch {
+      // A file this process cannot resolve or read (EACCES) is unreadable for the Claude child
+      // running as the same user too, so it contributes nothing, like a missing file.
+      return false;
+    }
     const helper = settings.apiKeyHelper;
     return (
       (typeof helper === "string" && helper.trim() !== "") ||

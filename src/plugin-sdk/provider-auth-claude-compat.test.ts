@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
   attestClaudeNativeLoginOwner,
@@ -58,6 +58,28 @@ async function attest(
 ) {
   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options })).owner;
 }
+
+// Claude's admin-managed settings directories, which the owner always reads. Every test maps
+// them, at the filesystem calls that resolve them, to its own fixture directory, so the test
+// host's real managed policy can never change an owner.
+const MANAGED_SETTINGS_DIRS = ["/etc/claude-code", "/Library/Application Support/ClaudeCode"];
+const { readdirSync, realpathSync } = fs;
+let managedSettingsDir: string;
+
+function managedFixturePath(target: fs.PathLike): string | undefined {
+  const posix = String(target).replaceAll("\\", "/");
+  const root = MANAGED_SETTINGS_DIRS.find((dir) => posix === dir || posix.startsWith(`${dir}/`));
+  return root ? path.join(managedSettingsDir, posix.slice(root.length)) : undefined;
+}
+
+beforeEach(() => {
+  managedSettingsDir = tempDirs.make("openclaw-claude-managed-");
+  const toFixture = (target: fs.PathLike) => managedFixturePath(target) ?? target;
+  vi.spyOn(fs, "realpathSync").mockImplementation(((target: fs.PathLike, options?: never) =>
+    realpathSync(toFixture(target), options)) as typeof fs.realpathSync);
+  vi.spyOn(fs, "readdirSync").mockImplementation(((target: fs.PathLike, options?: never) =>
+    readdirSync(toFixture(target), options)) as typeof fs.readdirSync);
+});
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -256,12 +278,7 @@ describe("attestClaudeNativeLoginOwner", () => {
     it("has no owner when Claude's managed settings or a drop-in select another login", async () => {
       const configDir = tempDirs.make("openclaw-claude-config-");
       loginIn(configDir, "uuid-a");
-      const managedSettingsDir = tempDirs.make("openclaw-claude-managed-");
-      const options = {
-        platform: "linux" as const,
-        env: { CLAUDE_CONFIG_DIR: configDir },
-        managedSettingsDir,
-      };
+      const options = { platform: "linux" as const, env: { CLAUDE_CONFIG_DIR: configDir } };
       const writeManaged = (file: string, value: unknown) => {
         fs.mkdirSync(path.dirname(path.join(managedSettingsDir, file)), { recursive: true });
         fs.writeFileSync(path.join(managedSettingsDir, file), JSON.stringify(value));
@@ -277,6 +294,21 @@ describe("attestClaudeNativeLoginOwner", () => {
       writeManaged("managed-settings.json", {});
       writeManaged("managed-settings.d/20-auth.json", { env: { ANTHROPIC_API_KEY: "synthetic" } });
       expect(await attest(options)).toBeUndefined();
+    });
+
+    it("keeps the owner when a managed settings file cannot be resolved", async () => {
+      const configDir = tempDirs.make("openclaw-claude-config-");
+      loginIn(configDir, "uuid-a");
+      const options = { platform: "linux" as const, env: { CLAUDE_CONFIG_DIR: configDir } };
+      expect(await attest(options)).toBe("uuid:uuid-a");
+      vi.mocked(fs.realpathSync).mockImplementation(((target: fs.PathLike) => {
+        if (managedFixturePath(target)) {
+          throw Object.assign(new Error("EACCES: permission denied"), { code: "EACCES" });
+        }
+        return realpathSync(target);
+      }) as typeof fs.realpathSync);
+      expect(readClaudeNativeLoginOwner(options)).toBe("uuid:uuid-a");
+      expect(await attest(options)).toBe("uuid:uuid-a");
     });
 
     it.each([
