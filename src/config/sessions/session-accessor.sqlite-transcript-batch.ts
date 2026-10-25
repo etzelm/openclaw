@@ -38,6 +38,8 @@ export function createTranscriptAppendBatch(
   scope: ResolvedTranscriptScope,
   events: Iterable<TranscriptEvent, unknown, boolean>,
   options: Omit<TranscriptAppendOptions, "onProjectionReconcileNeeded">,
+  /** Ids minted by this call cannot already exist; only the rest need the probe. */
+  mintedEventIds?: ReadonlySet<string>,
 ) {
   // Prepared arrays and the import spool cannot mutate the destination between
   // rows. Sequence and projection facts belong only to this synchronous batch.
@@ -52,7 +54,9 @@ export function createTranscriptAppendBatch(
   if (Array.isArray(events) && events.length > 0) {
     const identities = events.flatMap((event) => {
       const identity = readTranscriptEventIdentity(event);
-      return identity ? [identity] : [];
+      return identity && !(mintedEventIds?.has(identity.eventId) && !identity.messageIdempotencyKey)
+        ? [identity]
+        : [];
     });
     if (identities.length > 0) {
       for (const row of readTranscriptAppendIdentities(

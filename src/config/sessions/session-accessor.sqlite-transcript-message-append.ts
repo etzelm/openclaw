@@ -202,11 +202,20 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
   ) {
     return undefined;
   }
-  const eventIds = messages.map((append) => append.eventId ?? randomUUID());
+  const mintedEventIds = new Set<string>();
+  const eventIds = messages.map((append) => {
+    if (append.eventId !== undefined) {
+      return append.eventId;
+    }
+    const minted = randomUUID();
+    mintedEventIds.add(minted);
+    return minted;
+  });
   if (new Set(eventIds).size !== eventIds.length) {
     return undefined;
   }
   // The batch's one identity probe precedes all effects. Replays retain the ordered appender.
+  // Freshly minted UUIDs skip it; caller-supplied ids keep their idempotency probe.
   const batch = createTranscriptAppendBatch(
     database,
     resolved,
@@ -216,6 +225,7 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
       message: append.message,
     })),
     projection ?? {},
+    mintedEventIds,
   );
   if (batch.cursor.batch?.knownEventIds.size) {
     return undefined;
