@@ -87,6 +87,21 @@ not Gateway RPC or provider latency. The default Vite preview server does not
 activate Gateway route preload hints or serve the shipped compression sidecars;
 retain that mode for renderer diagnostics rather than network-readiness claims.
 
+For code-splitting evidence, add `--coverage` to capture executed and unused raw
+source bytes. `javaScriptResources` separately counts completed JavaScript
+fetches from Resource Timing: decoded body bytes, encoded body bytes, and transfer
+bytes including headers. Its `outsideCoverage` subset includes fetch-only
+preloads, so V8 coverage alone must not be reported as all downloaded code.
+Module preloads can parse/compile without evaluation, and dormant function bodies
+can be compiled lazily; unused source bytes are not a CPU estimate.
+
+Use a separate traced run (omit `--untraced`) for `trace.compilation`: coarse V8
+module parse/compile spans are unioned per renderer thread; this is not an
+exhaustive compiler profile. Main-thread and all-renderer
+thread CPU are reported separately from wall duration. CPU is unavailable when
+the trace lacks complete thread-clock intervals. Never mix traced readiness
+timings into the untraced comparison.
+
 This opt-in benchmark builds the production Control UI into a fresh artifact directory,
 warms a signed-in synthetic dashboard visit, and measures three reloads. It never
 connects to a real Gateway or account. The reusable inventory is
@@ -399,10 +414,14 @@ with the same `--fixture-now-ms` and a future `--live-start-at-ms`, `--runs 1`, 
 distinct `--port` / `--sandbox-port` values. The start barrier supports either
 `--streaming-reply` or `--live-events` and fails if setup misses the requested time.
 
-Use `--streaming-burst-size 5` to enqueue five snapshots every 166.7 ms
+Use `--streaming-rate 150 --streaming-burst-size 5` to enqueue five snapshots every 33.3 ms (fast-provider bursts). The default rate remains 30 snapshots/s; `--streaming-burst-size 5` alone enqueues five snapshots every 166.7 ms
 while retaining the average 30 deltas/s. The mock transport still applies
 `--frame-gap-ms`; set it to zero to remove intentional spacing, and inspect
 delivery timestamps before treating a group as one-frame delivery.
+`--filmstrip-only --streaming-reply` retains the stream's screenshot frames in
+`run-N.streaming.filmstrip/`. Traced/filmstrip runs also check plain-paragraph
+suffix visibility on the next rendering frame (`streaming.textVisibility`);
+keep these instrumented captures separate from timing comparisons.
 Streaming reports count synchronous
 stream assignments, frame publications, pane render calls/time, forced rail
 observations, and row ResizeObserver deliveries. These are separate boundaries:
