@@ -135,7 +135,14 @@ function attachConnection(data: BridgeWorkerData, clients: Set<() => void>) {
           );
           reply = { id: request.id, generation };
         } else {
+          // exp only: trip instrumentation (OCX_TRIPLOG / OCX_TRIPEXPLAIN); off by default.
+          const ocxExplain =
+            process.env.OCX_TRIPEXPLAIN === "1"
+              ? await ocxExplainQuery(client, request.sql, request.parameters)
+              : undefined;
+          const ocxStart = performance.now();
           const results = await client.query(request.sql, [...request.parameters]);
+          const ocxPgMs = performance.now() - ocxStart;
           const result: QueryResult = Array.isArray(results) ? results.at(-1)! : results;
           // A trailing SELECT must not hide an earlier write in the same SQL batch.
           const commands = (Array.isArray(results) ? results : [results]).map(
@@ -161,6 +168,9 @@ function attachConnection(data: BridgeWorkerData, clients: Set<() => void>) {
               fields: result.fields.map(({ name, dataTypeID }) => ({ name, dataTypeID })),
             },
           };
+          if (process.env.OCX_TRIPLOG) {
+            Object.assign(reply, { ocx: { pgMs: ocxPgMs, explain: ocxExplain } });
+          }
         }
       }
     } catch (error) {
@@ -212,3 +222,36 @@ function attachConnection(data: BridgeWorkerData, clients: Set<() => void>) {
 }
 attachHost(serviceHost);
 parentPort?.postMessage({ poolReady: true }, []);
+
+// exp only: server plan/exec time for one statement, rolled back before the real execution.
+async function ocxExplainQuery(
+  client: pg.Client,
+  sql: string,
+  parameters: readonly unknown[],
+): Promise<{ planMs?: number; execMs?: number; error?: string } | undefined> {
+  const text = sql.trim();
+  if (
+    /^(?:BEGIN|COMMIT|ROLLBACK|SAVEPOINT|RELEASE|SET|SHOW|START)\b/i.test(text) ||
+    /;\s*\S/.test(text) ||
+    /^select\s+set_config/i.test(text)
+  ) {
+    return undefined;
+  }
+  const inTransaction = client.getTransactionStatus() !== "I";
+  await client.query(inTransaction ? "SAVEPOINT ocx_explain" : "BEGIN");
+  try {
+    const result = await client.query(`EXPLAIN (ANALYZE, FORMAT JSON) ${text}`, [...parameters]);
+    const raw = result.rows[0]?.["QUERY PLAN"];
+    const plan = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return { planMs: plan[0]["Planning Time"], execMs: plan[0]["Execution Time"] };
+  } catch (error) {
+    return { error: String((error as Error).message).slice(0, 160) };
+  } finally {
+    if (inTransaction) {
+      await client.query("ROLLBACK TO SAVEPOINT ocx_explain");
+      await client.query("RELEASE SAVEPOINT ocx_explain");
+    } else {
+      await client.query("ROLLBACK");
+    }
+  }
+}

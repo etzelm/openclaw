@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { appendFileSync } from "node:fs";
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { receiveMessageOnPort, threadId, type MessagePort } from "node:worker_threads";
 import { assertEngineStoreExecutionAllowed } from "../database-engine/admission-scope.js";
@@ -163,6 +164,7 @@ export class PostgresSyncConnection implements PostgresSqlConnection {
       throw this.loseConnection();
     }
     const deadline = performance.now() + 120_000;
+    const ocxStart = performance.now();
     this.port.postMessage({ ...request, id }, []);
     recordWorkerMessage("sqlite_request", "to_worker");
     // Reply notifications belong to this connection; peer death is checked between slices.
@@ -183,6 +185,25 @@ export class PostgresSyncConnection implements PostgresSqlConnection {
       Atomics.wait(this.control, 0, observed, Math.min(remaining, 50));
     }
     const reply: BridgeReply | undefined = receiveMessageOnPort(this.port)?.message;
+    if (process.env.OCX_TRIPLOG) {
+      // exp only: one line per bridge request, with the worker's own pg time when it sent one.
+      const ocx = (reply as { ocx?: { pgMs?: number; explain?: unknown } } | undefined)?.ocx;
+      appendFileSync(
+        process.env.OCX_TRIPLOG,
+        `${JSON.stringify({
+          t: performance.timeOrigin + ocxStart,
+          thread: threadId,
+          op: request.operation,
+          sql:
+            request.operation === "query"
+              ? request.sql.replace(/\s+/g, " ").trim().slice(0, 240)
+              : undefined,
+          tripMs: performance.now() - ocxStart,
+          pgMs: ocx?.pgMs,
+          explain: ocx?.explain,
+        })}\n`,
+      );
+    }
     if (reply) {
       recordWorkerMessage("sqlite_reply", "from_worker");
     }
