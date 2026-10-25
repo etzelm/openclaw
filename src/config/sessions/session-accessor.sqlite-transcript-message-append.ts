@@ -487,7 +487,7 @@ export function appendTranscriptMessageInTransaction<TMessage>(
   const cursor: TranscriptAppendCursor | undefined =
     turn?.cursor ?? (readSessionActorTransactionState(database, resolved) ? undefined : {});
   if (cursor && !cursor.initialized && !cursor.initialState) {
-    cursor.initialState = readTranscriptAppendStateInTransaction(database, resolved);
+    cursor.initialState = readTranscriptAppendStateInTransaction(database, resolved, true);
   }
   if (!turn?.headerEnsured) {
     ensureTranscriptHeader(database, resolved, options.cwd, projection, cursor);
@@ -495,12 +495,21 @@ export function appendTranscriptMessageInTransaction<TMessage>(
       turn.headerEnsured = true;
     }
   }
+  // The locked append-state read already carried the latest identity, unless a header
+  // append in between cleared it.
+  const latestIdentity = cursor?.initialState?.latestIdentity;
+  const preparedParent = latestIdentity === undefined ? undefined : { latest: latestIdentity };
   if (turn && turn.parentId === undefined) {
-    turn.parentId = resolveTranscriptMessageAppendParent(database, resolved.sessionId, options);
+    turn.parentId = resolveTranscriptMessageAppendParent(
+      database,
+      resolved.sessionId,
+      options,
+      preparedParent,
+    );
   }
   const parentId = turn
     ? turn.parentId
-    : resolveTranscriptMessageAppendParent(database, resolved.sessionId, options);
+    : resolveTranscriptMessageAppendParent(database, resolved.sessionId, options, preparedParent);
   const event = createTranscriptMessageEvent({
     messageId,
     parentId: parentId ?? null,

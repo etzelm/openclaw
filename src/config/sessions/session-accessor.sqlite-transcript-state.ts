@@ -25,6 +25,7 @@ import {
 import { getSessionKysely, type ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
 import { parseSessionEntryJson } from "./session-accessor.sqlite-status.js";
 import {
+  readTranscriptAppendLatestIdentity,
   selectTranscriptAppendState,
   selectTranscriptSessionRoot,
   transcriptMutationStateQuery,
@@ -231,8 +232,9 @@ function writeTranscriptGeneration(
 export function readTranscriptAppendStateInTransaction(
   database: OpenClawAgentDatabase,
   scope: ResolvedTranscriptScope,
+  withLatestIdentity = false,
 ) {
-  const query = selectTranscriptAppendState(database, scope);
+  const query = selectTranscriptAppendState(database, scope, withLatestIdentity);
   const rows = executeSqliteQuerySync(database.db, query).rows;
   const row = rows[0]!;
   return {
@@ -240,6 +242,7 @@ export function readTranscriptAppendStateInTransaction(
     generation: row.generation,
     cold: Boolean(row.cold),
     nextSeq: row.max_seq === null ? 0 : sqliteNumber(row.max_seq) + 1,
+    latestIdentity: withLatestIdentity ? readTranscriptAppendLatestIdentity(row) : undefined,
     projection:
       row.indexed_seq === null
         ? undefined

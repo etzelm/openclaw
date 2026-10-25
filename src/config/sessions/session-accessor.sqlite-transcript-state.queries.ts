@@ -6,8 +6,10 @@ import {
 import type { EngineConnection } from "../../infra/sql-connection.js";
 import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
 import { getSessionKysely, type ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
+import { projectTranscriptNavigationSql } from "./session-model-context-projection.js";
 import { selectSessionTranscriptProjectionState } from "./session-transcript-index.js";
 import { foldedSessionKeyAliasCandidates, normalizeStoreSessionKey } from "./store-entry.js";
+import { transcriptEventNavigationSql } from "./transcript-payload.js";
 
 export const transcriptMutationStateQuery = createSqliteQueryCache((database: EngineConnection) => {
   const db = getSessionKysely(database);
@@ -68,7 +70,26 @@ export type TranscriptSessionRootRow = Awaited<
 export function selectTranscriptAppendState(
   database: OpenClawAgentDatabase,
   scope: ResolvedTranscriptScope,
+  withLatestIdentity = false,
 ) {
+  const db = getSessionKysely(database.db);
+  // The append parent's latest identity shares this locked read instead of its own statement.
+  const latestIdentity = db
+    .selectFrom("transcript_event_identities as ti")
+    .innerJoin("transcript_events as te", (join) =>
+      join.onRef("te.session_id", "=", "ti.session_id").onRef("te.seq", "=", "ti.seq"),
+    )
+    .select([
+      "ti.seq",
+      "ti.event_type",
+      projectTranscriptNavigationSql(
+        database.db,
+        transcriptEventNavigationSql(database.db, "te"),
+      ).as("event_json"),
+    ])
+    .where("ti.session_id", "=", scope.sessionId)
+    .orderBy("ti.seq", "desc")
+    .limit(1);
   return selectTranscriptSessionRoot(database, scope)
     .leftJoin(
       "transcript_rewrite_watermarks as generation",
@@ -91,6 +112,15 @@ export function selectTranscriptAppendState(
       "projection.needs_rebuild",
       "projection.has_unclassified",
     ])
+    .$if(withLatestIdentity, (query) =>
+      query
+        .leftJoin(latestIdentity.as("latest_identity"), (join) => join.onTrue())
+        .select([
+          "latest_identity.seq as latest_identity_seq",
+          "latest_identity.event_type as latest_identity_event_type",
+          "latest_identity.event_json as latest_identity_event_json",
+        ]),
+    )
     .select((eb) => [
       eb
         .selectFrom("transcript_events")
@@ -106,4 +136,18 @@ export function selectTranscriptAppendState(
         )
         .as("cold"),
     ]);
+}
+
+/** Null when the session has no identity yet. */
+export function readTranscriptAppendLatestIdentity(row: {
+  latest_identity_seq?: number | null;
+  latest_identity_event_type?: string | null;
+  latest_identity_event_json?: string | null;
+}) {
+  return row.latest_identity_seq === null || row.latest_identity_seq === undefined
+    ? null
+    : {
+        event_type: row.latest_identity_event_type ?? null,
+        event_json: row.latest_identity_event_json!,
+      };
 }

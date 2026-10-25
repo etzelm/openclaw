@@ -242,8 +242,9 @@ export function resolveTranscriptMessageAppendParent<TMessage>(
   database: Pick<OpenClawAgentDatabase, "db" | "path">,
   sessionId: string,
   options: Pick<TranscriptMessageAppendOptions<TMessage>, "appendIntent" | "parentId">,
+  prepared?: { latest: PreparedLatestIdentity | null },
 ): string | null {
-  const tailId = readActiveTranscriptAppendParentId(database, sessionId);
+  const tailId = readActiveTranscriptAppendParentId(database, sessionId, prepared);
   return resolveTranscriptAppendParent({
     tailId,
     parentId: options.parentId,
@@ -400,9 +401,12 @@ export function readTranscriptVisibleTailEntryIdInTransaction(
   return needsPrefix || first ? resolveFromNavigation() : leafId;
 }
 
+type PreparedLatestIdentity = { event_type: string | null; event_json: string };
+
 function readActiveTranscriptAppendParentId(
   database: Pick<OpenClawAgentDatabase, "db" | "path">,
   sessionId: string,
+  prepared?: { latest: PreparedLatestIdentity | null },
 ): string | null {
   const actor = readSessionActorTransactionState(database, { sessionId });
   if (actor?.transcript.complete) {
@@ -413,26 +417,29 @@ function readActiveTranscriptAppendParentId(
   const retainedNavigation =
     retainedIdentity &&
     actor?.transcript.navigation.findLast((event) => event.seq === retainedIdentity.seq);
+  // A locked append-state read may supply the latest identity; actors keep their own facts.
   const latest = retainedNavigation
     ? undefined
-    : executeSqliteQueryTakeFirstSync(
-        database.db,
-        db
-          .selectFrom("transcript_event_identities as ti")
-          .innerJoin("transcript_events as te", (join) =>
-            join.onRef("te.session_id", "=", "ti.session_id").onRef("te.seq", "=", "ti.seq"),
-          )
-          .select([
-            "ti.event_type",
-            projectTranscriptNavigationSql(
-              database.db,
-              transcriptEventNavigationSql(database.db, "te"),
-            ).as("event_json"),
-          ])
-          .where("ti.session_id", "=", sessionId)
-          .orderBy("ti.seq", "desc")
-          .limit(1),
-      );
+    : prepared && !actor
+      ? (prepared.latest ?? undefined)
+      : executeSqliteQueryTakeFirstSync(
+          database.db,
+          db
+            .selectFrom("transcript_event_identities as ti")
+            .innerJoin("transcript_events as te", (join) =>
+              join.onRef("te.session_id", "=", "ti.session_id").onRef("te.seq", "=", "ti.seq"),
+            )
+            .select([
+              "ti.event_type",
+              projectTranscriptNavigationSql(
+                database.db,
+                transcriptEventNavigationSql(database.db, "te"),
+              ).as("event_json"),
+            ])
+            .where("ti.session_id", "=", sessionId)
+            .orderBy("ti.seq", "desc")
+            .limit(1),
+        );
   const resolveFromNavigation = () =>
     scanSessionTranscriptTree(readTranscriptNavigationEvents(database, sessionId)).appendParentId;
   if (!retainedNavigation && !latest) {
