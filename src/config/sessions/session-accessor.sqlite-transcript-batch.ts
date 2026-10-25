@@ -115,19 +115,32 @@ export function createTranscriptAppendBatch(
       // Settle its index and attempt recency without advancing the mutation fence.
       preserveSessionEntryCacheAcrossWrite(database, () => {
         flushRows(false);
+        const touches = completed && appended > 0 && options.touchMutation !== false;
+        const index = cursor.appendToIndex;
         const flushProjectionWithMutation =
-          completed &&
-          appended > 0 &&
-          options.touchMutation !== false &&
+          touches &&
           !projectionNeedsRebuild &&
           isPostgresSqlConnection(database.db) &&
           readSessionActorTransactionState(database, scope)?.window
-            ? cursor.appendToIndex?.flush
+            ? index?.flush
             : undefined;
-        if (!flushProjectionWithMutation) {
-          cursor.appendToIndex?.flush();
+        const generation = cursor.generation;
+        const nextSeq = cursor.nextSeq;
+        // exp: outside an actor transaction, PG folds the window update into the final
+        // index-state statement when every fact its separate RETURNING re-read is held.
+        const fold =
+          !flushProjectionWithMutation &&
+          touches &&
+          index?.foldsWindowUpdate &&
+          generation &&
+          nextSeq !== undefined
+            ? { index, generation, rawSeq: nextSeq - 1 }
+            : undefined;
+        let indexFlushed = false;
+        if (!flushProjectionWithMutation && !fold) {
+          index?.flush();
         }
-        if (completed && appended > 0 && options.touchMutation !== false) {
+        if (touches) {
           windowPostimage = touchTranscriptMutationInTransaction(
             database,
             scope.sessionId,
@@ -136,10 +149,38 @@ export function createTranscriptAppendBatch(
               rowTranscript: projectionNeedsRebuild ? undefined : cursor.rowTranscript,
               projectionReady: !projectionNeedsRebuild,
               writeActorMutation: flushProjectionWithMutation,
+              ...(fold
+                ? {
+                    writeWindowMutation: (update) => {
+                      indexFlushed = true;
+                      const window = fold.index.flush(update, true);
+                      if (!window) {
+                        return undefined;
+                      }
+                      const state = fold.index.readPersistedWatermark();
+                      return {
+                        sessionId: scope.sessionId,
+                        sessionKey: window.sessionKey,
+                        updatedAt: window.updatedAt,
+                        generation: fold.generation,
+                        rawSeq: fold.rawSeq,
+                        leafEventId: state?.leafEventId ?? null,
+                        indexedSeq: state?.indexedSeq ?? null,
+                        activeMessageCount: state?.activeMessageCount ?? null,
+                        needsRebuild: state ? (state.needsRebuild ? 1 : 0) : null,
+                      };
+                    },
+                  }
+                : {}),
             },
             logicalAdvance,
           );
-        } else if (cursor.windowUpdatedAt !== undefined) {
+        }
+        if (fold && !indexFlushed) {
+          // The mutation owner wrote its window directly; the projection still commits.
+          fold.index.flush();
+        }
+        if (!touches && cursor.windowUpdatedAt !== undefined) {
           touchTranscriptWindowRecency(database, scope.sessionId, cursor.windowUpdatedAt, cursor);
         }
       });

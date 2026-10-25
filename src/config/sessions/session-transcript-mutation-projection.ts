@@ -17,6 +17,25 @@ export type TranscriptMutationOptions = {
   publicationAssistant?: SessionTranscriptAuthority["lastAssistantMessage"];
   persistActorMutation?: boolean;
   writeActorMutation?: (update: TranscriptWindowUpdate) => void;
+  /**
+   * Non-actor PG writers fold the window update into their final projection write.
+   * The CTE snapshot cannot see sibling writes, so the writer supplies those facts.
+   */
+  writeWindowMutation?: (
+    update: TranscriptWindowUpdate,
+  ) =>
+    | (Pick<
+        SessionTranscriptAuthority,
+        | "sessionKey"
+        | "updatedAt"
+        | "generation"
+        | "rawSeq"
+        | "leafEventId"
+        | "indexedSeq"
+        | "activeMessageCount"
+        | "needsRebuild"
+      > & { sessionId: string })
+    | undefined;
   projectionReady?: boolean;
 };
 

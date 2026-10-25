@@ -24,6 +24,12 @@ export type TranscriptWindowUpdate = UpdateQueryBuilder<
   UpdateResult
 >;
 
+export type TranscriptWindowPostimage = { sessionKey: string; updatedAt: number | null };
+export type TranscriptProjectionFlush = (
+  windowUpdate?: TranscriptWindowUpdate,
+  returnWindow?: boolean,
+) => TranscriptWindowPostimage | undefined;
+
 /** Writes each bounded PG projection chunk within the caller's existing transaction. */
 export function createPostgresProjectionFlusher(db: EngineConnection, sessionId: string) {
   type Chunk = {
@@ -40,8 +46,9 @@ export function createPostgresProjectionFlusher(db: EngineConnection, sessionId:
     ftsCount: number,
     watermarkMode: "none" | "insert" | "update",
     windowUpdate?: TranscriptWindowUpdate,
+    returnWindow = false,
   ) =>
-    prepareSqliteQuerySync<Chunk>(db, (parameter) => {
+    prepareSqliteQuerySync<Chunk, TranscriptWindowPostimage>(db, (parameter) => {
       const query =
         ftsCount > 0
           ? withPostgresSessionTranscriptFtsRows(
@@ -102,15 +109,30 @@ export function createPostgresProjectionFlusher(db: EngineConnection, sessionId:
                     .returning("session_id");
             })
           : withActive;
+      // All writes target distinct tables and use prepared values. Only FTS content
+      // depends on a sibling write, through the allocation owner's RETURNING rows.
+      if (windowUpdate && returnWindow) {
+        // Only the window's own columns: sibling CTE writes are invisible to this snapshot.
+        return withWatermark
+          .with("projection_window", () =>
+            windowUpdate.returning(["session_key", "transcript_updated_at"]),
+          )
+          .selectFrom("projection_window")
+          .select(["session_key as sessionKey", "transcript_updated_at as updatedAt"]);
+      }
       const withWindow = windowUpdate
         ? withWatermark.with("projection_window", () => windowUpdate.returning("session_id"))
         : withWatermark;
-      // All writes target distinct tables and use prepared values. Only FTS content
-      // depends on a sibling write, through the allocation owner's RETURNING rows.
-      return withWindow.selectNoFrom(sql.lit(1).as("written"));
+      return withWindow.selectNoFrom(sql.lit(1).as("written")) as never;
     });
   const writes = new Map<string, ReturnType<typeof prepare>>();
-  return (pending: Chunk, persisted: boolean, windowUpdate?: TranscriptWindowUpdate) => {
+  return (
+    pending: Chunk,
+    persisted: boolean,
+    windowUpdate?: TranscriptWindowUpdate,
+    returnWindow = false,
+  ): TranscriptWindowPostimage | undefined => {
+    let postimage: TranscriptWindowPostimage | undefined;
     const count = Math.max(
       pending.activeRows.length,
       pending.ftsRows.length,
@@ -127,13 +149,19 @@ export function createPostgresProjectionFlusher(db: EngineConnection, sessionId:
       const finalWindow = offset + TRANSCRIPT_INSERT_BATCH_SIZE >= count ? windowUpdate : undefined;
       // The supplied mutation contains this append's values; never cache those bindings.
       let write = finalWindow
-        ? prepare(chunk.activeRows.length, chunk.ftsRows.length, mode, finalWindow)
+        ? prepare(chunk.activeRows.length, chunk.ftsRows.length, mode, finalWindow, returnWindow)
         : writes.get(key);
       if (!write) {
         write = prepare(chunk.activeRows.length, chunk.ftsRows.length, mode);
         writes.set(key, write);
       }
-      withSqliteDatabaseWriteScope(db, [sqliteSessionIdWriteScope(sessionId)], () => write(chunk));
+      const result = withSqliteDatabaseWriteScope(db, [sqliteSessionIdWriteScope(sessionId)], () =>
+        write(chunk),
+      );
+      if (finalWindow && returnWindow) {
+        postimage = result.rows[0];
+      }
     }
+    return postimage;
   };
 }

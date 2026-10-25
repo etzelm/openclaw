@@ -540,53 +540,55 @@ export function advanceTranscriptMutationAtInTransaction(
       });
       return undefined;
     }
-    const context = executeSqliteQueryTakeFirstSync(
-      database.db,
-      update
-        .returning((eb) => [
-          "session_id as sessionId",
-          "session_key as sessionKey",
-          "transcript_updated_at as updatedAt",
-          eb
-            .selectFrom("transcript_rewrite_watermarks")
-            .select("generation")
-            .where("session_id", "=", sessionId)
-            .as("generation"),
-          eb.fn
-            .coalesce(
+    const context = options.writeWindowMutation
+      ? options.writeWindowMutation(update)
+      : executeSqliteQueryTakeFirstSync(
+          database.db,
+          update
+            .returning((eb) => [
+              "session_id as sessionId",
+              "session_key as sessionKey",
+              "transcript_updated_at as updatedAt",
               eb
-                .selectFrom("session_transcript_cold_archives")
-                .select("last_seq")
-                .where("session_id", "=", sessionId),
+                .selectFrom("transcript_rewrite_watermarks")
+                .select("generation")
+                .where("session_id", "=", sessionId)
+                .as("generation"),
+              eb.fn
+                .coalesce(
+                  eb
+                    .selectFrom("session_transcript_cold_archives")
+                    .select("last_seq")
+                    .where("session_id", "=", sessionId),
+                  eb
+                    .selectFrom("transcript_events")
+                    .select((inner) => inner.fn.max<number | null>("seq").as("seq"))
+                    .where("session_id", "=", sessionId),
+                )
+                .as("rawSeq"),
               eb
-                .selectFrom("transcript_events")
-                .select((inner) => inner.fn.max<number | null>("seq").as("seq"))
-                .where("session_id", "=", sessionId),
-            )
-            .as("rawSeq"),
-          eb
-            .selectFrom("session_transcript_index_state")
-            .select("leaf_event_id")
-            .where("session_id", "=", sessionId)
-            .as("leafEventId"),
-          eb
-            .selectFrom("session_transcript_index_state")
-            .select("indexed_seq")
-            .where("session_id", "=", sessionId)
-            .as("indexedSeq"),
-          eb
-            .selectFrom("session_transcript_index_state")
-            .select("active_message_count")
-            .where("session_id", "=", sessionId)
-            .as("activeMessageCount"),
-          eb
-            .selectFrom("session_transcript_index_state")
-            .select("needs_rebuild")
-            .where("session_id", "=", sessionId)
-            .as("needsRebuild"),
-        ])
-        .$assertType<SessionTranscriptAuthority>(),
-    );
+                .selectFrom("session_transcript_index_state")
+                .select("leaf_event_id")
+                .where("session_id", "=", sessionId)
+                .as("leafEventId"),
+              eb
+                .selectFrom("session_transcript_index_state")
+                .select("indexed_seq")
+                .where("session_id", "=", sessionId)
+                .as("indexedSeq"),
+              eb
+                .selectFrom("session_transcript_index_state")
+                .select("active_message_count")
+                .where("session_id", "=", sessionId)
+                .as("activeMessageCount"),
+              eb
+                .selectFrom("session_transcript_index_state")
+                .select("needs_rebuild")
+                .where("session_id", "=", sessionId)
+                .as("needsRebuild"),
+            ])
+            .$assertType<SessionTranscriptAuthority>(),
+        );
     if (context) {
       retainTranscriptContextFacts(
         database,

@@ -30,7 +30,7 @@ import {
 } from "./session-transcript-fts.js";
 import {
   createPostgresProjectionFlusher,
-  type TranscriptWindowUpdate,
+  type TranscriptProjectionFlush,
 } from "./session-transcript-index-postgres.js";
 import {
   prepareSessionTranscriptProjectionAppend,
@@ -310,7 +310,10 @@ export function createTranscriptIndexAppenderInTransaction(
 ): {
   append: (params: TranscriptIndexAppend) => boolean;
   flushRows: () => void;
-  flush: (windowUpdate?: TranscriptWindowUpdate) => void;
+  flush: TranscriptProjectionFlush;
+  /** PG folds the window update into its final projection statement; SQLite cannot. */
+  foldsWindowUpdate: boolean;
+  readPersistedWatermark: () => SessionTranscriptProjectionState | undefined;
   readFlushedAnchorFacts: () => { indexedSeq: number; entries: AppendedEntries } | undefined;
 } {
   const actor = readSessionActorTransactionState({ db }, { sessionId });
@@ -421,16 +424,21 @@ export function createTranscriptIndexAppenderInTransaction(
   return {
     append: appendEvent,
     flushRows,
-    flush(windowUpdate) {
+    foldsWindowUpdate: flushPostgres !== undefined,
+    // The index_state row as this appender last wrote or read it under the lock.
+    readPersistedWatermark: () =>
+      persisted && pendingUpdatedAt === undefined ? watermark : undefined,
+    flush(windowUpdate, returnWindow) {
       if (flushPostgres) {
         const next =
           pendingUpdatedAt !== undefined && watermark
             ? { ...watermark, updatedAt: pendingUpdatedAt }
             : undefined;
-        flushPostgres(
+        const postimage = flushPostgres(
           { activeRows: pendingActiveRows, ftsRows: pendingFtsRows, watermark: next },
           persisted,
           windowUpdate,
+          returnWindow,
         );
         pendingActiveRows.length = 0;
         pendingFtsRows.length = 0;
@@ -438,11 +446,11 @@ export function createTranscriptIndexAppenderInTransaction(
           persisted = true;
           pendingUpdatedAt = undefined;
         }
-        return;
+        return postimage;
       }
       flushRows();
       if (pendingUpdatedAt === undefined || !watermark) {
-        return;
+        return undefined;
       }
       const write = persisted
         ? (updateWatermark ??= createWatermarkWriter(db, sessionId, true))
@@ -450,6 +458,7 @@ export function createTranscriptIndexAppenderInTransaction(
       write({ ...watermark, updatedAt: pendingUpdatedAt });
       persisted = true;
       pendingUpdatedAt = undefined;
+      return undefined;
     },
     // Flushed rows under this transaction's lock; undefined sends callers to their read.
     readFlushedAnchorFacts() {
