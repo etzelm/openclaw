@@ -201,6 +201,18 @@ export class PostgresSyncConnection implements PostgresSqlConnection {
           tripMs: performance.now() - ocxStart,
           pgMs: ocx?.pgMs,
           explain: ocx?.explain,
+          stack: process.env.OCX_TRIPSTACK
+            ? new Error().stack
+                ?.split("\n")
+                .filter((line) => line.includes("/src/config/") || line.includes("/src/state/"))
+                .slice(0, 8)
+                .map((line) =>
+                  line
+                    .trim()
+                    .replace(/^at /, "")
+                    .replace(/\(.*\/src\//, "(src/"),
+                )
+            : undefined,
         })}\n`,
       );
     }
