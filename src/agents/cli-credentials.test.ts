@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { mockClaudeManagedSettings } from "../../test/helpers/claude-managed-settings.js";
 
 const execSyncMock = vi.hoisted(() => vi.fn());
 
@@ -65,6 +66,7 @@ describe("cli credentials", () => {
     execSyncMock.mockReset();
     delete process.env.CODEX_HOME;
     vi.unstubAllEnvs();
+    vi.restoreAllMocks();
   });
 
   it.each(["ENOENT", "ENOTDIR", "EACCES", "EPERM"])(
@@ -547,6 +549,7 @@ describe("cli credentials", () => {
   it("resolves a native login owner only for backends that own one", async () => {
     // A readable Claude login must not leak into other backends' history ownership.
     const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-native-owner-"));
+    mockClaudeManagedSettings(path.join(tempHome, "managed"));
     try {
       vi.stubEnv("HOME", tempHome);
       fs.mkdirSync(path.join(tempHome, ".claude"), { recursive: true });

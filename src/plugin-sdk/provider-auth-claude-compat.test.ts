@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mockClaudeManagedSettings } from "../../test/helpers/claude-managed-settings.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
   attestClaudeNativeLoginOwner,
@@ -59,26 +60,13 @@ async function attest(
   return (await attestClaudeNativeLoginOwner({ fetchFn, ...options })).owner;
 }
 
-// Claude's admin-managed settings directories, which the owner always reads. Every test maps
-// them, at the filesystem calls that resolve them, to its own fixture directory, so the test
-// host's real managed policy can never change an owner.
-const MANAGED_SETTINGS_DIRS = ["/etc/claude-code", "/Library/Application Support/ClaudeCode"];
-const { readdirSync, realpathSync } = fs;
+const { realpathSync } = fs;
 let managedSettingsDir: string;
-
-function managedFixturePath(target: fs.PathLike): string | undefined {
-  const posix = String(target).replaceAll("\\", "/");
-  const root = MANAGED_SETTINGS_DIRS.find((dir) => posix === dir || posix.startsWith(`${dir}/`));
-  return root ? path.join(managedSettingsDir, posix.slice(root.length)) : undefined;
-}
+let managedFixturePath: ReturnType<typeof mockClaudeManagedSettings>;
 
 beforeEach(() => {
   managedSettingsDir = tempDirs.make("openclaw-claude-managed-");
-  const toFixture = (target: fs.PathLike) => managedFixturePath(target) ?? target;
-  vi.spyOn(fs, "realpathSync").mockImplementation(((target: fs.PathLike, options?: never) =>
-    realpathSync(toFixture(target), options)) as typeof fs.realpathSync);
-  vi.spyOn(fs, "readdirSync").mockImplementation(((target: fs.PathLike, options?: never) =>
-    readdirSync(toFixture(target), options)) as typeof fs.readdirSync);
+  managedFixturePath = mockClaudeManagedSettings(managedSettingsDir);
 });
 
 afterEach(() => {
