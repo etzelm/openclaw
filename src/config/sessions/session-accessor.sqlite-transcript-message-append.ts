@@ -17,6 +17,7 @@ import {
 import { readTranscriptIdentityByEventId } from "./session-accessor.sqlite-read.js";
 import type { ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
 import {
+  createTranscriptMessageAppendMetadataBatchFromWrites,
   readActiveTranscriptEntryAnchorInTransaction,
   readTranscriptMessageAppendMetadataInTransaction,
   readTranscriptMessageAppendMetadataBatchInTransaction,
@@ -231,6 +232,8 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
     },
   };
   let completed = false;
+  let settled: ReturnType<typeof batch.settle> | undefined;
+  const sequences: number[] = [];
   try {
     for (const [index, append] of messages.entries()) {
       const committed = appendTranscriptMessageInTransaction(
@@ -245,6 +248,7 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
         throw new Error("Fresh transcript turn reused an existing event identity");
       }
       commits.push(committed);
+      sequences.push(context.cursor.nextSeq! - 1);
       const assistant = context.cursor.rowTranscript?.lastAssistantMessage;
       // Disk rows keep the per-message sentinel; the one publication carries
       // the assistant fact from earlier messages in this same transaction.
@@ -258,7 +262,7 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
     }
     completed = true;
   } finally {
-    batch.settle(completed, commits.length, projectionNeedsRebuild, {
+    settled = batch.settle(completed, commits.length, projectionNeedsRebuild, {
       steps: commits.length,
       adjustedTime,
       publicationAssistant,
@@ -267,11 +271,20 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
   if (projectionNeedsRebuild) {
     projection?.onProjectionReconcileNeeded?.();
   }
-  const metadata = readTranscriptMessageAppendMetadataBatchInTransaction(
-    database,
-    resolved,
-    commits.map(({ result }) => result),
-  );
+  const metadata =
+    readFreshLinearAppendMetadataFromWrites(
+      database,
+      resolved,
+      context.cursor,
+      commits,
+      sequences,
+      projectionNeedsRebuild ? undefined : settled?.windowPostimage,
+    ) ??
+    readTranscriptMessageAppendMetadataBatchInTransaction(
+      database,
+      resolved,
+      commits.map(({ result }) => result),
+    );
   for (const committed of commits) {
     const facts = metadata.get(committed.result.messageId);
     if (facts?.anchor) {
@@ -290,6 +303,49 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
       result.anchor ? result.anchor.activeMessagePosition + 1 : undefined,
     ),
   };
+}
+
+/** Returns undefined unless every column of the authoritative metadata read is known. */
+function readFreshLinearAppendMetadataFromWrites(
+  database: OpenClawAgentDatabase,
+  resolved: ResolvedTranscriptScope,
+  cursor: TranscriptAppendCursor,
+  commits: readonly TranscriptMessageCommit<unknown>[],
+  sequences: readonly number[],
+  windowPostimage: { updatedAt: number | null } | undefined,
+) {
+  const generation = cursor.generation;
+  const latestSeq = cursor.nextSeq === undefined ? undefined : cursor.nextSeq - 1;
+  const index = cursor.appendToIndex?.readFlushedAnchorFacts();
+  if (
+    !windowPostimage ||
+    !generation ||
+    latestSeq === undefined ||
+    !index ||
+    index.indexedSeq !== latestSeq ||
+    sequences.length !== commits.length
+  ) {
+    return undefined;
+  }
+  const messages = [];
+  for (const [position, { result }] of commits.entries()) {
+    const entry = index.entries.get(result.messageId);
+    if (!entry || entry.seq !== sequences[position]) {
+      return undefined;
+    }
+    messages.push({
+      messageId: result.messageId,
+      message: result.message,
+      seq: entry.seq,
+      parentId: result.effectiveParentId ?? null,
+      messagePosition: entry.messagePosition,
+    });
+  }
+  return createTranscriptMessageAppendMetadataBatchFromWrites(database, resolved, messages, {
+    generation,
+    latestSeq,
+    transcriptUpdatedAt: windowPostimage.updatedAt,
+  });
 }
 
 export function appendTranscriptMessageInTransaction<TMessage>(

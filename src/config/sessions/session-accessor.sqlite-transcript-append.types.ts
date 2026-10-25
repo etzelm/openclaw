@@ -41,6 +41,8 @@ export type TranscriptAppendCursor = {
   rowTranscript?: SessionRowTranscriptProjection;
   initialized?: boolean;
   initialState?: ReturnType<typeof readTranscriptAppendStateInTransaction>;
+  /** Rewrite generation read under this transaction's lock; absent when this append minted it. */
+  generation?: string;
   readIdentity?: ReturnType<typeof createTranscriptIdentityReader>;
   nextSeq?: number;
   appendToIndex?: ReturnType<typeof createTranscriptIndexAppenderInTransaction>;

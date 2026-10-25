@@ -109,7 +109,8 @@ export function createTranscriptAppendBatch(
       appended: number,
       projectionNeedsRebuild: boolean,
       logicalAdvance?: TranscriptMutationAdvance,
-    ) {
+    ): { windowPostimage?: { updatedAt: number | null } } {
+      let windowPostimage: { updatedAt: number | null } | undefined;
       // A caller may catch an iterator error and commit the accepted prefix.
       // Settle its index and attempt recency without advancing the mutation fence.
       preserveSessionEntryCacheAcrossWrite(database, () => {
@@ -127,7 +128,7 @@ export function createTranscriptAppendBatch(
           cursor.appendToIndex?.flush();
         }
         if (completed && appended > 0 && options.touchMutation !== false) {
-          touchTranscriptMutationInTransaction(
+          windowPostimage = touchTranscriptMutationInTransaction(
             database,
             scope.sessionId,
             {
@@ -150,6 +151,7 @@ export function createTranscriptAppendBatch(
           options,
         );
       }
+      return windowPostimage ? { windowPostimage } : {};
     },
   };
 }

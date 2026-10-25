@@ -351,6 +351,50 @@ export function readTranscriptMessageAppendMetadataBatchInTransaction(
   return result;
 }
 
+/**
+ * Fresh linear turns already hold every column the batch metadata read would return:
+ * identities and positions they wrote, the generation and sequence read under the
+ * same lock, and the window's update postimage. Build the identical metadata from them.
+ */
+export function createTranscriptMessageAppendMetadataBatchFromWrites(
+  database: TranscriptEntryRead["database"],
+  resolved: ResolvedTranscriptScope,
+  messages: readonly {
+    messageId: string;
+    message: unknown;
+    seq: number;
+    parentId: string | null;
+    messagePosition: number | null;
+  }[],
+  facts: { generation: string; latestSeq: number; transcriptUpdatedAt: number | null },
+): Map<string, ReturnType<typeof readTranscriptMessageAppendMetadataInTransaction>> {
+  const result = new Map<
+    string,
+    ReturnType<typeof readTranscriptMessageAppendMetadataInTransaction>
+  >();
+  const revision = getSqliteReadScopeRevision(database.db);
+  for (const message of messages) {
+    result.set(
+      message.messageId,
+      createTranscriptMessageAppendMetadata(
+        { database, resolved, entryId: message.messageId, message: message.message },
+        {
+          seq: message.seq,
+          parent_id: message.parentId,
+          // The fresh path refuses keyed messages; anchors read the key from the message.
+          message_idempotency_key: null,
+          message_position: message.messagePosition,
+          generation: facts.generation,
+          latestSeq: facts.latestSeq,
+          transcriptUpdatedAt: facts.transcriptUpdatedAt,
+        },
+        revision,
+      ),
+    );
+  }
+  return result;
+}
+
 /** Projects anchor fields after the caller verifies readiness in the same snapshot. */
 export function createTranscriptEntryAnchor(params: {
   database: Pick<OpenClawAgentDatabase, "path">;

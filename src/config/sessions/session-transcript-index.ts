@@ -73,6 +73,8 @@ export type SessionTranscriptIndexProjection = {
   leafEventId: string | null;
 };
 
+// Active rows one appender wrote, keyed by event id, for its batch's own postimage.
+type AppendedEntries = Map<string, { seq: number; messagePosition: number | null }>;
 // FTS rebuilds cost about 60 ms per 1,000 events/1 MiB on dev hardware; cap synchronous
 // work near a 250 ms event-loop stall and leave larger projections to the reconcile worker.
 export const SYNC_REBUILD_MAX_ROWS = 4_000;
@@ -309,6 +311,7 @@ export function createTranscriptIndexAppenderInTransaction(
   append: (params: TranscriptIndexAppend) => boolean;
   flushRows: () => void;
   flush: (windowUpdate?: TranscriptWindowUpdate) => void;
+  readFlushedAnchorFacts: () => { indexedSeq: number; entries: AppendedEntries } | undefined;
 } {
   const actor = readSessionActorTransactionState({ db }, { sessionId });
   const initial = prepared ? prepared.state : readSessionTranscriptProjectionState(db, sessionId);
@@ -321,6 +324,7 @@ export function createTranscriptIndexAppenderInTransaction(
   let pendingUpdatedAt: number | undefined;
   const pendingActiveRows: PreparedSessionTranscriptProjection["activeRows"] = [];
   const pendingFtsRows: TranscriptIndexEntry[] = [];
+  const entries: AppendedEntries = new Map();
   const flushPostgres = isPostgresSqlConnection(db)
     ? createPostgresProjectionFlusher(db, sessionId)
     : undefined;
@@ -385,6 +389,12 @@ export function createTranscriptIndexAppenderInTransaction(
     }
     if (append.activeRow) {
       pendingActiveRows.push(append.activeRow);
+      if (params.eventId) {
+        entries.set(params.eventId, {
+          seq: params.seq,
+          messagePosition: append.activeRow.messagePosition,
+        });
+      }
       if (actor) {
         actor.transcript.active = writableSessionActorMap(actor.transcript.active);
       }
@@ -440,6 +450,13 @@ export function createTranscriptIndexAppenderInTransaction(
       write({ ...watermark, updatedAt: pendingUpdatedAt });
       persisted = true;
       pendingUpdatedAt = undefined;
+    },
+    // Flushed rows under this transaction's lock; undefined sends callers to their read.
+    readFlushedAnchorFacts() {
+      const flushed = persisted && pendingUpdatedAt === undefined && !pendingActiveRows.length;
+      return flushed && watermark && !watermark.needsRebuild && !hasUnclassifiedEvents
+        ? { indexedSeq: watermark.indexedSeq, entries }
+        : undefined;
     },
   };
 }

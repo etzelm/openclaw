@@ -456,17 +456,17 @@ export function advanceTranscriptMutationAtInTransaction(
   sessionId: string,
   value: number,
   options: TranscriptMutationOptions = {},
-): void {
+): { updatedAt: number | null } | undefined {
   return withSqliteDatabaseWriteScope(database.db, [sqliteSessionIdWriteScope(sessionId)], () => {
     let transcriptUpdatedAt = Math.floor(value);
     const steps = options.steps ?? 1;
     if (!Number.isFinite(transcriptUpdatedAt) || transcriptUpdatedAt < 0) {
-      return;
+      return undefined;
     }
     if (!options.strictly) {
       const state = readTranscriptMutationStateInTransaction(database, sessionId);
       if (state.updatedAt !== null && state.updatedAt >= transcriptUpdatedAt) {
-        return;
+        return undefined;
       }
     }
     const db = getSessionKysely(database.db);
@@ -507,7 +507,7 @@ export function advanceTranscriptMutationAtInTransaction(
       .where("session_id", "=", sessionId);
     if (!findOpenClawAgentDatabaseIdentity(database)) {
       executeSqliteQuerySync(database.db, update);
-      return;
+      return undefined;
     }
     if (actor?.window) {
       if (options.persistActorMutation !== false) {
@@ -538,7 +538,7 @@ export function advanceTranscriptMutationAtInTransaction(
           : {}),
         ...publicationProjection,
       });
-      return;
+      return undefined;
     }
     const context = executeSqliteQueryTakeFirstSync(
       database.db,
@@ -603,7 +603,10 @@ export function advanceTranscriptMutationAtInTransaction(
         ...(options.projectionReady ? { projectionReady: true as const } : {}),
         ...publicationProjection,
       });
+      // The window's own postimage; the caller may reuse it instead of re-reading the row.
+      return { updatedAt: context.updatedAt };
     }
+    return undefined;
   });
 }
 
@@ -612,8 +615,8 @@ export function touchTranscriptMutationInTransaction(
   sessionId: string,
   options: Omit<TranscriptMutationOptions, "strictly" | "steps" | "publicationAssistant"> = {},
   logicalAdvance?: TranscriptMutationAdvance,
-): void {
-  advanceTranscriptMutationAtInTransaction(
+): { updatedAt: number | null } | undefined {
+  return advanceTranscriptMutationAtInTransaction(
     database,
     sessionId,
     logicalAdvance?.adjustedTime ?? Date.now(),

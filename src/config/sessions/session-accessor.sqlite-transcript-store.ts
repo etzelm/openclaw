@@ -151,6 +151,9 @@ export function appendTranscriptEventInTransaction(
             throw new SessionTranscriptColdError(scope.sessionId);
           }
           cursor.nextSeq = initial.nextSeq;
+          if (initial.generation) {
+            cursor.generation = initial.generation;
+          }
           cursor.appendToIndex = createTranscriptIndexAppenderInTransaction(
             database.db,
             scope.sessionId,
