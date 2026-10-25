@@ -106,9 +106,12 @@ export function postgresCatalogQuery(namespace: string, includeDefinitions = fal
     `(SELECT jsonb_agg(a.attname ORDER BY k.ordinality) FROM unnest(${keys}) WITH ORDINALITY k(num, ordinality) JOIN pg_catalog.pg_attribute a ON a.attrelid = ${relation} AND a.attnum = k.num)`;
   const action = (field: string) =>
     `CASE ${field} WHEN 'a' THEN 'NO ACTION' WHEN 'r' THEN 'RESTRICT' WHEN 'c' THEN 'CASCADE' WHEN 'n' THEN 'SET NULL' WHEN 'd' THEN 'SET DEFAULT' END`;
-  return `WITH relations AS (
-    SELECT c.oid, c.relname FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = ${literal} AND c.relkind IN ('r', 'p')
+  // pg_class has no namespace index, so every scan is O(relations in the database). Scan it once.
+  return `WITH classes AS (
+    SELECT c.oid, c.relname, c.relkind FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = ${literal} AND c.relkind IN ('r', 'p'${includeDefinitions ? ", 'v', 'm'" : ""})
+  ), relations AS (
+    SELECT oid, relname FROM classes WHERE relkind IN ('r', 'p')
   ), attributes AS (
     SELECT r.relname, a.attname, a.atttypid, a.atttypmod, a.attnotnull,
       a.attidentity, a.attnum, a.attgenerated, a.attcollation,
@@ -140,7 +143,7 @@ export function postgresCatalogQuery(namespace: string, includeDefinitions = fal
     UNION ALL SELECT r.relname, 'indexDefinition', jsonb_build_object('name', c.relname, 'definition', pg_catalog.pg_get_indexdef(i.indexrelid), 'valid', i.indisvalid) FROM relations r JOIN pg_catalog.pg_index i ON i.indrelid = r.oid JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
     UNION ALL SELECT a.relname, 'columnDefinition', jsonb_build_object('name', a.attname, 'default', a.default_expression, 'generated', a.attgenerated, 'identity', a.attidentity, 'collation', a.attcollation::regcollation::text) FROM attributes a
     UNION ALL SELECT r.relname, 'triggerDefinition', jsonb_build_object('name', t.tgname, 'definition', pg_catalog.pg_get_triggerdef(t.oid), 'enabled', t.tgenabled, 'function', pg_catalog.pg_get_functiondef(t.tgfoid)) FROM relations r JOIN pg_catalog.pg_trigger t ON t.tgrelid = r.oid WHERE NOT t.tgisinternal
-    UNION ALL SELECT c.relname, 'viewDefinition', to_jsonb(pg_catalog.pg_get_viewdef(c.oid)) FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = ${literal} AND c.relkind IN ('v', 'm')
+    UNION ALL SELECT c.relname, 'viewDefinition', to_jsonb(pg_catalog.pg_get_viewdef(c.oid)) FROM classes c WHERE c.relkind IN ('v', 'm')
     UNION ALL SELECT c.cfgname, 'textSearchDefinition', jsonb_build_object('token', m.maptokentype, 'order', m.mapseqno, 'dictionary', d.dictname, 'namespace', dn.nspname)
       FROM pg_catalog.pg_ts_config c JOIN pg_catalog.pg_namespace n ON n.oid = c.cfgnamespace
       JOIN pg_catalog.pg_ts_config_map m ON m.mapcfg = c.oid JOIN pg_catalog.pg_ts_dict d ON d.oid = m.mapdict

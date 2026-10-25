@@ -85,7 +85,7 @@ describe.skipIf(!connection)("PostgreSQL search admission failures", () => {
         const prepare = db.prepare.bind(db);
         const statements = vi.spyOn(db, "prepare").mockImplementation((sql) => {
           const statement = prepare(sql);
-          if (sql.includes("pg_catalog.pg_available_extensions")) {
+          if (sql.includes("pg_catalog.pg_extension")) {
             const all = statement.all.bind(statement);
             vi.spyOn(statement, "all").mockImplementation((...values) =>
               all(...values).map((row) =>

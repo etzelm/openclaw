@@ -49,12 +49,23 @@ export function admitPostgresSearch(
     }
   }
   const extensionSchema = schema.extensionSchema ?? "public";
-  const rows = db
-    .prepare(`SELECT a.name, e.extname, e.extversion, n.nspname FROM pg_catalog.pg_available_extensions a
+  // pg_available_extensions scans the server's extension directory on every call. Installed
+  // extensions are plain catalog rows, so only a missing one needs it to word the refusal.
+  const installed = !required.size
+    ? []
+    : db
+        .prepare(`SELECT e.extname AS name, e.extname, e.extversion, n.nspname FROM pg_catalog.pg_extension e
+    JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace
+    WHERE e.extname IN ('unaccent', 'pg_trgm', 'vector')`)
+        .all();
+  const rows = [...required].every((name) => installed.some((row) => row.name === name))
+    ? installed
+    : db
+        .prepare(`SELECT a.name, e.extname, e.extversion, n.nspname FROM pg_catalog.pg_available_extensions a
     LEFT JOIN pg_catalog.pg_extension e ON e.extname = a.name
     LEFT JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace
     WHERE a.name IN ('unaccent', 'pg_trgm', 'vector')`)
-    .all();
+        .all();
   for (const name of required) {
     const found = rows.find((row) => row.name === name);
     if (!found?.extname || found.nspname !== extensionSchema) {

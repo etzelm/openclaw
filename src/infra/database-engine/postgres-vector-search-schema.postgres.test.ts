@@ -143,7 +143,7 @@ describe.skipIf(!connection)("PostgreSQL binary vector schema", () => {
           .spyOn(PostgresSyncConnection.prototype, "prepare")
           .mockImplementation(function (this: PostgresSyncConnection, statementSql) {
             const statement = prepare.call(this, statementSql);
-            if (statementSql.includes("pg_catalog.pg_available_extensions")) {
+            if (statementSql.includes("pg_catalog.pg_extension")) {
               const all = statement.all.bind(statement);
               vi.spyOn(statement, "all").mockImplementation((...values) =>
                 all(...values).map((row) =>

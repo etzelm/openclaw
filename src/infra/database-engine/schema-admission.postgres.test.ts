@@ -161,6 +161,10 @@ describe.skipIf(!connection)("PostgreSQL schema admission", () => {
         open();
         const catalog = queries.filter((event) => event.sql.startsWith("WITH captured"));
         expect(catalog).toHaveLength(1);
+        // pg_class has no namespace index; one capture scans it once however many kinds it reads.
+        expect(
+          catalog[0]!.sql.match(/FROM pg_catalog\.pg_class c JOIN pg_catalog\.pg_namespace n/g),
+        ).toHaveLength(1);
         expect(queries.some((event) => event.sql.startsWith("CREATE SCHEMA"))).toBe(false);
         const catalogMs = catalog[0]!.durationMs;
         db.exec("UPDATE openclaw_schema_meta SET server_major = 0");
