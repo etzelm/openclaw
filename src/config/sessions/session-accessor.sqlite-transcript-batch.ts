@@ -1,3 +1,4 @@
+import { turnRtExperiment } from "./exp-turnrt-flags.js";
 import { isPostgresSqlConnection } from "../../infra/sql-connection.js";
 import {
   sqliteSessionIdWriteScope,
@@ -133,6 +134,7 @@ export function createTranscriptAppendBatch(
         // exp: outside an actor transaction, PG folds the window update into the final
         // index-state statement when every fact its separate RETURNING re-read is held.
         const fold =
+          turnRtExperiment(2) &&
           !flushProjectionWithMutation &&
           touches &&
           index?.foldsWindowUpdate &&

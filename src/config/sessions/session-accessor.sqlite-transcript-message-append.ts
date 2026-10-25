@@ -1,3 +1,4 @@
+import { turnRtExperiment } from "./exp-turnrt-flags.js";
 import { randomUUID } from "node:crypto";
 import { resolveTimestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
 import { isRecord } from "@openclaw/normalization-core/record-coerce";
@@ -225,7 +226,7 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
       message: append.message,
     })),
     projection ?? {},
-    mintedEventIds,
+    turnRtExperiment(3) ? mintedEventIds : undefined,
   );
   if (batch.cursor.batch?.knownEventIds.size) {
     return undefined;
@@ -282,14 +283,16 @@ export function appendFreshLinearTranscriptMessagesInTransaction(
     projection?.onProjectionReconcileNeeded?.();
   }
   const metadata =
-    readFreshLinearAppendMetadataFromWrites(
-      database,
-      resolved,
-      context.cursor,
-      commits,
-      sequences,
-      projectionNeedsRebuild ? undefined : settled?.windowPostimage,
-    ) ??
+    (turnRtExperiment(1)
+      ? readFreshLinearAppendMetadataFromWrites(
+          database,
+          resolved,
+          context.cursor,
+          commits,
+          sequences,
+          projectionNeedsRebuild ? undefined : settled?.windowPostimage,
+        )
+      : undefined) ??
     readTranscriptMessageAppendMetadataBatchInTransaction(
       database,
       resolved,
@@ -487,7 +490,7 @@ export function appendTranscriptMessageInTransaction<TMessage>(
   const cursor: TranscriptAppendCursor | undefined =
     turn?.cursor ?? (readSessionActorTransactionState(database, resolved) ? undefined : {});
   if (cursor && !cursor.initialized && !cursor.initialState) {
-    cursor.initialState = readTranscriptAppendStateInTransaction(database, resolved, true);
+    cursor.initialState = readTranscriptAppendStateInTransaction(database, resolved, turnRtExperiment(4));
   }
   if (!turn?.headerEnsured) {
     ensureTranscriptHeader(database, resolved, options.cwd, projection, cursor);
