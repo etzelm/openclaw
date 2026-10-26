@@ -46,14 +46,16 @@ const STATEMENT_LIMIT = 256;
 const CACHED_PLAN_RESULT_CHANGED = "0A000";
 
 /**
- * Reuses server-side prepared statements on one connection, so PostgreSQL parses and
- * plans each parameterized SQL text once per session instead of on every call. The server
- * re-analyzes a prepared statement when search_path changes, so the SQL text is the key.
+ * Reuses server-side prepared statements on one connection, so PostgreSQL parses each
+ * parameterized SQL text once per session instead of on every call; plan choice stays
+ * automatic (plan_cache_mode). The server re-analyzes a prepared statement when
+ * search_path changes, so the SQL text is the key.
  */
 function createStatementCache(client: pg.Client) {
   // node-postgres skips Parse for names in this map and has no deallocate API, so every
   // DEALLOCATE must drop its name here too.
-  const { parsedStatements } = client.connection as unknown as {
+  // SAFETY: pinned pg 8.23.1 records each ParseComplete name here; the PostgreSQL test proves it.
+  const { parsedStatements } = client.connection as typeof client.connection & {
     parsedStatements: Record<string, string>;
   };
   // SQL text -> statement name, least recently used first.
