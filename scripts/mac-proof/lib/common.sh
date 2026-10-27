@@ -119,10 +119,22 @@ pp_gateway_start() {
 
 pp_gateway_stop() {
   if [[ -f "$PP_ROOT/gateway.pid" ]]; then
-    kill "$(cat "$PP_ROOT/gateway.pid")" 2>/dev/null || true
+    local pid
+    pid="$(cat "$PP_ROOT/gateway.pid")"
+    pkill -TERM -P "$pid" 2>/dev/null || true
+    kill "$pid" 2>/dev/null || true
     rm -f "$PP_ROOT/gateway.pid"
-    sleep 2
   fi
+  # The CLI wrapper can exit while the Gateway keeps the port; free it by listener
+  # so the next case cannot be answered by a stale Gateway.
+  local pids i
+  for ((i = 0; i < 15; i++)); do
+    pids="$(lsof -ti "tcp:$PP_GATEWAY_PORT" -sTCP:LISTEN 2>/dev/null || true)"
+    [[ -z "$pids" ]] && return 0
+    kill $pids 2>/dev/null || true
+    sleep 1
+  done
+  pp_note "warning: port $PP_GATEWAY_PORT still has a listener after pp_gateway_stop"
 }
 
 pp_fixture_start() {
