@@ -102,13 +102,43 @@ pp_dashboard_up() {
 }
 
 local_network_alert_allow() {
-  # The runner raises a Local Network alert over the window center; a leftover
-  # alert would take the HID pointer and clicks. Best effort, logged either way.
-  local proc r
-  for proc in UserNotificationCenter CoreServicesUIAgent; do
-    r="$(osascript -e "tell application \"System Events\" to tell process \"$proc\" to click button \"Allow\" of window 1" 2>&1)" &&
-      pp_note "local network alert: clicked Allow in $proc" && return 0
-    pp_note "local network alert: none in $proc ($r)"
+  # The runner raises a Local Network alert ("Allow hosted-compute-... to find
+  # devices") over the window center. It keeps key focus, so the Browser
+  # shortcut and the first HID click never reach the app. The owning process
+  # varies, so try the usual owners, then any process with an Allow button.
+  # Polls a few times because the alert can appear late. Logged either way.
+  local attempt r
+  for attempt in 1 2 3; do
+    r="$(osascript 2>&1 <<'OSA'
+tell application "System Events"
+  set owners to {"UserNotificationCenter", "CoreServicesUIAgent"}
+  repeat with p in (every process)
+    set end of owners to (name of p)
+  end repeat
+  repeat with n in owners
+    try
+      with timeout of 3 seconds
+        tell process (n as text)
+          repeat with w in windows
+            if exists button "Allow" of w then
+              click button "Allow" of w
+              return "clicked Allow in " & (n as text)
+            else if exists button "Allow" of group 1 of w then
+              click button "Allow" of group 1 of w
+              return "clicked Allow in " & (n as text) & " (group)"
+            end if
+          end repeat
+        end tell
+      end timeout
+    end try
+  end repeat
+  return "none"
+end tell
+OSA
+)"
+    pp_note "local network alert (attempt $attempt): $r"
+    [[ "$r" == clicked* ]] && { sleep 1; return 0; }
+    sleep 5
   done
 }
 
@@ -122,11 +152,17 @@ pp_browser_panel_open() {
       pp_fail "chat pane never appeared (see logs/ax-no-chat.json)"
     }
   fi
+  local_network_alert_allow
   pp_app_activate
   osascript -e 'tell application "System Events" to keystroke "u" using {command down, option down, shift down}'
   if ! pp_wait_quiet 3 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web; then
     pp_note "browser shortcut did not open the panel; using Panels > Browser"
+    local_network_alert_allow
+    pp_app_activate
     pp_click_element AXButton "Panels" web || pp_fail "Panels button not found"
+    sleep 1
+    pp_wait_quiet 2 pp_ax exists "*" "Browser" web ||
+      pp_click_element AXButton "Panels" web || pp_fail "Panels button not found"
     sleep 1
     pp_click_element "*" "Browser" web || pp_fail "Browser entry not found in Panels"
     pp_wait_quiet 4 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web || {
@@ -169,7 +205,6 @@ pointer_build
 pp_record_start
 spoof_fixture_start
 pp_dashboard_up
-local_network_alert_allow
 pp_browser_panel_open
 
 # 1. App tab on the spoofing page, opened from the Browser panel address field.
