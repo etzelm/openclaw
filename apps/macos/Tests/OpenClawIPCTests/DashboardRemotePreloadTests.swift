@@ -65,12 +65,15 @@ struct DashboardRemotePreloadTests {
             // Native sign-in challenges are answered only for retained windows.
             #expect(preloaded.hasRetainedWindow)
             #expect(preloaded.documentHost.isNativeAuthAvailable())
+            // The menu counts only windows the user has seen.
+            #expect(manager.openWindowCount(for: .primary) == 0)
 
             try await manager.show()
 
             #expect(manager._testController() === preloaded)
             #expect(preloaded.isWindowOpen)
             #expect(!preloaded.isHiddenForExperience)
+            #expect(manager.openWindowCount(for: .primary) == 1)
             #expect(preloaded.auth.token == "primary")
         } }
     }
@@ -150,6 +153,7 @@ struct DashboardRemotePreloadTests {
             #expect(reconciled.window === preloadedWindow)
             #expect(!reconciled.isWindowOpen)
             #expect(reconciled.hasRetainedWindow)
+            #expect(manager.openWindowCount(for: .primary) == 0)
         } }
     }
 }

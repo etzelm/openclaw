@@ -1635,7 +1635,8 @@ extension DashboardManager {
     }
 
     func openWindowCount(for target: DashboardGatewayTarget) -> Int {
-        self.dashboardControllers().count(where: { $0.target == target })
+        // A launch preload nobody has opened is not a window the user has.
+        self.dashboardControllers().count(where: { $0.target == target && !$0.controller.isUnshownPreload })
     }
 
     private func updateFrontmostDashboardTarget() {
