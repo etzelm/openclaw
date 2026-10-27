@@ -194,6 +194,18 @@ jobs:
         # /bin/bash is the shell the runner image's TCC grants name.
         run: /bin/bash "$HARNESS/scripts/mac-proof/${ITEM}.sh"
 
+      - name: Require scenario verdict
+        # bash 3.2 can exit 0 after a set -u abort inside an EXIT trap, so a green
+        # scenario step is not proof; require the verdict line in the log.
+        shell: bash
+        run: |
+          want=PASS
+          [[ "$VARIANT" == base ]] && want=BASE
+          if ! grep -Eq "^[0-9:]+ ${want} " "$OUT/scenario.log" 2>/dev/null; then
+            echo "::error::scenario.log has no ${want} line (silent abort or incomplete scenario)"
+            exit 1
+          fi
+
       - name: Summarize
         if: always()
         shell: bash
