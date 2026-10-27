@@ -938,11 +938,11 @@ extension DashboardWindowController {
     }
 
     func navigateBack() {
-        self.activeNavigationWebView.goBack()
+        self.nativeBrowser.goBack(in: self.activeNavigationWebView)
     }
 
     func navigateForward() {
-        self.activeNavigationWebView.goForward()
+        self.nativeBrowser.goForward(in: self.activeNavigationWebView)
     }
 
     fileprivate func closeFocusedPanelOrWindow() {

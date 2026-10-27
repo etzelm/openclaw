@@ -813,6 +813,33 @@ struct DashboardNativeBrowserFailureTests {
         try await TestWait.state("automatic reload after manual reload") {
             loads["/crashing", default: 0] > reloaded && !crashing.isLoading && crashing.title == "Article"
         }
+
+        // Navigate menu Back and Forward (Command-[ and Command-]) restore the full budget too.
+        let secondURL = server.url("/second")
+        crashing.load(URLRequest(url: secondURL))
+        try await TestWait.state("second page") {
+            crashing.url?.path == "/second" && !crashing.isLoading && crashing.title == "Article"
+        }
+        let window = try #require(controller.window)
+        let rect = DashboardBrowserRect(x: 0, y: 0, width: 300, height: 200)
+        try controller.nativeBrowser.present(scope: "panel", tabId: "mac-crashing", rect: rect, visible: true)
+        #expect(window.makeFirstResponder(crashing))
+        for back in [true, false] {
+            let path = back ? crashingURL.path : secondURL.path
+            if back { controller.navigateBack() } else { controller.navigateForward() }
+            try await TestWait.state("menu history to \(path)") {
+                crashing.url?.path == path && !crashing.isLoading
+            }
+            for exit in 1...DashboardBrowserTab.automaticReloadLimit {
+                let before = loads[path, default: 0]
+                try Self.terminateContentProcess(of: crashing)
+                try await TestWait.state("automatic reload \(exit) at \(path)") {
+                    browser.failureView != nil ||
+                        (loads[path, default: 0] > before && !crashing.isLoading && crashing.title == "Article")
+                }
+                try #require(browser.failureView == nil, "exit \(exit) at \(path) after menu history")
+            }
+        }
     }
 
     private static func contentProcess(of webView: WKWebView) -> pid_t {

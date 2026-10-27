@@ -170,10 +170,10 @@ final class DashboardNativeBrowserHost {
     func perform(_ action: DashboardBrowserAction, tabId: String) throws {
         let webView = try self.requireWebView(tabId)
         let browser = self.browserTab(for: webView)
-        if [.back, .forward, .reload].contains(action) { browser?.resetAutomaticReloads() }
+        if action == .reload { browser?.resetAutomaticReloads() }
         switch action {
-        case .back: webView.goBack()
-        case .forward: webView.goForward()
+        case .back: self.goBack(in: webView)
+        case .forward: self.goForward(in: webView)
         case .reload:
             if let url = browser?.failedURL {
                 webView.load(URLRequest(url: url))
@@ -185,6 +185,17 @@ final class DashboardNativeBrowserHost {
         case .snapshot, .download: throw DashboardBrowserError.invalidRequest
         }
         self.scheduleStatePush()
+    }
+
+    /// Back and Forward are user navigation from the Browser panel and the Navigate menu alike.
+    func goBack(in webView: WKWebView) {
+        self.browserTab(for: webView)?.resetAutomaticReloads()
+        webView.goBack()
+    }
+
+    func goForward(in webView: WKWebView) {
+        self.browserTab(for: webView)?.resetAutomaticReloads()
+        webView.goForward()
     }
 
     func close(tabId: String) throws {
