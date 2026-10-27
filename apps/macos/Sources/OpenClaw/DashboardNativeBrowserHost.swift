@@ -377,8 +377,12 @@ extension DashboardNativeBrowserHost {
 
     func inspect(tabId: String, x: Double, y: Double) async throws -> [String: Any] {
         let webView = try self.requireWebView(tabId)
-        let script = BrowserInspectScript.source
-        let node = try await webView.evaluateJavaScript("(\(script))(\(x), \(y))")
+        // The client world keeps page overrides of DOM methods out of the result.
+        let node = try await webView.callAsyncJavaScript(
+            "return (\(BrowserInspectScript.source))(x, y)",
+            arguments: ["x": x, "y": y],
+            in: nil,
+            contentWorld: .defaultClient)
         guard self.webView(for: tabId) === webView else { throw DashboardBrowserError.unknownTab }
         return ["ok": true, "node": node ?? NSNull()]
     }

@@ -650,3 +650,62 @@ struct DashboardNativeBrowserFaviconTests {
             requestBrowserProfileImportOffer: { _ in false })
     }
 }
+
+@Suite(.serialized, .timeLimit(.minutes(1)))
+@MainActor
+struct DashboardNativeBrowserInspectTests {
+    @Test func `inspection reports the real element and stays hidden from page overrides`() async throws {
+        let server = try await DashboardHTTPFixture.start(
+            html: """
+            <!doctype html><html><head><title>Spoof</title></head>
+            <body style="margin:0"><div id="real" style="width:600px;height:400px">Real content</div><script>
+            window.inspectedByHost = false;
+            document.elementFromPoint = function () {
+              window.inspectedByHost = true;
+              const fake = document.createElement("button");
+              fake.id = "spoofed";
+              fake.setAttribute("aria-label", "Spoofed by page script");
+              return fake;
+            };
+            Element.prototype.getBoundingClientRect = function () {
+              window.inspectedByHost = true;
+              return { x: 0, y: 0, width: 1, height: 1 };
+            };
+            </script></body></html>
+            """,
+            contentSecurityPolicy: "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'")
+        defer { server.stop() }
+        let controller = DashboardWindowController(
+            url: server.url("/control/"),
+            auth: DashboardWindowAuth.unauthenticated,
+            websiteDataStore: .nonPersistent(),
+            windowAutosaveName: "",
+            requestBrowserProfileImportOffer: { _ in false })
+        defer { controller.closeDashboard() }
+        try controller.nativeBrowser.open(tabId: "mac-spoof", url: server.url("/article"), sessionKey: "")
+        let page = try #require(controller.nativeBrowser.webView(for: "mac-spoof"))
+        let rect = DashboardBrowserRect(x: 0, y: 0, width: 400, height: 300)
+        try controller.nativeBrowser.present(scope: "panel", tabId: "mac-spoof", rect: rect, visible: true)
+        try await TestWait.state("page overrides installed in a laid out tab") {
+            let ready = try? await page.evaluateJavaScript("typeof window.inspectedByHost + innerWidth")
+            return !page.isLoading && ready as? String == "boolean400"
+        }
+
+        let reply = try await controller.nativeBrowser.inspect(tabId: "mac-spoof", x: 50, y: 50)
+        let node = try #require(reply["node"] as? [String: Any])
+        #expect(node["tag"] as? String == "div")
+        #expect(node["id"] as? String == "real")
+        #expect(node["name"] as? String == "Real content")
+        #expect((node["rect"] as? [String: Any])?["width"] as? Double == 600)
+        let pageSawInspection = try await page.evaluateJavaScript("window.inspectedByHost") as? Bool
+        #expect(pageSawInspection == false)
+
+        let outside = try await controller.nativeBrowser.inspect(tabId: "mac-spoof", x: 5000, y: 5000)
+        #expect(outside["node"] is NSNull)
+
+        try controller.nativeBrowser.close(tabId: "mac-spoof")
+        await #expect(throws: DashboardBrowserError.self) {
+            _ = try await controller.nativeBrowser.inspect(tabId: "mac-spoof", x: 50, y: 50)
+        }
+    }
+}
