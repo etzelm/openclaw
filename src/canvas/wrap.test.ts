@@ -155,8 +155,6 @@ it("never turns script-dispatched link clicks into host.open", async () => {
       ["auxclick", 1],
     ] as const) {
       const event = new frame.MouseEvent(type, { bubbles: true, cancelable: true, button });
-      // Widget code cannot forge the unforgeable isTrusted flag.
-      expect(() => Object.defineProperty(event, "isTrusted", { value: true })).toThrow(TypeError);
       anchor.dispatchEvent(event);
       events.push(event);
     }

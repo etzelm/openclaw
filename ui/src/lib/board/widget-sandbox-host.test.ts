@@ -260,6 +260,13 @@ describe("BoardWidgetSandboxHost", () => {
   it("opens widget links only from the adopted wrapper port and ticket", async () => {
     const postMessage = vi.fn();
     vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+    Object.defineProperty(navigator, "userActivation", {
+      configurable: true,
+      value: { isActive: true },
+    });
+    onTestFinished(() => {
+      Reflect.deleteProperty(navigator, "userActivation");
+    });
     const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
     const f = await readyHost({ client: client() });
     const link = (id: string, ticket = "ticket") =>

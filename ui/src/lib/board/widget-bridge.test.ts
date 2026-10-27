@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, onTestFinished, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { dispatchWidgetPrompt } from "../../components/mcp-app-security.ts";
 import { BoardWidgetBridgeOwner } from "./widget-bridge.ts";
@@ -36,6 +36,12 @@ const handle = (
   context?: Parameters<BoardWidgetBridgeOwner["handle"]>[1],
 ) => controller.handle({ ...envelope, id: crypto.randomUUID(), method, params }, context);
 const emit = (payload: unknown) => handle("state.emit", { payload });
+const stubUserActivation = (isActive: boolean) => {
+  Object.defineProperty(navigator, "userActivation", { configurable: true, value: { isActive } });
+  onTestFinished(() => {
+    Reflect.deleteProperty(navigator, "userActivation");
+  });
+};
 it.each([
   ["https://example.com/path", false, null],
   ["javascript:alert(1)", false, "widget link url is invalid"],
@@ -56,6 +62,7 @@ it.each([
 it("hands widget links to the native link owner instead of a WebKit popup", async () => {
   const postMessage = vi.fn();
   vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+  stubUserActivation(true);
   const open = vi.spyOn(window, "open").mockReturnValue(null);
   await expect(handle("host.open", { url: "https://example.com/path" })).resolves.toEqual({
     ok: true,
@@ -67,6 +74,34 @@ it("hands widget links to the native link owner instead of a WebKit popup", asyn
     [{ type: "open-link", url: "https://example.com/path", target: "external" }],
   ]);
   expect(open).not.toHaveBeenCalled();
+});
+it("keeps widget links without user activation away from the native link owner", async () => {
+  const postMessage = vi.fn();
+  vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+  stubUserActivation(false);
+  // WebKit's popup blocker refuses the fallback open, as it does on main.
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  await expect(handle("host.open", { url: "https://example.com/path" })).rejects.toThrow(
+    "widget link could not be opened",
+  );
+  expect(postMessage).not.toHaveBeenCalled();
+  expect(open.mock.calls).toEqual([["https://example.com/path", "_blank", "noopener,noreferrer"]]);
+});
+it("opens at most one native widget link per second of user activation", async () => {
+  const postMessage = vi.fn();
+  vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+  stubUserActivation(true);
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  const link = (path: string) => handle("host.open", { url: `https://example.com/${path}` });
+  await expect(link("first")).resolves.toEqual({ ok: true });
+  await expect(link("burst")).rejects.toThrow("widget link could not be opened");
+  vi.advanceTimersByTime(1_000);
+  await expect(link("later")).resolves.toEqual({ ok: true });
+  expect(postMessage.mock.calls).toEqual([
+    [{ type: "open-link", url: "https://example.com/first", target: "external" }],
+    [{ type: "open-link", url: "https://example.com/later", target: "external" }],
+  ]);
+  expect(open.mock.calls).toEqual([["https://example.com/burst", "_blank", "noopener,noreferrer"]]);
 });
 it.each([
   ["javascript:alert(1)", "widget link url is invalid"],
@@ -94,6 +129,7 @@ it.each([
 it("never opens widget links for a forged or retired view ticket", async () => {
   const postMessage = vi.fn();
   vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+  stubUserActivation(true);
   const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
   const link = (ticket: string) =>
     controller.handle({

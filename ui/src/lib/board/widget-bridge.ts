@@ -48,6 +48,7 @@ export class BoardWidgetBridgeOwner {
   private readonly recentStatePayloads = new Map<string, number>();
   private readonly pendingStates = new Map<string, Promise<unknown>>();
   private stateAttemptTimes: number[] = [];
+  private lastNativeLinkAt = Number.NEGATIVE_INFINITY;
 
   constructor(
     private readonly options: {
@@ -123,9 +124,10 @@ export class BoardWidgetBridgeOwner {
     switch (request.method) {
       // Opening a link the user clicked is navigation, not a granted capability,
       // so this stays outside the tool-grant checks. Native hosts take it through
-      // their link owner, because WebKit's popup blocker does not carry the
-      // click's gesture across this MessagePort task. Browsers use the Control
-      // UI's openExternalUrlSafe owner, which applies noopener/noreferrer
+      // their link owner, because WebKit's popup blocker scopes the click's
+      // gesture to its own task and refuses window.open in this MessagePort task,
+      // although transient user activation survives the hop. Browsers use the
+      // Control UI's openExternalUrlSafe owner, which applies noopener/noreferrer
       // regardless of the `rel` a widget wrote. The absolute-http(s) gate here is
       // deliberately narrower than both: widget-supplied links must not reach
       // `blob:`, which the general external-link path allows.
@@ -134,7 +136,18 @@ export class BoardWidgetBridgeOwner {
         if (!/^https?:\/\//i.test(url)) {
           throw new Error("widget link url is invalid");
         }
-        if (!postNativeExternalLink(url) && !openExternalUrlSafe(url)) {
+        // The native route skips the popup blocker, so it keeps that blocker's
+        // rules in the dashboard realm: it needs live user activation and opens
+        // at most once a second, like a blocker that spends the gesture. Widget
+        // code that reaches the port without one falls through to window.open.
+        const now = Date.now();
+        const native =
+          navigator.userActivation?.isActive &&
+          now - this.lastNativeLinkAt >= 1_000 &&
+          postNativeExternalLink(url);
+        if (native) {
+          this.lastNativeLinkAt = now;
+        } else if (!openExternalUrlSafe(url)) {
           throw new Error("widget link could not be opened");
         }
         return { ok: true };
