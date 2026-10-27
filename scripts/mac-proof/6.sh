@@ -61,8 +61,13 @@ put_widget() {
 pp_identity
 pp_build_helpers
 pp_record_start
-pp_gateway_start '{"gateway":{"mode":"local"}}'
+# A configured default model keeps the Control UI off its first-run Model Setup
+# redirect (sessionDefaults.modelConfigured); no model is ever called.
+pp_gateway_start '{"agents":{"defaults":{"model":{"primary":"openai/gpt-5.5"}}},"gateway":{"mode":"local"}}'
 pp_fixture_start
+# A fresh Gateway has no session row, and board.widget.put needs one.
+pp_call sessions.create "{\"key\":\"$SESSION\",\"agentId\":\"main\"}" \
+  >"$OUT/logs/sessions-create.json" || pp_fail "sessions.create $SESSION failed"
 pp_app_config
 pp_app_launch --dashboard
 pp_ax wait-window 90 >/dev/null || pp_fail "dashboard window never appeared"
@@ -71,6 +76,13 @@ sleep 10
 # 1. Show the session dashboard with the v1 widget. ui.command only reaches the
 # requesting Control UI, so the panel is opened with its shortcut (mod+alt+shift+G).
 put_widget v1
+# The runner's agent raises a Local Network alert over the window center; a
+# leftover alert would take the HID click. Best effort, logged either way.
+for proc in UserNotificationCenter CoreServicesUIAgent; do
+  r="$(osascript -e "tell application \"System Events\" to tell process \"$proc\" to click button \"Allow\" of window 1" 2>&1)" &&
+    pp_note "local network alert: clicked Allow in $proc" && break
+  pp_note "local network alert: none in $proc ($r)"
+done
 pp_app_activate
 osascript -e 'tell application "System Events" to keystroke "g" using {command down, option down, shift down}'
 pp_tool "{\"tool\":\"dashboard\",\"args\":{\"action\":\"set_presentation\",\"presentation\":\"split\"},\"sessionKey\":\"$SESSION\"}" \
