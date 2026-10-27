@@ -257,6 +257,41 @@ describe("BoardWidgetSandboxHost", () => {
     const recreated = await setup(prefix + "-a", "b".repeat(32));
     await reply(recreated, prompt("recreated-view", "Independent generation"));
   });
+  it("opens widget links only from the adopted wrapper port and ticket", async () => {
+    const postMessage = vi.fn();
+    vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+    const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
+    const f = await readyHost({ client: client() });
+    const link = (id: string, ticket = "ticket") =>
+      request(id, "host.open", { url: "https://example.com/" + id }, ticket);
+    const other = document.createElement("iframe");
+    document.body.append(other);
+    // Window-channel requests from the widget frame, another frame, or another origin.
+    f.send(link("window-channel"));
+    f.send(link("other-frame"), [], other.contentWindow);
+    f.send(link("other-origin"), [], f.frame.contentWindow, "https://evil.example");
+    const port = await f.port();
+    // A second port offer, as forged by widget code after the wrapper's offer.
+    const forged = channel();
+    const forgedReplies: unknown[] = [];
+    forged.port2.addEventListener("message", (event) => forgedReplies.push(event.data));
+    f.send({ type: "openclaw:widget-bridge-port-offer" }, [forged.port1]);
+    forged.port2.postMessage(link("forged-port"), []);
+    await rejectRequest(
+      port,
+      link("forged-ticket", "forged"),
+      "widget view ticket does not match the active frame",
+    );
+    await reply(port, link("wrapper"));
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(postMessage.mock.calls).toEqual([
+      [{ type: "open-link", url: "https://example.com/wrapper", target: "external" }],
+    ]);
+    expect(open).not.toHaveBeenCalled();
+    expect(forgedReplies).toEqual([]);
+  });
   it("keeps the adopted ticket valid until renewal is acknowledged", async () => {
     const pending = Promise.withResolvers<unknown>();
     const c = {

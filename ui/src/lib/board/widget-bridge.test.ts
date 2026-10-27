@@ -68,6 +68,49 @@ it("hands widget links to the native link owner instead of a WebKit popup", asyn
   ]);
   expect(open).not.toHaveBeenCalled();
 });
+it.each([
+  ["javascript:alert(1)", "widget link url is invalid"],
+  ["JavaScript:alert(1)", "widget link url is invalid"],
+  ["data:text/html,<script>alert(1)</script>", "widget link url is invalid"],
+  ["blob:https://example.com/0", "widget link url is invalid"],
+  ["file:///etc/hosts", "widget link url is invalid"],
+  ["mailto:someone@example.com", "widget link url is invalid"],
+  ["tel:+15555550100", "widget link url is invalid"],
+  ["//example.com/path", "widget link url is invalid"],
+  [" https://example.com/path", "widget link url is invalid"],
+  ["https:example.com", "widget link url is invalid"],
+  ["https://", "widget link could not be opened"],
+] as const)(
+  "never opens a non-HTTP(S) widget link natively or by popup: %s",
+  async (url, error) => {
+    const postMessage = vi.fn();
+    vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+    const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
+    await expect(handle("host.open", { url })).rejects.toThrow(error);
+    expect(postMessage).not.toHaveBeenCalled();
+    expect(open).not.toHaveBeenCalled();
+  },
+);
+it("never opens widget links for a forged or retired view ticket", async () => {
+  const postMessage = vi.fn();
+  vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+  const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
+  const link = (ticket: string) =>
+    controller.handle({
+      ...envelope,
+      ticket,
+      id: crypto.randomUUID(),
+      method: "host.open",
+      params: { url: "https://example.com/path" },
+    });
+  await expect(link("forged")).rejects.toThrow("widget view ticket does not match");
+  controller.updateIdentity(document.createElement("iframe"), "renewed");
+  await expect(link("ticket")).rejects.toThrow("widget view ticket does not match");
+  expect(postMessage).not.toHaveBeenCalled();
+  expect(open).not.toHaveBeenCalled();
+  await expect(link("renewed")).resolves.toEqual({ ok: true });
+  expect(postMessage).toHaveBeenCalledOnce();
+});
 it("keeps confirmation when the authorization response omits its decision", async () => {
   client.request.mockResolvedValueOnce({});
   await handle("prompt.send", { text: "Show details" }, { promptUserActivated: true });

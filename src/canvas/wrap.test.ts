@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { runInNewContext } from "node:vm";
-import { expect, it, vi } from "vitest";
+import { JSDOM } from "jsdom";
+import { expect, it, onTestFinished, vi } from "vitest";
 import { buildWidgetDocument, WIDGET_SIZE_CONFIRMATION_HTML } from "./wrap.js";
 
 it("confirms current widget height on each parent chat-host notification", () => {
@@ -111,4 +112,63 @@ it("keeps the wrapped document bytes stable", () => {
   expect(createHash("sha256").update(html).digest("hex")).toBe(
     "e8c709f66c308ddf94d310ad2a29375a1edff39b9d82328464146045640e72f0",
   );
+});
+it("never turns script-dispatched link clicks into host.open", async () => {
+  // jsdom has no MessageChannel and drops transferred ports, so the real wrapper
+  // gets Node's channel and the parent's postMessage records its port offers.
+  const dom = new JSDOM("<iframe></iframe>", { runScripts: "dangerously" });
+  onTestFinished(() => dom.window.close());
+  const offers: Array<{ type: string; port?: MessagePort }> = [];
+  dom.window.postMessage = ((data: { type: string }, _origin: string, ports?: MessagePort[]) =>
+    offers.push({ type: data.type, port: ports?.[0] })) as Window["postMessage"];
+  const frame = dom.window.document.querySelector("iframe")!.contentWindow! as Window &
+    typeof globalThis;
+  Object.assign(frame, {
+    MessageChannel,
+    CanvasRenderingContext2D: function CanvasRenderingContext2D() {},
+    ResizeObserver: class {
+      observe() {}
+    },
+  });
+  frame.document.open();
+  frame.document.write(
+    buildWidgetDocument(
+      "Links",
+      ["https://example.com/a", "javascript:alert(1)", "data:text/html,x"]
+        .map((href, index) => `<a id="l${index}" target="_blank" href="${href}">${index}</a>`)
+        .join(""),
+    ),
+  );
+  frame.document.close();
+  const port = offers.find((offer) => offer.type === "openclaw:widget-bridge-port-offer")!.port!;
+  onTestFinished(() => port.close());
+  const received: Array<{ type: string; method?: string }> = [];
+  port.addEventListener("message", (event) => received.push(event.data));
+  port.start();
+  port.postMessage({ type: "openclaw:widget-host-init", ticket: "ticket" });
+  await vi.waitFor(() => expect(received[0]?.type).toBe("openclaw:widget-host-init-ack"));
+  const events: Event[] = [];
+  for (const anchor of frame.document.querySelectorAll("a")) {
+    anchor.click();
+    for (const [type, button] of [
+      ["click", 0],
+      ["auxclick", 1],
+    ] as const) {
+      const event = new frame.MouseEvent(type, { bubbles: true, cancelable: true, button });
+      // Widget code cannot forge the unforgeable isTrusted flag.
+      expect(() => Object.defineProperty(event, "isTrusted", { value: true })).toThrow(TypeError);
+      anchor.dispatchEvent(event);
+      events.push(event);
+    }
+  }
+  // The same port stays live: a granted API request still reaches the host.
+  void (
+    frame as unknown as { openclaw: { state: { emit: (payload: unknown) => unknown } } }
+  ).openclaw.state.emit({ live: true });
+  await vi.waitFor(() => expect(received.at(-1)?.method).toBe("state.emit"));
+  expect(received.map((message) => message.method ?? message.type)).toEqual([
+    "openclaw:widget-host-init-ack",
+    "state.emit",
+  ]);
+  expect(events.map((event) => event.defaultPrevented)).toEqual(events.map(() => false));
 });
