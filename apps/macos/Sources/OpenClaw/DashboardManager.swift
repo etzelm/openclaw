@@ -19,6 +19,8 @@ final class DashboardManager {
     @ObservationIgnored private var auxiliaryWindowOrder: [UUID] = []
     @ObservationIgnored private var endpointTask: Task<Void, Never>?
     @ObservationIgnored private var presentationTask: (task: Task<Void, Error>, userGesture: Bool)?
+    @ObservationIgnored private var remotePreloadPending = false
+    @ObservationIgnored private var mainOpensInFlight = 0
     @ObservationIgnored private var pendingOpenCommands: [DashboardNativeCommand] = []
     @ObservationIgnored private var openForCommandTask: Task<Void, Never>?
     @ObservationIgnored private var navigationIntents: [DashboardGatewayTarget: NavigationIntent] = [:]
@@ -60,6 +62,7 @@ final class DashboardManager {
     var testProfileEndpointProvider: (@Sendable (String) async throws
         -> GatewayConnection.EndpointSnapshot)?
     var testGatewayEntriesProvider: (@MainActor () async throws -> [DashboardGatewayEntry])?
+    var testControlChannelConnected: Bool?
     #endif
 
     init(
@@ -212,6 +215,7 @@ final class DashboardManager {
         // existing document after auth arrives without inventing a route change.
         let endpointState = await endpointStateProvider()
         await handleEndpointState(endpointState)
+        self.preloadRemoteIfReady()
     }
 
     @discardableResult
@@ -455,13 +459,21 @@ final class DashboardManager {
 
     /// Preload failures stay invisible: navigation errors land in the
     /// controller's `showLoadFailure`, which never orders the window front, and
-    /// preload skips `observeEndpointChanges()` so no observer path can call
-    /// `showFailure`. The failure page is only seen on a later explicit show.
+    /// local preload skips `observeEndpointChanges()` so no observer path can call
+    /// `showFailure`. Remote preload follows endpoint changes, whose failures use
+    /// `present: false`. The failure page is only seen on a later explicit show.
     func preloadIfConfigured() {
         guard self.mainTarget == .primary, self.controller == nil,
-              AppStateStore.shared.onboardingSeen,
-              let (configuration, _) = immediateWindowConfiguration()
+              AppStateStore.shared.onboardingSeen
         else { return }
+        guard let (configuration, _) = immediateWindowConfiguration() else {
+            // Remote dashboards learn their sign-in route from hello, so their
+            // preload waits for the authenticated control channel instead.
+            self.remotePreloadPending = self.observesGatewayChanges &&
+                AppStateStore.shared.connectionMode == .remote
+            self.preloadRemoteIfReady()
+            return
+        }
         let controller = makeController(
             configuration: configuration,
             target: .primary,
@@ -469,6 +481,56 @@ final class DashboardManager {
             auxiliary: false)
         self.installMainController(controller)
         controller.update(url: configuration.url, auth: configuration.auth)
+    }
+
+    private func remotePreloadDecision(pending: Bool, channelConnected: Bool) -> DashboardRemotePreloadDecision {
+        DashboardRemotePreloadDecision(
+            pending: pending,
+            mode: AppStateStore.shared.connectionMode,
+            channelConnected: channelConnected,
+            mainTargetIsPrimary: self.mainTarget == .primary,
+            hasController: self.controller != nil,
+            presentationInFlight: self.presentationTask != nil || self.mainOpensInFlight > 0)
+    }
+
+    private var controlChannelConnected: Bool {
+        #if DEBUG
+        if let testControlChannelConnected { return testControlChannelConnected }
+        #endif
+        return ControlChannel.shared.state == .connected
+    }
+
+    /// One hidden load through the hello-resolved route, so remote identity
+    /// dashboards never receive pre-hello native credentials.
+    @discardableResult
+    private func preloadRemoteIfReady() -> Task<Void, Never>? {
+        switch self.remotePreloadDecision(
+            pending: self.remotePreloadPending,
+            channelConnected: self.controlChannelConnected)
+        {
+        case .wait:
+            return nil
+        case .discard:
+            self.remotePreloadPending = false
+            return nil
+        case .start:
+            self.remotePreloadPending = false
+        }
+        let lifetime = self.windowLifetime
+        return Task { @MainActor [weak self] in
+            guard let self, let (configuration, endpoint) = try? await self.windowConfiguration(for: .primary)
+            else { return }
+            let auth = configuration.auth
+            // An explicit open in flight on either side of the lookup owns the first document.
+            guard self.windowLifetime == lifetime,
+                  self.remotePreloadDecision(
+                      pending: true, channelConnected: self.controlChannelConnected) == .start,
+                  configuration.signedOut == nil,
+                  auth.hasCredential || auth.hasAcceptedNativeBinding || auth.usesBrowserIdentity
+            else { return }
+            self.presentDashboard(
+                configuration: configuration, endpoint: endpoint, target: .primary, source: nil, present: false)
+        }
     }
 
     private func showResolvedPrimaryDashboard() async throws {
@@ -975,6 +1037,8 @@ extension DashboardManager {
             }
             let opensMain = reuseExisting && self.mainTarget == target
             let mainController = self.controller
+            if opensMain { self.mainOpensInFlight += 1 }
+            defer { if opensMain { self.mainOpensInFlight -= 1 } }
             do {
                 let (configuration, endpoint) = try await self.windowConfiguration(for: target, userGesture: true)
                 guard !Task.isCancelled, self.windowLifetime == lifetime,
@@ -1251,7 +1315,7 @@ extension DashboardManager {
                 windowAutosaveName: self.mainWindowAutosaveName,
                 auxiliary: false)
             self.installMainController(controller)
-            self.loadWindow(controller, configuration: configuration, present: true)
+            self.loadWindow(controller, configuration: configuration, present: present ?? true)
             presented = controller
         } else {
             presented = self.openWindow(for: target, configuration: configuration)
@@ -1622,6 +1686,13 @@ extension DashboardManager {
 
     func _testHandleControlChannelStateChange(_ state: ControlChannel.ConnectionState) async {
         await self.handleControlChannelStateChange(state)
+    }
+
+    /// Arms the launch preload as remote mode does on a gateway-observing manager.
+    @discardableResult
+    func _testArmRemotePreload() -> Task<Void, Never>? {
+        self.remotePreloadPending = true
+        return self.preloadRemoteIfReady()
     }
 
     func _testWindowTLSParams(for target: DashboardGatewayTarget) async throws -> GatewayTLSParams? {
