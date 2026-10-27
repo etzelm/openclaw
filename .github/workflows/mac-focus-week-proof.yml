@@ -23,6 +23,11 @@ on:
         required: false
         default: all
         type: string
+      runner:
+        description: Hosted macOS runner label (macos-26 = arm64, macos-26-intel = x64; separate capacity pools)
+        required: false
+        default: macos-26
+        type: string
 
 permissions:
   contents: read
@@ -70,7 +75,7 @@ jobs:
   proof:
     needs: plan
     name: proof ${{ matrix.id }}
-    runs-on: macos-26
+    runs-on: ${{ inputs.runner || 'macos-26' }}
     timeout-minutes: 100
     strategy:
       fail-fast: false
@@ -156,11 +161,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache-mode: restore
 
-      - name: Package app (ad-hoc signed, debug, arm64, no MLX voice)
+      - name: Package app (ad-hoc signed, debug, runner arch, no MLX voice)
         if: matrix.app
         env:
           BUILD_CONFIG: debug
-          BUILD_ARCHS: arm64
+          BUILD_ARCHS: ${{ contains(inputs.runner || 'macos-26', 'intel') && 'x86_64' || 'arm64' }}
           OPENCLAW_SKIP_MLX_TTS: "1"
           SIGN_IDENTITY: "-"
           ALLOW_ADHOC_SIGNING: "1"
