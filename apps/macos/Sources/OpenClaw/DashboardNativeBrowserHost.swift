@@ -163,16 +163,19 @@ final class DashboardNativeBrowserHost {
 
     func navigate(tabId: String, url: URL) throws {
         let webView = try self.requireWebView(tabId)
+        self.browserTab(for: webView)?.resetAutomaticReloads()
         webView.load(URLRequest(url: url))
     }
 
     func perform(_ action: DashboardBrowserAction, tabId: String) throws {
         let webView = try self.requireWebView(tabId)
+        let browser = self.browserTab(for: webView)
+        if [.back, .forward, .reload].contains(action) { browser?.resetAutomaticReloads() }
         switch action {
         case .back: webView.goBack()
         case .forward: webView.goForward()
         case .reload:
-            if let url = self.browserTab(for: webView)?.failedURL {
+            if let url = browser?.failedURL {
                 webView.load(URLRequest(url: url))
             } else {
                 webView.reload()
@@ -289,6 +292,23 @@ final class DashboardNativeBrowserHost {
                 message: nsError.localizedDescription,
                 reload: self.reloadAction(tabId: tab.id))
         }
+        self.scheduleStatePush()
+    }
+
+    /// WebKit leaves a terminated page blank. A bounded number of automatic reloads
+    /// keeps one-off recovery; a page that keeps crashing waits for the user.
+    func webContentProcessDidTerminate(_ webView: WKWebView) {
+        guard let tab = self.tabs.first(where: { $0.browser.webView === webView }) else { return }
+        let browser = tab.browser
+        if browser.consumeAutomaticReload() {
+            webView.reload()
+            return
+        }
+        browser.showFailure(
+            at: browser.failedURL ?? webView.url ?? browser.representedURL ?? browser.requestedURL,
+            title: String(localized: "This page stopped repeatedly"),
+            message: String(localized: "Choose Reload to try loading it again."),
+            reload: self.reloadAction(tabId: tab.id))
         self.scheduleStatePush()
     }
 
