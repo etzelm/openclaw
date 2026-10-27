@@ -5,6 +5,7 @@ import { SESSION_PULL_REQUESTS_SUBSCRIBE_METHOD } from "../../../src/gateway/con
 import { GatewayRequestError } from "../api/gateway-connect-errors.ts";
 import type { ApplicationContext } from "../app/context.ts";
 import { sessionProgressCardsForGateway } from "../lib/session-progress-cards.ts";
+import "../lib/toast-host.tsx";
 import { flush, waitForSolid } from "../test-helpers/solid-settle.ts";
 import { sessionProgressHoverTargetFromEvent } from "./session-progress-hovercard-target.ts";
 import { createHovercard } from "./session-progress-hovercard.test-support.ts";
@@ -236,6 +237,44 @@ describe("session progress hovercard ownership", () => {
         { agentId: "research", expectedMarkedUnreadAt: 100, expectedSessionId: "child-session" },
       ),
     );
+  });
+
+  it("reports a rejected Dismiss and keeps it for a retry", async () => {
+    const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+    await toast.updateComplete;
+    const patch = vi
+      .fn<ApplicationContext["sessions"]["patch"]>(async () => null)
+      .mockRejectedValueOnce(new Error("Session store unavailable"));
+    const harness = createHovercard({
+      sessionKey: "agent:research:main",
+      scopes: ["operator.read", "operator.write"],
+      sessionsPatch: patch,
+      rowDetails: {
+        attention: {
+          kind: "error",
+          reason: "Synthetic child failure",
+          sourceSessionKey: "agent:research:subagent:child",
+          sourceSessionId: "child-session",
+        },
+      },
+    });
+    document.body.append(harness.provider);
+    flush();
+    await harness.focus();
+    const dismiss = () =>
+      getPortal()?.querySelector<HTMLButtonElement>(".session-hovercard__dismiss") ?? null;
+    await waitForSolid(() => expect(dismiss()).not.toBeNull());
+    dismiss()!.click();
+    await waitForSolid(() =>
+      expect(toast.toast?.message).toBe(
+        "Couldn't mark as read. Try again. Session store unavailable",
+      ),
+    );
+    expect(toast.toast?.severity).toBe("error");
+    expect(dismiss()?.disabled).toBe(false);
+    dismiss()!.click();
+    await waitForSolid(() => expect(toast.toast?.message).toBe("Marked as read"));
+    expect(patch).toHaveBeenCalledTimes(2);
   });
 
   it("retires a removed provider while its progress request is pending", async () => {

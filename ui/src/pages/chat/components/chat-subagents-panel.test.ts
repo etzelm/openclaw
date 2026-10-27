@@ -20,6 +20,7 @@ import {
 import { mountSolid } from "../../../test-helpers/mount-solid.ts";
 import { createSolidApplicationContextProvider } from "../../../test-helpers/solid-application-context.tsx";
 import { waitForSolid } from "../../../test-helpers/solid-settle.ts";
+import "../../../lib/toast-host.tsx";
 import { ChatSubagentsPanel } from "./chat-subagents-panel.tsx";
 
 const history = (sessionId: GatewaySessionRow["sessionId"]) => ({
@@ -386,7 +387,11 @@ const failed = (id: string, extra: Partial<GatewaySessionRow> = {}): GatewaySess
   ...extra,
 });
 
-function mountFailures(initial: GatewaySessionRow[], mobile: boolean) {
+function mountFailures(
+  initial: GatewaySessionRow[],
+  mobile: boolean,
+  rejectOnce = new Set<string>(),
+) {
   let rows = initial;
   const patched: Record<string, unknown>[] = [];
   const f = mountPanel((method, params) => {
@@ -398,6 +403,9 @@ function mountFailures(initial: GatewaySessionRow[], mobile: boolean) {
       return history(rows.find((row) => row.key === values?.sessionKey)?.sessionId);
     }
     if (method === "sessions.patch") {
+      if (rejectOnce.delete(String(values?.key))) {
+        throw new Error("Session store unavailable");
+      }
       const read = { ...rows.find((row) => row.key === values?.key)!, lastReadAt: 20 };
       patched.push(values!);
       rows = rows.map((row) => (row.key === read.key ? read : row));
@@ -478,3 +486,38 @@ it("marks a mobile failure read in place and keeps focus on its row", async () =
   );
   expect(f.find(".chat-subagents-mobile__dismiss-all")).toBeNull();
 });
+
+it.each([false, true])(
+  "reports a rejected mark as read and keeps the control for a retry (mobile: %s)",
+  async (mobile) => {
+    const toast = document.createElement("openclaw-toast-host");
+    document.body.append(toast);
+    await toast.updateComplete;
+    onTestFinished(() => toast.remove());
+    const f = mountFailures(
+      [failed("a"), failed("b")],
+      mobile,
+      new Set(["agent:worker:subagent:a"]),
+    );
+    const selector = mobile ? ".chat-subagents-mobile__dismiss" : ".subagents-desktop__dismiss";
+    const mark = () => f.panel.querySelectorAll<HTMLButtonElement>(selector);
+    await waitForSolid(() => expect(mark()).toHaveLength(2));
+
+    mark()[0]!.click();
+    await waitForSolid(() =>
+      expect(toast.toast?.message).toBe(
+        "Couldn't mark as read. Try again. Session store unavailable",
+      ),
+    );
+    expect(toast.toast?.severity).toBe("error");
+    expect(mark()).toHaveLength(2);
+    expect(mark()[0]!.disabled).toBe(false);
+
+    mark()[0]!.click();
+    await waitForSolid(() => expect(mark()).toHaveLength(1));
+    expect(f.keys()).toEqual(["agent:worker:subagent:a"]);
+    // The successful retry replaces the stale failure.
+    expect(toast.toast?.message).toBe("Marked as read");
+    expect(toast.toast?.severity).toBeUndefined();
+  },
+);
