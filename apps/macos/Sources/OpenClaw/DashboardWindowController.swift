@@ -412,6 +412,11 @@ final class DashboardWindowController: NSWindowController, WKNavigationDelegate,
         self.isWindowOpen || self.isHiddenForExperience
     }
 
+    /// A window that was never shown keeps the experience-hidden lifetime until `show()`.
+    func retainHidden() {
+        (self.window as? DashboardWindow)?.isHiddenForExperience = true
+    }
+
     func hideForExperience() {
         guard let window else { return }
         // Keep the document and drafts, but retire actions admitted by the
