@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       items:
-        description: Comma-separated entries (5a,5b,6,3-head,3-base,4a-head,4a-base,4b) or all
+        description: Comma-separated entries or items (5a,5b,6,3-head,3-base,4a-head,4a-base,4b,9) or all
         required: false
         default: all
         type: string
@@ -55,12 +55,14 @@ jobs:
             {"id":"3-base","item":"3","pr":185434,"ref":"mac/3-exec-drop","variant":"base","app":true},
             {"id":"4a-head","item":"4a","pr":185435,"ref":"mac/4a-dashboard-preload-remote","variant":"head","app":true},
             {"id":"4a-base","item":"4a","pr":185435,"ref":"mac/4a-dashboard-preload-remote","variant":"base","app":true},
-            {"id":"4b","item":"4b","pr":185436,"ref":"mac/4b-pathprepend-node","variant":"head","app":false}
+            {"id":"4b","item":"4b","pr":185436,"ref":"mac/4b-pathprepend-node","variant":"head","app":false},
+            {"id":"9-head","item":"9","pr":0,"ref":"mac/9-inspect-isolated-world","variant":"head","app":true},
+            {"id":"9-base","item":"9","pr":0,"ref":"mac/9-inspect-isolated-world","variant":"base","app":true}
           ]'
           matrix="$(ITEMS="$ITEMS" ALL="$all" node -e '
             const all = JSON.parse(process.env.ALL);
             const want = process.env.ITEMS.split(",").map((s) => s.trim()).filter(Boolean);
-            const pick = want.includes("all") ? all : all.filter((e) => want.includes(e.id));
+            const pick = want.includes("all") ? all : all.filter((e) => want.includes(e.id) || want.includes(e.item));
             if (pick.length === 0) { console.error("no matching entries"); process.exit(1); }
             process.stdout.write(JSON.stringify({ include: pick }));')"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
@@ -87,9 +89,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          head_sha="$(gh api "repos/openclaw/openclaw/pulls/$PR" --jq .head.sha)"
-          base_sha="$(gh api "repos/openclaw/openclaw/pulls/$PR" --jq .base.sha)"
           fork_sha="$(gh api "repos/etzelm/openclaw/branches/$REF" --jq .commit.sha)"
+          if [[ "$PR" == "0" ]]; then
+            # No PR yet: the fork branch is the head and its first parent the base.
+            head_sha="$fork_sha"
+            base_sha="$(gh api "repos/etzelm/openclaw/commits/$fork_sha" --jq '.parents[0].sha')"
+          else
+            head_sha="$(gh api "repos/openclaw/openclaw/pulls/$PR" --jq .head.sha)"
+            base_sha="$(gh api "repos/openclaw/openclaw/pulls/$PR" --jq .base.sha)"
+          fi
           if [[ "$head_sha" != "$fork_sha" ]]; then
             echo "::error::fork $REF ($fork_sha) is not PR #$PR head ($head_sha)"
             exit 1
