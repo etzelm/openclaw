@@ -31,18 +31,21 @@ pp_browser_panel_open() {
       pp_fail "chat pane never appeared (see logs/ax-no-chat.json)"
     }
   fi
-  pp_app_activate
-  osascript -e 'tell application "System Events" to keystroke "u" using {command down, option down, shift down}'
-  if ! pp_wait_quiet 10 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web; then
-    pp_note "browser shortcut did not open the panel; using Panels > Browser"
-    pp_click_element AXButton "Panels" web || pp_fail "Panels button not found"
-    sleep 1
-    pp_click_element "*" "Browser" web || pp_fail "Browser entry not found in Panels"
-    pp_wait_quiet 15 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web || {
-      pp_ax dump "$OUT/logs/ax-browser-panel.json" >/dev/null || true
-      pp_fail "Browser panel did not open (see logs/ax-browser-panel.json)"
-    }
+  # The Cmd+Option+Shift+U shortcut cannot match here: with Option held the key
+  # is "¨", and resolveAsciiShortcutKey (src/shared/keyboard-shortcuts.ts)
+  # returns null for a non-ASCII key when altKey is set. Use the Panels launcher,
+  # pressed through accessibility (a coordinate click on Panels did not open it).
+  pp_ax press AXButton "Panels" web >/dev/null || pp_fail "Panels button not found"
+  if ! pp_wait_quiet 6 pp_ax exists AXButton "Browser" web; then
+    pp_ax dump "$OUT/logs/ax-panels.json" >/dev/null || true
+    pp_fail "Browser entry not found in Panels (see logs/ax-panels.json)"
   fi
+  pp_note "Panels launcher open"
+  pp_ax press AXButton "Browser" web >/dev/null || pp_fail "Browser entry could not be pressed"
+  pp_wait_quiet 8 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web || {
+    pp_ax dump "$OUT/logs/ax-browser-panel.json" >/dev/null || true
+    pp_fail "Browser panel did not open (see logs/ax-browser-panel.json)"
+  }
   sleep 2
   pp_ax dump "$OUT/logs/ax-browser-panel.json" >/dev/null || true
   pp_shot "01-browser-panel"
