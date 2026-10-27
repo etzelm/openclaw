@@ -53,10 +53,24 @@ pp_wait_for() {
   pp_fail "timed out after ${limit}s waiting for: $what"
 }
 
+pp_wait_quiet() {
+  # pp_wait_quiet <seconds> <command...>: like pp_wait_for, but returns 1 on timeout.
+  local limit="$1" i
+  shift
+  for ((i = 0; i < limit; i++)); do
+    if "$@" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
 pp_build_helpers() {
   # Compile the AppKit/CoreGraphics helpers once per job.
   swiftc -O -o "$PP_BIN/window-id" "$PP_LIB/window-id.swift"
   swiftc -O -o "$PP_BIN/click" "$PP_LIB/click.swift"
+  swiftc -O -o "$PP_BIN/tcc-check" "$PP_LIB/tcc-check.swift"
 }
 
 pp_cli() {
@@ -163,7 +177,9 @@ pp_approve_pairing() {
     fi
     sleep 2
   done
-  [[ "$approved" -gt 0 ]] || pp_fail "no pairing request arrived within ${limit}s"
+  # Loopback pairing can be approved silently by the Gateway; the caller's
+  # "node connected" wait is the real gate.
+  [[ "$approved" -gt 0 ]] || pp_note "no pairing request needed approval within ${limit}s"
 }
 
 pp_node_id() {
@@ -213,6 +229,12 @@ pp_app_launch() {
     --args "$@"
   pp_wait_for 60 "OpenClaw process" pgrep -f "$APP/Contents/MacOS/"
   pp_note "app launched: $(basename "$APP") args: $*"
+}
+
+pp_app_activate() {
+  # Keystrokes go to the frontmost app.
+  osascript -e "tell application id \"$PP_BUNDLE_ID\" to activate" >/dev/null 2>&1 || true
+  sleep 1
 }
 
 pp_app_quit() {

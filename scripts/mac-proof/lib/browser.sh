@@ -17,10 +17,20 @@ pp_dashboard_up() {
 }
 
 pp_browser_panel_open() {
-  # Same Gateway command the agent screen tool uses to show the Browser panel.
-  pp_call ui.command '{"command":{"kind":"panel","panel":"browser","open":true}}' \
-    >"$OUT/logs/ui-command-browser.json" || pp_fail "ui.command browser panel failed"
-  sleep 4
+  # ui.command only reaches the requesting Control UI connection, never a CLI
+  # caller, so open the panel the way a user does: the Control UI shortcut
+  # (mod+alt+shift+U), then the Command Palette entry as a fallback.
+  pp_app_activate
+  osascript -e 'tell application "System Events" to keystroke "u" using {command down, option down, shift down}'
+  if ! pp_wait_quiet 10 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web; then
+    pp_note "browser shortcut did not open the panel; trying the Command Palette"
+    pp_ax menu "Command Palette…" >>"$OUT/scenario.log" || pp_fail "Command Palette menu item not found"
+    sleep 1
+    pp_type "Toggle browser panel"
+    pp_wait_quiet 10 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web ||
+      pp_fail "Browser panel did not open (see logs/ax-browser-panel.json)"
+  fi
+  sleep 2
   pp_ax dump "$OUT/logs/ax-browser-panel.json" >/dev/null || true
   pp_shot "01-browser-panel"
 }

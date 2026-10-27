@@ -5,6 +5,11 @@ source "$(dirname "$0")/lib/common.sh"
 
 pp_build_helpers
 pp_note "macOS $(sw_vers -productVersion), $(xcodebuild -version | head -1)"
+# Hosted images pre-grant ScreenCapture, Accessibility and System Events to
+# /bin/bash, osascript and the hosted compute agent (runner-images
+# configure-tccdb-macos.sh). Logged, not fatal: a CLI's own preflight answer
+# can differ from its responsible process; the capture size check below decides.
+pp_note "tcc: $("$PP_BIN/tcc-check" 2>&1 || true)"
 
 screencapture -x "$OUT/shots/preflight-screen.png" || pp_fail "screencapture failed"
 size="$(stat -f %z "$OUT/shots/preflight-screen.png")"

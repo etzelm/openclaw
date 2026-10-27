@@ -35,7 +35,7 @@ screencapture -x "$OUT/shots/10-screen-before-open.png"
 
 # First visible open through the same action as the menu bar item.
 open "openclaw://dashboard"
-open_at="$(date +%s.%N 2>/dev/null || date +%s)"
+open_at="$(python3 -c 'import time; print(f"{time.time():.3f}")')" # BSD date has no %N
 for i in $(seq -w 0 15); do
   wid="$("$PP_BIN/window-id" OpenClaw 2>/dev/null || true)"
   [[ -n "$wid" ]] && screencapture -x -o -l "$wid" "$OUT/shots/20-first-open-frame-$i.png"

@@ -131,8 +131,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Upstream CI runs on its own xcode-27 label; the hosted macos-26 image
+          # carries several Xcodes and its /Applications/Xcode.app default can lag.
+          # Select the newest installed one, then let the upstream check enforce 26.4+.
           source scripts/lib/swift-toolchain.sh
-          select_xcode_toolchain
+          ls -d /Applications/Xcode*.app
+          newest="$(ls -d /Applications/Xcode_*.app 2>/dev/null | grep -vi beta | sort -V | tail -1 || true)"
+          sudo xcode-select -s "${newest:-/Applications/Xcode.app}/Contents/Developer"
+          xcodebuild -version
           require_swift_toolchain
 
       - name: Setup Node environment
@@ -167,11 +173,12 @@ jobs:
 
       - name: Preflight (GUI session, capture, accessibility)
         shell: bash
-        run: bash "$HARNESS/scripts/mac-proof/preflight.sh"
+        run: /bin/bash "$HARNESS/scripts/mac-proof/preflight.sh"
 
       - name: Run scenario ${{ matrix.id }}
         shell: bash
-        run: bash "$HARNESS/scripts/mac-proof/${ITEM}.sh"
+        # /bin/bash is the shell the runner image's TCC grants name.
+        run: /bin/bash "$HARNESS/scripts/mac-proof/${ITEM}.sh"
 
       - name: Summarize
         if: always()

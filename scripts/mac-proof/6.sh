@@ -68,13 +68,19 @@ pp_app_launch --dashboard
 pp_ax wait-window 90 >/dev/null || pp_fail "dashboard window never appeared"
 sleep 10
 
-# 1. Show the session dashboard with the v1 widget.
-pp_call ui.command "{\"command\":{\"kind\":\"navigate\",\"sessionKey\":\"$SESSION\"}}" \
-  >"$OUT/logs/ui-navigate.json" || pp_fail "ui.command navigate failed"
+# 1. Show the session dashboard with the v1 widget. ui.command only reaches the
+# requesting Control UI, so the panel is opened with its shortcut (mod+alt+shift+G).
 put_widget v1
+pp_app_activate
+osascript -e 'tell application "System Events" to keystroke "g" using {command down, option down, shift down}'
 pp_tool "{\"tool\":\"dashboard\",\"args\":{\"action\":\"set_presentation\",\"presentation\":\"split\"},\"sessionKey\":\"$SESSION\"}" \
   >"$OUT/logs/dashboard-presentation.json" || true
-sleep 8
+if ! pp_wait_quiet 15 pp_ax exists AXLink "Open widget link" web; then
+  # The shortcut toggles; a panel that was already open is now closed.
+  osascript -e 'tell application "System Events" to keystroke "g" using {command down, option down, shift down}'
+  pp_wait_quiet 15 pp_ax exists AXLink "Open widget link" web || pp_note "widget link not in AX tree yet"
+fi
+sleep 2
 pp_ax dump "$OUT/logs/ax-widget.json" >/dev/null || true
 pp_shot "10-widget-visible"
 
