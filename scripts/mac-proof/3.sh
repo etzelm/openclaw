@@ -14,6 +14,28 @@
 source "$(dirname "$0")/lib/common.sh"
 trap pp_cleanup EXIT
 
+seed_runtime() {
+  # The app's native exec policy owner runs `approvals native` through the
+  # profile's seeded runtime (CommandResolver.resolveLocalCLI). Only managed
+  # Gateway setup seeds it, and this remote-mode app skips setup, so every
+  # system.run is denied with "bundled runtime is not prepared". Seed it the
+  # way BundledRuntime.prepareSeed does: clone the bundle runtime to
+  # ~/.openclaw/runtime/<OpenClawRuntimeBuildID> and point `current` at it.
+  local id dir="$HOME/.openclaw/runtime"
+  id="$(/usr/libexec/PlistBuddy -c 'Print :OpenClawRuntimeBuildID' "$APP/Contents/Info.plist")" ||
+    pp_fail "app has no OpenClawRuntimeBuildID"
+  [[ -n "$id" && "$id" != */* && -x "$APP/Contents/Resources/runtime/bin/bun" ]] ||
+    pp_fail "app bundle runtime missing (build id '$id')"
+  mkdir -p "$dir"
+  rm -rf "${dir:?}/$id"
+  cp -cR "$APP/Contents/Resources/runtime" "$dir/$id" 2>/dev/null ||
+    { rm -rf "${dir:?}/$id" && cp -R "$APP/Contents/Resources/runtime" "$dir/$id"; } ||
+    pp_fail "could not seed runtime $id"
+  ln -sfn "$id" "$dir/current"
+  "$dir/$id/bin/bun" --version >/dev/null 2>&1 || pp_fail "seeded bun does not start"
+  pp_note "runtime seeded: ~/.openclaw/runtime/$id"
+}
+
 pp_identity
 pp_build_helpers
 pp_record_start
@@ -21,6 +43,7 @@ pp_record_start
 # timing is the only variable.
 pp_gateway_start '{}'
 pp_app_config
+seed_runtime
 pp_app_launch --dashboard
 pp_ax wait-window 90 >/dev/null || pp_fail "app window never appeared"
 pp_approve_pairing 120
