@@ -56,6 +56,7 @@ import {
 } from "./server-node-event-source.js";
 import { registerNodeApnsEvent } from "./server-node-events-apns.js";
 import { enqueueNodeExecNotice } from "./server-node-events-exec-notice.js";
+import { withNodeExecPathPrependWarning } from "./server-node-events-exec-path.js";
 import { handleNodeNotificationEvent } from "./server-node-events-notifications.js";
 import type {
   NodeEvent,
@@ -802,9 +803,8 @@ async function handlePreparedNodeEvent(
           return undefined;
         }
         text = `Exec finished (node=${nodeId}${runId ? ` id=${runId}` : ""}, ${exitLabel})`;
-        if (compactOutput) {
-          text += `\n${compactOutput}`;
-        }
+        text += compactOutput ? `\n${compactOutput}` : "";
+        text = withNodeExecPathPrependWarning(text, cfg, agentId);
       }
 
       const notify = async () => {

@@ -51,6 +51,10 @@ import { createApprovalSlug } from "./bash-tools.exec-runtime.js";
 import type { ExecToolDetails } from "./bash-tools.exec-types.js";
 import { abortable } from "./embedded-agent-runner/run/abortable.js";
 import { formatExecDeniedReasonMessage } from "./exec-approval-result.js";
+import {
+  EXEC_NODE_PATH_PREPEND_WARNING,
+  withNodePathPrependWarning,
+} from "./exec-node-path-prepend.js";
 import type { AgentToolResult } from "./runtime/index.js";
 import { callGatewayTool } from "./tools/gateway.js";
 
@@ -424,6 +428,7 @@ export async function executeNodeHostCommand(
         inlineFallbackPolicy = outcome.state.timeoutContext;
       } else {
         const followupTarget = buildExecApprovalFollowupTarget(params, approvalId);
+        const warnNodePath = params.warnings.includes(EXEC_NODE_PATH_PREPEND_WARNING);
         const sendDeniedFollowup = (reason: string) =>
           execHostShared.sendExecApprovalFollowupResult(
             followupTarget,
@@ -509,12 +514,16 @@ export async function executeNodeHostCommand(
             if (!invocation.ok) {
               await execHostShared.sendExecApprovalFollowupResult(
                 followupTarget,
-                formatNodeInvokeFailureFollowup({
-                  failure: invocation.failure,
-                  nodeId: target.nodeId,
-                  approvalId,
-                  command: params.command,
-                }),
+                withNodePathPrependWarning(
+                  formatNodeInvokeFailureFollowup({
+                    failure: invocation.failure,
+                    nodeId: target.nodeId,
+                    approvalId,
+                    command: params.command,
+                  }),
+                  // Only an unknown outcome may have run with the node's own PATH.
+                  warnNodePath && invocation.failure.reason === "outcome-unknown",
+                ),
               );
               return;
             }
@@ -538,7 +547,10 @@ export async function executeNodeHostCommand(
             const summary = output
               ? `Exec finished (node=${target.nodeId} id=${approvalId}, ${exitLabel})\n${output}`
               : `Exec finished (node=${target.nodeId} id=${approvalId}, ${exitLabel})`;
-            await execHostShared.sendExecApprovalFollowupResult(followupTarget, summary);
+            await execHostShared.sendExecApprovalFollowupResult(
+              followupTarget,
+              withNodePathPrependWarning(summary, warnNodePath),
+            );
           } catch {
             if (params.signal?.aborted || nodeInvocationCompleted) {
               return;
