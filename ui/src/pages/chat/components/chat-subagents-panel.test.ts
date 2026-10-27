@@ -9,6 +9,7 @@ import {
   createTestSessionCapability,
   sessionsResult,
 } from "../../../lib/sessions/session-capability.test-support.ts";
+import { patchReceipt } from "../../../lib/sessions/session-rpc.test-support.ts";
 import { disposeSidebarContextLifecycles } from "../../../test-helpers/app-sidebar-context-lifecycle.ts";
 import { createContext, createGatewayHarness } from "../../../test-helpers/app-sidebar.ts";
 import { createTestGatewayClient } from "../../../test-helpers/gateway-client.ts";
@@ -373,3 +374,113 @@ it.each(["parent", "hidden", "connection"] as const)(
     expect(stop()?.disabled).toBe(false);
   },
 );
+
+const failed = (id: string, extra: Partial<GatewaySessionRow> = {}): GatewaySessionRow => ({
+  ...child(id),
+  label: `Worker ${id}`,
+  status: "failed",
+  hasActiveRun: false,
+  activeRunIds: [],
+  endedAt: 10,
+  updatedAt: 10,
+  ...extra,
+});
+
+function mountFailures(initial: GatewaySessionRow[], mobile: boolean) {
+  let rows = initial;
+  const patched: Record<string, unknown>[] = [];
+  const f = mountPanel((method, params) => {
+    const values = asOptionalRecord(params);
+    if (method === "sessions.list") {
+      return page(values?.spawnedBy ? rows : []);
+    }
+    if (method === "chat.history") {
+      return history(rows.find((row) => row.key === values?.sessionKey)?.sessionId);
+    }
+    if (method === "sessions.patch") {
+      const read = { ...rows.find((row) => row.key === values?.key)!, lastReadAt: 20 };
+      patched.push(values!);
+      rows = rows.map((row) => (row.key === read.key ? read : row));
+      return patchReceipt(read.key, read, "");
+    }
+    return {};
+  }, mobile);
+  return { ...f, patched, keys: () => patched.map((values) => values.key) };
+}
+
+it("dismisses desktop failures one at a time and all at once, moving them to Done", async () => {
+  const f = mountFailures(
+    [
+      ...["a", "b", "c"].map((id) => failed(id)),
+      failed("seen", { lastReadAt: 20 }),
+      failed("shared", { sharingRole: "viewer" }),
+    ],
+    false,
+  );
+  const group = (key: string) =>
+    f.panel
+      .querySelector(`[data-session-key="agent:worker:subagent:${key}"]`)
+      ?.getAttribute("data-group");
+  const failedRows = () => f.panel.querySelectorAll('.subagents-desktop__row[data-group="failed"]');
+  const dismiss = () => f.panel.querySelectorAll<HTMLButtonElement>(".subagents-desktop__dismiss");
+  await waitForSolid(() => expect(dismiss()).toHaveLength(3));
+  expect(failedRows()).toHaveLength(4);
+  expect(group("seen")).toBe("done");
+  expect(dismiss()[0]!.getAttribute("aria-label")).toBe("Dismiss failure: Worker a");
+  const dismissAll = () => f.find(".subagents-desktop__dismiss-all");
+  expect(dismissAll()?.textContent).toBe("Dismiss all");
+
+  dismiss()[0]!.focus();
+  dismiss()[0]!.click();
+  await waitForSolid(() => expect(failedRows()).toHaveLength(3));
+  expect(f.patched).toEqual([
+    {
+      key: "agent:worker:subagent:a",
+      unread: false,
+      agentId: "worker",
+      expectedSessionId: "session-a",
+      expectedMarkedUnreadAt: null,
+    },
+  ]);
+  expect(group("a")).toBe("done");
+  await waitForSolid(() =>
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("Dismiss failure: Worker b"),
+  );
+
+  dismissAll()!.click();
+  await waitForSolid(() => expect(failedRows()).toHaveLength(1));
+  // The viewer-only failure stays an alert without a dismiss control and takes focus.
+  expect(f.keys()).toEqual([
+    "agent:worker:subagent:a",
+    "agent:worker:subagent:b",
+    "agent:worker:subagent:c",
+  ]);
+  expect(group("shared")).toBe("failed");
+  expect(dismissAll()).toBeNull();
+  await waitForSolid(() =>
+    expect(document.activeElement).toBe(
+      f.panel.querySelector(
+        '[data-session-key="agent:worker:subagent:shared"] .subagents-desktop__open',
+      ),
+    ),
+  );
+});
+
+it("dismisses a mobile failure in place and keeps focus on its row", async () => {
+  const f = mountFailures([failed("a"), failed("b")], true);
+  const dismiss = () =>
+    f.panel.querySelectorAll<HTMLButtonElement>(".chat-subagents-mobile__dismiss");
+  await waitForSolid(() => expect(dismiss()).toHaveLength(2));
+  expect(f.find(".chat-subagents-mobile__dismiss-all")?.textContent).toBe("Dismiss all");
+  const row = f.panel.querySelector('[data-session-key="agent:worker:subagent:a"]')!;
+  dismiss()[0]!.click();
+  await waitForSolid(() => expect(dismiss()).toHaveLength(1));
+  expect(f.keys()).toEqual(["agent:worker:subagent:a"]);
+  expect(
+    row.querySelector(".chat-subagents-mobile__indicator")?.hasAttribute("data-acknowledged"),
+  ).toBe(true);
+  await waitForSolid(() =>
+    expect(document.activeElement).toBe(row.querySelector(".chat-subagents-mobile__open")),
+  );
+  expect(f.find(".chat-subagents-mobile__dismiss-all")).toBeNull();
+});

@@ -230,6 +230,7 @@ export type SidebarSessionHovercardRow = Pick<
   | "placementProviderId"
   | "placementProfileId"
   | "placementMachine"
+  | "sharingRole"
   | "status"
   | "startedAt"
   | "updatedAt"

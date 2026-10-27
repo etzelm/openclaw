@@ -201,6 +201,8 @@ const enChatSession = {
       refresh: "Refresh subagents",
       stop: "Stop {name}",
       stopping: "Stopping…",
+      dismissFailure: "Dismiss failure: {name}",
+      dismissAllFailures: "Dismiss all",
       elapsed: "Elapsed time",
       duration: "Run duration",
     },
