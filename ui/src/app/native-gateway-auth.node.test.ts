@@ -475,6 +475,50 @@ describe("native authenticated Control UI", () => {
     },
   );
 
+  async function refuseAttempts(first: RecordingSocket, attempts: number) {
+    let socket = first;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      await expectRejected(socket);
+      if (attempt === attempts) {
+        return;
+      }
+      // The reconnect backoff tops out at 15 s.
+      await vi.advanceTimersByTimeAsync(15_000);
+      socket = currentSocket(`refused-${attempt}`, signedAt + attempt);
+    }
+  }
+
+  it("stops reconnecting after ten consecutive native refusals", async () => {
+    bridge.postMessage.mockImplementation(refuse("Native grant unavailable"));
+    await refuseAttempts(connect(), 10);
+    expect(gateway!.snapshot.phase).toBe("stopped");
+    expect(gateway!.snapshot.lastError).toBe("Native grant unavailable");
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(wsInstances).toHaveLength(10);
+    expect(bridge.postMessage).toHaveBeenCalledTimes(10);
+  });
+
+  it("recovers within the refusal budget and restarts the count after a grant", async () => {
+    bridge.postMessage.mockImplementation(refuse("Native grant unavailable"));
+    await refuseAttempts(connect(), 9);
+    expect(gateway!.snapshot.phase).toBe("connecting");
+    authorizeWith("recovered-native-grant");
+    await vi.advanceTimersByTimeAsync(15_000);
+    const recovered = currentSocket("recovered", signedAt + 10);
+    const frame = await recovered.connect.promise;
+    recovered.hello(frame.id);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(gateway!.snapshot.phase).toBe("connected");
+
+    bridge.postMessage.mockImplementation(refuse("Native grant unavailable"));
+    recovered.emitClose(1006, "");
+    await vi.advanceTimersByTimeAsync(15_000);
+    await refuseAttempts(currentSocket("after-hello", signedAt + 11), 9);
+    expect(gateway!.snapshot.phase).toBe("reconnecting");
+    await vi.advanceTimersByTimeAsync(15_000);
+    expect(wsInstances).toHaveLength(20);
+  });
+
   it("preserves the shipped iOS nonpersistent identity handoff", async () => {
     const deviceFamily = "iPhone";
     // The existing iOS host seeds its nonpersistent WKWebView, rather than

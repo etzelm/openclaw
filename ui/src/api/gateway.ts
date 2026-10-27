@@ -22,9 +22,7 @@ import type {
 import { isRecord } from "@openclaw/normalization-core/record-coerce";
 import { sleepWithAbort } from "@openclaw/retry";
 import { roleScopesAllow } from "../../../src/shared/operator-scope-compat.js";
-import { NativeGatewayAuthUnavailableError } from "../app/native-gateway-auth.ts";
 import { isRemoteControlUiIngress } from "../app/remote-ingress.ts";
-import { formatUiError } from "../lib/format-error.ts";
 import {
   clearDeviceAuthToken,
   loadDeviceAuthToken,
@@ -40,6 +38,7 @@ import {
   notifyBrowserWebSocketError,
   resolveBrowserGatewayClose,
   resolveGatewayErrorDetailCode,
+  resolveNativeAuthError,
   toGatewayErrorInfo,
   type GatewayBrowserCloseInfo,
 } from "./gateway-connect-errors.ts";
@@ -110,6 +109,7 @@ export class GatewayBrowserClient {
   private readonly remoteIngress = isRemoteControlUiIngress();
   private nativeAuthAbort: AbortController | null = null;
   private nativeAuthError: GatewayRequestError | null = null;
+  private nativeAuthRefusals = 0;
   // Close/stop advances this generation before another socket can make stale hello work look active.
   private recovery = { value: "", resolved: false, generation: 0 };
   private scopeUpgradeBinding: ScopeUpgradeBinding | null = null;
@@ -158,14 +158,8 @@ export class GatewayBrowserClient {
       buildConnectParams: (plan) => plan.params,
       onConnectPlanError: (error) => {
         if (this.opts.nativeConnectAuth) {
-          this.nativeAuthError =
-            error instanceof GatewayRequestError
-              ? error
-              : new GatewayRequestError({
-                  code: "UNAVAILABLE",
-                  message: formatUiError(error),
-                  retryable: error instanceof NativeGatewayAuthUnavailableError,
-                });
+          ({ error: this.nativeAuthError, refusals: this.nativeAuthRefusals } =
+            resolveNativeAuthError(error, this.nativeAuthRefusals));
           return {
             closeCode: CONNECT_FAILED_CLOSE_CODE,
             closeReason: "native authorization unavailable",
@@ -387,6 +381,7 @@ export class GatewayBrowserClient {
       nativeSignal: this.nativeAuthAbort.signal,
       selectAuth: (input) => this.selectConnectAuth(input),
     });
+    this.nativeAuthRefusals = 0;
     if (this.pendingDeviceTokenRetry && plan.selectedAuth.authDeviceToken) {
       this.pendingDeviceTokenRetry = false;
     }

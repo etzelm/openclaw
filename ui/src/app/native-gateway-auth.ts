@@ -32,7 +32,8 @@ export type NativeGatewayConnectAuth = (challenge: {
 type ChallengeMessage = { id: string; nonce: string; signedAt: number };
 
 // A current native grant can become available again after the app reconnects.
-// Retry through that same owner; malformed proofs and route violations stay terminal.
+// Retry through that same owner, up to the consecutive-refusal limit in
+// resolveNativeAuthError; malformed proofs and route violations stay terminal.
 export class NativeGatewayAuthUnavailableError extends Error {}
 
 type NativeAuthHost = Window & {

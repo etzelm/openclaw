@@ -10,6 +10,8 @@ import {
   type GatewayProtocolCloseContext,
 } from "@openclaw/gateway-client/browser";
 import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { NativeGatewayAuthUnavailableError } from "../app/native-gateway-auth.ts";
+import { formatUiError } from "../lib/format-error.ts";
 import { isLoopbackHostname } from "../lib/gateway-locality.ts";
 import {
   BROWSER_WEBSOCKET_SECURITY_ERROR_CODE,
@@ -51,6 +53,26 @@ export function isTrustedRetryEndpoint(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+// Transient native refusals recover within a few backoff steps; a document the app
+// keeps refusing stops instead of reconnecting every 15 s indefinitely.
+const NATIVE_AUTH_REFUSAL_LIMIT = 10;
+
+export function resolveNativeAuthError(error: unknown, priorRefusals: number) {
+  const refused = error instanceof NativeGatewayAuthUnavailableError;
+  const refusals = refused ? priorRefusals + 1 : 0;
+  if (error instanceof GatewayRequestError) {
+    return { error, refusals };
+  }
+  return {
+    refusals,
+    error: new GatewayRequestError({
+      code: "UNAVAILABLE",
+      message: formatUiError(error),
+      retryable: refused && refusals < NATIVE_AUTH_REFUSAL_LIMIT,
+    }),
+  };
 }
 
 export function resolveBrowserGatewayClose(
