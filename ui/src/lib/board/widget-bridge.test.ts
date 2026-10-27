@@ -20,6 +20,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 const envelope = { type: "openclaw:widget-bridge-request" as const, ticket: "ticket" };
@@ -51,6 +52,21 @@ it.each([
     url.startsWith("https:") ? [[url, "_blank", "noopener,noreferrer"]] : [],
   );
   expect(client.request).not.toHaveBeenCalled();
+});
+it("hands widget links to the native link owner instead of a WebKit popup", async () => {
+  const postMessage = vi.fn();
+  vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage } } });
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  await expect(handle("host.open", { url: "https://example.com/path" })).resolves.toEqual({
+    ok: true,
+  });
+  await expect(handle("host.open", { url: "javascript:alert(1)" })).rejects.toThrow(
+    "widget link url is invalid",
+  );
+  expect(postMessage.mock.calls).toEqual([
+    [{ type: "open-link", url: "https://example.com/path", target: "external" }],
+  ]);
+  expect(open).not.toHaveBeenCalled();
 });
 it("keeps confirmation when the authorization response omits its decision", async () => {
   client.request.mockResolvedValueOnce({});

@@ -1,4 +1,5 @@
 import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { postNativeExternalLink } from "../../app/native-link-routing.ts";
 import { dispatchWidgetPrompt } from "../../components/mcp-app-security.ts";
 import { openExternalUrlSafe } from "../open-external-url.ts";
 
@@ -121,17 +122,19 @@ export class BoardWidgetBridgeOwner {
     }
     switch (request.method) {
       // Opening a link the user clicked is navigation, not a granted capability,
-      // so this stays outside the tool-grant checks. Opening goes through the
-      // Control UI's openExternalUrlSafe owner, which applies noopener/noreferrer
+      // so this stays outside the tool-grant checks. Native hosts take it through
+      // their link owner, because WebKit's popup blocker does not carry the
+      // click's gesture across this MessagePort task. Browsers use the Control
+      // UI's openExternalUrlSafe owner, which applies noopener/noreferrer
       // regardless of the `rel` a widget wrote. The absolute-http(s) gate here is
-      // deliberately narrower than that shared policy: widget-supplied links must
-      // not reach `blob:`, which the general external-link path allows.
+      // deliberately narrower than both: widget-supplied links must not reach
+      // `blob:`, which the general external-link path allows.
       case "host.open": {
         const url = requiredString(params, "url");
         if (!/^https?:\/\//i.test(url)) {
           throw new Error("widget link url is invalid");
         }
-        if (!openExternalUrlSafe(url)) {
+        if (!postNativeExternalLink(url) && !openExternalUrlSafe(url)) {
           throw new Error("widget link could not be opened");
         }
         return { ok: true };
