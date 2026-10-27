@@ -6,8 +6,9 @@ name: Mac focus week proof
 # scenario in scripts/mac-proof/<item>.sh, capture the real window, upload.
 # Never contacts a real Gateway; every token is generated per job.
 #
-# Triggers: a push to mac/proof-pipeline runs every entry (workflow_dispatch
-# only works once this file is on the default branch, see DISPATCH.md).
+# Triggers: a push to mac/proof-pipeline runs every entry. After that first run
+# the workflow is registered, so `gh workflow run --ref mac/proof-pipeline`
+# can dispatch single entries without the file on the default branch.
 
 on:
   push:
