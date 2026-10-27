@@ -81,6 +81,63 @@ spoof_hits() {
   grep -c "\"path\":\"$1" "$SPOOF_HITS" || true
 }
 
+# Re-read on every poll (a "$(...)" argument to pp_wait_for is evaluated once).
+spoof_hits_ge() { [[ "$(spoof_hits "$1")" -ge "$2" ]]; }
+
+# Each AX query takes about 25 s on the hosted runner, so AX waits below count
+# attempts, not seconds: pp_wait_quiet 4 <ax check> allows roughly 100 s.
+
+# The Browser shortcut belongs to the chat pane (a document keydown listener in
+# ui/src/pages/chat/chat-pane-lifecycle.ts); Model Setup does not handle it. A
+# Gateway without a default model sends the first run to Model Setup
+# (ui/src/pages/model-setup/first-run.ts), so give it a model id to land on the
+# default chat. No agent turn runs, so the model is never called.
+pp_dashboard_up() {
+  pp_gateway_start '{"gateway":{"mode":"local"},"agents":{"defaults":{"model":"openai/gpt-5"}}}'
+  pp_app_config
+  pp_app_launch --dashboard
+  pp_ax wait-window 90 >/dev/null || pp_fail "dashboard window never appeared"
+  sleep 10
+  pp_shot "00-dashboard"
+}
+
+local_network_alert_allow() {
+  # The runner raises a Local Network alert over the window center; a leftover
+  # alert would take the HID pointer and clicks. Best effort, logged either way.
+  local proc r
+  for proc in UserNotificationCenter CoreServicesUIAgent; do
+    r="$(osascript -e "tell application \"System Events\" to tell process \"$proc\" to click button \"Allow\" of window 1" 2>&1)" &&
+      pp_note "local network alert: clicked Allow in $proc" && return 0
+    pp_note "local network alert: none in $proc ($r)"
+  done
+}
+
+pp_browser_panel_open() {
+  pp_app_activate
+  if ! pp_wait_quiet 3 pp_ax exists AXButton "Panels" web; then
+    pp_note "chat pane not shown; leaving the current page"
+    pp_click_element "*" "Back to app" web || osascript -e 'tell application "System Events" to key code 53'
+    pp_wait_quiet 3 pp_ax exists AXButton "Panels" web || {
+      pp_ax dump "$OUT/logs/ax-no-chat.json" >/dev/null || true
+      pp_fail "chat pane never appeared (see logs/ax-no-chat.json)"
+    }
+  fi
+  pp_app_activate
+  osascript -e 'tell application "System Events" to keystroke "u" using {command down, option down, shift down}'
+  if ! pp_wait_quiet 3 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web; then
+    pp_note "browser shortcut did not open the panel; using Panels > Browser"
+    pp_click_element AXButton "Panels" web || pp_fail "Panels button not found"
+    sleep 1
+    pp_click_element "*" "Browser" web || pp_fail "Browser entry not found in Panels"
+    pp_wait_quiet 4 pp_ax exists AXTextField "$PP_ADDRESS_LABEL" web || {
+      pp_ax dump "$OUT/logs/ax-browser-panel.json" >/dev/null || true
+      pp_fail "Browser panel did not open (see logs/ax-browser-panel.json)"
+    }
+  fi
+  sleep 2
+  pp_shot "01-browser-panel"
+}
+
 pointer_build() {
   # Pointer moves only (no click): Inspect follows pointermove on the overlay.
   cat >"$PP_ROOT/pointer.swift" <<'SWIFT'
@@ -110,14 +167,15 @@ pp_identity
 pp_build_helpers
 pointer_build
 pp_record_start
-pp_dashboard_up
 spoof_fixture_start
+pp_dashboard_up
+local_network_alert_allow
 pp_browser_panel_open
 
 # 1. App tab on the spoofing page, opened from the Browser panel address field.
 pp_browser_go "$SPOOF_URL"
-pp_wait_for 30 "load of /spoof" test "$(spoof_hits /spoof)" -ge 1
-pp_wait_quiet 20 pp_ax exists AXStaticText "INSPECT TARGET" web ||
+pp_wait_for 60 "load of /spoof" spoof_hits_ge /spoof 1
+pp_wait_quiet 4 pp_ax exists AXStaticText "INSPECT TARGET" web ||
   pp_fail "fixture page text not visible in the app"
 sleep 2
 ua="$(grep -m1 '"path":"/spoof' "$SPOOF_HITS" | sed -nE 's/.*"ua":"([^"]*)".*/\1/p')"
@@ -138,24 +196,24 @@ pp_click_element AXButton "Browser actions" web ||
   pp_click_element AXMenuButton "Browser actions" web ||
   pp_fail "Browser actions menu button not found"
 sleep 1
-pp_ax dump "$OUT/logs/ax-actions-menu.json" >/dev/null || true
 pp_click_element AXMenuItem "Inspect element" web ||
   pp_click_element "*" "Inspect element" web ||
-  pp_fail "Inspect element menu item not found (see logs/ax-actions-menu.json)"
+  pp_fail "Inspect element menu item not found (see logs/ax-fail.json)"
 sleep 3
 pp_note "inspect mode requested"
 
 # 3. Real pointer over the page; the overlay asks the app to inspect that point.
 pp_app_activate
+local_network_alert_allow
 "$PP_BIN/pointer" "$tx" "$ty"
 sleep 2
 "$PP_BIN/pointer" "$tx" "$ty"
-pp_wait_quiet 10 pp_ax exists AXStaticText "Focusable" web ||
-  pp_note "inspect tooltip not found by AX (see logs/ax-inspecting.json and the shot)"
-sleep 1
-pp_ax dump "$OUT/logs/ax-inspecting.json" >/dev/null || true
+sleep 3
 pp_shot "20-inspect-hover"
-sleep 2 # a page beacon is sent asynchronously
+pp_wait_quiet 2 pp_ax exists AXStaticText "Focusable" web || {
+  pp_note "inspect tooltip not found by AX (see logs/ax-inspecting.json and the shot)"
+  pp_ax dump "$OUT/logs/ax-inspecting.json" >/dev/null || true
+}
 
 real=0 spoofed=0
 pp_ax exists AXStaticText "Real page element" web >/dev/null 2>&1 && real=1
