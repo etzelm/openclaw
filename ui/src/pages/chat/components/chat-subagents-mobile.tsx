@@ -21,8 +21,6 @@ export type ChatSubagentMobileItem = {
   elapsed?: JSX.Element;
   /** Omitted when the native owner does not offer Stop for this run. */
   stop?: ChatSubagentMobileStop;
-  /** A failure the viewer opened or dismissed; it keeps its label without the alert color. */
-  acknowledged?: boolean;
   /** Offered for unacknowledged failures the viewer may mark read. */
   dismiss?: { label: string; onDismiss: () => Promise<void> };
 };
@@ -89,7 +87,6 @@ function MobileRow(props: {
         <span
           class="chat-subagents-mobile__indicator"
           data-status={props.item.status}
-          data-acknowledged={props.item.acknowledged ? "" : undefined}
           role="img"
           aria-label={props.item.statusLabel}
         >
@@ -137,7 +134,7 @@ function MobileRow(props: {
                 })
             }
           >
-            <Icon name="x" />
+            <Icon name="check" />
           </button>
         )}
       </Show>

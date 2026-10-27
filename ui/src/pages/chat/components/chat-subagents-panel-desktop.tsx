@@ -17,7 +17,6 @@ import { registerChatSessionEnglish } from "../../../i18n/locales/en-chat-sessio
 import { elementRef } from "../../../lib/reactive/element-ref.ts";
 import { registerEnglishCatalog, t } from "../../../lib/reactive/i18n.ts";
 import { createPendingFocus } from "../../../lib/reactive/pending-focus.ts";
-import { isUnacknowledgedSessionFailure } from "../../../lib/session-attention.ts";
 import { resolveSessionDisplayName } from "../../../lib/session-display.ts";
 import { isSessionRunStateActive } from "../../../lib/session-run-state.ts";
 import { endedWithoutFinishing, isUnfinishedSubagent } from "../chat-spawned-subagent.ts";
@@ -71,17 +70,11 @@ function groupFor(row: SubagentsPanelRow): Group {
   if (row.session.status === "queued") {
     return "waiting";
   }
-  if (isSessionRunStateActive(row.session)) {
-    return "active";
-  }
-  if (isUnfinishedSubagent(row.session)) {
-    return "waiting";
-  }
-  const ended = endedWithoutFinishing(row.session);
-  // A failure the viewer opened or dismissed is settled history, not an alert.
-  return ended === "failed" && !isUnacknowledgedSessionFailure(row.session)
-    ? "done"
-    : (ended ?? "done");
+  return isSessionRunStateActive(row.session)
+    ? "active"
+    : isUnfinishedSubagent(row.session)
+      ? "waiting"
+      : (endedWithoutFinishing(row.session) ?? "done");
 }
 
 function DesktopRow(props: {
@@ -195,11 +188,11 @@ function DesktopRow(props: {
           class="subagents-desktop__dismiss"
           ref={[elementRef(props.registerDismiss.bind(undefined, props.row.session.key))]}
           type="button"
-          aria-label={t("chat.subagentsPanel.dismissFailure", { name: name() })}
-          title={t("chat.subagentsPanel.dismissFailure", { name: name() })}
+          aria-label={t("chat.subagentsPanel.markFailureRead", { name: name() })}
+          title={t("chat.subagentsPanel.markFailureRead", { name: name() })}
           onClick={() => props.onDismiss([props.row])}
         >
-          <Icon name="x" />
+          <Icon name="check" />
         </button>
       </Show>
     </div>
@@ -270,20 +263,21 @@ export function ChatSubagentsPanelDesktop(props: ChatSubagentsPanelDesktopProps)
   const visible = (group: Group) => props.rows.filter((row) => groupFor(row) === group);
   const shownGroups = createMemo(() => groups.filter((group) => visible(group).length > 0));
   const dismissable = createMemo(() => visible("failed").filter(props.canDismissFailure));
-  // Focus follows the failure list once the Gateway reports the read and the rows leave it.
+  // Rows stay in Failed; focus moves on once the Gateway reports the read and the control goes.
   const [dismissal, setDismissal] = createSignal<{ keys: string[]; next?: string }>();
+  const pendingKeys = (keys: readonly string[]) =>
+    dismissable().some((row) => keys.includes(row.session.key));
   createPendingFocus(
-    () => ({
-      request: dismissal(),
-      active: props.active,
-      failed: visible("failed").map((row) => row.session.key),
-    }),
+    () => {
+      const request = dismissal();
+      return { request, active: props.active, pending: pendingKeys(request?.keys ?? []) };
+    },
     {
       requested: (next) => Boolean(next.request),
-      ready: (next) => next.active && !next.failed.some((key) => next.request?.keys.includes(key)),
+      ready: (next) => next.active && !next.pending,
       focus: ({ request }) => {
-        const next = request?.next;
-        const target = next ? (dismissButtons.get(next) ?? openButtons.get(next)) : undefined;
+        const next = request?.next ? dismissButtons.get(request.next) : undefined;
+        const target = next ?? openButtons.get(request?.keys[0] ?? "");
         (target?.isConnected ? target : content).focus({ preventScroll: true });
         setDismissal(undefined);
       },
@@ -291,17 +285,13 @@ export function ChatSubagentsPanelDesktop(props: ChatSubagentsPanelDesktopProps)
   );
   const dismiss = (rows: readonly SubagentsPanelRow[]) => {
     const keys = rows.map((row) => row.session.key);
-    const failed = visible("failed");
-    const index = failed.findIndex((row) => keys.includes(row.session.key));
-    const remaining = failed.filter((row) => !keys.includes(row.session.key));
+    const index = dismissable().findIndex((row) => keys.includes(row.session.key));
+    const remaining = dismissable().filter((row) => !keys.includes(row.session.key));
     const request = { keys, next: remaining[Math.min(index, remaining.length - 1)]?.session.key };
     setDismissal(request);
     void props.onDismissFailures(rows).finally(() => {
-      // A rejected write keeps its rows; drop the focus request instead of stealing focus later.
-      if (
-        dismissal() === request &&
-        visible("failed").some((row) => keys.includes(row.session.key))
-      ) {
+      // A rejected write keeps its controls; drop the focus request instead of stealing focus later.
+      if (dismissal() === request && pendingKeys(keys)) {
         setDismissal(undefined);
       }
     });
@@ -372,7 +362,7 @@ export function ChatSubagentsPanelDesktop(props: ChatSubagentsPanelDesktopProps)
                           type="button"
                           onClick={() => dismiss(dismissable())}
                         >
-                          {t("chat.subagentsPanel.dismissAllFailures")}
+                          {t("chat.subagentsPanel.markAllFailuresRead")}
                         </button>
                       </Show>
                     </h3>

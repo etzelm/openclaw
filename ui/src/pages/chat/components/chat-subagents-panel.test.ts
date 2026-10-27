@@ -408,7 +408,7 @@ function mountFailures(initial: GatewaySessionRow[], mobile: boolean) {
   return { ...f, patched, keys: () => patched.map((values) => values.key) };
 }
 
-it("dismisses desktop failures one at a time and all at once, moving them to Done", async () => {
+it("marks desktop failures read one at a time and all at once, keeping them in Failed", async () => {
   const f = mountFailures(
     [
       ...["a", "b", "c"].map((id) => failed(id)),
@@ -417,22 +417,22 @@ it("dismisses desktop failures one at a time and all at once, moving them to Don
     ],
     false,
   );
-  const group = (key: string) =>
-    f.panel
-      .querySelector(`[data-session-key="agent:worker:subagent:${key}"]`)
-      ?.getAttribute("data-group");
   const failedRows = () => f.panel.querySelectorAll('.subagents-desktop__row[data-group="failed"]');
-  const dismiss = () => f.panel.querySelectorAll<HTMLButtonElement>(".subagents-desktop__dismiss");
-  await waitForSolid(() => expect(dismiss()).toHaveLength(3));
-  expect(failedRows()).toHaveLength(4);
-  expect(group("seen")).toBe("done");
-  expect(dismiss()[0]!.getAttribute("aria-label")).toBe("Dismiss failure: Worker a");
-  const dismissAll = () => f.find(".subagents-desktop__dismiss-all");
-  expect(dismissAll()?.textContent).toBe("Dismiss all");
+  const mark = () => f.panel.querySelectorAll<HTMLButtonElement>(".subagents-desktop__dismiss");
+  const open = (key: string) =>
+    f.panel.querySelector(
+      `[data-session-key="agent:worker:subagent:${key}"] .subagents-desktop__open`,
+    );
+  await waitForSolid(() => expect(mark()).toHaveLength(3));
+  // Grouping stays by run outcome: an already-read failure is still listed as Failed.
+  expect(failedRows()).toHaveLength(5);
+  expect(mark()[0]!.getAttribute("aria-label")).toBe("Mark Worker a as read");
+  const markAll = () => f.find(".subagents-desktop__dismiss-all");
+  expect(markAll()?.textContent).toBe("Mark all as read");
 
-  dismiss()[0]!.focus();
-  dismiss()[0]!.click();
-  await waitForSolid(() => expect(failedRows()).toHaveLength(3));
+  mark()[0]!.focus();
+  mark()[0]!.click();
+  await waitForSolid(() => expect(mark()).toHaveLength(2));
   expect(f.patched).toEqual([
     {
       key: "agent:worker:subagent:a",
@@ -442,43 +442,37 @@ it("dismisses desktop failures one at a time and all at once, moving them to Don
       expectedMarkedUnreadAt: null,
     },
   ]);
-  expect(group("a")).toBe("done");
+  expect(failedRows()).toHaveLength(5);
   await waitForSolid(() =>
-    expect(document.activeElement?.getAttribute("aria-label")).toBe("Dismiss failure: Worker b"),
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("Mark Worker b as read"),
   );
 
-  dismissAll()!.click();
-  await waitForSolid(() => expect(failedRows()).toHaveLength(1));
-  // The viewer-only failure stays an alert without a dismiss control and takes focus.
+  markAll()!.click();
+  await waitForSolid(() => expect(mark()).toHaveLength(0));
+  // The viewer-only failure never offers the control.
   expect(f.keys()).toEqual([
     "agent:worker:subagent:a",
     "agent:worker:subagent:b",
     "agent:worker:subagent:c",
   ]);
-  expect(group("shared")).toBe("failed");
-  expect(dismissAll()).toBeNull();
-  await waitForSolid(() =>
-    expect(document.activeElement).toBe(
-      f.panel.querySelector(
-        '[data-session-key="agent:worker:subagent:shared"] .subagents-desktop__open',
-      ),
-    ),
-  );
+  expect(failedRows()).toHaveLength(5);
+  expect(markAll()).toBeNull();
+  await waitForSolid(() => expect(document.activeElement).toBe(open("b")));
 });
 
-it("dismisses a mobile failure in place and keeps focus on its row", async () => {
+it("marks a mobile failure read in place and keeps focus on its row", async () => {
   const f = mountFailures([failed("a"), failed("b")], true);
-  const dismiss = () =>
-    f.panel.querySelectorAll<HTMLButtonElement>(".chat-subagents-mobile__dismiss");
-  await waitForSolid(() => expect(dismiss()).toHaveLength(2));
-  expect(f.find(".chat-subagents-mobile__dismiss-all")?.textContent).toBe("Dismiss all");
+  const mark = () => f.panel.querySelectorAll<HTMLButtonElement>(".chat-subagents-mobile__dismiss");
+  await waitForSolid(() => expect(mark()).toHaveLength(2));
+  expect(f.find(".chat-subagents-mobile__dismiss-all")?.textContent).toBe("Mark all as read");
   const row = f.panel.querySelector('[data-session-key="agent:worker:subagent:a"]')!;
-  dismiss()[0]!.click();
-  await waitForSolid(() => expect(dismiss()).toHaveLength(1));
+  mark()[0]!.click();
+  await waitForSolid(() => expect(mark()).toHaveLength(1));
   expect(f.keys()).toEqual(["agent:worker:subagent:a"]);
-  expect(
-    row.querySelector(".chat-subagents-mobile__indicator")?.hasAttribute("data-acknowledged"),
-  ).toBe(true);
+  // The row keeps its Failed outcome indicator.
+  expect(row.querySelector(".chat-subagents-mobile__indicator")?.getAttribute("data-status")).toBe(
+    "failed",
+  );
   await waitForSolid(() =>
     expect(document.activeElement).toBe(row.querySelector(".chat-subagents-mobile__open")),
   );

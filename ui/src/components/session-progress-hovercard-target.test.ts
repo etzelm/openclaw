@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SESSION_PULL_REQUESTS_SUBSCRIBE_METHOD } from "../../../src/gateway/control-ui-contract.js";
 import { GatewayRequestError } from "../api/gateway-connect-errors.ts";
+import type { ApplicationContext } from "../app/context.ts";
 import { sessionProgressCardsForGateway } from "../lib/session-progress-cards.ts";
 import { flush, waitForSolid } from "../test-helpers/solid-settle.ts";
 import { sessionProgressHoverTargetFromEvent } from "./session-progress-hovercard-target.ts";
@@ -200,6 +201,42 @@ describe("session progress hovercard ownership", () => {
       expect(portalText()).toContain(`${agentId} progress`);
     },
   );
+
+  it("dismisses a folded child failure with that child's unread marker and owner role", async () => {
+    const patch = vi.fn<ApplicationContext["sessions"]["patch"]>(async () => null);
+    const childKey = "agent:research:subagent:child";
+    const harness = createHovercard({
+      sessionKey: "agent:research:main",
+      // Session-scoped writers may patch only sessions they own.
+      scopes: ["operator.read", "operator.sessions.write"],
+      sessionsPatch: patch,
+      rowDetails: {
+        attention: {
+          kind: "error",
+          reason: "Synthetic child failure",
+          sourceSessionKey: childKey,
+          sourceSessionId: "child-session",
+          sourceMarkedUnreadAt: 100,
+          sourceSharingRole: "owner",
+          childLabel: "Child review",
+        },
+      },
+    });
+    document.body.append(harness.provider);
+    flush();
+    await harness.focus();
+    const dismiss = () =>
+      getPortal()?.querySelector<HTMLButtonElement>(".session-hovercard__dismiss") ?? null;
+    await waitForSolid(() => expect(dismiss()).not.toBeNull());
+    dismiss()!.click();
+    await waitForSolid(() =>
+      expect(patch).toHaveBeenCalledWith(
+        childKey,
+        { unread: false },
+        { agentId: "research", expectedMarkedUnreadAt: 100, expectedSessionId: "child-session" },
+      ),
+    );
+  });
 
   it("retires a removed provider while its progress request is pending", async () => {
     const harness = mountHovercard("global", true);

@@ -81,7 +81,6 @@ const sessionLinkTitlers = new WeakMap<HTMLElement, SessionLinkTitler>();
 /** The error may be a child's failure folded into this row; dismiss acknowledges that child. */
 function failureDismissal(
   context: ApplicationContext | null,
-  sessionKey: string,
   row: SidebarSessionHovercardRow | undefined,
   fallbackAgentId: string | undefined,
 ) {
@@ -92,7 +91,8 @@ function failureDismissal(
   const target = {
     key: attention.sourceSessionKey,
     sessionId: attention.sourceSessionId,
-    sharingRole: attention.sourceSessionKey === sessionKey ? row?.sharingRole : undefined,
+    markedUnreadAt: attention.sourceMarkedUnreadAt,
+    sharingRole: attention.sourceSharingRole,
   };
   return canDismissSessionFailure(context, target, fallbackAgentId)
     ? () => void dismissSessionFailures(context, [target], fallbackAgentId)
@@ -384,7 +384,7 @@ function createSessionProgressHovercard(
         : undefined,
       pullRequests,
       progressCard: lastProgressCard,
-      dismissFailure: failureDismissal(currentContext, sessionKey, sidebarRow, session.agentId),
+      dismissFailure: failureDismissal(currentContext, sidebarRow, session.agentId),
     };
     const commit = (card: HTMLDivElement) => {
       if (hovercard.card !== card) {

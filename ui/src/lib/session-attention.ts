@@ -17,6 +17,9 @@ export type SessionRowAttention =
       sourceSessionKey: string;
       /** Fences a dismissal to the failed session, not a replacement under the same key. */
       sourceSessionId?: string;
+      /** The failed session's own unread marker and role, which its read acknowledgement needs. */
+      sourceMarkedUnreadAt?: number;
+      sourceSharingRole?: GatewaySessionRow["sharingRole"];
       childLabel?: string;
     };
 
@@ -66,5 +69,7 @@ export function sessionRowAttention(
       ),
     sourceSessionKey: row.key,
     ...(row.sessionId ? { sourceSessionId: row.sessionId } : {}),
+    ...(row.markedUnreadAt != null ? { sourceMarkedUnreadAt: row.markedUnreadAt } : {}),
+    ...(row.sharingRole ? { sourceSharingRole: row.sharingRole } : {}),
   };
 }

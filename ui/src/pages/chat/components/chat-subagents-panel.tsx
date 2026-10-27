@@ -272,7 +272,7 @@ export const ChatSubagentsPanel = defineSolidBridge<Props>(
               ? "waiting"
               : (endedWithoutFinishing(row.session) ?? "finished");
       const title = resolveSessionDisplayName(row.session.key, row.session);
-      const dismissLabel = t("chat.subagentsPanel.dismissFailure", { name: title });
+      const dismissLabel = t("chat.subagentsPanel.markFailureRead", { name: title });
       const statusLabel =
         status === "queued"
           ? t("common.queued")
@@ -290,8 +290,6 @@ export const ChatSubagentsPanel = defineSolidBridge<Props>(
         title,
         status,
         statusLabel,
-        // An opened or dismissed failure keeps its label without the alert.
-        acknowledged: status === "failed" && !isUnacknowledgedSessionFailure(row.session),
         dismiss: canDismissFailure(row)
           ? { label: dismissLabel, onDismiss: () => dismissFailures([row]) }
           : undefined,
@@ -350,7 +348,7 @@ export const ChatSubagentsPanel = defineSolidBridge<Props>(
                 dismissAll={
                   mobileDismissable().length > 1
                     ? {
-                        label: t("chat.subagentsPanel.dismissAllFailures"),
+                        label: t("chat.subagentsPanel.markAllFailuresRead"),
                         onDismiss: () => dismissFailures(mobileDismissable()),
                       }
                     : undefined

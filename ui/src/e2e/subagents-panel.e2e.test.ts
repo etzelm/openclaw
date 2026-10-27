@@ -296,7 +296,7 @@ suite.define(() => {
     );
   });
 
-  it("dismisses failed subagents one at a time and all at once on desktop and mobile", async () => {
+  it("marks failed subagents read one at a time and all at once on desktop and mobile", async () => {
     await suite.withPage(
       { viewport: { width: 1440, height: 1000 }, colorScheme: "dark", locale: "en-US" },
       async ({ page }) => {
@@ -350,39 +350,42 @@ suite.define(() => {
         const mobileDismiss = panel.locator(".chat-subagents-mobile__dismiss");
         await expect.poll(() => mobileDismiss.count()).toBe(4);
         await panel
-          .getByRole("button", { name: `Dismiss failure: ${failures[3]!.label}`, exact: true })
+          .getByRole("button", { name: `Mark ${failures[3]!.label} as read`, exact: true })
           .click();
         await expect.poll(() => mobileDismiss.count()).toBe(3);
         expect(
           await panel
             .locator(`[data-session-key="${failures[3]!.key}"] .chat-subagents-mobile__indicator`)
-            .getAttribute("data-acknowledged"),
-        ).toBe("");
+            .getAttribute("data-status"),
+        ).toBe("failed");
         await capture("failed-mobile-after-one");
 
         await page.setViewportSize({ width: 1440, height: 1000 });
         await page.locator(".shell:not(.shell--mobile-nav)").waitFor();
         await openChatSidePanelType(page, "Subagents");
-        await expect.poll(() => failedRows.count()).toBe(3);
+        const desktopMark = panel.locator(".subagents-desktop__dismiss");
+        await expect.poll(() => desktopMark.count()).toBe(3);
         const first = panel.getByRole("button", {
-          name: `Dismiss failure: ${failures[0]!.label}`,
+          name: `Mark ${failures[0]!.label} as read`,
           exact: true,
         });
         await first.focus();
         await first.press("Enter");
-        await expect.poll(() => failedRows.count()).toBe(2);
+        await expect.poll(() => desktopMark.count()).toBe(2);
         expect(
           await panel
             .locator(`[data-session-key="${failures[0]!.key}"]`)
             .getAttribute("data-group"),
-        ).toBe("done");
+        ).toBe("failed");
         await expect
           .poll(() => page.evaluate(() => document.activeElement?.getAttribute("aria-label")))
-          .toBe(`Dismiss failure: ${failures[1]!.label}`);
+          .toBe(`Mark ${failures[1]!.label} as read`);
         await capture("failed-desktop-after-one");
 
-        await panel.getByRole("button", { name: "Dismiss all", exact: true }).click();
-        await expect.poll(() => failedRows.count()).toBe(0);
+        await panel.getByRole("button", { name: "Mark all as read", exact: true }).click();
+        await expect.poll(() => desktopMark.count()).toBe(0);
+        // Grouping stays by run outcome; only the alert is acknowledged.
+        expect(await failedRows.count()).toBe(4);
         const patched = (await gateway.getRequests("sessions.patch")).map(
           (request) => request.params,
         );
