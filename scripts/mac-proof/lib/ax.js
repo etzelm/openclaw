@@ -137,6 +137,21 @@ function run(argv) {
       safe(() => { hit[0].attributes.byName("AXValue").value = value; });
       return String(attr(hit[0], "AXValue") || "");
     }
+    case "focus-tab": {
+      // Press Tab until the element reports AXFocused; returns the Tab count or
+      // "not-focused". Keystrokes reach the app on the hosted runner, while HID
+      // clicks and AXFocused/AXPress do not move DOM focus into web fields.
+      const hit = find(rest[0], rest[1], rest[2], false);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      const limit = Number(rest[3] || 40);
+      const seApp = Application("System Events");
+      for (let i = 0; i < limit; i++) {
+        if (attr(hit[0], "AXFocused") === true) return String(i);
+        seApp.keyCode(48);
+        delay(0.2);
+      }
+      return attr(hit[0], "AXFocused") === true ? String(limit) : "not-focused";
+    }
     case "exists": {
       if (!find(rest[0], rest[1], rest[2], false)) throw new Error("absent");
       return "present";

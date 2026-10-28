@@ -56,38 +56,29 @@ pp_browser_panel_open() {
 hits_ge() { [[ "$(pp_fixture_hits "$1")" -ge "$2" ]]; }
 hits_gt() { [[ "$(pp_fixture_hits "$1")" -gt "$2" ]]; }
 
-# HID clicks (raw or screen coordinates) and AXFocused do not move DOM focus into
-# the web address field on the hosted runner (runs 40561143504, 40609921512,
-# 40614875172). The side panel's own New tab button creates a side panel tab, not
-# a browser tab (run 40618185563), so it is not a focus path. Set the field's
-# AXValue (WebKit maps it to the DOM value and fires input), verify it, then
-# press the toolbar Go button; fall back to AXPress focus + typing.
+# HID clicks (raw or screen coordinates), AXFocused, AXPress, and AXValue do not
+# move DOM focus into the web address field on the hosted runner (runs
+# 40561143504, 40609921512, 40614875172, 40618185563, 40623127757). Keystrokes do
+# reach the app, so Tab from the focused chat composer into the side panel's
+# address field, then type and verify AXValue before Return.
 pp_browser_go() {
-  # pp_browser_go <url>: set the address field, verify, then Go.
-  local value
+  # pp_browser_go <url>: Tab to the address field, type, verify, Return.
+  local value focused
   pp_app_activate
-  value="$(pp_ax set-value AXTextField "$PP_ADDRESS_LABEL" web "$1")" || value=""
-  if ! pp_ax exists AXButton "Go" web >/dev/null 2>&1; then
-    # AXValue set the DOM value but not the draft state; focus and type instead.
+  focused="$(pp_ax focus-tab AXTextField "$PP_ADDRESS_LABEL" web 40)" || focused=""
+  if [[ "$focused" == "not-focused" ]]; then
     pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
     sleep 1
-    osascript -e 'tell application "System Events" to keystroke "a" using command down'
-    osascript -e "tell application \"System Events\" to keystroke \"$1\""
-    value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
   fi
+  osascript -e 'tell application "System Events" to keystroke "a" using command down'
+  osascript -e "tell application \"System Events\" to keystroke \"$1\""
+  value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
   if [[ "$value" != *"$1"* ]]; then
     pp_ax dump "$OUT/logs/ax-address-typed.json" >/dev/null || true
-    pp_fail "typed URL not in the address field (value '$value'; see logs/ax-address-typed.json)"
+    pp_fail "typed URL not in the address field (value '$value'; focus '$focused'; see logs/ax-address-typed.json)"
   fi
-  # The toolbar action becomes Go when the draft differs from the active URL;
-  # its presence proves the draft state took the value, not just the DOM value.
-  if pp_ax exists AXButton "Go" web >/dev/null 2>&1; then
-    pp_ax press AXButton "Go" web >/dev/null || pp_fail "Go button could not be pressed"
-    pp_note "navigate $1 (Go)"
-  else
-    pp_ax dump "$OUT/logs/ax-address-no-go.json" >/dev/null || true
-    pp_fail "address draft did not reach the Go state (see logs/ax-address-no-go.json)"
-  fi
+  osascript -e 'tell application "System Events" to key code 36'
+  pp_note "navigate $1 (focus after $focused tabs)"
 }
 
 LATE_A=$((PP_FIXTURE_PORT + 1)) # nothing listens until recovery
