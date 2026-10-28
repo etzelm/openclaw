@@ -56,28 +56,50 @@ pp_browser_panel_open() {
 hits_ge() { [[ "$(pp_fixture_hits "$1")" -ge "$2" ]]; }
 hits_gt() { [[ "$(pp_fixture_hits "$1")" -gt "$2" ]]; }
 
-# HID clicks and AXFocused do not move DOM focus into the web address field on
-# the hosted runner (runs 40561143504, 40609921512: the typed URL went to the
-# chat composer or nowhere). The UI's own New tab action calls
-# addressInput.focus() after creating a native blank tab
-# (ui/src/components/browser/browser-panel-native-owner.ts beginNewTab), so use
-# it to focus the field, then type and verify AXValue before Return.
-pp_browser_focus() {
-  pp_app_activate
-  pp_ax press AXButton "New tab" web >/dev/null || pp_fail "New tab button not found"
-  sleep 1
-}
-
+# HID clicks (raw or screen coordinates) and AXFocused do not move DOM focus into
+# the web address field on the hosted runner (runs 40561143504, 40609921512,
+# 40614875172). The side panel's own New tab button creates a side panel tab, not
+# a browser tab (run 40618185563), so it is not a focus path. Try AXPress on the
+# field (WebKit may focus a focusable element), then AXFocused, and verify the
+# typed AXValue before Return.
 pp_browser_go() {
-  # pp_browser_go <url>: type into the already focused address field, verify the
-  # typed value, then Return. Falls back to AXPress on the field once.
+  # pp_browser_go <url>: focus the address field, type, verify, Return.
   local value
   pp_app_activate
+  pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
+  sleep 1
   osascript -e 'tell application "System Events" to keystroke "a" using command down'
   osascript -e "tell application \"System Events\" to keystroke \"$1\""
   value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
   if [[ "$value" != *"$1"* ]]; then
-    pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
+    # Fallback: set AXFocused on the field, then type again.
+    osascript -l JavaScript - "$PP_BUNDLE_ID" "$PP_ADDRESS_LABEL" <<'JXA' >/dev/null 2>&1 || true
+function run(argv) {
+  const [bundleId, text] = argv;
+  const procs = Application("System Events").processes.whose({ bundleIdentifier: bundleId });
+  if (procs.length === 0) return;
+  const proc = procs[0];
+  const safe = (fn) => { try { return fn(); } catch (_) { return null; } };
+  const attr = (el, n) => safe(() => el.attributes.byName(n).value());
+  const needle = (text || "").toLowerCase();
+  const matches = (el) =>
+    ["AXTitle", "AXDescription", "AXValue", "AXHelp"].map((n) => attr(el, n)).concat([safe(() => el.name())])
+      .some((v) => typeof v === "string" && v.toLowerCase().includes(needle));
+  function* walk(el, depth) {
+    if (depth > 40) return;
+    yield el;
+    for (const kid of safe(() => el.uiElements()) || []) yield* walk(kid, depth + 1);
+  }
+  for (const win of proc.windows()) {
+    for (const el of walk(win, 0)) {
+      if (attr(el, "AXRole") === "AXTextField" && matches(el)) {
+        safe(() => { el.attributes.byName("AXFocused").value = true; });
+        return;
+      }
+    }
+  }
+}
+JXA
     sleep 1
     osascript -e 'tell application "System Events" to keystroke "a" using command down'
     osascript -e "tell application \"System Events\" to keystroke \"$1\""
@@ -99,7 +121,6 @@ pp_build_helpers
 pp_record_start
 pp_dashboard_up
 pp_browser_panel_open
-pp_browser_focus
 
 # 1. New tab, first load fails (connection refused on a loopback port).
 pp_browser_go "http://127.0.0.1:$LATE_A/first-load"
@@ -127,7 +148,6 @@ sleep 3
 pp_shot "11-new-tab-recovered-native-reload"
 
 # 3. Loaded page, then a failing navigation keeps the attempted address.
-pp_browser_focus
 pp_browser_go "http://127.0.0.1:$PP_FIXTURE_PORT/page/a"
 pp_wait_for 20 "load of /page/a" hits_ge /page/a 1
 sleep 2
