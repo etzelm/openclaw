@@ -2,7 +2,10 @@
 // Usage: osascript -l JavaScript ax.js <bundle-id> <verb> [args...]
 //   wait-window <seconds>          exit 0 once the app has a window
 //   frame <role> <text>            JSON frame/center of the first match
+//   screen-frame <role> <text>     JSON frame/center in screen coordinates
 //   press <role> <text>            AXPress the first match
+//   press-lowest <role> <text>     AXPress the match lowest on screen
+//   value <role> <text>            AXValue of the first match
 //   exists <role> <text>           exit 0 if a match exists
 //   menu <item-title>              click the first menu bar item with that title
 //   dump <path>                    write the front window's AX tree as JSON
@@ -10,6 +13,11 @@
 // <text> matches name, description, title, value or help (substring, case-insensitive).
 // Optional last arg <scope>: "native" skips elements inside an AXWebArea (AppKit
 // controls), "web" keeps only elements inside one (Control UI or page content).
+//
+// WebKit reports AXPosition for elements inside an AXWebArea relative to that
+// web area, not the screen. screen-frame adds the nearest AXWebArea origin, so a
+// HID click lands on the element instead of above it by the window's content
+// offset (the defect in run 40561143504).
 
 function run(argv) {
   const [bundleId, verb, ...rest] = argv;
@@ -38,26 +46,49 @@ function run(argv) {
     }
   };
 
-  function* walk(el, depth, inWeb) {
+  function* walk(el, depth, inWeb, webOrigin) {
     if (depth > 40) return;
-    const web = inWeb || attr(el, "AXRole") === "AXWebArea";
-    yield [el, inWeb];
+    const role = attr(el, "AXRole");
+    const isWeb = role === "AXWebArea";
+    const origin = isWeb ? (attr(el, "AXPosition") || [0, 0]) : webOrigin;
+    yield [el, inWeb, origin];
     const kids = safe(() => el.uiElements()) || [];
-    for (const kid of kids) yield* walk(kid, depth + 1, web);
+    for (const kid of kids) yield* walk(kid, depth + 1, inWeb || isWeb, origin);
   }
 
-  function find(role, text, scope) {
+  function matches(el, role, needle) {
+    if (role !== "*" && attr(el, "AXRole") !== role) return false;
+    if (!needle) return true;
+    return texts(el).some((t) => t.toLowerCase().includes(needle));
+  }
+
+  function find(role, text, scope, lowest) {
     const needle = (text || "").toLowerCase();
+    let hit = null;
+    let hitY = -Infinity;
     for (const win of proc.windows()) {
-      for (const [el, inWeb] of walk(win, 0, false)) {
+      for (const [el, inWeb, origin] of walk(win, 0, false, [0, 0])) {
         if (scope === "native" && inWeb) continue;
         if (scope === "web" && !inWeb) continue;
-        const r = attr(el, "AXRole");
-        if (role !== "*" && r !== role) continue;
-        if (!needle || texts(el).some((t) => t.toLowerCase().includes(needle))) return el;
+        if (!matches(el, role, needle)) continue;
+        if (!lowest) return [el, inWeb, origin];
+        const pos = attr(el, "AXPosition") || [0, 0];
+        const y = (inWeb ? origin[1] : 0) + pos[1];
+        if (y > hitY) {
+          hitY = y;
+          hit = [el, inWeb, origin];
+        }
       }
     }
-    return null;
+    return hit;
+  }
+
+  function screenFrame(el, inWeb, origin) {
+    const [x, y] = attr(el, "AXPosition") || [0, 0];
+    const [w, h] = attr(el, "AXSize") || [0, 0];
+    const sx = (inWeb ? origin[0] : 0) + x;
+    const sy = (inWeb ? origin[1] : 0) + y;
+    return { x: sx, y: sy, w, h, cx: sx + w / 2, cy: sy + h / 2 };
   }
 
   switch (verb) {
@@ -70,20 +101,37 @@ function run(argv) {
       throw new Error("no window");
     }
     case "frame": {
-      const el = find(rest[0], rest[1], rest[2]);
-      if (!el) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
-      const [x, y] = attr(el, "AXPosition");
-      const [w, h] = attr(el, "AXSize");
+      const hit = find(rest[0], rest[1], rest[2], false);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      const [x, y] = attr(hit[0], "AXPosition");
+      const [w, h] = attr(hit[0], "AXSize");
       return JSON.stringify({ x, y, w, h, cx: x + w / 2, cy: y + h / 2 });
     }
+    case "screen-frame": {
+      const hit = find(rest[0], rest[1], rest[2], false);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      return JSON.stringify(screenFrame(hit[0], hit[1], hit[2]));
+    }
     case "press": {
-      const el = find(rest[0], rest[1], rest[2]);
-      if (!el) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
-      el.actions.byName("AXPress").perform();
+      const hit = find(rest[0], rest[1], rest[2], false);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      hit[0].actions.byName("AXPress").perform();
       return "pressed";
     }
+    case "press-lowest": {
+      const hit = find(rest[0], rest[1], rest[2], true);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      const frame = screenFrame(hit[0], hit[1], hit[2]);
+      hit[0].actions.byName("AXPress").perform();
+      return JSON.stringify(frame);
+    }
+    case "value": {
+      const hit = find(rest[0], rest[1], rest[2], false);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      return String(attr(hit[0], "AXValue") || "");
+    }
     case "exists": {
-      if (!find(rest[0], rest[1], rest[2])) throw new Error("absent");
+      if (!find(rest[0], rest[1], rest[2], false)) throw new Error("absent");
       return "present";
     }
     case "menu": {
@@ -105,7 +153,7 @@ function run(argv) {
     case "dump": {
       const out = [];
       for (const win of proc.windows()) {
-        for (const [el, inWeb] of walk(win, 0, false)) {
+        for (const [el, inWeb] of walk(win, 0, false, [0, 0])) {
           out.push({ role: attr(el, "AXRole"), web: inWeb, texts: texts(el), pos: attr(el, "AXPosition") });
           if (out.length > 4000) break;
         }

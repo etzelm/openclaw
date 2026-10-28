@@ -265,9 +265,11 @@ pp_ax() {
 }
 
 pp_click_element() {
-  # pp_click_element <role> <text> [native|web]: HID-level click at the element's center.
+  # pp_click_element <role> <text> [native|web]: HID-level click at the element's
+  # center in screen coordinates (WebKit reports web elements relative to their
+  # AXWebArea; screen-frame adds that origin).
   local frame x y
-  frame="$(pp_ax frame "$1" "$2" "${3:-}")" || return 1
+  frame="$(pp_ax screen-frame "$1" "$2" "${3:-}")" || return 1
   x="$(printf '%s' "$frame" | sed -nE 's/.*"cx":([0-9.]+).*/\1/p')"
   y="$(printf '%s' "$frame" | sed -nE 's/.*"cy":([0-9.]+).*/\1/p')"
   [[ -n "$x" && -n "$y" ]] || return 1
