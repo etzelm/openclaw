@@ -2,11 +2,14 @@
 // a JSONL file (time, path, user agent) so a scenario can count page loads and
 // show which browser opened a link.
 // Usage: node fixture-server.mjs <port> <hits.jsonl>
+// FIXTURE_NEXT_URL adds a "continue" link to that address on every page, so a
+// scenario can navigate a loaded tab away without typing into the address field.
 import { appendFileSync } from "node:fs";
 import { createServer } from "node:http";
 
 const port = Number(process.argv[2]);
 const hitsPath = process.argv[3];
+const nextUrl = process.env.FIXTURE_NEXT_URL ?? "";
 
 const page = (title, body = "") =>
   `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title></head>` +
@@ -32,7 +35,8 @@ createServer((req, res) => {
     // address the review names.
     res.writeHead(302, { location: "https://example.com/widget" }).end();
   } else {
-    const links = '<p><a href="/page/b">to page b</a></p>';
+    const next = nextUrl ? `<p><a href="${nextUrl}">continue to the next address</a></p>` : "";
+    const links = `<p><a href="/page/b">to page b</a></p>${next}`;
     res
       .writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" })
       .end(page(`fixture ${url.pathname}`, links));

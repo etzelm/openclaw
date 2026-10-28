@@ -56,29 +56,32 @@ pp_browser_panel_open() {
 hits_ge() { [[ "$(pp_fixture_hits "$1")" -ge "$2" ]]; }
 hits_gt() { [[ "$(pp_fixture_hits "$1")" -gt "$2" ]]; }
 
-# HID clicks (raw or screen coordinates), AXFocused, AXPress, and AXValue do not
-# move DOM focus into the web address field on the hosted runner (runs
-# 40561143504, 40609921512, 40614875172, 40618185563, 40623127757). Keystrokes do
-# reach the app, so Tab from the focused chat composer into the side panel's
-# address field, then type and verify AXValue before Return.
-pp_browser_go() {
-  # pp_browser_go <url>: Tab to the address field, type, verify, Return.
-  local value focused
+# HID clicks (raw or screen coordinates), AXFocused, AXPress, AXValue, and Tab
+# never moved DOM focus into the web address field on the hosted runner (runs
+# 40561143504 to 40627169152); keystrokes fell through to the chat composer.
+# Browser actions > New browser tab opens a native tab and focuses the address
+# field from the page itself (focusAddress in
+# ui/src/components/browser/browser-panel-native-owner.ts), so type after that.
+pp_browser_new_tab_go() {
+  # pp_browser_new_tab_go <url>: New browser tab, type, verify, Return.
+  local value composer
   pp_app_activate
-  focused="$(pp_ax focus-tab AXTextField "$PP_ADDRESS_LABEL" web 80)" || focused=""
-  if [[ "$focused" == "not-focused" ]]; then
-    pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
-    sleep 1
+  pp_ax press AXButton "Browser actions" web >/dev/null || pp_fail "Browser actions button not found"
+  if ! pp_wait_quiet 6 pp_ax exists "*" "New browser tab" web; then
+    pp_ax dump "$OUT/logs/ax-browser-actions.json" >/dev/null || true
+    pp_fail "New browser tab not in Browser actions (see logs/ax-browser-actions.json)"
   fi
-  osascript -e 'tell application "System Events" to keystroke "a" using command down'
+  pp_ax press "*" "New browser tab" web >/dev/null || pp_fail "New browser tab could not be pressed"
+  sleep 3
   osascript -e "tell application \"System Events\" to keystroke \"$1\""
   value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
   if [[ "$value" != *"$1"* ]]; then
+    composer="$(pp_ax value AXTextArea "Chat composer" web)" || composer=""
     pp_ax dump "$OUT/logs/ax-address-typed.json" >/dev/null || true
-    pp_fail "typed URL not in the address field (value '$value'; focus '$focused'; see logs/ax-address-typed.json)"
+    pp_fail "typed URL not in the address field (value '$value'; composer '$composer'; see logs/ax-address-typed.json)"
   fi
   osascript -e 'tell application "System Events" to key code 36'
-  pp_note "navigate $1 (focus after $focused tabs)"
+  pp_note "new tab navigate $1"
 }
 
 LATE_A=$((PP_FIXTURE_PORT + 1)) # nothing listens until recovery
@@ -91,7 +94,7 @@ pp_dashboard_up
 pp_browser_panel_open
 
 # 1. New tab, first load fails (connection refused on a loopback port).
-pp_browser_go "http://127.0.0.1:$LATE_A/first-load"
+pp_browser_new_tab_go "http://127.0.0.1:$LATE_A/first-load"
 sleep 6
 # The failure view is a native subview of the tab's WKWebView; WebKit may expose
 # it inside the AXWebArea, so search both scopes for the title.
@@ -102,8 +105,11 @@ pp_ax frame AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-first-
 pp_ax value AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-first-failure.txt" || true
 pp_ax dump "$OUT/logs/ax-new-tab-failed.json" >/dev/null || true
 
-# 2. Native Reload retries the attempted address once it is reachable.
+# 2. Native Reload retries the attempted address once it is reachable. The
+# recovered page links to an address nothing serves yet, for step 3.
+export FIXTURE_NEXT_URL="http://127.0.0.1:$LATE_B/broken"
 pp_fixture_start "$LATE_A"
+unset FIXTURE_NEXT_URL
 if ! pp_ax press AXButton "Reload" native >/dev/null 2>&1; then
   # The failure view may sit inside the AXWebArea; press the lowest Reload
   # (the failure view is in the tab content, the toolbar is at the top).
@@ -115,12 +121,15 @@ pp_wait_for 20 "retry of /first-load" hits_ge /first-load 1
 sleep 3
 pp_shot "11-new-tab-recovered-native-reload"
 
-# 3. Loaded page, then a failing navigation keeps the attempted address.
-pp_browser_go "http://127.0.0.1:$PP_FIXTURE_PORT/page/a"
-pp_wait_for 20 "load of /page/a" hits_ge /page/a 1
-sleep 2
+# 3. The recovered tab is a loaded page; following its link to an unserved
+# address fails, and the tab keeps the attempted address.
+pp_ax exists AXLink "continue to the next address" >/dev/null || {
+  pp_ax dump "$OUT/logs/ax-loaded-page.json" >/dev/null || true
+  pp_fail "loaded page has no continue link (see logs/ax-loaded-page.json)"
+}
 pp_shot "20-loaded-page"
-pp_browser_go "http://127.0.0.1:$LATE_B/broken"
+pp_ax press AXLink "continue to the next address" >/dev/null || pp_fail "continue link could not be pressed"
+pp_note "navigate http://127.0.0.1:$LATE_B/broken from the loaded page"
 sleep 6
 pp_ax exists AXStaticText "couldn't be opened" >/dev/null ||
   pp_fail "native failure view missing after failed navigation from a loaded page"
