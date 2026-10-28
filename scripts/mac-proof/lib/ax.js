@@ -143,7 +143,7 @@ function run(argv) {
       // clicks and AXFocused/AXPress do not move DOM focus into web fields.
       const hit = find(rest[0], rest[1], rest[2], false);
       if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
-      const limit = Number(rest[3] || 40);
+      const limit = Number(rest[3] || 80);
       const seApp = Application("System Events");
       for (let i = 0; i < limit; i++) {
         if (attr(hit[0], "AXFocused") === true) return String(i);

@@ -65,7 +65,7 @@ pp_browser_go() {
   # pp_browser_go <url>: Tab to the address field, type, verify, Return.
   local value focused
   pp_app_activate
-  focused="$(pp_ax focus-tab AXTextField "$PP_ADDRESS_LABEL" web 40)" || focused=""
+  focused="$(pp_ax focus-tab AXTextField "$PP_ADDRESS_LABEL" web 80)" || focused=""
   if [[ "$focused" == "not-focused" ]]; then
     pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
     sleep 1
