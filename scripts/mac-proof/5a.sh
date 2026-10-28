@@ -56,23 +56,33 @@ pp_browser_panel_open() {
 hits_ge() { [[ "$(pp_fixture_hits "$1")" -ge "$2" ]]; }
 hits_gt() { [[ "$(pp_fixture_hits "$1")" -gt "$2" ]]; }
 
-# WebKit reports AXPosition for elements inside an AXWebArea relative to that
-# web area, so a HID click at the raw AXPosition lands above the element by the
-# window content offset (run 40561143504: the click missed "Page address").
-# lib/ax.js screen-frame adds the AXWebArea origin; lib/common.sh
-# pp_click_element uses it. AXFocused on a web field does not move DOM focus
-# (run 40609921512: focus reported true, typed value stayed empty), so click.
+# HID clicks and AXFocused do not move DOM focus into the web address field on
+# the hosted runner (runs 40561143504, 40609921512: the typed URL went to the
+# chat composer or nowhere). The UI's own New tab action calls
+# addressInput.focus() after creating a native blank tab
+# (ui/src/components/browser/browser-panel-native-owner.ts beginNewTab), so use
+# it to focus the field, then type and verify AXValue before Return.
+pp_browser_focus() {
+  pp_app_activate
+  pp_ax press AXButton "New tab" web >/dev/null || pp_fail "New tab button not found"
+  sleep 1
+}
+
 pp_browser_go() {
-  # pp_browser_go <url>: click the address field at its screen position, type,
-  # verify the typed value, then Return.
+  # pp_browser_go <url>: type into the already focused address field, verify the
+  # typed value, then Return. Falls back to AXPress on the field once.
   local value
   pp_app_activate
-  pp_click_element AXTextField "$PP_ADDRESS_LABEL" web ||
-    pp_fail "Browser address field not found (label '$PP_ADDRESS_LABEL')"
-  sleep 1
   osascript -e 'tell application "System Events" to keystroke "a" using command down'
   osascript -e "tell application \"System Events\" to keystroke \"$1\""
   value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
+  if [[ "$value" != *"$1"* ]]; then
+    pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
+    sleep 1
+    osascript -e 'tell application "System Events" to keystroke "a" using command down'
+    osascript -e "tell application \"System Events\" to keystroke \"$1\""
+    value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
+  fi
   if [[ "$value" != *"$1"* ]]; then
     pp_ax dump "$OUT/logs/ax-address-typed.json" >/dev/null || true
     pp_fail "typed URL not in the address field (value '$value'; see logs/ax-address-typed.json)"
@@ -89,6 +99,7 @@ pp_build_helpers
 pp_record_start
 pp_dashboard_up
 pp_browser_panel_open
+pp_browser_focus
 
 # 1. New tab, first load fails (connection refused on a loopback port).
 pp_browser_go "http://127.0.0.1:$LATE_A/first-load"
@@ -116,6 +127,7 @@ sleep 3
 pp_shot "11-new-tab-recovered-native-reload"
 
 # 3. Loaded page, then a failing navigation keeps the attempted address.
+pp_browser_focus
 pp_browser_go "http://127.0.0.1:$PP_FIXTURE_PORT/page/a"
 pp_wait_for 20 "load of /page/a" hits_ge /page/a 1
 sleep 2
