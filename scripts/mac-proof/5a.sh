@@ -59,47 +59,17 @@ hits_gt() { [[ "$(pp_fixture_hits "$1")" -gt "$2" ]]; }
 # HID clicks (raw or screen coordinates) and AXFocused do not move DOM focus into
 # the web address field on the hosted runner (runs 40561143504, 40609921512,
 # 40614875172). The side panel's own New tab button creates a side panel tab, not
-# a browser tab (run 40618185563), so it is not a focus path. Try AXPress on the
-# field (WebKit may focus a focusable element), then AXFocused, and verify the
-# typed AXValue before Return.
+# a browser tab (run 40618185563), so it is not a focus path. Set the field's
+# AXValue (WebKit maps it to the DOM value and fires input), verify it, then
+# press the toolbar Go button; fall back to AXPress focus + typing.
 pp_browser_go() {
-  # pp_browser_go <url>: focus the address field, type, verify, Return.
+  # pp_browser_go <url>: set the address field, verify, then Go.
   local value
   pp_app_activate
-  pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
-  sleep 1
-  osascript -e 'tell application "System Events" to keystroke "a" using command down'
-  osascript -e "tell application \"System Events\" to keystroke \"$1\""
-  value="$(pp_ax value AXTextField "$PP_ADDRESS_LABEL" web)" || value=""
-  if [[ "$value" != *"$1"* ]]; then
-    # Fallback: set AXFocused on the field, then type again.
-    osascript -l JavaScript - "$PP_BUNDLE_ID" "$PP_ADDRESS_LABEL" <<'JXA' >/dev/null 2>&1 || true
-function run(argv) {
-  const [bundleId, text] = argv;
-  const procs = Application("System Events").processes.whose({ bundleIdentifier: bundleId });
-  if (procs.length === 0) return;
-  const proc = procs[0];
-  const safe = (fn) => { try { return fn(); } catch (_) { return null; } };
-  const attr = (el, n) => safe(() => el.attributes.byName(n).value());
-  const needle = (text || "").toLowerCase();
-  const matches = (el) =>
-    ["AXTitle", "AXDescription", "AXValue", "AXHelp"].map((n) => attr(el, n)).concat([safe(() => el.name())])
-      .some((v) => typeof v === "string" && v.toLowerCase().includes(needle));
-  function* walk(el, depth) {
-    if (depth > 40) return;
-    yield el;
-    for (const kid of safe(() => el.uiElements()) || []) yield* walk(kid, depth + 1);
-  }
-  for (const win of proc.windows()) {
-    for (const el of walk(win, 0)) {
-      if (attr(el, "AXRole") === "AXTextField" && matches(el)) {
-        safe(() => { el.attributes.byName("AXFocused").value = true; });
-        return;
-      }
-    }
-  }
-}
-JXA
+  value="$(pp_ax set-value AXTextField "$PP_ADDRESS_LABEL" web "$1")" || value=""
+  if ! pp_ax exists AXButton "Go" web >/dev/null 2>&1; then
+    # AXValue set the DOM value but not the draft state; focus and type instead.
+    pp_ax press AXTextField "$PP_ADDRESS_LABEL" web >/dev/null 2>&1 || true
     sleep 1
     osascript -e 'tell application "System Events" to keystroke "a" using command down'
     osascript -e "tell application \"System Events\" to keystroke \"$1\""
@@ -109,8 +79,15 @@ JXA
     pp_ax dump "$OUT/logs/ax-address-typed.json" >/dev/null || true
     pp_fail "typed URL not in the address field (value '$value'; see logs/ax-address-typed.json)"
   fi
-  osascript -e 'tell application "System Events" to key code 36'
-  pp_note "navigate $1"
+  # The toolbar action becomes Go when the draft differs from the active URL;
+  # its presence proves the draft state took the value, not just the DOM value.
+  if pp_ax exists AXButton "Go" web >/dev/null 2>&1; then
+    pp_ax press AXButton "Go" web >/dev/null || pp_fail "Go button could not be pressed"
+    pp_note "navigate $1 (Go)"
+  else
+    pp_ax dump "$OUT/logs/ax-address-no-go.json" >/dev/null || true
+    pp_fail "address draft did not reach the Go state (see logs/ax-address-no-go.json)"
+  fi
 }
 
 LATE_A=$((PP_FIXTURE_PORT + 1)) # nothing listens until recovery

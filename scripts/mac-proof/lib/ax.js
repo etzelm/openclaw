@@ -130,6 +130,13 @@ function run(argv) {
       if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
       return String(attr(hit[0], "AXValue") || "");
     }
+    case "set-value": {
+      const hit = find(rest[0], rest[1], rest[2], false);
+      if (!hit) throw new Error(`no ${rest[0]} matching ${rest[1]}`);
+      const value = rest[3] ?? "";
+      safe(() => { hit[0].attributes.byName("AXValue").value = value; });
+      return String(attr(hit[0], "AXValue") || "");
+    }
     case "exists": {
       if (!find(rest[0], rest[1], rest[2], false)) throw new Error("absent");
       return "present";
