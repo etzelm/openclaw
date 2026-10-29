@@ -10,6 +10,7 @@ import { createSubsystemLogger } from "../logging/subsystem.js";
 import { CommandProcessCleanupError } from "../process/exec-result.js";
 import { defaultRuntime } from "../runtime.js";
 import { createDeferredCore } from "../shared/deferred.js";
+import { getDatabaseProcessRole } from "./database-engine/admission-scope.js";
 import { UPDATE_RUN_ID_ENV } from "./update-control-plane-sentinel.js";
 import {
   POST_CORE_UPDATE_ENV,
@@ -239,6 +240,42 @@ it.each(["database", "native"] as const)(
     expect(stderr.join("")).toContain(failure.message);
   },
 );
+
+it("runs the delegated Doctor under the one-shot database process role", async () => {
+  // The worker bypasses the CLI entry that installs this role. Without it the engine
+  // guard treats a selected PostgreSQL family as a Gateway main-thread connection and
+  // the delegated Doctor fails with "PostgreSQL connections must run in a worker".
+  let roleAtDoctor: ReturnType<typeof getDatabaseProcessRole>;
+  const doctor = vi.fn(async () => {
+    roleAtDoctor = getDatabaseProcessRole();
+  });
+  // mock-isolation: Observe the process role at Doctor entry without running maintenance against the host.
+  vi.doMock("../flows/doctor-health.js", () => ({ runDoctorHealthFlow: doctor }));
+  fixture.recordStep.mockImplementation(async (runId: string, step: unknown) => ({
+    runId,
+    status: "running",
+    steps: [step],
+  }));
+  process.env.OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH = "/synthetic/doctor.json";
+  try {
+    await runWorker(
+      {
+        executor: {},
+        runId: "synthetic-run",
+        root: "/synthetic",
+        configInputHash: "hash",
+        repair: true,
+      },
+      "--doctor",
+    );
+  } finally {
+    delete process.env.OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH;
+    vi.doUnmock("../flows/doctor-health.js");
+  }
+
+  expect(doctor).toHaveBeenCalledOnce();
+  expect(roleAtDoctor).toBe("cli-oneshot");
+});
 
 it("keeps live callbacks and deadline owners out of the migrated wire contract", () => {
   type Options = MigratedUpdateFinalizationInput["params"]["opts"];
