@@ -90,17 +90,28 @@ LATE_B=$((PP_FIXTURE_PORT + 2))
 
 pp_identity
 pp_build_helpers
-pp_record_start
 pp_dashboard_up
+# The recorder follows the PR build's windows, so it starts once the app is up.
+[[ "${PP_LOCAL:-}" == 1 ]] || pp_record_start
 pp_browser_panel_open
+if [[ "${PP_LOCAL:-}" == 1 ]]; then
+  # A personal machine lists its own sessions in the sidebar; keep them out of
+  # the evidence (the 00/01 shots above are dropped by the local runner).
+  pp_ax press AXButton "Collapse sidebar" web >/dev/null || pp_fail "could not collapse the sidebar"
+  sleep 1
+  pp_record_start
+fi
 
 # 1. New tab, first load fails (connection refused on a loopback port).
 pp_browser_new_tab_go "http://127.0.0.1:$LATE_A/first-load"
 sleep 6
 # The failure view is a native subview of the tab's WKWebView; WebKit may expose
 # it inside the AXWebArea, so search both scopes for the title.
-pp_ax exists AXStaticText "couldn't be opened" >/dev/null ||
+# The failure view is an AppKit subview of the tab's WKWebView, which WebKit
+# keeps out of the accessibility tree; read it from the window instead.
+pp_wait_screen_text 10 "couldn't be opened" >"$OUT/logs/failure-view-first-load.txt" ||
   pp_fail "native failure view missing after failed first load"
+pp_screen_text "Could not connect" >>"$OUT/logs/failure-view-first-load.txt" || true
 pp_shot "10-new-tab-failed"
 pp_ax frame AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-first-failure.json" || true
 pp_ax value AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-first-failure.txt" || true
@@ -111,14 +122,13 @@ pp_ax dump "$OUT/logs/ax-new-tab-failed.json" >/dev/null || true
 export FIXTURE_NEXT_URL="http://127.0.0.1:$LATE_B/broken"
 pp_fixture_start "$LATE_A"
 unset FIXTURE_NEXT_URL
-if ! pp_ax press AXButton "Reload" native >/dev/null 2>&1; then
-  # The failure view may sit inside the AXWebArea; press the lowest Reload
-  # (the failure view is in the tab content, the toolbar is at the top).
-  frame="$(pp_ax press-lowest AXButton "Reload" 2>/dev/null)" ||
-    pp_fail "no Reload button found after the failed first load"
-  pp_note "native Reload not exposed as native AX; pressed lowest Reload $frame"
-fi
+# The failure view's own Reload button (the only "Reload" text below its title;
+# the toolbar Reload is an icon), clicked through HID with the PR build in front.
+at="$(pp_click_screen_text "Reload" "couldn't be opened")" ||
+  pp_fail "failure view Reload button not found after the failed first load"
+pp_note "pressed the failure view's Reload at $at"
 pp_wait_for 20 "retry of /first-load" hits_ge /first-load 1
+pp_wait_screen_text_gone 10 "couldn't be opened" || pp_fail "failure view still shown after native Reload"
 sleep 3
 pp_shot "11-new-tab-recovered-native-reload"
 
@@ -132,8 +142,9 @@ pp_shot "20-loaded-page"
 pp_ax press AXLink "continue to the next address" >/dev/null || pp_fail "continue link could not be pressed"
 pp_note "navigate http://127.0.0.1:$LATE_B/broken from the loaded page"
 sleep 6
-pp_ax exists AXStaticText "couldn't be opened" >/dev/null ||
+pp_wait_screen_text 10 "couldn't be opened" >"$OUT/logs/failure-view-navigation.txt" ||
   pp_fail "native failure view missing after failed navigation from a loaded page"
+pp_screen_text "Could not connect" >>"$OUT/logs/failure-view-navigation.txt" || true
 pp_shot "21-loaded-tab-failed"
 pp_ax frame AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-nav-failure.json" || true
 pp_ax value AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-nav-failure.txt" || true
@@ -142,6 +153,7 @@ pp_ax value AXTextField "$PP_ADDRESS_LABEL" web >"$OUT/logs/address-after-nav-fa
 pp_fixture_start "$LATE_B"
 pp_ax press AXButton "Reload" web >/dev/null || pp_fail "toolbar Reload button not found"
 pp_wait_for 20 "retry of /broken" hits_ge /broken 1
+pp_wait_screen_text_gone 10 "couldn't be opened" || pp_fail "failure view still shown after toolbar Reload"
 sleep 3
 pp_shot "22-loaded-tab-recovered-toolbar-reload"
 pp_note "PASS 5a: first-load failure, navigation failure, native and toolbar Reload recovery"

@@ -71,6 +71,8 @@ pp_build_helpers() {
   swiftc -O -o "$PP_BIN/window-id" "$PP_LIB/window-id.swift"
   swiftc -O -o "$PP_BIN/click" "$PP_LIB/click.swift"
   swiftc -O -o "$PP_BIN/tcc-check" "$PP_LIB/tcc-check.swift"
+  swiftc -O -o "$PP_BIN/ocr" "$PP_LIB/ocr.swift"
+  swiftc -O -o "$PP_BIN/record" "$PP_LIB/record.swift"
 }
 
 pp_cli() {
@@ -226,6 +228,16 @@ pp_app_config() {
 }
 JSON
   local domain version
+  if [[ "${PP_LOCAL:-}" == 1 ]]; then
+    # Local reruns: start each run with the fresh WebKit and defaults state a
+    # hosted runner has. Only the PR build's own bundle id and named profile.
+    [[ "$PP_BUNDLE_ID" == ai.openclaw.mac.debug && -n "${PP_APP_PROFILE:-}" ]] ||
+      pp_fail "PP_LOCAL needs PP_BUNDLE_ID=ai.openclaw.mac.debug and PP_APP_PROFILE"
+    defaults delete "$PP_BUNDLE_ID" >/dev/null 2>&1 || true
+    defaults delete "ai.openclaw.mac.profile.$PP_APP_PROFILE" >/dev/null 2>&1 || true
+    rm -rf "$HOME/Library/WebKit/$PP_BUNDLE_ID" "$HOME/Library/HTTPStorages/$PP_BUNDLE_ID" \
+      "$HOME/Library/HTTPStorages/$PP_BUNDLE_ID.binarycookies" "$HOME/Library/Caches/$PP_BUNDLE_ID"
+  fi
   version="$(sed -nE 's/^let currentOnboardingVersion = ([0-9]+).*/\1/p' \
     "$SRC/apps/macos/Sources/OpenClaw/Constants.swift")"
   for domain in "$PP_BUNDLE_ID" ${PP_APP_PROFILE:+"ai.openclaw.mac.profile.$PP_APP_PROFILE"}; do
@@ -270,6 +282,27 @@ pp_ax() {
   osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" "$@"
 }
 
+pp_require_front() {
+  # Keys and HID clicks go to the frontmost app. With a daily OpenClaw running
+  # beside the PR build (local reruns), refuse to send them anywhere else.
+  [[ -z "${APP:-}" ]] && return 0
+  pgrep -f "$APP/Contents/MacOS/" >/dev/null || return 0
+  if ! command osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" frontmost >/dev/null 2>&1; then
+    command osascript -e "tell application id \"$PP_BUNDLE_ID\" to activate" >/dev/null 2>&1 || true
+    sleep 1
+    command osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" frontmost >/dev/null 2>&1 ||
+      pp_fail "PR build is not the frontmost app; refusing to send keys or clicks"
+  fi
+}
+
+osascript() {
+  # Every keystroke in the scenarios goes through System Events; guard them all.
+  case "$*" in
+    *"System Events"*keystroke* | *"System Events"*"key code"*) pp_require_front ;;
+  esac
+  command osascript "$@"
+}
+
 pp_click_element() {
   # pp_click_element <role> <text> [native|web]: HID-level click at the element's
   # center in screen coordinates (WebKit reports web elements relative to their
@@ -279,6 +312,7 @@ pp_click_element() {
   x="$(printf '%s' "$frame" | sed -nE 's/.*"cx":([0-9.]+).*/\1/p')"
   y="$(printf '%s' "$frame" | sed -nE 's/.*"cy":([0-9.]+).*/\1/p')"
   [[ -n "$x" && -n "$y" ]] || return 1
+  pp_require_front
   "$PP_BIN/click" "$x" "$y"
 }
 
@@ -291,25 +325,108 @@ pp_type() {
 pp_shot() {
   # pp_shot <name>: the app's frontmost real window plus the full screen.
   local name="$1" wid
-  wid="$("$PP_BIN/window-id" "${PP_WINDOW_OWNER:-OpenClaw}" 2>/dev/null || true)"
-  if [[ -n "$wid" ]]; then
-    screencapture -x -o -l "$wid" "$OUT/shots/$name.png"
+  local frame=""
+  # The PR build's tab failure view lives in a window-sized overlay window, so a
+  # single-window (-l) shot of it has no toolbar or address. Capture the main
+  # window's on-screen rect instead (the PR build is kept frontmost).
+  # Only when the PR build is frontmost: a rect shot of anything else could
+  # capture another app (pp_fail calls pp_shot, so do not fail from here).
+  if [[ -z "${PP_WINDOW_OWNER:-}" ]] && pp_ax frontmost >/dev/null 2>&1 &&
+    frame="$(pp_ax window-frame 2>/dev/null)"; then
+    wid="rect $frame"
+    screencapture -x -R "$frame" "$OUT/shots/$name.png"
+  else
+    wid="$("$PP_BIN/window-id" "${PP_WINDOW_OWNER:-$(pp_app_pid 2>/dev/null || echo OpenClaw)}" 2>/dev/null || true)"
+    [[ -n "$wid" ]] && screencapture -x -o -l "$wid" "$OUT/shots/$name.png"
   fi
-  screencapture -x "$OUT/shots/$name-screen.png"
+  # Local reruns (PP_LOCAL=1) run on a personal desktop: window shots only.
+  [[ "${PP_LOCAL:-}" == 1 ]] || screencapture -x "$OUT/shots/$name-screen.png"
   pp_note "shot $name (window ${wid:-none})"
 }
 
+pp_screen_text() {
+  # pp_screen_text <needle>: "<x> <y> <text>" in screen points for the first
+  # match in the PR build's window, read with Vision (see ocr.swift). Native
+  # views inside a WKWebView are not in the accessibility tree.
+  local frame wx wy ww img px py
+  frame="$(pp_ax window-frame)" || return 1
+  IFS=, read -r wx wy ww _ <<<"$frame"
+  img="$PP_ROOT/ocr-window.png"
+  pp_require_front
+  screencapture -x -R "$frame" "$img" || return 1
+  read -r px py text < <("$PP_BIN/ocr" "$img" "$1") || return 1
+  local iw
+  iw="$(sips -g pixelWidth "$img" | awk '/pixelWidth/{print $2}')"
+  # Window shots are in pixels; the window frame is in points.
+  awk -v px="$px" -v py="$py" -v wx="$wx" -v wy="$wy" -v ww="$ww" -v iw="$iw" -v t="$text" \
+    'BEGIN { s = iw / ww; printf "%d %d %s\n", wx + px / s, wy + py / s, t }'
+}
+
+pp_wait_screen_text() {
+  # pp_wait_screen_text <seconds> <needle>
+  local limit="$1" needle="$2" i
+  for ((i = 0; i < limit; i++)); do
+    pp_screen_text "$needle" && return 0
+    sleep 1
+  done
+  return 1
+}
+
+pp_wait_screen_text_gone() {
+  # pp_wait_screen_text_gone <seconds> <needle>
+  local limit="$1" needle="$2" i
+  for ((i = 0; i < limit; i++)); do
+    pp_screen_text "$needle" >/dev/null || return 0
+    sleep 1
+  done
+  return 1
+}
+
+pp_click_screen_text() {
+  # pp_click_screen_text <needle> [below-needle]: HID click on recognized text,
+  # optionally only a match below another recognized line.
+  local hit x y anchor ay
+  hit="$(pp_screen_text "$1")" || return 1
+  read -r x y _ <<<"$hit"
+  if [[ -n "${2:-}" ]]; then
+    anchor="$(pp_screen_text "$2")" || return 1
+    read -r _ ay _ <<<"$anchor"
+    (( y > ay )) || return 1
+  fi
+  pp_require_front
+  "$PP_BIN/click" "$x" "$y"
+  echo "$x $y"
+}
+
 pp_record_start() {
-  # Screen recording for the whole scenario, capped at PP_RECORD_MAX seconds.
-  screencapture -x -v -V "${PP_RECORD_MAX:-600}" "$OUT/recording.mov" \
-    >"$OUT/logs/recording.log" 2>&1 &
+  # Records only the PR build's windows (record.swift, ScreenCaptureKit) until
+  # pp_record_stop or PP_RECORD_MAX seconds. Call after the app has a window.
+  local pid=""
+  [[ -n "${APP:-}" ]] && pid="$(pp_app_pid)"
+  if [[ -n "$pid" ]]; then
+    "$PP_BIN/record" "$pid" "$OUT/recording.mov" "${PP_RECORD_MAX:-600}" >"$OUT/logs/recording.log" 2>&1 &
+  else
+    # No app window yet (scenarios that record from before launch, or CLI-only
+    # ones): full-screen screencapture, acceptable only on a disposable runner.
+    [[ "${PP_LOCAL:-}" == 1 ]] && pp_fail "local reruns record only the PR build; start the app first"
+    screencapture -x -v -V "${PP_RECORD_MAX:-600}" "$OUT/recording.mov" >"$OUT/logs/recording.log" 2>&1 &
+  fi
   echo $! >"$PP_ROOT/record.pid"
+  sleep 2
+  kill -0 "$(cat "$PP_ROOT/record.pid")" 2>/dev/null || pp_fail "recorder did not start (see logs/recording.log)"
 }
 
 pp_record_stop() {
   if [[ -f "$PP_ROOT/record.pid" ]]; then
-    kill -INT "$(cat "$PP_ROOT/record.pid")" 2>/dev/null || true
-    sleep 3
+    local pid i
+    pid="$(cat "$PP_ROOT/record.pid")"
+    kill -INT "$pid" 2>/dev/null || true
+    # record.swift finalizes the movie on SIGINT; never leave it running.
+    for ((i = 0; i < 40; i++)); do kill -0 "$pid" 2>/dev/null || break; sleep 0.5; done
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -KILL "$pid" 2>/dev/null || true
+      pp_note "recorder did not stop on SIGINT; killed (recording may be incomplete)"
+    fi
     rm -f "$PP_ROOT/record.pid"
   fi
 }
