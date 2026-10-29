@@ -171,6 +171,17 @@ jobs:
           /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
             -f dist/OpenClaw.app
           echo "APP=$GITHUB_WORKSPACE/dist/OpenClaw.app" >> "$GITHUB_ENV"
+          # Zipped app for local reruns of the harness on a machine without Xcode.
+          ditto -c -k --keepParent dist/OpenClaw.app "$RUNNER_TEMP/OpenClaw-app.zip"
+
+      - name: Upload built app
+        if: ${{ matrix.app }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mac-app-${{ matrix.id }}
+          path: ${{ runner.temp }}/OpenClaw-app.zip
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Build CLI and Gateway
         if: ${{ !matrix.app }}
