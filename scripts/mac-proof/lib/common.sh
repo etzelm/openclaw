@@ -225,16 +225,22 @@ pp_app_config() {
   }${extra}
 }
 JSON
-  defaults write "$PP_BUNDLE_ID" openclaw.onboardingSeen -bool true
-  defaults write "$PP_BUNDLE_ID" openclaw.onboardingVersion -int \
-    "$(sed -nE 's/^let currentOnboardingVersion = ([0-9]+).*/\1/p' \
-      "$SRC/apps/macos/Sources/OpenClaw/Constants.swift")"
+  local domain version
+  version="$(sed -nE 's/^let currentOnboardingVersion = ([0-9]+).*/\1/p' \
+    "$SRC/apps/macos/Sources/OpenClaw/Constants.swift")"
+  for domain in "$PP_BUNDLE_ID" ${PP_APP_PROFILE:+"ai.openclaw.mac.profile.$PP_APP_PROFILE"}; do
+    defaults write "$domain" openclaw.onboardingSeen -bool true
+    defaults write "$domain" openclaw.onboardingVersion -int "$version"
+  done
 }
 
 pp_app_launch() {
   # pp_app_launch [app args...]
   : "${APP:?APP is required for app scenarios}"
+  # PP_APP_PROFILE (local reruns): a named profile owns its own instance lock,
+  # defaults suite and Keychain service, so the app runs beside a daily OpenClaw.
   open -n -F "$APP" \
+    ${PP_APP_PROFILE:+--env "OPENCLAW_PROFILE=$PP_APP_PROFILE"} \
     --env "OPENCLAW_STATE_DIR=$PP_ROOT/app-state" \
     --env "OPENCLAW_CONFIG_PATH=$PP_ROOT/app-state/openclaw.json" \
     --env "OPENCLAW_LOG_DIR=$OUT/logs/app" \

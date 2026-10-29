@@ -66,7 +66,8 @@ pp_browser_new_tab_go() {
   # pp_browser_new_tab_go <url>: New browser tab, type, verify, Return.
   local value composer
   pp_app_activate
-  pp_ax press AXButton "Browser actions" web >/dev/null || pp_fail "Browser actions button not found"
+  # The "..." Menu trigger is exposed as AXPopUpButton; the toolbar group shares its label.
+  pp_ax press AXPopUpButton "Browser actions" web >/dev/null || pp_fail "Browser actions menu not found"
   if ! pp_wait_quiet 6 pp_ax exists "*" "New browser tab" web; then
     pp_ax dump "$OUT/logs/ax-browser-actions.json" >/dev/null || true
     pp_fail "New browser tab not in Browser actions (see logs/ax-browser-actions.json)"

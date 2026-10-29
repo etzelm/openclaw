@@ -22,7 +22,14 @@
 function run(argv) {
   const [bundleId, verb, ...rest] = argv;
   const se = Application("System Events");
-  const procs = se.processes.whose({ bundleIdentifier: bundleId });
+  let procs = se.processes.whose({ bundleIdentifier: bundleId });
+  if (verb === "wait-window") {
+    // System Events can list a just-launched app a few seconds after pgrep does.
+    for (let i = 0; i < 60 && procs.length === 0; i++) {
+      delay(0.5);
+      procs = se.processes.whose({ bundleIdentifier: bundleId });
+    }
+  }
   if (procs.length === 0) throw new Error(`process ${bundleId} not running`);
   const proc = procs[0];
 
@@ -95,7 +102,10 @@ function run(argv) {
     case "wait-window": {
       const limit = Number(rest[0] || 30);
       for (let i = 0; i < limit * 2; i++) {
-        if (proc.windows().length > 0) return "ok";
+        // A process that is still launching can throw "Invalid index" here.
+        try {
+          if (proc.windows().length > 0) return "ok";
+        } catch (_) {}
         delay(0.5);
       }
       throw new Error("no window");
