@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # FW-6 (#185433): authority-chain proof for dashboard HTML widget links.
+# Round 8 adds step 3b: two real clicks on one link under a second apart must
+# both open (each click is its own gesture; the bridge spends one per open).
 # Review ask: a real widget click in the shipped macOS dashboard opening the
 # link in the default browser, plus synthetic clicks, forged widget requests
 # and retired-document requests rejected before the external open.
@@ -54,13 +56,14 @@ widget_html() {
 <div style="font:18px -apple-system;padding:16px">
 <p><a id="allowed" target="_blank" href="$FIX/widget">Open widget link</a></p>
 <p><a id="synthetic" target="_blank" href="$FIX/synthetic">synthetic target</a></p>
+<p><a id="double" target="_blank" href="$FIX/double">Open double link</a></p>
 <p id="tag">widget $1</p>
-<p id="probe">probe $1 moves:0 down:none click:none</p>
+<p id="probe">probe $1 moves:0 down:none click:none dbl:0</p>
 <script>
-  var probe = { moves: 0, down: 'none', click: 'none' };
+  var probe = { moves: 0, down: 'none', click: 'none', dbl: 0 };
   function showProbe() {
     document.getElementById('probe').textContent =
-      'probe $1 moves:' + probe.moves + ' down:' + probe.down + ' click:' + probe.click;
+      'probe $1 moves:' + probe.moves + ' down:' + probe.down + ' click:' + probe.click + ' dbl:' + probe.dbl;
   }
   document.addEventListener('mousemove', function () { probe.moves += 1; showProbe(); }, true);
   document.addEventListener('mousedown', function (e) {
@@ -74,6 +77,7 @@ widget_html() {
   }, 2000);
   var retire = null;
   document.addEventListener('click', function (e) {
+    if (e.isTrusted && e.target.closest && e.target.closest('#double')) { probe.dbl += 1; showProbe(); }
     if (!e.target.closest || !e.target.closest('#allowed')) return;
     var act = navigator.userActivation && navigator.userActivation.isActive ? 'yes' : 'no';
     probe.click = (e.isTrusted ? 'trusted' : 'untrusted') + '-d' + e.detail + '-act-' + act; showProbe();
@@ -323,6 +327,23 @@ import ApplicationServices
 import CoreGraphics
 print("postEvent=\(CGPreflightPostEventAccess()) listenEvent=\(CGPreflightListenEventAccess()) axTrusted=\(AXIsProcessTrusted())")
 SWIFT
+cat >"$PP_ROOT/click1.swift" <<'SWIFT'
+// click1 <x> <y>: one HID left click (click state 1); prints the mouse-up time in epoch ms.
+import CoreGraphics
+import Foundation
+let a = CommandLine.arguments
+let p = CGPoint(x: Double(a[1])!, y: Double(a[2])!)
+let src = CGEventSource(stateID: .hidSystemState)
+func post(_ t: CGEventType) {
+  let e = CGEvent(mouseEventSource: src, mouseType: t, mouseCursorPosition: p, mouseButton: .left)!
+  e.setIntegerValueField(.mouseEventClickState, value: 1)
+  e.post(tap: .cghidEventTap)
+}
+post(.mouseMoved); usleep(30_000)
+post(.leftMouseDown); usleep(60_000); post(.leftMouseUp)
+print(Int(Date().timeIntervalSince1970 * 1000))
+SWIFT
+swiftc -O -o "$PP_BIN/click1" "$PP_ROOT/click1.swift" || pp_note "click1 did not build"
 swiftc -O -o "$PP_BIN/event-access" "$PP_ROOT/event-access.swift" &&
   pp_note "event access for helpers: $("$PP_BIN/event-access" 2>&1)" ||
   pp_note "event access check did not build"
@@ -388,6 +409,29 @@ fi
 [[ -n "$mechanism" ]] || pp_fail "no default browser hit on /widget after pointer clicks and AXPress"
 pp_note "allowed open via: $mechanism"
 
+# 3b. Two real clicks on another link, under a second apart. Each is a new
+# gesture, so each opens once. The browser takes the front after click 1 (its
+# window covers the app here), so, as a user would, the scenario brings the app
+# back and clicks again; the probe counts trusted clicks that reached the widget.
+ensure_key_window
+dframe="$(command osascript -l JavaScript "$PP_ROOT/hit-frame.js" "$PP_BUNDLE_ID" AXLink "Open double link" web 2>&1)" ||
+  pp_fail "double link not resolved: $dframe"
+dx="$(printf '%s' "$dframe" | sed -nE 's/.*"cx":(-?[0-9.]+).*/\1/p')"
+dy="$(printf '%s' "$dframe" | sed -nE 's/.*"cy":(-?[0-9.]+).*/\1/p')"
+pp_note "double link target: $dframe"
+u1="$("$PP_BIN/click1" "$dx" "$dy")"
+command osascript -e "tell application id \"$PP_BUNDLE_ID\" to activate" >/dev/null 2>&1 || true
+sleep 0.15
+u2="$("$PP_BIN/click1" "$dx" "$dy")"
+pp_note "double click: mouse-ups at $u1 and $u2 ms, $((u2 - u1)) ms apart (app re-activated between them)"
+pp_wait_quiet 15 hits_ge /double 2 || true
+probe_state "after-double"
+dhits="$(pp_fixture_hits /double)"
+pp_note "double click hits /double = $dhits at $(grep '"path":"/double' "$OUT/logs/fixture-hits.jsonl" 2>/dev/null | sed -nE 's/.*"at":"[^T]*T([^"]*)".*/\1/p' | tr '\n' ' ')"
+grep -q 'probe v1 [^"]*dbl:2' "$OUT/logs/ax-after-double.json" 2>/dev/null ||
+  pp_note "warning: the widget did not record both clicks; step 3b is inconclusive"
+[[ "$dhits" -eq 2 ]] || pp_fail "two real clicks under a second apart opened $dhits link(s), expected 2"
+
 # 4. Retire the v1 document; its requests fire 90 s after the click and are
 # armed only by a trusted click (recorded by the probe before retiring).
 probe_state "after-open"
@@ -412,4 +456,4 @@ done
 pp_note "allowed hit opener: $(head -1 "$OUT/logs/allowed-hit.jsonl")"
 grep -q "$BROWSER_UA" "$OUT/logs/allowed-hit.jsonl" || pp_fail "/widget was not opened by the default browser"
 [[ "$forbidden" -eq 0 ]] || pp_fail "$forbidden forbidden request(s) reached an external open"
-pp_note "PASS 6 ($mechanism): the click opened the default browser; synthetic, forged and retired (armed: $retired_armed) requests produced no open"
+pp_note "PASS 6 ($mechanism): the click opened the default browser; two clicks under a second apart opened twice; synthetic, forged and retired (armed: $retired_armed) requests produced no open"
