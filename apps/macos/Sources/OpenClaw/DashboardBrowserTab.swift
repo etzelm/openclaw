@@ -176,6 +176,9 @@ final class DashboardBrowserFailureView: NSView {
         self.reloadButton = NSButton(title: String(localized: "Reload"), target: nil, action: nil)
         self.reload = reload
         super.init(frame: .zero)
+        // Layer-backed like its WKWebView host: as a plain view it drew its opaque
+        // background over the whole dashboard window, not just the tab.
+        self.wantsLayer = true
         self.titleLabel.font = .systemFont(ofSize: NSFont.systemFontSize + 4, weight: .semibold)
         self.titleLabel.alignment = .center
         self.messageLabel.textColor = .secondaryLabelColor
@@ -208,9 +211,13 @@ final class DashboardBrowserFailureView: NSView {
         true
     }
 
-    override func draw(_ dirtyRect: NSRect) {
-        NSColor.windowBackgroundColor.setFill()
-        dirtyRect.fill()
+    override var wantsUpdateLayer: Bool {
+        true
+    }
+
+    override func updateLayer() {
+        // Runs with the view's appearance current, so the dynamic color resolves.
+        self.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
     }
 
     @objc private func reloadPage() {
