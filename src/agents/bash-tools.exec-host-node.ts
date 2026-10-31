@@ -514,16 +514,12 @@ export async function executeNodeHostCommand(
             if (!invocation.ok) {
               await execHostShared.sendExecApprovalFollowupResult(
                 followupTarget,
-                withNodePathPrependWarning(
-                  formatNodeInvokeFailureFollowup({
-                    failure: invocation.failure,
-                    nodeId: target.nodeId,
-                    approvalId,
-                    command: params.command,
-                  }),
-                  // Only an unknown outcome may have run with the node's own PATH.
-                  warnNodePath && invocation.failure.reason === "outcome-unknown",
-                ),
+                formatNodeInvokeFailureFollowup({
+                  failure: invocation.failure,
+                  nodeId: target.nodeId,
+                  approvalId,
+                  command: params.command,
+                }),
               );
               return;
             }
