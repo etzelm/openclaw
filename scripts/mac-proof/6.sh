@@ -164,6 +164,10 @@ probe_state() {
   pp_note "$1: ${line:-probe not in AX tree}"
 }
 
+# Default browser app name and the User-Agent token its requests carry (Safari unless set).
+BROWSER_APP="${PP_BROWSER_APP:-Safari}"
+BROWSER_UA="${PP_BROWSER_UA:-Safari}"
+
 pp_identity
 pp_build_helpers
 cat >"$PP_ROOT/network-alert.js" <<'JS'
@@ -171,7 +175,7 @@ function run(argv) {
   const se = Application("System Events");
   const safe = (fn) => { try { return fn(); } catch (_) { return null; } };
   const first = ["UserNotificationCenter", "CoreServicesUIAgent", "UserNotificationCenterAgent"];
-  const skip = ["Dock", "Finder", "Safari", "SystemUIServer", "ControlCenter", "WindowManager"];
+  const skip = ["Dock", "Finder", "Safari", "Google Chrome", "SystemUIServer", "ControlCenter", "WindowManager"];
   const procs = se.processes().map((p) => [p, safe(() => p.name()) || ""]);
   const ordered = procs.filter(([, n]) => first.includes(n))
     .concat(procs.filter(([, n]) => !first.includes(n) && !skip.includes(n)));
@@ -285,7 +289,7 @@ grep -q 'probe v1 [^"]*click:trusted' "$OUT/logs/ax-after-open.json" 2>/dev/null
 put_widget v2
 pp_note "v2 put $(($(date +%s) - last_click))s after the click; retired requests armed: $retired_armed"
 sleep 5
-PP_WINDOW_OWNER=Safari pp_shot "20-default-browser"
+PP_WINDOW_OWNER="$BROWSER_APP" pp_shot "20-default-browser"
 pp_shot "21-app-after-click"
 remaining=$((last_click + 105 - $(date +%s)))
 [[ "$remaining" -gt 0 ]] && sleep "$remaining"
@@ -300,6 +304,6 @@ for path in /synthetic /forged-open /forged-request /subframe-click /subframe-op
   forbidden=$((forbidden + n))
 done
 pp_note "allowed hit opener: $(head -1 "$OUT/logs/allowed-hit.jsonl")"
-grep -q 'Safari' "$OUT/logs/allowed-hit.jsonl" || pp_fail "/widget was not opened by the default browser"
+grep -q "$BROWSER_UA" "$OUT/logs/allowed-hit.jsonl" || pp_fail "/widget was not opened by the default browser"
 [[ "$forbidden" -eq 0 ]] || pp_fail "$forbidden forbidden request(s) reached an external open"
 pp_note "PASS 6 ($mechanism): the click opened the default browser; synthetic, forged, subframe and retired (armed: $retired_armed) requests produced no open"
