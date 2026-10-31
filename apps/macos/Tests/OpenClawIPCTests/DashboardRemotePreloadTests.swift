@@ -1,7 +1,9 @@
 import AppKit
+import ConcurrencyExtras
 import Foundation
 import Testing
 @testable import OpenClaw
+@testable import OpenClawKit
 
 /// Hands each primary lookup its own gate, so a test can resume them in order.
 private actor DashboardRemotePreloadLookups {
@@ -154,6 +156,87 @@ struct DashboardRemotePreloadTests {
             #expect(!reconciled.isWindowOpen)
             #expect(reconciled.hasRetainedWindow)
             #expect(manager.openWindowCount(for: .primary) == 0)
+        } }
+    }
+
+    /// The hidden preload is a retained document, so the native challenge bridge
+    /// answers it while it is current, and refuses once its socket, document or
+    /// identity is no longer the one that asked (same contract as an open window).
+    @Test(arguments: ["current", "socket", "document", "browser-identity-pending", "browser-identity"])
+    func `hidden remote preload answers native challenges only while its document is current`(
+        _ transition: String) async throws
+    {
+        try await TestIsolation.withIsolatedState { try await self.withRemoteLaunch {
+            let server = try await DashboardHTTPFixture.start()
+            defer { server.stop() }
+            let manager = self.remoteManager(
+                server: server, lookupGates: [DashboardWindowOwnershipPresentationGate(released: true)])
+            defer { manager.close() }
+            manager.testControlChannelConnected = true
+
+            await manager.preloadIfConfigured()?.value
+            let preloaded = try #require(manager._testController())
+            #expect(!preloaded.isWindowOpen)
+            let calls = LockIsolated(0)
+            let requested = AsyncTestGate()
+            let release = AsyncTestGate()
+            defer { release.open() }
+            let current = LockIsolated(true)
+            preloaded.documentHost.nativeGatewayAuthProvider = { _, _ in
+                calls.withValue { $0 += 1 }
+                requested.open()
+                await release.wait()
+                return DashboardNativeGatewayAuth(
+                    json: Data(#"{"auth":{"deviceToken":"native-grant"},"scopes":["operator.read"]}"#.utf8),
+                    isCurrent: { current.value })
+            }
+            try await waitForNativeDashboardDocument(preloaded)
+            if transition == "browser-identity" {
+                // A browser identity document never reaches the native provider.
+                preloaded.auth = .browserIdentity(gatewayUrl: server.websocketURL().absoluteString)
+            }
+            let pending = Task {
+                try await preloaded.webView.callAsyncJavaScript("""
+                try {
+                  return JSON.stringify(await window.webkit.messageHandlers.OpenClawNativeGatewayAuth.postMessage({
+                    id: 'request', nonce: 'challenge', signedAt: 123
+                  }));
+                } catch (error) { return JSON.stringify({rejected: String(error)}); }
+                """, in: nil, contentWorld: .page) as? String
+            }
+            if transition != "browser-identity" {
+                do {
+                    try await AsyncTimeout.withTimeout(
+                        seconds: 5, onTimeout: { URLError(.timedOut) }, operation: { await requested.wait() })
+                } catch {
+                    release.open()
+                    _ = await pending.result
+                    throw error
+                }
+                switch transition {
+                case "socket": current.setValue(false)
+                case "document": preloaded.webView(preloaded.webView, didCommit: nil)
+                case "browser-identity-pending":
+                    preloaded.auth = .browserIdentity(gatewayUrl: server.websocketURL().absoluteString)
+                default: break
+                }
+                release.open()
+            }
+            let json = try #require(try await pending.value)
+            let received = try #require(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+            switch transition {
+            case "current":
+                let result = try #require(received["result"] as? [String: Any])
+                #expect((result["auth"] as? [String: String])?["deviceToken"] == "native-grant")
+            case "browser-identity":
+                #expect(received["rejected"] != nil)
+                #expect(calls.value == 0)
+            default:
+                #expect(received["error"] as? String != nil)
+                #expect(received["result"] == nil)
+            }
+            // Answering or refusing a challenge never shows the preload.
+            #expect(!preloaded.isWindowOpen)
         } }
     }
 }
