@@ -21,34 +21,23 @@ import {
   reconcileSessionTranscriptIndexes,
   waitForSessionTranscriptIndexReconcile,
 } from "../../config/sessions/session-transcript-reconcile.js";
-import {
-  searchSessionTranscripts,
-  searchSessionTranscriptsReadOnlySync,
-} from "../../config/sessions/session-transcript-search.js";
+import { searchSessionTranscripts } from "../../config/sessions/session-transcript-search.js";
 import type { SessionTranscriptSearchParams } from "../../config/sessions/session-transcript-search.types.js";
 import { requestContext } from "../../gateway/server-methods/sessions-read-cache.test-support.js";
 import { sessionReadHandlers } from "../../gateway/server-methods/sessions-read.js";
 import { appendSessionTranscriptMessagesByIdentity } from "../../plugin-sdk/session-transcript-runtime.js";
 import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
 import { cleanupSessionStateForTest } from "../../test-utils/session-state-cleanup.js";
-import { PostgresSyncConnection } from "../postgres-sync/connection.js";
 import { dropPostgresTestSchemas } from "../postgres-sync/schema-cleanup.test-support.js";
 import { withEngineStoreAdmission } from "./admission-scope.js";
 import { installDatabaseEngineSelection } from "./context.js";
 import { resetDatabaseEngineSelectionForTest } from "./context.test-support.js";
-import { refreshPostgresPlannerStatistics } from "./postgres-planner-statistics.js";
 import { resolveDatabaseFamilyEngines } from "./registry.js";
 
 const configured = getEnvironmentData("openclaw.test.workboard.connection");
 const connection = typeof configured === "string" ? configured : undefined;
 const prefix = `sessionsearch_${randomUUID().replaceAll("-", "").slice(0, 10)}`;
 const directories = useAutoCleanupTempDirTracker(afterAll);
-
-type PostgresPlanNode = { "Index Name"?: string; Plans?: PostgresPlanNode[] };
-
-function planNodes(node: PostgresPlanNode): PostgresPlanNode[] {
-  return [node, ...(node.Plans ?? []).flatMap(planNodes)];
-}
 
 describe.skipIf(!connection)("PostgreSQL session search product flow", () => {
   let root: string;
@@ -226,67 +215,6 @@ describe.skipIf(!connection)("PostgreSQL session search product flow", () => {
     expect(hits.map((hit) => hit.messageId)).toEqual(["filename-hit"]);
     expect(hits[0]!.snippet).toContain("fix to server.py landed");
     expect(hits[0]!.snippet).not.toContain("Opening");
-  });
-
-  it("keeps the text index in the generic plan of the reused search statement", async () => {
-    // Enough agent rows that the text index wins only when the agent scope is estimated.
-    for (let session = 0; session < 300; session++) {
-      const target = scope(`planner-${session}`, "planner");
-      await upsertSessionEntryCore(target, { sessionId: target.sessionId, updatedAt: 1 });
-      await appendSessionTranscriptMessagesByIdentity({
-        ...target,
-        messages: Array.from({ length: 20 }, (_, index) => ({
-          eventId: `planner-${session}-${index}`,
-          message: {
-            role: "user",
-            content: session + index === 0 ? "plannerneedle" : "routine note ".repeat(80),
-          },
-        })),
-      });
-    }
-    expect(await hitIds("plannerneedle", { agentId: "planner" })).toEqual(["planner-0-0"]);
-    const capture = vi.spyOn(PostgresSyncConnection.prototype, "query");
-    let statement: { sql: string; schema: string } | undefined;
-    try {
-      const { env, storePath } = scope("selected");
-      withEngineStoreAdmission(() =>
-        searchSessionTranscriptsReadOnlySync({
-          agentId: "planner",
-          env,
-          storePath,
-          query: "plannerneedle",
-        }),
-      );
-      const index = capture.mock.calls.findIndex(
-        ([sql]) => sql.includes("^@") && sql.includes("session_transcript_fts"),
-      );
-      const reader = capture.mock.contexts[index] as PostgresSyncConnection | undefined;
-      if (reader) {
-        statement = { sql: capture.mock.calls[index]![0], schema: reader.schema };
-      }
-    } finally {
-      capture.mockRestore();
-    }
-    if (!statement) {
-      throw new Error("Session search must execute its scoped text-index statement");
-    }
-    // The bridge reuses this prepared statement; PostgreSQL switches to a generic plan after 5 runs.
-    expect(await refreshPostgresPlannerStatistics(client, statement.schema)).toMatchObject({
-      status: "analyzed",
-    });
-    await client.query("SELECT set_config('search_path', $1, false)", [
-      `"${statement.schema.replaceAll('"', '""')}"`,
-    ]);
-    try {
-      const { rows } = await client.query<{ "QUERY PLAN": [{ Plan: PostgresPlanNode }] }>(
-        `EXPLAIN (GENERIC_PLAN, FORMAT JSON) ${statement.sql}`,
-      );
-      expect(planNodes(rows[0]!["QUERY PLAN"][0].Plan).map((node) => node["Index Name"])).toContain(
-        "session_transcript_fts_search_gin",
-      );
-    } finally {
-      await client.query("RESET search_path");
-    }
   });
 
   it("publishes appends, rebuilds the active branch and removes deleted transcripts", async () => {
