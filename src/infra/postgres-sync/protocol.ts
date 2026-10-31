@@ -45,6 +45,8 @@ export type BridgeCommand =
       schema: string;
       sql: string;
       parameters: readonly SQLInputValue[];
+      /** Deferred read-only BEGIN, run before `sql` in the same request. */
+      begin?: string;
       reconnectIfIdle?: boolean;
     };
 export type BridgeRequest = BridgeCommand & { id: number };
