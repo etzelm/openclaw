@@ -162,8 +162,9 @@ dashboard_window() {
   # is (on) or is not (off) on screen, or empty.
   local want=false
   [[ "$2" == on ]] && want=true
-  grep '"title":"OpenClaw"' "$OUT/logs/windows-$1.jsonl" | grep "\"onScreen\":$want" |
-    sed -nE 's/.*"id":([0-9]+).*/\1/p' | head -n 1
+  # No match is a valid answer: under pipefail grep's exit 1 would abort.
+  { grep '"title":"OpenClaw"' "$OUT/logs/windows-$1.jsonl" | grep "\"onScreen\":$want" |
+    sed -nE 's/.*"id":([0-9]+).*/\1/p' | head -n 1; } || true
 }
 
 dismiss_network_alert() {
