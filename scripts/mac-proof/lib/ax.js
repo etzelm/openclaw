@@ -14,6 +14,7 @@
 //   pid                            print the target pid
 //   window-frame                   x,y,w,h of the app's first window (screen points)
 //   frontmost                      exit 0 if the target is the frontmost app
+//   raise [seconds]                bring the target to the front; prints the frontmost app
 // <role> is an AX role such as AXButton, AXLink, AXTextField, or "*".
 // <text> matches title, description, value, help or role description
 // (substring, case-insensitive). Optional <scope>: "native" skips elements inside
@@ -156,6 +157,28 @@ function run(argv) {
     case "frontmost":
       if (!frontmost()) throw new Error("not frontmost");
       return "frontmost";
+    case "raise": {
+      // On hosted macos-26, `activate` alone left another app frontmost (run
+      // 40812904893). Proof 6 reached frontmost=OpenClaw there by setting the
+      // System Events process frontmost, then AXRaise and AXMain on the window
+      // (runs 41182008780, 41184996689). Same steps, with the process chosen by pid.
+      const se = Application("System Events");
+      const procs = se.processes.whose({ unixId: pid });
+      if (procs.length === 0) throw new Error(`System Events has no process ${pid}`);
+      try { procs[0].frontmost = true; } catch (e) {}
+      const wins = windows();
+      const win = wins.find((w) => attr(w, "AXSubrole") === "AXStandardWindow") || wins[0];
+      if (win) {
+        $.AXUIElementPerformAction(win, $("AXRaise"));
+        $.AXUIElementSetAttributeValue(win, $("AXMain"), $.kCFBooleanTrue);
+      }
+      const limit = Number(rest[0] || 10);
+      for (let i = 0; i < limit * 2 && !frontmost(); i++) delay(0.5);
+      const front = $.NSWorkspace.sharedWorkspace.frontmostApplication;
+      const name = front ? `${ObjC.unwrap(front.bundleIdentifier)} pid ${front.processIdentifier}` : "none";
+      if (!frontmost()) throw new Error(`still not frontmost; frontmost is ${name}`);
+      return `frontmost (${name})`;
+    }
     case "wait-window": {
       const limit = Number(rest[0] || 30);
       for (let i = 0; i < limit * 2; i++) {

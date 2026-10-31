@@ -290,8 +290,12 @@ pp_require_front() {
   if ! command osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" frontmost >/dev/null 2>&1; then
     command osascript -e "tell application id \"$PP_BUNDLE_ID\" to activate" >/dev/null 2>&1 || true
     sleep 1
-    command osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" frontmost >/dev/null 2>&1 ||
-      pp_fail "PR build is not the frontmost app; refusing to send keys or clicks"
+    if ! command osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" frontmost >/dev/null 2>&1; then
+      local r
+      r="$(command osascript -l JavaScript "$PP_LIB/ax.js" "$PP_BUNDLE_ID" raise 10 2>&1)" ||
+        pp_fail "PR build is not the frontmost app; refusing to send keys or clicks (raise: $r)"
+      pp_note "raised PR build: $r"
+    fi
   fi
 }
 
