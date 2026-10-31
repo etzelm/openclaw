@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # FW-6 (#185433): authority-chain proof for dashboard HTML widget links.
 # Review ask: a real widget click in the shipped macOS dashboard opening the
-# link in the default browser, plus synthetic clicks, forged widget/subframe
-# requests and retired-document requests rejected before the external open.
+# link in the default browser, plus synthetic clicks, forged widget requests
+# and retired-document requests rejected before the external open.
 # Every candidate URL points at the loopback fixture, so the fixture's hit log
 # (with the opener's User-Agent) is the final-effect record: only /widget may
 # appear, and it must come from the default browser, not the app.
@@ -20,25 +20,39 @@ PP_FIXTURE_PORT="${PP_FIXTURE_PORT:-38790}"
 source "$(dirname "$0")/lib/common.sh"
 trap pp_cleanup EXIT
 
+pp_click_element() {
+  # Overrides the lib version for this scenario. lib screen-frame always adds
+  # the nearest AXWebArea origin, but on macOS 27.2 WebKit already reports web
+  # elements in screen coordinates (link at 1049,182 inside a web area at
+  # 1033,166), so every HID click missed by the web area origin. hit-frame.js
+  # tries both readings and keeps the one whose center hit-tests to the element.
+  local frame x y
+  frame="$(command osascript -l JavaScript "$PP_ROOT/hit-frame.js" "$PP_BUNDLE_ID" "$@" 2>&1)" || {
+    pp_note "click target $1 \"$2\" not resolved: $frame"
+    return 1
+  }
+  x="$(printf '%s' "$frame" | sed -nE 's/.*"cx":(-?[0-9.]+).*/\1/p')"
+  y="$(printf '%s' "$frame" | sed -nE 's/.*"cy":(-?[0-9.]+).*/\1/p')"
+  [[ -n "$x" && -n "$y" ]] || return 1
+  pp_note "click target $1 \"$2\": $frame"
+  pp_require_front
+  "$PP_BIN/click" "$x" "$y"
+}
+
 SESSION="agent:main:main"
 FIX="http://127.0.0.1:$PP_FIXTURE_PORT"
 
 widget_html() {
   # $1 = version tag. v1 carries the allowed link and every forbidden attempt.
   # #probe records what reached the widget document (read back through AX).
+  # No nested frames: board widgets render with blockDescendantFrames
+  # (src/gateway/board-sandbox.ts), so the sandbox proxy refuses a document
+  # with an iframe, never loads it, and the dashboard shows "A widget resource
+  # could not load" (laptop run 2026-10-31).
   cat <<HTML
 <div style="font:18px -apple-system;padding:16px">
 <p><a id="allowed" target="_blank" href="$FIX/widget">Open widget link</a></p>
 <p><a id="synthetic" target="_blank" href="$FIX/synthetic">synthetic target</a></p>
-<iframe id="sub" style="width:300px;height:60px;border:1px solid #ccc" srcdoc="
-  <a id='s' target='_blank' href='$FIX/subframe-click'>subframe</a>
-  <script>
-    setTimeout(function () {
-      document.getElementById('s').click();
-      try { window.open('$FIX/subframe-open', '_blank'); } catch (e) {}
-      try { top.postMessage({ type: 'request', method: 'host.open', params: { url: '$FIX/subframe-forged' } }, '*'); } catch (e) {}
-    }, 2500);
-  </script>"></iframe>
 <p id="tag">widget $1</p>
 <p id="probe">probe $1 moves:0 down:none click:none</p>
 <script>
@@ -95,6 +109,18 @@ put_widget() {
 # would be evaluated once, before the wait starts).
 hits_ge() { [[ "$(pp_fixture_hits "$1")" -ge "$2" ]]; }
 
+press_ui() {
+  # press_ui <role> <text>: open-only UI (Panels, Dashboard, New tab). Local
+  # runs use a HID click: on macOS 27.2 an AXPress on Panels opened the
+  # launcher and it closed again within ~0.5 s, while a HID click keeps it
+  # open. The hosted runner keeps AXPress (HID clicks did nothing there, 5b).
+  if [[ "${PP_LOCAL:-}" == 1 ]]; then
+    pp_click_element "$1" "$2" web
+  else
+    pp_ax press "$1" "$2" web >/dev/null
+  fi
+}
+
 dismiss_network_alert() {
   # The runner's agent raises "Allow ... to find devices on local networks"
   # over the window center (5b fail-screen.png). Press Allow through AX in
@@ -122,6 +148,17 @@ open_dashboard_panel() {
     pp_note "dashboard panel already shows the widget"
     return 0
   fi
+  # A saved layout can reopen the dashboard panel at launch (local profile
+  # reruns). Panels toggles the side panel, so pressing it would close it.
+  if pp_ax exists AXButton "Close Dashboard" web >/dev/null 2>&1; then
+    pp_note "dashboard panel already open (saved layout)"
+    pp_wait_quiet 20 pp_ax exists AXLink "Open widget link" web || {
+      pp_ax dump "$OUT/logs/ax-dashboard-panel.json" >/dev/null || true
+      pp_fail "widget link not shown in the open dashboard panel (see logs/ax-dashboard-panel.json)"
+    }
+    pp_note "dashboard panel open with the widget"
+    return 0
+  fi
   if ! pp_wait_quiet 4 pp_ax exists AXButton "Panels" web; then
     pp_ax dump "$OUT/logs/ax-no-chat.json" >/dev/null || true
     pp_fail "chat pane Panels button not found (see logs/ax-no-chat.json)"
@@ -132,14 +169,14 @@ open_dashboard_panel() {
   # chat-layout-menu test helper does the same).
   local attempt
   for attempt in 1 2; do
-    pp_ax press AXButton "Panels" web >/dev/null || pp_fail "Panels button could not be pressed"
+    press_ui AXButton "Panels" || pp_fail "Panels button could not be pressed"
     pp_wait_quiet 4 pp_ax exists AXButton "Dashboard" web && break
     if pp_ax exists AXLink "Open widget link" web >/dev/null 2>&1; then
       pp_note "Panels reopened the dashboard panel"
       return 0
     fi
     if pp_ax exists AXButton "New tab" web >/dev/null 2>&1; then
-      pp_ax press AXButton "New tab" web >/dev/null || true
+      press_ui AXButton "New tab" || true
       pp_note "side panel open without launcher: pressed New tab"
       pp_wait_quiet 4 pp_ax exists AXButton "Dashboard" web && break
     fi
@@ -148,8 +185,8 @@ open_dashboard_panel() {
     [[ "$attempt" == 2 ]] && pp_fail "Dashboard entry not found in Panels after 2 presses"
   done
   pp_note "Panels launcher open"
-  pp_ax press AXButton "Dashboard" web >/dev/null || pp_fail "Dashboard entry could not be pressed"
-  pp_wait_quiet 6 pp_ax exists AXLink "Open widget link" web || {
+  press_ui AXButton "Dashboard" || pp_fail "Dashboard entry could not be pressed"
+  pp_wait_quiet 20 pp_ax exists AXLink "Open widget link" web || {
     pp_ax dump "$OUT/logs/ax-dashboard-panel.json" >/dev/null || true
     pp_fail "widget link not shown after Panels > Dashboard (see logs/ax-dashboard-panel.json)"
   }
@@ -198,6 +235,71 @@ function run(argv) {
   return "none";
 }
 JS
+cat >"$PP_ROOT/hit-frame.js" <<'JS'
+ObjC.import("AppKit");
+ObjC.import("ApplicationServices");
+// hit-frame.js <bundle-id> <role> <text> [native|web]: screen center of the first
+// match, verified by a system-wide hit test (the element or its descendant).
+function raw(el, name) {
+  const ref = Ref();
+  if ($.AXUIElementCopyAttributeValue(el, $(name), ref) !== 0 || !ref[0]) return null;
+  return ObjC.castRefToObject(ref[0]);
+}
+function val(el, name) {
+  const v = raw(el, name);
+  if (v === null) return null;
+  if (v.isKindOfClass($.NSString)) return ObjC.unwrap(v);
+  if (v.isKindOfClass($.NSArray)) {
+    const out = [];
+    for (let i = 0; i < v.count; i++) out.push(v.objectAtIndex(i));
+    return out;
+  }
+  const d = ObjC.unwrap(v.description) || "";
+  const m = d.match(/(?:x|w):(-?[\d.]+) (?:y|h):(-?[\d.]+)/);
+  return m ? [Number(m[1]), Number(m[2])] : null;
+}
+function run(argv) {
+  const [bundle, role, text, scope] = argv;
+  const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier($(bundle));
+  if (Number(apps.count) !== 1) throw new Error(`expected one ${bundle}, found ${apps.count}`);
+  const app = $.AXUIElementCreateApplication(apps.objectAtIndex(0).processIdentifier);
+  const needle = (text || "").toLowerCase();
+  const texts = (el) => ["AXTitle", "AXDescription", "AXValue", "AXHelp", "AXRoleDescription"]
+    .map((n) => val(el, n)).filter((t) => typeof t === "string");
+  let hit = null;
+  const walk = (el, depth, inWeb, origin) => {
+    if (hit || depth > 40) return;
+    const r = val(el, "AXRole");
+    const isWeb = r === "AXWebArea";
+    const o = isWeb ? (val(el, "AXPosition") || [0, 0]) : origin;
+    const ok = (scope === "web" && inWeb) || (scope === "native" && !inWeb) || !scope;
+    if (ok && (role === "*" || r === role) && texts(el).some((t) => t.toLowerCase().includes(needle))) {
+      hit = [el, o];
+      return;
+    }
+    for (const kid of val(el, "AXChildren") || []) walk(kid, depth + 1, inWeb || isWeb, o);
+  };
+  for (const win of val(app, "AXWindows") || []) walk(win, 0, false, [0, 0]);
+  if (!hit) throw new Error(`no ${role} matching ${text}`);
+  const [el, origin] = hit;
+  const [x, y] = val(el, "AXPosition") || [0, 0];
+  const [w, h] = val(el, "AXSize") || [0, 0];
+  const system = $.AXUIElementCreateSystemWide();
+  const tried = [];
+  for (const [mode, sx, sy] of [["screen", x, y], ["web-relative", x + origin[0], y + origin[1]]]) {
+    const cx = Math.round(sx + w / 2), cy = Math.round(sy + h / 2);
+    const ref = Ref();
+    let at = null;
+    if ($.AXUIElementCopyElementAtPosition(system, cx, cy, ref) === 0 && ref[0]) at = ObjC.castRefToObject(ref[0]);
+    for (let i = 0; at && i < 10; i++) {
+      if (at.isEqual(el)) return JSON.stringify({ mode, cx, cy, w, h });
+      at = raw(at, "AXParent");
+    }
+    tried.push(`${mode} ${cx},${cy}`);
+  }
+  throw new Error(`no center hit-tests to the element (${tried.join("; ")})`);
+}
+JS
 cat >"$PP_ROOT/key-window.js" <<'JS'
 function run(argv) {
   const se = Application("System Events");
@@ -236,8 +338,10 @@ pp_call sessions.create "{\"key\":\"$SESSION\",\"agentId\":\"main\"}" \
 pp_app_config
 pp_app_launch --dashboard
 pp_ax wait-window 90 >/dev/null || pp_fail "dashboard window never appeared"
-[[ "${PP_LOCAL:-}" == 1 ]] && PP_RECORD_MAX=1500 pp_record_start
+# Starting right after wait-window failed with SCStreamError -3812 locally;
+# the window is settled after the pause.
 sleep 10
+[[ "${PP_LOCAL:-}" == 1 ]] && PP_RECORD_MAX=1500 pp_record_start
 
 # 1. Show the session dashboard with the v1 widget.
 put_widget v1
@@ -277,7 +381,7 @@ if [[ -z "$mechanism" ]]; then
   pp_shot "13-no-pointer-open"
   last_click="$(date +%s)"
   pp_ax press AXLink "Open widget link" web >/dev/null || pp_fail "widget link could not be pressed"
-  pp_note "no pointer click reached the link; activated it with AXPress"
+  pp_note "no default browser open after the HID clicks; activating the link with AXPress"
   pp_wait_quiet 30 hits_ge /widget 1 && mechanism="AXPress (accessibility activation, no pointer)"
 fi
 [[ -n "$mechanism" ]] || pp_fail "no default browser hit on /widget after pointer clicks and AXPress"
@@ -299,8 +403,7 @@ pp_shot "30-after-retire"
 
 grep '"path":"/widget"' "$OUT/logs/fixture-hits.jsonl" >"$OUT/logs/allowed-hit.jsonl" || true
 forbidden=0
-for path in /synthetic /forged-open /forged-request /subframe-click /subframe-open \
-  /subframe-forged /retired-open /retired-request; do
+for path in /synthetic /forged-open /forged-request /retired-open /retired-request; do
   n="$(pp_fixture_hits "$path")"
   pp_note "final-effect hits $path = $n"
   forbidden=$((forbidden + n))
@@ -308,4 +411,4 @@ done
 pp_note "allowed hit opener: $(head -1 "$OUT/logs/allowed-hit.jsonl")"
 grep -q "$BROWSER_UA" "$OUT/logs/allowed-hit.jsonl" || pp_fail "/widget was not opened by the default browser"
 [[ "$forbidden" -eq 0 ]] || pp_fail "$forbidden forbidden request(s) reached an external open"
-pp_note "PASS 6 ($mechanism): the click opened the default browser; synthetic, forged, subframe and retired (armed: $retired_armed) requests produced no open"
+pp_note "PASS 6 ($mechanism): the click opened the default browser; synthetic, forged and retired (armed: $retired_armed) requests produced no open"
