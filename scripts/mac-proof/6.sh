@@ -224,7 +224,8 @@ swiftc -O -o "$PP_BIN/event-access" "$PP_ROOT/event-access.swift" &&
   pp_note "event access for helpers: $("$PP_BIN/event-access" 2>&1)" ||
   pp_note "event access check did not build"
 # AX queries cost ~25 s each on the runner; keep the whole scenario on video.
-PP_RECORD_MAX=1500 pp_record_start
+# Local reruns record only the PR build, so they start after its window exists.
+[[ "${PP_LOCAL:-}" == 1 ]] || PP_RECORD_MAX=1500 pp_record_start
 # A configured default model keeps the Control UI off its first-run Model Setup
 # redirect (sessionDefaults.modelConfigured); no model is ever called.
 pp_gateway_start '{"agents":{"defaults":{"model":{"primary":"openai/gpt-5.5"}}},"gateway":{"mode":"local"}}'
@@ -235,6 +236,7 @@ pp_call sessions.create "{\"key\":\"$SESSION\",\"agentId\":\"main\"}" \
 pp_app_config
 pp_app_launch --dashboard
 pp_ax wait-window 90 >/dev/null || pp_fail "dashboard window never appeared"
+[[ "${PP_LOCAL:-}" == 1 ]] && PP_RECORD_MAX=1500 pp_record_start
 sleep 10
 
 # 1. Show the session dashboard with the v1 widget.
