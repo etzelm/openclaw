@@ -35,7 +35,8 @@ pp_click_element() {
   y="$(printf '%s' "$frame" | sed -nE 's/.*"cy":(-?[0-9.]+).*/\1/p')"
   [[ -n "$x" && -n "$y" ]] || return 1
   pp_note "click target $1 \"$2\": $frame"
-  pp_require_front
+  # pp_require_front exists only in the local (proof-5) lib.
+  if declare -F pp_require_front >/dev/null; then pp_require_front; fi
   "$PP_BIN/click" "$x" "$y"
 }
 
