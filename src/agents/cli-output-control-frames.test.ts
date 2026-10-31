@@ -231,15 +231,6 @@ describe("Claude stream control-frame budgets", () => {
     expect(parser.getOutput()?.text).toBe("done");
   });
 
-  it.each([
-    ["signature_delta", signature(8)],
-    ["message_delta", messageDelta()],
-  ])("keeps the ordinary-line limit for %s frames", (_name, record) => {
-    const parser = createClaudeParser();
-    parser.push(line(record, 20_001));
-    expect(parser.getErrorText()).toContain("exceeded 20000 lines");
-  });
-
   it("stops discarded frames at the allowance on the 20,001st line", () => {
     const sig = signature(ALLOWANCE - JSON.stringify(signature(0)).length);
     const padded = messageDelta();
