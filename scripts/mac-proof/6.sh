@@ -13,6 +13,10 @@
 # the behavior under test, so it is a HID pointer click first. If no pointer
 # click reaches the link, the link is activated by AXPress (WebKit runs it as a
 # user gesture, the VoiceOver path) and the PASS line says so.
+# The Gateway serves board widgets from its MCP App sandbox on gateway port + 1,
+# the shared fixture default: run 40565654500 failed board.get with
+# GatewayLockError on 28790 and the dashboard stayed empty.
+PP_FIXTURE_PORT="${PP_FIXTURE_PORT:-38790}"
 source "$(dirname "$0")/lib/common.sh"
 trap pp_cleanup EXIT
 
