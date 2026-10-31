@@ -39,6 +39,7 @@ export type BridgeCommand =
       storeId: string;
       lock: boolean;
       reconnectIfIdle?: boolean;
+      validateIfIdle?: boolean;
     }
   | {
       operation: "query";
@@ -48,6 +49,7 @@ export type BridgeCommand =
       /** Deferred read-only BEGIN, run before `sql` in the same request. */
       begin?: string;
       reconnectIfIdle?: boolean;
+      validateIfIdle?: boolean;
     };
 export type BridgeRequest = BridgeCommand & { id: number };
 export type BridgeReply = { id: number } & (
