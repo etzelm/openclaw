@@ -126,14 +126,27 @@ open_dashboard_panel() {
     pp_ax dump "$OUT/logs/ax-no-chat.json" >/dev/null || true
     pp_fail "chat pane Panels button not found (see logs/ax-no-chat.json)"
   fi
-  pp_ax press AXButton "Panels" web >/dev/null || pp_fail "Panels button could not be pressed"
-  if ! pp_wait_quiet 4 pp_ax exists AXButton "Dashboard" web; then
-    pp_ax dump "$OUT/logs/ax-panels.json" >/dev/null || true
-    pp_wait_quiet 2 pp_ax exists AXLink "Open widget link" web ||
-      pp_fail "Dashboard entry not found in Panels (see logs/ax-panels.json)"
-    pp_note "Panels reopened the dashboard panel"
-    return 0
-  fi
+  # Run 41182008780: one Panels press left the chat full width (no side
+  # panel, no launcher). Press again once; if the side panel opens on its
+  # tab strip without the launcher, open it with New tab (the
+  # chat-layout-menu test helper does the same).
+  local attempt
+  for attempt in 1 2; do
+    pp_ax press AXButton "Panels" web >/dev/null || pp_fail "Panels button could not be pressed"
+    pp_wait_quiet 4 pp_ax exists AXButton "Dashboard" web && break
+    if pp_ax exists AXLink "Open widget link" web >/dev/null 2>&1; then
+      pp_note "Panels reopened the dashboard panel"
+      return 0
+    fi
+    if pp_ax exists AXButton "New tab" web >/dev/null 2>&1; then
+      pp_ax press AXButton "New tab" web >/dev/null || true
+      pp_note "side panel open without launcher: pressed New tab"
+      pp_wait_quiet 4 pp_ax exists AXButton "Dashboard" web && break
+    fi
+    pp_ax dump "$OUT/logs/ax-panels-$attempt.json" >/dev/null || true
+    pp_note "Panels press $attempt opened no launcher (see logs/ax-panels-$attempt.json)"
+    [[ "$attempt" == 2 ]] && pp_fail "Dashboard entry not found in Panels after 2 presses"
+  done
   pp_note "Panels launcher open"
   pp_ax press AXButton "Dashboard" web >/dev/null || pp_fail "Dashboard entry could not be pressed"
   pp_wait_quiet 6 pp_ax exists AXLink "Open widget link" web || {
