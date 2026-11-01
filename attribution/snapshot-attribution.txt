@@ -1,0 +1,26 @@
+# Where each read-only snapshot of one chat.history call opens (ac2c420 + fix v2 debug copy, stack printed at every BEGIN ... READ ONLY).
+# v2 held a snapshot only around the page kernel; the two earlier snapshots come from the Claude CLI import check (v3 moves the hold to cover it).
+
+L3C_HOLD L3C_HOLD     OpenClawAgentDatabaseReadOnlyScope.read <- readMessagePage <- readIncrementalChatHistoryTailAttempt <- readIncrementalChatHistoryTail <- readChatHistoryPageKernel <- readSessionHistoryRequest <- withHistoryDatabase
+
+L3C_SNAP readPendingInputHistoryInDatabase <- OpenClawAgentDatabaseReadOnlyScope.read <- readPendingInputHistoryInWorker <- withHistoryDatabase
+
+L3C_SNAP readCurrentProjectionSnapshot <- OpenClawAgentDatabaseReadOnlyScope.read <- readHistoryRevision <- Module.prepareCliSessionHistoryReader <- readSessionHistoryRequest <- withHistoryDatabase
+
+L3C_SNAP readCurrentProjectionSnapshot <- OpenClawAgentDatabaseReadOnlyScope.read <- readMessagePage <- readIncrementalChatHistoryTailAttempt <- readIncrementalChatHistoryTail <- Module.prepareCliSessionHistoryReader <- readSessionHistoryRequest <- withHistoryDatabase
+
+L3C_HOLD L3C_HOLD     OpenClawAgentDatabaseReadOnlyScope.read <- readMessagePage <- readIncrementalChatHistoryTailAttempt <- readIncrementalChatHistoryTail <- readChatHistoryPageKernel <- readSessionHistoryRequest <- withHistoryDatabase
+
+# Diagnostics timeline spans for one warm call (ac2c420 base, OPENCLAW_DIAGNOSTICS=1), ms from call start:
+65.0 span.start gateway.chat.history.session_entry durationMs=0
+65.0 span.end gateway.chat.history.session_entry durationMs=0.19
+65.0 span.start gateway.chat.history.pending_inputs durationMs=0
+67.0 span.end gateway.chat.history.pending_inputs durationMs=1.63
+67.0 span.start gateway.chat.history.history_page durationMs=0
+72.0 span.end gateway.chat.history.history_page durationMs=4.97
+72.0 span.start gateway.chat.history.startup_projection durationMs=0
+72.0 span.end gateway.chat.history.startup_projection durationMs=0.1
+72.0 span.start gateway.chat.history.projection_final durationMs=0
+72.0 span.start gateway.chat.history.session_info durationMs=0
+72.0 span.end gateway.chat.history.session_info durationMs=0.1
+73.0 span.end gateway.chat.history.projection_final durationMs=0.9

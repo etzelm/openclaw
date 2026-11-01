@@ -1,0 +1,117 @@
+conformance_59992_state: verified 136 tables, 1414 columns, 299 CHECKs, 298 indexes, 33 FKs; zero unexplained differences (types/nullability/defaults/identity, PK, UNIQUE, FK actions/deferrability)
+conformance_59992_agent: verified 46 tables, 394 columns, 73 CHECKs, 108 indexes, 29 FKs; zero unexplained differences (types/nullability/defaults/identity, PK, UNIQUE, FK actions/deferrability)
+conformance_59992_state: verified v23-to-v24 task index migration, retained payload, and complete index definitions
+agent: SQLite/PostgreSQL trigger parity (4 triggers, no-op/key move/bulk/cascade/rollback) and translated index/CHECK behavior verified
+Pending v22 promotions: 
+[test] starting test/vitest/vitest.infra.config.ts
+
+ RUN  v5.0.5 <bench>/src-both
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js (48:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js:48:1 ]
+    │
+ 48 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js (6:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js:6:1 ]
+   │
+ 6 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js (11:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js:11:1 ]
+    │
+ 11 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js (9:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js:9:1 ]
+   │
+ 9 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js (12:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js:12:1 ]
+    │
+ 12 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+[vitest-workers] prepared 1da9baa257db in 25114ms (14731 inputs, 23177 outputs)
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > reuses an idle backend, but overlapping transactions have exclusive connections 139ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > expires quiet backends while preserving burst reuse and checked-out connections 15ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > settles only certified plain write scopes 19ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > settles only certified cte write scopes 12ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > keeps read snapshots pure when columns use qualified SQL keywords 8ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > rejects mutation hints in read snapshots without settling a sibling writer 15ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > releases evicted idle backends and their session locks 16ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > reconnects after an idle backend is terminated, without reusing the broken backend 12ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > settles committed batches and retains transactions opened later in a batch 14ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > switches namespaces but does not reuse across connection settings 7ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > switches A to B to A with prepared statements and the matching recovery namespace 29ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > inherits commit durability while applying settings with a quoted, comma-containing schema name 8ms
+ ✓  infra  src/infra/postgres-sync/reuse.postgres.test.ts > PostgreSQL exclusive idle connection reuse > parses each parameterized SQL text once per connection and survives DDL elsewhere 16ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > publishes positive and absent ACP rows after snapshot close and consumes typed postimages 28ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > reuses model-context navigation facts across PostgreSQL read-only snapshots 99ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > discards ACP facts after a failed snapshot callback 13ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > discards ACP facts after a failed snapshot close 8ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > keeps old ACP snapshots isolated from newer positive and negative postimages 11ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > refreshes cached session rows between snapshots (before -> after) 88ms
+ ✓  infra  src/infra/postgres-sync/read-facts.postgres.test.ts > PostgreSQL admitted read facts > refreshes cached session rows between snapshots (undefined -> created) 91ms
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  19:45:17
+   Duration  29.53s (transform 96%, setup 2%, tests 2%, import 1%)
+
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+ RUN  v5.0.5 <bench>/src-both
+
+ ✓  runtime-config  src/config/sessions/session-history-read-snapshot.postgres.test.ts > PostgreSQL chat.history page reads > reads a sparse page in one read-only snapshot 531ms
+ ✓  runtime-config  src/config/sessions/session-history-read-snapshot.postgres.test.ts > PostgreSQL chat.history page reads > reads a Claude CLI session after a provider swi… in one read-only snapshot 152ms
+ ✓  runtime-config  src/config/sessions/session-history-read-snapshot.postgres.test.ts > PostgreSQL chat.history page reads > rolls back a held snapshot after a failed read and opens a fresh one 2ms
+stderr | unknown test
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.agentDatabaseBorrowers
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] src/config/sessions/session-history-read-snapshot.postgres.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  19:45:48
+   Duration  9.39s (transform 70%, import 14%, tests 9%, worker 7%)
+
+[vitest-workers] verifying completed generation before cleanup
+[test] passed 2 Vitest shards in 42.63s
+CONFORMANCE both-pg rc=0 Sat Oct 31 19:45:59 PDT 2026

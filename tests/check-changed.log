@@ -1,0 +1,263 @@
+$ node scripts/check-changed.mjs --base 6e36a0b85b4
+[check:changed] lanes=core, coreTests
+[check:changed] src/config/sessions/session-history-read-snapshot.postgres.test.ts: core test
+[check:changed] src/gateway/session-history-worker-reader.ts: core production
+[check:changed] src/infra/postgres-sync/transaction.ts: core production
+[check:changed] src/state/openclaw-agent-db-readonly-scope.ts: core production
+
+[check:changed] conflict markers
+$ node scripts/check-no-conflict-markers.mjs
+
+[check:changed] line-cap growth ratchet
+$ node scripts/check-line-cap-ratchet.mjs --base 6e36a0b85b4
+Line-cap ratchet OK: 4 changed source files; no new violations or over-cap growth.
+
+[check:changed] max-lines suppression ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base 6e36a0b85b4
+max-lines ratchet OK: 401 grandfathered suppressions.
+OPENCLAW_* count 459/459
+
+[check:changed] assertion SAFETY comment ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base 6e36a0b85b4
+assertion SAFETY ratchet OK: 2382 files, 5414 grandfathered assertions.
+
+[check:changed] SQLite worker ratchet
+$ node --max-old-space-size=4096 --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base 6e36a0b85b4
+[database-worker-phase] {"phase":"ratchet.start","head":"44c00aed7fa597d04d9525697d141059ad5eaeda","base":"6e36a0b85b496d579b991386d4b4f9837debb492","source":"worktree","sinceMainMs":27.468165999999997}
+[database-worker-phase] {"phase":"head.sources","files":22752,"sinceMainMs":661.3600409999999}
+[database-worker-phase] {"phase":"head.semantic.inputs","files":22752,"sinceMainMs":672.0106659999999}
+[database-worker-phase] {"phase":"head.semantic.project","requestCount":2,"roundTripMs":2217.3659999999995,"serverTimeMs":1615.0570830000001,"bytesSent":203570532,"bytesReceived":2959415,"sourceFilesFetched":0,"nodesFetched":0,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":3321.658458}
+[database-worker-phase] {"phase":"head.semantic.sources-registration","requestCount":22988,"roundTripMs":4973.9252049999595,"serverTimeMs":3346.4513379999803,"bytesSent":208268806,"bytesReceived":1023387471,"sourceFilesFetched":22752,"nodesFetched":25463461,"nodesMaterialized":32978,"timingSample":"current","sinceMainMs":6380.508290999999}
+[database-worker-phase] {"phase":"head.semantic.credential-writers","requestCount":77888,"roundTripMs":7102.786094999967,"serverTimeMs":4744.225546000008,"bytesSent":228866873,"bytesReceived":1075370952,"sourceFilesFetched":22752,"nodesFetched":25463461,"nodesMaterialized":25363195,"timingSample":"current","sinceMainMs":16553.854083000002}
+[database-worker-phase] {"phase":"head.semantic.graph-classification","requestCount":262106,"roundTripMs":20191.06577599905,"serverTimeMs":13563.529069999762,"bytesSent":482901686,"bytesReceived":1982365149,"sourceFilesFetched":22752,"nodesFetched":25463461,"nodesMaterialized":25363195,"timingSample":"current","sinceMainMs":40627.929583}
+[database-worker-phase] {"phase":"head.semantic.close","requestCount":262106,"roundTripMs":20191.06577599905,"serverTimeMs":13563.529069999762,"bytesSent":482901686,"bytesReceived":1982365149,"sourceFilesFetched":22752,"nodesFetched":25463461,"nodesMaterialized":25363195,"timingSample":"last-successful","sinceMainMs":40660.900833}
+[database-worker-phase] {"phase":"head.syntax.inputs","files":751,"sinceMainMs":40785.109082999996}
+[database-worker-phase] {"phase":"head.syntax.project","requestCount":2,"roundTripMs":99.61604100000841,"serverTimeMs":63.226124,"bytesSent":9322277,"bytesReceived":135922,"sourceFilesFetched":0,"nodesFetched":0,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":40909.688958}
+[database-worker-phase] {"phase":"head.syntax.sources","requestCount":753,"roundTripMs":193.25541500004329,"serverTimeMs":134.5773679999999,"bytesSent":9472437,"bytesReceived":49008462,"sourceFilesFetched":751,"nodesFetched":1256750,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":41014.498332999996}
+[database-worker-phase] {"phase":"head.syntax.diagnostics","requestCount":754,"roundTripMs":193.3598730000449,"serverTimeMs":134.66632599999988,"bytesSent":9472540,"bytesReceived":49008464,"sourceFilesFetched":751,"nodesFetched":1256750,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":41014.803958}
+[database-worker-phase] {"phase":"head.syntax.walk-classify","requestCount":754,"roundTripMs":193.3598730000449,"serverTimeMs":134.66632599999988,"bytesSent":9472540,"bytesReceived":49008464,"sourceFilesFetched":751,"nodesFetched":1256750,"nodesMaterialized":1253469,"timingSample":"current","sinceMainMs":41209.673707999995}
+[database-worker-phase] {"phase":"head.syntax.close","requestCount":754,"roundTripMs":193.3598730000449,"serverTimeMs":134.66632599999988,"bytesSent":9472540,"bytesReceived":49008464,"sourceFilesFetched":751,"nodesFetched":1256750,"nodesMaterialized":1253469,"timingSample":"last-successful","sinceMainMs":41210.613790999996}
+[database-worker-phase] {"phase":"base.lookup","sinceMainMs":41369.029540999996}
+[database-worker-phase] {"phase":"base.reuse","outcome":"cached","sinceMainMs":41371.618040999994}
+[database-worker-phase] {"phase":"base.release","sinceMainMs":41371.785832999994}
+SQLite T1 live calls: 168 -> 168; T1-compat deprecated-only calls: 15 -> 15.
+[database-worker-phase] {"phase":"ratchet.compare","sinceMainMs":41372.055125}
+SQLite worker ratchet OK: no T1 call-count growth against 6e36a0b85b496d579b991386d4b4f9837debb492.
+[database-worker-phase] {"phase":"ratchet.terminal","outcome":"success","sinceMainMs":41372.068083}
+
+[check:changed] SQLite dialect ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-database-dialect-ratchet.mts --base 6e36a0b85b4
+SQL portability: 0 violations in 20530 production files (9378 parsed).
+SQLite dialect scope: 3 differing production files; use --full-tree for totals.
+SQLite dialect mechanical (changed files): 0 -> 0.
+SQLite dialect design (changed files): 0 -> 0.
+SQLite dialect engine-maintenance (changed files): 0 -> 0.
+SQLite string-set owner: 0 mechanical occurrences in changed files (included above).
+SQLite primitive owners: 0 engine-maintenance matches in changed files (excluded from comparison).
+SQLite dialect ratchet OK: no construct-group growth against 6e36a0b85b496d579b991386d4b4f9837debb492.
+
+[check:changed] test timeout race ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base 6e36a0b85b4
+test timeout race ratchet OK: 104 files, 190 grandfathered sites.
+
+[check:changed] first-party mock export ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base 6e36a0b85b4
+Mock factory ratchet OK: 6438 grandfathered factories.
+
+[check:changed] changelog attributions
+$ node --import ./scripts/tsx.mjs scripts/check-changelog-attributions.mts
+
+[check:changed] doctor deprecation registry
+$ node --import ./scripts/tsx.mjs scripts/check-doctor-deprecation-registry.ts
+[doctor-deprecation-registry] OK as of 2026-11-01
+
+[check:changed] guarded extension wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-extension-wildcard-reexports.mts
+No guarded extension wildcard re-exports found.
+
+[check:changed] plugin-sdk wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-plugin-sdk-wildcard-reexports.mts
+No plugin-sdk wildcard re-exports found in extension API barrels.
+
+[check:changed] duplicate scan target coverage
+$ node scripts/check-duplicates.mjs --coverage
+[dup:check] target coverage ok
+
+[check:changed] dependency pin guard
+$ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
+PASS direct dependency pin guard: checked 785 directly declared dependency specs across 215 tracked package manifests; 0 violations.
+
+[check:changed] format changed files
+$ node scripts/run-format.mts --check --no-error-on-unmatched-pattern -- src/config/sessions/session-history-read-snapshot.postgres.test.ts src/gateway/session-history-worker-reader.ts src/infra/postgres-sync/transaction.ts src/state/openclaw-agent-db-readonly-scope.ts
+[format] oxfmt/Bun parity checked on the same file set.
+
+[check:changed] config docs baseline
+$ node --import ./scripts/tsx.mjs scripts/generate-config-doc-baseline.ts --check
+OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+
+[check:changed] plugin boundaries
+$ node --import ./scripts/tsx.mjs scripts/plugin-boundary-report.ts --summary --fail-on-eligible-compat
+Plugin Boundary Report
+
+compat deprecated=68 eligibleForRemoval=0 removalPending=15 removalPendingDue=14
+  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8576 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
+  removal-pending 2026-09-30 plugin-sdk-media-understanding-public-demotion due=true blocker=`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate readerRefs=60 readers=extensions/browser/src/browser-tool.test-support.ts,extensions/browser/src/browser/vision.test.ts,extensions/browser/src/browser/vision.ts,extensions/browser/src/cli/browser-cli-extension.test.ts,extensions/browser/src/cli/browser-cli.test.ts
+  removal-pending 2026-09-30 plugin-sdk-memory-host-core-public-demotion due=true blocker=host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists readerRefs=31 readers=extensions/active-memory/index.status.test.ts,extensions/active-memory/index.test.ts,extensions/active-memory/index.ts,extensions/codex/src/app-server/attempt-context.test.ts,extensions/codex/src/app-server/run-attempt-memory.test-support.ts
+  removal-pending 2026-10-01 agent-harness-terminal-result-aliases due=true blocker=AgentHarnessAttemptResult.terminal and AgentHarnessDeliveryDefaults.visibleReplies; retain until harness migration verifies that legacy terminal fields and sourceVisibleReplies are unread readerRefs=0 readers=none
+  removal-pending 2026-10-01 message-presentation-legacy-bridges due=true blocker=MessagePresentation values and channel presentation renderers; retain until reply producers and official channel packages no longer emit or read legacy interactive replies readerRefs=158 readers=extensions/a2a/src/inbound.test.ts,extensions/a2a/src/reply-payload.ts,extensions/codex/src/app-server/run-attempt-active-turn.ts,extensions/codex/src/app-server/run-attempt.final-media.test.ts,extensions/codex/src/conversation-binding-hooks.ts
+  removal-pending 2026-10-01 official-plugin-export-aliases due=true blocker=MessagePresentation renderers and host-owned timeout/runtime behavior; retain until minimum supported official plugin packages no longer import these aliases readerRefs=18 readers=extensions/discord/api.ts,extensions/qa-lab/src/crabline-discord-thread-delivery.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.ts,extensions/qa-lab/src/live-transports/discord/discord-transcripts-authorization.runtime.ts
+  removal-pending 2026-10-01 plugin-sdk-channel-setup-input-fields due=true blocker=plugin-local setup input intersections that declare each owning channel field; retain each field until a new published-plugin artifact sweep finds no reader readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-runtime-api-compat-aliases due=true blocker=the namespaced plugin API and focused runtime methods named per surface; retain until all enumerated flat API and runtime aliases have no readers readerRefs=8 readers=extensions/discord/src/monitor/native-command.interaction-boundary.test.ts,extensions/feishu/src/bot.test.ts,extensions/mattermost/src/mattermost/monitor.inbound-system-event.test.ts,extensions/nextcloud-talk/src/inbound.behavior.test.ts,extensions/zalo/src/test-support/lifecycle-test-support.ts
+  removal-pending 2026-10-01 plugin-provider-manifest-compat-aliases due=true blocker=manifest-owned plugin kind/setup metadata and model catalog registration; retain until providers no longer publish runtime kind or legacy catalog hooks readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-sdk-provider-owned-helper-shims due=true blocker=provider-local auth, model, replay, OAuth, and stream helper APIs; retain until every helper is migrated in official providers and absent from published plugins readerRefs=515 readers=extensions/abliteration/index.ts,extensions/agentsapi/agentsapi-harness.persistence.test.ts,extensions/agentsapi/agentsapi-harness.ts,extensions/agentsapi/native-session-binding.test-api.ts,extensions/alibaba/video-generation-provider.test.ts
+  removal-pending 2026-10-01 media-legacy-projection due=true blocker=ordered `MsgContext.media` / `InboundMediaFacts[]`; typed hook `media` and `originalMedia`; `Attachment*` template variables; and `openclaw/plugin-sdk/media-local-roots`; retain until a clean published-plugin artifact sweep verifies that the legacy media surfaces have no readers readerRefs=2 readers=src/plugins/compat/media-legacy-projection.ts,test/scripts/check-deprecated-api-usage.test.ts
+  removal-pending 2026-10-01 memory-host-compatibility-aliases due=true blocker=canonical memory cache/FTS tables; retain until supported memory integrations are verified to use canonical tables without overrides and legacy table data remains preserved readerRefs=2 readers=src/plugins/compat/deprecation-marking.ts,src/plugins/contracts/extension-package-project-boundaries.test.ts
+  removal-pending 2026-10-01 plugin-sdk-broad-runtime-barrels due=true blocker=focused plugin SDK subpaths for each runtime capability; retain until bundled and published plugins no longer import any of the seven broad barrels readerRefs=877 readers=extensions/a2a/src/http.test.ts,extensions/acpx/src/runtime.ts,extensions/acpx/src/session-owner-migration.ts,extensions/active-memory/index.status.test.ts,extensions/active-memory/index.ts
+  removal-pending 2026-10-01 plugin-sdk-focused-compat-aliases due=true blocker=the focused replacement named by each TypeScript @deprecated annotation; retain until every enumerated alias has zero bundled and published readers readerRefs=468 readers=extensions/a2a/src/inbound.ts,extensions/acpx/index.test.ts,extensions/acpx/index.ts,extensions/acpx/register.runtime.startup.test.ts,extensions/acpx/runtime-api.ts
+  removal-pending 2026-12-01 plugin-sdk-plugin-config-runtime-public-demotion due=false blocker=`api.pluginConfig`, runtime tool context config, and focused `config-contracts`, `runtime-config-snapshot`, or `config-mutation` subpaths; retain the public subpath through the 2026-12-01 window while official plugin consumers migrate readerRefs=59 readers=extensions/active-memory/index.ts,extensions/active-memory/session-policy.ts,extensions/active-memory/trigger-recall.ts,extensions/amazon-bedrock-mantle/index.ts,extensions/amazon-bedrock/register.sync.runtime.ts
+plugin-sdk entrypoints=384 supportedBundledFacade=0 publicPluginOwned=1
+memory-host-sdk implementation=private-package-core-integrated private=true exports=10 sourceBridgeFiles=0 coreReferenceFiles=34
+
+[check:changed] wrapper shadowing
+$ node --import ./scripts/tsx.mjs scripts/check-wrapper-shadowing.mts
+wrapper shadowing guard passed.
+
+[check:changed] package patch guard
+$ node --import ./scripts/tsx.mjs scripts/check-package-patches.mts
+PASS package patch guard: no new pnpm patches; 19 approved patches allowlisted.
+
+[check:changed] test temp creation report (warning-only)
+No new test temp-directory migration warnings found.
+
+[check:changed] core tsgo graph boundary
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: state-logging: 747 test roots exceeds the advisory 720 limit; rebalance when convenient
+
+[check:changed] typecheck core
+$ node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/core.tsbuildinfo
+
+[check:changed] typecheck core tests
+[check:changed] core test graphs: agents-sessions, agents-root, agents-other, agents-tools, gateway-root, gateway-server, gateway-other, infra, state-logging, commands, plugins-platform, config-cli, messaging, services, other, ui-pages, ui-e2e, ui-other, packages, plugin-sdk, commands-doctor, cli-update, gateway-methods, ui-chat, services-cron, ui-app, ui-components, templates, ui-e2e-chat
+[tsgo:agents-sessions] passed in 1.0s
+[tsgo:agents-root] passed in 0.5s
+[tsgo:agents-other] passed in 0.5s
+[tsgo:agents-tools] passed in 0.5s
+[tsgo:gateway-root] passed in 0.9s
+[tsgo:gateway-server] passed in 0.8s
+[tsgo:gateway-other] passed in 0.7s
+[tsgo:infra] passed in 0.6s
+[tsgo:state-logging] passed in 0.7s
+[tsgo:commands] passed in 0.6s
+[tsgo:plugins-platform] passed in 0.7s
+[tsgo:config-cli] passed in 0.6s
+[tsgo:messaging] passed in 0.6s
+[tsgo:services] passed in 0.6s
+[tsgo:other] passed in 0.7s
+[tsgo:ui-pages] passed in 0.8s
+[tsgo:ui-e2e] passed in 0.7s
+[tsgo:ui-other] passed in 0.8s
+[tsgo:packages] passed in 0.6s
+[tsgo:plugin-sdk] passed in 0.6s
+[tsgo:commands-doctor] passed in 0.6s
+[tsgo:cli-update] passed in 0.6s
+[tsgo:gateway-methods] passed in 0.7s
+[tsgo:ui-chat] passed in 0.7s
+[tsgo:services-cron] passed in 0.6s
+[tsgo:ui-app] passed in 0.7s
+[tsgo:ui-components] passed in 0.7s
+[tsgo:templates] passed in 0.6s
+[tsgo:ui-e2e-chat] passed in 0.7s
+
+[check:changed] coercion helper declaration guard
+$ node --import ./scripts/tsx.mjs scripts/check-coercion-helper-declarations.mts
+Coercion helper declaration guard passed (121 allowlisted declarations).
+
+[check:changed] deprecated API usage
+$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
+deprecated API usage guard passed
+
+[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+[deadcode] Knip script unused-export scan passed with 0 entries.
+production unused-export scan:
+Unused exports are not allowed:
+  src/commands/backup-verify-spool.ts: DATABASE_SNAPSHOT_FREE_SPACE_RESERVE_BYTES
+  src/commands/backup-verify-spool.ts: MAX_DATABASE_SNAPSHOT_EXTRACT_BYTES
+  ui/src/pages/chat/components/chat-search-highlight.ts: CHAT_SEARCH_HIGHLIGHT
+  ui/src/pages/chat/components/chat-search-highlight.ts: syncChatSearchHighlight
+Delete the exports or model their real production consumers in Knip.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  src/commands/backup-verify-spool.ts: DATABASE_SNAPSHOT_FREE_SPACE_RESERVE_BYTES
+  src/commands/backup-verify-spool.ts: MAX_DATABASE_SNAPSHOT_EXTRACT_BYTES
+Delete the exports or model their real production consumers in Knip.
+
+[check:changed] lint core changed files
+Found 0 warnings and 0 errors.
+
+[check:changed] native state schema version guard
+native state schema version guard passed (v37)
+
+[check:changed] database-first legacy-store guard
+$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
+Database-first legacy-store guard passed.
+
+[check:changed] media download helper guard
+$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+
+[check:changed] runtime sidecar loader guard
+$ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
+runtime-sidecar-loaders: local runtime sidecar loaders look OK.
+
+[check:changed] runtime import cycles
+$ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
+Import cycle check: 0 runtime value cycle(s).
+
+[check:changed] webhook body guard
+$ node --import ./scripts/tsx.mjs scripts/check-webhook-auth-body-order.mts
+
+[check:changed] pairing store guard
+$ node --import ./scripts/tsx.mjs scripts/check-no-pairing-store-group-auth.mts
+
+[check:changed] pairing account guard
+$ node --import ./scripts/tsx.mjs scripts/check-pairing-account-scope.mts
+
+[check:changed] summary
+   1.49s  ok         conflict markers
+   775ms  ok         line-cap growth ratchet
+   4.14s  ok         max-lines suppression ratchet
+   9.52s  ok         assertion SAFETY comment ratchet
+  41.71s  ok         SQLite worker ratchet
+   5.53s  ok         SQLite dialect ratchet
+   2.22s  ok         test timeout race ratchet
+  10.20s  ok         first-party mock export ratchet
+   222ms  ok         changelog attributions
+   183ms  ok         doctor deprecation registry
+   243ms  ok         guarded extension wildcard re-exports
+   214ms  ok         plugin-sdk wildcard re-exports
+   339ms  ok         duplicate scan target coverage
+   304ms  ok         dependency pin guard
+   289ms  ok         format changed files
+   6.87s  ok         config docs baseline
+   2.67s  ok         plugin boundaries
+   6.06s  ok         wrapper shadowing
+   484ms  ok         package patch guard
+   282ms  ok         test temp creation report (warning-only)
+  20.98s  ok         core tsgo graph boundary
+   1.43s  ok         typecheck core
+  19.49s  ok         typecheck core tests
+   7.64s  ok         coercion helper declaration guard
+   9.26s  ok         deprecated API usage
+  65.31s  failed:1   dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+  24.60s  ok         lint core changed files
+    37ms  ok         native state schema version guard
+  20.09s  ok         database-first legacy-store guard
+   349ms  ok         media download helper guard
+   8.23s  ok         runtime sidecar loader guard
+  10.20s  ok         runtime import cycles
+   420ms  ok         webhook body guard
+   9.92s  ok         pairing store guard
+   8.79s  ok         pairing account guard
+[check:changed] FAILED (exit 1)
+[ELIFECYCLE] Command failed with exit code 1.
+CHECK_CHANGED rc=1 Sat Oct 31 19:39:17 PDT 2026
