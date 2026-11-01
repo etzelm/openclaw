@@ -1,0 +1,44 @@
+{
+ "gwStartEpoch": 1793514692.772556,
+ "src": "fix-idle",
+ "engine": "postgres",
+ "seed": "seed_pgc",
+ "label": "pg-fix-idle-r1",
+ "readyS": 11.8,
+ "firstRpcS": 11.89,
+ "loadavgStart": "{ 12.48 9.27 8.05 }",
+ "memStart": [
+  "System-wide memory free percentage: 92%"
+ ],
+ "arms": [
+  {
+   "name": "h16",
+   "ops": "ops_seed_pgc.json",
+   "conc": 16,
+   "start": 1793514732.9751291,
+   "end": 1793514778.13286,
+   "loadavg": [
+    "{ 12.60 9.61 8.22 }",
+    "{ 11.94 9.91 8.40 }"
+   ],
+   "rps": 445.8,
+   "perOp": {
+    "chat.history": {
+     "n": 20070,
+     "p50": 26.98,
+     "p95": 89.33,
+     "p99": 121.88,
+     "max": 217.82,
+     "mean": 35.75,
+     "errors": 0
+    }
+   }
+  }
+ ],
+ "backendsIdle0": "21\t0",
+ "backendsIdle10": "23\t0",
+ "backendsIdle45": "18\t0",
+ "backendsIdle100": "16\t0",
+ "backendsIdle300": "12\t0",
+ "gatewayExit": 0
+}
