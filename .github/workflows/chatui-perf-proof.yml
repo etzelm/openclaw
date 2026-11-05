@@ -1,0 +1,86 @@
+name: chatui-perf-proof
+
+# Secretless native proof for the ChatUI performance PRs. Runs on push to this
+# branch only; every input (base SHA, head diff, expected head tree) is committed here.
+on:
+  push:
+    branches: [proof/chatui-perf-rig]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chatui-perf-proof-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "24.22.1"
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
+jobs:
+  workload:
+    name: workload ${{ matrix.lane }}
+    runs-on: macos-26
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [p1, p2, p3]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        run: corepack enable
+      - name: Run lane
+        env:
+          PROOF_OUT: ${{ runner.temp }}/proof-out
+        run: bash rig/run-lane.sh ${{ matrix.lane }} 5
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chatui-perf-proof-${{ matrix.lane }}
+          path: |
+            ${{ runner.temp }}/proof-out/${{ matrix.lane }}/**
+            !${{ runner.temp }}/proof-out/${{ matrix.lane }}/*-trace-toc.xml
+          if-no-files-found: warn
+          retention-days: 90
+
+  full-suite:
+    name: full OpenClawKit tests ${{ matrix.lane }}
+    runs-on: macos-26
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [p1, p2, p3]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        run: corepack enable
+      - name: Full swift test on head
+        env:
+          PROOF_OUT: ${{ runner.temp }}/proof-out
+        run: bash rig/full-suite.sh ${{ matrix.lane }}
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chatui-full-suite-${{ matrix.lane }}
+          path: ${{ runner.temp }}/proof-out/${{ matrix.lane }}-full/**
+          if-no-files-found: warn
+          retention-days: 90
