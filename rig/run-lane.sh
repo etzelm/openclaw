@@ -50,20 +50,18 @@ step "toolchain"
 } | tee "$OUT/environment.txt"
 endstep
 
-step "mermaid assets (base install, copied to head)"
-(
-  cd "$WORK/base" || exit 1
-  pnpm install --frozen-lockfile --prefer-offline --optional \
-    --filter '@openclaw/mermaid-renderer...' --filter '@openclaw/gateway-protocol...' \
-    --config.ignore-scripts=false --config.engine-strict=false \
-    --config.enable-pre-post-scripts=true >"$LOG/pnpm.log" 2>&1 &&
-    node scripts/prepare-apple-mermaid.mjs >"$LOG/mermaid.log" 2>&1
-) || { tail -40 "$LOG/pnpm.log" "$LOG/mermaid.log"; fail "mermaid assets"; exit 1; }
-M=apps/shared/OpenClawKit/Sources/OpenClawChatUI/Resources/Mermaid
-mkdir -p "$WORK/head/apps/shared/mermaid" "$WORK/head/$(dirname "$M")"
-cp -R "$WORK/base/apps/shared/mermaid/assets" "$WORK/head/apps/shared/mermaid/"
-cp -R "$WORK/base/$M" "$WORK/head/$M"
-endstep
+for side in base head; do
+  step "$side: native asset dependencies and Mermaid assets"
+  (
+    cd "$WORK/$side" || exit 1
+    pnpm install --frozen-lockfile --prefer-offline --optional \
+      --filter '@openclaw/mermaid-renderer...' --filter '@openclaw/gateway-protocol...' \
+      --config.ignore-scripts=false --config.engine-strict=false \
+      --config.enable-pre-post-scripts=true >"$LOG/$side-pnpm.log" 2>&1 &&
+      node scripts/prepare-apple-mermaid.mjs >"$LOG/$side-mermaid.log" 2>&1
+  ) || { tail -40 "$LOG/$side-pnpm.log" "$LOG/$side-mermaid.log"; fail "$side assets"; exit 1; }
+  endstep
+done
 
 KIT=apps/shared/OpenClawKit
 FLAGS=(--disable-index-store -Xswiftc -gline-tables-only)
@@ -86,7 +84,15 @@ for side in base head; do
   step "$side: instrument and build release workload"
   python3 -I "$RIG/instrument.py" "$WORK/$side/$KIT/Sources/OpenClawChatUI" "$RIG/ChatPerfProbe.swift" | tee "$OUT/$side-probes.txt"
   cp "$RIG/ChatPerfProofWorkload.swift" "$WORK/$side/$KIT/Tests/OpenClawKitTests/"
-  git -C "$WORK/$side" add -N "$KIT" && git -C "$WORK/$side" diff -- "$KIT" >"$OUT/$side-instrumentation.diff"
+  git -C "$WORK/$side" add -N "$KIT" && git -C "$WORK/$side" diff -- "$KIT/Sources" \
+    "$KIT/Tests/OpenClawKitTests/ChatPerfProofWorkload.swift" >"$OUT/$side-instrumentation.diff"
+  # Other suites call DEBUG-only hooks, so the release workload build keeps only the workload test.
+  find "$WORK/$side/$KIT/Tests/OpenClawKitTests" -maxdepth 1 -name '*.swift' ! -name ChatPerfProofWorkload.swift -delete
+  for dir in "$WORK/$side/$KIT"/Tests/*/; do
+    [ "$(basename "$dir")" = OpenClawKitTests ] && continue
+    find "$dir" -name '*.swift' -delete
+    echo "// Parked for the release workload build." >"$dir/Parked.swift"
+  done
   swift build --package-path "$WORK/$side/$KIT" --scratch-path "$WORK/scratch-$side-rel" "${REL[@]}" --build-tests \
     >"$LOG/$side-build-release.log" 2>&1 || { grep -E "error:" "$LOG/$side-build-release.log" | head -20; fail "$side release build"; }
   endstep
