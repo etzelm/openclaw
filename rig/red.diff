@@ -1,5 +1,5 @@
 diff --git a/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift b/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift
-index 1f64a2fb81955b7ac8e1198e22a244d22fe5b51a..7d26cf6360fb8001730267e0f49542b79cd251cb 100644
+index 1f64a2fb81955b7ac8e1198e22a244d22fe5b51a..ec063b8c9ebf39af28f43957505fc96f9543b9d8 100644
 --- a/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift
 +++ b/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift
 @@ -68,11 +68,15 @@ public actor GatewayChannelActor {
@@ -18,7 +18,16 @@ index 1f64a2fb81955b7ac8e1198e22a244d22fe5b51a..7d26cf6360fb8001730267e0f49542b7
      private let networkPathUpdates: (@Sendable () -> AsyncStream<GatewayNetworkPath>)?
      private var networkPathTask: Task<Void, Never>?
      private var networkPathSettleTask: Task<Void, Never>?
-@@ -520,9 +524,7 @@ public actor GatewayChannelActor {
+@@ -82,6 +86,8 @@ public actor GatewayChannelActor {
+     var networkPathProbeTimeout: Duration = .seconds(5)
+     private var tickTask: Task<Void, Never>?
+     private var keepaliveTask: Task<Void, Never>?
++    /// Frames admitted by the receive loop; the keepalive treats any inbound frame as liveness.
++    private var inboundFrameCount: UInt64 = 0
+     private var pendingDeviceTokenRetry = false
+     private var deviceTokenRetryBudgetUsed = false
+     private var receivedDeviceAuthRoles = Set<String>()
+@@ -520,9 +526,7 @@ public actor GatewayChannelActor {
  
      private func keepaliveLoop(connectionGeneration: UInt64) async {
          while self.shouldReconnect {
@@ -29,7 +38,7 @@ index 1f64a2fb81955b7ac8e1198e22a244d22fe5b51a..7d26cf6360fb8001730267e0f49542b7
              guard self.shouldReconnect, self.isConnected(connectionGeneration: connectionGeneration) else { return }
              guard let task = self.task else { continue }
              // Best-effort ping keeps NAT/proxy state alive without generating RPC load.
-@@ -534,6 +536,16 @@ public actor GatewayChannelActor {
+@@ -534,6 +538,16 @@ public actor GatewayChannelActor {
          }
      }
  
@@ -46,8 +55,16 @@ index 1f64a2fb81955b7ac8e1198e22a244d22fe5b51a..7d26cf6360fb8001730267e0f49542b7
      static func loadDeviceIdentityForConnect(
          includeDeviceIdentity: Bool,
          profile: GatewayDeviceIdentityProfile) throws -> DeviceIdentity?
+@@ -1122,6 +1136,7 @@ extension GatewayChannelActor {
+         connectionGeneration: UInt64) async
+     {
+         guard self.isConnected(connectionGeneration: connectionGeneration) else { return }
++        self.inboundFrameCount &+= 1
+         guard let data = self.decodeMessageData(msg) else { return }
+         guard let frame = try? self.decoder.decode(GatewayFrame.self, from: data) else {
+             self.logger.error("gateway decode failed")
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift
-index afeeada7489d785ebab507984cb568e133038627..94f3c21628e5dfe03b64554c14c47f7b13217076 100644
+index afeeada7489d785ebab507984cb568e133038627..1dc893f36b697cda44f0845b2403856ed6f543a3 100644
 --- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift
 @@ -143,6 +143,23 @@ extension GatewayChannelActor {
@@ -74,7 +91,7 @@ index afeeada7489d785ebab507984cb568e133038627..94f3c21628e5dfe03b64554c14c47f7b
  }
  
  private func withPathRecoveryFixture(
-@@ -364,6 +381,55 @@ struct GatewayNetworkPathRecoveryTests {
+@@ -364,6 +381,89 @@ struct GatewayNetworkPathRecoveryTests {
          }
      }
  
@@ -120,6 +137,40 @@ index afeeada7489d785ebab507984cb568e133038627..94f3c21628e5dfe03b64554c14c47f7b
 +            await answerKeepalive(round: 2, sleep: keepalive, socket: socket, error: nil)
 +            await answerKeepalive(round: 3, sleep: keepalive, socket: socket, error: URLError(.timedOut))
 +            await keepalive.started.wait(forCount: 4)
++
++            #expect(socket.snapshotPingCount() == 3)
++            #expect(fixture.session.snapshotMakeCount() == 1)
++            #expect(await fixture.channel.currentConnectionGeneration() == generation)
++        }
++    }
++
++    @Test
++    func `inbound frames during missed pongs keep a busy socket`() async throws {
++        let keepalive = PathRecoverySleep()
++        try await withPathRecoveryFixture { fixture in
++            await fixture.channel.setKeepaliveSleep(keepalive)
++            try await fixture.channel.connect()
++            let socket = try #require(fixture.session.latestTask())
++            let generation = await fixture.channel.currentConnectionGeneration()
++            socket.holdPongs()
++
++            for round in 1...3 {
++                await keepalive.started.wait(forCount: round)
++                keepalive.release()
++                await socket.waitForPings(count: round)
++                // A response delivered while the pong is outstanding, as on a link busy with inbound data.
++                let response = Task {
++                    try await fixture.channel.request(method: "health", params: nil, timeoutMs: 0)
++                }
++                await socket.waitForSentRequests(method: "health", count: round)
++                let id = try #require(socket.sentRequests(method: "health").last?["id"] as? String)
++                socket.emitResponse(id: id, payload: [:])
++                _ = try await response.value
++                socket.finishPongs(error: URLError(.timedOut))
++                await keepalive.started.wait(forCount: round + 1)
++                // A replacement socket would never see the next ping, so stop here instead of hanging.
++                try #require(fixture.session.snapshotMakeCount() == 1)
++            }
 +
 +            #expect(socket.snapshotPingCount() == 3)
 +            #expect(fixture.session.snapshotMakeCount() == 1)
