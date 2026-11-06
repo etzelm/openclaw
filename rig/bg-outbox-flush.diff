@@ -1,5 +1,5 @@
 diff --git a/apps/ios/Sources/Model/NodeAppModel.swift b/apps/ios/Sources/Model/NodeAppModel.swift
-index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..2314cb4d5685515a392c1a11e1ee028c1556a0d2 100644
+index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625a4b41116 100644
 --- a/apps/ios/Sources/Model/NodeAppModel.swift
 +++ b/apps/ios/Sources/Model/NodeAppModel.swift
 @@ -981,6 +981,10 @@ final class NodeAppModel {
@@ -45,17 +45,15 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..2314cb4d5685515a392c1a11e1ee028c
          let outcomeMessage =
              "Background refresh wake outcome wakeId=\(wakeId) "
                  + "applied=\(result.applied) "
-@@ -7398,6 +7406,40 @@ extension NodeAppModel {
+@@ -7398,6 +7406,43 @@ extension NodeAppModel {
          return !Task.isCancelled && result.handled
      }
  
 +    /// The wake's own work only reconnects; queued chat sends flush from the
 +    /// reconnect events, so hold the wake open until they finish or time out.
 +    private func drainChatOutboxForBackgroundWake(wakeId: String, startedAt: Date) async {
-+        let elapsedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
-+        let timeoutMs = min(
-+            Self.backgroundWakeChatOutboxDrainTimeoutMs,
-+            Self.backgroundWakeBudgetMs - elapsedMs)
++        let timeoutMs = Self.backgroundWakeChatOutboxDrainTimeoutMs(
++            wakeElapsedMs: Int(Date().timeIntervalSince(startedAt) * 1000))
 +        let skipReason: String? = if !self.isBackgrounded {
 +            "not_backgrounded"
 +        } else if Task.isCancelled {
@@ -74,8 +72,9 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..2314cb4d5685515a392c1a11e1ee028c
 +            return
 +        }
 +        // The beacon only waits for the node session; the operator session can lag it.
++        // Without the node session the wake did not reach the Gateway, so do not wait.
 +        let result = await viewModel.drainOutboxForBackgroundWake(timeoutMs: timeoutMs) { [weak self] remainingMs in
-+            guard let self else { return false }
++            guard let self, self.gatewayConnected else { return false }
 +            if self.operatorConnected { return true }
 +            return await self.waitForGatewayConnection(timeoutMs: remainingMs, pollMs: 250, owner: .operator)
 +        }
@@ -83,11 +82,66 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..2314cb4d5685515a392c1a11e1ee028c
 +            "Wake chat outbox wakeId=\(wakeId, privacy: .public) result=\(result.rawValue, privacy: .public)")
 +    }
 +
++    static func backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: Int) -> Int {
++        min(self.backgroundWakeChatOutboxDrainTimeoutMs, self.backgroundWakeBudgetMs - wakeElapsedMs)
++    }
++
      func handleSignificantLocationWakeIfNeeded() async {
          let wakeId = Self.makePushWakeAttemptID()
          let now = Date()
+diff --git a/apps/ios/Tests/BackgroundWakeChatOutboxTests.swift b/apps/ios/Tests/BackgroundWakeChatOutboxTests.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..f3d418cb464f4b46d40927d17105f40fb3bdb3ee
+--- /dev/null
++++ b/apps/ios/Tests/BackgroundWakeChatOutboxTests.swift
+@@ -0,0 +1,45 @@
++import Foundation
++import OpenClawChatUI
++import Testing
++@testable import OpenClaw
++
++@MainActor
++@Suite(.serialized)
++struct BackgroundWakeChatOutboxTests {
++    @Test func `chat outbox wait shrinks with the time a slow reconnect used`() {
++        #expect(NodeAppModel.backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: 0) == 8000)
++        #expect(NodeAppModel.backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: 20500) == 4500)
++        #expect(NodeAppModel.backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: 25000) <= 0)
++    }
++
++    @Test func `wake that cannot reach the gateway does not wait for queued chat sends`() async throws {
++        let appModel = NodeAppModel()
++        let gatewayID = "bg-outbox-unreachable-\(UUID().uuidString)"
++        appModel.connectedGatewayID = gatewayID
++        let store = try #require(appModel.makeChatOfflineStore())
++        appModel.chatPresentation.sync(appModel: appModel)
++        let viewModel = try #require(appModel.chatPresentation.viewModel)
++        defer { viewModel.detachTransport() }
++        #expect(await store.enqueueCommand(OpenClawChatOutboxCommand(
++            id: UUID().uuidString,
++            sessionKey: "main",
++            deliverySessionKey: "agent:main:main",
++            routingContract: "per-sender|main|main",
++            agentID: "main",
++            text: "queued while offline",
++            thinking: "off",
++            createdAt: Date().timeIntervalSince1970,
++            status: .queued,
++            retryCount: 0,
++            lastError: nil)))
++        appModel.isBackgrounded = true
++        #expect(!appModel.gatewayConnected)
++
++        let started = Date()
++        _ = await appModel.handleBackgroundRefreshWake()
++
++        #expect(Date().timeIntervalSince(started) < 2)
++        #expect(await store.loadCommands().map(\.status) == [.queued])
++        _ = await appModel.purgeChatTranscriptCache(gatewayID: gatewayID)
++    }
++}
 diff --git a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
-index bc58071516d024bbf59bb842a5178324e4517cab..83a3ced8b25a8a982297b448b06ed6524fcc5752 100644
+index bc58071516d024bbf59bb842a5178324e4517cab..8c19e3d96359c624c31f3eaecc2c344a1c7b82ec 100644
 --- a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
 +++ b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
 @@ -21,6 +21,20 @@ public enum OpenClawChatOutboxMessageState: Equatable, Sendable {
@@ -98,9 +152,9 @@ index bc58071516d024bbf59bb842a5178324e4517cab..83a3ced8b25a8a982297b448b06ed652
 +public enum OpenClawChatOutboxWakeDrain: String, Sendable {
 +    /// Nothing was waiting to be sent.
 +    case idle
-+    /// Every waiting row was accepted by the Gateway.
++    /// No waiting row is still queued or sending, and none failed; some may still await history confirmation.
 +    case delivered
-+    /// A waiting row now needs the user's retry or delete, or history reconciliation.
++    /// A waiting row now needs the user's retry or delete.
 +    case failed
 +    /// Rows are still waiting at the deadline, for example during retry backoff.
 +    case pending
@@ -111,7 +165,25 @@ index bc58071516d024bbf59bb842a5178324e4517cab..83a3ced8b25a8a982297b448b06ed652
  /// Durable offline command outbox. Sends made while the gateway is unhealthy
  /// are persisted in installation-wide client state and flushed
  /// strictly in createdAt order when health recovers. A gateway ACK only moves
-@@ -773,6 +787,42 @@ extension OpenClawChatViewModel {
+@@ -708,14 +722,15 @@ extension OpenClawChatViewModel {
+     func pollHealthIfNeeded(
+         force: Bool,
+         sessionSnapshot: SessionSnapshot? = nil,
+-        refreshSessionsOnReconnect: Bool = true) async
++        refreshSessionsOnReconnect: Bool = true,
++        timeoutMs: Int = 5000) async
+     {
+         if !force, let last = lastHealthPollAt, Date().timeIntervalSince(last) < 10 {
+             return
+         }
+         self.lastHealthPollAt = Date()
+         do {
+-            let ok = try await self.transport.requestHealth(timeoutMs: 5000)
++            let ok = try await self.transport.requestHealth(timeoutMs: timeoutMs)
+             if let sessionSnapshot, !self.isCurrentSession(sessionSnapshot) { return }
+             self.applyTransportHealth(ok, refreshSessionsOnReconnect: refreshSessionsOnReconnect)
+         } catch {
+@@ -773,6 +788,44 @@ extension OpenClawChatViewModel {
          }
      }
  
@@ -132,11 +204,13 @@ index bc58071516d024bbf59bb842a5178324e4517cab..83a3ced8b25a8a982297b448b06ed652
 +        guard await waitForRoute(Int(deadline.timeIntervalSinceNow * 1000)) else { return .noRoute }
 +        var forceHealthPoll = true
 +        while !Task.isCancelled, Date() < deadline {
-+            if !self.healthOK {
++            let remainingMs = Int(deadline.timeIntervalSinceNow * 1000)
++            if !self.healthOK, remainingMs > 0 {
 +                // A reconnect whose health event has not landed yet. The healthy
 +                // edge starts the outbox's own flush; the drain never flushes
 +                // directly, so retry backoff and attempt limits stay in charge.
-+                await self.pollHealthIfNeeded(force: forceHealthPoll)
++                // The probe gets only the time left, so it cannot outlast the wake.
++                await self.pollHealthIfNeeded(force: forceHealthPoll, timeoutMs: min(5000, remainingMs))
 +                forceHealthPoll = false
 +            }
 +            if self.outboxFlushTask == nil, let commands = await outbox.loadCommandsIfAvailable() {
@@ -156,10 +230,10 @@ index bc58071516d024bbf59bb842a5178324e4517cab..83a3ced8b25a8a982297b448b06ed652
          let presentationGeneration = self.outboxPresentationGeneration
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
 new file mode 100644
-index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828afd1fc0b60
+index 0000000000000000000000000000000000000000..aea4d65b75eff9278916e18f0111b6019b7ec2e4
 --- /dev/null
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,143 @@
 +import Foundation
 +import Testing
 +@testable import OpenClawChatUI
@@ -245,6 +319,27 @@ index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828af
 +        #expect(rows.map(\.retryCount) == [3])
 +    }
 +
++    @Test func `background wake drain bounds a slow health check by the time left`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store)
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "slow link")
++        // A slow reconnect left little of the wake: the Gateway answers health only after 5 s.
++        await transport.state.update {
++            $0.healthDelayMs = 5000
++            $0.healthy = true
++        }
++        let started = Date()
++
++        #expect(await drain(vm, timeoutMs: 800) == .pending)
++        #expect(Date().timeIntervalSince(started) < 1.5)
++        #expect(try #require(await transport.state.healthTimeoutsMs.last) <= 800)
++        #expect(await store.loadCommands().map(\.status) == [.queued])
++    }
++
 +    @Test func `background wake drain gives up at its deadline while offline`() async throws {
 +        let (store, _, databaseDirectory) = try makeOutboxStore()
 +        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
@@ -282,6 +377,36 @@ index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828af
 +        #expect(await transport.state.sentIdempotencyKeys == queuedIDs)
 +    }
 +}
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift
+index fac6e92edf754811472486e42396ac3667e8fd31..bfab62c7fafc41a0ff7b65b01acb22fb372039c6 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift
+@@ -115,6 +115,9 @@ actor OutboxTransportState {
+     var sendRoutingChanged = false
+     var sendSettingsChanged = false
+     var historyFails = false
++    /// A slow health answer that still honors the request timeout, like the gateway request does.
++    var healthDelayMs: Int?
++    var healthTimeoutsMs: [Int] = []
+     var activeRun: OpenClawChatInFlightRun?
+     var sessionListFails = false
+     var historyRequestCount = 0
+@@ -565,8 +568,13 @@ final class OutboxTestTransport: @unchecked Sendable, OpenClawChatTransport {
+             sessions: self.sessions)
+     }
+ 
+-    func requestHealth(timeoutMs _: Int) async throws -> Bool {
+-        await self.state.healthy
++    func requestHealth(timeoutMs: Int) async throws -> Bool {
++        await self.state.update { $0.healthTimeoutsMs.append(timeoutMs) }
++        if let delayMs = await self.state.healthDelayMs {
++            try await Task.sleep(nanoseconds: UInt64(min(delayMs, timeoutMs)) * 1_000_000)
++            if delayMs > timeoutMs { throw URLError(.timedOut) }
++        }
++        return await self.state.healthy
+     }
+ 
+     func events() -> AsyncStream<OpenClawChatTransportEvent> {
 diff --git a/docs/platforms/ios.md b/docs/platforms/ios.md
 index 4ad54f47adaaeab897f024f0d732d8ad1954bb99..a440f8b22dff185aa1400ce4ecaf9fe6906e1eef 100644
 --- a/docs/platforms/ios.md

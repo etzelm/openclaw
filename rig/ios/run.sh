@@ -50,6 +50,7 @@ endstep
 tests=(-only-testing:OpenClawTests/BgOutboxFlushProofTests -only-testing:OpenClawTests/BgOutboxDeliveryProofTests)
 if [ "$SIDE" = head ]; then
   tests+=(
+    -only-testing:OpenClawTests/BackgroundWakeChatOutboxTests
     -only-testing:OpenClawTests/NodeAppModelInvokeTests
     -only-testing:OpenClawTests/BackgroundAliveBeaconTests
     -only-testing:OpenClawTests/ChatSendHydrationTests

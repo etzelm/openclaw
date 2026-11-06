@@ -10,7 +10,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RIG="$ROOT/rig"
 WORK="$ROOT/.studio/$SIDE"
 SRC="$WORK/src"
-TOOLS="$ROOT/.studio/tools"
+TOOLS="$ROOT/.studio/tools-$SIDE"
 mkdir -p "$WORK" "$OUT" "$TOOLS"
 die() { echo "FAILED: $*" | tee -a "$OUT/status.txt"; exit 1; }
 stamp() { echo "=== $(date -u +%H:%M:%S) $*"; }
@@ -21,6 +21,7 @@ cp "$RIG/ios/BgOutboxFlushProofTests.swift" "$SRC/apps/ios/Tests/BgOutboxFlushPr
 cp "$RIG/ios/BgOutboxDeliveryProofTests.swift" "$SRC/apps/ios/Tests/BgOutboxDeliveryProofTests.swift"
 # Proof-only local Gateway methods for the delivery test (test fixture only, same on both sides).
 git -C "$SRC" apply "$RIG/harness.diff" || die harness
+for f in ${EXTRA_TEST_FILES:-}; do cp "$f" "$SRC/apps/ios/Tests/" || die "extra test $f"; done
 
 stamp "tools"
 if [ ! -x "$TOOLS/xcodegen" ]; then
@@ -56,11 +57,17 @@ perl -e 'alarm shift; exec @ARGV' 300 xcrun simctl bootstatus "$SIM_ID" -b >>"$O
 tests=(-only-testing:OpenClawTests/BgOutboxFlushProofTests -only-testing:OpenClawTests/BgOutboxDeliveryProofTests)
 if [ -z "${ONLY_PROOF:-}" ] && { [ "$SIDE" = head ] || [ "${ALL_SUITES:-}" = 1 ]; }; then
   tests+=(
+    -only-testing:OpenClawTests/BackgroundWakeChatOutboxTests
     -only-testing:OpenClawTests/NodeAppModelInvokeTests
     -only-testing:OpenClawTests/BackgroundAliveBeaconTests
     -only-testing:OpenClawTests/ChatSendHydrationTests
     -only-testing:OpenClawTests/RootTabsPresentationTests
   )
+fi
+
+if [ -n "${ONLY_TESTS:-}" ]; then
+  tests=()
+  for t in $ONLY_TESTS; do tests+=("-only-testing:OpenClawTests/$t"); done
 fi
 
 stamp "xcodebuild test $SIDE"
@@ -83,6 +90,7 @@ echo "xcodebuild exit $rc after $(($(date +%s) - started)) s" | tee -a "$OUT/too
   echo "exit $rc"
 } | tee "$OUT/result.txt"
 
+if [ -n "${ONLY_TESTS:-}" ]; then exit "$rc"; fi
 seconds() { sed -n 's/.*wakeSeconds=\([0-9.]*\).*/\1/p' "$OUT/wake-$1-$SIDE.txt" 2>/dev/null | head -1; }
 queued="$(seconds queued)"
 empty="$(seconds empty)"

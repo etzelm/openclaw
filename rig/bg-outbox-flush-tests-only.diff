@@ -1,9 +1,9 @@
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
 new file mode 100644
-index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828afd1fc0b60
+index 0000000000000000000000000000000000000000..aea4d65b75eff9278916e18f0111b6019b7ec2e4
 --- /dev/null
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,143 @@
 +import Foundation
 +import Testing
 +@testable import OpenClawChatUI
@@ -89,6 +89,27 @@ index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828af
 +        #expect(rows.map(\.retryCount) == [3])
 +    }
 +
++    @Test func `background wake drain bounds a slow health check by the time left`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store)
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "slow link")
++        // A slow reconnect left little of the wake: the Gateway answers health only after 5 s.
++        await transport.state.update {
++            $0.healthDelayMs = 5000
++            $0.healthy = true
++        }
++        let started = Date()
++
++        #expect(await drain(vm, timeoutMs: 800) == .pending)
++        #expect(Date().timeIntervalSince(started) < 1.5)
++        #expect(try #require(await transport.state.healthTimeoutsMs.last) <= 800)
++        #expect(await store.loadCommands().map(\.status) == [.queued])
++    }
++
 +    @Test func `background wake drain gives up at its deadline while offline`() async throws {
 +        let (store, _, databaseDirectory) = try makeOutboxStore()
 +        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
@@ -126,3 +147,33 @@ index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828af
 +        #expect(await transport.state.sentIdempotencyKeys == queuedIDs)
 +    }
 +}
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift
+index fac6e92edf754811472486e42396ac3667e8fd31..bfab62c7fafc41a0ff7b65b01acb22fb372039c6 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxTests.swift
+@@ -115,6 +115,9 @@ actor OutboxTransportState {
+     var sendRoutingChanged = false
+     var sendSettingsChanged = false
+     var historyFails = false
++    /// A slow health answer that still honors the request timeout, like the gateway request does.
++    var healthDelayMs: Int?
++    var healthTimeoutsMs: [Int] = []
+     var activeRun: OpenClawChatInFlightRun?
+     var sessionListFails = false
+     var historyRequestCount = 0
+@@ -565,8 +568,13 @@ final class OutboxTestTransport: @unchecked Sendable, OpenClawChatTransport {
+             sessions: self.sessions)
+     }
+ 
+-    func requestHealth(timeoutMs _: Int) async throws -> Bool {
+-        await self.state.healthy
++    func requestHealth(timeoutMs: Int) async throws -> Bool {
++        await self.state.update { $0.healthTimeoutsMs.append(timeoutMs) }
++        if let delayMs = await self.state.healthDelayMs {
++            try await Task.sleep(nanoseconds: UInt64(min(delayMs, timeoutMs)) * 1_000_000)
++            if delayMs > timeoutMs { throw URLError(.timedOut) }
++        }
++        return await self.state.healthy
+     }
+ 
+     func events() -> AsyncStream<OpenClawChatTransportEvent> {
