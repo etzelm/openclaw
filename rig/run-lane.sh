@@ -115,7 +115,7 @@ build() {
     endstep
   done
   # Probe placement must be identical apart from line numbers; so must the workload file.
-  diff <(sed 's/:[0-9]*//' "$OUT/base-probes.txt") <(sed 's/:[0-9]*//' "$OUT/head-probes.txt") || { fail "probe sets differ"; exit 1; }
+  diff <(sed -E 's/\.swift:[0-9]+/.swift/' "$OUT/base-probes.txt") <(sed -E 's/\.swift:[0-9]+/.swift/' "$OUT/head-probes.txt") || { fail "probe sets differ"; exit 1; }
 }
 
 run_workload() {
