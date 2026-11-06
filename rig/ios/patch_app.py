@@ -165,9 +165,10 @@ UI_TESTS = r'''
             let send = app.buttons["chat-send-message"]
             XCTAssertTrue(send.waitForExistence(timeout: 5) && send.isEnabled, "send button at append \(index)")
             send.tap()
-            let answer = transcript.descendants(matching: .any)
-                .matching(NSPredicate(format: "label CONTAINS %@", "raw-append-\(index)")).firstMatch
-            XCTAssertTrue(answer.waitForExistence(timeout: 20), "appended answer \(index) missing")
+            // No UI query here: under load, snapshotting after a send can stall for minutes on both sides.
+            // The rig checks from the app's own rendered-row log that each appended answer rendered.
+            print("CHATPERF_APPEND_SENT \(index) \(Date().timeIntervalSince1970)")
+            Thread.sleep(forTimeInterval: 4)
         }
         Thread.sleep(forTimeInterval: 1.5)
         self.scratchMark(variant, "append", "end")

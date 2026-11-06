@@ -116,6 +116,7 @@ def sample(dir_):
             "rows": rows,
             "rowKeys": len(rows),
             "splitRowsWithCards": sum(1 for k, v in rows.items() if not k.endswith("#whole") and v),
+            "appendedRunsRendered": len({k.split("#")[0] for k in rows if k.startswith("perf-run-append-")}),
             "rowCardChanges": changes,
             "xctestMetrics": metrics.get(variant, {}),
             "outcome": outcome.get(variant, "unknown"),
@@ -150,7 +151,8 @@ def main():
         for side in ("base", "head"):
             rows = per[side]
             lines.append(
-                f"- {side}: {len(rows)} rounds, outcomes {[r['outcome'] for r in rows]}, row keys "
+                f"- {side}: {len(rows)} rounds, outcomes {[r['outcome'] for r in rows]}, appended answers rendered "
+                f"{[r['appendedRunsRendered'] for r in rows]}, row keys "
                 f"{sorted({r['rowKeys'] for r in rows})}, split rows with cards {sorted({r['splitRowsWithCards'] for r in rows})}, "
                 f"row hashes {sorted({r['rowsSHA256'][:16] for r in rows})}, card changes {[r['rowCardChanges'] for r in rows]}")
         # Which rows get rendered depends on how far a run scrolled, so compare row by row: every row key
