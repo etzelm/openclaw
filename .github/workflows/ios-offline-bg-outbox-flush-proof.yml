@@ -1,0 +1,97 @@
+name: ios-offline-bg-outbox-flush-proof
+
+# Secretless native proof for the iOS background-wake outbox change. Every input (base SHA, PR diff,
+# expected head tree, proof test) is committed on this branch. Nothing here is part of the PR.
+on:
+  push:
+    branches: [proof/ios-offline-bg-outbox-flush]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-offline-bg-outbox-flush-proof-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "24.22.1"
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
+jobs:
+  swift:
+    name: OpenClawKit swift test (${{ matrix.mode }} ${{ matrix.side }})
+    runs-on: macos-26
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { mode: focused, side: base-tests }
+          - { mode: focused, side: head }
+          - { mode: full, side: head }
+    steps:
+      - uses: actions/checkout@v5
+        timeout-minutes: 3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        timeout-minutes: 5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 3
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: swift test ${{ matrix.mode }} on ${{ matrix.side }}
+        timeout-minutes: 60
+        run: bash rig/swift.sh ${{ matrix.mode }} ${{ matrix.side }}
+      - name: Upload result
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-${{ matrix.mode }}-${{ matrix.side }}
+          path: ${{ runner.temp }}/bg-outbox-flush-proof/out/**
+          if-no-files-found: warn
+          retention-days: 90
+
+  ios:
+    name: iOS simulator (${{ matrix.side }})
+    runs-on: macos-26
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [base, head]
+    steps:
+      - uses: actions/checkout@v5
+        timeout-minutes: 3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        timeout-minutes: 5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 3
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Build and test on the simulator (${{ matrix.side }})
+        timeout-minutes: 85
+        run: bash rig/ios/run.sh ${{ matrix.side }}
+      - name: Upload evidence
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-${{ matrix.side }}
+          path: |
+            ${{ runner.temp }}/bg-outbox-flush-proof/out/**
+            !${{ runner.temp }}/bg-outbox-flush-proof/out/**/*.xcresult/**
+          if-no-files-found: warn
+          retention-days: 90

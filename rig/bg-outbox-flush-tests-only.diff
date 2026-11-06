@@ -1,0 +1,77 @@
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..f116e50ab85ec5c2a063ef38735c70404ed41e0c
+--- /dev/null
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
+@@ -0,0 +1,71 @@
++import Foundation
++import Testing
++@testable import OpenClawChatUI
++
++@MainActor
++private func queueWhileOffline(_ vm: OpenClawChatViewModel, text: String) async throws {
++    vm.input = text
++    vm.send()
++    try await waitForOutboxState { !vm.isSubmittingDraft }
++}
++
++@Suite(.timeLimit(.minutes(1)))
++struct ChatViewModelOutboxBackgroundWakeTests {
++    @Test func `background wake drain flushes queued sends before returning`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store, transcriptCache: store)
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "first")
++        try await queueWhileOffline(vm, text: "second")
++        let queuedIDs = await store.loadCommands().map(\.id)
++        #expect(queuedIDs.count == 2)
++
++        // A wake reconnects the gateway; its health event has not reached the view model yet.
++        await transport.state.update { $0.healthy = true }
++        let drained = await vm.drainOutboxForBackgroundWake(timeoutMs: 20000)
++
++        #expect(drained)
++        #expect(await transport.state.sentIdempotencyKeys == queuedIDs)
++        #expect(await transport.state.sentMessages == ["first", "second"])
++        #expect(await store.loadCommands().isEmpty)
++    }
++
++    @Test func `background wake drain gives up at its deadline while offline`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store)
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "still offline")
++
++        let drained = await vm.drainOutboxForBackgroundWake(timeoutMs: 300)
++
++        #expect(!drained)
++        #expect(await transport.state.sentIdempotencyKeys.isEmpty)
++        #expect(await store.loadCommands().map(\.status) == [.queued])
++    }
++
++    @Test func `background wake drain never replays an unconfirmed send`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store)
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "accepted before disconnect")
++        let queuedIDs = await store.loadCommands().map(\.id)
++        await transport.state.update {
++            $0.sendFailsAfterRecording = true
++            $0.healthy = true
++        }
++
++        #expect(await vm.drainOutboxForBackgroundWake(timeoutMs: 20000))
++        // A second wake must not resend the ambiguous attempt.
++        #expect(await vm.drainOutboxForBackgroundWake(timeoutMs: 20000))
++        #expect(await transport.state.sentIdempotencyKeys == queuedIDs)
++    }
++}
