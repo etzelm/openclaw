@@ -1,0 +1,168 @@
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSendSlowUploadProofTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSendSlowUploadProofTests.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..868ee6d65d6f41943026b3e1c23d168cc3afb02f
+--- /dev/null
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSendSlowUploadProofTests.swift
+@@ -0,0 +1,58 @@
++#if os(macOS) || os(iOS)
++import Foundation
++import OpenClawChatUI
++import Testing
++@testable import OpenClawKit
++
++/// Proof-only, not part of the fix: sends one 8 MB file through the shipped request path
++/// (GatewayNodeSession.request, real URLSession WebSocket) to a Gateway fixture that reads
++/// the upload at 160 KiB/s and ACKs chat.send only after the whole frame arrives (~65 s).
++struct ChatSendSlowUploadProofTests {
++    @Test(.stateDirectoryIsolated)
++    func `chat send with an 8 MB file is acknowledged after a slow upload`() async throws {
++        let rate = 160 * 1024
++        let fixture = try await NativeGatewayWebSocketFixture.start(issuedDeviceTokens: [nil])
++        defer { fixture.stop() }
++        fixture.throttleUploads(bytesPerSecond: rate)
++        let gateway = GatewayNodeSession()
++        try await gateway.connect(
++            url: fixture.url(),
++            credentials: .init(),
++            connectOptions: GatewayConnectOptions(
++                role: "node", scopes: [], caps: [], commands: [], permissions: [:],
++                clientId: "slow-upload-proof", clientMode: "node", clientDisplayName: "Slow Upload Proof",
++                includeDeviceIdentity: false),
++            sessionBox: nil,
++            onConnected: {},
++            onDisconnected: { _ in },
++            onInvoke: { BridgeInvokeResponse(id: $0.id, ok: true) })
++
++        let content = Data(repeating: 0x41, count: 8_000_000).base64EncodedString()
++        let request = OpenClawChatGatewayRequests.sendMessage(
++            sessionKey: "main",
++            agentID: nil,
++            expectedSessionRoutingContract: nil,
++            message: "report",
++            thinking: nil,
++            idempotencyKey: "slow-upload-proof",
++            attachments: [.init(type: "file", mimeType: "application/pdf", fileName: "report.pdf", content: content)])
++        let readBefore = fixture.bytesRead(at: 0)
++        let started = ContinuousClock.now
++        let outcome: String
++        do {
++            let data = try await gateway.request(request)
++            let ack = try JSONDecoder().decode(OpenClawChatSendResponse.self, from: data)
++            outcome = "ack runId=\(ack.runId) status=\(ack.status)"
++        } catch {
++            outcome = "error=\(error.localizedDescription)"
++        }
++        let elapsed = ContinuousClock.now - started
++        let read = fixture.bytesRead(at: 0) - readBefore
++        print(
++            "SEND_TIMEOUT_PROOF deadlineMs=\(Int(request.timeoutMs)) attachmentBase64Bytes=\(content.utf8.count)",
++            "drainBytesPerSecond=\(rate) elapsed=\(elapsed) serverReadBytesAtOutcome=\(read) outcome=\(outcome)")
++        await gateway.disconnect()
++        #expect(outcome == "ack runId=proof-run status=started")
++    }
++}
++#endif
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+index 6e4b23aa75c1199612c60caf77eb3ef5d90e4949..8341dc02aff592707b8a83ed44d369535822c92d 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+@@ -92,6 +92,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+         var buffer = Data()
+         var phase = Phase.handshake
+         var isStalled = false
++        var bytesRead = 0
+     }
+ 
+     private static let websocketGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+@@ -100,6 +101,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+     private let issuedDeviceTokens: [String?]
+     private let connectFailures: [Int: ConnectFailure]
+     private var clients: [Int: Client] = [:]
++    private var uploadDrainBytesPerSecond: Int?
+     private var connectAuth: [ConnectAuth] = []
+     private var nextConnectionIndex = 0
+     private var stopped = false
+@@ -223,6 +225,26 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+         self.queue.sync { self.clients[index]?.isStalled = true }
+     }
+ 
++    /// Proof-only slow uplink: open sockets drain at a fixed rate, receive Gateway ticks,
++    /// and get a chat.send ACK only after the whole request frame has been read.
++    func throttleUploads(bytesPerSecond: Int) {
++        self.queue.sync { self.uploadDrainBytesPerSecond = bytesPerSecond }
++    }
++
++    func bytesRead(at index: Int) -> Int {
++        self.queue.sync { self.clients[index]?.bytesRead ?? -1 }
++    }
++
++    private func scheduleTick(_ index: Int) {
++        self.queue.asyncAfter(deadline: .now() + 5) { [weak self] in
++            guard let self, !self.stopped, self.clients[index] != nil else { return }
++            self.sendJSON(
++                ["type": "event", "event": "tick", "payload": ["ts": 1_800_000_000_000]],
++                index: index)
++            self.scheduleTick(index)
++        }
++    }
++
+     func stop() {
+         self.queue.sync {
+             guard !self.stopped else { return }
+@@ -262,21 +284,29 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+ 
+     private func receive(_ index: Int) {
+         guard let client = self.clients[index], !client.isStalled else { return }
++        let rate = client.phase == .open ? self.uploadDrainBytesPerSecond : nil
+         client.connection.receive(
+             minimumIncompleteLength: 1,
+-            maximumLength: 65536)
++            maximumLength: rate == nil ? 65536 : 16384)
+         { [weak self] data, _, complete, error in
+             // A receive already in flight must not answer pings after the test stalls this socket.
+             guard let self, var client = self.clients[index], !client.isStalled else { return }
+             if let data {
+                 client.buffer.append(data)
++                client.bytesRead += data.count
+                 self.clients[index] = client
+                 self.process(index)
+             }
+             if error != nil || complete {
+                 self.close(index)
+             } else if self.clients[index] != nil {
+-                self.receive(index)
++                if let rate, let count = data?.count, count > 0 {
++                    self.queue.asyncAfter(deadline: .now() + Double(count) / Double(rate)) { [weak self] in
++                        self?.receive(index)
++                    }
++                } else {
++                    self.receive(index)
++                }
+             }
+         }
+     }
+@@ -426,6 +456,16 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+     }
+ 
+     private func handleText(_ data: Data, index: Int) {
++        if self.uploadDrainBytesPerSecond != nil, self.clients[index]?.phase == .open,
++           let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
++           request["method"] as? String == "chat.send",
++           let id = request["id"] as? String
++        {
++            self.sendJSON(
++                ["type": "res", "id": id, "ok": true, "payload": ["runId": "proof-run", "status": "started"]],
++                index: index)
++            return
++        }
+         guard var client = self.clients[index], client.phase == .connect,
+               let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               request["type"] as? String == "req",
+@@ -514,6 +554,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+             ],
+         ]
+         self.sendJSON(frame, index: index)
++        if self.uploadDrainBytesPerSecond != nil { self.scheduleTick(index) }
+     }
+ 
+     private func sendConnectFailure(id: String, failure: ConnectFailure, index: Int) {

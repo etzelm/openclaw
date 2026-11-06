@@ -9,3 +9,7 @@ Secretless real-Xcode proof rig for the chat.send attachment deadline fix (branc
   - focused: base + test-only.diff, `swift test --filter ChatGatewayRequestTests` must fail on the new test;
     then exact head tree, same filter must pass. Job fails unless both hold.
   - full-suite: full OpenClawKit `swift test --parallel` on the exact head tree.
+  - harness: rig/harness.diff (rig-only; adds a throttled-upload mode to NativeGatewayWebSocketFixture and
+    ChatSendSlowUploadProofTests) sends one 8 MB file through GatewayNodeSession.request with a real URLSession
+    WebSocket. The fixture reads at 160 KiB/s, sends ticks every 5 s, and ACKs chat.send after the whole frame.
+    Base must fail with "timed out after 30000ms"; the exact head tree must get the ACK.

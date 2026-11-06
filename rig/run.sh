@@ -1,8 +1,11 @@
 #!/bin/bash
 # Real-Xcode proof for the chat.send attachment deadline fix.
-# Usage: rig/run.sh focused | full
+# Usage: rig/run.sh focused | harness | full
 #   focused: base + new test only (expect the new test to fail), then base + full head diff
 #            (expect ChatGatewayRequestTests to pass). Same scratch dir, same runner.
+#   harness: rig-only harness.diff (throttled NativeGatewayWebSocketFixture + one proof test) sends an
+#            8 MB file through GatewayNodeSession.request. Base must time out at 30 s while the
+#            frame is still uploading; the exact head tree + harness must get the chat.send ACK.
 #   full:    full OpenClawKit swift test on the exact head tree.
 set -uo pipefail
 MODE="$1"
@@ -63,6 +66,30 @@ if [ "$MODE" = focused ]; then
   red_failed_on_new_test=0
   grep -Eq "(✘|failed).*$TEST_NAME" "$OUT/red.log" && red_failed_on_new_test=1
   test "$red" -ne 0 && test "$red_failed_on_new_test" = 1 && test "$green" -eq 0
+  exit $?
+fi
+
+if [ "$MODE" = harness ]; then
+  proof_line() { grep -h "SEND_TIMEOUT_PROOF" "$1" | tail -1; }
+  # Base: unmodified production code + rig-only harness.
+  git -C "$SRC" apply --index "$RIG/harness.diff" || exit 1
+  swift_test --filter ChatSendSlowUploadProofTests >"$OUT/base.log" 2>&1
+  base=$?
+  { proof_line "$OUT/base.log"; grep -E "Test run with|✘|error:" "$OUT/base.log" | tail -10; echo "exit $base"; } | tee "$OUT/base-result.txt"
+  # Head: exact head tree + the same harness.
+  git -C "$SRC" reset -q --hard
+  head_tree_check
+  git -C "$SRC" apply --index "$RIG/harness.diff" || exit 1
+  swift_test --filter ChatSendSlowUploadProofTests >"$OUT/head.log" 2>&1
+  head=$?
+  { proof_line "$OUT/head.log"; grep -E "Test run with|✘|✔|error:" "$OUT/head.log" | tail -10; echo "exit $head"; } | tee "$OUT/head-result.txt"
+  {
+    echo "### harness base $BASE (expect timeout at 30 s while uploading)"
+    echo '```'; cat "$OUT/base-result.txt"; echo '```'
+    echo "### harness head tree $HEAD_TREE (expect chat.send ACK)"
+    echo '```'; cat "$OUT/head-result.txt"; echo '```'
+  } | summary
+  test "$base" -ne 0 && proof_line "$OUT/base.log" | grep -q "timed out after 30000ms" && test "$head" -eq 0
   exit $?
 fi
 
