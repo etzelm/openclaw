@@ -137,10 +137,10 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
                  previews.append(preview)
              }
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
-index 79fc764076887d7a33426c3a2f829cf312a8064b..2d45898b1e15d77c1b5ab95fd1763100ff4495ca 100644
+index 79fc764076887d7a33426c3a2f829cf312a8064b..3e0c3c2715aeb98f9ab6f708d51728e03fd3afd3 100644
 --- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
-@@ -250,6 +250,53 @@ struct ChatSourcePreviewTests {
+@@ -250,6 +250,58 @@ struct ChatSourcePreviewTests {
          #expect((projector.project([answer])[answer.id] ?? []).isEmpty)
      }
  
@@ -173,6 +173,13 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..2d45898b1e15d77c1b5ab95fd1763100
 +            ([search("Edited"), fetch, answer, otherSearch, otherAnswer], context),
 +            ([search("Edited"), fetch, otherSearch, otherAnswer], context),
 +            (original, nil),
++            (original, context),
++        ]
++        // Replies whose cards must be reused (true) or rebuilt (false) at a step.
++        let reuse: [Int: [UUID: Bool]] = [
++            1: [answer.id: true, otherAnswer.id: true],
++            2: [answer.id: false, otherAnswer.id: true],
++            9: [answer.id: false, otherAnswer.id: false],
 +        ]
 +        var projector = ChatSourcePreviewProjector()
 +        var previous: [UUID: [ChatSourcePreview]] = [:]
@@ -180,12 +187,10 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..2d45898b1e15d77c1b5ab95fd1763100
 +            let incremental = projector.project(step.messages, context: step.context)
 +            var fresh = ChatSourcePreviewProjector()
 +            #expect(incremental == fresh.project(step.messages, context: step.context), "step \(index)")
-+            if index == 1 {
-+                // Appending an unrelated row keeps every reply's recorded cards.
-+                for id in [answer.id, otherAnswer.id] {
-+                    let before = previous[id]?.withUnsafeBufferPointer(\.baseAddress)
-+                    #expect(before != nil && before == incremental[id]?.withUnsafeBufferPointer(\.baseAddress))
-+                }
++            for (id, reused) in reuse[index] ?? [:] {
++                let before = previous[id]?.withUnsafeBufferPointer(\.baseAddress)
++                let after = incremental[id]?.withUnsafeBufferPointer(\.baseAddress)
++                #expect(before != nil && after != nil && (before == after) == reused, "step \(index)")
 +            }
 +            previous = incremental
 +        }

@@ -1,32 +1,28 @@
-name: chatui-perf-proof
+name: chatui-perf-proof-p2
 
-# Secretless native proof for the ChatUI performance PRs. Runs on push to this
+# Secretless native proof for PR #193863 (incremental source previews). Runs on push to this
 # branch only; every input (base SHA, head diff, expected head tree) is committed here.
 on:
   push:
-    branches: [proof/chatui-perf-rig]
-  workflow_dispatch:
+    branches: [proof/chatui-perf-p2]
 
 permissions:
   contents: read
 
 concurrency:
-  group: chatui-perf-proof-${{ github.sha }}
+  group: chatui-perf-proof-p2-${{ github.sha }}
   cancel-in-progress: false
 
 env:
   NODE_VERSION: "24.22.1"
   COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+  LANE: p2
 
 jobs:
   workload:
-    name: workload ${{ matrix.lane }}
+    name: workload p2 (base vs head, interleaved)
     runs-on: macos-26
-    timeout-minutes: 150
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [p1, p2, p3]
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
         with:
@@ -35,32 +31,42 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Select newest Xcode
+        timeout-minutes: 5
         run: bash rig/select-xcode.sh
       - name: Enable pnpm
+        timeout-minutes: 2
         run: corepack enable
-      - name: Run lane
-        env:
-          PROOF_OUT: ${{ runner.temp }}/proof-out
-        run: bash rig/run-lane.sh ${{ matrix.lane }} 5
+      - name: Prepare base and head (tree check, native assets)
+        timeout-minutes: 15
+        run: bash rig/run-lane.sh "$LANE" prepare
+      - name: Instrument identically and build release workload
+        timeout-minutes: 40
+        run: bash rig/run-lane.sh "$LANE" build
+      - name: Workload, 7 interleaved rounds
+        timeout-minutes: 25
+        run: bash rig/run-lane.sh "$LANE" workload 7
+      - name: xctrace os_signpost, one run per side
+        timeout-minutes: 12
+        continue-on-error: true
+        run: bash rig/run-lane.sh "$LANE" trace
+      - name: Summary
+        if: always()
+        timeout-minutes: 5
+        run: bash rig/run-lane.sh "$LANE" summary
       - name: Upload evidence
         if: always()
+        timeout-minutes: 10
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-perf-proof-${{ matrix.lane }}
-          path: |
-            ${{ runner.temp }}/proof-out/${{ matrix.lane }}/**
-            !${{ runner.temp }}/proof-out/${{ matrix.lane }}/*-trace-toc.xml
+          name: chatui-perf-proof-p2
+          path: ${{ runner.temp }}/chatui-proof/out/p2/**
           if-no-files-found: warn
           retention-days: 90
 
   full-suite:
-    name: full OpenClawKit tests ${{ matrix.lane }}
+    name: full OpenClawKit tests p2 head
     runs-on: macos-26
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [p1, p2, p3]
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v5
         with:
@@ -69,18 +75,20 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Select newest Xcode
+        timeout-minutes: 5
         run: bash rig/select-xcode.sh
       - name: Enable pnpm
+        timeout-minutes: 2
         run: corepack enable
       - name: Full swift test on head
-        env:
-          PROOF_OUT: ${{ runner.temp }}/proof-out
-        run: bash rig/full-suite.sh ${{ matrix.lane }}
+        timeout-minutes: 60
+        run: bash rig/full-suite.sh "$LANE"
       - name: Upload result
         if: always()
+        timeout-minutes: 10
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-full-suite-${{ matrix.lane }}
-          path: ${{ runner.temp }}/proof-out/${{ matrix.lane }}-full/**
+          name: chatui-full-suite-p2
+          path: ${{ runner.temp }}/chatui-full/out/p2-full/**
           if-no-files-found: warn
           retention-days: 90

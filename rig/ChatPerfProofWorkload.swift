@@ -1,9 +1,14 @@
-// Native proof workload for the shared chat view. The proof rig copies this file into
-// OpenClawKitTests on base and head alike; it is never part of a PR. Gated by CHAT_PERF_PROOF=1.
+// Native proof workload for incremental source previews (PR #193863). The proof rig copies this
+// file into OpenClawKitTests on base and head alike; it is never part of a PR. Gated by CHAT_PERF_PROOF=1.
+//
+// Every message reaches the view model through the chat transport: the initial history and the
+// reloads through `requestHistory`, persisted appends as `.sessionMessage` events, and the source
+// context through `.chatMetadataChanged` plus `loadSourceContext`. So the measured work always runs
+// messages.didSet -> ChatSourcePreviewState.update -> ChatSourcePreviewProjector.project.
 #if os(macOS)
 import AppKit
+import CryptoKit
 import Foundation
-import ObjectiveC
 import OpenClawKit
 import os
 import SwiftUI
@@ -12,8 +17,10 @@ import Testing
 
 private final class ProofTransport: @unchecked Sendable, OpenClawChatTransport {
     private let lock = NSLock()
-    private let history: [AnyCodable]
+    private var history: [AnyCodable]
     private var requests = 0
+    private var sourceContext: OpenClawChatSourceContext?
+    private var continuations: [AsyncStream<OpenClawChatTransportEvent>.Continuation] = []
 
     init(history: [AnyCodable]) {
         self.history = history
@@ -23,12 +30,31 @@ private final class ProofTransport: @unchecked Sendable, OpenClawChatTransport {
         self.lock.withLock { self.requests }
     }
 
+    /// Server side persistence: rows the next history request returns.
+    func persist(_ rows: [AnyCodable]) {
+        self.lock.withLock { self.history += rows }
+    }
+
+    func setSourceContext(_ context: OpenClawChatSourceContext?) {
+        self.lock.withLock { self.sourceContext = context }
+    }
+
+    func emit(_ event: OpenClawChatTransportEvent) {
+        let targets = self.lock.withLock { self.continuations }
+        for continuation in targets {
+            continuation.yield(event)
+        }
+    }
+
     func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload {
-        self.lock.withLock { self.requests += 1 }
+        let rows = self.lock.withLock {
+            self.requests += 1
+            return self.history
+        }
         return OpenClawChatHistoryPayload(
             sessionKey: sessionKey,
             sessionId: "proof-session",
-            messages: self.history,
+            messages: rows,
             thinkingLevel: "off")
     }
 
@@ -46,80 +72,61 @@ private final class ProofTransport: @unchecked Sendable, OpenClawChatTransport {
         true
     }
 
+    func loadSourceContext() async -> OpenClawChatSourceContext? {
+        self.lock.withLock { self.sourceContext }
+    }
+
     func events() -> AsyncStream<OpenClawChatTransportEvent> {
-        AsyncStream { $0.finish() }
+        AsyncStream { continuation in
+            self.lock.withLock { self.continuations.append(continuation) }
+        }
     }
-}
-
-/// Counts NSRegularExpression compiles by pattern family without touching product code.
-private enum RegexCompileCounter {
-    static func family(_ pattern: String) -> String {
-        if pattern.contains("https?://") { return "bareURL" }
-        if pattern.contains("EXTERNAL_UNTRUSTED_CONTENT") { return "externalFrame" }
-        if pattern.contains("<title") { return "htmlTitle" }
-        if pattern.contains("&#(x") { return "htmlEntity" }
-        if pattern.contains("[A-Za-z_:]") { return "htmlAttribute" }
-        return "other"
-    }
-
-    static let installed: Bool = {
-        let selector = NSSelectorFromString("initWithPattern:options:error:")
-        guard let method = class_getInstanceMethod(NSRegularExpression.self, selector) else { return false }
-        typealias Original = @convention(c) (
-            UnsafeRawPointer?, Selector, UnsafeRawPointer?, UInt, UnsafeRawPointer?) -> UnsafeRawPointer?
-        let original = unsafeBitCast(method_getImplementation(method), to: Original.self)
-        let replacement: @convention(block) (
-            UnsafeRawPointer?, UnsafeRawPointer?, UInt, UnsafeRawPointer?) -> UnsafeRawPointer? =
-            { receiver, pattern, options, error in
-                if let pattern {
-                    let text = Unmanaged<NSString>.fromOpaque(pattern).takeUnretainedValue() as String
-                    ChatPerfProbe.hit("regexCompile." + RegexCompileCounter.family(text))
-                }
-                return original(receiver, selector, pattern, options, error)
-            }
-        method_setImplementation(method, imp_implementationWithBlock(replacement))
-        return true
-    }()
 }
 
 private enum ProofFixture {
-    static let runs = 60
-    static let appended = 10
+    /// Cited replies in the loaded transcript (N).
+    static let runs = 80
+    /// New turns delivered one persisted message at a time (3 messages per turn).
+    static let appendedTurns = 7
+    static let reloadsSame = 5
+    static let reloadsGrown = 10
+    static let contextChanges = 10
     static let epochMs = 1_790_000_000_000.0
+    static let gateway = "https://gateway.proof.invalid"
 
-    static func wrap(_ text: String, name: String) -> String {
+    static let context = OpenClawChatSourceContext(
+        gatewayURL: URL(string: gateway + "/")!, basePath: "", publicOrigin: nil)
+
+    static func wrap(_ text: String) -> String {
         """
         <<<EXTERNAL_UNTRUSTED_CONTENT id="0123456789abcdef">>>
-        Source: \(name == "web_search" ? "Web Search" : "Web Fetch")
+        Source: Web Search
         ---
         \(text)
         <<<END_EXTERNAL_UNTRUSTED_CONTENT id="0123456789abcdef">>>
         """
     }
 
-    /// One agent turn: question, web_search result, cited answer that splits into three presentation parts.
+    /// One agent turn: question, web_search result, cited answer. The fourth cited link points at a
+    /// gateway chat route, so its card is shown without a source context and suppressed with one.
     static func turn(_ index: Int) -> [OpenClawChatMessage] {
         let runID = "proof-run-\(index)"
         let start = self.epochMs + Double(index) * 60000
-        let urls = (0..<3).map { "https://example\($0).com/article-\(index)" }
+        let urls = (0..<3).map { "https://example\($0).com/article-\(index)" } +
+            ["\(self.gateway)/chat/main/session-\(index)"]
         let rows: [[String: Any]] = urls.enumerated().map { offset, url in
             [
                 "url": url,
-                "title": self.wrap("Result \(offset) for question \(index)", name: "web_search"),
-                "snippet": self.wrap(
-                    "Snippet \(offset) with **findings** for question \(index) and a [reference](\(url)).",
-                    name: "web_search"),
+                "title": self.wrap("Result \(offset) for question \(index)"),
+                "snippet": self.wrap("Snippet \(offset) with **findings** for question \(index) and a [reference](\(url))."),
             ]
         }
-        let paragraph = String(
-            repeating: "This paragraph summarizes recorded findings with **emphasis** and plain prose. ",
-            count: 12)
-        let answer = "\(paragraph)\n\nSee [one](\(urls[0])), [two](\(urls[1])) and [three](\(urls[2])). " +
-            "Raw link https://example9.com/raw-\(index) for later.\n\n\(paragraph)"
+        let answer = "Recorded findings with **emphasis** for question \(index).\n\n" +
+            "See [one](\(urls[0])), [two](\(urls[1])), [three](\(urls[2])) and [session](\(urls[3]))."
         return [
             OpenClawChatMessage(
                 role: "user",
-                content: [.init(type: "text", text: "Question \(index): what changed in https://example.org/q-\(index)?")],
+                content: [.init(type: "text", text: "Question \(index): what changed?")],
                 timestamp: start),
             OpenClawChatMessage(
                 role: "toolResult", content: [], timestamp: start + 1000, transcriptRunID: runID,
@@ -132,53 +139,100 @@ private enum ProofFixture {
                 .init(type: "toolCall", id: "call-\(index)", name: "web_search"),
                 .init(type: "tool_result", text: "Recorded", id: "call-\(index)"),
                 .init(type: "text", text: answer),
-                .init(type: "toolCall", id: "next-\(index)", name: "read"),
-                .init(type: "tool_result", text: "Recorded next", id: "next-\(index)"),
-            ], timestamp: start + 2000, transcriptRunID: runID, phase: "final_answer"),
+            ], timestamp: start + 2000, transcriptRunID: runID, stopReason: "stop", phase: "final_answer"),
         ]
     }
 
-    static func history() throws -> [AnyCodable] {
-        let messages = (0..<self.runs).flatMap(self.turn)
+    static func userRow(_ index: Int) -> OpenClawChatMessage {
+        OpenClawChatMessage(
+            role: "user",
+            content: [.init(type: "text", text: "Follow-up \(index) from another device.")],
+            timestamp: self.epochMs + Double(self.runs + self.appendedTurns + index) * 60000)
+    }
+
+    static func encode(_ messages: [OpenClawChatMessage]) throws -> [AnyCodable] {
         let data = try JSONEncoder().encode(messages)
         return try JSONDecoder().decode([AnyCodable].self, from: data)
     }
+}
 
-    static let openGraphHTML = """
-    <html><head><title>Fixture &amp; page</title>
-    <meta property="og:title" content="Proof &#x27;page&#x27; title">
-    <meta name="description" content="A &quot;fixture&quot; description &amp; more">
-    <meta property="og:image" content="/images/card.png">
-    </head><body><p>Body</p></body></html>
-    """
+/// Deterministic digest of projected cards (Swift's Hasher is seeded per process).
+private enum CardDigest {
+    static func hex(_ text: String) -> String {
+        SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    static func describe(_ cards: [ChatSourcePreview]) -> String {
+        cards.map { card in
+            let kind = card.excerptKind.map { "\($0)" } ?? "-"
+            let cited = card.citedURLs.map(\.absoluteString).joined(separator: ",")
+            return "\(card.url.absoluteString)|\(card.title)|\(card.domain)|\(card.excerpt ?? "-")|\(kind)|\(cited)"
+        }.joined(separator: "\n")
+    }
+
+    /// Per cited reply (keyed by run id) plus one digest over all of them in run order.
+    @MainActor static func capture(_ vm: OpenClawChatViewModel) -> (perReply: [String: String], all: String, cards: Int) {
+        var perReply: [String: String] = [:]
+        var cards = 0
+        for message in vm.messages {
+            guard let runID = message.transcriptRunID,
+                  let previews = vm.sourcePreviewState.previews[message.id], !previews.isEmpty else { continue }
+            perReply[runID] = self.hex(self.describe(previews))
+            cards += previews.count
+        }
+        let all = perReply.keys.sorted { lhs, rhs in
+            (Int(lhs.split(separator: "-").last ?? "") ?? 0) < (Int(rhs.split(separator: "-").last ?? "") ?? 0)
+        }.map { "\($0)=\(perReply[$0]!)" }.joined(separator: "\n")
+        return (perReply, self.hex(all), cards)
+    }
 }
 
 @MainActor
 private final class ProofRecorder {
+    static let watched = [
+        "sourceStateUpdate", "project", "cardBuild", "cardTitleRender", "cardExcerptRender",
+        "citationParse", "externalFrameStrip", "rowSourcePreviews",
+    ]
     let label: String
     let signposter = OSSignposter(subsystem: "ai.openclaw.chatperfproof", category: "workload")
     var phases: [[String: Any]] = []
-    let clock = ContinuousClock()
 
     init(label: String) {
         self.label = label
     }
 
-    func phase(_ name: String, steps: Int, _ body: () async throws -> Void) async rethrows {
-        let before = ChatPerfProbe.snapshot()
+    /// Runs `body` once per step and records, per step, the probe count deltas, the duration of
+    /// every ChatSourcePreviewState.update call that ran inside it, and the cited replies present.
+    func phase(
+        _ name: String,
+        steps: Int,
+        citedReplies: () -> Int,
+        _ body: (Int) async throws -> Bool) async rethrows
+    {
         let id = self.signposter.makeSignpostID()
         let state = self.signposter.beginInterval("phase", id: id, "\(self.label, privacy: .public) \(name, privacy: .public)")
-        let started = self.clock.now
-        try await body()
-        let elapsed = started.duration(to: self.clock.now)
-        self.signposter.endInterval("phase", state)
-        let after = ChatPerfProbe.snapshot()
-        var counts: [String: Int] = [:]
-        for (key, value) in after where value - (before[key] ?? 0) > 0 {
-            counts[key] = value - (before[key] ?? 0)
+        var records: [[String: Any]] = []
+        var timeouts = 0
+        for step in 0..<steps {
+            let before = ChatPerfProbe.snapshot()
+            let durationsBefore = ChatPerfProbe.durations("sourceStateUpdate").count
+            let ok = try await body(step)
+            if !ok { timeouts += 1 }
+            let after = ChatPerfProbe.snapshot()
+            var counts: [String: Int] = [:]
+            for key in Self.watched {
+                counts[key] = (after[key] ?? 0) - (before[key] ?? 0)
+            }
+            let updateNs = Array(ChatPerfProbe.durations("sourceStateUpdate").dropFirst(durationsBefore))
+            records.append([
+                "counts": counts,
+                "updateNs": updateNs.map { Int($0) },
+                "citedReplies": citedReplies(),
+                "ok": ok,
+            ])
         }
-        let ms = Double(elapsed.components.seconds) * 1000 + Double(elapsed.components.attoseconds) / 1e15
-        self.phases.append(["name": name, "steps": steps, "ms": ms, "counts": counts])
+        self.signposter.endInterval("phase", state)
+        self.phases.append(["name": name, "steps": records, "timeouts": timeouts])
     }
 }
 
@@ -206,6 +260,7 @@ struct ChatPerfProofWorkload {
         return own + view.subviews.flatMap { Self.scrollViews(in: $0) }
     }
 
+    /// Bounded wait on the main run loop; never waits on an expectation that might not fulfil.
     @MainActor private static func waitUntil(
         _ host: NSView,
         seconds: Double,
@@ -220,6 +275,24 @@ struct ChatPerfProofWorkload {
         return true
     }
 
+    /// Lets in-flight bootstrap and refresh work drain: waits until the update count is stable.
+    @MainActor private static func quiesce(_ host: NSView, seconds: Double = 0.4) async {
+        var last = ChatPerfProbe.snapshot()["sourceStateUpdate"] ?? 0
+        var stableSince = Date()
+        let deadline = Date().addingTimeInterval(10)
+        while Date() < deadline {
+            self.pump(host)
+            try? await Task.sleep(for: .milliseconds(20))
+            let now = ChatPerfProbe.snapshot()["sourceStateUpdate"] ?? 0
+            if now != last {
+                last = now
+                stableSince = Date()
+            } else if Date().timeIntervalSince(stableSince) >= seconds {
+                return
+            }
+        }
+    }
+
     @MainActor private static func snapshot(_ view: NSView, to url: URL) {
         guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
@@ -227,15 +300,14 @@ struct ChatPerfProofWorkload {
     }
 
     @Test(.enabled(if: Self.enabled))
-    @MainActor func `shared chat view renders a cited transcript`() async throws {
+    @MainActor func `source previews follow transport updates in the shared chat view`() async throws {
         let outDir = URL(fileURLWithPath: Self.environment["CHAT_PERF_OUT"] ?? NSTemporaryDirectory())
         let label = Self.environment["CHAT_PERF_LABEL"] ?? "local"
         let sample = Self.environment["CHAT_PERF_SAMPLE"] ?? "0"
         try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
-        let regexCounting = RegexCompileCounter.installed
 
         _ = NSApplication.shared
-        let transport = try ProofTransport(history: ProofFixture.history())
+        let transport = try ProofTransport(history: ProofFixture.encode((0..<ProofFixture.runs).flatMap(ProofFixture.turn)))
         let vm = OpenClawChatViewModel(sessionKey: "main", transport: transport)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 960, height: 720),
@@ -255,92 +327,105 @@ struct ChatPerfProofWorkload {
             window.close()
         }
         let recorder = ProofRecorder(label: label)
-        let expectedRows = ProofFixture.runs * 3
-        var loaded = false
+        let cited = { vm.sourcePreviewState.previews.count }
+        var digests: [String: String] = [:]
+        var expectedRows = ProofFixture.runs * 3
 
-        try await recorder.phase("load", steps: 1) {
+        // Load: ChatView.onAppear starts bootstrap, which requests history from the transport.
+        try await recorder.phase("load", steps: 1, citedReplies: cited) { _ in
             await Self.settle(host)
             if transport.historyRequests == 0 { vm.load() }
-            loaded = await Self.waitUntil(host, seconds: 30) { vm.messages.count >= expectedRows }
+            let ok = await Self.waitUntil(host, seconds: 30) { vm.messages.count >= expectedRows }
+            await Self.quiesce(host)
+            return ok
+        }
+        #expect(vm.messages.count == expectedRows, "history rows loaded: \(vm.messages.count)")
+        digests["load"] = CardDigest.capture(vm).all
+
+        // (a) Persisted-message appends: one `.sessionMessage` event per message, as the gateway
+        // sends them; the server history grows with each one.
+        let appended = (0..<ProofFixture.appendedTurns).flatMap { ProofFixture.turn(ProofFixture.runs + $0) }
+        try await recorder.phase("append", steps: appended.count, citedReplies: cited) { step in
+            let message = appended[step]
+            try transport.persist(ProofFixture.encode([message]))
+            expectedRows += 1
+            transport.emit(.sessionMessage(OpenClawSessionMessageEventPayload(
+                sessionKey: "main", message: message, messageId: nil, messageSeq: nil)))
+            let ok = await Self.waitUntil(host, seconds: 10) { vm.messages.count >= expectedRows }
             await Self.settle(host)
+            return ok
         }
-        #expect(loaded, "history rows loaded: \(vm.messages.count)")
+        #expect(vm.messages.count == expectedRows, "rows after appends: \(vm.messages.count)")
+        digests["append"] = CardDigest.capture(vm).all
 
-        let scrollView = Self.scrollViews(in: host).max {
+        // (b1) History reload returning exactly the rows already shown (foreground resume).
+        try await recorder.phase("reloadSame", steps: ProofFixture.reloadsSame, citedReplies: cited) { _ in
+            let before = transport.historyRequests
+            await vm.resumeFromForeground().value
+            await Self.settle(host)
+            return transport.historyRequests > before
+        }
+        digests["reloadSame"] = CardDigest.capture(vm).all
+
+        // (b2) History reload with the same message ids plus one new row from another device.
+        try await recorder.phase("reloadGrown", steps: ProofFixture.reloadsGrown, citedReplies: cited) { step in
+            try transport.persist(ProofFixture.encode([ProofFixture.userRow(step)]))
+            expectedRows += 1
+            await vm.resumeFromForeground().value
+            let ok = await Self.waitUntil(host, seconds: 10) { vm.messages.count >= expectedRows }
+            await Self.settle(host)
+            return ok
+        }
+        #expect(vm.messages.count == expectedRows, "rows after reloads: \(vm.messages.count)")
+        digests["reloadGrown"] = CardDigest.capture(vm).all
+
+        // (c) Source context changes: `.chatMetadataChanged` makes the view model reload the context
+        // from the transport (invalidate to nil, then the loaded value). Alternates gateway / none.
+        try await recorder.phase("contextChange", steps: ProofFixture.contextChanges, citedReplies: cited) { step in
+            let target: OpenClawChatSourceContext? = step % 2 == 0 ? ProofFixture.context : nil
+            transport.setSourceContext(target)
+            let start = ChatPerfProbe.snapshot()["sourceStateUpdate"] ?? 0
+            transport.emit(.chatMetadataChanged(modelCatalogChanged: false))
+            let ok = await Self.waitUntil(host, seconds: 10) {
+                (ChatPerfProbe.snapshot()["sourceStateUpdate"] ?? 0) >= start + 2 &&
+                    vm.sourcePreviewState.context == target
+            }
+            await Self.settle(host)
+            if step == 0 { digests["contextGateway"] = CardDigest.capture(vm).all }
+            return ok
+        }
+        let final = CardDigest.capture(vm)
+        digests["final"] = final.all
+
+        // Screenshot of the first cited replies with their cards.
+        if let scrollView = Self.scrollViews(in: host).max(by: {
             ($0.documentView?.frame.height ?? 0) < ($1.documentView?.frame.height ?? 0)
-        }
-        #expect(scrollView != nil)
-        let positions = 16
-        let cycles = 2
-        try await recorder.phase("scroll", steps: positions * 2 * cycles) {
-            guard let scrollView else { return }
-            for _ in 0..<cycles {
-                for forward in [true, false] {
-                    for step in 0..<positions {
-                        let clip = scrollView.contentView
-                        let maxY = max(0, (scrollView.documentView?.frame.height ?? 0) - clip.bounds.height)
-                        let fraction = Double(forward ? step : positions - 1 - step) / Double(positions - 1)
-                        clip.scroll(to: NSPoint(x: 0, y: maxY * fraction))
-                        scrollView.reflectScrolledClipView(clip)
-                        await Self.settle(host)
-                    }
-                }
-            }
-        }
-        Self.snapshot(host, to: outDir.appendingPathComponent("\(label)-\(sample)-transcript.png"))
-
-        let widths: [CGFloat] = [720, 1120, 840, 960]
-        try await recorder.phase("resize", steps: widths.count) {
-            for width in widths {
-                window.setContentSize(NSSize(width: width, height: 720))
+        }) {
+            let clip = scrollView.contentView
+            let flipped = scrollView.documentView?.isFlipped ?? true
+            let maxY = max(0, (scrollView.documentView?.frame.height ?? 0) - clip.bounds.height)
+            clip.scroll(to: NSPoint(x: 0, y: flipped ? 0 : maxY))
+            scrollView.reflectScrolledClipView(clip)
+            for _ in 0..<5 {
                 await Self.settle(host)
             }
         }
+        Self.snapshot(host, to: outDir.appendingPathComponent("\(label)-\(sample)-cards.png"))
 
-        try await recorder.phase("append", steps: ProofFixture.appended) {
-            for offset in 0..<ProofFixture.appended {
-                vm.replaceMessages(vm.messages + ProofFixture.turn(ProofFixture.runs + offset))
-                await Self.settle(host)
-            }
-        }
-
-        let words = (0..<24).map { "word\($0)" }
-        try await recorder.phase("stream", steps: words.count) {
-            for count in 1...words.count {
-                vm.updateStreamingAssistantText(words.prefix(count).joined(separator: " "))
-                if let scheduledID = vm.streamPacing.scheduledID {
-                    vm.flushStreamingAssistantDisplay(scheduledID: scheduledID)
-                }
-                await Self.settle(host)
-            }
-        }
-
-        let baseURL = try #require(URL(string: "https://example.com/page"))
-        let parses = 50
-        var parsed = 0
-        try await recorder.phase("openGraphParse", steps: parses) {
-            for _ in 0..<parses {
-                if case .loaded = parseChatOpenGraph(html: ProofFixture.openGraphHTML, baseURL: baseURL) {
-                    parsed += 1
-                }
-            }
-        }
-        #expect(parsed == parses)
-
-        let rendered = vm.sourcePreviewState.previews.values.reduce(0) { $0 + $1.count }
-        #expect(rendered > 0, "source cards were projected")
+        #expect(final.cards > 0, "source cards projected: \(final.cards)")
         let summary: [String: Any] = [
             "label": label,
             "sample": sample,
-            "regexCounting": regexCounting,
             "historyRows": vm.messages.count,
-            "projectedCards": rendered,
-            "scrollDocumentHeight": scrollView?.documentView?.frame.height ?? 0,
+            "citedReplies": final.perReply.count,
+            "projectedCards": final.cards,
+            "digests": digests,
+            "perReplyDigest": final.perReply,
             "phases": recorder.phases,
         ]
         let data = try JSONSerialization.data(withJSONObject: summary, options: [.prettyPrinted, .sortedKeys])
         try data.write(to: outDir.appendingPathComponent("\(label)-\(sample).json"))
-        print("CHAT_PERF_PROOF wrote \(label)-\(sample).json rows=\(vm.messages.count) cards=\(rendered)")
+        print("CHAT_PERF_PROOF wrote \(label)-\(sample).json rows=\(vm.messages.count) cited=\(final.perReply.count) cards=\(final.cards)")
     }
 }
 #endif

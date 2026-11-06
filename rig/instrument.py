@@ -20,11 +20,10 @@ TARGETS = [
     ("ChatSourcePreviews.swift", r"^\s*private static func title\(", "cardTitleRender"),
     ("ChatSourcePreviews.swift", r"^\s*private static func excerpt\(", "cardExcerptRender"),
     ("ChatSourcePreviews.swift", r"^\s*private static func prose\(", "externalFrameStrip"),
-    ("ChatLinkPreview.swift", r"^func chatPreviewURLs\(in markdown: String\)", "markdownURLScan"),
-    ("ChatLinkPreview.swift", r"^func chatFirstPreviewURL\(", "rowLinkPreviewURL"),
-    ("ChatLinkPreview.swift", r"^private func chatBarePreviewURLs\(", "bareURLTextScan"),
-    ("ChatLinkPreview.swift", r"^func parseChatOpenGraph\(", "openGraphParse"),
 ]
+
+# Labels whose whole body is also wrapped in an os_signpost interval with a monotonic timer.
+TIMED = {"sourceStateUpdate"}
 
 STATEMENT = re.compile(r"^(return|guard|let|var|if|for|while|switch|defer|do|throw|_ =)\b")
 
@@ -44,11 +43,14 @@ def instrument(source_dir: Path) -> list[str]:
         body = lines[brace + 1]
         indent = re.match(r"^\s*", body).group(0) or "    "
         probe = f'{indent}let _ = ChatPerfProbe.hit("{label}")'
+        if label in TIMED:
+            probe += (f'\n{indent}let chatPerfInterval = ChatPerfProbe.begin("{label}")'
+                      f'\n{indent}defer {{ ChatPerfProbe.end("{label}", chatPerfInterval) }}')
         single = lines[brace + 2].strip() == "}" and not STATEMENT.match(body.strip())
         if single:
             lines[brace + 1] = f"{indent}return {body.strip()}"
         lines.insert(brace + 1, probe)
-        report.append(f"{label}: {name}:{start + 1}{' (single expression)' if single else ''}")
+        report.append(f"{label}: {name}:{start + 1}{' (single expression)' if single else ''}{' (timed)' if label in TIMED else ''}")
     for name, lines in files.items():
         (source_dir / name).write_text("\n".join(lines))
     return report
