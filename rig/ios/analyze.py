@@ -113,6 +113,7 @@ def sample(dir_):
         result[variant] = {
             "phases": phases,
             "rowsSHA256": hashlib.sha256(text.encode()).hexdigest(),
+            "rows": rows,
             "rowKeys": len(rows),
             "splitRowsWithCards": sum(1 for k, v in rows.items() if not k.endswith("#whole") and v),
             "rowCardChanges": changes,
@@ -139,6 +140,7 @@ def main():
             samples.setdefault(side, {})[round_] = sample(dir_)
     env = (out / "environment.txt").read_text().strip() if (out / "environment.txt").exists() else "n/a"
     lines = ["### p1 iOS simulator: shipped app, Debug build", "", "```", env, "```", ""]
+    summary_check = {}
     for status in sorted(out.glob("status-*.txt")):
         lines.append(f"- {status.name}: {status.read_text().strip()}")
     for variant in ("cards", "nocards"):
@@ -151,9 +153,22 @@ def main():
                 f"- {side}: {len(rows)} rounds, outcomes {[r['outcome'] for r in rows]}, row keys "
                 f"{sorted({r['rowKeys'] for r in rows})}, split rows with cards {sorted({r['splitRowsWithCards'] for r in rows})}, "
                 f"row hashes {sorted({r['rowsSHA256'][:16] for r in rows})}, card changes {[r['rowCardChanges'] for r in rows]}")
-        hb = {r["rowsSHA256"] for r in per["base"]}
-        hh = {r["rowsSHA256"] for r in per["head"]}
-        lines.append(f"- rendered cards per row: {'IDENTICAL' if hb and hb == hh and len(hb) == 1 else 'DIFFERENT or incomplete'}")
+        # Which rows get rendered depends on how far a run scrolled, so compare row by row: every row key
+        # rendered on both sides (any round) must carry the same cards, and each side must agree with itself.
+        seen = {side: {} for side in ("base", "head")}
+        conflicts = 0
+        for side in ("base", "head"):
+            for r in per[side]:
+                for key, value in r["rows"].items():
+                    if seen[side].setdefault(key, value) != value:
+                        conflicts += 1
+        common = sorted(set(seen["base"]) & set(seen["head"]))
+        mismatched = [k for k in common if seen["base"][k] != seen["head"][k]]
+        carded = sum(1 for k in common if seen["base"][k])
+        verdict = "IDENTICAL" if common and not mismatched and not conflicts else "DIFFERENT"
+        lines.append(f"- rendered cards per row: {len(common)} row keys rendered on both sides ({carded} with cards), "
+                     f"{len(mismatched)} differ, {conflicts} within-side conflicts -> {verdict}")
+        summary_check[variant] = {"common": len(common), "carded": carded, "mismatched": mismatched, "conflicts": conflicts}
         lines += ["", "| Phase | Measure | Base median | Head median | Base range | Head range |", "|---|---|---:|---:|---|---|"]
         for phase in PHASES:
             def vals(side, getter):
@@ -189,7 +204,7 @@ def main():
     for png in sorted((out / "samples").glob("*/attachments/*.png")):
         shots.append(f"{png.parent.parent.name}/{png.name} {hashlib.sha256(png.read_bytes()).hexdigest()[:16]}")
     (out / "screenshots.txt").write_text("\n".join(shots) + "\n")
-    (out / "counts.json").write_text(json.dumps(samples, indent=2, sort_keys=True))
+    (out / "counts.json").write_text(json.dumps({"outputCheck": summary_check, "samples": samples}, indent=2, sort_keys=True))
     print("\n".join(lines))
 
 

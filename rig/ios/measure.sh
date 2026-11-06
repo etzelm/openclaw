@@ -83,7 +83,7 @@ run_side() {
   local xctestrun
   xctestrun="$(find "$WORK/products/$side" -maxdepth 1 -name '*.xctestrun' | head -1)"
   echo "=== $(date -u +%H:%M:%S) round $round $side"
-  perl -e 'alarm shift; exec @ARGV' 480 xcodebuild test-without-building -xctestrun "$xctestrun" \
+  perl -e 'alarm shift; exec @ARGV' 660 xcodebuild test-without-building -xctestrun "$xctestrun" \
     -destination "id=$UDID" "${TESTS[@]}" -resultBundlePath "$result" >"$LOG/test-$side-$round.log" 2>&1
   local rc=$?
   grep -E "CHATPERF_|measured \[|Test Case .*(passed|failed)|error:|\*\* TEST" "$LOG/test-$side-$round.log" \

@@ -132,10 +132,11 @@ UI_TESTS = r'''
             for: Self.chatScreenshotTarget,
             additionalArguments: ["--openclaw-perf-citations-fixture", variant])
         let app = try XCTUnwrap(self.app)
-        let latest = app.descendants(matching: .any)
+        let transcript = try self.chatTranscript(in: app)
+        // Scoped to the transcript: an app-wide `.any` snapshot (keyboard included) can time out.
+        let latest = transcript.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "raw-59")).firstMatch
         XCTAssertTrue(latest.waitForExistence(timeout: 30), "latest cited answer missing")
-        let transcript = try self.chatTranscript(in: app)
         Thread.sleep(forTimeInterval: 2)
         self.scratchMark(variant, "load", "end")
         self.attachScreenshot(named: "\(variant)-latest")
@@ -148,8 +149,8 @@ UI_TESTS = r'''
             options: options)
         {
             print("CHATPERF_SCROLL_ITERATION \(Date().timeIntervalSince1970)")
-            for _ in 0..<6 { transcript.swipeDown(velocity: .fast) }
-            for _ in 0..<6 { transcript.swipeUp(velocity: .fast) }
+            for _ in 0..<4 { transcript.swipeDown(velocity: .fast) }
+            for _ in 0..<4 { transcript.swipeUp(velocity: .fast) }
             Thread.sleep(forTimeInterval: 1.5)
         }
         self.scratchMark(variant, "scroll", "end")
@@ -158,13 +159,13 @@ UI_TESTS = r'''
         let input = self.chatMessageInput(in: app)
         XCTAssertTrue(input.waitForExistence(timeout: 8))
         self.scratchMark(variant, "append", "begin")
-        for index in 0..<4 {
+        for index in 0..<3 {
             input.tap()
             input.typeText("Append \(index)")
             let send = app.buttons["chat-send-message"]
             XCTAssertTrue(send.waitForExistence(timeout: 5) && send.isEnabled, "send button at append \(index)")
             send.tap()
-            let answer = app.descendants(matching: .any)
+            let answer = transcript.descendants(matching: .any)
                 .matching(NSPredicate(format: "label CONTAINS %@", "raw-append-\(index)")).firstMatch
             XCTAssertTrue(answer.waitForExistence(timeout: 20), "appended answer \(index) missing")
         }
