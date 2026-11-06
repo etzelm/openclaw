@@ -249,6 +249,7 @@ struct ChatPerfProofWorkload {
         let label = Self.environment["CHAT_PERF_LABEL"] ?? "local"
         let sample = Self.environment["CHAT_PERF_SAMPLE"] ?? "0"
         let variant = withSources ? "cards" : "nocards"
+        if let only = Self.environment["CHAT_PERF_ONLY"], only != variant { return }
         try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
         let regexCounting = RegexCompileCounter.installed
 

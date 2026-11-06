@@ -14,12 +14,13 @@ fail() { echo "::warning::$*"; echo "TRACE: $*" >>"$OUT/trace-status.txt"; }
 # shellcheck source=/dev/null
 source "$RIG/workload.sh"
 
-for side in base head; do
+for side in head base; do
+  pkill -x xctrace 2>/dev/null; sleep 1
   echo "=== $(date -u +%H:%M:%S) trace $side"
   attach="$WORK/attach-$side"
   rm -rf "$attach" "$WORK/$side.trace"
   mkdir -p "$attach"
-  CHAT_PERF_ATTACH_DIR="$attach" run_workload "$side" trace &
+  CHAT_PERF_ONLY=cards CHAT_PERF_ATTACH_DIR="$attach" run_workload "$side" trace &
   wpid=$!
   for _ in $(seq 1 600); do [ -s "$attach/pid" ] && break; sleep 0.2; done
   if [ ! -s "$attach/pid" ]; then
@@ -29,15 +30,15 @@ for side in base head; do
     continue
   fi
   target="$(cat "$attach/pid")"
-  perl -e 'alarm shift; exec @ARGV' 240 xcrun xctrace record --template 'Time Profiler' \
-    --attach "$target" --time-limit 120s --output "$WORK/$side.trace" >"$LOG/$side-xctrace.log" 2>&1 &
+  perl -e 'alarm shift; exec @ARGV' 330 xcrun xctrace record --template 'Time Profiler' \
+    --attach "$target" --time-limit 90s --output "$WORK/$side.trace" >"$LOG/$side-xctrace.log" 2>&1 &
   xpid=$!
   for _ in $(seq 1 150); do grep -q "Ctrl-C to stop" "$LOG/$side-xctrace.log" 2>/dev/null && break; sleep 0.2; done
   sleep 2
   touch "$attach/go"
   wait "$wpid"
   # Attached recording ends when the target exits; the alarm above bounds the save.
-  wait "$xpid" || fail "$side: xctrace exited $?"
+  wait "$xpid" || { fail "$side: xctrace exited $?"; pkill -9 -x xctrace 2>/dev/null; }
   tail -5 "$LOG/$side-xctrace.log"
   if [ -d "$WORK/$side.trace" ]; then
     perl -e 'alarm shift; exec @ARGV' 240 xcrun xctrace export --input "$WORK/$side.trace" \

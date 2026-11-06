@@ -24,8 +24,8 @@ def main():
     samples = 0
     stacks = {name: 0 for name in STACKS}
     combo = {
-        "citations(in:) and Document(parsing:)": 0,
-        "previews(for:) and citations(in:)": 0,
+        "previews(for:) and Document(parsing:)": 0,
+        "messageRow and previews(for:)": 0,
     }
     leaf = {}
 
@@ -52,10 +52,10 @@ def main():
         hit = {name: any(rx.search(n) for n in names) for name, rx in STACKS.items()}
         for name, value in hit.items():
             stacks[name] += value
-        combo["citations(in:) and Document(parsing:)"] += (
-            hit["ChatSourcePreviewProjector.citations(in:)"] and hit["Document(parsing:)"])
-        combo["previews(for:) and citations(in:)"] += (
-            hit["ChatSourcePreviewState.previews(for:)"] and hit["ChatSourcePreviewProjector.citations(in:)"])
+        combo["previews(for:) and Document(parsing:)"] += (
+            hit["ChatSourcePreviewState.previews(for:)"] and hit["Document(parsing:)"])
+        combo["messageRow and previews(for:)"] += (
+            hit["OpenClawChatView.messageRow(for:...)"] and hit["ChatSourcePreviewState.previews(for:)"])
         if names and ("OpenClaw" in names[0] or "Chat" in names[0] or "Markdown" in names[0]):
             short = re.sub(r"\s+", " ", names[0])[:120]
             leaf[short] = leaf.get(short, 0) + 1

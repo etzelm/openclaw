@@ -106,8 +106,12 @@ def profile_lines(out):
         if not path.exists():
             lines.append(f"- {side}: no time profile export")
             continue
-        data = json.loads(path.read_text())
-        lines.append(f"- {side}: {data.get('samples', 0)} main-thread samples in the workload process")
+        try:
+            data = json.loads(path.read_text())
+        except ValueError:
+            lines.append(f"- {side}: time profile export failed (see trace-status.txt)")
+            continue
+        lines.append(f"- {side}: {data.get('samples', 0)} main-thread samples in the workload process (cards transcript)")
         for name, value in data.get("stacks", {}).items():
             lines.append(f"  - samples with `{name}` on the stack: {value}")
     return lines
