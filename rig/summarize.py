@@ -39,7 +39,7 @@ def load(out):
     samples = {side: [] for side in SIDES}
     for path in sorted((out / "samples").glob("*.json")):
         data = json.loads(path.read_text())
-        if data.get("sample") == "trace":
+        if data.get("sample") == "trace" or path.name.startswith("cold-"):
             continue
         samples.setdefault(data["label"], []).append(data)
     return samples
@@ -139,6 +139,67 @@ def digest_lines(samples):
                    "equal": ok and not mismatched}
 
 
+def fmt_list(values):
+    return ", ".join(f"{v:.1f}" for v in values)
+
+
+def cold_lines(out):
+    rows = {side: [] for side in SIDES}
+    for path in sorted((out / "samples").glob("cold-*.json")):
+        data = json.loads(path.read_text())
+        rows.setdefault(data["label"], []).append(data)
+    if not rows["base"] or not rows["head"]:
+        return ["- no cold samples"], {}
+    lines = [
+        "| Cold sample set | Metric | Base n | Base median | Base p95 | Head n | Head median | Head p95 | Head vs base (median) |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    result = {}
+    lists = []
+    for title, select in (("first view in a fresh process", lambda v: v["index"] == 0),
+                          ("fresh view in a warm process (views 2 to 8)", lambda v: v["index"] > 0)):
+        for metric, name in (("updateMs", "`update` call that built all cards"), ("projectMs", "`project` inside it")):
+            cells, meds = [], {}
+            for side in SIDES:
+                values = [v[metric] for d in sorted(rows[side], key=lambda d: int(d["sample"]))
+                          for v in d["views"] if select(v) and v[metric] >= 0]
+                med = statistics.median(values) if values else None
+                meds[side] = med
+                result.setdefault(title, {}).setdefault(metric, {})[side] = {
+                    "n": len(values), "median": med, "p95": pct(values, 0.95), "values": values}
+                cells += [str(len(values)), f"{med:.1f} ms" if med is not None else "n/a",
+                          f"{pct(values, 0.95):.1f} ms" if values else "n/a"]
+                if metric == "updateMs" and title.startswith("first"):
+                    lists.append(f"- {side}, first view per process, `update` ms in run order: {fmt_list(values)}")
+            delta = (f"{(meds['head'] / meds['base'] - 1) * 100:+.1f}%"
+                     if meds["base"] and meds["head"] else "n/a")
+            lines.append(f"| {title} | {name} | " + " | ".join(cells) + f" | {delta} |")
+    digests = {side: {v["digest"] for d in rows[side] for v in d["views"]} for side in SIDES}
+    equal = len(digests["base"]) == 1 and digests["base"] == digests["head"]
+    lines += [""] + lists + [f"- Card digest over all cold views: {'equal on both sides' if equal else 'DIFFERS'}."]
+    result["digestsEqual"] = equal
+    return lines, result
+
+
+def stall_lines(samples):
+    lines = [
+        "| Phase | Steps per side | Base max stall per step, median / p95 | Head max stall per step, median / p95 | Base stalls > 16.7 ms | Head stalls > 16.7 ms | Base > 33.4 ms | Head > 33.4 ms |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    data = {}
+    for key, title in PHASES:
+        cells = {}
+        for side in SIDES:
+            records = steps(samples[side], key)
+            peaks = [r.get("maxStallMs", 0) for r in records]
+            cells[side] = (len(records), statistics.median(peaks) if peaks else 0, pct(peaks, 0.95) or 0,
+                           sum(r.get("stalls17", 0) for r in records), sum(r.get("stalls33", 0) for r in records))
+            data.setdefault(key, {})[side] = dict(zip(["steps", "medianMaxMs", "p95MaxMs", "stalls17", "stalls33"], cells[side]))
+        b, h = cells["base"], cells["head"]
+        lines.append(f"| {title} | {b[0]} | {b[1]:.1f} / {b[2]:.1f} ms | {h[1]:.1f} / {h[2]:.1f} ms | {b[3]} | {h[3]} | {b[4]} | {h[4]} |")
+    return lines, data
+
+
 def signpost_lines(out):
     lines = []
     for side in SIDES:
@@ -189,8 +250,14 @@ def main():
                   ""] + table
         table, digests = digest_lines(samples)
         lines += ["", "#### Output: SHA-256 of the projected cards", ""] + table
+        table, stalls = stall_lines(samples)
+        lines += ["", "#### Main-thread stalls while each step runs (2 ms main-queue timer; gap = main thread busy)", ""] + table
+        result["stalls"] = stalls
         result.update({"counts": counts, "times": times, "digests": digests,
                        "samples": {side: len(samples[side]) for side in SIDES}})
+    table, cold = cold_lines(out)
+    lines += ["", "#### Cold first projection (80 cited replies), fresh window + view model + transport per view", ""] + table
+    result["cold"] = cold
     lines += ["", "#### xctrace os_signpost export (one extra run per side)", ""] + signpost_lines(out)
     (out / "counts.json").write_text(json.dumps(result, indent=2, sort_keys=True))
     print("\n".join(lines))

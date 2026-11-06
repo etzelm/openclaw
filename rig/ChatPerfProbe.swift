@@ -7,6 +7,7 @@ final class ChatPerfProbe: @unchecked Sendable {
     struct Interval {
         let state: OSSignpostIntervalState
         let start: UInt64
+        let cardBuilds: Int
     }
 
     private static let shared = ChatPerfProbe()
@@ -14,6 +15,8 @@ final class ChatPerfProbe: @unchecked Sendable {
     private let lock = NSLock()
     private var counts: [String: Int] = [:]
     private var durations: [String: [UInt64]] = [:]
+    /// Card builds that ran inside each timed call, parallel to `durations`.
+    private var builds: [String: [Int]] = [:]
 
     @discardableResult
     static func hit(_ label: String) -> Bool {
@@ -23,11 +26,12 @@ final class ChatPerfProbe: @unchecked Sendable {
         return true
     }
 
-    /// Opens an os_signpost interval named "sourceStateUpdate" and starts a monotonic timer.
+    /// Opens an os_signpost interval named after `label` and starts a monotonic timer.
     static func begin(_ label: StaticString) -> Interval {
         let id = self.signposter.makeSignpostID()
         let state = self.signposter.beginInterval(label, id: id)
-        return Interval(state: state, start: DispatchTime.now().uptimeNanoseconds)
+        let cardBuilds = self.snapshot()["cardBuild"] ?? 0
+        return Interval(state: state, start: DispatchTime.now().uptimeNanoseconds, cardBuilds: cardBuilds)
     }
 
     static func end(_ label: StaticString, _ interval: Interval) {
@@ -36,6 +40,7 @@ final class ChatPerfProbe: @unchecked Sendable {
         let key = "\(label)"
         self.shared.lock.lock()
         self.shared.durations[key, default: []].append(elapsed)
+        self.shared.builds[key, default: []].append((self.shared.counts["cardBuild"] ?? 0) - interval.cardBuilds)
         self.shared.lock.unlock()
     }
 
@@ -43,6 +48,12 @@ final class ChatPerfProbe: @unchecked Sendable {
         self.shared.lock.lock()
         defer { self.shared.lock.unlock() }
         return self.shared.counts
+    }
+
+    static func builds(_ label: String) -> [Int] {
+        self.shared.lock.lock()
+        defer { self.shared.lock.unlock() }
+        return self.shared.builds[label] ?? []
     }
 
     static func durations(_ label: String) -> [UInt64] {

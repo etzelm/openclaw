@@ -45,6 +45,9 @@ jobs:
       - name: Workload, 7 interleaved rounds
         timeout-minutes: 25
         run: bash rig/run-lane.sh "$LANE" workload 7
+      - name: Cold first projection, 15 fresh processes per side, interleaved
+        timeout-minutes: 20
+        run: bash rig/run-lane.sh "$LANE" cold 15
       - name: xctrace os_signpost, one run per side
         timeout-minutes: 25
         continue-on-error: true

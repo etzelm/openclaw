@@ -5,6 +5,7 @@
 #   focused   debug build + focused suites on unmodified base and head
 #   build     instrument both sides identically and build the release workload
 #   workload  run the shared ChatView workload interleaved base/head for <rounds> rounds
+#   cold      cold first projection: <rounds> fresh processes per side, interleaved, 8 fresh views each
 #   trace     one extra run per side under xctrace (os_signpost), bounded; may fail
 #   summary   write summary.md, counts.json and the job summary table
 set -uo pipefail
@@ -148,6 +149,25 @@ workload() {
   [ "$failures" = 0 ]
 }
 
+cold() {
+  step "cold first projection, interleaved base/head x$ROUNDS processes"
+  mkdir -p "$OUT/samples"
+  local failures=0
+  for i in $(seq 1 "$ROUNDS"); do
+    for side in base head; do
+      CHAT_PERF_PROOF=1 CHAT_PERF_MODE=cold CHAT_PERF_COLD_VIEWS=8 CHAT_PERF_OUT="$OUT/samples" \
+        CHAT_PERF_LABEL="$side" CHAT_PERF_SAMPLE="$i" \
+        limit 180 swift test --package-path "$WORK/$side/$KIT" --scratch-path "$WORK/scratch-$side-rel" "${REL[@]}" \
+        --skip-build --filter ChatPerfProofWorkload >"$LOG/$side-cold-$i.log" 2>&1 ||
+        { tail -20 "$LOG/$side-cold-$i.log"; fail "$side cold sample $i"; failures=$((failures + 1)); }
+      grep -E "CHAT_PERF_PROOF" "$LOG/$side-cold-$i.log"
+    done
+    [ "$i" = 1 ] && [ "$failures" = 2 ] && break
+  done
+  endstep
+  [ "$failures" = 0 ]
+}
+
 trace() {
   step "os_signpost trace, one extra run per side (bounded)"
   local code=0
@@ -195,6 +215,7 @@ case "$MODE" in
   focused) focused ;;
   build) build ;;
   workload) workload ;;
+  cold) cold ;;
   trace) trace ;;
   summary) summary ;;
   *) echo "unknown mode $MODE"; exit 2 ;;

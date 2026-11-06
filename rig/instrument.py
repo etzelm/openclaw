@@ -23,7 +23,7 @@ TARGETS = [
 ]
 
 # Labels whose whole body is also wrapped in an os_signpost interval with a monotonic timer.
-TIMED = {"sourceStateUpdate"}
+TIMED = {"sourceStateUpdate", "project"}
 
 STATEMENT = re.compile(r"^(return|guard|let|var|if|for|while|switch|defer|do|throw|_ =)\b")
 

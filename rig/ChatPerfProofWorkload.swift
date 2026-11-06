@@ -187,6 +187,50 @@ private enum CardDigest {
     }
 }
 
+/// Main-queue stall probe: a 2 ms timer on the main dispatch queue. A gap between two firings
+/// means the main thread was busy (layout, rendering, model work) for that long, so gaps over
+/// 16.7 ms are frames a 60 Hz display could not have produced. A proxy, not a display-link count.
+@MainActor
+private final class MainStallMonitor {
+    private var timer: DispatchSourceTimer?
+    private var last = DispatchTime.now().uptimeNanoseconds
+    private var gaps: [UInt64] = []
+
+    func start() {
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now(), repeating: .milliseconds(2), leeway: .microseconds(500))
+        timer.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.tick() }
+        }
+        self.last = DispatchTime.now().uptimeNanoseconds
+        timer.resume()
+        self.timer = timer
+    }
+
+    func stop() {
+        self.timer?.cancel()
+        self.timer = nil
+    }
+
+    private func tick() {
+        let now = DispatchTime.now().uptimeNanoseconds
+        self.gaps.append(now &- self.last)
+        self.last = now
+    }
+
+    func reset() {
+        self.last = DispatchTime.now().uptimeNanoseconds
+        self.gaps = []
+    }
+
+    /// Gaps since the last reset, including the one still open.
+    func take() -> [UInt64] {
+        self.tick()
+        defer { self.gaps = [] }
+        return self.gaps
+    }
+}
+
 @MainActor
 private final class ProofRecorder {
     static let watched = [
@@ -196,9 +240,11 @@ private final class ProofRecorder {
     let label: String
     let signposter = OSSignposter(subsystem: "ai.openclaw.chatperfproof", category: "workload")
     var phases: [[String: Any]] = []
+    let stalls = MainStallMonitor()
 
     init(label: String) {
         self.label = label
+        self.stalls.start()
     }
 
     /// Runs `body` once per step and records, per step, the probe count deltas, the duration of
@@ -216,7 +262,12 @@ private final class ProofRecorder {
         for step in 0..<steps {
             let before = ChatPerfProbe.snapshot()
             let durationsBefore = ChatPerfProbe.durations("sourceStateUpdate").count
+            let projectBefore = ChatPerfProbe.durations("project").count
+            let stepState = self.signposter.beginInterval("step", id: id, "\(name, privacy: .public) \(step)")
+            self.stalls.reset()
             let ok = try await body(step)
+            let gaps = self.stalls.take().map { Double($0) / 1e6 }
+            self.signposter.endInterval("step", stepState)
             if !ok { timeouts += 1 }
             let after = ChatPerfProbe.snapshot()
             var counts: [String: Int] = [:]
@@ -224,9 +275,14 @@ private final class ProofRecorder {
                 counts[key] = (after[key] ?? 0) - (before[key] ?? 0)
             }
             let updateNs = Array(ChatPerfProbe.durations("sourceStateUpdate").dropFirst(durationsBefore))
+            let projectNs = Array(ChatPerfProbe.durations("project").dropFirst(projectBefore))
             records.append([
                 "counts": counts,
                 "updateNs": updateNs.map { Int($0) },
+                "projectNs": projectNs.map { Int($0) },
+                "maxStallMs": gaps.max() ?? 0,
+                "stalls17": gaps.filter { $0 > 16.7 }.count,
+                "stalls33": gaps.filter { $0 > 33.4 }.count,
                 "citedReplies": citedReplies(),
                 "ok": ok,
             ])
@@ -239,7 +295,8 @@ private final class ProofRecorder {
 @Suite(.serialized)
 struct ChatPerfProofWorkload {
     static let environment = ProcessInfo.processInfo.environment
-    static let enabled = environment["CHAT_PERF_PROOF"] == "1"
+    static let enabled = environment["CHAT_PERF_PROOF"] == "1" && environment["CHAT_PERF_MODE"] != "cold"
+    static let coldEnabled = environment["CHAT_PERF_PROOF"] == "1" && environment["CHAT_PERF_MODE"] == "cold"
 
     @MainActor private static func pump(_ host: NSView) {
         host.layoutSubtreeIfNeeded()
@@ -321,12 +378,13 @@ struct ChatPerfProofWorkload {
             showsAssistantAvatars: false,
             showsComposer: false))
         window.contentView = host
+        let recorder = ProofRecorder(label: label)
         defer {
+            recorder.stalls.stop()
             vm.detachTransport()
             window.contentView = nil
             window.close()
         }
-        let recorder = ProofRecorder(label: label)
         let cited = { vm.sourcePreviewState.previews.count }
         var digests: [String: String] = [:]
         var expectedRows = ProofFixture.runs * 3
@@ -426,6 +484,65 @@ struct ChatPerfProofWorkload {
         let data = try JSONSerialization.data(withJSONObject: summary, options: [.prettyPrinted, .sortedKeys])
         try data.write(to: outDir.appendingPathComponent("\(label)-\(sample).json"))
         print("CHAT_PERF_PROOF wrote \(label)-\(sample).json rows=\(vm.messages.count) cited=\(final.perReply.count) cards=\(final.cards)")
+    }
+    /// Cold first projection: a new window, view model and transport per view. View 0 is also the
+    /// first projection in a fresh process; views 1 and later are fresh projectors in a warm process.
+    @Test(.enabled(if: Self.coldEnabled))
+    @MainActor func `cold first projection in a fresh chat view`() async throws {
+        let outDir = URL(fileURLWithPath: Self.environment["CHAT_PERF_OUT"] ?? NSTemporaryDirectory())
+        let label = Self.environment["CHAT_PERF_LABEL"] ?? "local"
+        let sample = Self.environment["CHAT_PERF_SAMPLE"] ?? "0"
+        let views = Int(Self.environment["CHAT_PERF_COLD_VIEWS"] ?? "") ?? 8
+        try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
+        _ = NSApplication.shared
+        let history = try ProofFixture.encode((0..<ProofFixture.runs).flatMap(ProofFixture.turn))
+        let signposter = OSSignposter(subsystem: "ai.openclaw.chatperfproof", category: "cold")
+        var results: [[String: Any]] = []
+        for index in 0..<views {
+            let updatesBefore = ChatPerfProbe.durations("sourceStateUpdate").count
+            let projectsBefore = ChatPerfProbe.durations("project").count
+            let state = signposter.beginInterval("coldView", id: signposter.makeSignpostID(), "\(label, privacy: .public) \(index)")
+            let transport = ProofTransport(history: history)
+            let vm = OpenClawChatViewModel(sessionKey: "main", transport: transport)
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 960, height: 720),
+                styleMask: [.titled, .closable, .resizable],
+                backing: .buffered,
+                defer: false)
+            window.isReleasedWhenClosed = false
+            let host = NSHostingView(rootView: OpenClawChatView(
+                viewModel: vm, displayOptions: [], showsAssistantAvatars: false, showsComposer: false))
+            window.contentView = host
+            await Self.settle(host)
+            if transport.historyRequests == 0 { vm.load() }
+            let ok = await Self.waitUntil(host, seconds: 30) { vm.messages.count >= ProofFixture.runs * 3 }
+            await Self.quiesce(host)
+            signposter.endInterval("coldView", state)
+            // The call that built every reply's cards is the cold projection.
+            let pick = { (key: String, start: Int) -> Double? in
+                let pairs = zip(ChatPerfProbe.durations(key).dropFirst(start), ChatPerfProbe.builds(key).dropFirst(start))
+                return pairs.first { $0.1 >= ProofFixture.runs }.map { Double($0.0) / 1e6 }
+            }
+            let cards = CardDigest.capture(vm)
+            results.append([
+                "index": index,
+                "ok": ok,
+                "updateMs": pick("sourceStateUpdate", updatesBefore) ?? -1,
+                "projectMs": pick("project", projectsBefore) ?? -1,
+                "citedReplies": cards.perReply.count,
+                "digest": cards.all,
+            ])
+            vm.detachTransport()
+            window.contentView = nil
+            window.close()
+            await Self.settle(host)
+        }
+        #expect(results.allSatisfy { ($0["ok"] as? Bool) == true && ($0["updateMs"] as? Double ?? -1) >= 0 })
+        let data = try JSONSerialization.data(
+            withJSONObject: ["label": label, "sample": sample, "views": results],
+            options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: outDir.appendingPathComponent("cold-\(label)-\(sample).json"))
+        print("CHAT_PERF_PROOF wrote cold-\(label)-\(sample).json views=\(results.count)")
     }
 }
 #endif
