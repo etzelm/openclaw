@@ -20,7 +20,7 @@ TARGETS = [
     ("ChatSourcePreviews.swift", r"^\s*private static func title\(", "cardTitleRender"),
     ("ChatSourcePreviews.swift", r"^\s*private static func excerpt\(", "cardExcerptRender"),
     ("ChatSourcePreviews.swift", r"^\s*private static func prose\(", "externalFrameStrip"),
-    ("ChatLinkPreview.swift", r"^func chatPreviewURLs\(in markdown: String\)", "markdownURLScan"),
+    ("ChatLinkPreview.swift", r"^func chatPreviewURLs\(in markdown: String\)", "previewURLDocumentParse"),
     ("ChatLinkPreview.swift", r"^func chatFirstPreviewURL\(", "rowLinkPreviewURL"),
     ("ChatLinkPreview.swift", r"^private func chatBarePreviewURLs\(", "bareURLTextScan"),
     ("ChatLinkPreview.swift", r"^func parseChatOpenGraph\(", "openGraphParse"),
@@ -54,11 +54,27 @@ def instrument(source_dir: Path) -> list[str]:
     return report
 
 
+CALL_SITE = ("ChatView.swift", "sourcePreviews: self.viewModel.sourcePreviews(for: msg),",
+             "sourcePreviews: ChatPerfProbe.messageRow(msg) { self.viewModel.sourcePreviews(for: msg) },")
+
+
+def wrap_call_site(source_dir: Path) -> str:
+    name, old, new = CALL_SITE
+    path = source_dir / name
+    text = path.read_text()
+    if text.count(old) != 1:
+        sys.exit(f"instrument: {name}: messageRow call site matched {text.count(old)} times")
+    line = text[: text.index(old)].count("\n") + 1
+    path.write_text(text.replace(old, new))
+    return f"messageRow: {name}:{line} (call-site wrapper)"
+
+
 def main() -> None:
     source_dir = Path(sys.argv[1])
     shutil.copy(sys.argv[2], source_dir / "ChatPerfProbe.swift")
     for line in instrument(source_dir):
         print(line)
+    print(wrap_call_site(source_dir))
 
 
 if __name__ == "__main__":

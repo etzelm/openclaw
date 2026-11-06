@@ -2,6 +2,7 @@
 // OpenClawKitTests on base and head alike; it is never part of a PR. Gated by CHAT_PERF_PROOF=1.
 #if os(macOS)
 import AppKit
+import CryptoKit
 import Foundation
 import ObjectiveC
 import OpenClawKit
@@ -97,8 +98,9 @@ private enum ProofFixture {
         """
     }
 
-    /// One agent turn: question, web_search result, cited answer that splits into three presentation parts.
-    static func turn(_ index: Int) -> [OpenClawChatMessage] {
+    /// One agent turn: question, web_search result (when `withSources`), cited answer that splits
+    /// into three presentation parts. Without the result row the same answer has no source cards.
+    static func turn(_ index: Int, withSources: Bool) -> [OpenClawChatMessage] {
         let runID = "proof-run-\(index)"
         let start = self.epochMs + Double(index) * 60000
         let urls = (0..<3).map { "https://example\($0).com/article-\(index)" }
@@ -113,21 +115,21 @@ private enum ProofFixture {
         }
         let paragraph = String(
             repeating: "This paragraph summarizes recorded findings with **emphasis** and plain prose. ",
-            count: 12)
+            count: 4)
         let answer = "\(paragraph)\n\nSee [one](\(urls[0])), [two](\(urls[1])) and [three](\(urls[2])). " +
             "Raw link https://example9.com/raw-\(index) for later.\n\n\(paragraph)"
-        return [
-            OpenClawChatMessage(
-                role: "user",
-                content: [.init(type: "text", text: "Question \(index): what changed in https://example.org/q-\(index)?")],
-                timestamp: start),
-            OpenClawChatMessage(
-                role: "toolResult", content: [], timestamp: start + 1000, transcriptRunID: runID,
-                toolCallId: "call-\(index)", toolName: "web_search",
-                details: AnyCodable([
-                    "kind": "results", "results": rows,
-                    "externalContent": ["source": "web_search", "untrusted": true, "wrapped": true],
-                ] as [String: Any])),
+        let question = OpenClawChatMessage(
+            role: "user",
+            content: [.init(type: "text", text: "Question \(index): what changed in https://example.org/q-\(index)?")],
+            timestamp: start)
+        let result = OpenClawChatMessage(
+            role: "toolResult", content: [], timestamp: start + 1000, transcriptRunID: runID,
+            toolCallId: "call-\(index)", toolName: "web_search",
+            details: AnyCodable([
+                "kind": "results", "results": rows,
+                "externalContent": ["source": "web_search", "untrusted": true, "wrapped": true],
+            ] as [String: Any]))
+        return [question] + (withSources ? [result] : []) + [
             OpenClawChatMessage(role: "assistant", content: [
                 .init(type: "toolCall", id: "call-\(index)", name: "web_search"),
                 .init(type: "tool_result", text: "Recorded", id: "call-\(index)"),
@@ -138,8 +140,8 @@ private enum ProofFixture {
         ]
     }
 
-    static func history() throws -> [AnyCodable] {
-        let messages = (0..<self.runs).flatMap(self.turn)
+    static func history(withSources: Bool) throws -> [AnyCodable] {
+        let messages = (0..<self.runs).flatMap { self.turn($0, withSources: withSources) }
         let data = try JSONEncoder().encode(messages)
         return try JSONDecoder().decode([AnyCodable].self, from: data)
     }
@@ -186,6 +188,21 @@ private final class ProofRecorder {
 struct ChatPerfProofWorkload {
     static let environment = ProcessInfo.processInfo.environment
     static let enabled = environment["CHAT_PERF_PROOF"] == "1"
+    static let windowHeight: CGFloat = 1000
+    @MainActor static var profilerWaited = false
+
+    /// For the trace step: publish the pid, then wait (bounded) until the profiler has attached.
+    @MainActor private static func waitForProfilerIfRequested() async {
+        guard !self.profilerWaited, let dir = self.environment["CHAT_PERF_ATTACH_DIR"] else { return }
+        self.profilerWaited = true
+        let pidFile = URL(fileURLWithPath: dir).appendingPathComponent("pid")
+        let goFile = URL(fileURLWithPath: dir).appendingPathComponent("go")
+        try? "\(ProcessInfo.processInfo.processIdentifier)".write(to: pidFile, atomically: true, encoding: .utf8)
+        let deadline = Date().addingTimeInterval(90)
+        while !FileManager.default.fileExists(atPath: goFile.path), Date() < deadline {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+    }
 
     @MainActor private static func pump(_ host: NSView) {
         host.layoutSubtreeIfNeeded()
@@ -226,36 +243,45 @@ struct ChatPerfProofWorkload {
         try? rep.representation(using: .png, properties: [:])?.write(to: url)
     }
 
-    @Test(.enabled(if: Self.enabled))
-    @MainActor func `shared chat view renders a cited transcript`() async throws {
+    @Test(.enabled(if: Self.enabled), arguments: [true, false])
+    @MainActor func `shared chat view renders a cited transcript`(withSources: Bool) async throws {
         let outDir = URL(fileURLWithPath: Self.environment["CHAT_PERF_OUT"] ?? NSTemporaryDirectory())
         let label = Self.environment["CHAT_PERF_LABEL"] ?? "local"
         let sample = Self.environment["CHAT_PERF_SAMPLE"] ?? "0"
+        let variant = withSources ? "cards" : "nocards"
         try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
         let regexCounting = RegexCompileCounter.installed
 
         _ = NSApplication.shared
-        let transport = try ProofTransport(history: ProofFixture.history())
+        let transport = try ProofTransport(history: ProofFixture.history(withSources: withSources))
         let vm = OpenClawChatViewModel(sessionKey: "main", transport: transport)
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 960, height: 720),
+            contentRect: NSRect(x: 0, y: 0, width: 960, height: Self.windowHeight),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false)
         window.isReleasedWhenClosed = false
+        // Same configuration as the macOS Quick Chat reply area: desktop layout folds completed
+        // work, which is what splits an answer into presentation rows.
         let host = NSHostingView(rootView: OpenClawChatView(
             viewModel: vm,
             displayOptions: [],
             showsAssistantAvatars: false,
-            showsComposer: false))
+            composerChrome: .clean,
+            showsComposer: false,
+            isComposerEnabled: false,
+            isAttachmentInputEnabled: false)
+            .environment(\.openClawChatDesktopLayout, true))
         window.contentView = host
         defer {
             vm.detachTransport()
             window.contentView = nil
             window.close()
         }
-        let recorder = ProofRecorder(label: label)
-        let expectedRows = ProofFixture.runs * 3
+        ChatPerfProbe.resetRows()
+        await Self.waitForProfilerIfRequested()
+        let recorder = ProofRecorder(label: "\(label) \(variant)")
+        let expectedRows = ProofFixture.runs * (withSources ? 3 : 2)
         var loaded = false
 
         try await recorder.phase("load", steps: 1) {
@@ -265,6 +291,7 @@ struct ChatPerfProofWorkload {
             await Self.settle(host)
         }
         #expect(loaded, "history rows loaded: \(vm.messages.count)")
+        Self.snapshot(host, to: outDir.appendingPathComponent("\(label)-\(sample)-\(variant)-latest.png"))
 
         let scrollView = Self.scrollViews(in: host).max {
             ($0.documentView?.frame.height ?? 0) < ($1.documentView?.frame.height ?? 0)
@@ -287,19 +314,19 @@ struct ChatPerfProofWorkload {
                 }
             }
         }
-        Self.snapshot(host, to: outDir.appendingPathComponent("\(label)-\(sample)-transcript.png"))
+        Self.snapshot(host, to: outDir.appendingPathComponent("\(label)-\(sample)-\(variant)-transcript.png"))
 
         let widths: [CGFloat] = [720, 1120, 840, 960]
         try await recorder.phase("resize", steps: widths.count) {
             for width in widths {
-                window.setContentSize(NSSize(width: width, height: 720))
+                window.setContentSize(NSSize(width: width, height: Self.windowHeight))
                 await Self.settle(host)
             }
         }
 
         try await recorder.phase("append", steps: ProofFixture.appended) {
             for offset in 0..<ProofFixture.appended {
-                vm.replaceMessages(vm.messages + ProofFixture.turn(ProofFixture.runs + offset))
+                vm.replaceMessages(vm.messages + ProofFixture.turn(ProofFixture.runs + offset, withSources: withSources))
                 await Self.settle(host)
             }
         }
@@ -315,32 +342,37 @@ struct ChatPerfProofWorkload {
             }
         }
 
-        let baseURL = try #require(URL(string: "https://example.com/page"))
-        let parses = 50
-        var parsed = 0
-        try await recorder.phase("openGraphParse", steps: parses) {
-            for _ in 0..<parses {
-                if case .loaded = parseChatOpenGraph(html: ProofFixture.openGraphHTML, baseURL: baseURL) {
-                    parsed += 1
-                }
-            }
-        }
-        #expect(parsed == parses)
 
         let rendered = vm.sourcePreviewState.previews.values.reduce(0) { $0 + $1.count }
-        #expect(rendered > 0, "source cards were projected")
+        let (rows, rowChanges) = ChatPerfProbe.renderedRows()
+        let rowLines = rows.keys.sorted().map { key in "\(key)\n\(rows[key] ?? "")" }
+        let rowHash = SHA256.hash(data: Data(rowLines.joined(separator: "\n\n").utf8))
+            .map { String(format: "%02x", $0) }.joined()
+        let splitRows = rows.keys.filter { !$0.hasSuffix("#whole") }
+        let splitRowsWithCards = splitRows.filter { rows[$0]?.isEmpty == false }
+        #expect(!splitRows.isEmpty, "messageRow rendered split rows")
+        try rowLines.joined(separator: "\n\n").write(
+            to: outDir.appendingPathComponent("\(label)-\(sample)-\(variant)-rows.txt"), atomically: true, encoding: .utf8)
+        #expect((rendered > 0) == withSources, "source cards projected: \(rendered)")
         let summary: [String: Any] = [
             "label": label,
             "sample": sample,
+            "variant": variant,
             "regexCounting": regexCounting,
             "historyRows": vm.messages.count,
             "projectedCards": rendered,
+            "renderedRowKeys": rows.count,
+            "renderedSplitRows": splitRows.count,
+            "renderedSplitRowsWithCards": splitRowsWithCards.count,
+            "renderedRowCardChanges": rowChanges,
+            "renderedRowsSHA256": rowHash,
             "scrollDocumentHeight": scrollView?.documentView?.frame.height ?? 0,
             "phases": recorder.phases,
         ]
         let data = try JSONSerialization.data(withJSONObject: summary, options: [.prettyPrinted, .sortedKeys])
-        try data.write(to: outDir.appendingPathComponent("\(label)-\(sample).json"))
-        print("CHAT_PERF_PROOF wrote \(label)-\(sample).json rows=\(vm.messages.count) cards=\(rendered)")
+        try data.write(to: outDir.appendingPathComponent("\(label)-\(sample)-\(variant).json"))
+        print("CHAT_PERF_PROOF wrote \(label)-\(sample)-\(variant).json rows=\(vm.messages.count) cards=\(rendered) " +
+            "splitRows=\(splitRows.count) splitRowsWithCards=\(splitRowsWithCards.count) rowsSHA256=\(rowHash)")
     }
 }
 #endif

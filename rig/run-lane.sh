@@ -1,12 +1,13 @@
 #!/bin/bash
 # Native proof for one ChatUI perf lane on a GitHub-hosted macOS runner with Xcode.
-# Usage: rig/run-lane.sh <lane> [samples]
+# Usage: rig/run-lane.sh <lane> prepare|workload [samples]
 # Builds base and head of the lane with the selected Xcode, runs the focused suites on
 # unmodified code, then runs the shared ChatView workload ABAB on identically
 # instrumented builds and records one os_signpost trace per side.
 set -uo pipefail
 LANE="$1"
-SAMPLES="${2:-5}"
+STAGE="$2"
+SAMPLES="${3:-5}"
 RIG="$(cd "$(dirname "$0")" && pwd)"
 WORK="${RUNNER_TEMP:-/tmp}/chatui-proof"
 OUT="${PROOF_OUT:-$WORK/out}/$LANE"
@@ -23,6 +24,11 @@ step() { echo "::group::$*"; echo "=== $(date -u +%H:%M:%S) $*"; }
 endstep() { echo "::endgroup::"; }
 fail() { echo "::error::$*"; echo "FAILED: $*" >> "$OUT/status.txt"; }
 
+KIT=apps/shared/OpenClawKit
+FLAGS=(--disable-index-store -Xswiftc -gline-tables-only)
+REL=(-c release -Xswiftc -enable-testing --disable-index-store)
+
+if [ "$STAGE" = prepare ]; then
 step "source: base $BASE, head $HEAD"
 SRC="$WORK/src"
 rm -rf "$SRC"
@@ -63,10 +69,6 @@ for side in base head; do
   endstep
 done
 
-KIT=apps/shared/OpenClawKit
-FLAGS=(--disable-index-store -Xswiftc -gline-tables-only)
-REL=(-c release -Xswiftc -enable-testing --disable-index-store)
-
 for side in base head; do
   step "$side: focused suites on unmodified code ($FOCUS)"
   if swift build --package-path "$WORK/$side/$KIT" --scratch-path "$WORK/scratch-$side-debug" "${FLAGS[@]}" --build-tests \
@@ -99,58 +101,27 @@ for side in base head; do
 done
 
 # Probe placement must be identical apart from line numbers.
-diff <(sed 's/:[0-9]*//' "$OUT/base-probes.txt") <(sed 's/:[0-9]*//' "$OUT/head-probes.txt") || fail "probe sets differ"
+sed -E 's/:[0-9]+( |$)/\1/' "$OUT/base-probes.txt" >"$OUT/probe-set.txt"
+diff "$OUT/probe-set.txt" <(sed -E 's/:[0-9]+( |$)/\1/' "$OUT/head-probes.txt") || fail "probe sets differ"
+if [ -s "$OUT/status.txt" ]; then cat "$OUT/status.txt"; exit 1; fi
+exit 0
+fi
 
-run_workload() {
-  local side="$1" sample="$2"
-  CHAT_PERF_PROOF=1 CHAT_PERF_OUT="$OUT/samples" CHAT_PERF_LABEL="$side" CHAT_PERF_SAMPLE="$sample" \
-    swift test --package-path "$WORK/$side/$KIT" --scratch-path "$WORK/scratch-$side-rel" "${REL[@]}" \
-    --skip-build --filter ChatPerfProofWorkload >"$LOG/$side-workload-$sample.log" 2>&1 ||
-    { tail -30 "$LOG/$side-workload-$sample.log"; fail "$side workload sample $sample"; }
-  grep -E "CHAT_PERF_PROOF|Test run with" "$LOG/$side-workload-$sample.log"
-}
+# shellcheck source=/dev/null
+source "$RIG/workload.sh"
 
-step "workload ABAB x$SAMPLES"
+step "workload, interleaved base/head x$SAMPLES (odd rounds base first, even rounds head first)"
 mkdir -p "$OUT/samples"
 uptime | tee "$OUT/load-before.txt"
 for i in $(seq 1 "$SAMPLES"); do
-  run_workload base "$i"
-  run_workload head "$i"
+  if [ $((i % 2)) -eq 1 ]; then order="base head"; else order="head base"; fi
+  for side in $order; do run_workload "$side" "$i"; done
 done
 uptime | tee "$OUT/load-after.txt"
 endstep
 
-step "os_signpost trace, one extra run per side"
-for side in base head; do
-  trace="$WORK/$side.trace"
-  rm -rf "$trace"
-  xcrun xctrace record --template 'Time Profiler' --instrument os_signpost --all-processes \
-    --time-limit 600s --output "$trace" >"$LOG/$side-xctrace.log" 2>&1 &
-  xpid=$!
-  sleep 8
-  run_workload "$side" trace
-  sleep 2
-  kill -INT "$xpid" 2>/dev/null
-  wait "$xpid"
-  tail -5 "$LOG/$side-xctrace.log"
-  if [ -d "$trace" ]; then
-    xcrun xctrace export --input "$trace" --toc >"$OUT/$side-trace-toc.xml" 2>"$LOG/$side-export.log"
-    for schema in os-signpost-interval os-signpost; do
-      xcrun xctrace export --input "$trace" \
-        --xpath "/trace-toc/run[@number=\"1\"]/data/table[@schema=\"$schema\"]" \
-        >"$WORK/$side-$schema.xml" 2>>"$LOG/$side-export.log" || true
-    done
-    python3 -I "$RIG/signposts.py" "$side" "$WORK/$side-os-signpost-interval.xml" "$WORK/$side-os-signpost.xml" \
-      >"$OUT/$side-signposts.json" 2>>"$LOG/$side-export.log" || fail "$side signpost export"
-  else
-    fail "$side trace not recorded"
-  fi
-done
-endstep
-
-step "summary"
+step "summary (counts only; the trace step appends its own section)"
 python3 -I "$RIG/summarize.py" "$LANE" "$OUT" "$(field title)" | tee "$OUT/summary.md"
-[ -n "${GITHUB_STEP_SUMMARY:-}" ] && cat "$OUT/summary.md" >>"$GITHUB_STEP_SUMMARY"
 endstep
 
 if [ -s "$OUT/status.txt" ]; then

@@ -1,17 +1,16 @@
-name: chatui-perf-proof
+name: chatui-perf-proof-p1
 
-# Secretless native proof for the ChatUI performance PRs. Runs on push to this
-# branch only; every input (base SHA, head diff, expected head tree) is committed here.
+# Secretless native proof for the split-row citation cache change (lane p1). Runs on push
+# to this branch only; every input (base SHA, head diff, expected head tree) is committed here.
 on:
   push:
-    branches: [proof/chatui-perf-rig]
-  workflow_dispatch:
+    branches: [proof/chatui-perf-p1]
 
 permissions:
   contents: read
 
 concurrency:
-  group: chatui-perf-proof-${{ github.sha }}
+  group: chatui-perf-proof-p1-${{ github.sha }}
   cancel-in-progress: false
 
 env:
@@ -20,67 +19,78 @@ env:
 
 jobs:
   workload:
-    name: workload ${{ matrix.lane }}
+    name: workload p1
     runs-on: macos-26
-    timeout-minutes: 150
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [p1, p2, p3]
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v5
+        timeout-minutes: 3
         with:
           persist-credentials: false
       - uses: actions/setup-node@v5
+        timeout-minutes: 5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Select newest Xcode
+        timeout-minutes: 3
         run: bash rig/select-xcode.sh
       - name: Enable pnpm
+        timeout-minutes: 2
         run: corepack enable
-      - name: Run lane
-        env:
-          PROOF_OUT: ${{ runner.temp }}/proof-out
-        run: bash rig/run-lane.sh ${{ matrix.lane }} 5
+      - name: Build base and head, focused suites, instrument
+        timeout-minutes: 50
+        run: bash rig/run-lane.sh p1 prepare
+      - name: Workload, interleaved base/head x5 (counts)
+        timeout-minutes: 25
+        run: bash rig/run-lane.sh p1 workload 5
+      - name: Time Profiler trace (optional)
+        timeout-minutes: 12
+        continue-on-error: true
+        run: bash rig/trace-lane.sh p1
+      - name: Job summary
+        if: always()
+        timeout-minutes: 2
+        run: |
+          f="$RUNNER_TEMP/chatui-proof/out/p1/summary.md"
+          [ -f "$f" ] && cat "$f" >>"$GITHUB_STEP_SUMMARY" || echo "no summary" >>"$GITHUB_STEP_SUMMARY"
       - name: Upload evidence
         if: always()
+        timeout-minutes: 5
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-perf-proof-${{ matrix.lane }}
-          path: |
-            ${{ runner.temp }}/proof-out/${{ matrix.lane }}/**
-            !${{ runner.temp }}/proof-out/${{ matrix.lane }}/*-trace-toc.xml
+          name: chatui-perf-proof-p1
+          path: ${{ runner.temp }}/chatui-proof/out/p1/**
           if-no-files-found: warn
           retention-days: 90
 
   full-suite:
-    name: full OpenClawKit tests ${{ matrix.lane }}
+    name: full OpenClawKit tests p1 head
     runs-on: macos-26
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [p1, p2, p3]
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
+        timeout-minutes: 3
         with:
           persist-credentials: false
       - uses: actions/setup-node@v5
+        timeout-minutes: 5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Select newest Xcode
+        timeout-minutes: 3
         run: bash rig/select-xcode.sh
       - name: Enable pnpm
+        timeout-minutes: 2
         run: corepack enable
       - name: Full swift test on head
-        env:
-          PROOF_OUT: ${{ runner.temp }}/proof-out
-        run: bash rig/full-suite.sh ${{ matrix.lane }}
+        timeout-minutes: 35
+        run: bash rig/full-suite.sh p1
       - name: Upload result
         if: always()
+        timeout-minutes: 5
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-full-suite-${{ matrix.lane }}
-          path: ${{ runner.temp }}/proof-out/${{ matrix.lane }}-full/**
+          name: chatui-full-suite-p1
+          path: ${{ runner.temp }}/chatui-full/out/p1-full/**
           if-no-files-found: warn
           retention-days: 90

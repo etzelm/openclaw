@@ -1,8 +1,8 @@
 diff --git a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+SourcePreviews.swift b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+SourcePreviews.swift
-index 0ef73d67b5cce9b06ea53f6a62c3466fea879ca2..b0bd1ab5311687241376bf7561355f3d3be36534 100644
+index 0ef73d67b5c..562fe75041d 100644
 --- a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+SourcePreviews.swift
 +++ b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+SourcePreviews.swift
-@@ -4,22 +4,64 @@ import Observation
+@@ -4,22 +4,59 @@ import Observation
  @MainActor
  @Observable
  final class ChatSourcePreviewState {
@@ -39,14 +39,9 @@ index 0ef73d67b5cce9b06ea53f6a62c3466fea879ca2..b0bd1ab5311687241376bf7561355f3d
      @ObservationIgnored private var projector = ChatSourcePreviewProjector()
      @ObservationIgnored private var messages: [OpenClawChatMessage] = []
      @ObservationIgnored private var task: Task<Void, Never>?
-+    @ObservationIgnored private let citations: (OpenClawChatMessage) -> [URL]
 +    // Split rows come from the narrated transcript, not from update(), so each
 +    // part's links are checked against the part's own visible-text inputs on read.
 +    @ObservationIgnored private var partLinks: [UUID: PartLinks] = [:]
-+
-+    init(citations: @escaping (OpenClawChatMessage) -> [URL] = ChatSourcePreviewProjector.citations(in:)) {
-+        self.citations = citations
-+    }
  
      func update(_ messages: [OpenClawChatMessage]) {
          self.messages = messages
@@ -63,21 +58,21 @@ index 0ef73d67b5cce9b06ea53f6a62c3466fea879ca2..b0bd1ab5311687241376bf7561355f3d
 +        if let cached = self.partLinks[message.presentationID], cached.matches(message) {
 +            links = cached.links
 +        } else {
-+            links = self.citations(message)
++            links = ChatSourcePreviewProjector.citations(in: message)
 +            self.partLinks[message.presentationID] = PartLinks(message, links: links)
 +        }
          return previews.filter { preview in links.contains(where: preview.represents) }
      }
  
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
-index 79fc764076887d7a33426c3a2f829cf312a8064b..e4657b1cf6d9cba340b30de3ccd644ab9bf0435b 100644
+index 79fc7640768..e816c433c02 100644
 --- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
-@@ -339,6 +339,55 @@ struct ChatSourcePreviewTests {
+@@ -339,6 +339,48 @@ struct ChatSourcePreviewTests {
          #expect(cards == [[], [self.first, self.second], []])
      }
  
-+    @Test @MainActor func `split rows parse citations once per part text until that text changes`() {
++    @Test @MainActor func `split row cards follow each row's visible text across repeated renders`() {
 +        func split(_ text: String, id: UUID = UUID(), run: String? = nil) -> OpenClawChatMessage {
 +            OpenClawChatMessage(id: id, role: "assistant", content: [
 +                .init(type: "toolCall", id: "call", name: "read"),
@@ -85,11 +80,7 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..e4657b1cf6d9cba340b30de3ccd644ab
 +                .init(type: "text", text: text),
 +            ], timestamp: 3, transcriptRunID: run ?? self.runID, phase: "final_answer")
 +        }
-+        var parsed: [String] = []
-+        let state = ChatSourcePreviewState { message in
-+            parsed.append(ChatMessageVisibleText.visibleText(in: message))
-+            return ChatSourcePreviewProjector.citations(in: message)
-+        }
++        let state = ChatSourcePreviewState()
 +        let cited = split("Read \(self.first).")
 +        let uncited = split("Read \(self.first).", run: "other-run")
 +        let search = self.search([self.row(self.first), self.row(self.second)])
@@ -100,13 +91,11 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..e4657b1cf6d9cba340b30de3ccd644ab
 +        for _ in 0..<3 {
 +            #expect(render([cited, uncited]) == [[], [self.first], [], []])
 +        }
-+        #expect(parsed == ["", "Read \(self.first)."])
 +
 +        let revised = split("Read \(self.second).", id: cited.id)
 +        #expect(render([revised]) == [[], []])
 +        state.update([search, revised])
 +        #expect(render([revised]) == [[], [self.second]])
-+        #expect(parsed == ["", "Read \(self.first).", "Read \(self.second)."])
 +
 +        // Same row and content; each step changes one footer input of the visible text from the step before.
 +        func footer(_ stopReason: String?, cites url: String? = nil, ownsFooter: Bool = true) -> OpenClawChatMessage {
@@ -123,7 +112,6 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..e4657b1cf6d9cba340b30de3ccd644ab
 +        #expect(cards(footer("error", cites: self.first)).isEmpty)
 +        #expect(cards(footer("error")) == [self.second])
 +        #expect(cards(footer("error", ownsFooter: false)).isEmpty)
-+        #expect(parsed.suffix(5) == ["", "See \(self.second).", "See \(self.first).", "See \(self.second).", ""])
 +    }
 +
      private func answer(_ text: String) -> OpenClawChatMessage {

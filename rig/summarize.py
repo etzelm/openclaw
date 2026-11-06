@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summarize one lane's base vs head workload samples as Markdown.
+"""Summarize the p1 base vs head workload samples as Markdown and counts.json.
 
 Usage: summarize.py <lane> <out dir> <title>
 """
@@ -7,6 +7,15 @@ import json
 import statistics
 import sys
 from pathlib import Path
+
+PHASES = ["load", "scroll", "resize", "append", "stream"]
+KEY = [
+    ("messageRow.splitRow", "split rows evaluated by `ChatView.messageRow`"),
+    ("rowSourcePreviews@messageRow", "`ChatSourcePreviewState.previews(for:)` under messageRow"),
+    ("citationParse@messageRow", "`ChatSourcePreviewProjector.citations(in:)` under messageRow"),
+    ("previewURLDocumentParse@messageRow", "`Document(parsing:)` (link scan) under messageRow"),
+    ("citationParse", "`citations(in:)` from all callers (incl. projection in `update`)"),
+]
 
 
 def pct(values, q):
@@ -18,88 +27,127 @@ def pct(values, q):
 
 
 def load(out):
-    samples = {"base": [], "head": []}
+    variants = {}
     for path in sorted((out / "samples").glob("*.json")):
         data = json.loads(path.read_text())
         if data.get("sample") == "trace":
             continue
-        samples.setdefault(data["label"], []).append(data)
-    return samples
+        sides = variants.setdefault(data.get("variant", "cards"), {"base": [], "head": []})
+        sides.setdefault(data["label"], []).append(data)
+    return variants
 
 
-def phase_table(samples):
-    names = []
-    for data in samples["base"] + samples["head"]:
-        for phase in data["phases"]:
-            if phase["name"] not in names:
-                names.append(phase["name"])
-    lines = []
-    for name in names:
-        per_side = {}
-        for side in ("base", "head"):
-            phases = [p for d in samples[side] for p in d["phases"] if p["name"] == name]
-            per_side[side] = phases
-        steps = (per_side["base"] or per_side["head"])[0]["steps"]
-        lines.append(f"\n#### Phase `{name}` ({steps} steps)\n")
-        lines.append("| Measure | Base (median) | Head (median) | Base range | Head range |")
-        lines.append("|---|---:|---:|---|---|")
-        labels = sorted({k for side in per_side.values() for p in side for k in p["counts"]})
-        for label in labels:
-            cells = []
-            ranges = []
-            for side in ("base", "head"):
-                values = [p["counts"].get(label, 0) for p in per_side[side]]
-                cells.append(f"{statistics.median(values):g}" if values else "n/a")
-                ranges.append(f"{min(values)}..{max(values)}" if values else "n/a")
-            lines.append(f"| `{label}` calls | {cells[0]} | {cells[1]} | {ranges[0]} | {ranges[1]} |")
-        cells = []
-        ranges = []
-        for side in ("base", "head"):
-            values = [p["ms"] for p in per_side[side]]
-            cells.append(f"{statistics.median(values):.1f} ms" if values else "n/a")
-            ranges.append(f"p95 {pct(values, 0.95):.1f}, min {min(values):.1f}" if values else "n/a")
-        lines.append(f"| wall time | {cells[0]} | {cells[1]} | {ranges[0]} | {ranges[1]} |")
+def phase_values(samples, side, phase, label):
+    return [p["counts"].get(label, 0) for d in samples[side] for p in d["phases"] if p["name"] == phase]
+
+
+def phase_ms(samples, side, phase):
+    return [p["ms"] for d in samples[side] for p in d["phases"] if p["name"] == phase]
+
+
+def med(values, fmt="{:g}"):
+    return fmt.format(statistics.median(values)) if values else "n/a"
+
+
+def span(values):
+    return f"{min(values):g}..{max(values):g}" if values else "n/a"
+
+
+def key_table(samples, counts):
+    lines = [
+        "| Phase | Measure | Base median | Head median | Base range | Head range |",
+        "|---|---|---:|---:|---|---|",
+    ]
+    for phase in PHASES:
+        for label, text in KEY:
+            base = phase_values(samples, "base", phase, label)
+            head = phase_values(samples, "head", phase, label)
+            counts.setdefault(phase, {})[label] = {"base": base, "head": head}
+            lines.append(f"| {phase} | {text} | {med(base)} | {med(head)} | {span(base)} | {span(head)} |")
+        base = phase_ms(samples, "base", phase)
+        head = phase_ms(samples, "head", phase)
+        counts[phase]["wallMs"] = {"base": base, "head": head}
+        lines.append(
+            f"| {phase} | wall time ms (median, p95) | {med(base, '{:.1f}')} (p95 {pct(base, 0.95):.1f}) | "
+            f"{med(head, '{:.1f}')} (p95 {pct(head, 0.95):.1f}) | | |")
     return lines
 
 
-def signpost_lines(out):
+def totals(samples):
+    lines = ["| Calls over the whole workload | Base (median) | Head (median) |", "|---|---:|---:|"]
+    labels = sorted({k for side in samples.values() for d in side for p in d["phases"] for k in p["counts"]})
+    for label in labels:
+        cells = []
+        for side in ("base", "head"):
+            values = [sum(p["counts"].get(label, 0) for p in d["phases"]) for d in samples[side]]
+            cells.append(f"{statistics.median(values):g}" if values else "n/a")
+        lines.append(f"| `{label}` | {cells[0]} | {cells[1]} |")
+    return lines
+
+
+def output_check(samples):
+    hashes = {side: sorted({d.get("renderedRowsSHA256", "missing") for d in samples[side]}) for side in ("base", "head")}
+    same = len(hashes["base"]) == 1 and hashes["base"] == hashes["head"] and hashes["base"] != ["missing"]
+    first = (samples["base"] or samples["head"])[0]
+    changes = {side: [d.get("renderedRowCardChanges") for d in samples[side]] for side in ("base", "head")}
+    return same, [
+        f"- rendered row keys: {first.get('renderedRowKeys')}, split rows: {first.get('renderedSplitRows')}, "
+        f"split rows with cards: {first.get('renderedSplitRowsWithCards')}",
+        f"- per-row cards SHA-256, base: {', '.join(h[:16] for h in hashes['base'])}; "
+        f"head: {', '.join(h[:16] for h in hashes['head'])} -> {'IDENTICAL' if same else 'DIFFERENT'}",
+        f"- rows whose cards changed between renders within a sample: base {changes['base']}, head {changes['head']}",
+    ]
+
+
+def profile_lines(out):
     lines = []
     for side in ("base", "head"):
-        path = out / f"{side}-signposts.json"
+        path = out / f"{side}-timeprofile.json"
         if not path.exists():
-            lines.append(f"- {side}: no signpost export")
+            lines.append(f"- {side}: no time profile export")
             continue
         data = json.loads(path.read_text())
-        parts = [f"{i['message'] or i['name']} {i['duration']}" for i in data["intervals"]]
-        lines.append(f"- {side}: {len(data['intervals'])} intervals ({'; '.join(parts) or 'none'})")
+        lines.append(f"- {side}: {data.get('samples', 0)} main-thread samples in the workload process")
+        for name, value in data.get("stacks", {}).items():
+            lines.append(f"  - samples with `{name}` on the stack: {value}")
     return lines
 
 
 def main():
     lane, out, title = sys.argv[1], Path(sys.argv[2]), sys.argv[3]
-    samples = load(out)
+    variants = load(out)
     env = (out / "environment.txt").read_text().strip() if (out / "environment.txt").exists() else "n/a"
     lines = [f"### {lane}: {title}", "", "```", env, "```", ""]
     for side in ("base", "head"):
         focused = out / f"{side}-focused.txt"
         text = focused.read_text().strip() if focused.exists() else "not run"
-        lines.append(f"- {side} focused suites: {text or 'no result line'}")
-    meta = []
-    for side in ("base", "head"):
-        if samples[side]:
-            first = samples[side][0]
-            meta.append(
-                f"{side}: {len(samples[side])} samples, {first['historyRows']} history rows, "
-                f"{first['projectedCards']} projected cards, regex counting {first['regexCounting']}")
-        else:
-            meta.append(f"{side}: no samples")
-    lines += [f"- {m}" for m in meta]
+        text = " ".join(line.strip() for line in text.splitlines() if "Test run with" in line) or text
+        lines.append(f"- {side} focused suites (unmodified code): {text or 'no result line'}")
     status = out / "status.txt"
     if status.exists() and status.read_text().strip():
         lines.append(f"- failures: {status.read_text().strip()}")
-    if samples["base"] and samples["head"]:
-        lines += phase_table(samples)
-    lines += ["", "#### os_signpost intervals (xctrace, one extra run per side)", ""] + signpost_lines(out)
+    counts = {}
+    all_same = True
+    for variant in sorted(variants):
+        samples = variants[variant]
+        lines += ["", f"#### Transcript `{variant}`", ""]
+        for side in ("base", "head"):
+            if samples[side]:
+                first = samples[side][0]
+                lines.append(
+                    f"- {side}: {len(samples[side])} samples (sample order {', '.join(d['sample'] for d in samples[side])}), "
+                    f"{first['historyRows']} history messages, {first['projectedCards']} projected cards")
+            else:
+                lines.append(f"- {side}: no samples")
+        if samples["base"] and samples["head"]:
+            same, check = output_check(samples)
+            all_same = all_same and same
+            lines += check + [""] + key_table(samples, counts.setdefault(variant, {}))
+            lines += ["", "<details><summary>All probe counts, whole workload</summary>", ""] + totals(samples)
+            lines += ["", "</details>"]
+    lines += ["", "#### Time Profiler (xctrace attached to the workload process, one extra run per side)", ""]
+    lines += profile_lines(out)
+    (out / "counts.json").write_text(json.dumps({"lane": lane, "outputIdentical": all_same, "variants": counts}, indent=2))
     print("\n".join(lines))
 
 
