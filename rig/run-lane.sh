@@ -171,7 +171,9 @@ cold() {
 trace() {
   step "os_signpost trace, one extra run per side (bounded)"
   local code=0
-  for side in base head; do
+  # Head first, and no xctrace left between sides: a second recording in one job has hung while saving.
+  for side in head base; do
+    pkill -INT -x xctrace 2>/dev/null; sleep 3; pkill -KILL -x xctrace 2>/dev/null
     local trace="$WORK/$side.trace"
     rm -rf "$trace"
     # Only the os_signpost instrument (no Time Profiler) and a fixed time limit: xctrace stops by

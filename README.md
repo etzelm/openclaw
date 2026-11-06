@@ -7,8 +7,8 @@ holds only the rig; nothing here is part of the PR. Rerun: push a commit to this
 Job `workload`:
 
 1. Fetches base `6b959f4ca63` from `openclaw/openclaw`, applies `rig/lanes/p2.diff`
-   (`git diff --full-index 6b959f4ca63..0315b4ee1b4`) and stops unless the tree equals the PR head
-   tree `5e8277008fa` recorded in `rig/lanes.json`.
+   (`git diff --full-index 6b959f4ca63..41394d91dc1`) and stops unless the tree equals the PR head
+   tree `3fd4b5ec20f` recorded in `rig/lanes.json`.
 2. Applies identical scratch instrumentation to base and head (`rig/instrument.py`, `rig/ChatPerfProbe.swift`):
    a call counter at the top of each source preview function, plus an `os_signpost` interval and a
    monotonic timer around `ChatSourcePreviewState.update`. Copies `rig/ChatPerfProofWorkload.swift`
