@@ -156,15 +156,15 @@ trace() {
     rm -rf "$trace"
     # Only the os_signpost instrument (no Time Profiler) and a fixed time limit: xctrace stops by
     # itself, so nothing waits on a SIGINT-driven finalisation.
-    limit 300 xcrun xctrace record --instrument os_signpost --all-processes \
-      --time-limit 75s --output "$trace" >"$LOG/$side-xctrace.log" 2>&1 &
+    limit 600 xcrun xctrace record --instrument os_signpost --all-processes \
+      --time-limit 40s --output "$trace" >"$LOG/$side-xctrace.log" 2>&1 &
     local xpid=$!
     sleep 6
     run_workload "$side" trace || code=1
     wait "$xpid" || { echo "xctrace exit $?"; code=1; }
     tail -5 "$LOG/$side-xctrace.log"
     if [ -d "$trace" ]; then
-      limit 240 xcrun xctrace export --input "$trace" \
+      limit 300 xcrun xctrace export --input "$trace" \
         --xpath '/trace-toc/run[@number="1"]/data/table[@schema="os-signpost-interval"]' \
         >"$WORK/$side-os-signpost-interval.xml" 2>"$LOG/$side-export.log" || code=1
       python3 -I "$RIG/signposts.py" "$side" "$WORK/$side-os-signpost-interval.xml" \

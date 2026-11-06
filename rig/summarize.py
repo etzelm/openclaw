@@ -49,14 +49,15 @@ def phase(data, name):
     return next((p for p in data["phases"] if p["name"] == name), None)
 
 
-def steps(samples, name, kind=None):
+def steps(samples, name, select=None):
+    """Records of phase `name`; `select(index)` picks steps (None = all)."""
     out = []
     for data in samples:
         p = phase(data, name)
         if not p:
             continue
         for index, record in enumerate(p["steps"]):
-            if kind is None or index % 3 == kind:
+            if select is None or select(index):
                 out.append(record)
     return out
 
@@ -176,8 +177,10 @@ def main():
     result = {"lane": lane}
     if samples["base"] and samples["head"]:
         rows = [("load", "load", None)] + \
-            [("append", f"append: {kind}", i) for i, kind in enumerate(APPEND_KINDS)] + \
-            [("append", "append: any message", None), ("reloadSame", "reload, identical rows", None),
+            [("append", f"append: {kind}", (lambda k: lambda i: i % 3 == k)(n)) for n, kind in enumerate(APPEND_KINDS)] + \
+            [("append", "append: any message", None),
+             ("reloadSame", "first reload after the 21 event-delivered rows (same ids)", lambda i: i == 0),
+             ("reloadSame", "later reloads, identical rows", lambda i: i > 0),
              ("reloadGrown", "reload, same ids + 1 new row", None), ("contextChange", "source context change", None)]
         table, counts = count_table(samples, rows)
         lines += ["", "#### Counts per step (median, range across all steps of all samples)", ""] + table
