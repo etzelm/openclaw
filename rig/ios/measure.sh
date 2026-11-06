@@ -66,15 +66,14 @@ for runtime, items in json.load(sys.stdin)["devices"].items():
 fi
 
 if [ "$1" = trace ]; then
-  # One extra run per side under xctrace (os_signpost instrument, all host processes, so it sees the
-  # simulator app). Head first; no xctrace left between sides. Exported filtered to the rig's subsystem.
+  # One extra run per side under xctrace (os_signpost instrument, all processes on the simulator device). Head first; no xctrace left between sides. Exported filtered to the rig's subsystem.
   UDID="$(cat "$WORK/udid")"
   code=0
   for side in head base; do
     pkill -INT -x xctrace 2>/dev/null; sleep 3; pkill -KILL -x xctrace 2>/dev/null
     trace="$WORK/ios-$side.trace"
     rm -rf "$trace"
-    perl -e 'alarm shift; exec @ARGV' 600 xcrun xctrace record --instrument os_signpost --all-processes \
+    perl -e 'alarm shift; exec @ARGV' 600 xcrun xctrace record --device "$UDID" --instrument os_signpost --all-processes \
       --time-limit 150s --output "$trace" >"$LOG/xctrace-$side.log" 2>&1 &
     xpid=$!
     sleep 8

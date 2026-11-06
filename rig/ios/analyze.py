@@ -252,10 +252,14 @@ def main():
     result["output"] = {"phaseDigestsEqual": ok, "replyMismatches": mismatch, "replies": len(ref), "rowsEqual": rows_equal}
 
     shots = {}
-    for path in sorted((out / "samples").glob("*/attachments/*.png")):
-        side = path.parts[-3].split("-")[0]
-        name = re.sub(r"_\d+_[0-9A-F-]+\.png$", "", path.name)
-        shots.setdefault(name, {}).setdefault(side, set()).add(hashlib.md5(path.read_bytes()).hexdigest())
+    for manifest in sorted((out / "samples").glob("*/attachments/manifest.json")):
+        side = manifest.parts[-3].split("-")[0]
+        for test in json.loads(manifest.read_text()):
+            for item in test.get("attachments", []):
+                path = manifest.parent / item["exportedFileName"]
+                name = re.sub(r"_\d+_[0-9A-F-]+\.png$", "", item.get("suggestedHumanReadableName", path.name))
+                if path.exists():
+                    shots.setdefault(name, {}).setdefault(side, set()).add(hashlib.md5(path.read_bytes()).hexdigest())
     lines += ["", "#### Screenshots", ""]
     for name, by_side in sorted(shots.items()):
         lines.append(f"- {name}: distinct images base {len(by_side.get('base', []))}, head {len(by_side.get('head', []))}, "
