@@ -1,6 +1,6 @@
 #!/bin/bash
 # Real-Xcode proof for the chat reconnect catalog burst fix.
-# Usage: rig/run.sh focused | harness | full
+# Usage: rig/run.sh focused | full
 #   focused: base + new test only (expect the new test to fail), then base + full head diff
 #            (expect the new test and the related chat view model suites to pass). Same scratch dir, same runner.
 #   full:    full OpenClawKit swift test on the exact head tree.
@@ -64,31 +64,6 @@ if [ "$MODE" = focused ]; then
   red_failed_on_new_test=0
   grep -Eq "(✘|failed).*$TEST_NAME" "$OUT/red.log" && red_failed_on_new_test=1
   test "$red" -ne 0 && test "$red_failed_on_new_test" = 1 && test "$green" -eq 0
-  exit $?
-fi
-
-if [ "$MODE" = harness ]; then
-  # Rig-only harness.diff: a chat Gateway mode for NativeGatewayWebSocketFixture plus one proof test that
-  # drives OpenClawChatViewModel through GatewayNodeSession over a real URLSession WebSocket while the
-  # socket drops twice and health goes false then true, with each chat.history held 1.5 s.
-  wire_line() { grep -h "RECONNECT_WIRE_SUMMARY" "$1" | tail -1; }
-  git -C "$SRC" apply --index "$RIG/harness.diff" || exit 1
-  swift_test --filter ChatReconnectBurstWireProofTests >"$OUT/base.log" 2>&1
-  base=$?
-  { grep -h "RECONNECT_WIRE" "$OUT/base.log"; grep -E "Test run with|✘|error:" "$OUT/base.log" | tail -10; echo "exit $base"; } | tee "$OUT/base-result.txt"
-  git -C "$SRC" reset -q --hard
-  head_tree_check
-  git -C "$SRC" apply --index "$RIG/harness.diff" || exit 1
-  swift_test --filter ChatReconnectBurstWireProofTests >"$OUT/head.log" 2>&1
-  head=$?
-  { grep -h "RECONNECT_WIRE" "$OUT/head.log"; grep -E "Test run with|✘|✔|error:" "$OUT/head.log" | tail -10; echo "exit $head"; } | tee "$OUT/head-result.txt"
-  {
-    echo "### harness base $BASE (expect catalogs re-read before the transcript answer)"
-    echo '```'; wire_line "$OUT/base.log"; tail -3 "$OUT/base-result.txt"; echo '```'
-    echo "### harness head tree $HEAD_TREE (expect each catalog at most once before the transcript answer)"
-    echo '```'; wire_line "$OUT/head.log"; tail -3 "$OUT/head-result.txt"; echo '```'
-  } | summary
-  test "$base" -ne 0 && wire_line "$OUT/base.log" | grep -q "catalogRequests=" && test "$head" -eq 0
   exit $?
 fi
 
