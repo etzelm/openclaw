@@ -1,0 +1,132 @@
+diff --git a/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift b/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift
+index 1f64a2fb81955b7ac8e1198e22a244d22fe5b51a..7d26cf6360fb8001730267e0f49542b79cd251cb 100644
+--- a/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift
++++ b/apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift
+@@ -68,11 +68,15 @@ public actor GatewayChannelActor {
+     var testRecoverySleep: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+     var testNetworkPathObserved: (@Sendable (GatewayNetworkPath) -> Void)?
+     var testNetworkPathRecoveryFinished: (@Sendable () -> Void)?
++    var testKeepaliveSleep: (@Sendable (Duration) async throws -> Void)?
+     #endif
+     private let connectChallengeTimeoutSeconds: Double = 6.0
+     // Some networks will silently drop idle TCP/TLS flows around ~30s. The gateway tick is server->client,
+     // but NATs/proxies often require outbound traffic to keep the connection alive.
+     private let keepaliveIntervalSeconds: Double = 15.0
++    // A single lost pong can be a transient stall on a weak link. Two in a row retire the socket
++    // well before the tick watchdog (2x tickIntervalMs) would.
++    private static let keepaliveMissLimit = 2
+     private let networkPathUpdates: (@Sendable () -> AsyncStream<GatewayNetworkPath>)?
+     private var networkPathTask: Task<Void, Never>?
+     private var networkPathSettleTask: Task<Void, Never>?
+@@ -520,9 +524,7 @@ public actor GatewayChannelActor {
+ 
+     private func keepaliveLoop(connectionGeneration: UInt64) async {
+         while self.shouldReconnect {
+-            guard await self.sleepUnlessCancelled(
+-                nanoseconds: UInt64(self.keepaliveIntervalSeconds * 1_000_000_000))
+-            else { return }
++            guard await self.sleepBeforeKeepalive() else { return }
+             guard self.shouldReconnect, self.isConnected(connectionGeneration: connectionGeneration) else { return }
+             guard let task = self.task else { continue }
+             // Best-effort ping keeps NAT/proxy state alive without generating RPC load.
+@@ -534,6 +536,16 @@ public actor GatewayChannelActor {
+         }
+     }
+ 
++    private func sleepBeforeKeepalive() async -> Bool {
++        #if DEBUG
++        if let testKeepaliveSleep {
++            do { try await testKeepaliveSleep(.seconds(self.keepaliveIntervalSeconds)) } catch { return false }
++            return !Task.isCancelled
++        }
++        #endif
++        return await self.sleepUnlessCancelled(nanoseconds: UInt64(self.keepaliveIntervalSeconds * 1_000_000_000))
++    }
++
+     static func loadDeviceIdentityForConnect(
+         includeDeviceIdentity: Bool,
+         profile: GatewayDeviceIdentityProfile) throws -> DeviceIdentity?
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift
+index afeeada7489d785ebab507984cb568e133038627..94f3c21628e5dfe03b64554c14c47f7b13217076 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayNetworkPathRecoveryTests.swift
+@@ -143,6 +143,23 @@ extension GatewayChannelActor {
+     fileprivate func hasPathRecoveryConnectBackoff() -> Bool {
+         self.connectFailureBackoff.deadline != nil
+     }
++
++    fileprivate func setKeepaliveSleep(_ sleep: PathRecoverySleep) {
++        self.testKeepaliveSleep = { try await sleep.sleep($0) }
++    }
++}
++
++/// Runs one keepalive round on `socket`: wakes the loop, waits for its ping, answers it.
++private func answerKeepalive(
++    round: Int,
++    sleep: PathRecoverySleep,
++    socket: FakeGatewayWebSocketTask,
++    error: Error?) async
++{
++    await sleep.started.wait(forCount: round)
++    sleep.release()
++    await socket.waitForPings(count: round)
++    socket.finishPongs(error: error)
+ }
+ 
+ private func withPathRecoveryFixture(
+@@ -364,6 +381,55 @@ struct GatewayNetworkPathRecoveryTests {
+         }
+     }
+ 
++    @Test
++    func `consecutive keepalive misses reconnect before the tick watchdog`() async throws {
++        let keepalive = PathRecoverySleep()
++        try await withPathRecoveryFixture { fixture in
++            await fixture.channel.setKeepaliveSleep(keepalive)
++            try await fixture.channel.connect()
++            let oldSocket = try #require(fixture.session.latestTask())
++            oldSocket.holdPongs()
++
++            await answerKeepalive(round: 1, sleep: keepalive, socket: oldSocket, error: URLError(.timedOut))
++            await keepalive.started.wait(forCount: 2)
++            // One lost pong alone keeps the socket.
++            try #require(fixture.session.snapshotMakeCount() == 1)
++            await answerKeepalive(round: 2, sleep: keepalive, socket: oldSocket, error: URLError(.timedOut))
++            // Either the old loop sleeps again or the replacement socket starts its own loop.
++            await keepalive.started.wait(forCount: 3)
++
++            #expect(oldSocket.snapshotPingCount() == 2)
++            #expect(oldSocket.state == .canceling)
++            #expect(fixture.session.snapshotMakeCount() == 2)
++            try await fixture.channel.connect()
++            #expect(fixture.session.latestTask()?.sentRequestCount(method: "connect") == 1)
++        }
++    }
++
++    @Test
++    func `a keepalive miss between healthy pongs keeps the socket`() async throws {
++        let keepalive = PathRecoverySleep()
++        try await withPathRecoveryFixture { fixture in
++            await fixture.channel.setKeepaliveSleep(keepalive)
++            try await fixture.channel.connect()
++            let socket = try #require(fixture.session.latestTask())
++            let generation = await fixture.channel.currentConnectionGeneration()
++            socket.holdPongs()
++
++            await answerKeepalive(round: 1, sleep: keepalive, socket: socket, error: URLError(.timedOut))
++            await keepalive.started.wait(forCount: 2)
++            // A replacement socket would never see the remaining pings, so stop here instead of hanging.
++            try #require(fixture.session.snapshotMakeCount() == 1)
++            await answerKeepalive(round: 2, sleep: keepalive, socket: socket, error: nil)
++            await answerKeepalive(round: 3, sleep: keepalive, socket: socket, error: URLError(.timedOut))
++            await keepalive.started.wait(forCount: 4)
++
++            #expect(socket.snapshotPingCount() == 3)
++            #expect(fixture.session.snapshotMakeCount() == 1)
++            #expect(await fixture.channel.currentConnectionGeneration() == generation)
++        }
++    }
++
+     @Test
+     func `shutdown terminates path consumption and fences an outstanding probe`() async throws {
+         try await withPathRecoveryFixture { fixture in
