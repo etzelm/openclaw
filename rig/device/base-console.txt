@@ -1,0 +1,61 @@
+# Base (main 60a2e23d542), same iPhone 14 Pro Max, iOS 27.2, same personal-team local build setup as head.
+# App os_log lines mirrored by `devicectl device process launch --console` with OS_ACTIVITY_DT_MODE=YES,
+# filtered to PushWake / BackgroundWake / connection lines. Redacted: LAN IP, pid, local run id.
+2026-11-06 13:58:18.477425-0800 OpenClaw [GatewayDiag] [2026-11-06T21:58:18.477Z] chat.ui send queued after route change sessionKey=main localRunId=<id> error=The operation couldn’t be completed. (OpenClawChatUI.OpenClawChatTransportSendError error 0.)
+# Run B, first attempt: the expiration call reached the scheduler before the task launched, so the wake was not
+# expired and ran its full 12 s reconnect wait. Not comparable with head; repeated below.
+2026-11-06 14:01:09.500746-0800 OpenClaw [PushWake] Background reconnect lease reason=scene_background_grace seconds=25.0 wasSuppressed=false
+2026-11-06 14:01:09.500819-0800 OpenClaw [PushWake] Background grace started seconds=25.000000
+2026-11-06 14:01:09.502379-0800 OpenClaw [BackgroundWake] Scheduled background wake refresh reason=scene_background delaySeconds=120.0
+2026-11-06 14:01:21.598960-0800 OpenClaw [BackgroundWake] Scheduled background wake refresh reason=reschedule delaySeconds=900.0
+2026-11-06 14:01:21.601105-0800 OpenClaw [PushWake] Background refresh wake received wakeId=8D96AFA3 trigger=bg_app_refresh backgrounded=true autoReconnect=true
+2026-11-06 14:01:21.601604-0800 OpenClaw [PushWake] Wake reconnect begin wakeId=8D96AFA3 stableID=manual|<lan-ip>|19789
+2026-11-06 14:01:21.601686-0800 OpenClaw [PushWake] Background reconnect lease reason=wake_8D96AFA3 seconds=30.0 wasSuppressed=false
+2026-11-06 14:01:21.656930-0800 OpenClaw [PushWake] Wake reconnect trigger applied wakeId=8D96AFA3
+2026-11-06 14:01:33.768792-0800 OpenClaw [PushWake] Background refresh wake outcome wakeId=8D96AFA3 applied=true handled=false reason=connect_timeout durationMs=12166
+2026-11-06 14:01:33.769150-0800 OpenClaw [BackgroundWake] Background wake refresh finished applied=false
+2026-11-06 14:01:34.840294-0800 OpenClaw [PushWake] Background reconnect suppressed reason=background_grace_timer disconnect=true
+2026-11-06 14:01:34.847444-0800 OpenClaw [PushWake] Background grace ended reason=timer
+2026-11-06 14:01:59.659194-0800 OpenClaw [PushWake] Background reconnect cleared reason=scene_foreground
+# Run B (expiry), same timing as head: Gateway SIGSTOPped, BGTask launched 8 s into the grace, expired 4 s after
+# "wake received".
+2026-11-06 14:02:04.879724-0800 OpenClaw [PushWake] Background reconnect lease reason=scene_background_grace seconds=25.0 wasSuppressed=false
+2026-11-06 14:02:04.879806-0800 OpenClaw [PushWake] Background grace started seconds=25.000000
+2026-11-06 14:02:04.880255-0800 OpenClaw [BackgroundWake] Scheduled background wake refresh reason=scene_background delaySeconds=120.0
+2026-11-06 14:02:12.487538-0800 OpenClaw [BackgroundWake] Scheduled background wake refresh reason=reschedule delaySeconds=900.0
+2026-11-06 14:02:12.487716-0800 OpenClaw [PushWake] Background refresh wake received wakeId=BCC15811 trigger=bg_app_refresh backgrounded=true autoReconnect=true
+2026-11-06 14:02:12.487793-0800 OpenClaw [PushWake] Wake reconnect begin wakeId=BCC15811 stableID=manual|<lan-ip>|19789
+2026-11-06 14:02:12.487861-0800 OpenClaw [PushWake] Background reconnect lease reason=wake_BCC15811 seconds=30.0 wasSuppressed=false
+2026-11-06 14:02:12.528552-0800 OpenClaw [PushWake] Wake reconnect trigger applied wakeId=BCC15811
+2026-11-06 14:02:16.883522-0800 OpenClaw [PushWake] Background refresh wake outcome wakeId=BCC15811 applied=true handled=false reason=connect_timeout durationMs=4395
+2026-11-06 14:02:16.883641-0800 OpenClaw [BackgroundWake] Background wake refresh finished applied=false
+2026-11-06 14:02:30.779418-0800 OpenClaw [PushWake] Background reconnect suppressed reason=background_grace_expired disconnect=true
+2026-11-06 14:02:30.779940-0800 OpenClaw [PushWake] Background grace ended reason=expired
+2026-11-06 14:02:57.549463-0800 OpenClaw [PushWake] Background reconnect cleared reason=scene_foreground
+# Run A (delivery), same timing as head: BGTask launched 8 s into the grace, Gateway resumed (SIGCONT) 1 s later.
+2026-11-06 14:03:02.744219-0800 OpenClaw [PushWake] Background reconnect lease reason=scene_background_grace seconds=25.0 wasSuppressed=false
+2026-11-06 14:03:02.744317-0800 OpenClaw [PushWake] Background grace started seconds=25.000000
+2026-11-06 14:03:02.744805-0800 OpenClaw [BackgroundWake] Scheduled background wake refresh reason=scene_background delaySeconds=120.0
+2026-11-06 14:03:10.189497-0800 OpenClaw [BackgroundWake] Scheduled background wake refresh reason=reschedule delaySeconds=900.0
+2026-11-06 14:03:10.190417-0800 OpenClaw [PushWake] Background refresh wake received wakeId=B27847B7 trigger=bg_app_refresh backgrounded=true autoReconnect=true
+2026-11-06 14:03:10.190751-0800 OpenClaw [PushWake] Wake reconnect begin wakeId=B27847B7 stableID=manual|<lan-ip>|19789
+2026-11-06 14:03:10.190827-0800 OpenClaw [PushWake] Background reconnect lease reason=wake_B27847B7 seconds=30.0 wasSuppressed=false
+2026-11-06 14:03:10.228792-0800 OpenClaw [PushWake] Wake reconnect trigger applied wakeId=B27847B7
+2026-11-06 14:03:11.471735-0800 OpenClaw [GatewayDiag] [2026-11-06T22:03:11.469Z] gateway connected host=<lan-ip> scheme=ws
+2026-11-06 14:03:11.629438-0800 OpenClaw [GatewayDiag] [2026-11-06T22:03:11.626Z] operator gateway connected host=<lan-ip> scheme=ws
+2026-11-06 14:03:11.649956-0800 OpenClaw [PushWake] Background refresh wake outcome wakeId=B27847B7 applied=true handled=false reason=beacon_failed durationMs=1458
+2026-11-06 14:03:11.653863-0800 OpenClaw [BackgroundWake] Background wake refresh finished applied=false
+2026-11-06 14:03:28.502246-0800 OpenClaw [PushWake] Background reconnect suppressed reason=background_grace_expired disconnect=true
+2026-11-06 14:03:28.503229-0800 OpenClaw [PushWake] Background grace ended reason=expired
+
+# Host timeline (laptop clock):
+# 13:44:52.310 gateway_SIGSTOP (before the base message)
+# 14:01:07.781 B background_app / 14:01:16.655 simulate_launch / 14:01:20.684 simulate_expiration (landed before launch)
+# 14:02:03.191 B2 background_app / 14:02:12.086 simulate_launch / 14:02:16.658 simulate_expiration (4 s after wake)
+# 14:03:01.091 A background_app / 14:03:09.931 simulate_launch / 14:03:10.992 gateway_SIGCONT
+#
+# Test Gateway transcript (session_transcript_fts): user "bg proof base" timestamp 1794002593074 = 14:03:13.074,
+# after the BGTask had already finished (14:03:11.654). The send happened only because the leftover grace window
+# kept the process running; a real OS wake ends when the task completes.
+# Test Gateway log, beacon rejections (same on head):
+# 2026-11-06T14:03:11.643-08:00 ✗ node.event errorCode=UNAVAILABLE errorMessage=node pairing changed while invocation was active
