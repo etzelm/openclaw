@@ -49,6 +49,36 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
+  harness:
+    name: real WebSocket wire order, base vs head
+    runs-on: macos-26
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 5
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Wire trace on base then head tree
+        timeout-minutes: 60
+        run: bash rig/run.sh harness
+      - name: Upload result
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconnect-burst-harness
+          path: ${{ runner.temp }}/reconnect-burst/out/harness/**
+          if-no-files-found: warn
+          retention-days: 90
+
   full-suite:
     name: full OpenClawKit swift test on head
     runs-on: macos-26

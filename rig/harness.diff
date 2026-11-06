@@ -1,0 +1,355 @@
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatReconnectBurstWireProofTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatReconnectBurstWireProofTests.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..fa9180f9b515c39418b2536db187ae46ae481e63
+--- /dev/null
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatReconnectBurstWireProofTests.swift
+@@ -0,0 +1,227 @@
++#if os(macOS) || os(iOS)
++import Foundation
++import OpenClawProtocol
++import Testing
++@testable import OpenClawChatUI
++@testable import OpenClawKit
++
++/// Proof-only, not part of the fix. The method bodies below are copied from the app's
++/// IOSGatewayChatTransport (the app target cannot be linked into this package), so every
++/// chat RPC goes through GatewayNodeSession over a real URLSession WebSocket.
++private struct ProofGatewayChatTransport: OpenClawChatGatewayTransport {
++    let gateway: GatewayNodeSession
++
++    var chatGatewayAgentID: String? {
++        nil
++    }
++
++    func requestChatGateway(_ request: OpenClawChatGatewayRequest) async throws -> Data {
++        try await self.gateway.request(request)
++    }
++
++    func sessionTarget(for sessionKey: String, overrideAgentID: String?) -> OpenClawChatSessionTarget {
++        OpenClawChatSessionTarget.resolve(
++            sessionKey,
++            selectedAgentID: nil,
++            overrideAgentID: overrideAgentID,
++            policy: .scopeBareKeysToSelectedAgent)
++    }
++
++    func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload {
++        let target = self.sessionTarget(for: sessionKey, overrideAgentID: nil)
++        let request = OpenClawChatGatewayRequests.history(sessionKey: target.sessionKey, agentID: target.agentID)
++        return try await JSONDecoder().decode(OpenClawChatHistoryPayload.self, from: self.gateway.request(request))
++    }
++
++    func requestHistory(sessionKey: String, cursor: String) async throws -> OpenClawChatHistoryPayload {
++        guard let route = await self.gateway.currentRoute() else { throw CancellationError() }
++        let target = self.sessionTarget(for: sessionKey, overrideAgentID: nil)
++        let request = OpenClawChatGatewayRequests.history(
++            sessionKey: target.sessionKey, agentID: target.agentID, cursor: cursor, maxBytes: 256 * 1024)
++        let data = try await self.gateway.request(request, ifCurrentRoute: route)
++        guard await self.gateway.currentRoute() == route else { throw CancellationError() }
++        return try JSONDecoder().decode(OpenClawChatHistoryPayload.self, from: data)
++    }
++
++    func listModels(agentID: String?) async throws -> [OpenClawChatModelChoice] {
++        let response = try await gateway.request(OpenClawChatGatewayRequests.modelsList(agentID: agentID))
++        return try OpenClawChatGatewayPayloadCodec.decodeModelChoices(response)
++    }
++
++    func loadModelCatalog(sessionKey: String, agentID: String?) async throws -> OpenClawChatModelCatalogSnapshot {
++        guard let route = await self.gateway.currentRoute() else { throw CancellationError() }
++        guard await self.gateway.supportsServerCapability(.publishedModelCatalog, ifCurrentRoute: route) == true
++        else {
++            return OpenClawChatModelCatalogSnapshot(choices: [], availabilityIsSessionScoped: false)
++        }
++        let request = OpenClawChatGatewayRequests.modelsList(agentID: agentID, sessionKey: sessionKey)
++        let response = try await self.gateway.request(request, ifCurrentRoute: route)
++        return try OpenClawChatGatewayPayloadCodec.decodeModelCatalog(response)
++    }
++
++    func isSwarmEnabled(sessionKey: String) async throws -> Bool {
++        let request = OpenClawChatGatewayRequests.chatMetadata(sessionKey: sessionKey, fallbackAgentID: nil)
++        let response = try await gateway.request(request)
++        return try JSONDecoder().decode(OpenClawChatMetadataCapabilities.self, from: response).swarmEnabled
++    }
++
++    var supportsComposerCapabilities: Bool {
++        true
++    }
++
++    /// The app adapter sends these three reads; their decoding does not affect request order.
++    func loadComposerCapabilityCatalog(
++        sessionKey: String,
++        agentID: String?) async -> OpenClawChatComposerCapabilityCatalog
++    {
++        guard let route = await self.gateway.currentRoute() else { return OpenClawChatComposerCapabilityCatalog() }
++        let target = self.sessionTarget(for: sessionKey, overrideAgentID: agentID)
++        async let config = try? self.gateway.request(
++            OpenClawChatGatewayRequests.composerConfigGet(), ifCurrentRoute: route)
++        async let skills = try? self.gateway.request(
++            OpenClawChatGatewayRequests.composerSkillsStatus(agentID: target.agentID), ifCurrentRoute: route)
++        async let tools = try? self.gateway.request(
++            OpenClawChatGatewayRequests.composerToolsEffective(
++                sessionKey: target.sessionKey, agentID: target.agentID),
++            ifCurrentRoute: route)
++        _ = await (config, skills, tools)
++        return OpenClawChatComposerCapabilityCatalog()
++    }
++
++    func gatewayAdvertisesMethod(_ method: String) async -> Bool? {
++        guard let route = await self.gateway.currentRoute() else { return nil }
++        return await self.gateway.supportsServerMethod(method, ifCurrentRoute: route)
++    }
++
++    func fetchProgressCard(sessionKey: String, agentID: String?) async throws -> ProgressCard? {
++        let target = self.sessionTarget(for: sessionKey, overrideAgentID: agentID)
++        let data = try await self.gateway.request(OpenClawChatGatewayRequests.progressCardGet(
++            sessionKey: target.sessionKey,
++            agentID: target.agentID))
++        return try OpenClawChatGatewayPayloadCodec.decodeProgressCard(
++            data,
++            agentID: OpenClawChatSessionKey.agentID(from: target.sessionKey) ?? target.agentID)
++    }
++
++    func sendMessage(
++        sessionKey _: String,
++        message _: String,
++        thinking _: String,
++        idempotencyKey _: String,
++        attachments _: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
++    {
++        throw CancellationError()
++    }
++
++    func listSessions(limit: Int?, search: String?, archived: Bool) async throws -> OpenClawChatSessionsListResponse {
++        OpenClawChatSessionsListResponse(ts: nil, path: nil, count: 0, defaults: nil, sessions: [])
++    }
++
++    func requestHealth(timeoutMs: Int) async throws -> Bool {
++        let res = try await gateway.request(OpenClawChatGatewayRequests.health(timeoutMs: timeoutMs))
++        return (try? JSONDecoder().decode(OpenClawGatewayHealthOK.self, from: res))?.ok ?? true
++    }
++
++    func events() -> AsyncStream<OpenClawChatTransportEvent> {
++        AsyncStream { continuation in
++            let task = Task {
++                let stream = await self.gateway.subscribeServerEvents()
++                for await evt in stream {
++                    if Task.isCancelled { return }
++                    if let mapped = OpenClawChatGatewayPayloadCodec.event(from: evt) {
++                        continuation.yield(mapped)
++                    }
++                }
++            }
++            continuation.onTermination = { @Sendable _ in task.cancel() }
++        }
++    }
++}
++
++struct ChatReconnectBurstWireProofTests {
++    /// A flapping link: the socket drops, health goes false then true, and it drops again,
++    /// while the Gateway takes 1.5 s to answer each chat.history.
++    @Test(.stateDirectoryIsolated) @MainActor
++    func `flapping socket keeps catalog reads behind the transcript read`() async throws {
++        let fixture = try await NativeGatewayWebSocketFixture.start(issuedDeviceTokens: [])
++        defer { fixture.stop() }
++        fixture.acceptedOperatorScopes = ["operator.read", "operator.write"]
++        fixture.serveChat(
++            historyDelay: 1.5,
++            methods: [
++                "chat.history", "health", "models.list", "chat.metadata", "question.list", "progressCard.get",
++                "config.get", "skills.status", "tools.effective",
++            ],
++            capabilities: [GatewayServerCapability.publishedModelCatalog.rawValue])
++        let gateway = GatewayNodeSession()
++        try await gateway.connect(
++            url: fixture.url(),
++            credentials: .init(),
++            connectOptions: GatewayConnectOptions(
++                role: "operator", scopes: ["operator.read", "operator.write"], caps: [], commands: [],
++                permissions: [:], clientId: "reconnect-burst-proof", clientMode: "ui",
++                clientDisplayName: "Reconnect Burst Proof", includeDeviceIdentity: false),
++            sessionBox: nil,
++            onConnected: {},
++            onDisconnected: { _ in },
++            onInvoke: { BridgeInvokeResponse(id: $0.id, ok: true) })
++        let vm = OpenClawChatViewModel(sessionKey: "main", transport: ProofGatewayChatTransport(gateway: gateway))
++        defer { vm.detachTransport() }
++        _ = await vm.refreshHistoryAfterRun()
++        await vm.pollHealthIfNeeded(force: true)
++        try await Task.sleep(for: .milliseconds(500))
++        fixture.resetWire()
++
++        func waitFor(_ condition: () -> Bool) async throws {
++            for _ in 0..<300 where !condition() {
++                try await Task.sleep(for: .milliseconds(20))
++            }
++        }
++        func historyRequested(after connection: Int) -> Bool {
++            fixture.wireTrace.contains { $0.connection > connection && $0.entry == "-> chat.history" }
++        }
++
++        let first = try #require(fixture.latestOpenConnection)
++        fixture.closeConnection(at: first)
++        try await waitFor { historyRequested(after: first) }
++        let second = try #require(fixture.latestOpenConnection)
++        fixture.pushEvent("health", payload: ["ok": false], at: second)
++        try await Task.sleep(for: .milliseconds(100))
++        fixture.pushEvent("health", payload: ["ok": true], at: second)
++        try await Task.sleep(for: .milliseconds(200))
++        fixture.closeConnection(at: second)
++        try await waitFor { historyRequested(after: second) }
++        // Let the last held history answer and every follow-up read settle.
++        try await Task.sleep(for: .seconds(4))
++        await gateway.disconnect()
++
++        let trace = fixture.wireTrace
++        for item in trace {
++            print("RECONNECT_WIRE +\(item.ms)ms conn\(item.connection) \(item.entry)")
++        }
++        let catalogMethods: Set = [
++            "models.list", "chat.metadata", "question.list", "config.get", "skills.status", "tools.effective",
++        ]
++        let catalogRequests = trace.filter { entry in
++            entry.entry.hasPrefix("-> ") && catalogMethods.contains(String(entry.entry.dropFirst(3)))
++        }
++        let firstHistoryAnswer = trace.firstIndex { $0.entry == "<- chat.history" } ?? trace.endIndex
++        let earlyReads = trace[..<firstHistoryAnswer].filter { entry in
++            entry.entry.hasPrefix("-> ") && catalogMethods.contains(String(entry.entry.dropFirst(3)))
++        }.map(\.entry)
++        let beforeHistory = earlyReads.count
++        let mostRepeatedEarlyRead = Dictionary(grouping: earlyReads, by: { $0 }).values.map(\.count).max() ?? 0
++        let connections = Set(trace.map(\.connection)).sorted()
++        print(
++            "RECONNECT_WIRE_SUMMARY connections=\(connections) catalogRequests=\(catalogRequests.count)",
++            "catalogRequestsBeforeFirstHistoryAnswer=\(beforeHistory)",
++            "mostRepeatedCatalogReadBeforeFirstHistoryAnswer=\(mostRepeatedEarlyRead)",
++            "historyRequests=\(trace.count { $0.entry == "-> chat.history" })",
++            "historyAnswers=\(trace.count { $0.entry == "<- chat.history" })")
++        #expect(connections.count >= 2)
++        #expect(trace.contains { $0.entry == "<- chat.history" })
++        // Back-to-back reconnects must not stack catalog bursts ahead of the transcript.
++        #expect(mostRepeatedEarlyRead <= 1, "a catalog was re-read before any transcript answer")
++    }
++}
++#endif
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+index 6e4b23aa75c1199612c60caf77eb3ef5d90e4949..b9240f9fc322c8df513749dbeec32dfc03fe53e8 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+@@ -74,6 +74,13 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+     }
+ 
+     private var roleDeviceTokens: [String: String]?
++    /// Proof-only chat Gateway: answers chat RPCs on open sockets, holds chat.history, and
++    /// records each request and response in arrival order. Nil keeps the connect-only fixture.
++    private var chatHistoryDelay: TimeInterval?
++    private var advertisedMethods: [String] = []
++    private var advertisedCapabilities: [String] = []
++    private var wire: [(ms: Int, connection: Int, entry: String)] = []
++    private var wireStart = Date()
+     private var httpResponseHandler: HTTPResponseHandler?
+     private var receivedRequests: [Request] = []
+     private var receivedRoles: [String] = []
+@@ -223,6 +230,69 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+         self.queue.sync { self.clients[index]?.isStalled = true }
+     }
+ 
++    func serveChat(historyDelay: TimeInterval, methods: [String], capabilities: [String]) {
++        self.queue.sync {
++            self.chatHistoryDelay = historyDelay
++            self.advertisedMethods = methods
++            self.advertisedCapabilities = capabilities
++        }
++    }
++
++    func resetWire() {
++        self.queue.sync {
++            self.wire = []
++            self.wireStart = Date()
++        }
++    }
++
++    var wireTrace: [(ms: Int, connection: Int, entry: String)] {
++        self.queue.sync { self.wire }
++    }
++
++    var latestOpenConnection: Int? {
++        self.queue.sync { self.clients.filter { $0.value.phase == .open }.keys.max() }
++    }
++
++    func pushEvent(_ event: String, payload: [String: Any], at index: Int) {
++        self.queue.sync {
++            self.record("event \(event) \(payload)", index: index)
++            self.sendJSON(["type": "event", "event": event, "payload": payload], index: index)
++        }
++    }
++
++    private func record(_ entry: String, index: Int) {
++        self.wire.append((Int(Date().timeIntervalSince(self.wireStart) * 1000), index, entry))
++    }
++
++    private func answerChatRequest(_ request: [String: Any], index: Int) {
++        guard let method = request["method"] as? String, let id = request["id"] as? String else { return }
++        self.record("-> \(method)", index: index)
++        let payload: [String: Any] = switch method {
++        case "chat.history":
++            ["sessionKey": "main", "sessionId": "proof-session", "messages": [], "thinkingLevel": "off"]
++        case "health":
++            ["ok": true]
++        case "models.list":
++            ["models": []]
++        case "chat.metadata":
++            ["swarmEnabled": false]
++        case "question.list":
++            ["questions": []]
++        default:
++            [:]
++        }
++        let respond = { [weak self] in
++            guard let self, self.clients[index] != nil else { return }
++            self.record("<- \(method)", index: index)
++            self.sendJSON(["type": "res", "id": id, "ok": true, "payload": payload], index: index)
++        }
++        if method == "chat.history", let delay = self.chatHistoryDelay, delay > 0 {
++            self.queue.asyncAfter(deadline: .now() + delay, execute: respond)
++        } else {
++            respond()
++        }
++    }
++
+     func stop() {
+         self.queue.sync {
+             guard !self.stopped else { return }
+@@ -426,6 +496,13 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+     }
+ 
+     private func handleText(_ data: Data, index: Int) {
++        if self.chatHistoryDelay != nil, self.clients[index]?.phase == .open,
++           let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
++           request["type"] as? String == "req"
++        {
++            self.answerChatRequest(request, index: index)
++            return
++        }
+         guard var client = self.clients[index], client.phase == .connect,
+               let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               request["type"] as? String == "req",
+@@ -492,9 +569,9 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+                     "connId": "native-\(index)",
+                 ],
+                 "features": [
+-                    "methods": [],
++                    "methods": self.advertisedMethods,
+                     "events": [],
+-                    "capabilities": [],
++                    "capabilities": self.advertisedCapabilities,
+                 ],
+                 "snapshot": [
+                     "presence": [["ts": 1]],
+@@ -514,6 +591,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+             ],
+         ]
+         self.sendJSON(frame, index: index)
++        if self.chatHistoryDelay != nil { self.record("connected", index: index) }
+     }
+ 
+     private func sendConnectFailure(id: String, failure: ConnectFailure, index: Int) {
