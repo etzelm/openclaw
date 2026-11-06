@@ -1,8 +1,8 @@
 diff --git a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatSourcePreviews.swift b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatSourcePreviews.swift
-index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997b2d75e9f 100644
+index 4d9f36a63585ba056f314cff9928afc200e83512..3206646669eda67d6a546a90d16088b832815eb3 100644
 --- a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatSourcePreviews.swift
 +++ b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatSourcePreviews.swift
-@@ -27,13 +27,17 @@ struct ChatSourcePreview: Identifiable, Hashable {
+@@ -27,13 +27,18 @@ struct ChatSourcePreview: Identifiable, Hashable {
      }
  }
  
@@ -17,11 +17,12 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
 +        /// Cards for `links`, built from the same-run rows in `sourceIDs` under the projector's context.
 +        var previews: [ChatSourcePreview] = []
 +        var sourceIDs: [UUID] = []
-+        var rendered: [Candidate: RenderedCandidate] = [:]
++        /// Markdown rendered for `previews`, kept in the shared cache while this reply is.
++        var rendered: [(Candidate, RenderedCandidate)] = []
      }
  
      private struct Result {
-@@ -55,17 +59,7 @@ struct ChatSourcePreviewProjector {
+@@ -55,17 +60,7 @@ struct ChatSourcePreviewProjector {
          var page: Candidate?
          var search: Candidate?
  
@@ -40,7 +41,7 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
              let source = render(self.source)
              let pageExcerpt = self.page.map(render)?.excerpt
              let excerpt = pageExcerpt ?? self.search.map(render)?.excerpt
-@@ -85,38 +79,64 @@ struct ChatSourcePreviewProjector {
+@@ -85,38 +80,75 @@ struct ChatSourcePreviewProjector {
  
      private var entries: [UUID: Entry] = [:]
      private var renderedCandidates: [Candidate: RenderedCandidate] = [:]
@@ -52,20 +53,25 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
      {
          var retained: [UUID: Entry] = [:]
 -        var retainedCandidates: [Candidate: RenderedCandidate] = [:]
-+        var renderedNow: [Candidate: RenderedCandidate] = [:]
++        var rendered: [Candidate: RenderedCandidate] = [:]
          var runs: [String: [Entry]] = [:]
 +        var changedRuns: Set<String> = []
-+        var rerendered = false
++        var reused: [[(Candidate, RenderedCandidate)]] = []
++        var replaced = false
          var previews: [UUID: [ChatSourcePreview]] = [:]
          for message in messages {
              guard let runID = ChatPayloadDecoding.trimmedNonEmptyString(message.transcriptRunID) else { continue }
 -            let entry: Entry = if let cached = self.entries[message.id], cached.message == message {
 -                cached
 +            var entry: Entry
++            // Whether the last projection had cards for this row, so its rendered Markdown may be dropped.
++            let wasCited: Bool
 +            if let cached = self.entries[message.id], cached.message == message {
 +                entry = cached
++                wasCited = true
              } else {
 -                Entry(
++                wasCited = self.entries[message.id]?.links.isEmpty == false
 +                entry = Entry(
                      message: message,
                      links: message.isCompletedReply ? Self.citations(in: message) : [],
@@ -84,19 +90,20 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
 +                let sourceIDs = sources.map(\.message.id)
 +                // Cards depend only on this reply, the earlier rows of its run and the context.
 +                if context != self.context || changedRuns.contains(runID) || entry.sourceIDs != sourceIDs {
-+                    var rendered: [Candidate: RenderedCandidate] = [:]
++                    var used: [(Candidate, RenderedCandidate)] = []
 +                    entry.previews = Self.previews(links: entry.links, entries: sources, context: context) { candidate in
-+                        let value = rendered[candidate] ?? renderedNow[candidate] ??
-+                            self.renderedCandidates[candidate] ?? RenderedCandidate(
-+                                title: Self.title(candidate.title, source: candidate.name),
-+                                excerpt: Self.excerpt(candidate.excerpt, source: candidate.name))
++                        let value = rendered[candidate] ?? self.renderedCandidates[candidate] ?? RenderedCandidate(
++                            title: Self.title(candidate.title, source: candidate.name),
++                            excerpt: Self.excerpt(candidate.excerpt, source: candidate.name))
 +                        rendered[candidate] = value
++                        used.append((candidate, value))
 +                        return value
 +                    }
-+                    renderedNow.merge(rendered) { current, _ in current }
 +                    entry.sourceIDs = sourceIDs
-+                    entry.rendered = rendered
-+                    rerendered = true
++                    entry.rendered = used
++                    replaced = replaced || wasCited
++                } else {
++                    reused.append(entry.rendered)
 +                }
 +                previews[message.id] = entry.previews
              }
@@ -104,12 +111,17 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
              runs[runID, default: []].append(entry)
          }
 +        // Rendered Markdown is kept for exactly the cited replies that remain.
-+        if rerendered || self.entries.values.contains(where: {
++        if replaced || self.entries.values.contains(where: {
 +            !$0.links.isEmpty && retained[$0.message.id]?.links.isEmpty != false
 +        }) {
-+            self.renderedCandidates = retained.values.reduce(into: [:]) {
-+                $0.merge($1.rendered) { current, _ in current }
++            for pairs in reused {
++                rendered.merge(pairs) { current, _ in current }
 +            }
++            self.renderedCandidates = rendered
++        } else if self.renderedCandidates.isEmpty {
++            self.renderedCandidates = rendered
++        } else if !rendered.isEmpty {
++            self.renderedCandidates.merge(rendered) { current, _ in current }
 +        }
          self.entries = retained
 -        self.renderedCandidates = retainedCandidates
@@ -117,7 +129,7 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
          return previews
      }
  
-@@ -124,8 +144,7 @@ struct ChatSourcePreviewProjector {
+@@ -124,8 +156,7 @@ struct ChatSourcePreviewProjector {
          links: [URL],
          entries: [Entry],
          context: OpenClawChatSourceContext?,
@@ -127,7 +139,7 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..5725bbe6ca96029e7bcbc1290e559997
      {
          var cited = Set(links.map(Self.key))
          var sources: [String: Sources] = [:]
-@@ -191,7 +210,7 @@ struct ChatSourcePreviewProjector {
+@@ -191,7 +222,7 @@ struct ChatSourcePreviewProjector {
              if let index = previews.firstIndex(where: { Self.key($0.url) == canonical }) {
                  previews[index].citedURLs.append(link)
              } else if previews.count < 8 {
