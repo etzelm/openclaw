@@ -8,6 +8,8 @@ Usage: patch_app.py <repo root>
 2. OpenClawSnapshotUITests.swift: two scratch UI tests (cards / nocards) that load, scroll, append.
 3. project.yml: drops the SwiftFormat/SwiftLint pre-build phases (they would lint the scratch code;
    the PR's own code is linted by upstream CI). Nothing else in the project changes.
+4. Xcode 26 compile compatibility (hosted runners have no Xcode 27): the four iOS 27.1-only branches
+   are wrapped in `#if compiler(>=6.4)`; see compat_xcode26().
 Every anchor must match exactly once, so base and head get the same edits or the job fails.
 """
 import sys
@@ -175,6 +177,54 @@ UI_TESTS = r'''
 '''
 
 
+COMPAT = [
+    ("apps/ios/Sources/Design/OpenClawProComponents.swift",
+     "        if #available(iOS 27.1, *) {\n"
+     "            self.item.axisBehavior(.verticalPreferred).visibilityPriority(.high)\n"
+     "        } else {\n"
+     "            self.item\n"
+     "        }\n"),
+    ("apps/ios/Sources/Design/ChatProTab.swift",
+     "                    if #available(iOS 27.1, *) {\n"
+     "                        // Custom controls must explicitly support the system's side bar.\n"
+     "                        self.chatToolbar.axisBehavior(.verticalPreferred)\n"
+     "                    } else {\n"
+     "                        self.chatToolbar\n"
+     "                    }\n"),
+    ("apps/ios/Sources/Design/ChatProTab.swift",
+     "        if #available(iOS 27.1, *) {\n"
+     "            self.headerAgentIdentityButton.modifier(ChatToolbarStatusPopover(\n"
+     "                isExpanded: self.$isGatewayStatusManuallyExpanded,\n"
+     "                status: self.expandedGatewayStatusLabel))\n"
+     "        } else {\n"
+     "            self.headerAgentIdentityButton\n"
+     "        }\n"),
+]
+
+
+def compat_xcode26():
+    """Xcode 26 cannot compile the iOS 27.1-only branches (iOS 27.1 SDK symbols). Wrap exactly those
+    branches in `#if compiler(>=6.4)`: an Xcode 27 build sees the original source, and on an iOS 26
+    simulator the `else` branch is the one that runs either way."""
+    for name, block in COMPAT:
+        path = ROOT / name
+        indent = block[: len(block) - len(block.lstrip())]
+        fallback = block.split("} else {\n", 1)[1].rsplit("}", 1)[0]
+        fallback = "\n".join(line[4:] for line in fallback.rstrip("\n").split("\n")) + "\n"
+        replace_once(path, block, "#if compiler(>=6.4)\n" + block + "#else\n" + fallback + "#endif\n")
+    path = ROOT / "apps/ios/Sources/Design/ChatProTab.swift"
+    lines = path.read_text().split("\n")
+    start = [i for i, line in enumerate(lines) if line == "@available(iOS 27.1, *)"
+             and lines[i + 1].startswith("private struct ChatToolbarStatusPopover")]
+    if len(start) != 1:
+        sys.exit("patch_app: ChatToolbarStatusPopover anchor")
+    end = next(i for i in range(start[0] + 1, len(lines)) if lines[i] == "}")
+    lines[end] += "\n#endif"
+    lines[start[0]] = "#if compiler(>=6.4)\n" + lines[start[0]]
+    path.write_text("\n".join(lines))
+    print("patched ChatProTab.swift (ChatToolbarStatusPopover under compiler(>=6.4))")
+
+
 def main():
     transport = IOS / "Sources/Chat/AppleReviewDemoChatTransport.swift"
     replace_once(
@@ -217,6 +267,7 @@ def main():
         sys.exit("patch_app: project.yml lint phases not as expected")
     project.write_text("\n".join(lines[:start] + lines[end:]))
     print(f"patched apps/ios/project.yml (removed lines {start + 1}..{end})")
+    compat_xcode26()
 
 
 if __name__ == "__main__":
