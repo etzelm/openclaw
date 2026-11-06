@@ -1,86 +1,154 @@
 diff --git a/apps/ios/Sources/Model/NodeAppModel.swift b/apps/ios/Sources/Model/NodeAppModel.swift
-index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..de055646c336179b3accad62496bb8d2fbf3e464 100644
+index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..2314cb4d5685515a392c1a11e1ee028c1556a0d2 100644
 --- a/apps/ios/Sources/Model/NodeAppModel.swift
 +++ b/apps/ios/Sources/Model/NodeAppModel.swift
-@@ -981,6 +981,8 @@ final class NodeAppModel {
+@@ -981,6 +981,10 @@ final class NodeAppModel {
      private static let watchExecApprovalBridgeStateKey = "watch.execApproval.bridge.state.v1"
      private static let backgroundAliveLastSuccessAtMsKey = "gateway.backgroundAlive.lastSuccessAtMs"
      private static let backgroundAliveLastTriggerKey = "gateway.backgroundAlive.lastTrigger"
-+    /// Reconnect (12 s) plus beacon (8 s) leave about this much of the ~30 s wake budget.
++    /// Apple allows a background wake about 30 s; silent pushes have no expiration handler.
++    private static let backgroundWakeBudgetMs = 25000
++    /// Upper bound for holding a wake open for queued chat sends; a slow reconnect leaves less.
 +    private static let backgroundWakeChatOutboxDrainTimeoutMs = 8000
      private static let preferredCameraFacingKey = "camera.preferredFacing"
      private static let foregroundResumeHealthTimeoutSeconds = 1
  
-@@ -7365,6 +7367,7 @@ extension NodeAppModel {
+@@ -7330,6 +7334,7 @@ extension NodeAppModel {
+     }
+ 
+     func handleSilentPushWake(_ userInfo: [AnyHashable: Any]) async -> SilentPushWakeResult {
++        let wakeStartedAt = Date()
+         let wakeId = Self.makePushWakeAttemptID()
+         guard Self.isSilentPushPayload(userInfo) else {
+             self.pushWakeLogger.info("Ignored APNs payload wakeId=\(wakeId, privacy: .public): not silent push")
+@@ -7365,6 +7370,7 @@ extension NodeAppModel {
          let result = await performBackgroundAliveBeaconIfNeeded(
              wakeId: wakeId,
              trigger: .silentPush)
-+        await self.drainChatOutboxForBackgroundWake(wakeId: wakeId)
++        await self.drainChatOutboxForBackgroundWake(wakeId: wakeId, startedAt: wakeStartedAt)
          let outcomeMessage =
              "Silent push outcome wakeId=\(wakeId) "
                  + "applied=\(result.applied) "
-@@ -7388,6 +7391,7 @@ extension NodeAppModel {
+@@ -7377,6 +7383,7 @@ extension NodeAppModel {
+ 
+     func handleBackgroundRefreshWake(trigger: String = "bg_app_refresh") async -> Bool {
+         guard !Task.isCancelled else { return false }
++        let wakeStartedAt = Date()
+         let wakeId = Self.makePushWakeAttemptID()
+         let normalizedTrigger = BackgroundAliveBeacon.normalizeTrigger(trigger)
+         let receivedMessage =
+@@ -7388,6 +7395,7 @@ extension NodeAppModel {
          let result = await performBackgroundAliveBeaconIfNeeded(
              wakeId: wakeId,
              trigger: normalizedTrigger)
-+        await self.drainChatOutboxForBackgroundWake(wakeId: wakeId)
++        await self.drainChatOutboxForBackgroundWake(wakeId: wakeId, startedAt: wakeStartedAt)
          let outcomeMessage =
              "Background refresh wake outcome wakeId=\(wakeId) "
                  + "applied=\(result.applied) "
-@@ -7398,6 +7402,19 @@ extension NodeAppModel {
+@@ -7398,6 +7406,40 @@ extension NodeAppModel {
          return !Task.isCancelled && result.handled
      }
  
 +    /// The wake's own work only reconnects; queued chat sends flush from the
 +    /// reconnect events, so hold the wake open until they finish or time out.
-+    private func drainChatOutboxForBackgroundWake(wakeId: String) async {
-+        guard self.isBackgrounded, self.operatorConnected, !Task.isCancelled,
-+              self.chatPresentation.isCurrent(appModel: self),
-+              let viewModel = self.chatPresentation.viewModel
-+        else { return }
-+        let drained = await viewModel.drainOutboxForBackgroundWake(
-+            timeoutMs: Self.backgroundWakeChatOutboxDrainTimeoutMs)
++    private func drainChatOutboxForBackgroundWake(wakeId: String, startedAt: Date) async {
++        let elapsedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
++        let timeoutMs = min(
++            Self.backgroundWakeChatOutboxDrainTimeoutMs,
++            Self.backgroundWakeBudgetMs - elapsedMs)
++        let skipReason: String? = if !self.isBackgrounded {
++            "not_backgrounded"
++        } else if Task.isCancelled {
++            "cancelled"
++        } else if timeoutMs <= 0 {
++            "wake_budget_spent"
++        } else if !self.chatPresentation.isCurrent(appModel: self) || self.chatPresentation.viewModel == nil {
++            "no_chat_owner"
++        } else {
++            nil
++        }
++        guard skipReason == nil, let viewModel = self.chatPresentation.viewModel else {
++            let reason = skipReason ?? ""
++            self.pushWakeLogger.info(
++                "Wake chat outbox skipped wakeId=\(wakeId, privacy: .public) reason=\(reason, privacy: .public)")
++            return
++        }
++        // The beacon only waits for the node session; the operator session can lag it.
++        let result = await viewModel.drainOutboxForBackgroundWake(timeoutMs: timeoutMs) { [weak self] remainingMs in
++            guard let self else { return false }
++            if self.operatorConnected { return true }
++            return await self.waitForGatewayConnection(timeoutMs: remainingMs, pollMs: 250, owner: .operator)
++        }
 +        self.pushWakeLogger.info(
-+            "Wake chat outbox drain wakeId=\(wakeId, privacy: .public) drained=\(drained, privacy: .public)")
++            "Wake chat outbox wakeId=\(wakeId, privacy: .public) result=\(result.rawValue, privacy: .public)")
 +    }
 +
      func handleSignificantLocationWakeIfNeeded() async {
          let wakeId = Self.makePushWakeAttemptID()
          let now = Date()
 diff --git a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
-index bc58071516d024bbf59bb842a5178324e4517cab..05f26639be6d7c975ea55f79628b4563f0637539 100644
+index bc58071516d024bbf59bb842a5178324e4517cab..83a3ced8b25a8a982297b448b06ed6524fcc5752 100644
 --- a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
 +++ b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
-@@ -773,6 +773,34 @@ extension OpenClawChatViewModel {
+@@ -21,6 +21,20 @@ public enum OpenClawChatOutboxMessageState: Equatable, Sendable {
+     }
+ }
+ 
++/// Outcome of holding a background wake open for the outbox.
++public enum OpenClawChatOutboxWakeDrain: String, Sendable {
++    /// Nothing was waiting to be sent.
++    case idle
++    /// Every waiting row was accepted by the Gateway.
++    case delivered
++    /// A waiting row now needs the user's retry or delete, or history reconciliation.
++    case failed
++    /// Rows are still waiting at the deadline, for example during retry backoff.
++    case pending
++    /// The Gateway route did not come up in time.
++    case noRoute = "no_route"
++}
++
+ /// Durable offline command outbox. Sends made while the gateway is unhealthy
+ /// are persisted in installation-wide client state and flushed
+ /// strictly in createdAt order when health recovers. A gateway ACK only moves
+@@ -773,6 +787,42 @@ extension OpenClawChatViewModel {
          }
      }
  
 +    /// Background wakes report completion as soon as their own work ends, and
-+    /// the OS may suspend the app right after. Give queued sends a bounded
-+    /// window to flush first. Returns false when work remains at the deadline.
-+    public func drainOutboxForBackgroundWake(timeoutMs: Int) async -> Bool {
-+        guard let outbox, !self.isTransportDetached else { return true }
++    /// the OS may suspend the app right after. Holds the wake open for up to
++    /// `timeoutMs` while the outbox's own flush and retry schedule deliver the
++    /// rows that were unsent when the wait began. `waitForRoute` runs only when
++    /// such rows exist and reports whether the Gateway route came up in time.
++    public func drainOutboxForBackgroundWake(
++        timeoutMs: Int,
++        waitForRoute: (_ remainingMs: Int) async -> Bool) async -> OpenClawChatOutboxWakeDrain
++    {
++        guard let outbox, !self.isTransportDetached else { return .idle }
 +        let deadline = Date().addingTimeInterval(Double(max(0, timeoutMs)) / 1000)
++        guard let initial = await outbox.loadCommandsIfAvailable() else { return .pending }
++        let unsent = Set(initial.filter { $0.status == .queued || $0.status == .sending }.map(\.id))
++        guard !unsent.isEmpty else { return .idle }
++        guard await waitForRoute(Int(deadline.timeIntervalSinceNow * 1000)) else { return .noRoute }
 +        var forceHealthPoll = true
-+        while !Task.isCancelled {
-+            if self.outboxFlushTask == nil {
-+                guard let commands = await outbox.loadCommandsIfAvailable() else { return false }
-+                // Unconfirmed rows never replay automatically, so they do not hold the wake open.
-+                guard commands.contains(where: { $0.status == .queued || $0.status == .sending }) else {
-+                    return true
-+                }
-+                if self.healthOK {
-+                    self.flushOutboxIfNeeded()
-+                } else {
-+                    // The wake may reconnect before its health event lands; ask once, then throttle.
-+                    await self.pollHealthIfNeeded(force: forceHealthPoll)
-+                    forceHealthPoll = false
++        while !Task.isCancelled, Date() < deadline {
++            if !self.healthOK {
++                // A reconnect whose health event has not landed yet. The healthy
++                // edge starts the outbox's own flush; the drain never flushes
++                // directly, so retry backoff and attempt limits stay in charge.
++                await self.pollHealthIfNeeded(force: forceHealthPoll)
++                forceHealthPoll = false
++            }
++            if self.outboxFlushTask == nil, let commands = await outbox.loadCommandsIfAvailable() {
++                let tracked = commands.filter { unsent.contains($0.id) }
++                if !tracked.contains(where: { $0.status == .queued || $0.status == .sending }) {
++                    // Accepted rows await history confirmation or are already gone.
++                    return tracked.contains { $0.status == .failed } ? .failed : .delivered
 +                }
 +            }
-+            guard Date() < deadline else { return false }
 +            try? await Task.sleep(nanoseconds: 100_000_000)
 +        }
-+        return false
++        return .pending
 +    }
 +
      private func performOutboxFlush() async {
@@ -88,10 +156,10 @@ index bc58071516d024bbf59bb842a5178324e4517cab..05f26639be6d7c975ea55f79628b4563
          let presentationGeneration = self.outboxPresentationGeneration
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
 new file mode 100644
-index 0000000000000000000000000000000000000000..f116e50ab85ec5c2a063ef38735c70404ed41e0c
+index 0000000000000000000000000000000000000000..0d7e3aabaad6f3d62e8fba6c071828afd1fc0b60
 --- /dev/null
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatViewModelOutboxBackgroundWakeTests.swift
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,122 @@
 +import Foundation
 +import Testing
 +@testable import OpenClawChatUI
@@ -103,9 +171,13 @@ index 0000000000000000000000000000000000000000..f116e50ab85ec5c2a063ef38735c7040
 +    try await waitForOutboxState { !vm.isSubmittingDraft }
 +}
 +
++private func drain(_ vm: OpenClawChatViewModel, timeoutMs: Int) async -> OpenClawChatOutboxWakeDrain {
++    await vm.drainOutboxForBackgroundWake(timeoutMs: timeoutMs) { _ in true }
++}
++
 +@Suite(.timeLimit(.minutes(1)))
 +struct ChatViewModelOutboxBackgroundWakeTests {
-+    @Test func `background wake drain flushes queued sends before returning`() async throws {
++    @Test func `background wake drain delivers queued sends before returning`() async throws {
 +        let (store, _, databaseDirectory) = try makeOutboxStore()
 +        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
 +        let transport = OutboxTestTransport(healthy: false)
@@ -119,12 +191,58 @@ index 0000000000000000000000000000000000000000..f116e50ab85ec5c2a063ef38735c7040
 +
 +        // A wake reconnects the gateway; its health event has not reached the view model yet.
 +        await transport.state.update { $0.healthy = true }
-+        let drained = await vm.drainOutboxForBackgroundWake(timeoutMs: 20000)
++        #expect(await drain(vm, timeoutMs: 20000) == .delivered)
 +
-+        #expect(drained)
 +        #expect(await transport.state.sentIdempotencyKeys == queuedIDs)
 +        #expect(await transport.state.sentMessages == ["first", "second"])
-+        #expect(await store.loadCommands().isEmpty)
++        #expect(await drain(vm, timeoutMs: 20000) == .idle)
++    }
++
++    @Test func `background wake drain keeps the retry backoff after a gateway rejection`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        // Production retry delays.
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store, retryDelaysMs: [2000, 8000])
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "rejected once")
++        await transport.state.update {
++            $0.sendRejects = true
++            $0.healthy = true
++        }
++        let started = Date()
++
++        // Inside the 2 s backoff the drain only waits: one attempt spent, row still queued.
++        #expect(await drain(vm, timeoutMs: 1500) == .pending)
++        let afterRejection = await store.loadCommands()
++        #expect(afterRejection.map(\.status) == [.queued])
++        #expect(afterRejection.map(\.retryCount) == [1])
++
++        // The outbox's own retry timer sends it again inside the wake window.
++        await transport.state.update { $0.sendRejects = false }
++        #expect(await drain(vm, timeoutMs: 5000) == .delivered)
++        #expect(Date().timeIntervalSince(started) >= 2)
++        #expect(await transport.state.sentMessages == ["rejected once"])
++    }
++
++    @Test func `background wake drain reports terminal rejections as failed`() async throws {
++        let (store, _, databaseDirectory) = try makeOutboxStore()
++        defer { try? FileManager.default.removeItem(at: databaseDirectory) }
++        let transport = OutboxTestTransport(healthy: false)
++        let vm = await makeOutboxViewModel(transport: transport, outbox: store)
++
++        await MainActor.run { vm.load() }
++        try await queueWhileOffline(vm, text: "always rejected")
++        await transport.state.update {
++            $0.sendRejects = true
++            $0.healthy = true
++        }
++
++        #expect(await drain(vm, timeoutMs: 20000) == .failed)
++        let rows = await store.loadCommands()
++        #expect(rows.map(\.status) == [.failed])
++        #expect(rows.map(\.retryCount) == [3])
 +    }
 +
 +    @Test func `background wake drain gives up at its deadline while offline`() async throws {
@@ -136,9 +254,8 @@ index 0000000000000000000000000000000000000000..f116e50ab85ec5c2a063ef38735c7040
 +        await MainActor.run { vm.load() }
 +        try await queueWhileOffline(vm, text: "still offline")
 +
-+        let drained = await vm.drainOutboxForBackgroundWake(timeoutMs: 300)
-+
-+        #expect(!drained)
++        #expect(await drain(vm, timeoutMs: 300) == .pending)
++        #expect(await vm.drainOutboxForBackgroundWake(timeoutMs: 300) { _ in false } == .noRoute)
 +        #expect(await transport.state.sentIdempotencyKeys.isEmpty)
 +        #expect(await store.loadCommands().map(\.status) == [.queued])
 +    }
@@ -157,9 +274,24 @@ index 0000000000000000000000000000000000000000..f116e50ab85ec5c2a063ef38735c7040
 +            $0.healthy = true
 +        }
 +
-+        #expect(await vm.drainOutboxForBackgroundWake(timeoutMs: 20000))
++        // The lost ack is settled by history (the fake Gateway stored the turn), never by a resend.
++        let outcome = await drain(vm, timeoutMs: 20000)
++        #expect(outcome == .delivered, "outcome \(outcome.rawValue)")
 +        // A second wake must not resend the ambiguous attempt.
-+        #expect(await vm.drainOutboxForBackgroundWake(timeoutMs: 20000))
++        #expect(await drain(vm, timeoutMs: 20000) == .idle)
 +        #expect(await transport.state.sentIdempotencyKeys == queuedIDs)
 +    }
 +}
+diff --git a/docs/platforms/ios.md b/docs/platforms/ios.md
+index 4ad54f47adaaeab897f024f0d732d8ad1954bb99..a440f8b22dff185aa1400ce4ecaf9fe6906e1eef 100644
+--- a/docs/platforms/ios.md
++++ b/docs/platforms/ios.md
+@@ -683,6 +683,8 @@ Expected operator flow:
+ 
+ When iOS wakes the app for a silent push, background refresh, or significant-location event, the app attempts a short node reconnect and then calls `node.event` with `event: "node.presence.alive"`. The Gateway records this as `lastSeenAtMs`/`lastSeenReason` on the paired node/device metadata only after the authenticated node device identity is known.
+ 
++When chat messages are waiting in the offline outbox, a silent push or background refresh wake then stays open for up to 8 seconds while they send, in order and with the usual retry backoff; a slow reconnect leaves less of that time.
++
+ The app treats a background wake as successfully recorded only when the Gateway response includes `handled: true`. Older Gateways may acknowledge `node.event` with `{ "ok": true }`; that response is compatible but does not count as a durable last-seen update.
+ 
+ Background refresh wakes are requested through the system BackgroundTasks scheduler whenever the app moves to the background, after a silent push that could not be applied, and again after each refresh run; iOS decides when they actually execute. They stop if Background App Refresh is turned off for OpenClaw in iOS Settings, leaving push and significant-location wakes.

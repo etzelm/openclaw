@@ -16,6 +16,9 @@ die() { echo "::error::$*"; echo "FAILED: $*" >>"$OUT/status.txt"; exit 1; }
 step "source ($SIDE)"
 bash "$RIG/source.sh" "$SIDE" "$SRC" --native-assets | tee "$OUT/source.txt" || die "source"
 cp "$RIG/ios/BgOutboxFlushProofTests.swift" "$SRC/apps/ios/Tests/BgOutboxFlushProofTests.swift"
+cp "$RIG/ios/BgOutboxDeliveryProofTests.swift" "$SRC/apps/ios/Tests/BgOutboxDeliveryProofTests.swift"
+# Proof-only local Gateway methods for the delivery test (test fixture only, same on both sides).
+git -C "$SRC" apply "$RIG/harness.diff" || die "harness"
 cp "$RIG/ios/BgOutboxFlushProofTests.swift" "$OUT/"
 endstep
 
@@ -44,7 +47,7 @@ xcrun simctl bootstatus "$SIM_ID" -b >/dev/null 2>&1 || die "simulator boot"
 { xcodebuild -version; swift --version 2>&1 | head -1; sw_vers; } | tee "$OUT/toolchain.txt"
 endstep
 
-tests=(-only-testing:OpenClawTests/BgOutboxFlushProofTests)
+tests=(-only-testing:OpenClawTests/BgOutboxFlushProofTests -only-testing:OpenClawTests/BgOutboxDeliveryProofTests)
 if [ "$SIDE" = head ]; then
   tests+=(
     -only-testing:OpenClawTests/NodeAppModelInvokeTests
@@ -70,7 +73,7 @@ echo "xcodebuild exit $rc after $(($(date +%s) - started)) s" | tee -a "$OUT/too
 endstep
 
 {
-  grep -E "BG_OUTBOX_PROOF |Test run with|✘|error:|\*\* TEST" "$OUT/xcodebuild.log" | sed "s#$SRC/##g" | tail -60
+  grep -E "BG_OUTBOX_PROOF |BG_OUTBOX_DELIVERY|Test run with|✘|error:|\*\* TEST" "$OUT/xcodebuild.log" | sed "s#$SRC/##g" | tail -60
   echo "exit $rc"
 } | tee "$OUT/result.txt"
 {
@@ -97,6 +100,14 @@ if [ -n "$queued" ] && [ -n "$empty" ]; then
 fi
 echo "$verdict" | tee -a "$OUT/result.txt"
 echo "verdict: $verdict" >>"${GITHUB_STEP_SUMMARY:-/dev/null}"
+delivery="$(cat "$OUT/delivery-$SIDE.txt" 2>/dev/null)"
+case "$SIDE:$delivery" in
+  head:*sentBeforeReturn=true*sendCount=1*) dverdict="HEAD_DELIVERED" ;;
+  base:*sentBeforeReturn=false*) dverdict="BASE_NOT_DELIVERED_BEFORE_RETURN" ;;
+  *) dverdict="DELIVERY_UNEXPECTED" ;;
+esac
+echo "DELIVERY $SIDE: $dverdict | $delivery" | tee -a "$OUT/result.txt"
+[ "$dverdict" = DELIVERY_UNEXPECTED ] && rc=1
 case "$verdict" in HEAD_OK*|BASE_GAP_CONFIRMED*) ;; *) rc=1 ;; esac
 xcrun simctl shutdown "$SIM_ID" 2>/dev/null || true
 exit "$rc"
