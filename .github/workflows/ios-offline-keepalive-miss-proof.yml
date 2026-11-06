@@ -108,3 +108,52 @@ jobs:
           path: ${{ runner.temp }}/keepalive-miss/out/native/**
           if-no-files-found: warn
           retention-days: 90
+
+  real-gateway:
+    name: shipped client vs real openclaw gateway frozen with SIGSTOP, base vs head
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 5
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Fetch base, install, build the Gateway
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          SRC="$RUNNER_TEMP/keepalive-miss-real/src"
+          git init -q "$SRC"
+          git -C "$SRC" fetch -q --depth 1 https://github.com/openclaw/openclaw.git cb73e59f9356796d4eec6ffeffff327e213355a6
+          git -C "$SRC" checkout -q --detach FETCH_HEAD
+          cd "$SRC"
+          pnpm install --frozen-lockfile
+          node scripts/prepare-apple-mermaid.mjs
+          pnpm build
+      - name: Real Gateway keepalive proof, base then head
+        timeout-minutes: 40
+        run: |
+          zsh rig/real-gateway.sh "$RUNNER_TEMP/keepalive-miss-real/src"
+          for side in base head; do
+            echo "### $side"; echo '```'
+            grep -E "KEEPALIVE_REAL_GATEWAY|Test run with|^exit" "$RUNNER_TEMP/keepalive-miss-real/out/real-gateway/real-gateway-$side.log"
+            echo '```'
+          done >> "$GITHUB_STEP_SUMMARY"
+          grep -q "reason=gateway socket unresponsive to keepalive pings" "$RUNNER_TEMP/keepalive-miss-real/out/real-gateway/real-gateway-head.log"
+      - name: Upload result
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: keepalive-miss-real-gateway
+          path: ${{ runner.temp }}/keepalive-miss-real/out/real-gateway/**
+          if-no-files-found: warn
+          retention-days: 90

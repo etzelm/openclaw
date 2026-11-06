@@ -1,0 +1,100 @@
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/KeepaliveMissRealGatewayProofTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/KeepaliveMissRealGatewayProofTests.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..2a2e274497481a31c7e8f168a73eea57773801fd
+--- /dev/null
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/KeepaliveMissRealGatewayProofTests.swift
+@@ -0,0 +1,94 @@
++#if os(macOS)
++import Darwin
++import Foundation
++import Synchronization
++import Testing
++@testable import OpenClawKit
++
++/// Proof-only, not part of the fix. Runs only when rig/real-gateway.sh provides a real
++/// `openclaw gateway run` on loopback (KEEPALIVE_GATEWAY_URL, KEEPALIVE_GATEWAY_TOKEN, KEEPALIVE_GATEWAY_PID).
++/// The shipped GatewayChannelActor connects as a device-less operator with the shared token and keeps its
++/// production timers. 35 s after hello the Gateway process is frozen with SIGSTOP (TCP stays open, no
++/// pongs, no ticks, no network path change). It is resumed with SIGCONT as soon as the client retires
++/// the socket, so the replacement handshake reaches the same real Gateway.
++struct KeepaliveMissRealGatewayProofTests {
++    private final class Events: Sendable {
++        let lines = Mutex<[String]>([])
++        let start = Date()
++
++        func record(_ line: String) {
++            let elapsed = String(format: "%7.2f", Date().timeIntervalSince(self.start))
++            let stamp = ISO8601DateFormatter.string(
++                from: Date(), timeZone: .gmt, formatOptions: [.withFullTime, .withFractionalSeconds])
++            self.lines.withLock { $0.append("t=\(elapsed)s [\(stamp)] \(line)") }
++        }
++    }
++
++    private static let env = ProcessInfo.processInfo.environment
++
++    @Test(.enabled(if: Self.env["KEEPALIVE_GATEWAY_URL"] != nil), .stateDirectoryIsolated)
++    func `real Gateway frozen with SIGSTOP is retired and replaced`() async throws {
++        let url = try #require(Self.env["KEEPALIVE_GATEWAY_URL"].flatMap(URL.init(string:)))
++        let token = try #require(Self.env["KEEPALIVE_GATEWAY_TOKEN"])
++        let pid = try #require(Self.env["KEEPALIVE_GATEWAY_PID"].flatMap { pid_t($0) })
++        let events = Events()
++        let frozen = Mutex(false)
++        let snapshots = AsyncStream<UInt64>.makeStream()
++        var connections = snapshots.stream.makeAsyncIterator()
++        let channel = GatewayChannelActor(
++            url: url,
++            token: token,
++            pushHandler: { push, generation in
++                if case .snapshot = push {
++                    events.record("hello generation=\(generation)")
++                    snapshots.continuation.yield(generation)
++                }
++            },
++            connectOptions: GatewayConnectOptions(
++                role: "operator", scopes: [], caps: [], commands: [], permissions: [:],
++                clientId: "openclaw-ios", clientMode: "ui", clientDisplayName: "Keepalive Proof",
++                includeDeviceIdentity: false,
++                allowStoredDeviceAuth: false),
++            disconnectHandler: { reason, generation in
++                events.record("disconnect generation=\(generation) reason=\(reason)")
++                let wasFrozen = frozen.withLock { value in
++                    defer { value = false }
++                    return value
++                }
++                if wasFrozen {
++                    kill(pid, SIGCONT)
++                    events.record("gateway resumed (SIGCONT)")
++                }
++            },
++            networkPathUpdates: nil)
++        defer {
++            snapshots.continuation.finish()
++            if frozen.withLock({ $0 }) { kill(pid, SIGCONT) }
++        }
++
++        try await channel.connect()
++        let first = try #require(await connections.next())
++        try await Task.sleep(for: .seconds(35))
++        frozen.withLock { $0 = true }
++        kill(pid, SIGSTOP)
++        events.record("gateway frozen (SIGSTOP)")
++
++        let deadline = Task {
++            try? await Task.sleep(for: .seconds(180))
++            snapshots.continuation.finish()
++        }
++        let second = await connections.next()
++        deadline.cancel()
++        await channel.shutdown()
++
++        for line in events.lines.withLock({ $0 }) {
++            print("KEEPALIVE_REAL_GATEWAY \(line)")
++        }
++        print(
++            "KEEPALIVE_REAL_GATEWAY first generation=\(first)",
++            "replacement generation=\(second.map(String.init) ?? "none within 180 s")")
++        #expect(second != nil)
++        #expect(second != first)
++    }
++}
++#endif

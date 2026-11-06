@@ -17,3 +17,8 @@ Secretless real-Xcode proof rig for reconnecting after consecutive missed keepal
   shipped `GatewayChannelActor` over a real URLSession WebSocket with its real timers and no path updates, silences the
   fixture 35 s after hello, and prints `KEEPALIVE_PROOF` lines (pings, disconnect reason, replacement hello).
   - native job: base + harness (tree 112f483ceee), then head + harness (tree 5d06ec3ad73).
+- rig/real-gateway.diff + rig/real-gateway.sh (proof only): `KeepaliveMissRealGatewayProofTests` connects the shipped
+  `GatewayChannelActor` as a device-less operator (shared token, loopback) to a real `openclaw gateway run` built from
+  base, freezes the Gateway process with SIGSTOP 35 s after hello, resumes it with SIGCONT when the client retires the
+  socket, and prints `KEEPALIVE_REAL_GATEWAY` lines. Trees: base + real-gateway 46b4a414220, head + real-gateway
+  11ed46dc9ae. `real-gateway` job runs it on a hosted runner and also captures the client's os_log with sudo.
