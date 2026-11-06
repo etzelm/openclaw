@@ -1,11 +1,12 @@
 #!/bin/bash
 # Full OpenClawKit `swift test` on one lane's exact head tree, unmodified, with Xcode.
-# Usage: rig/full-suite.sh <lane>
+# Usage: rig/full-suite.sh <lane> [head|base]
 set -uo pipefail
 LANE="$1"
+SIDE="${2:-head}"
 RIG="$(cd "$(dirname "$0")" && pwd)"
 WORK="${RUNNER_TEMP:-/tmp}/chatui-full"
-OUT="${PROOF_OUT:-$WORK/out}/$LANE-full"
+OUT="${PROOF_OUT:-$WORK/out}/$LANE-full$([ "$SIDE" = base ] && echo -base)"
 mkdir -p "$WORK" "$OUT"
 field() { python3 -I -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]][sys.argv[3]])' "$RIG/lanes.json" "$LANE" "$1"; }
 BASE="$(field base)"
@@ -15,10 +16,14 @@ rm -rf "$SRC"
 git init -q "$SRC"
 git -C "$SRC" fetch -q --depth 1 https://github.com/openclaw/openclaw.git "$BASE" || exit 1
 git -C "$SRC" checkout -q --detach FETCH_HEAD
-git -C "$SRC" apply --index "$RIG/lanes/$LANE.diff" || exit 1
-tree="$(git -C "$SRC" write-tree)"
-echo "head tree $tree (expected $HEAD_TREE)" | tee "$OUT/environment.txt"
-test "$tree" = "$HEAD_TREE" || exit 1
+if [ "$SIDE" = base ]; then
+  echo "base $BASE (unmodified)" | tee "$OUT/environment.txt"
+else
+  git -C "$SRC" apply --index "$RIG/lanes/$LANE.diff" || exit 1
+  tree="$(git -C "$SRC" write-tree)"
+  echo "head tree $tree (expected $HEAD_TREE)" | tee "$OUT/environment.txt"
+  test "$tree" = "$HEAD_TREE" || exit 1
+fi
 { xcodebuild -version; swift --version 2>&1; sw_vers; sysctl -n hw.ncpu; } | tee -a "$OUT/environment.txt"
 cd "$SRC" || exit 1
 pnpm install --frozen-lockfile --prefer-offline --optional \
@@ -32,7 +37,7 @@ code=$?
 grep -E "Test run with|Executed [0-9]+ test|error:|✘" "$OUT/swift-test.log" | tail -40 | tee "$OUT/result.txt"
 echo "exit $code" | tee -a "$OUT/result.txt"
 {
-  echo "### $LANE full OpenClawKit swift test on head tree $HEAD_TREE"
+  echo "### $LANE full OpenClawKit swift test on $SIDE ($(head -1 "$OUT/environment.txt"))"
   echo '```'
   cat "$OUT/result.txt"
   echo '```'

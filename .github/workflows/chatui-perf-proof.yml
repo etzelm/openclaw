@@ -21,6 +21,7 @@ env:
 jobs:
   workload:
     name: workload p2 (base vs head, interleaved)
+    if: ${{ !contains(github.event.head_commit.message, '[full-only]') }}
     runs-on: macos-26
     timeout-minutes: 90
     steps:
@@ -67,9 +68,13 @@ jobs:
           retention-days: 90
 
   full-suite:
-    name: full OpenClawKit tests p2 head
+    name: full OpenClawKit tests p2 ${{ matrix.side }}
     runs-on: macos-26
     timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        side: ${{ fromJSON(contains(github.event.head_commit.message, '[full-only]') && '["head","base"]' || '["head"]') }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -83,15 +88,15 @@ jobs:
       - name: Enable pnpm
         timeout-minutes: 2
         run: corepack enable
-      - name: Full swift test on head
+      - name: Full swift test on ${{ matrix.side }}
         timeout-minutes: 60
-        run: bash rig/full-suite.sh "$LANE"
+        run: bash rig/full-suite.sh "$LANE" "${{ matrix.side }}"
       - name: Upload result
         if: always()
         timeout-minutes: 10
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-full-suite-p2
-          path: ${{ runner.temp }}/chatui-full/out/p2-full/**
+          name: chatui-full-suite-p2${{ matrix.side == 'base' && '-base' || '' }}
+          path: ${{ runner.temp }}/chatui-full/out/p2-full*/**
           if-no-files-found: warn
           retention-days: 90
