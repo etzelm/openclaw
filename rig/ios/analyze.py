@@ -125,7 +125,15 @@ def sample(dir_):
     for _, key, sha, count in ev["r"]:
         rows[key] = (sha, count)
     final = ev["n"][-1] if ev["n"] else (0, 0, 0, "")
+    timeline = [{"step": f"{phase} {index}", "start": round(start, 3), "end": round(end, 3),
+                 "updates": [{"t": round(u[0], 3), "ms": round(u[1] / 1e6, 3), "cardBuilds": u[2],
+                              "titleRenders": u[3], "excerptRenders": u[4]} for u in ev["u"] if start <= u[0] < end],
+                 "cardChanges": [{"t": round(c[0], 3), "reply": c[1], "sha256": c[2]} for c in ev["c"] if start <= c[0] < end],
+                 "cardsAfter": next(({"citedReplies": n[1], "cards": n[2], "sha256": n[3]}
+                                     for n in reversed(ev["n"]) if n[0] < end), None)}
+                for phase, index, start, end in steps]
     return {
+        "timeline": timeline,
         "records": records,
         "done": done is not None,
         "stepMarks": {p: sum(1 for _, parts in step_marks if parts[1] == p) for p in ("append", "refresh", "context")},
@@ -154,6 +162,12 @@ def main():
         side, _, round_ = dir_.name.partition("-")
         if side in samples and (s := sample(dir_)):
             samples[side][round_] = s
+    for side in SIDES:
+        for round_, s in samples[side].items():
+            (out / "timeline").mkdir(exist_ok=True)
+            (out / "timeline" / f"{side}-{round_}.json").write_text(json.dumps(
+                {"side": side, "round": round_, "note": "redacted: fixture transcript, reserved .invalid gateway host",
+                 "steps": s["timeline"]}, indent=1))
     env = (out / "environment.txt").read_text().strip() if (out / "environment.txt").exists() else "n/a"
     lines = ["### p2 shipped iOS app on an iOS simulator", "", "```", env, "```", ""]
     status = sorted(out.glob("status-*.txt"))

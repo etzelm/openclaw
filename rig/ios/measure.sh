@@ -66,31 +66,23 @@ for runtime, items in json.load(sys.stdin)["devices"].items():
 fi
 
 if [ "$1" = trace ]; then
-  # One extra run per side under xctrace (os_signpost instrument, all processes on the simulator device). Head first; no xctrace left between sides. Exported filtered to the rig's subsystem.
+  # One extra run per side with the simulator's unified log streaming the app's os_signpost
+  # intervals (subsystem ai.openclaw.chatperfproof only, so nothing else leaves the job).
   UDID="$(cat "$WORK/udid")"
   code=0
   for side in head base; do
-    pkill -INT -x xctrace 2>/dev/null; sleep 3; pkill -KILL -x xctrace 2>/dev/null
-    trace="$WORK/ios-$side.trace"
-    rm -rf "$trace"
-    perl -e 'alarm shift; exec @ARGV' 600 xcrun xctrace record --device "$UDID" --instrument os_signpost --all-processes \
-      --time-limit 150s --output "$trace" >"$LOG/xctrace-$side.log" 2>&1 &
-    xpid=$!
-    sleep 8
+    stream="$OUT/signpost-stream-$side.ndjson"
+    perl -e 'alarm shift; exec @ARGV' 400 xcrun simctl spawn "$UDID" log stream --signpost --style ndjson \
+      --predicate 'subsystem == "ai.openclaw.chatperfproof"' >"$stream" 2>"$LOG/logstream-$side.log" &
+    spid=$!
+    sleep 5
     xctestrun="$(find "$WORK/products/$side" -maxdepth 1 -name '*.xctestrun' | head -1)"
     perl -e 'alarm shift; exec @ARGV' 300 xcodebuild test-without-building -xctestrun "$xctestrun" \
       -destination "id=$UDID" "${TESTS[@]}" >"$LOG/test-$side-trace.log" 2>&1 || code=1
-    wait "$xpid" || code=1
-    tail -3 "$LOG/xctrace-$side.log"
-    if [ -d "$trace" ]; then
-      perl -e 'alarm shift; exec @ARGV' 300 xcrun xctrace export --input "$trace" \
-        --xpath '/trace-toc/run[@number="1"]/data/table[@schema="os-signpost-interval"]' \
-        >"$WORK/ios-$side-intervals.xml" 2>"$LOG/xctrace-export-$side.log" || code=1
-      python3 -I "$RIG/signposts.py" "$side" "$WORK/ios-$side-intervals.xml" >"$OUT/signposts-$side.json" \
-        2>>"$LOG/xctrace-export-$side.log" || { echo "$side: no proof signposts"; code=1; }
-    else
-      echo "$side: trace not saved"; code=1
-    fi
+    sleep 3
+    kill "$spid" 2>/dev/null; wait "$spid" 2>/dev/null
+    python3 -I "$RIG/ios/signpost_stream.py" "$side" "$stream" >"$OUT/signposts-$side.json" || { echo "$side: no signposts"; code=1; }
+    gzip -f "$stream"
   done
   exit "$code"
 fi
