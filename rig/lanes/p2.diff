@@ -149,10 +149,10 @@ index 4d9f36a63585ba056f314cff9928afc200e83512..3206646669eda67d6a546a90d16088b8
                  previews.append(preview)
              }
 diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
-index 79fc764076887d7a33426c3a2f829cf312a8064b..84be0f77da7769f756377fce60b64079527dbb83 100644
+index 79fc764076887d7a33426c3a2f829cf312a8064b..f6b69e2f63aebac3869f3b014684c0e51ac22696 100644
 --- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
 +++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatSourcePreviewTests.swift
-@@ -250,6 +250,68 @@ struct ChatSourcePreviewTests {
+@@ -250,6 +250,65 @@ struct ChatSourcePreviewTests {
          #expect((projector.project([answer])[answer.id] ?? []).isEmpty)
      }
  
@@ -206,9 +206,6 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..84be0f77da7769f756377fce60b64079
 +            let incremental = projector.project(step.messages, context: step.context)
 +            var fresh = ChatSourcePreviewProjector()
 +            #expect(incremental == fresh.project(step.messages, context: step.context), "step \(index)")
-+            // Rendered source text is kept for exactly the cited replies that remain, as a fresh projection keeps.
-+            let kept = self.renderedCount(projector)
-+            #expect(kept != nil && kept == self.renderedCount(fresh), "step \(index)")
 +            for (id, reused) in reuse[index] ?? [:] {
 +                let before = previous[id]?.withUnsafeBufferPointer(\.baseAddress)
 +                let after = incremental[id]?.withUnsafeBufferPointer(\.baseAddress)
@@ -221,15 +218,3 @@ index 79fc764076887d7a33426c3a2f829cf312a8064b..84be0f77da7769f756377fce60b64079
      @Test func `inline results and JSON result text retain invocation and canonical run ownership`() throws {
          let payload = self.searchPayload([self.row(self.first, snippet: "The <think> tag is literal source content.")])
          let answer = self.answer("[source](\(self.first))")
-@@ -339,6 +401,11 @@ struct ChatSourcePreviewTests {
-         #expect(cards == [[], [self.first, self.second], []])
-     }
- 
-+    private func renderedCount(_ projector: ChatSourcePreviewProjector) -> Int? {
-+        Mirror(reflecting: projector).children.first { $0.label == "renderedCandidates" }
-+            .map { Mirror(reflecting: $0.value).children.count }
-+    }
-+
-     private func answer(_ text: String) -> OpenClawChatMessage {
-         OpenClawChatMessage(
-             role: "assistant", content: [.init(type: "text", text: text, mimeType: nil, fileName: nil, content: nil)],

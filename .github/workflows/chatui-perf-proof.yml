@@ -3,8 +3,8 @@ name: chatui-perf-proof-p2
 # Secretless native proof for PR #193863 (incremental source previews). Runs on push to this
 # branch only; every input (base SHA, head diff, expected head tree) is committed here.
 on:
-  push:
-    branches: [proof/chatui-perf-p2]
+  # macOS package workload; the iOS shipped-app workflow is the one that runs on push.
+  workflow_dispatch:
 
 permissions:
   contents: read

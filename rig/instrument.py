@@ -43,6 +43,9 @@ def instrument(source_dir: Path) -> list[str]:
         body = lines[brace + 1]
         indent = re.match(r"^\s*", body).group(0) or "    "
         probe = f'{indent}let _ = ChatPerfProbe.hit("{label}")'
+        if label == "sourceStateUpdate":
+            # Declared first, so it runs last: after the timed interval has ended.
+            probe += f'\n{indent}defer {{ ChatPerfProbe.cards(self.messages, self.previews) }}'
         if label in TIMED:
             probe += (f'\n{indent}let chatPerfInterval = ChatPerfProbe.begin("{label}")'
                       f'\n{indent}defer {{ ChatPerfProbe.end("{label}", chatPerfInterval) }}')
@@ -56,11 +59,27 @@ def instrument(source_dir: Path) -> list[str]:
     return report
 
 
+CALL_SITE = ("ChatView.swift", "sourcePreviews: self.viewModel.sourcePreviews(for: msg),",
+             "sourcePreviews: ChatPerfProbe.messageRow(msg) { self.viewModel.sourcePreviews(for: msg) },")
+
+
+def wrap_call_site(source_dir: Path) -> str:
+    name, old, new = CALL_SITE
+    path = source_dir / name
+    text = path.read_text()
+    if text.count(old) != 1:
+        sys.exit(f"instrument: {name}: messageRow call site matched {text.count(old)} times")
+    line = text[: text.index(old)].count("\n") + 1
+    path.write_text(text.replace(old, new))
+    return f"messageRow: {name}:{line} (call-site wrapper)"
+
+
 def main() -> None:
     source_dir = Path(sys.argv[1])
     shutil.copy(sys.argv[2], source_dir / "ChatPerfProbe.swift")
     for line in instrument(source_dir):
         print(line)
+    print(wrap_call_site(source_dir))
 
 
 if __name__ == "__main__":
