@@ -2,6 +2,7 @@
 // OpenClawKitTests on base and head alike; it is never part of a PR. Gated by CHAT_PERF_PROOF=1.
 #if os(macOS)
 import AppKit
+import CryptoKit
 import Foundation
 import ObjectiveC
 import OpenClawKit
@@ -151,6 +152,18 @@ private enum ProofFixture {
     <meta property="og:image" content="/images/card.png">
     </head><body><p>Body</p></body></html>
     """
+
+    /// No og:title, so the parser falls back to <title> and the title pattern runs too.
+    static let openGraphTitleFallbackHTML = """
+    <html><head><title>Fallback &#8211; title &lt;here&gt;</title>
+    <meta name="description" content="Plain description">
+    <meta property="og:image:url" content="https://cdn.example.com/a.png">
+    </head><body></body></html>
+    """
+
+    static func digest(_ value: String) -> String {
+        SHA256.hash(data: Data(value.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
 }
 
 @MainActor
@@ -158,6 +171,7 @@ private final class ProofRecorder {
     let label: String
     let signposter = OSSignposter(subsystem: "ai.openclaw.chatperfproof", category: "workload")
     var phases: [[String: Any]] = []
+    var timings: [String: [Double]] = [:]
     let clock = ContinuousClock()
 
     init(label: String) {
@@ -220,10 +234,44 @@ struct ChatPerfProofWorkload {
         return true
     }
 
-    @MainActor private static func snapshot(_ view: NSView, to url: URL) {
-        guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+    @discardableResult
+    @MainActor private static func snapshot(_ view: NSView, to url: URL) -> String {
+        guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return "none" }
         view.cacheDisplay(in: view.bounds, to: rep)
-        try? rep.representation(using: .png, properties: [:])?.write(to: url)
+        guard let png = rep.representation(using: .png, properties: [:]) else { return "none" }
+        try? png.write(to: url)
+        return SHA256.hash(data: png).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// What each bubble shows that depends on the changed code: the link preview URL the bubble
+    /// derives (ChatMessageBubble.linkPreviewURL), every preview URL in its text, and its source cards.
+    @MainActor private static func rowFingerprints(_ vm: OpenClawChatViewModel) -> [String] {
+        vm.messages.enumerated().map { (index, message) -> String in
+            let role = message.role.lowercased()
+            let text = ChatMessageVisibleText.displayText(in: message, includeThinking: false)
+            let urls = chatPreviewURLs(in: text)
+            let cards = vm.sourcePreviews(for: message)
+            var preview = ""
+            if role == "user" || role == "assistant", let first = urls.first,
+               role != "assistant" || !cards.contains(where: { $0.represents(first) })
+            {
+                preview = first.absoluteString
+            }
+            let cardText: [String] = cards.map { card -> String in
+                let fields: [String] = [
+                    card.url.absoluteString, card.title, card.domain, card.excerpt ?? "-",
+                    String(describing: card.excerptKind),
+                    card.citedURLs.map(\.absoluteString).joined(separator: ","),
+                ]
+                return fields.joined(separator: "|")
+            }
+            let fields: [String] = [
+                "\(index)", role, preview, urls.map(\.absoluteString).joined(separator: ","),
+                cardText.joined(separator: ";"),
+            ]
+            let row = fields.joined(separator: "\n")
+            return ProofFixture.digest(row)
+        }
     }
 
     @Test(.enabled(if: Self.enabled))
@@ -287,7 +335,8 @@ struct ChatPerfProofWorkload {
                 }
             }
         }
-        Self.snapshot(host, to: outDir.appendingPathComponent("\(label)-\(sample)-transcript.png"))
+        let screenshotDigest = Self.snapshot(
+            host, to: outDir.appendingPathComponent("\(label)-\(sample)-transcript.png"))
 
         let widths: [CGFloat] = [720, 1120, 840, 960]
         try await recorder.phase("resize", steps: widths.count) {
@@ -315,17 +364,43 @@ struct ChatPerfProofWorkload {
             }
         }
 
+        // Direct calls of the function every user/assistant bubble body runs (timing bonus).
+        let bubbleTexts = vm.messages
+            .filter { ["user", "assistant"].contains($0.role.lowercased()) }
+            .map { ChatMessageVisibleText.displayText(in: $0, includeThinking: false) }
+        let passes = 20
+        try await recorder.phase("bubbleScan", steps: passes * bubbleTexts.count) {
+            for _ in 0..<passes {
+                let started = recorder.clock.now
+                var found = 0
+                for text in bubbleTexts where chatFirstPreviewURL(in: text) != nil {
+                    found += 1
+                }
+                let elapsed = started.duration(to: recorder.clock.now)
+                recorder.timings["bubbleScanPassUs", default: []].append(
+                    Double(elapsed.components.attoseconds) / 1e12 + Double(elapsed.components.seconds) * 1e6)
+                #expect(found > 0)
+            }
+        }
+
         let baseURL = try #require(URL(string: "https://example.com/page"))
+        let fixtures = [ProofFixture.openGraphHTML, ProofFixture.openGraphTitleFallbackHTML]
         let parses = 50
         var parsed = 0
+        var parseResults: [String] = []
         try await recorder.phase("openGraphParse", steps: parses) {
-            for _ in 0..<parses {
-                if case .loaded = parseChatOpenGraph(html: ProofFixture.openGraphHTML, baseURL: baseURL) {
-                    parsed += 1
-                }
+            for index in 0..<parses {
+                let started = recorder.clock.now
+                let result = parseChatOpenGraph(html: fixtures[index % 2], baseURL: baseURL)
+                let elapsed = started.duration(to: recorder.clock.now)
+                recorder.timings["openGraphParseUs", default: []].append(
+                    Double(elapsed.components.attoseconds) / 1e12 + Double(elapsed.components.seconds) * 1e6)
+                if case .loaded = result { parsed += 1 }
+                if index < 2 { parseResults.append(String(describing: result)) }
             }
         }
         #expect(parsed == parses)
+        let rows = Self.rowFingerprints(vm)
 
         let rendered = vm.sourcePreviewState.previews.values.reduce(0) { $0 + $1.count }
         #expect(rendered > 0, "source cards were projected")
@@ -337,6 +412,13 @@ struct ChatPerfProofWorkload {
             "projectedCards": rendered,
             "scrollDocumentHeight": scrollView?.documentView?.frame.height ?? 0,
             "phases": recorder.phases,
+            "timings": recorder.timings,
+            "bubbleTexts": bubbleTexts.count,
+            "screenshotSHA256": screenshotDigest,
+            "openGraphResults": parseResults.map(ProofFixture.digest),
+            "openGraphResultText": parseResults,
+            "rowSHA256": rows,
+            "rowsSHA256": ProofFixture.digest(rows.joined(separator: "\n")),
         ]
         let data = try JSONSerialization.data(withJSONObject: summary, options: [.prettyPrinted, .sortedKeys])
         try data.write(to: outDir.appendingPathComponent("\(label)-\(sample).json"))

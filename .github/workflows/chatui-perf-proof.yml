@@ -1,17 +1,17 @@
-name: chatui-perf-proof
+name: chatui-perf-proof-p3
 
-# Secretless native proof for the ChatUI performance PRs. Runs on push to this
+# Secretless native proof for the static preview regex change (p3). Runs on push to this
 # branch only; every input (base SHA, head diff, expected head tree) is committed here.
 on:
   push:
-    branches: [proof/chatui-perf-rig]
+    branches: [proof/chatui-perf-p3]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: chatui-perf-proof-${{ github.sha }}
+  group: chatui-perf-proof-p3-${{ github.sha }}
   cancel-in-progress: false
 
 env:
@@ -20,67 +20,82 @@ env:
 
 jobs:
   workload:
-    name: workload ${{ matrix.lane }}
+    name: workload p3
     runs-on: macos-26
-    timeout-minutes: 150
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [p1, p2, p3]
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v5
+        timeout-minutes: 5
         with:
           persist-credentials: false
       - uses: actions/setup-node@v5
+        timeout-minutes: 5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Select newest Xcode
+        timeout-minutes: 5
         run: bash rig/select-xcode.sh
       - name: Enable pnpm
+        timeout-minutes: 5
         run: corepack enable
-      - name: Run lane
-        env:
-          PROOF_OUT: ${{ runner.temp }}/proof-out
-        run: bash rig/run-lane.sh ${{ matrix.lane }} 5
+      - name: Prepare base and head (tree check, native assets)
+        timeout-minutes: 15
+        run: bash rig/run-lane.sh prepare
+      - name: Instrument and build release workload
+        timeout-minutes: 30
+        run: bash rig/run-lane.sh build
+      - name: Workload ABAB x5 (counts)
+        timeout-minutes: 25
+        run: bash rig/run-lane.sh workload 5
+      - name: Summary
+        if: always()
+        timeout-minutes: 5
+        run: bash rig/run-lane.sh summary
+      - name: Optional os_signpost trace
+        timeout-minutes: 12
+        continue-on-error: true
+        run: bash rig/run-lane.sh trace
       - name: Upload evidence
         if: always()
+        timeout-minutes: 10
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-perf-proof-${{ matrix.lane }}
-          path: |
-            ${{ runner.temp }}/proof-out/${{ matrix.lane }}/**
-            !${{ runner.temp }}/proof-out/${{ matrix.lane }}/*-trace-toc.xml
+          name: chatui-perf-proof-p3
+          path: ${{ runner.temp }}/chatui-proof/out/p3/**
           if-no-files-found: warn
           retention-days: 90
 
-  full-suite:
-    name: full OpenClawKit tests ${{ matrix.lane }}
+  focused:
+    name: focused suites p3 (unmodified base and head)
     runs-on: macos-26
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [p1, p2, p3]
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v5
+        timeout-minutes: 5
         with:
           persist-credentials: false
       - uses: actions/setup-node@v5
+        timeout-minutes: 5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Select newest Xcode
+        timeout-minutes: 5
         run: bash rig/select-xcode.sh
       - name: Enable pnpm
+        timeout-minutes: 5
         run: corepack enable
-      - name: Full swift test on head
-        env:
-          PROOF_OUT: ${{ runner.temp }}/proof-out
-        run: bash rig/full-suite.sh ${{ matrix.lane }}
+      - name: Prepare base and head (tree check, native assets)
+        timeout-minutes: 15
+        run: bash rig/run-lane.sh prepare
+      - name: Focused suites on unmodified base and head
+        timeout-minutes: 45
+        run: bash rig/run-lane.sh focused && test ! -s "$RUNNER_TEMP/chatui-proof/out/p3/status.txt"
       - name: Upload result
         if: always()
+        timeout-minutes: 10
         uses: actions/upload-artifact@v4
         with:
-          name: chatui-full-suite-${{ matrix.lane }}
-          path: ${{ runner.temp }}/proof-out/${{ matrix.lane }}-full/**
+          name: chatui-perf-proof-p3-focused
+          path: ${{ runner.temp }}/chatui-proof/out/p3/**
           if-no-files-found: warn
           retention-days: 90
