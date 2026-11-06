@@ -1,0 +1,158 @@
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/KeepaliveMissNativeProofTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/KeepaliveMissNativeProofTests.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..aaccdfdc3c569364b4279714faaf1c40428eef52
+--- /dev/null
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/KeepaliveMissNativeProofTests.swift
+@@ -0,0 +1,82 @@
++#if os(macOS) || os(iOS)
++import Foundation
++import Synchronization
++import Testing
++@testable import OpenClawKit
++
++/// Proof-only, not part of the fix. Drives the shipped GatewayChannelActor over a real URLSession
++/// WebSocket with its real timers (15 s keepalive, 10 s pong deadline, 30 s Gateway ticks).
++/// The fixture Gateway ticks normally, then goes silent 35 s after hello: it keeps reading,
++/// records every ping, and answers nothing. No network path change is emitted.
++struct KeepaliveMissNativeProofTests {
++    private final class Events: Sendable {
++        let lines = Mutex<[String]>([])
++        let start = Date()
++
++        func record(_ line: String) {
++            let elapsed = String(format: "%7.2f", Date().timeIntervalSince(self.start))
++            self.lines.withLock { $0.append("t=\(elapsed)s \(line)") }
++        }
++
++        func offset(_ date: Date) -> String {
++            String(format: "%.2f", date.timeIntervalSince(self.start))
++        }
++    }
++
++    @Test
++    func `silent Gateway socket with no path change is retired and replaced`() async throws {
++        let fixture = try await NativeGatewayWebSocketFixture.start(issuedDeviceTokens: [nil, nil])
++        defer { fixture.stop() }
++        let events = Events()
++        let snapshots = AsyncStream<UInt64>.makeStream()
++        var connections = snapshots.stream.makeAsyncIterator()
++        let channel = GatewayChannelActor(
++            url: fixture.url(),
++            token: nil,
++            pushHandler: { push, generation in
++                if case .snapshot = push {
++                    events.record("hello snapshot generation=\(generation)")
++                    snapshots.continuation.yield(generation)
++                }
++            },
++            connectOptions: GatewayConnectOptions(
++                role: "node", scopes: [], caps: [], commands: [], permissions: [:],
++                clientId: "keepalive-miss-proof", clientMode: "node", clientDisplayName: "Keepalive Proof",
++                includeDeviceIdentity: false),
++            disconnectHandler: { reason, generation in
++                events.record("disconnect generation=\(generation) reason=\(reason)")
++            },
++            // No path updates at all: the network path probe cannot be the detector.
++            networkPathUpdates: nil)
++        defer { snapshots.continuation.finish() }
++
++        try await channel.connect()
++        let first = try #require(await connections.next())
++        try await Task.sleep(for: .seconds(35))
++        fixture.silenceConnection(at: 0)
++        events.record("fixture connection 0 silent (no pongs, no ticks, no frames)")
++
++        let deadline = Task {
++            try? await Task.sleep(for: .seconds(180))
++            snapshots.continuation.finish()
++        }
++        let second = await connections.next()
++        deadline.cancel()
++        let pings = fixture.unansweredPings(at: 0).map(events.offset)
++        let replacementAuth = fixture.capturedAuth(at: 1) != nil
++        await channel.shutdown()
++
++        for line in events.lines.withLock({ $0 }) {
++            print("KEEPALIVE_PROOF \(line)")
++        }
++        print("KEEPALIVE_PROOF unanswered pings on connection 0 at t=\(pings.joined(separator: ", "))s")
++        print(
++            "KEEPALIVE_PROOF first generation=\(first)",
++            "replacement generation=\(second.map(String.init) ?? "none within 180 s")",
++            "replacement connect frame decoded=\(replacementAuth)")
++        #expect(second != nil)
++        #expect(second != first)
++        #expect(replacementAuth)
++    }
++}
++#endif
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+index 6e4b23aa75c1199612c60caf77eb3ef5d90e4949..6ec9f4a6bb163df6abf35ce861754edf2396f237 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+@@ -92,6 +92,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+         var buffer = Data()
+         var phase = Phase.handshake
+         var isStalled = false
++        var isSilent = false
+     }
+ 
+     private static let websocketGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+@@ -101,6 +102,8 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+     private let connectFailures: [Int: ConnectFailure]
+     private var clients: [Int: Client] = [:]
+     private var connectAuth: [ConnectAuth] = []
++    /// Outlives the client record, which is dropped when the socket closes.
++    private var unansweredPingLog: [Int: [Date]] = [:]
+     private var nextConnectionIndex = 0
+     private var stopped = false
+     let port: UInt16
+@@ -223,6 +226,27 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+         self.queue.sync { self.clients[index]?.isStalled = true }
+     }
+ 
++    /// Proof-only silent peer: keeps reading, records each ping, and sends nothing back
++    /// (no pongs, no ticks), like a flow a NAT or weak radio stopped delivering downstream.
++    func silenceConnection(at index: Int) {
++        self.queue.sync { self.clients[index]?.isSilent = true }
++    }
++
++    func unansweredPings(at index: Int) -> [Date] {
++        self.queue.sync { self.unansweredPingLog[index] ?? [] }
++    }
++
++    /// Proof-only Gateway ticks at the advertised 30 s interval until the connection goes silent.
++    private func scheduleTick(_ index: Int) {
++        self.queue.asyncAfter(deadline: .now() + 30) { [weak self] in
++            guard let self, !self.stopped, let client = self.clients[index], !client.isSilent else { return }
++            self.sendJSON(
++                ["type": "event", "event": "tick", "payload": ["ts": 1_800_000_000_000]],
++                index: index)
++            self.scheduleTick(index)
++        }
++    }
++
+     func stop() {
+         self.queue.sync {
+             guard !self.stopped else { return }
+@@ -418,7 +442,11 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+                 self.close(index)
+                 return
+             case 0x9:
+-                self.sendFrame(opcode: 0xA, payload: frame.payload, index: index)
++                if client.isSilent {
++                    self.unansweredPingLog[index, default: []].append(Date())
++                } else {
++                    self.sendFrame(opcode: 0xA, payload: frame.payload, index: index)
++                }
+             default:
+                 break
+             }
+@@ -514,6 +542,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+             ],
+         ]
+         self.sendJSON(frame, index: index)
++        self.scheduleTick(index)
+     }
+ 
+     private func sendConnectFailure(id: String, failure: ConnectFailure, index: Int) {

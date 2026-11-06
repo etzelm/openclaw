@@ -5,12 +5,16 @@
 #            the consecutive-miss test must fail and the single-miss test must pass.
 #            Then the exact head tree: GatewayNetworkPathRecoveryTests must pass.
 #   full:    full OpenClawKit swift test on the exact head tree.
+#   native:  proof-only harness (rig/harness.diff): real URLSession socket to a fixture Gateway that goes
+#            silent with no path change; base then head, KEEPALIVE_PROOF lines into the summary.
 set -uo pipefail
 MODE="$1"
 RIG="$(cd "$(dirname "$0")" && pwd)"
 BASE="cb73e59f9356796d4eec6ffeffff327e213355a6"
 RED_TREE="9f6b7a9016187eae9e4e4969c0427032ef212301"
 HEAD_TREE="14a1ed9c5b04c221a9878edfd35a304ead1935f0"
+BASE_HARNESS_TREE="112f483ceee25116f1579793c09443bdea9f3a9e"
+HEAD_HARNESS_TREE="5d06ec3ad73fd2627bb6e3d294573286ee85f42c"
 SUITE="GatewayNetworkPathRecoveryTests"
 RED_TEST="consecutive keepalive misses reconnect before the tick watchdog"
 GUARD_TEST="a keepalive miss between healthy pongs keeps the socket"
@@ -78,5 +82,21 @@ if [ "$MODE" = full ]; then
   { echo "### full OpenClawKit swift test on head tree $HEAD_TREE"; echo '```'; cat "$OUT/full-result.txt"; echo '```'; } | summary
   exit "$code"
 fi
+if [ "$MODE" = native ]; then
+  for side in base head; do
+    git -C "$SRC" reset -q --hard
+    if [ "$side" = head ]; then git -C "$SRC" apply --index "$RIG/head.diff" || exit 1; want="$HEAD_HARNESS_TREE"; else want="$BASE_HARNESS_TREE"; fi
+    git -C "$SRC" apply --index "$RIG/harness.diff" || exit 1
+    tree="$(git -C "$SRC" write-tree)"
+    echo "$side+harness tree $tree (expected $want)" | tee -a "$OUT/environment.txt"
+    test "$tree" = "$want" || exit 1
+    swift_test --filter KeepaliveMissNativeProofTests >"$OUT/native-$side.log" 2>&1
+    echo "exit $?" >>"$OUT/native-$side.log"
+    { echo "### $side + harness (tree $tree)"; echo '```'; grep -E "KEEPALIVE_PROOF|Test run with|^exit" "$OUT/native-$side.log"; echo '```'; } | summary
+  done
+  grep -q "reason=gateway socket unresponsive to keepalive pings" "$OUT/native-head.log"
+  exit $?
+fi
+
 echo "unknown mode $MODE"
 exit 2

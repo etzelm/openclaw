@@ -12,3 +12,8 @@ Secretless real-Xcode proof rig for reconnecting after consecutive missed keepal
     "consecutive keepalive misses reconnect before the tick watchdog" and pass
     "a keepalive miss between healthy pongs keeps the socket"; then the exact head tree, same filter must pass.
   - full-suite: full OpenClawKit `swift test --parallel` on the exact head tree.
+- rig/harness.diff (proof only, never in the PR): `NativeGatewayWebSocketFixture` gains a silent mode (keeps reading,
+  records each ping, sends no pongs, ticks or frames) and 30 s Gateway ticks; `KeepaliveMissNativeProofTests` drives the
+  shipped `GatewayChannelActor` over a real URLSession WebSocket with its real timers and no path updates, silences the
+  fixture 35 s after hello, and prints `KEEPALIVE_PROOF` lines (pings, disconnect reason, replacement hello).
+  - native job: base + harness (tree 112f483ceee), then head + harness (tree 5d06ec3ad73).

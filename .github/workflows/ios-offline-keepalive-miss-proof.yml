@@ -78,3 +78,33 @@ jobs:
           path: ${{ runner.temp }}/keepalive-miss/out/full/**
           if-no-files-found: warn
           retention-days: 90
+
+  native:
+    name: real URLSession socket, silent Gateway, base vs head
+    runs-on: macos-26
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 5
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Native keepalive proof, base then head
+        timeout-minutes: 60
+        run: bash rig/run.sh native
+      - name: Upload result
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: keepalive-miss-native
+          path: ${{ runner.temp }}/keepalive-miss/out/native/**
+          if-no-files-found: warn
+          retention-days: 90
