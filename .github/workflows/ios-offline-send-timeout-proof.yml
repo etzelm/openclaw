@@ -1,0 +1,78 @@
+name: ios-offline-send-timeout-proof
+
+# Secretless real-Xcode proof for the chat.send attachment deadline fix.
+# Every input (base SHA, head diff, test-only diff, expected head tree) is committed on this branch.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-offline-send-timeout-proof-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "24.22.1"
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
+jobs:
+  focused:
+    name: ChatGatewayRequestTests red on base, green on head
+    runs-on: macos-26
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 5
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Red (base + new test) then green (head tree)
+        timeout-minutes: 60
+        run: bash rig/run.sh focused
+      - name: Upload result
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: send-timeout-focused
+          path: ${{ runner.temp }}/send-timeout/out/focused/**
+          if-no-files-found: warn
+          retention-days: 90
+
+  full-suite:
+    name: full OpenClawKit swift test on head
+    runs-on: macos-26
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 5
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Full swift test on head tree
+        timeout-minutes: 60
+        run: bash rig/run.sh full
+      - name: Upload result
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: send-timeout-full-suite
+          path: ${{ runner.temp }}/send-timeout/out/full/**
+          if-no-files-found: warn
+          retention-days: 90

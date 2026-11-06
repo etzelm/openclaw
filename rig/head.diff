@@ -1,0 +1,62 @@
+diff --git a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatGatewayRequest.swift b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatGatewayRequest.swift
+index 28764c60a279ed4c208f981a8c5a926fa4d9ec02..74bcb6e71c677a810c0bf6b39866ea89ccbfb99c 100644
+--- a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatGatewayRequest.swift
++++ b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatGatewayRequest.swift
+@@ -743,10 +743,16 @@ public enum OpenClawChatGatewayRequests {
+         return OpenClawChatGatewayRequest(
+             method: "chat.send",
+             params: params,
+-            // Admission includes audio transcription; zero waits until the
+-            // captured connection closes, the caller cancels, or the ACK arrives.
+-            timeoutMs: Double(requestTimeoutMs ??
+-                (attachments.contains { $0.mimeType.lowercased().hasPrefix("audio/") } ? 0 : 30000)))
++            timeoutMs: Double(requestTimeoutMs ?? self.sendTimeoutMs(attachments)))
++    }
++
++    private static func sendTimeoutMs(_ attachments: [OpenClawChatAttachmentPayload]) -> Int {
++        // Admission includes audio transcription; zero waits until the
++        // captured connection closes, the caller cancels, or the ACK arrives.
++        if attachments.contains(where: { $0.mimeType.lowercased().hasPrefix("audio/") }) { return 0 }
++        // URLSession completes a WebSocket send once the frame is buffered, so the
++        // deadline also covers the upload: allow 32 bytes/ms (256 kbit/s) for it.
++        return 30000 + attachments.reduce(0) { $0 + $1.content.utf8.count } / 32
+     }
+ 
+     public static func agentWait(
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatGatewayRequestTests.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatGatewayRequestTests.swift
+index 88b72099d49fb4968e1ed5e471fc415264a8d807..ae374ccbe3c98dc8b08d9eff269e109e93bef047 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatGatewayRequestTests.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatGatewayRequestTests.swift
+@@ -822,6 +822,32 @@ struct ChatGatewayRequestTests {
+         }
+     }
+ 
++    @Test func `attachment send deadline leaves admission time after a slow upload`() {
++        // An 8 MB file is 10,666,668 base64 bytes. URLSession reports the send
++        // done once buffered, so the deadline must outlast the upload itself.
++        let content = String(repeating: "A", count: 10_666_668)
++        func request(_ timeout: Int?, _ attachments: [OpenClawChatAttachmentPayload]) -> Double {
++            OpenClawChatGatewayRequests.sendMessage(
++                sessionKey: "main",
++                agentID: nil,
++                expectedSessionRoutingContract: nil,
++                message: "report",
++                thinking: nil,
++                idempotencyKey: "file-send",
++                attachments: attachments,
++                requestTimeoutMs: timeout).timeoutMs
++        }
++        let file = OpenClawChatAttachmentPayload(
++            type: "file", mimeType: "application/pdf", fileName: "report.pdf", content: content)
++        let uploadAt1MbpsMs = Double(content.utf8.count * 8 / 1000)
++
++        // 30 s admission window plus the upload at 256 kbit/s.
++        #expect(request(nil, [file]) == 30000 + 333_333)
++        #expect(request(nil, [file]) > 30000 + uploadAt1MbpsMs)
++        #expect(request(nil, []) == 30000)
++        #expect(request(1200, [file]) == 1200)
++    }
++
+     @Test func `send request omits inherited thinking override`() {
+         let inherited = OpenClawChatGatewayRequests.sendMessage(
+             sessionKey: "global",
