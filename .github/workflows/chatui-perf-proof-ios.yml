@@ -1,0 +1,101 @@
+name: chatui-perf-proof-p1-ios
+
+# Secretless native proof for openclaw/openclaw#193741 in the shipped iOS app on an iOS simulator.
+# Base and head are built in parallel with the identical scratch fixture and probes, then measured
+# interleaved on one simulator in one job. Nothing here is part of the PR.
+on:
+  push:
+    branches: [proof/chatui-perf-p1]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chatui-perf-proof-p1-ios-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "24.22.1"
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
+jobs:
+  build:
+    name: build iOS app (${{ matrix.side }})
+    runs-on: macos-26
+    timeout-minutes: 95
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [base, head]
+    steps:
+      - uses: actions/checkout@v5
+        timeout-minutes: 3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        timeout-minutes: 5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Select newest Xcode
+        timeout-minutes: 3
+        run: bash rig/select-xcode.sh
+      - name: Enable pnpm
+        timeout-minutes: 2
+        run: corepack enable
+      - name: Build (source, scratch fixture, tools, xcodebuild build-for-testing)
+        timeout-minutes: 80
+        run: bash rig/ios/build-side.sh ${{ matrix.side }}
+      - name: Upload build
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-${{ matrix.side }}
+          path: |
+            ${{ runner.temp }}/ios-proof/products-${{ matrix.side }}.tgz
+            ${{ runner.temp }}/ios-proof/out/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  measure:
+    name: measure base vs head on one simulator
+    needs: build
+    runs-on: macos-26
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v5
+        timeout-minutes: 3
+        with:
+          persist-credentials: false
+      - name: Select newest Xcode
+        timeout-minutes: 3
+        run: bash rig/select-xcode.sh
+      - uses: actions/download-artifact@v4
+        timeout-minutes: 10
+        with:
+          pattern: ios-build-*
+          path: ${{ runner.temp }}/ios-proof/artifacts
+      - name: Boot simulator, unpack builds
+        timeout-minutes: 15
+        run: bash rig/ios/measure.sh setup
+      - name: Rounds 1-3 (base/head interleaved)
+        timeout-minutes: 25
+        run: bash rig/ios/measure.sh run 1 3
+      - name: Rounds 4-5 (base/head interleaved)
+        timeout-minutes: 25
+        run: bash rig/ios/measure.sh run 4 5
+      - name: Summary
+        if: always()
+        timeout-minutes: 3
+        run: |
+          out="$RUNNER_TEMP/ios-proof/out"
+          python3 -I rig/ios/analyze.py "$out" | tee "$out/summary.md" >>"$GITHUB_STEP_SUMMARY"
+      - name: Upload evidence
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: chatui-perf-proof-p1-ios
+          path: ${{ runner.temp }}/ios-proof/out/**
+          if-no-files-found: warn
+          retention-days: 90
