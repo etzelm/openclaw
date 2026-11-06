@@ -1,6 +1,9 @@
+import BackgroundTasks
 import Foundation
 import OpenClawKit
 import Testing
+import UIKit
+import UserNotifications
 @testable import OpenClaw
 @testable import OpenClawChatUI
 
@@ -10,6 +13,15 @@ private final class ProofGateway: @unchecked Sendable {
     private let lock = NSLock()
     private var sends: [(key: String, text: String, at: Date)] = []
     private var calls: [String] = []
+    private var chatHealthy = true
+
+    func setChatHealthy(_ healthy: Bool) {
+        self.lock.withLock { self.chatHealthy = healthy }
+    }
+
+    var sendTimes: [Date] {
+        self.lock.withLock { self.sends.map(\.at) }
+    }
 
     var methodLog: String {
         self.lock.withLock { self.calls.joined(separator: ",") }
@@ -27,7 +39,7 @@ private final class ProofGateway: @unchecked Sendable {
         self.lock.withLock { self.calls.append("\(role.prefix(1)):\(method)") }
         switch method {
         case "health":
-            return ["ok": true]
+            return ["ok": self.lock.withLock { self.chatHealthy }]
         case "node.event":
             return ["ok": true, "handled": true, "reason": "beacon_persisted"]
         case "agents.list":
@@ -203,6 +215,124 @@ struct BgOutboxDeliveryProofTests {
                 throw CancellationError()
             }
             try await Task.sleep(nanoseconds: 50_000_000)
+        }
+    }
+}
+
+/// OS wake proof, identical on base and head. Runs only when rig/ios/studio-os-wake.sh sets
+/// BG_OUTBOX_OS_SCENARIO (push | bgtask | bgtask-bound). It configures the running app's own model (the one SwiftUI
+/// scene phases and
+/// the app delegate use), queues a message, and then waits while the runner backgrounds the app with a
+/// real app switch, lets the real grace period end, sends a real silent push through
+/// `xcrun simctl push`, and later brings the app back to the foreground.
+@MainActor
+@Suite(.serialized)
+struct BgOutboxOSWakeProofTests {
+    @Test func `real silent push wake with a queued message`() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let scenario = env["BG_OUTBOX_OS_SCENARIO"], let out = env["BG_OUTBOX_PROOF_OUT"] else { return }
+        let side = env["BG_OUTBOX_PROOF_SIDE"] ?? "unknown"
+        func mark(_ name: String, _ text: String = "") {
+            let line = "\(Date().timeIntervalSince1970) \(name) \(text)\n"
+            let url = URL(fileURLWithPath: out).appendingPathComponent("os-\(scenario)-\(side)-\(name).txt")
+            try? line.write(to: url, atomically: true, encoding: .utf8)
+        }
+        UserDefaults.standard.removeObject(forKey: "gateway.backgroundAlive.lastSuccessAtMs")
+        let appModel = try #require(OpenClawAppModelRegistry.appModel)
+
+        let server = try await NativeGatewayWebSocketFixture.start(issuedDeviceTokens: [], tls: true)
+        defer { server.stop() }
+        let gateway = ProofGateway()
+        server.acceptedOperatorScopes = ["operator.read", "operator.write"]
+        server.helloCapabilities = ["chat-send-routing-contract", "session-settings-cas-v1"]
+        server.requestHandler = { role, method, params in gateway.handle(role: role, method: method, params: params) }
+        let stableID = "manual|127.0.0.1|\(server.port)"
+        var options = GatewayConnectOptions(
+            role: "node",
+            scopes: [],
+            caps: [],
+            commands: [],
+            permissions: [:],
+            clientId: "openclaw-ios",
+            clientMode: "node",
+            clientDisplayName: "OS wake proof",
+            includeDeviceIdentity: false,
+            allowStoredDeviceAuth: false)
+        options.deviceAuthGatewayID = stableID
+        let tls = GatewayTLSParams(
+            required: true,
+            expectedFingerprint: server.fingerprint,
+            allowTOFU: false,
+            storeKey: nil)
+        appModel.applyGatewayConnectConfig(GatewayConnectConfig(
+            url: server.url(),
+            stableID: stableID,
+            tls: tls,
+            token: "proof-token",
+            bootstrapToken: nil,
+            password: nil,
+            nodeOptions: options))
+        try await Self.wait(seconds: 30) {
+            appModel.gatewayConnected && appModel.isOperatorGatewayConnected && appModel.chatDeliveryAgentId != nil
+        }
+        appModel.chatPresentation.sync(appModel: appModel)
+        let viewModel = try #require(appModel.chatPresentation.viewModel)
+        try await Self.wait(seconds: 30) { viewModel.healthOK }
+        let store = try #require(appModel.makeChatOfflineStore())
+
+        // The user sends while Chat sees the Gateway as unhealthy, so the message is queued durably.
+        gateway.setChatHealthy(false)
+        await viewModel.pollHealthIfNeeded(force: true)
+        viewModel.input = "queued before the wake"
+        viewModel.send()
+        try await Self.wait(seconds: 30) { await !store.loadCommands().isEmpty }
+        let commandID = try #require(await store.loadCommands().first?.id)
+        // "deliver": the Gateway answers chat health again by the time iOS wakes the app.
+        // "bound": it never does, so the wake can only end at its time limit.
+        gateway.setChatHealthy(!scenario.hasSuffix("bound"))
+        // What a set-up device already has: notification permission (provisional needs no prompt) and an
+        // APNs registration, so the simulator accepts the pushed notification for this app.
+        let granted = try? await UNUserNotificationCenter.current().requestAuthorization(options: [
+            .alert,
+            .provisional,
+        ])
+        UIApplication.shared.registerForRemoteNotifications()
+        mark("ready", "command=\(commandID) notificationsGranted=\(granted == true)")
+
+        // The runner backgrounds the app, waits out the grace period, pushes, then foregrounds it.
+        try await Self.wait(seconds: 60) { appModel.isBackgrounded }
+        mark("backgrounded")
+        if scenario.hasPrefix("bgtask") {
+            // After the real grace period disconnects the app, ask BGTaskScheduler to launch the
+            // registered refresh task: the same call Apple documents running from lldb.
+            try await Self.wait(seconds: 90) { !appModel.gatewayConnected }
+            let identifier = (Bundle.main.bundleIdentifier ?? "") + ".bgrefresh"
+            let selector = NSSelectorFromString("_simulateLaunchForTaskWithIdentifier:")
+            mark("bgtask_launch", "identifier=\(identifier) available=\(BGTaskScheduler.shared.responds(to: selector))")
+            _ = BGTaskScheduler.shared.perform(selector, with: identifier)
+        }
+        try await Self.wait(seconds: 180) { !appModel.isBackgrounded }
+        mark("foregrounded")
+        try? await Task.sleep(nanoseconds: 3_000_000_000)
+
+        let sends = gateway.sendTimes.map { String(format: "%.3f", $0.timeIntervalSince1970) }
+        let rows = await store.loadCommands().map(\.status.rawValue)
+        mark(
+            "result",
+            "sendTimes=\(sends.joined(separator: ",")) sendCount=\(sends.count) rows=\(rows.joined(separator: ","))")
+        appModel.disconnectGateway()
+        viewModel.detachTransport()
+        _ = await appModel.purgeChatTranscriptCache(gatewayID: stableID)
+    }
+
+    private static func wait(seconds: Double, _ condition: @MainActor () async -> Bool) async throws {
+        let deadline = Date().addingTimeInterval(seconds)
+        while await !condition() {
+            guard Date() < deadline else {
+                Issue.record("timed out")
+                throw CancellationError()
+            }
+            try await Task.sleep(nanoseconds: 100_000_000)
         }
     }
 }

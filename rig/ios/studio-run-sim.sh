@@ -20,7 +20,12 @@ bash "$RIG/source.sh" "$SIDE" "$SRC" --native-assets | tee "$OUT/source.txt" || 
 cp "$RIG/ios/BgOutboxFlushProofTests.swift" "$SRC/apps/ios/Tests/BgOutboxFlushProofTests.swift"
 cp "$RIG/ios/BgOutboxDeliveryProofTests.swift" "$SRC/apps/ios/Tests/BgOutboxDeliveryProofTests.swift"
 # Proof-only local Gateway methods for the delivery test (test fixture only, same on both sides).
-git -C "$SRC" apply "$RIG/harness.diff" || die harness
+# Head already carries the fixture extension; base gets it from the rig.
+if git -C "$SRC" apply --check "$RIG/harness.diff" 2>/dev/null; then
+  git -C "$SRC" apply "$RIG/harness.diff" || die harness
+else
+  git -C "$SRC" apply -R --check "$RIG/harness.diff" || die "harness neither applies nor is present"
+fi
 for f in ${EXTRA_TEST_FILES:-}; do cp "$f" "$SRC/apps/ios/Tests/" || die "extra test $f"; done
 
 stamp "tools"

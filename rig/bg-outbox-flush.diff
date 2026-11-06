@@ -1,5 +1,5 @@
 diff --git a/apps/ios/Sources/Model/NodeAppModel.swift b/apps/ios/Sources/Model/NodeAppModel.swift
-index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625a4b41116 100644
+index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..e10e3b422d1f900ee4cc2dc6c09110af44ca2ff8 100644
 --- a/apps/ios/Sources/Model/NodeAppModel.swift
 +++ b/apps/ios/Sources/Model/NodeAppModel.swift
 @@ -981,6 +981,10 @@ final class NodeAppModel {
@@ -21,15 +21,28 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625
          let wakeId = Self.makePushWakeAttemptID()
          guard Self.isSilentPushPayload(userInfo) else {
              self.pushWakeLogger.info("Ignored APNs payload wakeId=\(wakeId, privacy: .public): not silent push")
-@@ -7365,6 +7370,7 @@ extension NodeAppModel {
+@@ -7365,18 +7370,27 @@ extension NodeAppModel {
          let result = await performBackgroundAliveBeaconIfNeeded(
              wakeId: wakeId,
              trigger: .silentPush)
-+        await self.drainChatOutboxForBackgroundWake(wakeId: wakeId, startedAt: wakeStartedAt)
++        let chat = await self.drainChatOutboxForBackgroundWake(wakeId: wakeId, startedAt: wakeStartedAt)
++        // A throttled beacon mutates nothing and reports no data (#129026); delivered chat
++        // sends and their history refresh are new data for that same wake.
++        let disposition: SilentPushWakeResult = result.disposition == .noData && chat == .delivered
++            ? .newData
++            : result.disposition
          let outcomeMessage =
              "Silent push outcome wakeId=\(wakeId) "
                  + "applied=\(result.applied) "
-@@ -7377,6 +7383,7 @@ extension NodeAppModel {
+                 + "handled=\(result.handled) "
+                 + "reason=\(result.reason) "
++                + "chat=\(chat?.rawValue ?? "skipped") "
++                + "disposition=\(disposition) "
+                 + "durationMs=\(result.durationMs)"
+         self.pushWakeLogger.info("\(outcomeMessage, privacy: .public)")
+-        return result.disposition
++        return disposition
+     }
  
      func handleBackgroundRefreshWake(trigger: String = "bg_app_refresh") async -> Bool {
          guard !Task.isCancelled else { return false }
@@ -37,23 +50,31 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625
          let wakeId = Self.makePushWakeAttemptID()
          let normalizedTrigger = BackgroundAliveBeacon.normalizeTrigger(trigger)
          let receivedMessage =
-@@ -7388,6 +7395,7 @@ extension NodeAppModel {
+@@ -7388,16 +7402,56 @@ extension NodeAppModel {
          let result = await performBackgroundAliveBeaconIfNeeded(
              wakeId: wakeId,
              trigger: normalizedTrigger)
-+        await self.drainChatOutboxForBackgroundWake(wakeId: wakeId, startedAt: wakeStartedAt)
++        let chat = await self.drainChatOutboxForBackgroundWake(wakeId: wakeId, startedAt: wakeStartedAt)
          let outcomeMessage =
              "Background refresh wake outcome wakeId=\(wakeId) "
                  + "applied=\(result.applied) "
-@@ -7398,6 +7406,43 @@ extension NodeAppModel {
+                 + "handled=\(result.handled) "
+                 + "reason=\(result.reason) "
++                + "chat=\(chat?.rawValue ?? "skipped") "
+                 + "durationMs=\(result.durationMs)"
+         self.pushWakeLogger.info("\(outcomeMessage, privacy: .public)")
          return !Task.isCancelled && result.handled
      }
  
 +    /// The wake's own work only reconnects; queued chat sends flush from the
 +    /// reconnect events, so hold the wake open until they finish or time out.
-+    private func drainChatOutboxForBackgroundWake(wakeId: String, startedAt: Date) async {
-+        let timeoutMs = Self.backgroundWakeChatOutboxDrainTimeoutMs(
-+            wakeElapsedMs: Int(Date().timeIntervalSince(startedAt) * 1000))
++    /// Nil when the wake skipped the wait.
++    private func drainChatOutboxForBackgroundWake(
++        wakeId: String,
++        startedAt: Date) async -> OpenClawChatOutboxWakeDrain?
++    {
++        let elapsedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
++        let timeoutMs = min(Self.backgroundWakeChatOutboxDrainTimeoutMs, Self.backgroundWakeBudgetMs - elapsedMs)
 +        let skipReason: String? = if !self.isBackgrounded {
 +            "not_backgrounded"
 +        } else if Task.isCancelled {
@@ -69,7 +90,7 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625
 +            let reason = skipReason ?? ""
 +            self.pushWakeLogger.info(
 +                "Wake chat outbox skipped wakeId=\(wakeId, privacy: .public) reason=\(reason, privacy: .public)")
-+            return
++            return nil
 +        }
 +        // The beacon only waits for the node session; the operator session can lag it.
 +        // Without the node session the wake did not reach the Gateway, so do not wait.
@@ -80,10 +101,7 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625
 +        }
 +        self.pushWakeLogger.info(
 +            "Wake chat outbox wakeId=\(wakeId, privacy: .public) result=\(result.rawValue, privacy: .public)")
-+    }
-+
-+    static func backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: Int) -> Int {
-+        min(self.backgroundWakeChatOutboxDrainTimeoutMs, self.backgroundWakeBudgetMs - wakeElapsedMs)
++        return result
 +    }
 +
      func handleSignificantLocationWakeIfNeeded() async {
@@ -91,22 +109,154 @@ index 5ceb9bcac1d0cc64bbc5d97d62a4ebfcae0d81eb..f817be9288cd4f06141a8dcf693d7625
          let now = Date()
 diff --git a/apps/ios/Tests/BackgroundWakeChatOutboxTests.swift b/apps/ios/Tests/BackgroundWakeChatOutboxTests.swift
 new file mode 100644
-index 0000000000000000000000000000000000000000..f3d418cb464f4b46d40927d17105f40fb3bdb3ee
+index 0000000000000000000000000000000000000000..42e77d229bcbdfc8eb0712d63cfcdc6bc0bf3c92
 --- /dev/null
 +++ b/apps/ios/Tests/BackgroundWakeChatOutboxTests.swift
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,188 @@
 +import Foundation
-+import OpenClawChatUI
++import OpenClawKit
 +import Testing
++import UIKit
 +@testable import OpenClaw
++@testable import OpenClawChatUI
++
++/// Local Gateway answers for chat replay and the alive beacon. Runs on the fixture's queue.
++private final class WakeChatGateway: @unchecked Sendable {
++    private let lock = NSLock()
++    private var healthy = true
++    private var sends: [(key: String, text: String)] = []
++
++    var sentKeys: [String] {
++        self.lock.withLock { self.sends.map(\.key) }
++    }
++
++    func setHealthy(_ healthy: Bool) {
++        self.lock.withLock { self.healthy = healthy }
++    }
++
++    func handle(method: String, params: [String: Any]) -> [String: Any]? {
++        switch method {
++        case "health":
++            return ["ok": self.lock.withLock { self.healthy }]
++        case "node.event":
++            return ["ok": true, "handled": true]
++        case "agents.list":
++            return ["defaultId": "main", "mainKey": "main", "scope": "per-sender", "agents": [["id": "main"]]]
++        case "sessions.list":
++            return ["sessions": []]
++        case "chat.send":
++            let key = params["idempotencyKey"] as? String ?? ""
++            self.lock.withLock { self.sends.append((key, params["message"] as? String ?? "")) }
++            return ["runId": key, "status": "started"]
++        case "chat.history":
++            let rows: [[String: Any]] = self.lock.withLock {
++                self.sends.map { send in
++                    [
++                        "id": "history-\(send.key)",
++                        "role": "user",
++                        "content": [["type": "text", "text": send.text]],
++                        "idempotencyKey": "\(send.key):user",
++                    ]
++                }
++            }
++            return ["sessionKey": params["sessionKey"] as? String ?? "agent:main:main", "messages": rows]
++        default:
++            return nil
++        }
++    }
++}
 +
 +@MainActor
 +@Suite(.serialized)
 +struct BackgroundWakeChatOutboxTests {
-+    @Test func `chat outbox wait shrinks with the time a slow reconnect used`() {
-+        #expect(NodeAppModel.backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: 0) == 8000)
-+        #expect(NodeAppModel.backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: 20500) == 4500)
-+        #expect(NodeAppModel.backgroundWakeChatOutboxDrainTimeoutMs(wakeElapsedMs: 25000) <= 0)
++    private static let lastSuccessKey = "gateway.backgroundAlive.lastSuccessAtMs"
++
++    @Test(arguments: [true, false])
++    func `throttled silent push reports new data only when it delivered chat`(queuesMessage: Bool) async throws {
++        let isolation = await GatewayRegistryTestIsolation()
++        defer { isolation.restore() }
++        let state = try TemporaryOpenClawState(instanceID: "wake-chat-\(UUID().uuidString)")
++        defer { state.restore() }
++        let defaults = UserDefaults.standard
++        let previousSuccess = defaults.object(forKey: Self.lastSuccessKey)
++        defer {
++            if let previousSuccess {
++                defaults.set(previousSuccess, forKey: Self.lastSuccessKey)
++            } else {
++                defaults.removeObject(forKey: Self.lastSuccessKey)
++            }
++        }
++
++        let server = try await NativeGatewayWebSocketFixture.start(issuedDeviceTokens: [], tls: true)
++        defer { server.stop() }
++        let gateway = WakeChatGateway()
++        server.acceptedOperatorScopes = ["operator.read", "operator.write"]
++        server.helloCapabilities = ["chat-send-routing-contract", "session-settings-cas-v1"]
++        server.requestHandler = { _, method, params in gateway.handle(method: method, params: params) }
++        let stableID = "manual|127.0.0.1|\(server.port)"
++        var options = GatewayConnectOptions(
++            role: "node",
++            scopes: [],
++            caps: [],
++            commands: [],
++            permissions: [:],
++            clientId: "openclaw-ios",
++            clientMode: "node",
++            clientDisplayName: "Wake chat",
++            includeDeviceIdentity: false,
++            allowStoredDeviceAuth: false)
++        options.deviceAuthGatewayID = stableID
++        let tls = GatewayTLSParams(
++            required: true,
++            expectedFingerprint: server.fingerprint,
++            allowTOFU: false,
++            storeKey: nil)
++        let appModel = NodeAppModel()
++        defer { appModel.disconnectGateway() }
++        appModel.applyGatewayConnectConfig(GatewayConnectConfig(
++            url: server.url(),
++            stableID: stableID,
++            tls: tls,
++            token: "wake-chat-token",
++            bootstrapToken: nil,
++            password: nil,
++            nodeOptions: options))
++        try await Self.wait {
++            appModel.gatewayConnected && appModel.isOperatorGatewayConnected && appModel.chatDeliveryAgentId != nil
++        }
++        appModel.chatPresentation.sync(appModel: appModel)
++        let viewModel = try #require(appModel.chatPresentation.viewModel)
++        defer { viewModel.detachTransport() }
++        try await Self.wait { viewModel.healthOK }
++        let store = try #require(appModel.makeChatOfflineStore())
++
++        // Connected sockets, but Chat sees the Gateway as unhealthy, so a send is queued.
++        gateway.setHealthy(false)
++        await viewModel.pollHealthIfNeeded(force: true)
++        #expect(!viewModel.healthOK)
++        if queuesMessage {
++            viewModel.input = "queued while unhealthy"
++            viewModel.send()
++            try await Self.wait { await !store.loadCommands().isEmpty }
++        }
++        gateway.setHealthy(true)
++
++        // Throttled wake: node connected and a beacon succeeded moments ago.
++        appModel.isBackgrounded = true
++        defaults.set(Date().timeIntervalSince1970 * 1000, forKey: Self.lastSuccessKey)
++        let delegate = OpenClawAppDelegate()
++        delegate.appModel = appModel
++        let result = await withCheckedContinuation { continuation in
++            delegate.application(
++                UIApplication.shared,
++                didReceiveRemoteNotification: ["aps": ["content-available": 1]],
++                fetchCompletionHandler: { continuation.resume(returning: $0) })
++        }
++
++        #expect(result == (queuesMessage ? .newData : .noData))
++        #expect(gateway.sentKeys.count == (queuesMessage ? 1 : 0))
++        #expect(await store.loadCommands().filter { $0.status == .queued }.isEmpty)
++        _ = await appModel.purgeChatTranscriptCache(gatewayID: stableID)
 +    }
 +
 +    @Test func `wake that cannot reach the gateway does not wait for queued chat sends`() async throws {
@@ -138,6 +288,17 @@ index 0000000000000000000000000000000000000000..f3d418cb464f4b46d40927d17105f40f
 +        #expect(Date().timeIntervalSince(started) < 2)
 +        #expect(await store.loadCommands().map(\.status) == [.queued])
 +        _ = await appModel.purgeChatTranscriptCache(gatewayID: gatewayID)
++    }
++
++    private static func wait(_ condition: @MainActor () async -> Bool) async throws {
++        let deadline = Date().addingTimeInterval(20)
++        while await !condition() {
++            guard Date() < deadline else {
++                Issue.record("timed out")
++                throw CancellationError()
++            }
++            try await Task.sleep(nanoseconds: 50_000_000)
++        }
 +    }
 +}
 diff --git a/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift b/apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Outbox.swift
@@ -407,15 +568,86 @@ index fac6e92edf754811472486e42396ac3667e8fd31..bfab62c7fafc41a0ff7b65b01acb22fb
      }
  
      func events() -> AsyncStream<OpenClawChatTransportEvent> {
+diff --git a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+index 6e4b23aa75c1199612c60caf77eb3ef5d90e4949..6c78cd0b006de78adfcd110854a54e5ca9ee3b8c 100644
+--- a/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
++++ b/apps/shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+@@ -92,6 +92,41 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+         var buffer = Data()
+         var phase = Phase.handshake
+         var isStalled = false
++        var role = ""
++    }
++
++    /// Test-only Gateway methods after connect. Nil payload answers "unknown method".
++    typealias RequestHandler = @Sendable (_ role: String, _ method: String, _ params: [String: Any]) -> [String: Any]?
++    private var openRequestHandler: RequestHandler?
++    private var advertisedCapabilities: [String] = []
++
++    var requestHandler: RequestHandler? {
++        get { self.queue.sync { self.openRequestHandler } }
++        set { self.queue.sync { self.openRequestHandler = newValue } }
++    }
++
++    var helloCapabilities: [String] {
++        get { self.queue.sync { self.advertisedCapabilities } }
++        set { self.queue.sync { self.advertisedCapabilities = newValue } }
++    }
++
++    private func handleOpenRequest(_ data: Data, index: Int) -> Bool {
++        guard let handler = self.openRequestHandler, let client = self.clients[index], client.phase == .open,
++              let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
++              request["type"] as? String == "req",
++              let method = request["method"] as? String, method != "connect",
++              let id = request["id"] as? String
++        else { return false }
++        let params = request["params"] as? [String: Any] ?? [:]
++        if let payload = handler(client.role, method, params) {
++            self.sendJSON(["type": "res", "id": id, "ok": true, "payload": payload], index: index)
++        } else {
++            self.sendJSON([
++                "type": "res", "id": id, "ok": false,
++                "error": ["code": "INVALID_REQUEST", "message": "unknown method: \(method)"],
++            ], index: index)
++        }
++        return true
+     }
+ 
+     private static let websocketGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+@@ -426,6 +461,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+     }
+ 
+     private func handleText(_ data: Data, index: Int) {
++        if self.handleOpenRequest(data, index: index) { return }
+         guard var client = self.clients[index], client.phase == .connect,
+               let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               request["type"] as? String == "req",
+@@ -442,6 +478,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+             bootstrapToken: auth?["bootstrapToken"] as? String,
+             deviceToken: auth?["deviceToken"] as? String))
+         client.phase = .open
++        client.role = role
+         self.clients[index] = client
+         self.connectRoleEvents.continuation.yield(role)
+         if let failure = self.connectFailures[index] {
+@@ -494,7 +531,7 @@ final class NativeGatewayWebSocketFixture: @unchecked Sendable {
+                 "features": [
+                     "methods": [],
+                     "events": [],
+-                    "capabilities": [],
++                    "capabilities": self.advertisedCapabilities,
+                 ],
+                 "snapshot": [
+                     "presence": [["ts": 1]],
 diff --git a/docs/platforms/ios.md b/docs/platforms/ios.md
-index 4ad54f47adaaeab897f024f0d732d8ad1954bb99..a440f8b22dff185aa1400ce4ecaf9fe6906e1eef 100644
+index 4ad54f47adaaeab897f024f0d732d8ad1954bb99..596bce4d828040e9e231a77022df139ec3ec5aa8 100644
 --- a/docs/platforms/ios.md
 +++ b/docs/platforms/ios.md
 @@ -683,6 +683,8 @@ Expected operator flow:
  
  When iOS wakes the app for a silent push, background refresh, or significant-location event, the app attempts a short node reconnect and then calls `node.event` with `event: "node.presence.alive"`. The Gateway records this as `lastSeenAtMs`/`lastSeenReason` on the paired node/device metadata only after the authenticated node device identity is known.
  
-+When chat messages are waiting in the offline outbox, a silent push or background refresh wake then stays open for up to 8 seconds while they send, in order and with the usual retry backoff; a slow reconnect leaves less of that time.
++When chat messages are waiting in the offline outbox, a silent push or background refresh wake then stays open for up to 8 seconds while they send, in order and with the usual retry backoff; a slow reconnect leaves less of that time, and a wake that does not reach the Gateway does not wait.
 +
  The app treats a background wake as successfully recorded only when the Gateway response includes `handled: true`. Older Gateways may acknowledge `node.event` with `{ "ok": true }`; that response is compatible but does not count as a durable last-seen update.
  
