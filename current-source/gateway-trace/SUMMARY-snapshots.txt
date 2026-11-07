@@ -1,0 +1,34 @@
+# sparse session, limit 2 (5 runs per arm, run order L1..L10: base fix fix base base fix fix base base fix)
+sparse-base-L1 [sparse] {'ok': 1.0, 'other_reads': 14.33, 'other_snapshots': 7.33, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-base-L4 [sparse] {'ok': 1.0, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-base-L5 [sparse] {'ok': 1.0, 'other_reads': 8.33, 'other_snapshots': 4.0, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-base-L8 [sparse] {'ok': 1.0, 'other_reads': 2.0, 'other_snapshots': 1.0, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-base-L9 [sparse] {'ok': 1.0, 'other_reads': 0.33, 'other_snapshots': 0.33, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-L10 [sparse] {'ok': 1.0, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-L2 [sparse] {'ok': 1.0, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-L3 [sparse] {'ok': 1.0, 'other_reads': 7.67, 'other_snapshots': 3.67, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-L6 [sparse] {'ok': 1.0, 'other_reads': 2.33, 'other_snapshots': 1.0, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-L7 [sparse] {'ok': 1.0, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+# imported Claude Code threads, limit 2, same runs
+sparse-base-L1 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-base-L4 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-base-L5 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-base-L8 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-base-L9 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-fix-L10 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-fix-L2 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-fix-L3 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-fix-L6 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+sparse-fix-L7 [catalog-import] {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=12
+# 12 sessions, limit 100 (round 3 ran fix first)
+base-r1 {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=36
+fix-r1 {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=36
+base-r2 {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=36
+fix-r2 {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=36
+fix-r3 {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=36
+base-r3 {'ok': 1.0, 'page_reads': 3.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=36
+# earlier sparse rounds without the latency run
+sparse-base-s1 [sparse] {'ok': 1.0, 'other_reads': 0.33, 'other_snapshots': 0.33, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-s1 [sparse] {'ok': 1.0, 'other_reads': 5.33, 'other_snapshots': 2.67, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-fix-s2 [sparse] {'ok': 1.0, 'page_reads': 11.0, 'page_snapshots': 1.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3
+sparse-base-s2 [sparse] {'ok': 1.0, 'page_reads': 11.0, 'page_snapshots': 3.0, 'pending_reads': 1.0, 'pending_snapshots': 1.0} calls=3

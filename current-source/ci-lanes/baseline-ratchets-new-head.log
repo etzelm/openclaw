@@ -1,0 +1,40 @@
+$ node --import ./scripts/tsx.mjs scripts/ci-baseline-ratchets.mts --base ci-ratchet-base --no-merge-base
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base ci-ratchet-base --no-merge-base
+max-lines ratchet OK: 396 grandfathered suppressions.
+[ok] max-lines
+$ node scripts/check-line-cap-ratchet.mjs --base ci-ratchet-base --no-merge-base
+Line-cap ratchet OK: 4 changed source files; no new violations or over-cap growth.
+[ok] line-cap
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base ci-ratchet-base --no-merge-base
+assertion SAFETY ratchet OK: 2382 files, 5409 grandfathered assertions.
+[ok] assertion-safety
+$ node --import ./scripts/tsx.mjs scripts/check-database-dialect-ratchet.mts --base ci-ratchet-base --no-merge-base
+SQLite dialect ratchet OK: no construct-group growth against ci-ratchet-base.
+[ok] database-dialect
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base ci-ratchet-base --no-merge-base
+test timeout race ratchet OK: 103 files, 186 grandfathered sites.
+[ok] timeout-race
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base ci-ratchet-base --no-merge-base
+Mock factory ratchet OK: 6365 grandfathered factories.
+[ok] mock-exports
+$ node --import ./scripts/tsx.mjs scripts/check-test-lines-ratchet.mts --base ci-ratchet-base --no-merge-base
+Test lines OK: 6556734; ceiling: 6556830; slack: 96.
+[ok] test-lines
+OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+[ok] config-docs
+[ok] plugin-inventory
+$ node --max-old-space-size=4096 --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base ci-ratchet-base --no-merge-base
+SQLite worker ratchet OK: no T1 call-count growth against ci-ratchet-base.
+[ok] database-worker
+[baseline-ratchets] summary
+  22.48s  ok         max-lines
+   2.32s  ok         line-cap
+  18.58s  ok         assertion-safety
+  11.97s  ok         database-dialect
+   6.15s  ok         timeout-race
+  54.63s  ok         mock-exports
+  19.15s  ok         test-lines
+  80.92s  ok         config-docs
+   1.75s  ok         plugin-inventory
+ 289.92s  ok         database-worker
+rc=0 head 213409bf
