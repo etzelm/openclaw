@@ -1,0 +1,62 @@
+$ npm install -g openclaw@2026.11.3   # latest on the npm registry
+rc=0
+$ openclaw --version
+OpenClaw 2026.11.3 (847611d)
+$ openclaw doctor --fix --non-interactive   # first run
+DOCTOR_RC=0
+$ openclaw config set agents.defaults.timeoutSeconds 321
+Updated agents.defaults.timeoutSeconds. Change will apply without restarting the gateway.
+$ openclaw config set plugins.entries.workboard.enabled true
+Updated plugins.entries.workboard.enabled. Change will apply without restarting the gateway.
+$ openclaw agents add helper --non-interactive --workspace <e2e>/home/helper-ws
+rc=0
+$ openclaw workboard create "Card A" --priority high
+32b77e73  todo      high    default  Card A
+$ openclaw workboard create "Card B" --priority normal
+e739cb6b  todo      normal  default  Card B
+$ openclaw workboard create "Card C" --priority low
+70d7b0fb  todo      low     default  Card C
+$ openclaw workboard move <Card A> --status ready
+32b77e73  ready     high    default  Card A
+$ openclaw config set database.postgres.connection <dsn>
+Updated database.postgres.connection. Restart the gateway to apply.
+$ openclaw database port --to postgres
+rc=0
+Database port: complete (postgres); 1 workboard stores.
+$ openclaw workboard list
+e739cb6b  todo      normal  default  Card B
+70d7b0fb  todo      low     default  Card C
+32b77e73  ready     high    default  Card A
+$ anchor (store id -> live namespace)
+d9570744-6269-4108-9d48-3c68358047ef -> port_cc48da502d03476fa048b56175b555f9
+$ psql: cards in port_cc48da502d03476fa048b56175b555f9
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+$ psql: per-table row digests (stable columns)
+workboard_attachment_blobs - rows=0
+workboard_boards - rows=0
+workboard_card_artifacts - rows=0
+workboard_card_attachments - rows=0
+workboard_card_attempts - rows=0
+workboard_card_comments - rows=0
+workboard_card_diagnostics - rows=0
+workboard_card_events 158b69c1d0681dc778e1cb84bf87f6aa rows=4
+workboard_card_labels - rows=0
+workboard_card_links - rows=0
+workboard_card_notifications - rows=0
+workboard_card_proof - rows=0
+workboard_cards a47e6d1568f4e706fbbf8fd09ba7bfa9 rows=3
+workboard_notification_subscriptions - rows=0
+workboard_schema_migrations 78390972678fdea0c998aca7b9bd7b60 rows=1
+workboard_session_placements - rows=0
+workboard_worker_logs - rows=0
+workboard_worker_protocol - rows=0
+$ openclaw backup create --output <e2e>/backups --verify
+rc=0
+archive: 2026-11-11T08-12-40.483-08-00-openclaw-backup.tar.gz sha256 977fe8c282c5df6291a903878872d332fa4ae4dbd41aa19ffb8c976eec1beab1
+$ openclaw doctor --fix --non-interactive   # standalone original state capture
+DOCTOR_RC=0
+$ files of original state captures (sha256)
+d4a5dcf9ba544cd24259d2af951ae5b7910b10156f0ee5f248f87376cd1577aa  doctor-8f7a68a2-d0f6-4d41-a2b7-74ca536c73b6/manifest.json
+$ psql: schemas

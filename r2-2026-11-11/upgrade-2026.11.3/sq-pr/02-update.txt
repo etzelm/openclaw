@@ -1,0 +1,26 @@
+$ openclaw update --tag ./openclaw-2026.11.8.tgz --yes --no-restart --json   # pr build
+UPDATE_RC=1
+$ update result (--json)
+status: error | reason: state-migrated-no-rollback | before: 2026.11.3 | after: 2026.11.8
+- updater-runtime-retention exit 0 | {"inventoryMs":7140,"materializationMs":10597,"entries":45805,"estimatedBytes":668446720,"linked":41481,"copied":1576}
+- database snapshot exit 0 | Databases snapshotted at <e2e>/prefix/lib/node_modules/.openclaw.package-backup-31192-1794414507024.databases. Verified successful activation removes these snapshots; otherwise retain them with the update's recovery artifacts. / <e2e>/hom
+- package-install exit 0 
+- candidate-state-snapshot exit 0 | database snapshot $OPENCLAW_STATE_DIR/agents/helper/agent/openclaw-agent.sqlite: completed, attempt 1, 167/167 pages, 684,032 bytes, 0.051 seconds. / database snapshot $OPENCLAW_STATE_DIR/state/openclaw.sqlite: completed, attempt 1, 404/404 pages, 1,654,784 bytes, 0.041 seconds. / database snapshot 
+- candidate-doctor exit 0 | Doctor sections: startup 0.0 s, maintenance.begin 0.7 s, database-preflight 0.4 s, schema-admission 0.1 s, state-database-repair 0.0 s, database-migrations 0.0 s, heartbeat-migration-backups 0.0 s, state-schema 0.3 s, config-flow 3.5 s, legacy-cron.crontab 0.0 s, legacy-cron.store 0.0 s, legacy-cron
+- candidate-doctor-lint exit 0 
+- candidate-config exit 0 
+- candidate-plugins exit 0 
+- candidate-recovery exit 0 
+- candidate-gateway-startup exit 0 
+- candidate-state-cleanup exit 0 
+- package-swap exit 0 
+- openclaw doctor exit 0 | Doctor sections: startup 0.0 s, maintenance.preserve-original-state 0.2 s, maintenance.begin 0.7 s, schema-admission 0.1 s, state-database-repair 0.5 s, database-migrations 2.3 s, heartbeat-migration-backups 0.0 s, state-schema 0.2 s, config-flow 6.8 s, legacy-cron.crontab 0.0 s, legacy-cron.store 0
+- database migration writes exit 0 | Doctor interval openclaw doctor; backup <e2e>/prefix/lib/node_modules/.openclaw.package-backup-31192-1794414507024.databases; from SHA-256 1725c7f37d6d97e4544687ce113071311ccc30392023f8841d96778e2f001e8d to SHA-256 d70060c621cdea24644082bfc8954111ca31b516450aa9c6a2ef1d
+- post-stop-checks exit 0 
+- openclaw doctor exit 1 | Agent database migration did not finish: <e2e>/home/.openclaw/plugins/workboard/workboard.sqlite; expected schema 41, found 0.
+- update-driver-handoff exit 0 | Handoff began after "database migration writes"; the fresh driver adopted the run after 2722ms.
+- gateway recovery verification exit 1 
+- database rollback exit 1 | Databases changed after openclaw doctor: <e2e>/home/.openclaw/agents/helper/agent/openclaw-agent.sqlite, <e2e>/home/.openclaw/state/openclaw.sqlite; restoring the backup would discard later writes. Current databases were preserved. Keep t
+$ files of the Workboard rollback capture seen while the update ran
+$ PostgreSQL log during the update: restore_ schema DDL
+0

@@ -1,0 +1,60 @@
+$ openclaw --version
+OpenClaw 2026.11.3 (847611d)
+$ openclaw config get agents.defaults.timeoutSeconds
+321
+$ openclaw config get plugins.entries.workboard.enabled
+true
+$ openclaw config get database.postgres.connection
+__OPENCLAW_REDACTED__
+$ openclaw agents list --json (ids)
+main, helper
+$ anchor (store id -> live namespace)
+d9570744-6269-4108-9d48-3c68358047ef -> port_cc48da502d03476fa048b56175b555f9
+$ psql: cards in port_cc48da502d03476fa048b56175b555f9
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+$ diff <stable rows> <rows after upgrade>   # per table, stable columns
+(identical: 18 Workboard tables)
+$ openclaw workboard list
+e739cb6b  todo      normal  default  Card B
+70d7b0fb  todo      low     default  Card C
+32b77e73  ready     high    default  Card A
+$ openclaw workboard create "Card D"   # write after upgrade
+b55e399f  todo      normal  default  Card D
+$ openclaw doctor --non-interactive
+DOCTOR_RC=0
+$ stable original state capture files: sha256 before vs after upgrade
+(stable files: 4, unchanged: 4)
+$ openclaw update status   # capture inventory
+rc=0
+Warning: Original state capture is unavailable; the update continues without it. A running Gateway or another active writer changing state during capture is expected to cause this. Database rollback uses the pre-migration snapshots taken after the Gateway stops. A completed update does not need to be restarted because of this warning. Cause: Original update capture failed; evidence retained at $OPENCLAW_STATE_DIR.update-captures/40659c7f-2ff1-4cef-a984-33a42e108633 | State schema inspection failed (exit): [redacted-diagnostic]; after 0.980 seconds during database backup for source scope [$OPENCLAW_STATE_DIR/agents/helper/agent/openclaw-agent.sqlite, $OPENCLAW_STATE_DIR/state/openclaw.sqlite, $OPENCLAW_STATE_DIR/state/openclaw.sqlite, …] (scope: 5 source paths): PostgreSQL update capture requires exclusive ownership; stop through the service owner, then rerun... Database backup files retained at $OPENCLAW_STATE_DIR.update-captures/40659c7f-2ff1-4cef-a984-33a42e108633/database.databases.
+Doctor capture doctor-8f7a68a2-d0f6-4d41-a2b7-74ca536c73b6: manual
+<e2e>/home/.openclaw.update-captures/doctor-8f7a68a2-d0f6-4d41-a2b7-74ca536c73b6/manifest.json
+Standalone Doctor capture <e2e>/home/.openclaw.update-captures/doctor-8f7a68a2-d0f6-4d41-a2b7-74ca536c73b6/manifest.json: pre-repair state retained for manual inspection. No repair outcome is recorded.
+Update capture: incomplete
+<e2e>/home/.openclaw.update-captures/40659c7f-2ff1-4cef-a984-33a42e108633
+$ openclaw config set database.postgres.recoveryCaptures server
+Correct the setting above and retry. Run openclaw config schema to inspect supported settings and values.
+$ openclaw backup verify <stable archive>   # written by 2026.11.3
+rc=0
+SQLite database inventory verified.
+$ openclaw backup restore <stable archive> --target <e2e>/restored
+rc=0
+
+Activation is explicit: stop the Gateway, move the restored asset tree into place or point OPENCLAW_STATE_DIR at the restored state asset, then run `openclaw doctor`.
+$ restored anchor (store id -> namespace)
+d9570744-6269-4108-9d48-3c68358047ef -> port_cc48da502d03476fa048b56175b555f9
+$ diff <stable rows> <restored port_cc48da502d03476fa048b56175b555f9>
+8c8
+< workboard_card_events 158b69c1d0681dc778e1cb84bf87f6aa rows=4
+---
+> workboard_card_events bd74c3f23402f22732ba8599323c79ca rows=5
+13c13
+< workboard_cards a47e6d1568f4e706fbbf8fd09ba7bfa9 rows=3
+---
+> workboard_cards 902dd6309927b0beea7ce3508ae3a1b2 rows=4
+$ live anchor after restore (unchanged)
+d9570744-6269-4108-9d48-3c68358047ef -> port_cc48da502d03476fa048b56175b555f9
+$ psql: schemas
+openclaw_workboard_ca5fe657156e4313 | (no marker)

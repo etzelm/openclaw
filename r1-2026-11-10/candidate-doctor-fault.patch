@@ -1,0 +1,17 @@
+--- a/src/flows/doctor-health.ts
++++ b/src/flows/doctor-health.ts
+@@ -54,6 +54,14 @@
+ ) {
+   const signal = resolveCommandProcessSignal(getAsyncWorkSignal());
+   signal?.throwIfAborted();
++  // Proof only: fail this candidate's update Doctor on the real state dir when the harness marker exists.
++  if (
++    process.env.OPENCLAW_UPDATE_IN_PROGRESS === "1" &&
++    !resolveStateDir().includes("update-canary") &&
++    (await import("node:fs")).existsSync(`${resolveStateDir()}/.proof-fail-update-doctor`)
++  ) {
++    throw new Error("injected candidate update Doctor failure before migrations");
++  }
+   const writeAuthority = delegatedAuthority && createDoctorWriteAuthority(delegatedAuthority);
+   using custody = await retainUpdateDoctorProcesses(
+     writeAuthority?.assertCurrent,

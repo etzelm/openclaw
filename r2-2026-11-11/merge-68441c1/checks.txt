@@ -1,0 +1,18 @@
+Head 68441c1c157 = signed merge of main c324818cbf8 (contains #197058 d04c6ab44ad) into 9edd6cbabc1.
+Conflicts: docs/.generated/config-baseline.counts.json and .sha256 only; regenerated with `pnpm config:docs:gen`
+  (core 2645 -> 2646, channel 4005, plugin 5018 as on main). Merge tree 4a7459bf300 identical on both hosts.
+$ pnpm config:docs:check
+OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+$ pnpm check:test-lines-ratchet --base c324818cbf8 --no-merge-base
+Test lines OK: 6664332; ceiling: 6664338; slack: 6.
+$ git diff 577da8a944e 9edd6cbabc1 -- . ':(exclude)docs/.generated' | git patch-id --stable    # vs the same at the new head
+identical patch-id; 27 files changed, 911 insertions(+), 119 deletions(-) in both
+(29 files, +914/-122 including the two regenerated docs/.generated baselines)
+$ ls ui/src/e2e/activity-denial-refresh.real-gateway.e2e.test.ts
+No such file or directory   (retired on main by #197058)
+$ git diff --shortstat 9edd6cbabc1 HEAD -- <capture, restore and update path, 779 files>
+7 files changed, 442 insertions(+), 49 deletions(-), all from main #196873 (5d537561763):
+  src/cli/update-cli/update-command-git.ts, update-command-target.ts, update-command-target-space.ts,
+  update-snapshot-space-cleanup.ts (+ .test.ts), update-command-package-space.test.ts, update-recovery-copies.test-support.ts
+  none is in the PR diff; the cleanup it offers covers <state>.update-captures and session recovery copies.
+Not re-run at this head: sections 1 and 2 (packages from 680518deb7d and 9edd6cbabc1), PG conformance, check:changed.

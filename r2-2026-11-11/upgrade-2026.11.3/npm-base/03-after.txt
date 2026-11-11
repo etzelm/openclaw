@@ -1,0 +1,62 @@
+$ openclaw --version
+OpenClaw 2026.11.8 (577da8a)
+$ openclaw config get agents.defaults.timeoutSeconds
+321
+$ openclaw config get plugins.entries.workboard.enabled
+true
+$ openclaw config get database.postgres.connection
+__OPENCLAW_REDACTED__
+$ openclaw config get database.engine
+sqlite
+$ openclaw agents list --json (ids)
+main, helper
+$ anchor (store id -> live namespace)
+aca80083-20e6-4d09-8b35-f4516afa5a60 -> openclaw_workboard_aca8008320e64d09
+$ psql: cards in openclaw_workboard_aca8008320e64d09
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+$ diff <stable rows> <rows after upgrade>   # per table, stable columns
+(identical: 18 Workboard tables)
+$ openclaw workboard list
+e39f8d18  todo      normal  default  Card B
+4e5d6115  todo      low     default  Card C
+0861657b  ready     high    default  Card A
+$ openclaw workboard create "Card D"   # write after upgrade
+c4566114  todo      normal  default  Card D
+$ openclaw doctor --non-interactive
+DOCTOR_RC=0
+$ stable original state capture files: sha256 before vs after upgrade
+(stable files: 4, unchanged: 4)
+$ openclaw update status   # capture inventory
+rc=0
+Doctor capture doctor-c288298a-f0f1-47ee-9f07-1c1b28eac308: manual
+<e2e>/home/.openclaw.update-captures/doctor-c288298a-f0f1-47ee-9f07-1c1b28eac308/manifest.json
+Standalone Doctor capture <e2e>/home/.openclaw.update-captures/doctor-c288298a-f0f1-47ee-9f07-1c1b28eac308/manifest.json: pre-repair state retained for manual inspection. No repair outcome is recorded. Cleanup retention: retained-doctor-capture.
+Doctor capture doctor-3d103608-7aa0-4dc3-8e59-bf9fe68bfc8e: manual
+<e2e>/home/.openclaw.update-captures/doctor-3d103608-7aa0-4dc3-8e59-bf9fe68bfc8e/manifest.json
+Standalone Doctor capture <e2e>/home/.openclaw.update-captures/doctor-3d103608-7aa0-4dc3-8e59-bf9fe68bfc8e/manifest.json: pre-repair state retained for manual inspection. No repair outcome is recorded. Cleanup retention: retained-doctor-capture.
+$ openclaw config set database.postgres.recoveryCaptures server
+Correct the setting above and retry. Run openclaw config schema to inspect supported settings and values.
+$ openclaw backup verify <stable archive>   # written by 2026.11.3
+rc=0
+This legacy archive has no PostgreSQL capsule ownership inventory. Unlisted exports are preserved as files, not imported. Re-run backup with this version on the source installation to recover plugin PostgreSQL stores automatically.
+$ openclaw backup restore <stable archive> --target <e2e>/restored
+rc=0
+
+Activation is explicit: stop the Gateway, move the restored asset tree into place or point OPENCLAW_STATE_DIR at the restored state asset, then run `openclaw doctor`.
+$ restored anchor (store id -> namespace)
+aca80083-20e6-4d09-8b35-f4516afa5a60 -> openclaw_workboard_aca8008320e64d09
+$ diff <stable rows> <restored openclaw_workboard_aca8008320e64d09>
+8c8
+< workboard_card_events e6c37eb5de7fae79fa50f16e2ef22db6 rows=4
+---
+> workboard_card_events ad988842b66d876742f7f9b906436c72 rows=5
+13c13
+< workboard_cards c58415419698d0c31574b14ecce967f3 rows=3
+---
+> workboard_cards 1f68e743eb3f833f6a390b629496a162 rows=4
+$ live anchor after restore (unchanged)
+aca80083-20e6-4d09-8b35-f4516afa5a60 -> openclaw_workboard_aca8008320e64d09
+$ psql: schemas
+openclaw_workboard_aca8008320e64d09 | (no marker)

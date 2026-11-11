@@ -1,0 +1,32 @@
+ FAIL   ui-e2e-bundled  ui/src/e2e/activity-denial-refresh.real-gateway.e2e.test.ts:33 > Activity denial real Gateway > keeps a real guest timeline denial stable across unrelated session mutations
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('.activity-feed__feedback [role=alert]') to be visible
+
+ ❯ ui/src/e2e/activity-denial-refresh.real-gateway.e2e.test.ts:137:25
+    135|             await waitForControlUiGatewayReady(page);
+    136|             const alert = page.locator(".activity-feed__feedback [role…
+    137|             await alert.waitFor();
+       |                         ^
+    138|             const denial = await alert.textContent();
+    139|             expect(denial).toContain("Other people's activity is priva…
+ ❯ runQaGatewayFixture test/helpers/qa-gateway-cleanup.ts:15:7
+ ❯ ui/src/e2e/control-ui-e2e-suite.test-support.ts:717:22
+ ❯ runQaGatewayFixture test/helpers/qa-gateway-cleanup.ts:15:7
+ ❯ runPage ui/src/e2e/control-ui-e2e-suite.test-support.ts:707:16
+ ❯ Object.withPage ui/src/e2e/control-ui-e2e-suite.test-support.ts:728:33
+ ❯ Object.run ui/src/e2e/activity-denial-refresh.real-gateway.e2e.test.ts:97:9
+ ❯ ui/src/e2e/control-ui-e2e-suite.test-support.ts:519:18
+ ❯ runQaGatewayFixture test/helpers/qa-gateway-cleanup.ts:15:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { log: [ '  - waiting for locator('.activity-feed__feedback [role=alert]') to be visible' ] }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 22 passed (23)
+      Tests  1 failed | 66 passed (67)
+   Start at  05:58:13
+   Duration  155.60s (tests 70%, transform 26%, import 4%)
+
+

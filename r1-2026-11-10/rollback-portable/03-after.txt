@@ -1,0 +1,70 @@
+$ update result (--json): status, reason, rollbackOutcome, steps
+status: error | reason: doctor-failed | rollbackOutcome: {"status":"succeeded","reason":"Previous package and configuration restored"}
+- updater-runtime-retention exit 0 | {"entries":49257,"estimatedBytes":736591872,"inventoryMs":22003,"materializationMs":17819,"linked":44711,"copied":1665}
+- database snapshot exit 0 | Databases snapshotted at <e2e>/prefix/lib/node_modules/.openclaw.package-backup-15580-1794366886720.databases. Verified successful activation removes these snapshots only if automatic restoration remains available; otherwise retain them with the update's recovery artifacts. / <e2e>/home/.openclaw/
+- package-install exit 0 
+- candidate-state-snapshot exit 0 | database snapshot: completed, attempt 1, 12/12 pages, 49,152 bytes, 0.045 seconds for $OPENCLAW_STATE_DIR/client/credentials.sqlite / database snapshot: completed, attempt 1, 349/349 pages, 1,429,504 bytes, 0.044 seconds for $OPENCLAW_STATE_DIR/state/openclaw.sqlite / database snapshot: completed, attempt 1, 51/51 pages, 208,896 bytes, 1.080 seconds for /Vol
+- candidate-doctor exit 0 | Doctor sections: startup 0.0 s, maintenance.begin 0.2 s, database-preflight 0.0 s, schema-admission 0.0 s, state-database-repair 0.0 s, database-migrations 0.0 s, heartbeat-migration-backups 0.4 s, state-schema 0.0 s, config-flow 3.3 s, legacy-cron.crontab 0.0 s, legacy-cron.store 0.0 s, legacy-cron.inference 0.0 s, legacy-cron.execution-context 0.0 s, contr
+- candidate-doctor-lint exit 0 
+- candidate-config exit 0 
+- candidate-plugins exit 0 
+- candidate-recovery exit 0 
+- candidate-gateway-startup exit 0 
+- candidate-state-cleanup exit 0 
+- package-swap exit 0 
+- openclaw doctor exit 1 | injected candidate update Doctor failure before migrations
+- database migration writes exit 0 
+- post-stop-checks exit 0 
+- database rollback exit 0 | Restored pre-migration databases from <e2e>/prefix/lib/node_modules/.openclaw.package-backup-15580-1794366886720.databases. / Migrated database file retained for manual recovery: PostgreSQL namespace openclaw_workboard_9875238e92fe4042 / Migrated database file retained for manual recovery: <e2e>/h
+- package-rollback exit 0 
+- package-backup-retention exit 0 
+- gateway recovery verification exit 1 
+$ openclaw --version
+OpenClaw 2026.11.8 (680518d)
+$ files of the Workboard rollback capture seen while the update ran
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/.pending
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/anchor.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/database.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/manifest.json
+$ PostgreSQL log, database oc_e2e, during the update: schema DDL, capture comments, copy statements (truncated)
+19:16:44.585 CREATE SCHEMA "restore_1eb52fa5f2c945329f0ccfb69a7788cb"
+(end)
+$ anchor (store id -> live namespace) after
+9875238e-92fe-4042-afa0-3d0fbb979932 -> restore_1eb52fa5f2c945329f0ccfb69a7788cb
+$ psql: capture-related schemas after
+openclaw_workboard_9875238e92fe4042 | (no marker)
+restore_1eb52fa5f2c945329f0ccfb69a7788cb | (no marker)
+$ psql: cards in restore_1eb52fa5f2c945329f0ccfb69a7788cb (anchor-selected live store)
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+$ psql: per-table row digests of the live store after
+$ diff <before> <after>
+(identical: 18 Workboard tables)
+$ rollback capture manifest (retained): carrier fields
+{"carrier":"(none: portable)","schemaVersion":2,"snapshotId":"workboard.sqlite.postgres","createdAt":"2026-11-11T03:15:10.698Z","profile":"exact","exportSchemaVersion":4}
+$ retained rollback capture files (Workboard)
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/anchor.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/database.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/manifest.json
+$ psql: sequences in Workboard namespaces (allocations)
+ERROR:  syntax error at or near "''"
+LINE 1: ...ences WHERE schemaname ~ ''^(restore_|openclaw_workboard_)''
+                                                                     ^
+$ manifest allocation facts
+verification.allocations: {}
+$ local SQLite exports of the Workboard store after the update
+208896 bytes  <e2e>/home/.openclaw.update-captures/<run>/database.databases/.../workboard.sqlite.postgres/database.sqlite
+208896 bytes  <e2e>/prefix/lib/node_modules/<rollback snapshot>/.../workboard.sqlite.postgres/database.sqlite
+(end of list)
+$ openclaw workboard list
+2a02bc16  todo      normal  default  Card B
+797c0d11  todo      low     default  Card C
+0ca5500a  ready     high    default  Card A
+$ openclaw workboard create "Card D"   # write after rollback
+12d00efa  todo      normal  default  Card D
+$ psql: cards in restore_1eb52fa5f2c945329f0ccfb69a7788cb
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+Card D | todo | normal

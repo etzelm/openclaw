@@ -1,0 +1,74 @@
+$ update result (--json): status, reason, rollbackOutcome, steps
+status: error | reason: doctor-failed | rollbackOutcome: {"status":"succeeded","reason":"Previous package and configuration restored"}
+- updater-runtime-retention exit 0 | {"entries":49257,"estimatedBytes":736591872,"inventoryMs":14502,"materializationMs":37735,"linked":44711,"copied":1665}
+- database snapshot exit 0 | Databases snapshotted at <e2e>/prefix/lib/node_modules/.openclaw.package-backup-29016-1794367417657.databases. Verified successful activation removes these snapshots only if automatic restoration remains available; otherwise retain them with the update's recovery artifacts. / <e2e>/home/.openclaw/
+- package-install exit 0 
+- candidate-state-snapshot exit 0 | database snapshot: completed, attempt 1, 12/12 pages, 49,152 bytes, 0.073 seconds for $OPENCLAW_STATE_DIR/client/credentials.sqlite / database snapshot: completed, attempt 1, 349/349 pages, 1,429,504 bytes, 0.091 seconds for $OPENCLAW_STATE_DIR/state/openclaw.sqlite / database snapshot: completed, attempt 1, 51/51 pages, 208,896 bytes, 1.929 seconds for /Vol
+- candidate-doctor exit 0 | Doctor sections: startup 0.0 s, maintenance.begin 0.4 s, database-preflight 0.0 s, schema-admission 0.0 s, state-database-repair 0.0 s, database-migrations 0.0 s, heartbeat-migration-backups 0.7 s, state-schema 0.0 s, config-flow 5.6 s, legacy-cron.crontab 0.0 s, legacy-cron.store 0.0 s, legacy-cron.inference 0.0 s, legacy-cron.execution-context 0.0 s, contr
+- candidate-doctor-lint exit 0 
+- candidate-config exit 0 
+- candidate-plugins exit 0 
+- candidate-recovery exit 0 
+- candidate-gateway-startup exit 0 
+- candidate-state-cleanup exit 0 
+- package-swap exit 0 
+- openclaw doctor exit 1 | injected candidate update Doctor failure before migrations
+- database migration writes exit 0 
+- post-stop-checks exit 0 
+- database rollback exit 0 | Restored pre-migration databases from <e2e>/prefix/lib/node_modules/.openclaw.package-backup-29016-1794367417657.databases. / Migrated database file retained for manual recovery: PostgreSQL namespace openclaw_workboard_e7d71760ebd34b8a / Migrated database file retained for manual recovery: <e2e>/h
+- package-rollback exit 0 
+- package-backup-retention exit 0 
+- gateway recovery verification exit 1 
+$ openclaw --version
+OpenClaw 2026.11.8 (680518d)
+$ files of the Workboard rollback capture seen while the update ran
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/.pending
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/anchor.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/manifest.json
+$ PostgreSQL log, database oc_e2e, during the update: schema DDL, capture comments, copy statements (truncated)
+19:23:54.179 CREATE SCHEMA "restore_ec1ea530c82a4d58b367e6131158c21d"
+19:23:54.205 INSERT INTO "restore_ec1ea530c82a4d58b367e6131158c21d"."workboard_cards" ("id","board_id","title","notes","status","priority","agent_id","session_key","run_i
+19:23:54.241 COMMENT ON SCHEMA "restore_ec1ea530c82a4d58b367e6131158c21d" IS '{"openclawCapture":"<e2e>/prefix/lib/node_modules/.openclaw.p
+19:25:14.599 CREATE SCHEMA "restore_9d2eb53ddb914c6c85464da3c5c55813"
+19:25:14.627 INSERT INTO "restore_9d2eb53ddb914c6c85464da3c5c55813"."workboard_cards" ("id","board_id","title","notes","status","priority","agent_id","session_key","run_i
+(end)
+$ anchor (store id -> live namespace) after
+e7d71760-ebd3-4b8a-addf-2409d11aa9fc -> restore_9d2eb53ddb914c6c85464da3c5c55813
+$ psql: capture-related schemas after
+openclaw_workboard_e7d71760ebd34b8a | (no marker)
+restore_9d2eb53ddb914c6c85464da3c5c55813 | (no marker)
+restore_ec1ea530c82a4d58b367e6131158c21d | {"openclawCapture":"<e2e>/prefix/lib/node_modules/.openclaw.package-backup-29016-1794367417657.databases/payl
+$ psql: cards in restore_9d2eb53ddb914c6c85464da3c5c55813 (anchor-selected live store)
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+$ psql: per-table row digests of the live store after
+$ diff <before> <after>
+(identical: 18 Workboard tables)
+$ diff <before> <retained capture restore_ec1ea530c82a4d58b367e6131158c21d>
+(identical)
+$ rollback capture manifest (retained): carrier fields
+{"carrier":"postgres-schema","schemaVersion":2,"snapshotId":"workboard.sqlite.postgres","createdAt":"2026-11-11T03:23:54.241Z","profile":"exact","exportSchemaVersion":4,"schema":"restore_ec1ea530c82a4d58b367e6131158c21d"}
+$ retained rollback capture files (Workboard)
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/anchor.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/manifest.json
+$ psql: sequences in Workboard namespaces (allocations)
+ERROR:  syntax error at or near "''"
+LINE 1: ...ences WHERE schemaname ~ ''^(restore_|openclaw_workboard_)''
+                                                                     ^
+$ manifest allocation facts
+verification.allocations: {}
+$ local SQLite exports of the Workboard store after the update
+208896 bytes  <e2e>/home/.openclaw.update-captures/<run>/database.databases/.../workboard.sqlite.postgres/database.sqlite
+(end of list)
+$ openclaw workboard list
+24bb726c  todo      normal  default  Card B
+1994bdfa  todo      low     default  Card C
+3827e4a6  ready     high    default  Card A
+$ openclaw workboard create "Card D"   # write after rollback
+732fd44a  todo      normal  default  Card D
+$ psql: cards in restore_9d2eb53ddb914c6c85464da3c5c55813
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+Card D | todo | normal

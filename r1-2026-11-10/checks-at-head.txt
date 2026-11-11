@@ -1,0 +1,50 @@
+Checks at 680518deb7d (merge of main 277e32c668a) and b7842b029bc (head). macOS arm64, Node 24, PostgreSQL 17.11.
+
+== at 680518deb7d
+node scripts/test-database-conformance.mjs --engine postgres --connection <dsn> -- <batch>
+  batch a: backup-schema-capture, client-credential-update, backup (database-engine), update-cohort-restore.postgres,
+           archive-restore.postgres, port-provider
+      Tests  11 passed (11)                 # shard 1, 1 file
+      Tests  25 passed | 2 skipped (27)     # shard 2, 5 files
+  batch b: doctor-migration.postgres
+      Tests  26 passed (26)
+  batch c: agent-port.postgres, port-command.postgres, update-preflight.conformance, openclaw-state-db.postgres
+      Tests  32 passed (32)
+  total: 11 files, 94 passed, 2 skipped, rc 0 for every batch
+pnpm test src/infra/database-engine/config.test.ts src/cli/update-cli/update-command-database-retention.test.ts
+      Tests  14 passed (14)
+      Tests  15 passed (15)
+pnpm config:docs:check   OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+pnpm config:schema:check [base-config-schema] ok
+
+== at b7842b029bc (head)
+pnpm check:baseline-ratchets --base 277e32c668a --no-merge-base
+  max-lines ok | assertion-safety ok | database-dialect ok | timeout-race ok | mock-exports ok
+  config-docs ok | plugin-inventory ok | database-worker ok
+  test-lines failed: Test lines: 6644549; ceiling: 6644542; over by: 7; net delta: +469.
+same check on plain main 277e32c668a against its parent:
+  Test lines: 6644080; ceiling: 6644073; over by: 7; net delta: 0. Tree is over the ceiling; this change does not add test lines.
+  -> the 7 lines are inherited from main; this change adds +469 and allocates exactly 469.
+pnpm docs:check-mdx    rc 0
+pnpm docs:check-links  rc 0
+oxfmt --check on the two docs files and the allocation file   rc 0
+git diff --check origin/main...HEAD                            clean
+pnpm check:changed --base 277e32c668a (local run): 37 gates ok, including typecheck core, typecheck core tests,
+  lint core, lint scripts, format changed files, config docs baseline, core tsgo graph boundary.
+  1 failed: dead export scan. It lists 17 files, none touched by this PR. `pnpm deadcode:exports` on plain main
+  277e32c668a fails with the same 17 files.
+
+== at 2278b2ed4b2 (merge of main f7008994ce8 into b7842b029bc; scripts/gates3.sh)
+PostgreSQL conformance, same three batches: rc 0 each
+  batch a  Tests 11 passed (11); Tests 25 passed | 2 skipped (27)
+  batch b  Tests 26 passed (26)
+  batch c  Tests 32 passed (32)
+unit       Tests 14 passed (14); Tests 15 passed (15)
+pnpm config:docs:check rc 0 | pnpm config:schema:check rc 0
+pnpm check:baseline-ratchets --base f7008994ce8 --no-merge-base: all ok
+  max-lines, assertion-safety, database-dialect, timeout-race, mock-exports, test-lines, config-docs, plugin-inventory, database-worker
+  Test lines OK: 6650121; ceiling: 6650131; slack: 10.   (allocation 469 unchanged)
+same check on plain main f7008994ce8 vs its parent 2a2eea3fde2: all ok, Test lines OK: 6649652; ceiling: 6649662; slack: 10.
+pnpm check:changed --base f7008994ce8: 37 ok, 1 failed: dead export scan, 18 files, 0 of them in the PR diff (29 files).
+  pnpm deadcode:exports on plain f7008994ce8: same 18 files.
+git diff --check f7008994ce8...HEAD: clean

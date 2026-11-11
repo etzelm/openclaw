@@ -1,0 +1,49 @@
+$ openclaw --version
+OpenClaw 2026.11.8 (680518d)
+$ openclaw config set plugins.entries.workboard.enabled true
+Updated plugins.entries.workboard.enabled. Change will apply without restarting the gateway.
+$ openclaw workboard create "Card A" --priority high
+3827e4a6  todo      high    default  Card A
+$ openclaw workboard create "Card B" --priority normal
+24bb726c  todo      normal  default  Card B
+$ openclaw workboard create "Card C" --priority low
+1994bdfa  todo      low     default  Card C
+$ openclaw config set database.postgres.connection <dsn>
+Updated database.postgres.connection. Restart the gateway to apply.
+$ openclaw database port --family workboard --to postgres
+Database port: complete (postgres); 1 database stores.
+$ openclaw config set database.postgres.recoveryCaptures server
+Updated database.postgres.recoveryCaptures. Restart the gateway to apply.
+$ openclaw config get database.postgres.recoveryCaptures
+server
+$ openclaw workboard move <Card A> --status ready
+3827e4a6  ready     high    default  Card A
+$ anchor (store id -> live namespace) before
+e7d71760-ebd3-4b8a-addf-2409d11aa9fc -> openclaw_workboard_e7d71760ebd34b8a
+$ psql: capture-related schemas before
+openclaw_workboard_e7d71760ebd34b8a | (no marker)
+$ psql: cards in openclaw_workboard_e7d71760ebd34b8a
+Card A | ready | high
+Card B | todo | normal
+Card C | todo | low
+$ psql: per-table row digests of the live store before
+workboard_attachment_blobs - rows=0
+workboard_boards - rows=0
+workboard_card_artifacts - rows=0
+workboard_card_attachments - rows=0
+workboard_card_attempts - rows=0
+workboard_card_comments - rows=0
+workboard_card_diagnostics - rows=0
+workboard_card_events 06f4c8ea380d7aef912a83e634ed0095 rows=4
+workboard_card_labels - rows=0
+workboard_card_links - rows=0
+workboard_card_notifications - rows=0
+workboard_card_proof - rows=0
+workboard_cards 67e578ab536f4facc62398c049e7cd54 rows=3
+workboard_notification_subscriptions - rows=0
+workboard_schema_migrations 9907d64193042700b0bd1d7172c4d8f9 rows=1
+workboard_session_placements - rows=0
+workboard_worker_logs - rows=0
+workboard_worker_protocol - rows=0
+$ local SQLite exports of the Workboard store before the update
+(end of list)

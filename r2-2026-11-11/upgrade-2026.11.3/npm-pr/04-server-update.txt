@@ -1,0 +1,24 @@
+$ openclaw config get database.postgres.recoveryCaptures
+server
+$ openclaw update --tag ./openclaw-2026.11.9.tgz --yes --no-restart --json   # head, unmodified
+UPDATE_RC=0
+status: ok | reason: - | before: 2026.11.8 | after: 2026.11.9
+$ openclaw --version
+OpenClaw 2026.11.9 (9edd6cb)
+$ files of the Workboard rollback capture seen while the update ran
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/.pending
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/anchor.sqlite
+<rollback snapshot>/.../plugins/workboard/workboard.sqlite.postgres/manifest.json
+$ PostgreSQL log during the update: restore_ schema DDL
+(end)
+$ anchor (store id -> live namespace)
+3076b856-294b-47c1-8645-c9ff783dcad0 -> openclaw_workboard_3076b856294b47c1
+$ diff <rows before> <rows after server-capture update>
+(identical: 18 Workboard tables)
+$ psql: schemas
+openclaw_workboard_3076b856294b47c1 | (no marker)
+$ openclaw workboard list
+40c96292  todo      normal  default  Card B
+a36d2bc6  todo      low     default  Card C
+35ca3799  todo      normal  default  Card D
+5b2c61a4  ready     high    default  Card A

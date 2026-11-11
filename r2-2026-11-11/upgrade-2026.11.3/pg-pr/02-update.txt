@@ -1,0 +1,11 @@
+$ openclaw update --tag ./openclaw-2026.11.8.tgz --yes --no-restart --json   # pr build
+UPDATE_RC=1
+$ update result (--json)
+status: error | reason: candidate-snapshot-failed | before: 2026.11.3 | after: -
+- updater-runtime-retention exit 0 | {"inventoryMs":10010,"materializationMs":15307,"entries":45805,"estimatedBytes":668446720,"linked":41481,"copied":1576}
+- package-install exit 0 
+- candidate-state-snapshot exit 1 | snapshot: Update state snapshot failed (exit): State snapshot failed (exit): [redacted-diagnostic]; after 1.047 seconds during inventory for $OPENCLAW_STATE_DIR (scope: 1 source paths): Existing SQLite state data cannot switch engines; stop the Gateway and use openclaw database port for a supported 
+- gateway recovery observation exit 0 | No recovery needed; installation unchanged at 2026.11.3. No service was stopped or started.
+$ files of the Workboard rollback capture seen while the update ran
+$ PostgreSQL log during the update: restore_ schema DDL
+0

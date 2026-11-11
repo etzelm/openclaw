@@ -1,0 +1,46 @@
+$ openclaw --version
+OpenClaw 2026.11.8 (577da8a)
+$ openclaw config get agents.defaults.timeoutSeconds
+321
+$ openclaw config get plugins.entries.workboard.enabled
+true
+$ openclaw config get database.postgres.connection
+Config path is valid but unset: database.postgres.connection. The runtime default applies until you set an authored value with openclaw config set database.postgres.connection <value>.
+$ openclaw agents list --json (ids)
+main, helper
+$ sqlite3: cards
+Card A|ready|high
+Card B|todo|normal
+Card C|todo|low
+$ diff <stable rows> <rows after upgrade>   # per table, stable columns
+(identical: 18 Workboard tables)
+$ openclaw workboard list
+73067b44  todo      normal  default  Card B
+eff0759b  todo      low     default  Card C
+e708d87f  ready     high    default  Card A
+$ openclaw workboard create "Card D"   # write after upgrade
+67c5e80d  todo      normal  default  Card D
+$ openclaw doctor --non-interactive
+DOCTOR_RC=0
+$ stable original state capture files: sha256 before vs after upgrade
+(stable files: 8, unchanged: 8)
+$ openclaw update status   # capture inventory
+rc=0
+Snapshot location: <e2e>/tmp/openclaw-update-canary-MyUs41 (explicit-tmpdir). Snapshot requires 74 MiB for 3 MiB SQLite and 0 B plugin files and scratch space. Checked <e2e>/tmp: 1199 GiB available; ~/.openclaw.update-captures: 1199 GiB available; /tmp: 640 GiB available.
+Databases snapshotted at <e2e>/prefix/lib/node_modules/.openclaw.package-backup-34722-1794414722347.databases. Verified successful activation removes these snapshots; otherwise retain them with the update's recovery artifacts.
+<e2e>/home/.openclaw.update-captures/bf9af271-2981-40db-bcd4-694e6c15958a/manifest.json
+Update recovery set <e2e>/home/.openclaw.update-captures/bf9af271-2981-40db-bcd4-694e6c15958a/manifest.json: other recovery sets exist; restoring this set could discard newer database writes. Automatic restoration is refused; inspect with `openclaw update cleanup --dry-run`. Resolve the recorded outcome before attempting recovery.
+Doctor capture doctor-bc49df10-e342-4888-9d3e-c6d2906a4425: manual
+<e2e>/home/.openclaw.update-captures/doctor-bc49df10-e342-4888-9d3e-c6d2906a4425/manifest.json
+$ openclaw config set database.postgres.recoveryCaptures server
+Correct the setting above and retry. Run openclaw config schema to inspect supported settings and values.
+$ openclaw backup verify <stable archive>   # written by 2026.11.3
+rc=0
+SQLite database inventory verified.
+$ openclaw backup restore <stable archive> --target <e2e>/restored
+rc=0
+
+Activation is explicit: stop the Gateway, move the restored asset tree into place or point OPENCLAW_STATE_DIR at the restored state asset, then run `openclaw doctor`.
+$ diff <stable rows> <restored Workboard store>
+(identical)
+$ psql: schemas

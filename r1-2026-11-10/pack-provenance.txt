@@ -1,0 +1,17 @@
+Packages used by the rollback runs (macOS arm64, Node 24.22.2, PostgreSQL 17.11 with pgvector, unaccent, pg_trgm,
+max_locks_per_transaction=512, log_statement=all). Built with scripts/package-openclaw-for-docker.mjs.
+
+2026.11.8  head 680518deb7d as committed (installed updater: takes the capture and runs the rollback)
+           openclaw-2026.11.8.tgz sha256 9255a82b18db3de743abf6a975281236a443308374a8caf585e503d8a13e72f8
+2026.11.9  head 680518deb7d plus candidate-doctor-fault.patch (update candidate only)
+           openclaw-2026.11.9.tgz sha256 1a455a8cd494d4d90df836122de3e85854f78367342bbe42c0ce9ec9d00173dd
+
+candidate-doctor-fault.patch (the only synthetic step):
+  src/flows/doctor-health.ts, start of runDoctorHealthFlow: when OPENCLAW_UPDATE_IN_PROGRESS=1, the state dir is not
+  an update canary copy, and <state dir>/.proof-fail-update-doctor exists, throw
+  "injected candidate update Doctor failure before migrations". The harness creates the marker just before
+  `openclaw update` and removes it right after, so the candidate rehearsal passes and the post-swap update Doctor fails.
+
+The final head adds two commits on 680518deb7d: a test-line allocation number and two docs paragraphs.
+$ git diff --stat 680518deb7d <head> -- src extensions packages ui scripts
+(empty)

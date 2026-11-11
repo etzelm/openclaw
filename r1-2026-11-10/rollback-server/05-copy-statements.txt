@@ -1,0 +1,12 @@
+PostgreSQL statement log (database oc_e2e only) during the server-mode failed update, workboard_cards shown;
+the same INSERT ... SELECT runs for each Workboard table.
+
+$ copy into the capture schema (update rollback capture, before the package swap)
+19:23:54.205 INSERT INTO "restore_ec1ea530c82a4d58b367e6131158c21d"."workboard_cards" (...) SELECT ... FROM "openclaw_workboard_e7d71760ebd34b8a"."workboard_cards"
+$ copy from the capture schema into a fresh namespace (database rollback, after the candidate Doctor failed)
+19:25:14.627 INSERT INTO "restore_9d2eb53ddb914c6c85464da3c5c55813"."workboard_cards" (...) SELECT ... FROM "restore_ec1ea530c82a4d58b367e6131158c21d"."workboard_cards"
+$ count of INSERT statements into each schema during the update
+restore_ec1ea530c82a4d58b367e6131158c21d (capture): 18
+restore_9d2eb53ddb914c6c85464da3c5c55813 (restored live store): 18
+$ COMMENT ON SCHEMA statements during the update (capture marker)
+1
