@@ -1,0 +1,54 @@
+A=p1-m-1 runs=1 worker_requests=43289 busy_us_per_req=2940.2
+B=p1-a-2 runs=1 worker_requests=41204 busy_us_per_req=3071.7
+## self, us per worker request: A  B  B-A
+ 23984.7  25488.4  +1503.7  (idle)
+  2940.2   3071.7   +131.5  (busy)
+  1541.3   1606.6    +65.2  request transcript-adapters.mjs
+    89.6    100.6    +10.9  (garbage collector)
+   156.7    162.4     +5.7  (anon)
+    46.3     42.1     -4.1  serialize transcript-chat-history-response-page.mjs
+    16.9     20.8     +3.9  exchangeDatabaseAdmissions transcript-sqlite-worker-database-admission-relay.mjs
+    12.4     16.1     +3.7  postMessage 
+    31.3     34.3     +3.0  sanitizeNumericMetadata transcript-chat-display-projection.sanitize.mjs
+    31.9     34.5     +2.6  parseAssistantTextSignature transcript-chat-message-content.mjs
+     0.2      2.6     +2.4  flushCompileCache 
+    12.5     14.7     +2.1  isSilentAssistantTranscriptMessage transcript-chat-message-content.mjs
+   167.3    165.3     -2.0  parseActiveTranscriptMessageRow transcript-session-accessor.sqlite-projection-read-8-v1kXLL.mjs
+    21.3     23.3     +1.9  projectTranscriptEntryMessage transcript-session-transcript-entry-message.mjs
+    20.4     22.3     +1.9  readAssistantTextBlocksForPhase transcript-chat-message-content.mjs
+    41.6     39.8     -1.8  RegExp: [\r\n]\s*NO_REPLY\s*$ 
+     1.1      2.6     +1.5  read 
+     9.7     11.2     +1.5  compileSourceTextModule utils
+     7.8      6.4     -1.4  memoryUsage 
+     2.6      4.0     +1.4  postTaskMessage transcript-worker.mjs
+     4.5      5.9     +1.4  #getOrCreateModuleJobAfterResolve loader
+     2.0      3.4     +1.3  prepareChatHistoryRecoveryMessages transcript-chat-display-projection.core-VgBZE-d4.mjs
+     6.8      8.1     +1.3  readTableColumns transcript-openclaw-state-db-schema-helpers-ieA-mx1j.mjs
+    74.4     73.2     -1.2  receiveMessageOnPort io
+    39.7     40.9     +1.2  sanitizeChatHistoryMessage transcript-chat-display-projection.sanitize.mjs
+## inclusive, us per worker request: A  B  B-A
+  1878.3    235.3  -1642.9  runSqliteReadSnapshotSync transcript-sqlite-transaction.mjs
+  1878.0    235.1  -1642.9  runPostgresTransactionSync transcript-adapters.mjs
+  1878.0    235.1  -1642.9  runTransaction transcript-adapters.mjs
+  1877.8    236.7  -1641.0  withSqlitePostCommitPublications transcript-sqlite-post-commit-Dar-GXaG.mjs
+     0.0   1225.8  +1225.8  ee.allowCold transcript-session-history-worker-reader.mjs
+  1193.0      0.0  -1193.0  D.allowCold transcript-session-history-worker-reader.mjs
+     0.0    160.2   +160.2  readExactSessionEntriesWithLifecycleAsync transcript-session-entry-read.worker.mjs
+     0.0    160.1   +160.1  readExactSessionEntriesWithLifecycle transcript-session-entry-read.worker.mjs
+   153.4      0.0   -153.4  readExactSessionEntriesWithLifecycleAsync transcript-session-entry-read.worker-Mkfq-uv4.mjs
+   153.3      0.0   -153.3  readExactSessionEntriesWithLifecycle transcript-session-entry-read.worker-Mkfq-uv4.mjs
+     0.0    151.7   +151.7  n transcript-session-entry-read.worker.mjs
+   145.4      0.0   -145.4  n transcript-session-entry-read.worker-Mkfq-uv4.mjs
+  2940.2   3071.7   +131.5  (root)
+  2471.2   2571.1    +99.9  (anon)
+  1657.9   1572.8    -85.1  readCurrentProjectionSnapshot transcript-session-accessor.sqlite-projection-read-8-v1kXLL.mjs
+  1667.1   1583.7    -83.4  readWithCanonicalSessionAdmission transcript-session-canonical-key.mjs
+     0.0     79.1    +79.1  beginPostgresReadOnlyTransaction transcript-adapters.mjs
+  1629.9   1697.6    +67.7  request transcript-adapters.mjs
+  1693.6   1761.1    +67.5  execute transcript-adapters.mjs
+  1748.6   1814.4    +65.8  observeDatabaseOperation transcript-sqlite-transaction.mjs
+  1749.0   1814.5    +65.5  query transcript-adapters.mjs
+     0.0     63.5    +63.5  runInSnapshot transcript-openclaw-agent-db-readonly-scope.mjs
+  2073.9   2012.6    -61.3  readOpenClawAgentDatabase transcript-openclaw-agent-db-readonly-open.mjs
+  2074.2   2013.0    -61.2  runSqliteReadOperationSync transcript-sqlite-schema-facts-D0-yDppa.mjs
+     0.0     61.0    +61.0  endSnapshotHold transcript-openclaw-agent-db-readonly-scope.mjs

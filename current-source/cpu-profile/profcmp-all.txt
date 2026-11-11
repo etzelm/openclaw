@@ -1,0 +1,54 @@
+A=p1-m runs=2 worker_requests=86106 busy_us_per_req=2946.0
+B=p1-a runs=2 worker_requests=82635 busy_us_per_req=3069.1
+## self, us per worker request: A  B  B-A
+ 24305.5  25189.4   +883.9  (idle)
+  2946.0   3069.1   +123.2  (busy)
+  1553.0   1614.9    +61.9  request transcript-adapters.mjs
+    91.6    102.2    +10.5  (garbage collector)
+    46.4     41.1     -5.2  serialize transcript-chat-history-response-page.mjs
+   156.2    160.4     +4.2  (anon)
+    12.3     15.3     +3.0  postMessage 
+    31.9     34.4     +2.5  parseAssistantTextSignature transcript-chat-message-content.mjs
+    30.5     32.6     +2.1  sanitizeNumericMetadata transcript-chat-display-projection.sanitize.mjs
+    20.8     22.5     +1.7  readAssistantTextBlocksForPhase transcript-chat-message-content.mjs
+    21.4     22.9     +1.5  projectTranscriptEntryMessage transcript-session-transcript-entry-message.mjs
+    57.8     59.2     +1.4  (program)
+     4.3      5.7     +1.4  #getOrCreateModuleJobAfterResolve loader
+     0.2      1.6     +1.4  flushCompileCache 
+    12.7     14.0     +1.2  isSilentAssistantTranscriptMessage transcript-chat-message-content.mjs
+     1.1      2.3     +1.2  projectChatHistoryWithReplies transcript-chat-history-reply-messages.mjs
+     9.4     10.5     +1.1  stat 
+     9.2     10.3     +1.1  filterVisibleProjectedHistoryMessages transcript-chat-display-projection.history.mjs
+     9.5      8.5     -1.1  sanitizeChatHistoryContentBlock transcript-chat-display-projection.sanitize.mjs
+    11.4     12.4     +1.1  RegExp: This\s+context\s+is\s+runtime-generated,\s+not\s+user-authored\.\s+Keep\s+internal\s+details\s+private\. 
+     9.1     10.2     +1.0  compileSourceTextModule utils
+    40.9     41.9     +1.0  sanitizeChatHistoryMessage transcript-chat-display-projection.sanitize.mjs
+     4.5      5.5     +0.9  findNativeToolMarkerTextBlocks transcript-native-tool-marker-nFthbV-q.mjs
+     2.8      3.7     +0.9  readSessionHistoryRequest transcript-session-history-worker-reader.mjs
+    75.3     74.5     -0.8  receiveMessageOnPort io
+## inclusive, us per worker request: A  B  B-A
+  1884.4    234.4  -1650.0  runSqliteReadSnapshotSync transcript-sqlite-transaction.mjs
+  1884.1    234.2  -1649.9  runPostgresTransactionSync transcript-adapters.mjs
+  1884.1    234.2  -1649.9  runTransaction transcript-adapters.mjs
+  1883.8    235.6  -1648.2  withSqlitePostCommitPublications transcript-sqlite-post-commit-Dar-GXaG.mjs
+     0.0   1222.4  +1222.4  ee.allowCold transcript-session-history-worker-reader.mjs
+  1190.8      0.0  -1190.8  D.allowCold transcript-session-history-worker-reader.mjs
+     0.0    165.9   +165.9  readExactSessionEntriesWithLifecycleAsync transcript-session-entry-read.worker.mjs
+     0.0    165.8   +165.8  readExactSessionEntriesWithLifecycle transcript-session-entry-read.worker.mjs
+   157.7      0.0   -157.7  readExactSessionEntriesWithLifecycleAsync transcript-session-entry-read.worker-Mkfq-uv4.mjs
+   157.5      0.0   -157.5  readExactSessionEntriesWithLifecycle transcript-session-entry-read.worker-Mkfq-uv4.mjs
+     0.0    157.3   +157.3  n transcript-session-entry-read.worker.mjs
+   149.5      0.0   -149.5  n transcript-session-entry-read.worker-Mkfq-uv4.mjs
+  2946.0   3069.1   +123.2  (root)
+  2475.1   2571.2    +96.1  (anon)
+  1660.6   1572.8    -87.8  readCurrentProjectionSnapshot transcript-session-accessor.sqlite-projection-read-8-v1kXLL.mjs
+  1670.3   1583.1    -87.3  readWithCanonicalSessionAdmission transcript-session-canonical-key.mjs
+     0.0     81.2    +81.2  beginPostgresReadOnlyTransaction transcript-adapters.mjs
+  2084.1   2018.6    -65.5  readOpenClawAgentDatabase transcript-openclaw-agent-db-readonly-open.mjs
+  2084.4   2018.9    -65.4  runSqliteReadOperationSync transcript-sqlite-schema-facts-D0-yDppa.mjs
+  1642.0   1707.1    +65.2  request transcript-adapters.mjs
+     0.0     64.8    +64.8  runInSnapshot transcript-openclaw-agent-db-readonly-scope.mjs
+  1705.1   1769.2    +64.0  execute transcript-adapters.mjs
+  1759.4   1822.1    +62.7  observeDatabaseOperation transcript-sqlite-transaction.mjs
+  1759.7   1822.3    +62.6  query transcript-adapters.mjs
+     0.0     62.5    +62.5  endSnapshotHold transcript-openclaw-agent-db-readonly-scope.mjs
