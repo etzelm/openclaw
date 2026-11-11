@@ -1,0 +1,377 @@
+$ node scripts/check-changed.mjs --base <redacted>eda6a64d
+[check:changed] lanes=core, coreTests, docs
+[check:changed] src/config/sessions/session-history-lane-sizing.test.ts: core test
+[check:changed] src/config/sessions/session-transcript-read-pools.ts: core production
+[check:changed] src/config/sessions/session-transcript-worker-resources.ts: core production
+[check:changed] src/infra/worker-pool-sizing.test.ts: core test
+[check:changed] src/infra/worker-pool-sizing.ts: core production
+
+[check:changed] conflict markers
+$ node scripts/check-no-conflict-markers.mjs
+
+[check:changed] line-cap growth ratchet
+$ node scripts/check-line-cap-ratchet.mjs --base <redacted>eda6a64d
+Line-cap ratchet OK: 5 changed source files; no new violations or over-cap growth.
+
+[check:changed] max-lines suppression ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-max-lines-ratchet.mts --base <redacted>eda6a64d
+max-lines ratchet OK: 393 grandfathered suppressions.
+OPENCLAW_* count 461/461
+
+[check:changed] assertion SAFETY comment ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-assertion-safety-ratchet.mts --base <redacted>eda6a64d
+assertion SAFETY ratchet OK: 2375 files, 5394 grandfathered assertions.
+
+[check:changed] SQLite worker ratchet
+$ node --max-old-space-size=4096 --import ./scripts/tsx.mjs scripts/check-database-worker-ratchet.mts --base <redacted>eda6a64d
+[database-worker-phase] {"phase":"ratchet.start","head":"<redacted>24924710","base":"<redacted>eda6a64d","source":"worktree","sinceMainMs":28.837625000000003}
+[database-worker-phase] {"phase":"head.sources","files":23615,"sinceMainMs":660.757375}
+[database-worker-phase] {"phase":"head.semantic.inputs","files":23615,"sinceMainMs":670.27475}
+[database-worker-phase] {"phase":"head.semantic.project","requestCount":2,"roundTripMs":2149.7934999999998,"serverTimeMs":1519.011834,"bytesSent":212778078,"bytesReceived":3311099,"sourceFilesFetched":0,"nodesFetched":0,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":3281.197583}
+[database-worker-phase] {"phase":"head.semantic.sources-registration","requestCount":23851,"roundTripMs":4415.492857000049,"serverTimeMs":3107.370583000018,"bytesSent":215829238,"bytesReceived":1072951364,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":32824,"timingSample":"current","sinceMainMs":5814.890083}
+[database-worker-phase] {"phase":"head.semantic.credential-writers","requestCount":82476,"roundTripMs":6674.819111000325,"serverTimeMs":4506.4204530000225,"bytesSent":228577839,"bytesReceived":1124360451,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"current","sinceMainMs":17715.276958000002}
+[database-worker-phase] {"phase":"head.semantic.closure-expansion","requestCount":101614,"roundTripMs":7918.873104999992,"serverTimeMs":5355.353561000025,"bytesSent":236479220,"bytesReceived":1165229605,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"current","sinceMainMs":19541.374875}
+[database-worker-phase] {"phase":"head.semantic.binding-forwarding","requestCount":110821,"roundTripMs":8091.060693999932,"serverTimeMs":5416.972161000027,"bytesSent":240122771,"bytesReceived":1176253310,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"current","sinceMainMs":20895.257083}
+[database-worker-phase] {"phase":"head.semantic.reference-prefetch","requestCount":117129,"roundTripMs":18599.465054999942,"serverTimeMs":13144.386902000031,"bytesSent":261663818,"bytesReceived":1924483008,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"current","sinceMainMs":38455.06675}
+[database-worker-phase] {"phase":"head.semantic.caller-classification","requestCount":230022,"roundTripMs":22792.256419001,"serverTimeMs":15412.060446999853,"bytesSent":293522996,"bytesReceived":2132746716,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"current","sinceMainMs":47073.889166}
+[database-worker-phase] {"phase":"head.semantic.graph-classification","requestCount":237851,"roundTripMs":22925.600208000775,"serverTimeMs":15454.09419599987,"bytesSent":296153017,"bytesReceived":2141691902,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"current","sinceMainMs":47306.377708}
+[database-worker-phase] {"phase":"head.semantic.close","requestCount":237851,"roundTripMs":22925.600208000775,"serverTimeMs":15454.09419599987,"bytesSent":296153017,"bytesReceived":2141691902,"sourceFilesFetched":23615,"nodesFetched":26710832,"nodesMaterialized":26603940,"timingSample":"last-successful","sinceMainMs":47341.86325}
+[database-worker-phase] {"phase":"head.syntax.inputs","files":794,"sinceMainMs":47469.374166}
+[database-worker-phase] {"phase":"head.syntax.project","requestCount":2,"roundTripMs":99.80849999999919,"serverTimeMs":65.111457,"bytesSent":10200375,"bytesReceived":159509,"sourceFilesFetched":0,"nodesFetched":0,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":47596.239416000004}
+[database-worker-phase] {"phase":"head.syntax.sources","requestCount":796,"roundTripMs":202.08971099994233,"serverTimeMs":146.2894140000001,"bytesSent":10305890,"bytesReceived":53773284,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":47816.465083}
+[database-worker-phase] {"phase":"head.syntax.diagnostics","requestCount":797,"roundTripMs":202.2038769999417,"serverTimeMs":146.3878720000001,"bytesSent":10305916,"bytesReceived":53773286,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":47816.754791}
+[database-worker-phase] {"phase":"head.syntax.walk-classify","requestCount":797,"roundTripMs":202.2038769999417,"serverTimeMs":146.3878720000001,"bytesSent":10305916,"bytesReceived":53773286,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":1374735,"timingSample":"current","sinceMainMs":48031.337083}
+[database-worker-phase] {"phase":"head.syntax.close","requestCount":797,"roundTripMs":202.2038769999417,"serverTimeMs":146.3878720000001,"bytesSent":10305916,"bytesReceived":53773286,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":1374735,"timingSample":"last-successful","sinceMainMs":48032.477708}
+[database-worker-phase] {"phase":"base.lookup","sinceMainMs":48079.948083}
+[database-worker-phase] {"phase":"base.sources","files":23615,"sinceMainMs":50637.379375000004}
+[database-worker-phase] {"phase":"base.equality","sinceMainMs":50642.159125}
+[database-worker-phase] {"phase":"base.semantic.inputs","files":23615,"sinceMainMs":50653.257041000004}
+[database-worker-phase] {"phase":"base.semantic.project","requestCount":2,"roundTripMs":2181.949042,"serverTimeMs":1632.5740409999999,"bytesSent":186794845,"bytesReceived":3311127,"sourceFilesFetched":0,"nodesFetched":0,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":53251.202666000005}
+[database-worker-phase] {"phase":"base.semantic.sources-registration","requestCount":23851,"roundTripMs":4331.983605000089,"serverTimeMs":3171.0182830000313,"bytesSent":189846231,"bytesReceived":1015515331,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":32824,"timingSample":"current","sinceMainMs":55648.811375}
+[database-worker-phase] {"phase":"base.semantic.closure-expansion","requestCount":42992,"roundTripMs":5424.511152999978,"serverTimeMs":3985.962644000018,"bytesSent":197751749,"bytesReceived":1056401202,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":1832933,"timingSample":"current","sinceMainMs":57331.434875}
+[database-worker-phase] {"phase":"base.semantic.binding-forwarding","requestCount":64232,"roundTripMs":6211.6475960004245,"serverTimeMs":4403.819642999961,"bytesSent":202048409,"bytesReceived":1075427545,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":26014021,"timingSample":"current","sinceMainMs":62655.622791}
+[database-worker-phase] {"phase":"base.semantic.reference-prefetch","requestCount":70547,"roundTripMs":13998.162838000251,"serverTimeMs":10764.762965999997,"bytesSent":223592755,"bytesReceived":1828603560,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":26014021,"timingSample":"current","sinceMainMs":75802.77925}
+[database-worker-phase] {"phase":"base.semantic.caller-classification","requestCount":183406,"roundTripMs":17774.231902002866,"serverTimeMs":12786.404916999834,"bytesSent":255321086,"bytesReceived":2035750763,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":26014021,"timingSample":"current","sinceMainMs":84193.759375}
+[database-worker-phase] {"phase":"base.semantic.graph-classification","requestCount":191235,"roundTripMs":17911.78426200268,"serverTimeMs":12828.432825999935,"bytesSent":257950607,"bytesReceived":2044701310,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":26014021,"timingSample":"current","sinceMainMs":84460.766}
+[database-worker-phase] {"phase":"base.semantic.close","requestCount":191235,"roundTripMs":17911.78426200268,"serverTimeMs":12828.432825999935,"bytesSent":257950607,"bytesReceived":2044701310,"sourceFilesFetched":23615,"nodesFetched":26120911,"nodesMaterialized":26014021,"timingSample":"last-successful","sinceMainMs":84498.657458}
+[database-worker-phase] {"phase":"base.syntax.inputs","files":794,"sinceMainMs":84619.487708}
+[database-worker-phase] {"phase":"base.syntax.project","requestCount":2,"roundTripMs":114.31791699999303,"serverTimeMs":74.29516699999999,"bytesSent":10200375,"bytesReceived":159509,"sourceFilesFetched":0,"nodesFetched":0,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":84761.934458}
+[database-worker-phase] {"phase":"base.syntax.sources","requestCount":796,"roundTripMs":221.04122799965262,"serverTimeMs":152.32304599999995,"bytesSent":10305890,"bytesReceived":53773284,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":84966.856166}
+[database-worker-phase] {"phase":"base.syntax.diagnostics","requestCount":797,"roundTripMs":221.1678949996567,"serverTimeMs":152.43092099999996,"bytesSent":10305916,"bytesReceived":53773286,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":0,"timingSample":"current","sinceMainMs":84967.196208}
+[database-worker-phase] {"phase":"base.syntax.walk-classify","requestCount":797,"roundTripMs":221.1678949996567,"serverTimeMs":152.43092099999996,"bytesSent":10305916,"bytesReceived":53773286,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":1374735,"timingSample":"current","sinceMainMs":85189.310833}
+[database-worker-phase] {"phase":"base.syntax.close","requestCount":797,"roundTripMs":221.1678949996567,"serverTimeMs":152.43092099999996,"bytesSent":10305916,"bytesReceived":53773286,"sourceFilesFetched":794,"nodesFetched":1378180,"nodesMaterialized":1374735,"timingSample":"last-successful","sinceMainMs":85190.43541600001}
+[database-worker-phase] {"phase":"base.reuse","outcome":"analyzed","sinceMainMs":85190.452583}
+[database-worker-phase] {"phase":"base.publish","sinceMainMs":85243.654625}
+[database-worker-phase] {"phase":"base.release","sinceMainMs":85243.795041}
+SQLite T1 live calls: 167 -> 167; T1-compat deprecated-only calls: 15 -> 15.
+[database-worker-phase] {"phase":"ratchet.compare","sinceMainMs":85244.097208}
+SQLite worker ratchet OK: no T1 call-count growth against <redacted>eda6a64d.
+[database-worker-phase] {"phase":"ratchet.terminal","outcome":"success","sinceMainMs":85244.112166}
+
+[check:changed] SQLite dialect ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-database-dialect-ratchet.mts --base <redacted>eda6a64d
+SQL portability: 0 violations in 21084 production files (9626 parsed).
+SQLite dialect scope: 3 differing production files; use --full-tree for totals.
+SQLite dialect mechanical (changed files): 0 -> 0.
+SQLite dialect design (changed files): 0 -> 0.
+SQLite dialect engine-maintenance (changed files): 0 -> 0.
+SQLite string-set owner: 0 mechanical occurrences in changed files (included above).
+SQLite primitive owners: 0 engine-maintenance matches in changed files (excluded from comparison).
+SQLite dialect ratchet OK: no construct-group growth against <redacted>eda6a64d.
+
+[check:changed] test timeout race ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-timeout-race-ratchet.mts --base <redacted>eda6a64d
+test timeout race ratchet OK: 103 files, 187 grandfathered sites.
+
+[check:changed] first-party mock export ratchet
+$ node --import ./scripts/tsx.mjs scripts/check-test-mock-exports.mts --base <redacted>eda6a64d
+Mock factory ratchet OK: 6349 grandfathered factories.
+
+[check:changed] changelog attributions
+$ node --import ./scripts/tsx.mjs scripts/check-changelog-attributions.mts
+
+[check:changed] doctor deprecation registry
+$ node --import ./scripts/tsx.mjs scripts/check-doctor-deprecation-registry.ts
+[doctor-deprecation-registry] OK as of 2026-11-11
+
+[check:changed] guarded extension wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-extension-wildcard-reexports.mts
+No guarded extension wildcard re-exports found.
+
+[check:changed] plugin-sdk wildcard re-exports
+$ node --import ./scripts/tsx.mjs scripts/check-plugin-sdk-wildcard-reexports.mts
+No plugin-sdk wildcard re-exports found in extension API barrels.
+
+[check:changed] duplicate scan target coverage
+$ node scripts/check-duplicates.mjs --coverage
+[dup:check] target coverage ok
+
+[check:changed] dependency pin guard
+$ node --import ./scripts/tsx.mjs scripts/check-dependency-pins.mts
+PASS direct dependency pin guard: checked 806 directly declared dependency specs across 222 tracked package manifests; 0 violations.
+
+[check:changed] format changed files
+$ node scripts/run-format.mts --check --no-error-on-unmatched-pattern -- docs/agent-runtime-architecture.md docs/gateway/postgresql.md src/config/sessions/session-history-lane-sizing.test.ts src/config/sessions/session-transcript-read-pools.ts src/config/sessions/session-transcript-worker-resources.ts src/infra/worker-pool-sizing.test.ts src/infra/worker-pool-sizing.ts
+[format] oxfmt/Bun parity checked on the same file set.
+
+[check:changed] config docs baseline
+$ node --import ./scripts/tsx.mjs scripts/generate-config-doc-baseline.ts --check
+OK docs/.generated/config-baseline.sha256 and docs/.generated/config-baseline.counts.json
+
+[check:changed] plugin boundaries
+$ node --import ./scripts/tsx.mjs scripts/plugin-boundary-report.ts --summary --fail-on-eligible-compat
+Plugin Boundary Report
+
+compat deprecated=68 eligibleForRemoval=0 removalPending=15 removalPendingDue=14
+  removal-pending 2026-09-08 sdk-untrusted-context-identifier-aliases due=true blocker=`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`; retain the aliases until migration of published plugin readers is verified and explicit breaking-release approval is granted readerRefs=8778 readers=extensions/a2a/index.ts,extensions/a2a/runtime-api.ts,extensions/a2a/setup-entry.ts,extensions/a2a/src/accounts.test.ts,extensions/a2a/src/accounts.ts
+  removal-pending 2026-09-30 plugin-sdk-media-understanding-public-demotion due=true blocker=`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate readerRefs=60 readers=extensions/browser/src/browser-tool.test-support.ts,extensions/browser/src/browser/vision.test.ts,extensions/browser/src/browser/vision.ts,extensions/browser/src/cli/browser-cli-extension.test.ts,extensions/browser/src/cli/browser-cli.test.ts
+  removal-pending 2026-09-30 plugin-sdk-memory-host-core-public-demotion due=true blocker=host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists readerRefs=31 readers=extensions/active-memory/index.status.test.ts,extensions/active-memory/index.test.ts,extensions/active-memory/index.ts,extensions/codex/src/app-server/attempt-context.test.ts,extensions/codex/src/app-server/run-attempt-memory.test-support.ts
+  removal-pending 2026-10-01 agent-harness-terminal-result-aliases due=true blocker=AgentHarnessAttemptResult.terminal and AgentHarnessDeliveryDefaults.visibleReplies; retain until harness migration verifies that legacy terminal fields and sourceVisibleReplies are unread readerRefs=0 readers=none
+  removal-pending 2026-10-01 message-presentation-legacy-bridges due=true blocker=MessagePresentation values and channel presentation renderers; retain until reply producers and official channel packages no longer emit or read legacy interactive replies readerRefs=158 readers=extensions/a2a/src/inbound.test.ts,extensions/a2a/src/reply-payload.ts,extensions/codex/src/app-server/run-attempt-active-turn.ts,extensions/codex/src/app-server/run-attempt.final-media.test.ts,extensions/codex/src/conversation-binding-hooks.ts
+  removal-pending 2026-10-01 official-plugin-export-aliases due=true blocker=MessagePresentation renderers and host-owned timeout/runtime behavior; retain until minimum supported official plugin packages no longer import these aliases readerRefs=17 readers=extensions/discord/api.ts,extensions/qa-lab/src/crabline-discord-thread-delivery.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.test.ts,extensions/qa-lab/src/live-transports/discord/discord-live.runtime.ts,extensions/qa-lab/src/live-transports/slack/adapter.runtime.test.ts
+  removal-pending 2026-10-01 plugin-sdk-channel-setup-input-fields due=true blocker=plugin-local setup input intersections that declare each owning channel field; retain each field until a new published-plugin artifact sweep finds no reader readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-runtime-api-compat-aliases due=true blocker=the namespaced plugin API and focused runtime methods named per surface; retain until all enumerated flat API and runtime aliases have no readers readerRefs=8 readers=extensions/discord/src/monitor/native-command.interaction-boundary.test.ts,extensions/feishu/src/bot.test.ts,extensions/mattermost/src/mattermost/monitor.inbound-system-event.test.ts,extensions/nextcloud-talk/src/inbound.behavior.test.ts,extensions/zalo/src/test-support/lifecycle-test-support.ts
+  removal-pending 2026-10-01 plugin-provider-manifest-compat-aliases due=true blocker=manifest-owned plugin kind/setup metadata and model catalog registration; retain until providers no longer publish runtime kind or legacy catalog hooks readerRefs=0 readers=none
+  removal-pending 2026-10-01 plugin-sdk-provider-owned-helper-shims due=true blocker=provider-local auth, model, replay, OAuth, and stream helper APIs; retain until every helper is migrated in official providers and absent from published plugins readerRefs=539 readers=extensions/abliteration/index.ts,extensions/agentsapi/agentsapi-harness.persistence.test.ts,extensions/agentsapi/agentsapi-harness.ts,extensions/agentsapi/native-session-binding.test-api.ts,extensions/alibaba/video-generation-provider.test.ts
+  removal-pending 2026-10-01 media-legacy-projection due=true blocker=ordered `MsgContext.media` / `InboundMediaFacts[]`; typed hook `media` and `originalMedia`; `Attachment*` template variables; and `openclaw/plugin-sdk/media-local-roots`; retain until a clean published-plugin artifact sweep verifies that the legacy media surfaces have no readers readerRefs=2 readers=src/plugins/compat/media-legacy-projection.ts,test/scripts/check-deprecated-api-usage.test.ts
+  removal-pending 2026-10-01 memory-host-compatibility-aliases due=true blocker=canonical memory cache/FTS tables; retain until supported memory integrations are verified to use canonical tables without overrides and legacy table data remains preserved readerRefs=2 readers=src/plugins/compat/deprecation-marking.ts,src/plugins/contracts/extension-package-project-boundaries.test.ts
+  removal-pending 2026-10-01 plugin-sdk-broad-runtime-barrels due=true blocker=focused plugin SDK subpaths for each runtime capability; retain until bundled and published plugins no longer import any of the seven broad barrels readerRefs=885 readers=extensions/a2a/src/http.test.ts,extensions/acpx/src/runtime.ts,extensions/acpx/src/session-owner-migration.ts,extensions/active-memory/index.status.test.ts,extensions/active-memory/index.ts
+  removal-pending 2026-10-01 plugin-sdk-focused-compat-aliases due=true blocker=the focused replacement named by each TypeScript @deprecated annotation; retain until every enumerated alias has zero bundled and published readers readerRefs=473 readers=extensions/a2a/src/inbound.ts,extensions/acpx/index.test.ts,extensions/acpx/index.ts,extensions/acpx/register.runtime.startup.test.ts,extensions/acpx/runtime-api.ts
+  removal-pending 2026-12-01 plugin-sdk-plugin-config-runtime-public-demotion due=false blocker=`api.pluginConfig`, runtime tool context config, and focused `config-contracts`, `runtime-config-snapshot`, or `config-mutation` subpaths; retain the public subpath through the 2026-12-01 window while official plugin consumers migrate readerRefs=60 readers=extensions/active-memory/index.ts,extensions/active-memory/session-policy.ts,extensions/active-memory/trigger-recall.ts,extensions/amazon-bedrock-mantle/index.ts,extensions/amazon-bedrock/register.sync.runtime.ts
+plugin-sdk entrypoints=388 supportedBundledFacade=0 publicPluginOwned=1
+memory-host-sdk implementation=private-package-core-integrated private=true exports=10 sourceBridgeFiles=0 coreReferenceFiles=36
+
+[check:changed] wrapper shadowing
+$ node --import ./scripts/tsx.mjs scripts/check-wrapper-shadowing.mts
+wrapper shadowing guard passed.
+
+[check:changed] package patch guard
+$ node --import ./scripts/tsx.mjs scripts/check-package-patches.mts
+PASS package patch guard: no new pnpm patches; 19 approved patches allowlisted.
+
+[check:changed] test temp creation report (warning-only)
+No new test temp-directory migration warnings found.
+
+[check:changed] core tsgo graph boundary
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: agents-root: 727 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: agents-other: 736 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: gateway-root: 728 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: gateway-other: 732 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: state-logging: 781 test roots exceeds the advisory 720 limit; rebalance when convenient
+Core test shard root budget
+  test/tsconfig/tsconfig.core.test.json: ui-chat: 740 test roots exceeds the advisory 720 limit; rebalance when convenient
+
+[check:changed] typecheck core
+$ node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental --tsBuildInfoFile .artifacts/tsgo-cache/core.tsbuildinfo
+
+[check:changed] typecheck core tests
+[check:changed] core test graphs: infra, agents-sessions, agents-root, agents-other, agents-tools, gateway-root, gateway-server, gateway-other, state-logging, commands, plugins-platform, config-cli, messaging, services, other, ui-pages, ui-e2e, ui-other, packages, plugin-sdk, commands-doctor, cli-update, gateway-methods, ui-chat, services-cron, ui-app, ui-components, templates, ui-e2e-chat
+[tsgo:infra] passed in 3.8s
+[tsgo:agents-sessions] passed in 4.0s
+[tsgo:agents-root] passed in 2.6s
+[tsgo:agents-other] passed in 2.1s
+[tsgo:agents-tools] passed in 2.2s
+[tsgo:gateway-root] passed in 2.5s
+[tsgo:gateway-server] passed in 2.7s
+[tsgo:gateway-other] passed in 2.5s
+[tsgo:state-logging] passed in 2.4s
+[tsgo:commands] passed in 2.0s
+[tsgo:plugins-platform] passed in 2.1s
+[tsgo:config-cli] passed in 2.6s
+[tsgo:messaging] passed in 2.0s
+[tsgo:services] passed in 2.2s
+[tsgo:other] passed in 2.3s
+[tsgo:ui-pages] passed in 2.4s
+[tsgo:ui-e2e] passed in 2.4s
+[tsgo:ui-other] passed in 2.4s
+[tsgo:packages] passed in 2.1s
+[tsgo:plugin-sdk] passed in 2.4s
+[tsgo:commands-doctor] passed in 3.7s
+[tsgo:cli-update] passed in 3.9s
+[tsgo:gateway-methods] passed in 5.2s
+[tsgo:ui-chat] passed in 4.8s
+[tsgo:services-cron] passed in 2.2s
+[tsgo:ui-app] passed in 2.8s
+[tsgo:ui-components] passed in 4.7s
+[tsgo:templates] passed in 3.4s
+[tsgo:ui-e2e-chat] passed in 3.0s
+
+[check:changed] coercion helper declaration guard
+$ node --import ./scripts/tsx.mjs scripts/check-coercion-helper-declarations.mts
+Coercion helper declaration guard passed (121 allowlisted declarations).
+
+[check:changed] deprecated API usage
+$ node --import ./scripts/tsx.mjs scripts/check-deprecated-api-usage.mts
+deprecated API usage guard passed
+
+[check:changed] dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+production unused-export scan:
+Unused exports are not allowed:
+  extensions/knowledge/src/tool-result-contract.ts: Incomplete
+  extensions/knowledge/src/tool-result-contract.ts: Issue
+  extensions/knowledge/src/tool-result-contract.ts: LeanDefinition
+  extensions/knowledge/src/tool-result-contract.ts: LeanRecordFields
+  extensions/knowledge/src/tool-result-contract.ts: page
+  extensions/knowledge/src/tool-result-contract.ts: Via
+  extensions/knowledge/src/tool-results.ts: AGENT_HIT_LIMIT
+  extensions/knowledge/src/tool-results.ts: AGENT_RECORD_MAX_CHARS
+  extensions/knowledge/src/tool-results.ts: leanChronicle
+  extensions/knowledge/src/tool-results.ts: leanEvidenceRead
+  extensions/knowledge/src/tool-results.ts: leanLastSeen
+  extensions/knowledge/src/tool-results.ts: leanLookup
+  extensions/knowledge/src/tool-results.ts: leanOntology
+  extensions/knowledge/src/tool-results.ts: leanReceipt
+  extensions/knowledge/src/tool-results.ts: leanReconcileEvidence
+  extensions/knowledge/src/tool-results.ts: leanRecord
+  extensions/knowledge/src/tool-results.ts: leanRecords
+  extensions/knowledge/src/tool-results.ts: leanRemember
+  extensions/knowledge/src/tool-results.ts: leanSearch
+  extensions/knowledge/src/tool-results.ts: leanSourceCheck
+  extensions/knowledge/src/tool-results.ts: leanStatus
+  extensions/knowledge/src/tool-results.ts: leanVerify
+  extensions/knowledge/src/tool-rows.ts: rowDate
+  src/agents/agent-hooks/compaction-safeguard-quality.ts: nestRequiredSummaryHeadings
+  src/agents/models-config.ts: planOpenClawModelsJsonSource
+  src/agents/openclaw-tools.ts: filterToolsByClientCaps
+  src/agents/sessions/auth-storage.ts: AuthCredential
+  src/agents/sessions/auth-storage.ts: AuthStatus
+  src/agents/sessions/auth-storage.ts: AuthStorageBackend
+  src/agents/sessions/model-registry.ts: ResolvedRequestAuth
+  src/agents/tool-search-directory.ts: MAX_MCP_TOOL_DIRECTORY_BYTES
+  src/agents/tool-search-directory.ts: sanitizeMcpToolDirectoryDescription
+  src/config/sessions/session-delivery-generation-diagnostics.ts: projectLeaseDiagnosticFrames
+  src/gateway/openclaw-id/gateway-key.ts: gatewayKeyPath
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: createKeyFile
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: ed25519PublicKeyHex
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: loadKeyFile
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: stagedKeyPath
+  src/gateway/server-methods/config-write-flow.ts: replyWithBillingRouteWarnings
+  src/plugins/provider-external-auth.ts: resolveExternalAuthProfilesWithPlugins
+  src/plugins/provider-runtime.ts: augmentModelCatalogWithProviderPlugins
+  src/plugins/provider-runtime.ts: classifyProviderFailoverSignalWithPlugin
+  src/plugins/provider-runtime.ts: formatProviderAuthProfileApiKeyWithPlugin
+  src/plugins/provider-runtime.ts: loginProviderOAuthWithPlugin
+  src/plugins/provider-runtime.ts: refreshProviderOAuthCredentialWithPlugin
+  src/plugins/provider-runtime.ts: resolveExternalAuthProfilesWithPlugins
+  src/plugins/provider-runtime.ts: resolveProviderModernModelRef
+  src/plugins/provider-runtime.ts: resolveProviderOAuthCredentialWithPlugin
+  src/plugins/provider-runtime.ts: resolveProviderOAuthRefreshCapabilityWithPlugin
+  src/plugins/provider-runtime.ts: resolveProviderRuntimePlugin
+  src/plugins/types.ts: ProviderAuthOptionBag
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyCredentialParams
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyResult
+  src/plugins/types.ts: ProviderResolveNonInteractiveApiKeyParams (types)
+  src/process/linux-oom-score.ts: resolveOomScoreWrappedCommand
+  src/process/linux-oom-score.ts: spawnWithInheritedOomScore
+Delete the exports or model their real production consumers in Knip.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  extensions/knowledge/src/tool-result-contract.ts: Incomplete
+  extensions/knowledge/src/tool-result-contract.ts: Issue
+  extensions/knowledge/src/tool-result-contract.ts: LeanDefinition
+  extensions/knowledge/src/tool-result-contract.ts: LeanRecordFields
+  extensions/knowledge/src/tool-result-contract.ts: page
+  extensions/knowledge/src/tool-result-contract.ts: Via
+  extensions/knowledge/src/tool-results.ts: AGENT_RECORD_MAX_CHARS
+  extensions/knowledge/src/tool-results.ts: leanChronicle
+  extensions/knowledge/src/tool-results.ts: leanEvidenceRead
+  extensions/knowledge/src/tool-results.ts: leanLastSeen
+  extensions/knowledge/src/tool-results.ts: leanLookup
+  extensions/knowledge/src/tool-results.ts: leanOntology
+  extensions/knowledge/src/tool-results.ts: leanReceipt
+  extensions/knowledge/src/tool-results.ts: leanReconcileEvidence
+  extensions/knowledge/src/tool-results.ts: leanRecords
+  extensions/knowledge/src/tool-results.ts: leanRemember
+  extensions/knowledge/src/tool-results.ts: leanSearch
+  extensions/knowledge/src/tool-results.ts: leanSourceCheck
+  extensions/knowledge/src/tool-results.ts: leanStatus
+  extensions/knowledge/src/tool-results.ts: leanVerify
+  extensions/knowledge/src/tool-rows.ts: rowDate
+  src/agents/agent-hooks/compaction-safeguard-quality.ts: nestRequiredSummaryHeadings
+  src/agents/openclaw-tools.ts: filterToolsByClientCaps (openClawTools)
+  src/gateway/openclaw-id/gateway-key.ts: gatewayKeyPath
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: loadKeyFile
+  src/plugins/types.ts: ProviderAuthOptionBag
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyCredentialParams
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyResult
+  src/plugins/types.ts: ProviderResolveNonInteractiveApiKeyParams (types)
+  src/process/linux-oom-score.ts: spawnWithInheritedOomScore
+Delete the exports or model their real production consumers in Knip.
+
+[check:changed] lint core changed files
+Found 0 warnings and 0 errors.
+
+[check:changed] native state schema version guard
+native state schema version guard passed (v39)
+
+[check:changed] database-first legacy-store guard
+$ node --import ./scripts/tsx.mjs scripts/check-database-first-legacy-stores.mts
+Database-first legacy-store guard passed.
+
+[check:changed] media download helper guard
+$ node --import ./scripts/tsx.mjs scripts/check-media-download-helper-roundtrip.mts
+
+[check:changed] runtime sidecar loader guard
+$ node --import ./scripts/tsx.mjs scripts/check-runtime-sidecar-loaders.mts
+runtime-sidecar-loaders: local runtime sidecar loaders look OK.
+
+[check:changed] runtime import cycles
+$ node --import ./scripts/tsx.mjs scripts/check-import-cycles.ts
+Import cycle check: 0 runtime value cycle(s).
+
+[check:changed] webhook body guard
+$ node --import ./scripts/tsx.mjs scripts/check-webhook-auth-body-order.mts
+
+[check:changed] pairing store guard
+$ node --import ./scripts/tsx.mjs scripts/check-no-pairing-store-group-auth.mts
+
+[check:changed] pairing account guard
+$ node --import ./scripts/tsx.mjs scripts/check-pairing-account-scope.mts
+
+[check:changed] summary
+   1.31s  ok         conflict markers
+   1.20s  ok         line-cap growth ratchet
+   4.29s  ok         max-lines suppression ratchet
+   9.35s  ok         assertion SAFETY comment ratchet
+  85.60s  ok         SQLite worker ratchet
+   9.56s  ok         SQLite dialect ratchet
+   2.33s  ok         test timeout race ratchet
+  13.22s  ok         first-party mock export ratchet
+   484ms  ok         changelog attributions
+   392ms  ok         doctor deprecation registry
+   389ms  ok         guarded extension wildcard re-exports
+   258ms  ok         plugin-sdk wildcard re-exports
+   396ms  ok         duplicate scan target coverage
+   382ms  ok         dependency pin guard
+   262ms  ok         format changed files
+   9.68s  ok         config docs baseline
+   3.06s  ok         plugin boundaries
+   5.74s  ok         wrapper shadowing
+   518ms  ok         package patch guard
+   299ms  ok         test temp creation report (warning-only)
+  26.96s  ok         core tsgo graph boundary
+   3.84s  ok         typecheck core
+  83.57s  ok         typecheck core tests
+  10.17s  ok         coercion helper declaration guard
+  10.66s  ok         deprecated API usage
+ 102.67s  failed:1   dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)
+  20.05s  ok         lint core changed files
+    41ms  ok         native state schema version guard
+  25.63s  ok         database-first legacy-store guard
+   394ms  ok         media download helper guard
+  10.19s  ok         runtime sidecar loader guard
+  12.15s  ok         runtime import cycles
+   438ms  ok         webhook body guard
+  12.58s  ok         pairing store guard
+   9.14s  ok         pairing account guard
+[check:changed] FAILED (exit 1)
+[ELIFECYCLE] Command failed with exit code 1.
+RC=1 Tue Nov 10 20:03:29 PST 2026

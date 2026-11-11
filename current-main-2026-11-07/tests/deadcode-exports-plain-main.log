@@ -1,0 +1,99 @@
+$ node --import ./scripts/tsx.mjs scripts/check-deadcode-exports.mts
+[deadcode] Knip script unused-export scan passed with 0 entries.
+[deadcode] Knip production unused-export scan still running after 60s.
+[deadcode] Knip full-tree unused-export scan still running after 60s.
+production unused-export scan:
+Unused exports are not allowed:
+  extensions/knowledge/src/tool-result-contract.ts: Incomplete
+  extensions/knowledge/src/tool-result-contract.ts: Issue
+  extensions/knowledge/src/tool-result-contract.ts: LeanDefinition
+  extensions/knowledge/src/tool-result-contract.ts: LeanRecordFields
+  extensions/knowledge/src/tool-result-contract.ts: page
+  extensions/knowledge/src/tool-result-contract.ts: Via
+  extensions/knowledge/src/tool-results.ts: AGENT_HIT_LIMIT
+  extensions/knowledge/src/tool-results.ts: AGENT_RECORD_MAX_CHARS
+  extensions/knowledge/src/tool-results.ts: leanChronicle
+  extensions/knowledge/src/tool-results.ts: leanEvidenceRead
+  extensions/knowledge/src/tool-results.ts: leanLastSeen
+  extensions/knowledge/src/tool-results.ts: leanLookup
+  extensions/knowledge/src/tool-results.ts: leanOntology
+  extensions/knowledge/src/tool-results.ts: leanReceipt
+  extensions/knowledge/src/tool-results.ts: leanReconcileEvidence
+  extensions/knowledge/src/tool-results.ts: leanRecord
+  extensions/knowledge/src/tool-results.ts: leanRecords
+  extensions/knowledge/src/tool-results.ts: leanRemember
+  extensions/knowledge/src/tool-results.ts: leanSearch
+  extensions/knowledge/src/tool-results.ts: leanSourceCheck
+  extensions/knowledge/src/tool-results.ts: leanStatus
+  extensions/knowledge/src/tool-results.ts: leanVerify
+  extensions/knowledge/src/tool-rows.ts: rowDate
+  src/agents/agent-hooks/compaction-safeguard-quality.ts: nestRequiredSummaryHeadings
+  src/agents/models-config.ts: planOpenClawModelsJsonSource
+  src/agents/openclaw-tools.ts: filterToolsByClientCaps
+  src/agents/sessions/auth-storage.ts: AuthCredential
+  src/agents/sessions/auth-storage.ts: AuthStatus
+  src/agents/sessions/auth-storage.ts: AuthStorageBackend
+  src/agents/sessions/model-registry.ts: ResolvedRequestAuth
+  src/agents/tool-search-directory.ts: MAX_MCP_TOOL_DIRECTORY_BYTES
+  src/agents/tool-search-directory.ts: sanitizeMcpToolDirectoryDescription
+  src/config/sessions/session-delivery-generation-diagnostics.ts: projectLeaseDiagnosticFrames
+  src/gateway/openclaw-id/gateway-key.ts: gatewayKeyPath
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: createKeyFile
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: ed25519PublicKeyHex
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: loadKeyFile
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: stagedKeyPath
+  src/gateway/server-methods/config-write-flow.ts: replyWithBillingRouteWarnings
+  src/plugins/provider-external-auth.ts: resolveExternalAuthProfilesWithPlugins
+  src/plugins/provider-runtime.ts: augmentModelCatalogWithProviderPlugins
+  src/plugins/provider-runtime.ts: classifyProviderFailoverSignalWithPlugin
+  src/plugins/provider-runtime.ts: formatProviderAuthProfileApiKeyWithPlugin
+  src/plugins/provider-runtime.ts: loginProviderOAuthWithPlugin
+  src/plugins/provider-runtime.ts: refreshProviderOAuthCredentialWithPlugin
+  src/plugins/provider-runtime.ts: resolveExternalAuthProfilesWithPlugins
+  src/plugins/provider-runtime.ts: resolveProviderModernModelRef
+  src/plugins/provider-runtime.ts: resolveProviderOAuthCredentialWithPlugin
+  src/plugins/provider-runtime.ts: resolveProviderOAuthRefreshCapabilityWithPlugin
+  src/plugins/provider-runtime.ts: resolveProviderRuntimePlugin
+  src/plugins/types.ts: ProviderAuthOptionBag
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyCredentialParams
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyResult
+  src/plugins/types.ts: ProviderResolveNonInteractiveApiKeyParams (types)
+  src/process/linux-oom-score.ts: resolveOomScoreWrappedCommand
+  src/process/linux-oom-score.ts: spawnWithInheritedOomScore
+Delete the exports or model their real production consumers in Knip.
+[deadcode] Knip full-tree unused-export scan still running after 120s.
+full-tree unused-export scan:
+Unused exports are not allowed:
+  extensions/knowledge/src/tool-result-contract.ts: Incomplete
+  extensions/knowledge/src/tool-result-contract.ts: Issue
+  extensions/knowledge/src/tool-result-contract.ts: LeanDefinition
+  extensions/knowledge/src/tool-result-contract.ts: LeanRecordFields
+  extensions/knowledge/src/tool-result-contract.ts: page
+  extensions/knowledge/src/tool-result-contract.ts: Via
+  extensions/knowledge/src/tool-results.ts: AGENT_RECORD_MAX_CHARS
+  extensions/knowledge/src/tool-results.ts: leanChronicle
+  extensions/knowledge/src/tool-results.ts: leanEvidenceRead
+  extensions/knowledge/src/tool-results.ts: leanLastSeen
+  extensions/knowledge/src/tool-results.ts: leanLookup
+  extensions/knowledge/src/tool-results.ts: leanOntology
+  extensions/knowledge/src/tool-results.ts: leanReceipt
+  extensions/knowledge/src/tool-results.ts: leanReconcileEvidence
+  extensions/knowledge/src/tool-results.ts: leanRecords
+  extensions/knowledge/src/tool-results.ts: leanRemember
+  extensions/knowledge/src/tool-results.ts: leanSearch
+  extensions/knowledge/src/tool-results.ts: leanSourceCheck
+  extensions/knowledge/src/tool-results.ts: leanStatus
+  extensions/knowledge/src/tool-results.ts: leanVerify
+  extensions/knowledge/src/tool-rows.ts: rowDate
+  src/agents/agent-hooks/compaction-safeguard-quality.ts: nestRequiredSummaryHeadings
+  src/agents/openclaw-tools.ts: filterToolsByClientCaps (openClawTools)
+  src/gateway/openclaw-id/gateway-key.ts: gatewayKeyPath
+  src/gateway/openclaw-id/tunnel-child/keyfile.ts: loadKeyFile
+  src/plugins/types.ts: ProviderAuthOptionBag
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyCredentialParams
+  src/plugins/types.ts: ProviderNonInteractiveApiKeyResult
+  src/plugins/types.ts: ProviderResolveNonInteractiveApiKeyParams (types)
+  src/process/linux-oom-score.ts: spawnWithInheritedOomScore
+Delete the exports or model their real production consumers in Knip.
+[ELIFECYCLE] Command failed with exit code 1.
+RC=1 Tue Nov 10 19:59:19 PST 2026

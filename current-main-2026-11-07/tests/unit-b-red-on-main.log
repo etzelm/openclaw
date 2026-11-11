@@ -1,0 +1,160 @@
+[test] starting test/vitest/vitest.infra.config.ts
+
+ RUN  v5.0.5 <ssd>/work/pc-190001/w.noindex/src-m
+
+ ×  infra  src/infra/worker-pool-sizing.test.ts > keeps SQLite history at the reader size on 2 CPUs 71ms
+   → resolveSessionHistoryWorkerCount is not a function
+ ×  infra  src/infra/worker-pool-sizing.test.ts > keeps SQLite history at the reader size on 8 CPUs 1ms
+   → resolveSessionHistoryWorkerCount is not a function
+ ×  infra  src/infra/worker-pool-sizing.test.ts > keeps SQLite history at the reader size on 128 CPUs 1ms
+   → resolveSessionHistoryWorkerCount is not a function
+ ×  infra  src/infra/worker-pool-sizing.test.ts > sizes PostgreSQL history for blocking reads on 2 CPUs 1ms
+   → resolveSessionHistoryWorkerCount is not a function
+ ×  infra  src/infra/worker-pool-sizing.test.ts > sizes PostgreSQL history for blocking reads on 3 CPUs 1ms
+   → resolveSessionHistoryWorkerCount is not a function
+ ×  infra  src/infra/worker-pool-sizing.test.ts > sizes PostgreSQL history for blocking reads on 128 CPUs 1ms
+   → resolveSessionHistoryWorkerCount is not a function
+ ×  infra  src/infra/worker-pool-sizing.test.ts > sizes history from the agent database family 2ms
+   → resolveSessionHistoryWorkerCount is not a function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > keeps SQLite history at the reader size on 2 CPUs
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > keeps SQLite history at the reader size on 8 CPUs
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > keeps SQLite history at the reader size on 128 CPUs
+TypeError: resolveSessionHistoryWorkerCount is not a function
+ ❯ src/infra/worker-pool-sizing.test.ts:39:10
+     37| ])("keeps SQLite history at the reader size on %i CPUs", (cpus, expect…
+     38|   cpu.count = cpus;
+     39|   expect(resolveSessionHistoryWorkerCount(undefined)).toBe(expected);
+       |          ^
+     40|   expect(resolveSessionHistoryWorkerCount(selection("sqlite"))).toBe(e…
+     41| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > sizes PostgreSQL history for blocking reads on 2 CPUs
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > sizes PostgreSQL history for blocking reads on 3 CPUs
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > sizes PostgreSQL history for blocking reads on 128 CPUs
+TypeError: resolveSessionHistoryWorkerCount is not a function
+ ❯ src/infra/worker-pool-sizing.test.ts:49:10
+     47| ])("sizes PostgreSQL history for blocking reads on %i CPUs", (cpus, ex…
+     48|   cpu.count = cpus;
+     49|   expect(resolveSessionHistoryWorkerCount(selection("postgres"))).toBe…
+       |          ^
+     50| });
+     51|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL   infra  src/infra/worker-pool-sizing.test.ts > sizes history from the agent database family
+TypeError: resolveSessionHistoryWorkerCount is not a function
+ ❯ src/infra/worker-pool-sizing.test.ts:55:5
+     53|   const mixed = selection("sqlite");
+     54|   expect(
+     55|     resolveSessionHistoryWorkerCount({
+       |     ^
+     56|       ...mixed,
+     57|       effectiveEngines: { ...mixed.effectiveEngines, state: "postgres"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed (7)
+   Start at  19:31:00
+   Duration  1.88s (transform 68%, setup 26%, tests 6%)
+
+[test] starting test/vitest/vitest.runtime-config.config.ts
+
+ RUN  v5.0.5 <ssd>/work/pc-190001/w.noindex/src-m
+
+[vitest] still running with no output for 30000ms.
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js (48:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/resolve-evaluate-options.js:48:1 ]
+    │
+ 48 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js (6:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-create.js:6:1 ]
+   │
+ 6 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js (11:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/@mdx-js+mdx@3.1.1_supports-color@10.2.2/node_modules/@mdx-js/mdx/lib/util/estree-util-is-declaration.js:11:1 ]
+    │
+ 11 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js (12:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js" may not be preserved when bundling.
+    ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/comment.js:12:1 ]
+    │
+ 12 │ ''
+    │ ─┬  
+    │  ╰── module level directive may not be preserved
+    │ 
+    │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+────╯
+
+node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js (9:0) [MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "" in "node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js" may not be preserved when bundling.
+   ╭─[ node_modules/.pnpm/hast-util-to-estree@3.1.3_supports-color@10.2.2/node_modules/hast-util-to-estree/lib/handlers/text.js:9:1 ]
+   │
+ 9 │ ''
+   │ ─┬  
+   │  ╰── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[vitest-workers] prepared a47c2957d42f in 33213ms (15164 inputs, 29631 outputs)
+stderr | unknown test
+
+ ✓  runtime-config  src/config/sessions/session-history-lane-sizing.test.ts > sizes the history lane from the sqlite engine installed after import 35164ms
+ ×  runtime-config  src/config/sessions/session-history-lane-sizing.test.ts > sizes the history lane from the postgres engine installed after import 49ms
+   → expected 2 to be 4 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   runtime-config  src/config/sessions/session-history-lane-sizing.test.ts > sizes the history lane from the postgres engine installed after import
+AssertionError: expected 2 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 2
+
+ ❯ src/config/sessions/session-history-lane-sizing.test.ts:<redacted len=5>
+     46|     installDatabaseEngineSelection(selection(engine));
+     47|
+     48|     expect(historyLane.pool.getSnapshot().maxWorkers).toBe(expected);
+       |                                                       ^
+     49|     expect(transcriptSearchLane.pool.getSnapshot().maxWorkers).toBe(2);
+     50|   },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  19:31:03
+   Duration  35.99s (tests 99%, worker 1%)
+
+[vitest-workers] verifying completed generation before cleanup
+[test] failed 2 Vitest shards in 41.39s
+[test] FAILED (exit 1)
+RC=1 Tue Nov 10 19:31:40 PST 2026
