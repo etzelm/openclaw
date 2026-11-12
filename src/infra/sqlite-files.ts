@@ -7,6 +7,12 @@ import { sha256FileSync } from "./crypto-digest.js";
 /** SQLite main database plus every journal-mode sidecar that can contain database pages. */
 const SQLITE_DATABASE_FILE_SUFFIXES = ["", "-wal", "-shm", "-journal"] as const;
 export const SQLITE_SIDECAR_SUFFIXES = SQLITE_DATABASE_FILE_SUFFIXES.slice(1);
+
+export function stripSqliteSidecarSuffix(sourcePath: string): string {
+  const sidecarSuffix = SQLITE_SIDECAR_SUFFIXES.find((suffix) => sourcePath.endsWith(suffix));
+  return sidecarSuffix ? sourcePath.slice(0, -sidecarSuffix.length) : sourcePath;
+}
+
 // SQLite WAL format: https://sqlite.org/fileformat2.html#walformat defines a 32-byte header.
 const SQLITE_WAL_HEADER_BYTES = 32;
 const APPLE_DOUBLE_MAGIC = Buffer.from([0x00, 0x05, 0x16, 0x07]);

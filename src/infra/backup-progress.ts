@@ -26,6 +26,49 @@ export type BackupProgressEvent = {
 
 export type ReportBackupProgress = (event: BackupProgressEvent) => void;
 
+const SQLITE_SNAPSHOT_STAGES = {
+  "source-acquisition": "sqlite-source-acquisition",
+  "source-integrity": "sqlite-source-integrity",
+  "online-copy": "sqlite-online-copy",
+  vacuum: "sqlite-vacuum",
+  hash: "sqlite-hash",
+  "published-integrity": "sqlite-published-integrity",
+} as const satisfies Record<string, BackupProgressStage>;
+
+/** Maps one verified SQLite snapshot's stage and page callbacks onto backup progress events. */
+export function createSqliteSnapshotProgressHooks(onProgress: ReportBackupProgress | undefined) {
+  if (!onProgress) {
+    return {};
+  }
+  let currentStage: keyof typeof SQLITE_SNAPSHOT_STAGES = "online-copy";
+  return {
+    onStage: (
+      stage: keyof typeof SQLITE_SNAPSHOT_STAGES,
+      phase: "start" | "done",
+      bytes: number,
+    ) => {
+      if (phase === "start") {
+        currentStage = stage;
+      }
+      onProgress({
+        stage: SQLITE_SNAPSHOT_STAGES[stage],
+        phase,
+        ...(phase === "start" ? { sourceBytes: bytes } : { bytes }),
+      });
+    },
+    onProgress: ({ totalPages, remainingPages }: import("node:sqlite").BackupProgressInfo) => {
+      if (totalPages > 0) {
+        onProgress({
+          stage: SQLITE_SNAPSHOT_STAGES[currentStage],
+          phase: "progress",
+          pages: totalPages - remainingPages,
+          totalPages,
+        });
+      }
+    },
+  };
+}
+
 type StageTotals = {
   startedAt?: number;
   elapsedMs: number;
