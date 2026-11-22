@@ -29,6 +29,29 @@ import { resolveCanonicalSessionEntryFromStoreKeys } from "./session-utils-store
 import { testState } from "./test-helpers.js";
 import { directSessionReq, getGatewayConfigModule } from "./test/server-sessions.test-helpers.js";
 
+const creationFault = vi.hoisted(() => ({ loseReplaceReceipt: false }));
+vi.mock("../config/sessions/session-accessor.js", async (importActual) => {
+  const actual = await importActual<typeof import("../config/sessions/session-accessor.js")>();
+  return {
+    ...actual,
+    // Models a replace that commits natively but loses both its result and receipt.
+    createSessionEntryWithTranscript: async (
+      ...args: Parameters<typeof actual.createSessionEntryWithTranscript>
+    ) => {
+      if (!creationFault.loseReplaceReceipt) {
+        return await actual.createSessionEntryWithTranscript(...args);
+      }
+      const [scope, create, options = {}] = args;
+      await actual.createSessionEntryWithTranscript(scope, create, {
+        ...options,
+        onLifecycleCommitted: undefined,
+      });
+      const { SqliteWorkerError } = await import("../infra/sqlite-worker-contract.js");
+      throw new SqliteWorkerError("replace result and receipt lost", "outcome-unknown");
+    },
+  };
+});
+
 const { createSessionStoreDir, withSessionTestState } = setupSessionCreateHandlerTestHarness();
 
 async function fixture(root: string, required = false) {
@@ -600,6 +623,31 @@ test("required workspace rejects absent or unauthorized selections and alternate
       { context, client },
     );
     expect(forged).toMatchObject({ ok: false, error: { code: "INVALID_REQUEST" } });
+  });
+});
+
+test("creation retains the new required checkout when the replace outcome is unknown", async () => {
+  await withSessionTestState({ layout: "state-only" }, async (state) => {
+    const { project, context, client } = await fixture(state.root, true);
+    const key = "agent:main:dashboard:receipt-lost-workspace";
+    creationFault.loseReplaceReceipt = true;
+    let response: { ok: boolean };
+    try {
+      response = await directSessionReq(
+        "sessions.create",
+        { key, projectId: project.id },
+        { context, client },
+      ).catch(() => ({ ok: false }));
+    } finally {
+      creationFault.loseReplaceReceipt = false;
+    }
+    expect(response.ok).toBe(false);
+    // The persisted session may require this checkout; rollback must not delete it.
+    const record = managedWorktrees.findLiveByOwner("session", key);
+    expect(record).toBeDefined();
+    await expect(
+      fs.access(expectDefined(record, "retained checkout").path),
+    ).resolves.toBeUndefined();
   });
 });
 

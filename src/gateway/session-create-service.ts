@@ -44,6 +44,7 @@ import {
   triggerInternalHook,
 } from "../hooks/internal-hooks.js";
 import { formatErrorMessage } from "../infra/errors.js";
+import { hasSqliteWorkerOutcomeUnknown } from "../infra/sqlite-worker-contract.js";
 import {
   isIncognitoSessionKey,
   isSubagentSessionKey,
@@ -508,6 +509,8 @@ export async function createGatewaySession(
   let createdNewEntry = false;
   let preparedLifecycle: PreparedGatewaySessionLifecycle | undefined;
   let lifecyclePreparationCommitted = false;
+  // A replace that may have committed without a receipt still owns its checkout.
+  let lifecyclePreparationOutcomeUnknown = false;
   const holdParentLifecycle =
     params.creation?.via === "spawn" ||
     params.emitCommandHooks === true ||
@@ -1232,6 +1235,7 @@ export async function createGatewaySession(
       if (error instanceof Error && error.name === "SessionLabelConflictError") {
         return { ...invalidSessionRequest(error.message), phase: "entry" as const };
       }
+      lifecyclePreparationOutcomeUnknown ||= hasSqliteWorkerOutcomeUnknown(error);
       throw error;
     });
     if (!created.ok) {
@@ -1340,7 +1344,8 @@ export async function createGatewaySession(
     targets: lifecycleTargets,
     run: createChildSession,
     finalize: async () => {
-      if (!lifecyclePreparationCommitted) {
+      // Missing settlement cannot authorize removal of a possibly committed checkout.
+      if (!lifecyclePreparationCommitted && !lifecyclePreparationOutcomeUnknown) {
         await rollbackGatewaySessionPreparation({
           prepared: preparedLifecycle,
           onError: params.onLifecycleCleanupError,
