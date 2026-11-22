@@ -77,6 +77,7 @@ export type MainSessionRecoveryCommand =
       now: number;
       runs?: RestartRecoveryRun[];
       resetRuntime?: boolean;
+      interruption?: "gateway-restart" | "unknown-cause";
     }
   | {
       kind: "observe";

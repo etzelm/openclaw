@@ -3,6 +3,12 @@ export type MainRestartRecoveryState = {
   cycleId: string;
   /** Monotonic identity for observations within the current recovery cycle. */
   revision: number;
+  /**
+   * Lifecycle evidence for the interruption: a graceful Gateway stop or restart
+   * marked the run, or startup found it orphaned (crash or unknown cause).
+   * Absence is legacy state and is treated as an unknown cause.
+   */
+  interruption?: "gateway-restart" | "unknown-cause";
   /** Attempts charged when their reservation is persisted, before dispatch. */
   chargedAttempts: number;
   /** Last attempt observed starting a backend turn; later startup failures get a fresh budget. */

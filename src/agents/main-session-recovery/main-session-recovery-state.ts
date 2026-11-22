@@ -355,6 +355,11 @@ export function transitionMainSessionRecovery(
           reservation: undefined,
         });
       }
+      const marked = entry.mainRestartRecovery;
+      if (command.interruption && marked && marked.interruption === undefined) {
+        // The first marker of a cycle records its lifecycle evidence.
+        entry.mainRestartRecovery = { ...marked, interruption: command.interruption };
+      }
       entry.status = "running";
       entry.activeWriterRunId = undefined;
       entry.lifecycleRunId = undefined;

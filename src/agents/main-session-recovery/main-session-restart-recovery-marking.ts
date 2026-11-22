@@ -55,6 +55,7 @@ async function markRecoveryStore(params: {
         forceRestartSafeTools?: boolean;
         replaceRuns?: boolean;
         resetRuntime?: boolean;
+        interruption?: "gateway-restart" | "unknown-cause";
         runs?: RestartRecoveryRun[];
       }
     | { action: "retire_terminal" }
@@ -258,6 +259,8 @@ export async function markRestartAbortedMainSessions(params: {
               forceRestartSafeTools: matchedActiveAdmission,
               replaceRuns: true,
               resetRuntime: entry.status !== "running",
+              // The shutdown owner observed this run: a graceful stop or restart.
+              interruption: "gateway-restart",
               runs,
             };
           },
@@ -373,7 +376,12 @@ async function markOrphanedMainSessionStore(
       orphanChecks.push(hasLiveOwner);
       return isMainRestartRecoveryAggregateTerminalOnly(entry)
         ? { action: "retire_terminal" }
-        : { action: "mark", resetRuntime: entry.status !== "running" };
+        : {
+            action: "mark",
+            resetRuntime: entry.status !== "running",
+            // Startup found an orphan without a shutdown marker; the cause is unproven.
+            interruption: "unknown-cause",
+          };
     },
   });
 }

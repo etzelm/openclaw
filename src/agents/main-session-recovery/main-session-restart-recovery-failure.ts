@@ -26,10 +26,22 @@ const TOMBSTONED_SESSION_NOTICE =
   "Your transcript is safe. In WebChat, use Resume in new session to continue it; " +
   "in other channels, use /new or /reset to start a replacement session.";
 
-const FOREGROUND_STOPPED_NOTICE =
-  "This foreground-only request stopped after a Gateway restart and was not resumed. " +
-  "Your conversation and workspace are preserved. Send a new message to continue; " +
-  "the execution environment must finish cleanup before it can be reused.";
+// Recommended wording for RFC 0039 (draft, pending RFC acceptance). The label
+// leads so every client can show it; restart wording requires lifecycle evidence.
+const FOREGROUND_NOTICE_TAIL =
+  "Your conversation history is preserved. Send a new message to continue. " +
+  "Some actions may already have completed; check their results before repeating the request. " +
+  "The workspace must finish cleanup before it can be reused.";
+
+export function formatForegroundStopNotice(
+  interruption: "gateway-restart" | "unknown-cause" | undefined,
+): string {
+  return interruption === "gateway-restart"
+    ? "Stopped after restart. This turn stopped when the Gateway restarted and was not " +
+        `resumed automatically, for security reasons. ${FOREGROUND_NOTICE_TAIL}`
+    : "Interrupted, not resumed. This turn was interrupted for an unknown reason and was not " +
+        `resumed automatically, for security reasons. ${FOREGROUND_NOTICE_TAIL}`;
+}
 
 /** Terminalize the interrupted input, not the conversation or its execution cleanup receipt. */
 export async function stopForegroundOnlyRestartWithNotice(params: {
@@ -62,7 +74,7 @@ export async function stopForegroundOnlyRestartWithNotice(params: {
     expectedSessionId: entry.sessionId,
     expectedLifecycleRevision: entry.lifecycleRevision ?? null,
     expectedSessionState: buildRestartRecoveryExpectedState(entry, observation),
-    text: FOREGROUND_STOPPED_NOTICE,
+    text: formatForegroundStopNotice(entry.mainRestartRecovery?.interruption),
     idempotencyKey: foregroundRestartStopNoticeKey(sourceRunId ?? observation.cycleId),
     // The notice and source tombstone commit together. A newer foreground
     // claim must not inherit a false notice or lose its restart ownership.
