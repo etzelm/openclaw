@@ -296,3 +296,14 @@ describe("sidebar entries", () => {
     expect(new Set(["cron", "usage", ...more])).toEqual(new Set(SIDEBAR_NAV_ROUTES));
   });
 });
+
+describe("Devices settings visibility", () => {
+  it("keeps Devices for read-only inventory users and pairing operators", () => {
+    expect(isSettingsNavigationRouteVisible("devices", ["operator.read"])).toBe(true);
+    expect(isSettingsNavigationRouteVisible("devices", ["operator.pairing"])).toBe(true);
+    expect(isSettingsNavigationRouteVisible("devices", [])).toBe(false);
+    expect(
+      visibleSettingsNavigationGroups(["operator.read"]).flatMap((group) => group.routes),
+    ).toContain("devices");
+  });
+});

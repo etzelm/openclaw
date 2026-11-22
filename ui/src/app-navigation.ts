@@ -261,14 +261,19 @@ export function isSettingsNavigationRouteVisible(
   if ((routeId === "updates" || routeId === "talk") && nativeDeviceSettings !== null) {
     return true;
   }
+  if (routeId === "devices") {
+    // node.list needs only operator.read; the page keeps its own pairing action guards.
+    return (
+      operatorScopeSatisfied("operator.read", scopes) ||
+      operatorScopeSatisfied("operator.pairing", scopes)
+    );
+  }
   const requiredScope =
-    routeId === "devices"
-      ? "operator.pairing"
-      : routeId === "approvals"
-        ? "operator.approvals"
-        : READ_SETTINGS_ROUTES.has(settingsNavigationOwnerRoute(routeId))
-          ? "operator.read"
-          : "operator.admin";
+    routeId === "approvals"
+      ? "operator.approvals"
+      : READ_SETTINGS_ROUTES.has(settingsNavigationOwnerRoute(routeId))
+        ? "operator.read"
+        : "operator.admin";
   return operatorScopeSatisfied(requiredScope, scopes);
 }
 
