@@ -88,6 +88,30 @@ describe("agent run terminal outcome", () => {
     });
   });
 
+  it("never reports success while cleanup remains unconfirmed, in either order", () => {
+    const completed = buildAgentRunTerminalOutcome({ status: "ok", endedAt: 300 });
+    const cleanup = buildAgentRunTerminalOutcome({
+      status: "error",
+      endedAt: 200,
+      error: new CommandProcessCleanupError(),
+    });
+    for (const [first, second] of [
+      [cleanup, completed],
+      [completed, cleanup],
+    ]) {
+      expect(mergeAgentRunTerminalOutcome(first, second!)).toMatchObject({
+        reason: "failed",
+        status: "error",
+        cleanupError: cleanup.cleanupError,
+      });
+    }
+    // A proven cancellation keeps precedence over a later completion.
+    const cancelled = buildAgentRunTerminalOutcome({ status: "timeout", stopReason: "rpc" });
+    expect(
+      mergeAgentRunTerminalOutcome(mergeAgentRunTerminalOutcome(cancelled, cleanup), completed),
+    ).toMatchObject({ reason: cancelled.reason, cleanupError: cleanup.cleanupError });
+  });
+
   it("bounds cleanup diagnostics and does not infer provenance from error text", () => {
     const message = new CommandProcessCleanupError().message;
     expect(

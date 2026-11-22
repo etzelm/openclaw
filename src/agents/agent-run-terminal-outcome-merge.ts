@@ -91,7 +91,18 @@ export function mergeAgentRunTerminalOutcome(
   const error = boundedDetails.includes(cleanupError)
     ? boundedDetails
     : [boundedDetails, cleanupError].filter(Boolean).join("\n\n");
-  return selected.cleanupError === cleanupError && selected.error === error
+  // Unconfirmed cleanup can never be observed as success, whichever order the
+  // completion and the cleanup failure arrive in. Cancellation and hard timeout
+  // keep their precedence because they are not completions.
+  const unconfirmedCompletion = selected.reason === "completed" || selected.status === "ok";
+  return !unconfirmedCompletion &&
+    selected.cleanupError === cleanupError &&
+    selected.error === error
     ? selected
-    : { ...selected, cleanupError, error };
+    : {
+        ...selected,
+        ...(unconfirmedCompletion ? { reason: "failed" as const, status: "error" as const } : {}),
+        cleanupError,
+        error,
+      };
 }
