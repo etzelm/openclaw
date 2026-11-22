@@ -43,7 +43,8 @@ describe("SQLite session message cuts", () => {
     const targetKey = sessionKey + ":publication-failure";
     const failure = new Error("session publication failed");
     const onCommitted = vi.fn();
-    const emitBatch = sessionChanges.emitBatch;
+    // Keep the real publisher bound to its owner while the spy wraps it.
+    const emitBatch = sessionChanges.emitBatch.bind(sessionChanges);
     const publication = vi
       .spyOn(sessionChanges, "emitBatch")
       .mockImplementation((changes, database, beforePublicNotifications) => {
