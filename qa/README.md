@@ -8,6 +8,7 @@ Files:
 - `scenarios/<theme>/*.yaml` - one runnable scenario per YAML file.
 - `frontier-harness-plan.md` - big-model bakeoff and tuning loop for harness work.
 - `convex-credential-broker/` - standalone Convex v1 lease broker for pooled live credentials.
+- `rfc0039-foreground/` - live proof for RFC 0039 foreground-only guest turns against a scratch Gateway, including an upgrade run.
 
 Key workflow:
 
