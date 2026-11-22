@@ -90,6 +90,11 @@ import {
   retainReplyOperationUntilComplete,
 } from "./reply-run-registry.js";
 import { isReplyProfilerEnabled } from "./reply-timing-tracker.js";
+import {
+  acquireReplyTurnRequiredWorkspaceLease,
+  closeBeforeReleasingRequiredWorkspace,
+  type RequiredWorkspaceReplyLease,
+} from "./required-workspace-run-lease.js";
 
 async function executeAgentTurnInternalLoop(
   params: AgentTurnParams,
@@ -517,7 +522,10 @@ async function executeAgentTurnInternal(
       operatorAuthority: params.followupRun.operatorAuthority,
     }),
   });
+  let requiredWorkspaceLease: RequiredWorkspaceReplyLease | undefined;
   try {
+    const custody = acquireReplyTurnRequiredWorkspaceLease(params);
+    requiredWorkspaceLease = custody && (await custody);
     return await executeAgentTurnInternalLoop(
       params,
       runId,
@@ -535,7 +543,7 @@ async function executeAgentTurnInternal(
       try {
         await drainAgentRunTerminalWrites(preparedRunAdmission.operationalRunInstance);
       } finally {
-        await preparedRunAdmission.close();
+        await closeBeforeReleasingRequiredWorkspace(preparedRunAdmission, requiredWorkspaceLease);
       }
     }
   }

@@ -1103,6 +1103,17 @@ export async function getReplyFromConfig(
         workspaceDir: stagingSessionEntry.spawnedWorkspaceDir,
         cwd: stagingSessionEntry.spawnedCwd,
       }) ?? workspaceDir;
+    if (stagingWorkspaceDir !== workspaceDir) {
+      // A borrowed required checkout is validated before media is copied into it.
+      const { assertRequiredWorkspaceReplyPaths } =
+        await import("./required-workspace-run-lease.js");
+      await assertRequiredWorkspaceReplyPaths({
+        entry: stagingSessionEntry,
+        sessionKey,
+        cfg,
+        candidatePaths: [stagingWorkspaceDir],
+      });
+    }
     // Private library selections change the sandbox isolation identity. Resolve
     // the current selection before staging so the attachment and admitted run
     // select the same SSH runtime, even when a prior snapshot needs refreshing.

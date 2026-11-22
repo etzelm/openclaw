@@ -216,6 +216,45 @@ test("local lease and worker source selection reject replacement of the register
   });
 });
 
+test("reply execution holds required custody and rejects a replaced or missing checkout before effects", async () => {
+  await withSessionTestState({ layout: "state-only" }, async (state) => {
+    const { workspace, cfg, key, entry, worktree } = await recordRequiredSession(state.root);
+    const { acquireRequiredWorkspaceReplyLease } =
+      await import("../auto-reply/reply/required-workspace-run-lease.js");
+    const acquire = () =>
+      acquireRequiredWorkspaceReplyLease({
+        entry,
+        sessionKey: key,
+        cfg,
+        candidatePaths: [entry.spawnedCwd, entry.sessionRoot],
+      });
+    // Sessions without a recorded requirement keep their existing reply path.
+    await expect(
+      acquireRequiredWorkspaceReplyLease({
+        entry: { ...entry, requiredWorkspace: undefined },
+        sessionKey: key,
+        cfg,
+        candidatePaths: [workspace],
+      }),
+    ).resolves.toBeUndefined();
+    const lease = await acquire();
+    expect(lease).toBeDefined();
+    await lease?.release();
+    const retainedPath = `${worktree.path}.retained`;
+    await fs.rename(worktree.path, retainedPath);
+    try {
+      await expect(acquire()).rejects.toThrow("required workspace");
+      // A missing checkout is a denial; reply execution must not recreate it.
+      await expect(fs.access(worktree.path)).rejects.toThrow();
+      await fs.symlink(workspace, worktree.path, "dir");
+      await expect(acquire()).rejects.toThrow("required workspace");
+    } finally {
+      await fs.rm(worktree.path, { force: true });
+      await fs.rename(retainedPath, worktree.path);
+    }
+  });
+});
+
 test("hidden children borrow exact custody until parent reset and never own checkout cleanup", async () => {
   await withSessionTestState({ layout: "state-only" }, async (state) => {
     const {
