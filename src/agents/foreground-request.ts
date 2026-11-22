@@ -1,7 +1,7 @@
 /** Host-owned accepted input; serializing or copying the carrier grants no admission. */
 export type ForegroundUserRequest = Readonly<{ kind: "foreground-user-request" }>;
 // Claims compare the admitted owner's exact identity without importing its admission lifecycle.
-type Source = { assertCurrent: () => void; owner?: object };
+type Source = { assertCurrent: () => void; owner?: object; sealedBy?: object };
 const sources = new WeakMap<ForegroundUserRequest, readonly Source[]>();
 const requestKey = Symbol("accepted foreground user input");
 type RequestOwner = { [requestKey]?: ForegroundUserRequest };
@@ -40,6 +40,21 @@ export function combineForegroundUserRequests(
     : undefined;
 }
 
+/**
+ * Admission completed for this owner: the accepted input stays bound to that run
+ * and cannot be claimed by another, but its connection lifetime stops mattering.
+ */
+export function sealForegroundUserRequestClaim(
+  request: ForegroundUserRequest | undefined,
+  owner: object,
+): void {
+  for (const source of (request && sources.get(request)) ?? []) {
+    if (source.owner === owner) {
+      source.sealedBy = owner;
+    }
+  }
+}
+
 /** Claim only when foreground policy is required; ordinary queued work keeps its existing lifetime. */
 export function prepareForegroundUserRequestClaim(
   request: ForegroundUserRequest | undefined,
@@ -54,7 +69,11 @@ export function prepareForegroundUserRequestClaim(
       if (source.owner && source.owner !== owner) {
         throw new Error("User input already belongs to another foreground request.");
       }
-      source.assertCurrent();
+      // Once its own run is admitted, a browser disconnect no longer withdraws the
+      // turn (RFC 0039); revocation still reaches it through operator authority.
+      if (source.sealedBy !== owner) {
+        source.assertCurrent();
+      }
     }
     // Validate every collected source before atomically claiming the batch.
     // A retry may keep its incarnation; another restricted run cannot reuse it.

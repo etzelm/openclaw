@@ -24,6 +24,7 @@ import { prepareGatewayContextBindingOwner } from "../plugins/runtime/gateway-co
 import { createDeferredCore } from "../shared/deferred.js";
 import {
   prepareForegroundUserRequestClaim,
+  sealForegroundUserRequestClaim,
   type ForegroundUserRequest,
 } from "./foreground-request.js";
 import type { PreparedOperatorModelPolicy } from "./operator-model-policy.types.js";
@@ -638,6 +639,7 @@ export function prepareAgentRunAdmission(params: {
         const foregroundRequest = !params.recovery
           ? prepareForegroundUserRequestClaim(params.foregroundRequest, operationalRunInstance)
           : undefined;
+        const foregroundOnly = operatorAuthority?.rolePolicy?.execution === "foreground-only";
         bindAdmittedRunDelegatedAuthority(
           context,
           assertSourceCurrent,
@@ -646,12 +648,18 @@ export function prepareAgentRunAdmission(params: {
         );
         admittedContext = context;
         try {
-          if (operatorAuthority?.rolePolicy?.execution === "foreground-only") {
+          if (foregroundOnly) {
             assertAdmittedRunForegroundRequest(context);
           }
           await params.onAdmitted?.(context);
           if (closed || !getAdmittedRunDelegatedAuthority(context)) {
             throw new Error("prepared execution authority closed during admission");
+          }
+          if (foregroundOnly) {
+            // The input may retire while onAdmitted awaits; recheck before returning.
+            assertAdmittedRunForegroundRequest(context);
+            // Admitted: a later browser disconnect lets this bounded turn continue.
+            sealForegroundUserRequestClaim(params.foregroundRequest, operationalRunInstance);
           }
           return context;
         } catch (error) {

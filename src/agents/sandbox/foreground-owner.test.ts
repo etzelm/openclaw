@@ -1,6 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import { createAdmittedRunOperatorAuthority } from "../admitted-run-context.js";
+import {
+  attachGatewayLocalUserIngress,
+  bindGatewayForegroundUserRequest,
+  prepareGatewayLocalUserIngress,
+} from "../../gateway/local-user-ingress.js";
+import {
+  createAdmittedRunOperatorAuthority,
+  createOperationalRunInstanceRef,
+  prepareAgentRunAdmission,
+} from "../admitted-run-context.js";
+import { getForegroundUserRequest } from "../foreground-request.js";
 import { prepareForegroundTestAdmission } from "../run-execution-policy.test-support.js";
 import { acquireForegroundSandboxCustody } from "./foreground-owner.js";
 
@@ -67,6 +77,65 @@ describe("foreground allocation owner", () => {
       expect(release).toHaveBeenCalledOnce();
     },
   );
+
+  it("keeps a sealed turn after the tab closes but stops it when authority is revoked", async () => {
+    let connected = true;
+    let revoked = false;
+    const client = {};
+    attachGatewayLocalUserIngress(
+      client,
+      prepareGatewayLocalUserIngress({
+        authMethod: "token",
+        authenticatedUserExpected: true,
+        isLocalClient: false,
+        profile: { profileId: "guest" },
+      }),
+    );
+    const input = {};
+    bindGatewayForegroundUserRequest(client, input, () => {
+      if (!connected) {
+        throw new Error("Foreground user connection is no longer active.");
+      }
+    });
+    const prepared = prepareAgentRunAdmission({
+      cfg: {},
+      operationalRunInstance: createOperationalRunInstanceRef("sealed-guest"),
+      operatorAuthority: createAdmittedRunOperatorAuthority({
+        profileId: "guest",
+        scopes: ["operator.sessions.write"],
+        assertCurrent() {
+          if (revoked) {
+            throw new Error("guest role revoked");
+          }
+        },
+        rolePolicy: {
+          sessionAccessCap: "none",
+          sandboxRequired: true,
+          agents: "*",
+          execution: "foreground-only",
+        },
+      }),
+      foregroundRequest: getForegroundUserRequest(input),
+      facts: {
+        runId: "sealed-guest",
+        agentId: "main",
+        ingress: { kind: "gateway-client", boundary: "test", state: "present" },
+      },
+    });
+    try {
+      const context = await prepared.admit("embedded");
+      connected = false;
+      // The admitted bounded turn survives the tab closing.
+      const custody = acquireForegroundSandboxCustody(context);
+      expect(() => custody.assertCurrent()).not.toThrow();
+      // Revocation still withdraws it before any further sandbox or exec effect.
+      revoked = true;
+      expect(() => custody.assertCurrent()).toThrow("guest role revoked");
+      expect(() => custody.runProducer(async () => {})).toThrow("guest role revoked");
+    } finally {
+      await prepared.close().catch(() => {});
+    }
+  });
 
   it("rejects custody and new cleanup registration after admission closes", async () => {
     const prepared = prepare("closed-foreground");

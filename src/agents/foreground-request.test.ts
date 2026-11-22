@@ -7,6 +7,7 @@ import {
   prepareGatewayLocalUserIngress,
 } from "../gateway/local-user-ingress.js";
 import {
+  assertAdmittedRunForegroundRequest,
   createAdmittedRunOperatorAuthority,
   createOperationalRunInstanceRef,
   prepareAgentRunAdmission,
@@ -136,6 +137,72 @@ describe("accepted foreground input", () => {
     } finally {
       await first.close();
       await replay.close();
+    }
+  });
+
+  it("rejects restricted admission when the accepted input retires during onAdmitted", async () => {
+    for (const operatorAuthority of [restricted(), undefined]) {
+      let current = true;
+      const request = acceptedInput(() => {
+        if (!current) {
+          throw new Error("source retired");
+        }
+      });
+      const prepared = prepareChannelRunAdmission({
+        cfg: {},
+        runId: operatorAuthority ? "restricted-disconnect" : "staff-disconnect",
+        agentId: "main",
+        ingressKind: "channel",
+        boundary: "test",
+        foregroundRequest: request,
+        operatorAuthority,
+        onAdmitted: () => {
+          // The user connection closes while admission is still preparing.
+          current = false;
+        },
+      });
+      try {
+        if (operatorAuthority) {
+          await expect(prepared.admit("embedded")).rejects.toThrow();
+        } else {
+          // Ordinary staff work keeps its existing lifetime.
+          await expect(prepared.admit("embedded")).resolves.toBeDefined();
+        }
+      } finally {
+        await prepared.close();
+      }
+    }
+  });
+
+  it("lets an admitted restricted turn continue after the browser disconnects", async () => {
+    let current = true;
+    const request = acceptedInput(() => {
+      if (!current) {
+        throw new Error("source retired");
+      }
+    });
+    const prepare = (runId: string) =>
+      prepareChannelRunAdmission({
+        cfg: {},
+        runId,
+        agentId: "main",
+        ingressKind: "channel",
+        boundary: "test",
+        foregroundRequest: request,
+        operatorAuthority: restricted(),
+      });
+    const admitted = prepare("admitted-then-disconnected");
+    const other = prepare("another-run");
+    try {
+      const context = await admitted.admit("embedded");
+      // The tab closes after admission; the bounded turn keeps its authority.
+      current = false;
+      expect(() => assertAdmittedRunForegroundRequest(context)).not.toThrow();
+      // The accepted input still cannot start a second run.
+      await expect(other.admit("embedded")).rejects.toThrow("another foreground request");
+    } finally {
+      await admitted.close();
+      await other.close();
     }
   });
 
