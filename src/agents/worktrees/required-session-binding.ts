@@ -4,6 +4,7 @@ import { withSessionEntryReadOnlyInWorker } from "../../config/sessions/session-
 import type { InternalSessionEntry, SessionEntry } from "../../config/sessions/types.js";
 import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import { resolveGatewaySessionStoreTargetInWorker } from "../../gateway/session-utils-store-worker.js";
+import { normalizeGitPathForFilesystem } from "../../infra/git-exec.js";
 import { requireGit } from "./git.js";
 import type { ManagedWorktreeRecord } from "./types.js";
 
@@ -52,6 +53,31 @@ export function sharesRequiredSessionWorkspace(child: SessionEntry, parent: Sess
   );
 }
 
+/** Git prints path-typed fields with forward slashes on Windows; compare at the filesystem boundary. */
+function sameCheckoutPath(gitPath: string, fsPath: string, platform: NodeJS.Platform): boolean {
+  if (platform !== "win32") {
+    return gitPath === fsPath;
+  }
+  const normalize = (value: string) =>
+    path.win32.normalize(normalizeGitPathForFilesystem(value, platform)).toLowerCase();
+  return normalize(gitPath) === normalize(fsPath);
+}
+
+/** Exact top-level, common-dir, and branch identity; only path fields are normalized. */
+export function matchesRequiredCheckoutIdentity(
+  output: string,
+  expected: { root: string; commonDir: string; branch: string },
+  platform: NodeJS.Platform = process.platform,
+): boolean {
+  const fields = output.split(/\r?\n/u);
+  return (
+    fields.length === 3 &&
+    sameCheckoutPath(fields[0] ?? "", expected.root, platform) &&
+    sameCheckoutPath(fields[1] ?? "", expected.commonDir, platform) &&
+    fields[2] === `refs/heads/${expected.branch}`
+  );
+}
+
 /** Inspect the checkout while the native run lease prevents managed removal. */
 export async function assertRequiredSessionWorktreeCheckout(
   record: Pick<ManagedWorktreeRecord, "path" | "repoRoot" | "branch">,
@@ -80,7 +106,7 @@ export async function assertRequiredSessionWorktreeCheckout(
     { beforeRun: assertCurrent },
   );
   assertCurrent();
-  if (actual !== `${root}\n${commonDir}\nrefs/heads/${record.branch}`) {
+  if (!matchesRequiredCheckoutIdentity(actual, { root, commonDir, branch: record.branch })) {
     throw new Error(REQUIRED_WORKTREE_UNAVAILABLE);
   }
 }

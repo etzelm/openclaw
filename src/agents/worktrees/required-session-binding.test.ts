@@ -6,9 +6,44 @@ import type { SessionEntry } from "../../config/sessions/types.js";
 import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
 import {
   assertRequiredSessionWorktree,
+  matchesRequiredCheckoutIdentity,
   REQUIRED_WORKTREE_UNAVAILABLE,
 } from "./required-session-binding.js";
 import type { ManagedWorktreeRecord } from "./types.js";
+
+test("checkout identity normalizes Git path fields on Windows and keeps the branch exact", () => {
+  const expected = {
+    root: "C:\\repo\\checkout",
+    commonDir: "C:\\repo\\.git",
+    branch: "openclaw/required",
+  };
+  const git = (root: string, common: string, ref = "refs/heads/openclaw/required") =>
+    `${root}\n${common}\n${ref}`;
+  expect(
+    matchesRequiredCheckoutIdentity(git("C:/repo/checkout", "C:/repo/.git"), expected, "win32"),
+  ).toBe(true);
+  expect(
+    matchesRequiredCheckoutIdentity(git("/c/repo/checkout", "c:/repo/.git"), expected, "win32"),
+  ).toBe(true);
+  expect(
+    matchesRequiredCheckoutIdentity(git("C:/repo/other", "C:/repo/.git"), expected, "win32"),
+  ).toBe(false);
+  expect(
+    matchesRequiredCheckoutIdentity(
+      git("C:/repo/checkout", "C:/repo/.git", "refs/heads/OpenClaw/required"),
+      expected,
+      "win32",
+    ),
+  ).toBe(false);
+  // POSIX paths stay byte-exact.
+  const posix = { root: "/repo/checkout", commonDir: "/repo/.git", branch: "b" };
+  expect(
+    matchesRequiredCheckoutIdentity("/repo/checkout\n/repo/.git\nrefs/heads/b", posix, "linux"),
+  ).toBe(true);
+  expect(
+    matchesRequiredCheckoutIdentity("/Repo/checkout\n/repo/.git\nrefs/heads/b", posix, "linux"),
+  ).toBe(false);
+});
 
 test("required execution binds its concrete checkout and rejects path or registry replacement", async () => {
   await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
