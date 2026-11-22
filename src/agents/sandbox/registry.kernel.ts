@@ -66,6 +66,19 @@ function removeContainerRegistryRowInDatabase(db: DatabaseSync, containerName: s
   );
 }
 
+/**
+ * A foreground receipt, a retained "foreground-owner" policy whose receipt was
+ * lost, or an unknown retirement policy all keep the row out of generic cleanup.
+ * Only the original owner's confirmed retirement can remove it.
+ */
+export function requiresOwnerRetirement(entry: object | null | undefined): boolean {
+  return Boolean(
+    entry &&
+    (("foreground" in entry && entry.foreground) ||
+      ("retirementPolicy" in entry && entry.retirementPolicy !== undefined)),
+  );
+}
+
 export function assertForegroundSandboxReservationCurrent(
   current: SandboxRegistryEntry | null,
   expected: SandboxRegistryEntry,
@@ -88,7 +101,7 @@ export function writeSandboxRegistryInDatabase(
   if (write.operation === "remove") {
     const row = readSandboxRegistryRowInDatabase(db, "container", write.containerName);
     const current = row ? rowToContainerEntry(row) : null;
-    if (current?.foreground) {
+    if (requiresOwnerRetirement(current)) {
       throw new Error("Foreground sandbox requires confirmed owner retirement before removal.");
     }
     if (write.preserveRemovalIntent) {
@@ -117,7 +130,10 @@ export function writeSandboxRegistryInDatabase(
         "Workspace has an unfinished sandbox allocation; cleanup must complete before retrying.",
       );
     }
-    insertSandboxRegistryRowInDatabase(db, containerEntryToRow(entry));
+    insertSandboxRegistryRowInDatabase(
+      db,
+      containerEntryToRow(normalizeSandboxRegistryEntry(entry)),
+    );
     return;
   }
   if (write.operation === "foreground-record" || write.operation === "foreground-retire") {
@@ -160,11 +176,14 @@ export function writeSandboxRegistryInDatabase(
       ) {
         throw new Error("Foreground allocation identity and uncertainty cannot be replaced.");
       }
-      insertSandboxRegistryRowInDatabase(db, containerEntryToRow(entry));
+      insertSandboxRegistryRowInDatabase(
+        db,
+        containerEntryToRow(normalizeSandboxRegistryEntry(entry)),
+      );
     }
     return;
   }
-  if (entry.foreground || existing?.foreground) {
+  if (entry.foreground || requiresOwnerRetirement(existing)) {
     throw new Error("Foreground sandbox allocation can only be changed by its owner.");
   }
   if (write.operation === "update") {
@@ -329,6 +348,8 @@ function normalizeSandboxRegistryEntry(entry: SandboxRegistryEntry): SandboxRegi
     backendId: entry.backendId?.trim() || "docker",
     runtimeLabel: entry.runtimeLabel?.trim() || entry.containerName,
     configLabelKind: entry.configLabelKind?.trim() || "Image",
+    // Rows written before the typed policy existed still carry their receipt.
+    ...(entry.foreground ? { retirementPolicy: "foreground-owner" as const } : {}),
   };
 }
 

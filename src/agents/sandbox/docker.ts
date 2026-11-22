@@ -501,7 +501,7 @@ async function ensureSandboxContainerLifecycle(
   let existingRegistryEntry = await readRegistryEntry(containerName);
   // Built-in engines bypass generic reservation; fence their retained native
   // owner before config replacement or restart can touch the physical allocation.
-  if (existingRegistryEntry?.foreground) {
+  if (existingRegistryEntry?.foreground || existingRegistryEntry?.retirementPolicy !== undefined) {
     throw new Error("Foreground sandbox requires confirmed owner retirement before reuse.");
   }
   if (

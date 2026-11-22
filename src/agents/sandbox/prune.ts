@@ -21,6 +21,7 @@ import {
   type SandboxBrowserRegistryEntry,
   type SandboxRegistryEntry,
 } from "./registry.js";
+import { requiresOwnerRetirement } from "./registry.kernel.js";
 import { resolveSandboxAgentId } from "./shared.js";
 import type { SandboxPruneConfig } from "./types.js";
 
@@ -70,7 +71,7 @@ async function pruneSandboxRegistryEntries<TEntry extends SandboxRegistryEntry>(
   for (const entry of registry.entries) {
     // Foreground receipts are retired only by their exact allocation owner;
     // age-based pruning cannot prove process extinction after a Gateway crash.
-    if (entry.foreground) {
+    if (requiresOwnerRetirement(entry)) {
       continue;
     }
     if (!shouldPruneSandboxEntry(resolveEntryPruneConfig(params.config, entry), now, entry)) {

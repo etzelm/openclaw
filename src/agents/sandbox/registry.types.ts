@@ -40,6 +40,12 @@ export type SandboxRegistryEntry = {
   runtimeState?: "pending" | "ready" | "removing" | "removing-pending";
   /** Exact foreground allocation receipt; only confirmed retirement can remove it. */
   foreground?: ForegroundSandboxReceipt;
+  /**
+   * Allocation retirement policy (RFC 0039). "foreground-owner" reserves cleanup
+   * for the original foreground owner. Generic cleanup retains any row with a
+   * policy, including a lost owner receipt or an unknown value from another build.
+   */
+  retirementPolicy?: "foreground-owner";
 };
 
 export type SandboxRegistry = {

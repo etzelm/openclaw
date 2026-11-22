@@ -153,6 +153,48 @@ describe("registry race safety", () => {
     await expect(readRegistryEntry(entry.containerName)).resolves.toBeNull();
   });
 
+  it("marks foreground allocations and retains lost-owner or unknown retirement policies", async () => {
+    const foreground = containerEntry({
+      containerName: "container-marked",
+      backendId: "docker",
+      workspaceDir: "/workspace/marked",
+      foreground: {
+        runId: "run-marked",
+        instanceId: "instance-marked",
+        engineIdentity: { kind: "docker", id: "daemon-1" },
+        createAttempted: false,
+        startAttempted: false,
+      },
+    });
+    await reserveForegroundSandboxRegistryEntry(foreground);
+    await expect(readRegistryEntry(foreground.containerName)).resolves.toMatchObject({
+      retirementPolicy: "foreground-owner",
+    });
+    // A row whose owner receipt was lost, and a row with a policy from another
+    // build, both stay out of generic cleanup.
+    for (const [name, payload] of [
+      ["container-lost-owner", { retirementPolicy: "foreground-owner" }],
+      ["container-unknown-policy", { retirementPolicy: "future-owner" }],
+    ] as const) {
+      const row = containerEntry({ containerName: name, backendId: "docker" });
+      runOpenClawStateWriteTransaction(({ db }) => {
+        insertSandboxRegistryRowInDatabase(db, {
+          ...containerEntryToRow(row),
+          entry_json: JSON.stringify({ ...row, ...payload }),
+        });
+      });
+      await expect(removeRegistryEntry(name)).rejects.toThrow("confirmed owner retirement");
+      const removeRuntime = vi.fn();
+      await expect(removeSandboxRegistryRuntime(row, removeRuntime)).rejects.toThrow(
+        "confirmed owner retirement",
+      );
+      expect(removeRuntime).not.toHaveBeenCalled();
+      await expect(readRegistryEntry(name)).resolves.toMatchObject(payload);
+    }
+    await retireForegroundSandboxRegistryEntry(foreground);
+    await expect(readRegistryEntry(foreground.containerName)).resolves.toBeNull();
+  });
+
   it("retains proven non-dispatch monotonically without accepting a conflicting create ID", async () => {
     const entry = containerEntry({
       backendId: "docker",

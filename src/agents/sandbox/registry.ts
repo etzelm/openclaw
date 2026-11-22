@@ -27,6 +27,7 @@ import {
   type SandboxRegistryWrite,
   readSandboxRegistryEntryInDatabase,
   readSandboxRegistryRowInDatabase,
+  requiresOwnerRetirement,
   rowToBrowserEntry,
   rowToContainerEntry,
 } from "./registry.kernel.js";
@@ -272,7 +273,7 @@ export async function removeSandboxRegistryRuntime(
   const selected = runOpenClawStateWriteTransaction(({ db }) => {
     const row = readSandboxRegistryRowInDatabase(db, "container", entry.containerName);
     const current = row ? rowToContainerEntry(row) : null;
-    if (current?.foreground) {
+    if (requiresOwnerRetirement(current)) {
       throw new Error("Foreground sandbox requires confirmed owner retirement before removal.");
     }
     if (
@@ -382,7 +383,7 @@ export function removeSandboxRegistryGeneration(
     assertCurrent();
     const row = readSandboxRegistryRowInDatabase(db, kind, entry.containerName);
     const current = row && (kind === "browser" ? rowToBrowserEntry(row) : rowToContainerEntry(row));
-    if (current && "foreground" in current && current.foreground) {
+    if (requiresOwnerRetirement(current)) {
       throw new Error("Foreground sandbox requires confirmed owner retirement before removal.");
     }
     if (!current || !sameSandboxRegistryGeneration(current, entry)) {

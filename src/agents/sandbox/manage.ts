@@ -23,6 +23,7 @@ import {
   type SandboxBrowserRegistryEntry,
   type SandboxRegistryEntry,
 } from "./registry.js";
+import { requiresOwnerRetirement } from "./registry.kernel.js";
 import { resolveSandboxAgentId } from "./shared.js";
 
 export type SandboxContainerInfo = SandboxRegistryEntry & {
@@ -123,7 +124,8 @@ export async function removeSandboxRuntimeGeneration(params: {
   assertCurrent: () => void;
 }): Promise<void> {
   const { runtime, engine, id } = params;
-  if (runtime.kind === "container" && runtime.entry.foreground) {
+  // A lost owner receipt or an unknown retirement policy is retained before any runtime effect.
+  if (runtime.kind === "container" && requiresOwnerRetirement(runtime.entry)) {
     throw new Error("Foreground sandbox requires confirmed owner retirement before removal.");
   }
   const assertCurrent = () => {
