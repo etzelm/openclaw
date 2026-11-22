@@ -114,10 +114,22 @@ export function spawnBrokerCommand(
   argv: string[],
   options: Options,
   prepared: BrokerExecaOptions,
+  launchFence?: AbortSignal,
 ) {
   const remote = host.spawnExeca(argv, prepared);
   const child = remote.child;
   const closed = child.waitForClose();
+  let launched = false;
+  // Settlement may outlive this signal; only a command that has not launched is fenced.
+  const onLaunchFence = () => {
+    if (!launched) {
+      remote.cancelLaunch();
+    }
+  };
+  launchFence?.addEventListener("abort", onLaunchFence, { once: true });
+  if (launchFence?.aborted) {
+    onLaunchFence();
+  }
   const onAbort = () => {
     child.killed = true;
     remote.cancel();
@@ -143,10 +155,14 @@ export function spawnBrokerCommand(
       }
       return restored;
     })
-    .finally(() => options.cancelSignal?.removeEventListener("abort", onAbort));
+    .finally(() => {
+      options.cancelSignal?.removeEventListener("abort", onAbort);
+      launchFence?.removeEventListener("abort", onLaunchFence);
+    });
   void promise.catch(() => {});
   void once(child, "spawn").then(
     () => {
+      launched = true;
       setImmediate(() => {
         for (const stream of [child.stdout, child.stderr]) {
           if (stream?.readableFlowing === null) {

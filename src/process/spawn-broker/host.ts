@@ -271,6 +271,10 @@ export class SpawnBrokerHost {
           request.child.fail(toErrorObject(error, "Spawn broker cancellation delivery failed")),
         );
       },
+      cancelLaunch: () => {
+        // Best effort: a launched command keeps its settlement and receipt path.
+        void this.transmit({ type: "cancel-launch", id }).catch(() => {});
+      },
     };
   }
 

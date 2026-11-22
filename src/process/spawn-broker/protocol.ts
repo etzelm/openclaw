@@ -21,6 +21,8 @@ export type BrokerRequest =
   | { type: "ipc"; id: number; sequence: number; message: Serializable }
   | { type: "disconnect"; id: number }
   | { type: "cancel"; id: number }
+  /** Withdraw launch authority; ignored once the command has actually launched. */
+  | { type: "cancel-launch"; id: number }
   | { type: "pipe-received"; id: number; fd: number }
   | { type: "output-drained"; id: number; fd: number; error?: BrokerError }
   | { type: "shutdown" };
@@ -53,6 +55,9 @@ export type BrokerResponse =
   | { type: "disconnect"; id: number }
   | { type: "ipc"; id: number; message: Serializable }
   | { type: "execa-result"; id: number; result: BrokerExecaResult };
+
+/** Proves the command never launched: its launch authority was withdrawn first. */
+export const SPAWN_LAUNCH_FENCED_MESSAGE = "Spawn launch authority was withdrawn before dispatch";
 
 export class SpawnBrokerError extends Error {
   readonly code = "ERR_SPAWN_BROKER_UNAVAILABLE";

@@ -4,6 +4,7 @@ import { CommandProcessCleanupError } from "../../process/exec-result.js";
 import {
   resolveCommandProcessSignal,
   retainCommandProcessCleanup,
+  SpawnLaunchFencedError,
   withCommandProcessScope,
 } from "../../process/exec-spawn.js";
 import {
@@ -131,6 +132,35 @@ describe("foreground native dispatch", () => {
       await stopped;
       expect(command).not.toHaveBeenCalled();
       expect(created).not.toHaveBeenCalled();
+      expect(notDispatched).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each(["create", "start"] as const)(
+    "records non-dispatch when the launch fence refuses %s after the custody check",
+    async (operation) => {
+      const { controller, engine } = fixture();
+      const created = vi.fn();
+      const notDispatched = vi.fn();
+      // Stop lands after the last custody check, while the command waits for launch.
+      command.mockImplementation(() => {
+        controller.abort();
+        throw new SpawnLaunchFencedError();
+      });
+      const pending =
+        operation === "create"
+          ? execNativeSandboxCreate(
+              engine,
+              ["create", "sandbox:test"],
+              created,
+              async () => {},
+              notDispatched,
+            )
+          : execNativeSandboxStart(engine, "a".repeat(64), async () => {}, notDispatched);
+      await expect(pending).rejects.toThrow("withdrawn before dispatch");
+      expect(command).toHaveBeenCalledOnce();
+      expect(created).not.toHaveBeenCalled();
+      // The receipt proves non-dispatch, so the allocation can retire normally.
       expect(notDispatched).toHaveBeenCalledOnce();
     },
   );

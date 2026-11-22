@@ -5,6 +5,7 @@ import { createAbortError } from "../../infra/abort-signal.js";
 import { toErrorObject } from "../../infra/errors.js";
 import { resolveExecutableFromPathEnv } from "../../infra/executable-path.js";
 import {
+  isSpawnLaunchFenced,
   runOutsideCommandProcessScope,
   withCommandProcessScope,
 } from "../../process/exec-spawn.js";
@@ -246,6 +247,11 @@ async function runContainerRaw(
         [binding?.executable ?? engine.command, ...(engine.globalArgs ?? []), ...args],
         {
           ...(binding ? { baseEnv: binding.env, cwd: binding.cwd } : {}),
+          // Stop, workspace retirement, or revocation after the assertion above
+          // must still prevent a create/start queued behind the spawn broker.
+          ...(lifecycle !== "cleanup" && binding?.custody
+            ? { launchFence: binding.custody.signal }
+            : {}),
           cancelSignal: opts?.signal,
           encoding: "buffer",
           input: opts?.input ?? Buffer.alloc(0),
@@ -255,6 +261,11 @@ async function runContainerRaw(
         },
       );
     } catch (error) {
+      if (lifecycle !== "cleanup" && isSpawnLaunchFenced(error)) {
+        // The fence proves the command never launched, so the receipt can retire.
+        await onNotDispatched?.();
+        throw error;
+      }
       if (opts?.signal?.aborted) {
         throw createAbortError("Aborted");
       }

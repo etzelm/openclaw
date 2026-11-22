@@ -5,7 +5,7 @@ import { serialize } from "node:v8";
 import { execa, type Options } from "execa";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { runCommandWithTimeout } from "../exec.js";
+import { runCommandWithTimeout, spawnCommand } from "../exec.js";
 import { BrokerChild } from "./child.js";
 import { runWithSpawnBroker } from "./context.js";
 import { brokerExecaOptions, spawnBrokerCommand } from "./execa-client.js";
@@ -305,6 +305,36 @@ describe.skipIf(skipBrokerTests)("broker execa parity", () => {
     );
     expect(canceled).toBeInstanceOf(Error);
     expect(canceled).toMatchObject({ failed: true, isCanceled: true });
+  });
+
+  it("fences launch authority without interrupting a command that already launched", async () => {
+    const dir = tempDirs.make("openclaw-launch-fence-");
+    const marker = path.join(dir, "launched");
+    const source = `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'x')`;
+    const withdrawn = AbortSignal.abort(new Error("Stop"));
+    for (const broker of [false, true]) {
+      await runWithSpawnBroker(broker ? host : undefined, async () => {
+        expect(() =>
+          spawnCommand([process.execPath, "-e", source], { launchFence: withdrawn }),
+        ).toThrow();
+      });
+    }
+    await expect(readFile(marker)).rejects.toMatchObject({ code: "ENOENT" });
+    // Withdrawal after launch leaves settlement and receipt collection intact.
+    const fence = new AbortController();
+    const prepared = brokerExecaOptions({ reject: false })!;
+    const launched = spawnBrokerCommand(
+      host,
+      [process.execPath, "-e", "setTimeout(()=>process.stdout.write('settled'),200)"],
+      { reject: false },
+      prepared,
+      fence.signal,
+    );
+    await new Promise<void>((resolve) => {
+      launched.nodeChildProcess.once("spawn", () => resolve());
+    });
+    fence.abort();
+    expect(await launched).toMatchObject({ failed: false, stdout: "settled" });
   });
 
   it("fails in-flight commands on broker loss and resumes in the next broker", async () => {

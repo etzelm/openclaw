@@ -20,6 +20,7 @@ import { BrokerChild } from "./spawn-broker/child.js";
 import { getSpawnBroker } from "./spawn-broker/context.js";
 import { brokerExecaOptions, spawnBrokerCommand } from "./spawn-broker/execa-client.js";
 import type { CommandSpawnOptions, CommandSubprocess } from "./spawn-broker/execa-types.js";
+import { SPAWN_LAUNCH_FENCED_MESSAGE } from "./spawn-broker/protocol.js";
 import { recordChildProcessSpawn } from "./spawn-diagnostics.js";
 import { resolveSafeChildProcessInvocation } from "./windows-command.js";
 
@@ -354,11 +355,30 @@ export function shouldSpawnWithShell(params: {
   return false;
 }
 
+/** The command never launched because its launch authority was withdrawn. */
+export class SpawnLaunchFencedError extends Error {
+  readonly code = "ERR_SPAWN_LAUNCH_FENCED";
+  constructor() {
+    super(SPAWN_LAUNCH_FENCED_MESSAGE);
+    this.name = "SpawnLaunchFencedError";
+  }
+}
+
+/** Proven non-dispatch, from the in-process fence or the spawn broker worker. */
+export function isSpawnLaunchFenced(error: unknown): boolean {
+  return error instanceof Error && error.message.includes(SPAWN_LAUNCH_FENCED_MESSAGE);
+}
+
 type SpawnCommandOptions = CommandSpawnOptions & {
   baseEnv?: NodeJS.ProcessEnv;
   executionTimeoutMs?: number;
   /** The command runner routes scope cancellation through its termination owner. */
   inheritScopeCancellation?: boolean;
+  /**
+   * Launch authority. Aborting it prevents a command that has not launched yet,
+   * including one queued in the spawn broker; a launched command keeps settling.
+   */
+  launchFence?: AbortSignal;
 };
 
 export function spawnCommandWithInvocation<
@@ -382,8 +402,12 @@ export function spawnCommandWithInvocation<
     cancelSignal,
     executionTimeoutMs,
     inheritScopeCancellation = true,
+    launchFence,
     ...execaOptions
   } = sourceOptions;
+  if (launchFence?.aborted) {
+    throw new SpawnLaunchFencedError();
+  }
   const commandEnv = resolveCommandEnv({ argv, baseEnv, env });
   const invocation = resolveSafeChildProcessInvocation({
     argv,
@@ -419,6 +443,7 @@ export function spawnCommandWithInvocation<
           [invocation.command, ...invocation.args],
           commandOptions,
           remoteOptions,
+          launchFence,
         )
       : execa(invocation.command, invocation.args, commandOptions);
   recordChildProcessSpawn(invocation.command, child.nodeChildProcess);

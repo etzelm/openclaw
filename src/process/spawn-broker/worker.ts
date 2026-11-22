@@ -13,6 +13,7 @@ import { holdPipeForTransfer, takePipePrefix } from "./pipe.js";
 import {
   serializeBrokerError,
   SpawnBrokerError,
+  SPAWN_LAUNCH_FENCED_MESSAGE,
   type BrokerRequest,
   type BrokerResponse,
 } from "./protocol.js";
@@ -34,7 +35,10 @@ type Admission = { type: "started"; entry: Owned } | { type: "failed"; execa: Br
 const owned = new Map<number, Owned>();
 const receiver = createBrokerReceiver();
 let stopping = false;
-const starting = new Map<number, { canceled?: boolean; signal?: NodeJS.Signals | number }>();
+const starting = new Map<
+  number,
+  { canceled?: boolean; launchCanceled?: boolean; signal?: NodeJS.Signals | number }
+>();
 let resources: Awaited<ReturnType<typeof createBrokerNativeResourceServer>> | undefined;
 let startup: "waiting" | "initializing" | "ready" = "waiting";
 
@@ -163,7 +167,11 @@ async function launch(
     });
     return;
   }
-  const pending: { canceled?: boolean; signal?: NodeJS.Signals | number } = {};
+  const pending: {
+    canceled?: boolean;
+    launchCanceled?: boolean;
+    signal?: NodeJS.Signals | number;
+  } = {};
   starting.set(message.id, pending);
   let spawnedChild: ChildProcess | undefined;
   const assertActive = () => {
@@ -176,6 +184,11 @@ async function launch(
     // another descriptor acknowledgement or a large buffered command result.
     const admission = await sender.reserve<Admission>(async (publish) => {
       assertActive();
+      // The final dispatch is the launch fence: authority withdrawn while this
+      // request waited for the outbound reservation must not start the command.
+      if (pending.launchCanceled) {
+        throw new SpawnBrokerError(SPAWN_LAUNCH_FENCED_MESSAGE);
+      }
       const execa =
         message.type === "spawn-execa"
           ? await startBrokerExeca(message.argv, message.options, assertActive)
@@ -431,6 +444,9 @@ process.on("message", (raw: unknown, handle: SendHandle) => {
     const pending = starting.get(message.id);
     if (pending && message.type === "cancel") {
       pending.canceled = true;
+    }
+    if (pending && message.type === "cancel-launch") {
+      pending.launchCanceled = true;
     }
     if (pending && message.type === "kill") {
       pending.signal = message.signal;
