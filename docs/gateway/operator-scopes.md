@@ -368,6 +368,14 @@ they cannot join that container's cleanup. Select the embedded runtime and a
 supported sandbox and send a chat message to continue. Talk status, transcript delivery,
 and cancellation remain available.
 
+Inside a foreground turn, the qualified tools are the file tools (read, write, edit,
+and patch), commands that run in the foreground inside the request's container, and
+stateless web fetch and search. Each of these ends with the turn because the
+container owns every process it starts. Background commands and writes to background
+processes, starting or messaging other sessions, automations, goals, background media
+generation, browser sandboxes, node commands, terminals, and remote placement are
+refused with an explanation.
+
 Request settlement waits for owned processes and the exact container to stop.
 Stop acknowledges cancellation promptly while that cleanup finishes; late cleanup
 failures remain visible in the thread. Detached shell children cannot keep the
@@ -381,11 +389,34 @@ the conversation's immutable creation policy. Selecting a maintainer's personal
 tools or sending a later maintainer message cannot loosen the same environment.
 Conversation history, drafts, and the managed worktree remain available after Stop.
 
+A foreground turn is always bounded: it uses the agent's run timeout, and a disabled
+(`0`) timeout falls back to the default agent timeout instead of running without a
+deadline. A per-request `timeoutMs` can shorten a foreground turn but never extend it past
+that timeout. Waiting for an approval or a tool result happens inside the turn and does not
+extend it. On a Gateway with guest roles, setting `agents.defaults.timeoutSeconds` to `600`
+(10 minutes) is the recommended value pending RFC 0039 acceptance. While a turn is active, a new
+message in the same thread is rejected with an explanation instead of being queued;
+wait for the turn to finish or stop it, then send the message again.
+
 After a Gateway restart, accepted foreground inputs are never replayed automatically.
-OpenClaw records a stopped notice for interrupted active work. Startup reconciles
-retained container receipts before request dispatch becomes ready. A fresh authenticated
-message is required to continue; heartbeats, scheduled work, and internal continuations
-cannot authorize a restricted turn.
+OpenClaw records one stopped notice in the thread for interrupted active work, in the
+same commit that ends the turn. The notice starts with **Stopped after restart** when
+the Gateway's own stop or restart marked the turn, and with **Interrupted, not resumed**
+when startup found the turn without that evidence, for example after a crash. It
+explains that the work was not resumed for security reasons, that history is preserved,
+and that some actions may already have completed. The Control UI and WebChat show the
+notice from the conversation history. Other channels do not receive it yet. Startup reconciles retained container
+receipts before request dispatch becomes ready. A fresh authenticated message is required
+to continue; heartbeats, scheduled work, and internal continuations cannot authorize a
+restricted turn. Retrying the stopped request with its original request ID returns the
+recorded result without running it again, including after its ID leaves the bounded list
+of recent terminal requests, for as long as the stopped notice remains in the thread. If
+that receipt cannot be read, the retry is reported as unavailable rather than run.
+
+Foreground sandbox allocations are recorded with `retirementPolicy: "foreground-owner"` in
+the existing sandbox registry entry. Generic cleanup keeps any allocation that has a
+retirement policy, including one whose owner receipt was lost or whose policy value comes
+from another build; only the original owner's confirmed shutdown removes it.
 
 Abrupt Gateway process death can leave a container running while the Gateway is down;
 this policy does not guarantee immediate extinction during that outage. Startup and
