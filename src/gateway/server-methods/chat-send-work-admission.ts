@@ -16,6 +16,11 @@ import { SessionMutationAuthorizationChangedError } from "../session-mutation-au
 import { loadSessionEntry } from "../session-utils.js";
 import { captureGatewayClientUploadCommitGuard } from "../upload-policy.js";
 import { formatForLog } from "../ws-log.js";
+import {
+  FOREGROUND_THREAD_BUSY,
+  isForegroundMainUserTurn,
+  isForegroundOnlyChatSend,
+} from "./chat-send-foreground-busy.js";
 import type { NormalizedChatSendRequest } from "./chat-send-request.js";
 import type { PreparedChatSendSession } from "./chat-send-session.js";
 import { resolveOperatorSessionCreation } from "./session-creation-provenance.js";
@@ -125,8 +130,15 @@ export function createChatSendWorkAdmission(params: {
 export function assertChatSendExclusiveAdmission(
   request: NormalizedChatSendRequest,
   session: PreparedChatSendSession,
+  client?: GatewayRequestHandlerOptions["client"],
 ): void {
-  if (!request.goalOperation && !request.providerReviewAcknowledgment) {
+  // A foreground-only thread admits one bounded turn: concurrent sends that both
+  // passed the early check are serialized here, before any user turn is written.
+  const foregroundOnly =
+    client !== undefined &&
+    isForegroundMainUserTurn(request, session.cfg) &&
+    isForegroundOnlyChatSend(session.entry, client, session.cfg);
+  if (!request.goalOperation && !request.providerReviewAcknowledgment && !foregroundOnly) {
     return;
   }
   const { storePath, sessionKey, backingSessionId, activeRunScopeKey } = session;
@@ -138,7 +150,9 @@ export function assertChatSendExclusiveAdmission(
     throw new Error(
       request.providerReviewAcknowledgment
         ? "The session still has active work. Review its status before continuing."
-        : "goal-session-busy",
+        : request.goalOperation
+          ? "goal-session-busy"
+          : FOREGROUND_THREAD_BUSY,
     );
   }
 }

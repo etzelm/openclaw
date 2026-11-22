@@ -40,6 +40,10 @@ import {
   ACTIVE_LEAF_CHANGED_ERROR_REASON,
   assertExpectedLeafActive,
 } from "./chat-send-active-leaf.js";
+import {
+  FOREGROUND_THREAD_BUSY,
+  respondForegroundThreadBusy,
+} from "./chat-send-foreground-busy.js";
 import { prepareGoalChatSendRetry } from "./chat-send-goal-retry.js";
 import type { NormalizedChatSendRequest } from "./chat-send-request.js";
 import {
@@ -73,6 +77,10 @@ export function respondChatSendAdmissionError(
         { retryable: true, details: { reason: "goal-session-busy" } },
       ),
     );
+    return;
+  }
+  if (error instanceof Error && error.message === FOREGROUND_THREAD_BUSY) {
+    respondForegroundThreadBusy(respond);
     return;
   }
   if (error instanceof Error && error.message === SESSION_ROUTING_CHANGED_ERROR_REASON) {

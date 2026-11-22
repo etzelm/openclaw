@@ -46,6 +46,7 @@ import {
   resolveRestartSafeChatAdmission,
 } from "./chat-restart-recovery.js";
 import { assertExpectedLeafActive } from "./chat-send-active-leaf.js";
+import { rejectBusyForegroundChatSend } from "./chat-send-foreground-busy.js";
 import { prepareGoalChatSendRetry } from "./chat-send-goal-retry.js";
 import {
   inspectGoalChatSendRetry,
@@ -161,6 +162,9 @@ export async function admitChatSend(
   if (!request.goalOperation && respondChatSendRetry(params)) {
     return { ok: false as const };
   }
+  if (rejectBusyForegroundChatSend({ ...session, request, client, context, respond })) {
+    return { ok: false as const };
+  }
   const uploadAdmission = admitChatSendUploads({ params: p, client, context, respond });
   if (!uploadAdmission.ok) {
     return uploadAdmission;
@@ -274,7 +278,7 @@ export async function admitChatSend(
       expectedPermissionMode: p.expectedPermissionMode,
       expectedToolOverrides: p.expectedToolOverrides,
     });
-    assertChatSendExclusiveAdmission(request, session);
+    assertChatSendExclusiveAdmission(request, { ...session, entry: latestEntry }, client);
     if (entry && !latestEntry) {
       throw new Error(`Session "${sessionKey}" was deleted while starting work. Retry.`);
     }
@@ -393,7 +397,7 @@ export async function admitChatSend(
       assertAllowed: () => {
         params.assertCurrent?.();
         assertSessionTargetCurrent();
-        assertChatSendExclusiveAdmission(request, session);
+        assertChatSendExclusiveAdmission(request, session, client);
       },
       revalidateAllowed: commitChatWorkAdmission,
       onInterrupt: (reason) => {
