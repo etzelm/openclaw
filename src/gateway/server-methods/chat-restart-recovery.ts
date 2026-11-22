@@ -226,10 +226,34 @@ export async function resolveDurableChatClaim(params: {
       };
     }
   }
-  return isAdoptedRestartRecoveryClaim(entry, params.clientRunId) ||
+  if (
+    isAdoptedRestartRecoveryClaim(entry, params.clientRunId) ||
     hasRestartRecoveryTerminalRun(entry, params.clientRunId)
-    ? { kind: "accepted" }
-    : { kind: "continue", entry };
+  ) {
+    return { kind: "accepted" };
+  }
+  // The terminal id list is bounded; a stopped foreground request stays
+  // recognized while its exact scoped notice remains in the transcript.
+  const { findForegroundRestartStopReceipt } =
+    await import("../../agents/main-session-recovery/foreground-restart-stop-receipt.js");
+  const stopReceipt = await findForegroundRestartStopReceipt({
+    entry,
+    clientRunId: params.clientRunId,
+    sessionKey: params.persistedSessionKey,
+    storePath: params.storePath,
+  });
+  if (stopReceipt === "found") {
+    return { kind: "accepted" };
+  }
+  if (stopReceipt === "unavailable") {
+    // Unknown, not absent: never dispatch, and let the client retry the same request.
+    return {
+      kind: "pending",
+      message:
+        "Could not confirm whether this request already stopped after a restart, so it was not run. Retry in a moment.",
+    };
+  }
+  return { kind: "continue", entry };
 }
 
 function isRestartSafeChatSession(params: {

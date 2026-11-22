@@ -468,6 +468,16 @@ export function mergeRestartRecoveryTerminalRunIds(
   return normalizeRestartRecoveryTerminalRunIds([...currentRunIds, ...appendedRunIds]);
 }
 
+/** Only a full bounded list can have evicted an earlier terminal request id. */
+export function isRestartRecoveryTerminalRunListSaturated(
+  entry: SessionEntry | undefined,
+): boolean {
+  return (
+    (normalizeRestartRecoveryTerminalRunIds(entry?.restartRecoveryTerminalRunIds)?.length ?? 0) >=
+    MAX_TERMINAL_RUN_IDS
+  );
+}
+
 export function hasRestartRecoveryTerminalRun(
   entry: SessionEntry | undefined,
   runId: string,

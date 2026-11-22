@@ -11,6 +11,7 @@ import { appendAssistantMessageToSessionTranscript } from "../../config/sessions
 import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import type { GatewayRecoveryRuntime } from "../../gateway/server-instance-runtime.types.js";
 import type { DeliveryContext } from "../../utils/delivery-context.shared.js";
+import { foregroundRestartStopNoticeKey } from "./foreground-restart-stop-receipt.js";
 import { buildMainSessionRecoveryClearPatch } from "./main-session-recovery-clear.js";
 import type { MainSessionRecoveryObservation } from "./main-session-recovery-state.js";
 import { commitMainSessionRecovery } from "./main-session-recovery-store.js";
@@ -62,7 +63,7 @@ export async function stopForegroundOnlyRestartWithNotice(params: {
     expectedLifecycleRevision: entry.lifecycleRevision ?? null,
     expectedSessionState: buildRestartRecoveryExpectedState(entry, observation),
     text: FOREGROUND_STOPPED_NOTICE,
-    idempotencyKey: `foreground-restart:${sourceRunId ?? observation.cycleId}:stopped`,
+    idempotencyKey: foregroundRestartStopNoticeKey(sourceRunId ?? observation.cycleId),
     // The notice and source tombstone commit together. A newer foreground
     // claim must not inherit a false notice or lose its restart ownership.
     sessionLifecyclePatch: {
