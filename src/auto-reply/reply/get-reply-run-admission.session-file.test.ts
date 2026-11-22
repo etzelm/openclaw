@@ -6,6 +6,7 @@ import type { SessionEntry } from "../../config/sessions.js";
 import { clearCommandLane, enqueueCommandInLane } from "../../process/command-queue.js";
 import { resolveAdmittedRunSessionFile } from "./agent-runner-core.js";
 import { parseInlineSessionDirectives } from "./directive-handling.parse.js";
+import { FOREGROUND_BUSY_REPLY } from "./foreground-turn-policy.js";
 import { prepareReplyRunAdmission } from "./get-reply-run-admission.js";
 import type { PreparedReplyRunContext } from "./get-reply-run-context.js";
 import { createModelSelectionStateFixture } from "./model-selection.test-support.js";
@@ -280,6 +281,62 @@ describe("prepared reply transcript identity", () => {
       }
     },
   );
+
+  it("refuses a busy foreground-only thread without dropping its queued work", async () => {
+    const { context, entry, sessionKey, sessionId } = createAdmissionFixture();
+    entry.execution = "foreground-only";
+    const lane = resolveEmbeddedSessionLane(sessionKey);
+    const entered = createDeferred();
+    const release = createDeferred();
+    const blocker = enqueueCommandInLane(lane, async () => {
+      entered.resolve();
+      await release.promise;
+    });
+    await entered.promise;
+    const queued = enqueueCommandInLane(lane, async () => "kept");
+    const operation = createReplyOperation({ sessionKey, sessionId, resetTriggered: false });
+    operation.setPhase("running");
+    const older = createQueueTestRun({ prompt: "Earlier followup", messageId: "older-fg" });
+    enqueueFollowupRun(sessionKey, older, { mode: "followup" }, "message-id", undefined, false);
+    try {
+      const prepared = await prepareReplyRunAdmission({
+        ...context,
+        effectiveQueueMode: "interrupt",
+      });
+      expect(prepared).toEqual({
+        kind: "reply",
+        reply: { text: FOREGROUND_BUSY_REPLY, isError: true },
+      });
+      expect(getExistingFollowupQueue(sessionKey)?.items).toEqual([older]);
+      release.resolve();
+      await blocker;
+      await expect(queued).resolves.toBe("kept");
+    } finally {
+      release.resolve();
+      operation.complete();
+      clearCommandLane(lane);
+      clearFollowupQueue(sessionKey);
+      await Promise.allSettled([blocker, queued]);
+    }
+  });
+
+  it("keeps a heartbeat silent on a busy foreground-only thread", async () => {
+    const { context, entry, sessionKey, sessionId } = createAdmissionFixture();
+    entry.execution = "foreground-only";
+    const operation = createReplyOperation({ sessionKey, sessionId, resetTriggered: false });
+    operation.setPhase("running");
+    try {
+      const prepared = await prepareReplyRunAdmission({
+        ...context,
+        isHeartbeat: true,
+        effectiveQueueMode: "followup",
+      });
+      expect(prepared).not.toMatchObject({ reply: { text: FOREGROUND_BUSY_REPLY } });
+    } finally {
+      operation.complete();
+      clearFollowupQueue(sessionKey);
+    }
+  });
 
   it.each([false, true])(
     "keeps caller-only model auth selection off the shared session (fast=%s)",

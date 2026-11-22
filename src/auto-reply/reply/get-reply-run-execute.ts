@@ -43,6 +43,7 @@ import { resolveInternalTurnTranscript } from "../internal-turn-source.js";
 import type { OriginatingChannelType } from "../templating.js";
 import { resolveCurrentTurnImages } from "./current-turn-images.js";
 import { resolveEffectiveReplyRoute } from "./effective-reply-route.js";
+import { resolveForegroundTurnTimeoutMs } from "./foreground-turn-policy.js";
 import type { PreparedReplyRunAdmission } from "./get-reply-run-admission.js";
 import {
   buildPersistedMediaImageLayout,
@@ -560,10 +561,10 @@ export async function executePreparedReplyRun(state: PreparedReplyRunAdmission) 
           ? { fullAccessBlockedReason: fullAccessState.blockedReason }
           : {}),
       },
-      timeoutMs,
+      timeoutMs: resolveForegroundTurnTimeoutMs(timeoutMs, foregroundOnly, cfg),
       runTimeoutOverrideMs:
         opts?.timeoutOverrideMs !== undefined || opts?.timeoutOverrideSeconds !== undefined
-          ? timeoutMs
+          ? resolveForegroundTurnTimeoutMs(timeoutMs, foregroundOnly, cfg)
           : undefined,
       blockReplyBreak: resolvedBlockStreamingBreak,
       ownerNumbers: resolveOwnerPromptNumbers({

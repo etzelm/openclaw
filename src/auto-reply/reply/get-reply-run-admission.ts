@@ -29,6 +29,7 @@ import {
   resolveThinkingSelectionForModel,
 } from "../thinking.js";
 import { removeDirectiveSpan } from "./directive-parsing.js";
+import { FOREGROUND_BUSY_REPLY } from "./foreground-turn-policy.js";
 import type { PreparedReplyRunContext } from "./get-reply-run-context.js";
 import {
   loadAgentRunnerRuntime,
@@ -393,8 +394,13 @@ export async function prepareReplyRunAdmission(context: PreparedReplyRunContext)
     } as const;
   }
   const visibleTurnPreemptsHeartbeat = heartbeatPreemption === "drained";
+  const foregroundOnlySession =
+    opts?.operatorAuthority?.rolePolicy?.execution === "foreground-only" ||
+    preparedSessionState.sessionEntry?.execution === "foreground-only";
   if (
     activeRunQueueMode === "interrupt" &&
+    // A busy foreground thread refuses below; it must not drop queued work first.
+    !foregroundOnlySession &&
     !isRoomEvent &&
     sessionLaneKey &&
     (laneSize > 0 || activeSessionIdForInterrupt)
@@ -554,6 +560,12 @@ export async function prepareReplyRunAdmission(context: PreparedReplyRunContext)
       ? replyRunRegistry.resolveCurrentInterruptTarget(sessionKey)
       : undefined;
   const hasQueuedFollowups = hasPendingFollowupQueueWork([queueKey]);
+  if ((isActive || hasQueuedFollowups) && !context.isHeartbeat && foregroundOnlySession) {
+    // One bounded foreground turn at a time: reject before any queue mode can
+    // interrupt, wait for, steer, or queue behind the active turn.
+    typing.cleanup();
+    return { kind: "reply", reply: { text: FOREGROUND_BUSY_REPLY, isError: true } } as const;
+  }
   const activeRunAcceptsCurrentThread =
     !isActive ||
     !sessionKey ||
