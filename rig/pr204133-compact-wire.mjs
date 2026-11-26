@@ -149,7 +149,7 @@ if (mode === "--self-test") {
     const cfg = {
       logging: { file: join(scratch, "openclaw.log") },
       agents: { defaults: { workspace, skipBootstrap: true, agentProfileId: "openclaw/" + mode,
-        heartbeat: { every: "0m" }, model: { primary: PROVIDER + "/" + MODEL, fallbacks: [] } },
+        model: { primary: PROVIDER + "/" + MODEL, fallbacks: [] } },
         entries: { main: {} } },
       models: { mode: "replace", providers: { [PROVIDER]: {
         baseUrl: "http://127.0.0.1:" + server.address().port + "/v1",
@@ -167,6 +167,13 @@ if (mode === "--self-test") {
     // Main #169714 requires prepared runtime config before reply reads it.
     const { captureRuntimeConfigAsyncReader } = await fromSource("src/config/io.runtime.ts");
     await captureRuntimeConfigAsyncReader()();
+    // Bind a lifecycle owner for the session MCP runtime, as runLocalAgentCommand does.
+    const { GatewayScheduler } = await fromSource("src/infra/gateway-scheduler.ts");
+    const { LegacyPluginSdkResourceHost } = await fromSource("src/plugins/legacy-sdk-resource-host.ts");
+    const { createLegacyPluginSdkReplyDispatch } = await fromSource("src/plugins/legacy-sdk-reply-dispatch.ts");
+    const scheduler = new GatewayScheduler();
+    const host = new LegacyPluginSdkResourceHost(createLegacyPluginSdkReplyDispatch());
+    host.bindScheduler(scheduler);
     const now = Date.now();
     const inputRows = [
       { message_id: "native-204133", sender: "Alice", body: "status ready", timestamp_ms: now - 1000 },
@@ -176,14 +183,14 @@ if (mode === "--self-test") {
     const text = "Acknowledge this proof turn: " + nonce;
     let result;
     try {
-      result = await getReplyFromConfig({
+      result = await host.run(() => getReplyFromConfig({
         Body: text, BodyForAgent: text, CommandBody: text, MessageSid: nonce,
         From: "webchat:proof-user", To: "webchat:proof-user", SenderName: "Proof user", SenderId: "proof-user",
         Provider: "webchat", Surface: "webchat", ChatType: "direct", Timestamp: now,
         SessionKey: "agent:main:compact-wire-proof", CommandAuthorized: true,
         ChannelStructuredContext: [{ label: "Conversation context", type: "chat_window", source: "session",
           payload: { order: "chronological", relation: "selected_for_current_message", messages: inputRows } }],
-      }, { abortSignal: AbortSignal.timeout(90_000) });
+      }, { abortSignal: AbortSignal.timeout(90_000) }));
     } catch (error) {
       if (!failures.length) throw error;
       throw new AggregateError([...failures, error], "model wire assertion failed");
