@@ -164,6 +164,9 @@ if (mode === "--self-test") {
     const fromSource = (file) => import(pathToFileURL(resolve(file)).href);
     ({ closeOpenClawAgentDatabasesAsync: closeDatabases } = await fromSource("src/state/openclaw-agent-db-lifecycle.ts"));
     const { getReplyFromConfig } = await fromSource("src/auto-reply/reply/get-reply.ts");
+    // Main #169714 requires prepared runtime config before reply reads it.
+    const { captureRuntimeConfigAsyncReader } = await fromSource("src/config/io.runtime.ts");
+    await captureRuntimeConfigAsyncReader()();
     const now = Date.now();
     const inputRows = [
       { message_id: "native-204133", sender: "Alice", body: "status ready", timestamp_ms: now - 1000 },
