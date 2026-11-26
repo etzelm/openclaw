@@ -1,0 +1,108 @@
+name: Agent Profiles exact-head proof
+
+on:
+  push:
+    branches: [proof/agent-profiles-exact-head]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-profiles-exact-proof-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    if: github.repository == 'etzelm/openclaw' && github.ref == 'refs/heads/proof/agent-profiles-exact-head'
+    name: ${{ matrix.proof }} (${{ matrix.head }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - proof: auto-upgrade
+            head: 4fab55097d90e1d4f38404c1d35ea813cf7f7320
+            compact: false
+          - proof: compact-upgrade-and-wire
+            head: 286a1b86900a035a36d61cd8eb18fe872fc9996c
+            compact: true
+    env:
+      CANDIDATE_HEAD: ${{ matrix.head }}
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    steps:
+      - name: Read the proof harness at the reviewed workflow revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: proof
+          persist-credentials: false
+      - name: Check out the pinned candidate separately
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: etzelm/openclaw
+          ref: ${{ matrix.head }}
+          path: candidate
+          persist-credentials: false
+      - name: Verify exact workspaces before running any candidate code
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C proof rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_HEAD"
+          git -C candidate diff --quiet HEAD --
+          echo "Candidate $CANDIDATE_HEAD; workflow $GITHUB_SHA"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+      - name: Build candidate with its pinned toolchain
+        shell: bash
+        working-directory: candidate
+        timeout-minutes: 27
+        run: |
+          set -euo pipefail
+          proof_home="$RUNNER_TEMP/candidate-build-home"
+          proof_tmp="$RUNNER_TEMP/candidate-build-tmp"
+          mkdir -p "$proof_home" "$proof_tmp"
+          env -i PATH="$PATH" HOME="$proof_home" TMPDIR="$proof_tmp" CI=1 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 bash --noprofile --norc -euo pipefail -c '
+            corepack pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+            corepack pnpm build
+          '
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_HEAD"
+          git diff --quiet HEAD --
+      - name: Prove a 2026.11.9 home upgrades and continues the exact same session
+        shell: bash
+        timeout-minutes: 9
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/agent-profiles-fixture"
+          proof_out="$RUNNER_TEMP/agent-profiles-proof-out"
+          mkdir -p "$fixture/install-home" "$fixture/tmp" "$proof_out"
+          install -m 0644 proof/rig/seed-stable.mjs "$fixture/seed-stable.mjs"
+          env -i PATH="$PATH" HOME="$fixture/install-home" TMPDIR="$fixture/tmp" CI=1 npm_config_registry=https://registry.npmjs.org/ npm install --prefix "$fixture/stable" --save-exact --ignore-scripts --no-audit --no-fund openclaw@2026.11.9
+          node --input-type=module -e 'import fs from "node:fs"; const root=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const p=root.packages["node_modules/openclaw"]; if(p.version!=="2026.11.9" || p.integrity!=="sha512-Yr0UWw8GHmMywkhAYAs/ltDqvcIp8oEFfffhiaPlCmIQr+O6bRifHiLImpdffQv3/SvdmSLMgbcWPiv1fqyH3w==") process.exit(1);' "$fixture/stable/package-lock.json"
+          env -i PATH="$PATH" HOME="$fixture/install-home" TMPDIR="$fixture/tmp" CI=1 CANDIDATE_CHECKOUT="$GITHUB_WORKSPACE/candidate" CANDIDATE_CLI="$GITHUB_WORKSPACE/candidate/openclaw.mjs" CANDIDATE_HEAD="$CANDIDATE_HEAD" node "$fixture/seed-stable.mjs"
+          mapfile -t receipts < <(find "$fixture" -mindepth 2 -maxdepth 2 -name upgrade-verification.json -type f)
+          test "${#receipts[@]}" = 1
+          jq -e --arg head "$CANDIDATE_HEAD" '.candidateUpgrade == "pass" and .candidateHead == $head and .samePersistedSession and .continuedProviderRequestSawStoredMarker' "${receipts[0]}" >/dev/null
+          install -m 0644 "${receipts[0]}" "$proof_out/upgrade-verification.json"
+      - name: Capture the actual compact provider request
+        if: matrix.compact
+        shell: bash
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          proof_home="$RUNNER_TEMP/compact-proof-home"
+          proof_tmp="$RUNNER_TEMP/compact-proof-tmp"
+          mkdir -p "$proof_home" "$proof_tmp" "$RUNNER_TEMP/agent-profiles-proof-out"
+          env -i PATH="$PATH" HOME="$proof_home" TMPDIR="$proof_tmp" CI=1 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 bash "$GITHUB_WORKSPACE/proof/rig/compact-wire.run.sh" "$GITHUB_WORKSPACE/candidate" "$CANDIDATE_HEAD" "$RUNNER_TEMP/agent-profiles-proof-out"
+          test -s "$RUNNER_TEMP/agent-profiles-proof-out/compact-wire-verification.json"
+      - name: Upload only the sanitized proof receipts
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: agent-profiles-${{ matrix.proof }}-${{ matrix.head }}
+          path: ${{ runner.temp }}/agent-profiles-proof-out/*-verification.json
+          if-no-files-found: error
+          retention-days: 7
