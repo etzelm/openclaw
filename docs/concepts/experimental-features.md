@@ -537,6 +537,10 @@ Labs only switches the feature on or off. Everything else lives outside Labs:
   approve or deny their request, change a member's role, and remove members. Use an approved owner
   browser to change access. Devices paired with this Gateway are in
   **Settings → Devices**.
+  To attach an OpenClaw ID to an existing personal Gateway profile, select that profile
+  when inviting the member and approve the request in **People**. Signing in with OpenClaw ID
+  alone does not attach it to a profile. Turning on remote access does not require a personal
+  profile link.
 
 - **Member names**: an approved member is named from their OpenClaw ID account,
   or from the part of their email before the `@` when the account reports no
