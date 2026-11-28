@@ -1,0 +1,24 @@
+# user_profiles (id | display_name | role)
+guest-profile | Guest | null
+member-profile | Member | member
+person-profile | Person | member
+admin-profile | Admin | maintainer
+gateway-owner | OpenClaw Service User | null
+# user_profile_emails (email | profile_id)
+admin@example.test | admin-profile
+guest@example.test | guest-profile
+member@example.test | member-profile
+person@example.test | person-profile
+# user_profile_identities (provider | subject | profile_id)
+gateway.local | owner | gateway-owner
+openclaw.id | ocid-member | member-profile
+# claw link (core:openclaw-id @retained.claw)
+linked: yes
+hostname: claw-c9ac86.claws.example.test
+binding_seq: 1
+discovery.owner_account_id: ocid-other
+owner_profile.sub: ocid-other
+members: none
+owner_devices: 1
+invites: 1
+invite-report: <invite> resolution=pending account=null existingProfile=admin-profile
