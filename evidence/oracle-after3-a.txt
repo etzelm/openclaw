@@ -1,0 +1,18 @@
+## after leg 3
+-- user_profile_identities (provider, subject, profile_id)
+gateway.local | owner | gateway-owner
+openclaw.id | ocid-maintainer | maintainer-profile
+openclaw.id | ocid-member | member-profile
+openclaw.id | ocid-person | profile-a
+-- user_profile_emails (profile_id, email)
+guest-profile | guest@example.test
+maintainer-profile | maintainer@example.test
+member-profile | member@example.test
+profile-a | other@example.test
+profile-a | person@example.test
+-- user_profiles (id, role)
+guest-profile | null
+member-profile | member
+profile-a | member
+maintainer-profile | maintainer
+gateway-owner | null

@@ -1,0 +1,19 @@
+# merge base 8a8e0177 source, this branch's account-link.persistence.test.ts: pnpm test src/gateway/openclaw-id/account-link.persistence.test.ts --maxWorkers=1
+[41m[1m FAIL [22m[49m [30m[42m gateway-database-workers [49m[39m src/gateway/openclaw-id/account-link.persistence.test.ts[2m > [22ma device grant from another account never creates a profile's first link
+[31m[1mAssertionError[22m: expected { ok: true, payload: { …(3) }, …(1) } to match object { ok: true, payload: { …(2) } }
+[32m-     "link": "link_approval_required",[39m
+[31m+     "link": "linked",[39m
+[41m[1m FAIL [22m[49m [30m[42m gateway-database-workers [49m[39m src/gateway/openclaw-id/account-link.persistence.test.ts[2m > [22mlinks an admin's profile through the owner browser's invite, redeemed by the admin's account
+[31m[1mAssertionError[22m: expected { ok: true, payload: { …(3) }, …(1) } to match object { ok: true, …(1) }
+[32m-     "link": "link_approval_required",[39m
+[31m+     "link": "linked",[39m
+[41m[1m FAIL [22m[49m [30m[42m gateway-database-workers [49m[39m src/gateway/openclaw-id/account-link.persistence.test.ts[2m > [22mlinks a first account only when its verified email is this sign-in's own email
+[31m[1mAssertionError[22m: unverified email: expected { ok: true, payload: { …(3) }, …(1) } to match object { ok: true, …(1) }
+[32m-     "link": "link_approval_required",[39m
+[31m+     "link": "linked",[39m
+[41m[1m FAIL [22m[49m [30m[42m gateway-database-workers [49m[39m src/gateway/openclaw-id/account-link.persistence.test.ts[2m > [22mapplies the same rule to a held sign-in
+[31m[1mAssertionError[22m: expected { ok: true, payload: { …(2) }, …(1) } to match object { ok: true, …(1) }
+[32m-     "link": "link_approval_required",[39m
+[31m+     "link": "linked",[39m
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+Tests  4 failed (4)
