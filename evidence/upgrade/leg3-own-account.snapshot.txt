@@ -1,0 +1,17 @@
+-- user_profile_identities (provider, subject, profile_id, verified_email_json, created_at)
+gateway.local | owner | gateway-owner |  | 1795825968890
+openclaw.id | ocid-maintainer | maintainer-profile | {"kind":"openclaw-id-display","email":"maintainer@example.test"} | 1795825986687
+openclaw.id | ocid-member | member-profile | {"kind":"openclaw-id-display","email":"member@example.test"} | 1795825989608
+openclaw.id | ocid-other | profile-b | {"kind":"openclaw-id-display","email":"other@example.test"} | 1795826071507
+openclaw.id | ocid-person | profile-a | {"kind":"openclaw-id-display","email":"person@example.test"} | 1795826002375
+-- user_profile_emails (email, profile_id, created_at)
+maintainer@example.test | maintainer-profile | 1795825975109
+member@example.test | member-profile | 1795825975703
+other@example.test | profile-b | 1795825974524
+person@example.test | profile-a | 1795825973908
+-- user_profiles (id, role)
+gateway-owner | null
+profile-a | member
+profile-b | member
+maintainer-profile | maintainer
+member-profile | member
